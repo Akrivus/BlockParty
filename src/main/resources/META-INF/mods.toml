@@ -1,0 +1,27 @@
+modLoader="javafml"
+loaderVersion="[31,)"
+
+[[mods]]
+modId="moeblocks"
+version="${file.jarVersion}"
+displayName="Moe Blocks"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/moeblocks"
+logoFile="moeblocks.png"
+credits="KAGIC for the idea, Akrivus for the code, Judacraz for textures, Azuraskys for voice lines."
+authors="Akrivus"
+description='''
+Moe Blocks allows the player to create kawaii creatures known as moes (pronounced mo-ays), which act in various ways to gain the player's affection. Moes are created by rolling a magical die that forms the moe from the block it lands on.
+'''
+
+[[dependencies.moeblocks]]
+    modId="forge"
+    mandatory=true
+    versionRange="[31,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.moeblocks]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.15,)"
+    ordering="NONE"
+    side="BOTH"

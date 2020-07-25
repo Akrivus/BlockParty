@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:bone",
+    "minecraft:bowl",
+    "minecraft:feather",
+    "minecraft:fire_charge",
+    "minecraft:magma_cream",
+    "minecraft:poisonous_potato",
+    "minecraft:rabbit_foot",
+    "minecraft:scute",
+    "minecraft:slime_ball",
+    "minecraft:spider_eye"
+  ]
+}

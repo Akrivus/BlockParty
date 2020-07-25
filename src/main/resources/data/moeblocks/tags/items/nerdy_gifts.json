@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:book",
+    "minecraft:bookshelf",
+    "minecraft:clock",
+    "minecraft:compass",
+    "minecraft:enchanted_book",
+    "minecraft:painting",
+    "minecraft:paper",
+    "minecraft:redstone",
+    "minecraft:writable_book",
+    "minecraft:written_book"
+  ]
+}

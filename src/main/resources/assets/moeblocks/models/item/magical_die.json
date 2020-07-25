@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "north": "moeblocks:block/die_1",
+    "south": "moeblocks:block/die_6",
+    "east": "moeblocks:block/die_3",
+    "west": "moeblocks:block/die_4",
+    "up": "moeblocks:block/die_5",
+    "down": "moeblocks:block/die_2"
+  }
+}
