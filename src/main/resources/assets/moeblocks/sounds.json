@@ -3,14 +3,12 @@
     "category": "player",
     "subtitle": "subtitle.moe.attack",
     "sounds": [
-
     ]
   },
   "entity.moe.dead": {
     "category": "player",
     "subtitle": "subtitle.moe.dead",
     "sounds": [
-
     ]
   },
   "entity.moe.eat": {
@@ -47,14 +45,12 @@
     "category": "player",
     "subtitle": "subtitle.moe.emotion.crying",
     "sounds": [
-
     ]
   },
   "entity.moe.emotion.embarrassed": {
     "category": "player",
     "subtitle": "subtitle.moe.emotion.embarrassed",
     "sounds": [
-
     ]
   },
   "entity.moe.emotion.happy": {
@@ -94,21 +90,18 @@
     "category": "player",
     "subtitle": "subtitle.moe.emotion.psychotic",
     "sounds": [
-
     ]
   },
   "entity.moe.emotion.scared": {
     "category": "player",
     "subtitle": "subtitle.moe.emotion.scared",
     "sounds": [
-
     ]
   },
   "entity.moe.emotion.smitten": {
     "category": "player",
     "subtitle": "subtitle.moe.emotion.smitten",
     "sounds": [
-
     ]
   },
   "entity.moe.greet.level_1": {
@@ -122,14 +115,18 @@
     "category": "player",
     "subtitle": "subtitle.moe.greet.level_2",
     "sounds": [
-
     ]
   },
   "entity.moe.greet.level_3": {
     "category": "player",
     "subtitle": "subtitle.moe.greet.level_3",
     "sounds": [
-
+    ]
+  },
+  "entity.moe.greet.level_4": {
+    "category": "player",
+    "subtitle": "subtitle.moe.greet.level_4",
+    "sounds": [
     ]
   },
   "entity.moe.hurt": {
