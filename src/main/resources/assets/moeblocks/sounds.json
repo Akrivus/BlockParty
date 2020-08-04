@@ -150,6 +150,12 @@
       "moeblocks:sing1"
     ]
   },
+  "entity.moe.thank_you": {
+    "category": "player",
+    "subtitle": "subtitle.moe.thank_you",
+    "sounds": [
+    ]
+  },
   "entity.moe.yes": {
     "category": "player",
     "subtitle": "subtitle.moe.yes",

@@ -56,11 +56,6 @@ public class WetSpongeBehavior extends BasicBehavior {
     }
 
     @Override
-    public Behaviors getKey() {
-        return Behaviors.WET_SPONGE;
-    }
-
-    @Override
     public boolean onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
         if (stack.getItem() == Items.BUCKET) {
             this.moe.setBlockData(Blocks.SPONGE.getDefaultState());
@@ -72,5 +67,10 @@ public class WetSpongeBehavior extends BasicBehavior {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public Behaviors getKey() {
+        return Behaviors.WET_SPONGE;
     }
 }

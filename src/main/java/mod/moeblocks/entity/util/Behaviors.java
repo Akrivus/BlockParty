@@ -26,6 +26,7 @@ public enum Behaviors {
     GLOWSTONE(GlowstoneBehavior::new, Blocks.GLOWSTONE),
     GRASS_BLOCK(GrassBlockBehavior::new, Blocks.GRASS_BLOCK),
     HONEYCOMB_BLOCK(HoneycombBlockBehavior::new, Blocks.HONEYCOMB_BLOCK),
+    LOG(LogBehavior::new, Blocks.ACACIA_LOG, Blocks.ACACIA_WOOD, Blocks.BIRCH_LOG, Blocks.BIRCH_WOOD, Blocks.DARK_OAK_LOG, Blocks.DARK_OAK_WOOD, Blocks.JUNGLE_LOG, Blocks.JUNGLE_WOOD, Blocks.OAK_LOG, Blocks.OAK_WOOD, Blocks.SPRUCE_LOG, Blocks.SPRUCE_WOOD),
     MAGMA_BLOCK(MagmaBlockBehavior::new, Blocks.MAGMA_BLOCK),
     MISSING(BasicBehavior::new),
     MYCELIUM(MyceliumBehavior::new, Blocks.MYCELIUM),

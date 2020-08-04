@@ -1,0 +1,27 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:azure_bluet",
+    "minecraft:cake",
+    "minecraft:dandelion",
+    "minecraft:diamond_hoe",
+    "minecraft:firework_rocket",
+    "minecraft:flower_pot",
+    "minecraft:golden_hoe",
+    "minecraft:honeycomb",
+    "minecraft:iron_hoe",
+    "minecraft:music_disc_cat",
+    "minecraft:music_disc_far",
+    "minecraft:music_disc_stal",
+    "minecraft:music_disc_wait",
+    "minecraft:oxeye_daisy",
+    "minecraft:pink_tulip",
+    "minecraft:poppy",
+    "minecraft:scute",
+    "minecraft:stone_hoe",
+    "minecraft:sugar",
+    "minecraft:sunflower",
+    "minecraft:white_tulip",
+    "minecraft:wooden_hoe"
+  ]
+}

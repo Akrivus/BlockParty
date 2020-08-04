@@ -1,5 +1,6 @@
 package mod.moeblocks.entity;
 
+import mod.moeblocks.register.ItemsMoe;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
@@ -19,12 +20,12 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class StateEntity extends MobEntity {
+public class StateEntity extends CreatureEntity {
     private LivingEntity followTarget;
     private LivingEntity avoidTarget;
     private int avoidTimer;
 
-    protected StateEntity(EntityType<? extends MobEntity> type, World world) {
+    protected StateEntity(EntityType<? extends CreatureEntity> type, World world) {
         super(type, world);
     }
 
@@ -71,16 +72,23 @@ public class StateEntity extends MobEntity {
     @Override
     protected void updateEquipmentIfNeeded(ItemEntity entity) {
         ItemStack stack = entity.getItem();
+        if (this.tryEquipItem(stack)) {
+            this.onItemPickup(entity, stack.getCount());
+            entity.remove();
+        }
+    }
+
+    public boolean tryEquipItem(ItemStack stack) {
         if (this.canPickUpItem(stack)) {
             EquipmentSlotType slot = this.getSlotForStack(stack);
             ItemStack drop = this.getItemStackFromSlot(slot);
             if (this.shouldExchangeEquipment(stack, drop, slot)) {
                 this.entityDropItem(drop);
                 this.setItemStackToSlot(slot, stack);
-                this.onItemPickup(entity, stack.getCount());
-                entity.remove();
+                return true;
             }
         }
+        return false;
     }
 
     @Override
@@ -120,7 +128,7 @@ public class StateEntity extends MobEntity {
     }
 
     public boolean canBeTarget(LivingEntity target) {
-        return target != null && target.isAlive();
+        return target != null && target.isAlive() && !target.equals(this);
     }
 
     public EquipmentSlotType getSlotForStack(ItemStack stack) {
@@ -209,6 +217,10 @@ public class StateEntity extends MobEntity {
         return null;
     }
 
+    public boolean isMeleeFighter() {
+        return this.isWieldingWeapons() && !this.isRangedFighter();
+    }
+
     public boolean isRangedFighter() {
         return this.isWieldingBow() && this.hasAmmo() || this.getThrowableFromStack(this.getHeldItemMainhand()) != null;
     }
@@ -222,6 +234,10 @@ public class StateEntity extends MobEntity {
         return this.isAmmo(this.getHeldItem(Hand.OFF_HAND).getItem());
     }
 
+    public boolean isWieldingWeapons() {
+        return this.getHeldItem(Hand.MAIN_HAND).getItem().isIn(ItemsMoe.Tags.WEAPONS);
+    }
+
     public int getAttackCooldown() {
         return (int) (1.0 / this.getAttribute(SharedMonsterAttributes.ATTACK_SPEED).getValue() / 5.0);
     }
@@ -230,8 +246,13 @@ public class StateEntity extends MobEntity {
         return this.followTarget;
     }
 
-    public void setFollowTarget(LivingEntity player) {
-        this.followTarget = player;
+    public void setFollowTarget(LivingEntity leader) {
+        this.setHomePosAndDistance(this.getPosition(), leader == null ? 16 : -1);
+        this.followTarget = leader;
+    }
+
+    public boolean isWaiting() {
+        return this.followTarget == null;
     }
 
     public LivingEntity getAvoidTarget() {

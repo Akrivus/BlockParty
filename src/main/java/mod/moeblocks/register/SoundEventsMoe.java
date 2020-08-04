@@ -1,5 +1,6 @@
 package mod.moeblocks.register;
 
+import com.sun.org.apache.regexp.internal.RE;
 import mod.moeblocks.MoeMod;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
@@ -32,5 +33,6 @@ public class SoundEventsMoe {
     public static final RegistryObject<SoundEvent> HURT = REGISTRY.register("entity.moe.hurt", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.hurt")));
     public static final RegistryObject<SoundEvent> NO = REGISTRY.register("entity.moe.no", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.no")));
     public static final RegistryObject<SoundEvent> SING = REGISTRY.register("entity.moe.sing", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.sing")));
+    public static final RegistryObject<SoundEvent> THANK_YOU = REGISTRY.register("entity.moe.thank_you", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.thank_you")));
     public static final RegistryObject<SoundEvent> YES = REGISTRY.register("entity.moe.yes", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.yes")));
 }

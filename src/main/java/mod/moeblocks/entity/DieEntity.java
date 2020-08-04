@@ -117,9 +117,9 @@ public abstract class DieEntity extends ProjectileItemEntity {
                     this.remove();
                 }
             } else {
-                double x = Math.abs(this.getMotion().x) * (this.rand.nextFloat() * 90.0 + 90.0);
-                double y = Math.abs(this.getMotion().y) * (this.rand.nextFloat() * 90.0 + 90.0);
-                double z = Math.abs(this.getMotion().z) * (this.rand.nextFloat() * 90.0 + 90.0);
+                double x = Math.abs(this.getMotion().x) * (this.rand.nextFloat() * 90.0 + 90.0) + this.rand.nextFloat();
+                double y = Math.abs(this.getMotion().y) * (this.rand.nextFloat() * 90.0 + 90.0) + this.rand.nextFloat();
+                double z = Math.abs(this.getMotion().z) * (this.rand.nextFloat() * 90.0 + 90.0) + this.rand.nextFloat();
                 this.addRotations(new Vec3d(x, y, z));
             }
         }

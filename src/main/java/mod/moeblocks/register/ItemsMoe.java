@@ -44,6 +44,14 @@ public class ItemsMoe {
     }
 
     public static class Tags {
-        public static final Tag<Item> ACCEPTABLE = new ItemTags.Wrapper(new ResourceLocation(MoeMod.ID, "acceptable"));
+        public static final Tag<Item> EQUIPPABLES = new ItemTags.Wrapper(new ResourceLocation(MoeMod.ID, "equippables"));
+        public static final Tag<Item> GIFTABLES = new ItemTags.Wrapper(new ResourceLocation(MoeMod.ID, "giftables"));
+        public static final Tag<Item> GREENS = new ItemTags.Wrapper(new ResourceLocation(MoeMod.ID, "greens"));
+        public static final Tag<Item> MEATS = new ItemTags.Wrapper(new ResourceLocation(MoeMod.ID, "meats"));
+        public static final Tag<Item> RELICS = new ItemTags.Wrapper(new ResourceLocation(MoeMod.ID, "relics"));
+        public static final Tag<Item> SWEETS = new ItemTags.Wrapper(new ResourceLocation(MoeMod.ID, "sweets"));
+        public static final Tag<Item> TREASURES = new ItemTags.Wrapper(new ResourceLocation(MoeMod.ID, "treasures"));
+        public static final Tag<Item> WEAPONS = new ItemTags.Wrapper(new ResourceLocation(MoeMod.ID, "weapons"));
+        public static final Tag<Item> WONDERS = new ItemTags.Wrapper(new ResourceLocation(MoeMod.ID, "wonders"));
     }
 }

@@ -5,7 +5,11 @@
     "minecraft:beetroot_soup",
     "minecraft:bread",
     "minecraft:carrot",
+    "minecraft:cod",
+    "minecraft:cooked_cod",
+    "minecraft:cooked_salmon",
     "minecraft:dried_kelp",
-    "minecraft:mushroom_stew"
+    "minecraft:mushroom_stew",
+    "minecraft:salmon"
   ]
 }

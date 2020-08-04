@@ -14,6 +14,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.util.UUID;
+
 public class MoeDieEntity extends DieEntity {
     protected BlockState blockStateForSpawn;
     protected Deres dere;
@@ -39,10 +41,11 @@ public class MoeDieEntity extends DieEntity {
             TileEntity extra = this.world.getTileEntity(this.getPositionUnderneath());
             if (state.equals(this.blockStateForSpawn)) {
                 MoeEntity moe = EntityTypesMoe.MOE.get().create(this.world);
-                moe.setPositionAndRotation(this.getPosX() - 0.5F, this.getPosY(), this.getPosZ(), this.rotationYaw, this.rotationPitch);
+                moe.setPositionAndRotation(this.getPosX(), this.getPosY(), this.getPosZ(), this.rotationYaw, this.rotationPitch);
                 moe.setBlockData(state);
                 moe.setExtraBlockData(extra != null ? extra.getTileData() : new CompoundNBT());
                 moe.setDere(this.dere);
+                moe.getRelationships().get(this.getPlayer() != null ? this.getPlayer().getUniqueID() : UUID.randomUUID()).addTrust(100);
                 if (this.world.addEntity(moe)) {
                     this.world.setBlockState(this.getPositionUnderneath(), Blocks.AIR.getDefaultState());
                     return false;

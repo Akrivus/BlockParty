@@ -2,6 +2,7 @@ package mod.moeblocks.entity.ai.behavior;
 
 import mod.moeblocks.entity.util.Behaviors;
 import mod.moeblocks.register.SoundEventsMoe;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.NoteBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -15,7 +16,7 @@ public class NoteBlockBehavior extends BasicBehavior {
 
     @Override
     public void start() {
-        this.pitch = (float) (Math.pow(2.0D, ((this.note = this.getBlockState().get(NoteBlock.NOTE)) - 12) / 12.0D));
+        this.pitch = this.moe.getBlockData().getBlock() == Blocks.NOTE_BLOCK ? (float) (Math.pow(2.0D, ((this.note = this.moe.getBlockData().get(NoteBlock.NOTE)) - 12) / 12.0D)) : 1.0F;
     }
 
     @Override
@@ -31,11 +32,6 @@ public class NoteBlockBehavior extends BasicBehavior {
     }
 
     @Override
-    public Behaviors getKey() {
-        return Behaviors.NOTE_BLOCK;
-    }
-
-    @Override
     public boolean onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
         if (hand == Hand.MAIN_HAND) {
             this.pitch = (float) (Math.pow(2.0D, ((this.note = Math.max(this.note + 1 % 25, 0)) - 12) / 12.0D));
@@ -48,7 +44,17 @@ public class NoteBlockBehavior extends BasicBehavior {
     }
 
     @Override
+    public Behaviors getKey() {
+        return Behaviors.NOTE_BLOCK;
+    }
+
+    @Override
     public float getPitch() {
         return this.pitch;
+    }
+
+    @Override
+    public String getFile() {
+        return String.format("%s.%d", super.getFile(), this.note);
     }
 }

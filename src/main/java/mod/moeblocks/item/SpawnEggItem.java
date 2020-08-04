@@ -38,6 +38,7 @@ public class SpawnEggItem extends Item {
             moe.setBlockData(state.getBlock().isIn(BlocksMoe.Tags.MOEABLES) ? state : Blocks.AIR.getDefaultState());
             moe.setExtraBlockData(extra != null ? extra.getTileData() : new CompoundNBT());
             moe.setDere(this.dere);
+            moe.getRelationships().get(player).addTrust(100);
             if (world.addEntity(moe)) {
                 context.getItem().shrink(1);
             }

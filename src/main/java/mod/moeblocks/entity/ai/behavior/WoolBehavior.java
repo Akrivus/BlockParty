@@ -1,6 +1,7 @@
 package mod.moeblocks.entity.ai.behavior;
 
 import mod.moeblocks.entity.util.Behaviors;
+import mod.moeblocks.entity.util.Emotions;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
@@ -37,6 +38,7 @@ public class WoolBehavior extends BasicBehavior {
         if (stack.getItem() instanceof ShearsItem) {
             this.moe.entityDropItem(this.moe.getBlockData().getBlock());
             this.moe.setBlockData(WOOL_TO_CARPET.get(this.moe.getBlockData().getBlock()).getDefaultState());
+            this.moe.setEmotion(Emotions.ANGRY);
             stack.damageItem(1, player, entity -> {
                 entity.sendBreakAnimation(hand);
             });

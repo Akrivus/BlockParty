@@ -1,7 +1,9 @@
 package mod.moeblocks.entity.ai.dere;
 
 import mod.moeblocks.entity.ai.AbstractState;
-import mod.moeblocks.entity.util.Deres;
+import mod.moeblocks.entity.ai.Relationship;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.BossInfo;
 
 public abstract class AbstractDere extends AbstractState {
     public float[] getEyeColor() {
@@ -12,12 +14,20 @@ public abstract class AbstractDere extends AbstractState {
         return 0xffffff;
     }
 
+    public BossInfo.Color getBarColor() {
+        return BossInfo.Color.WHITE;
+    }
+
+    public void onHello(LivingEntity host, Relationship relationship) {
+
+    }
+
+    public void onStare(LivingEntity host, Relationship relationship) {
+
+    }
+
     @Override
     public String toString() {
         return this.getKey().name();
-    }
-
-    public Deres getKey() {
-        return Deres.HIMEDERE;
     }
 }

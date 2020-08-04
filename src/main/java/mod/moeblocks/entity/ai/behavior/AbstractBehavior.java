@@ -2,8 +2,7 @@ package mod.moeblocks.entity.ai.behavior;
 
 import mod.moeblocks.entity.MoeEntity;
 import mod.moeblocks.entity.ai.AbstractState;
-import mod.moeblocks.entity.ai.IState;
-import mod.moeblocks.entity.util.Behaviors;
+import mod.moeblocks.entity.ai.IMachineState;
 import mod.moeblocks.util.MoeBlockAliases;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -36,7 +35,7 @@ public abstract class AbstractBehavior extends AbstractState {
     }
 
     @Override
-    public IState stop(IState swap) {
+    public IMachineState stop(IMachineState swap) {
         if (!this.moe.world.isRemote() && this.moe != null) {
             this.moe.getAttribute(SharedMonsterAttributes.ARMOR).removeModifier(this.moe.getUniqueID());
             this.moe.setCanFly(false);
@@ -81,9 +80,5 @@ public abstract class AbstractBehavior extends AbstractState {
     @Override
     public String toString() {
         return this.getKey().name();
-    }
-
-    public Behaviors getKey() {
-        return Behaviors.MISSING;
     }
 }
