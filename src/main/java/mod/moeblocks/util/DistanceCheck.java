@@ -1,22 +1,21 @@
 package mod.moeblocks.util;
 
-import mod.moeblocks.entity.MoeEntity;
 import net.minecraft.entity.Entity;
 
 import java.util.Comparator;
 
 public class DistanceCheck implements Comparator<Entity> {
-    private final MoeEntity moe;
+    private final Entity entity;
 
-    public DistanceCheck(MoeEntity moe) {
+    public DistanceCheck(Entity entity) {
         super();
-        this.moe = moe;
+        this.entity = entity;
     }
 
     @Override
     public int compare(Entity one, Entity two) {
-        float d1 = this.moe.getDistance(one);
-        float d2 = this.moe.getDistance(two);
+        float d1 = this.entity.getDistance(one);
+        float d2 = this.entity.getDistance(two);
         return Float.compare(d1, d2);
     }
 

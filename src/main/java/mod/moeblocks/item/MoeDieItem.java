@@ -21,7 +21,7 @@ public class MoeDieItem extends Item {
         ItemStack stack = player.getHeldItem(hand);
         if (!world.isRemote) {
             MoeDieEntity die = new MoeDieEntity(world, player);
-            die.shoot(player, player.rotationPitch, player.rotationYaw, 0.0F, 0.8F, 1.0F);
+            die.func_234612_a_(player, player.rotationPitch, player.rotationYaw, 0.0F, 0.8F, 1.0F);
             die.setItem(stack);
             world.addEntity(die);
         }

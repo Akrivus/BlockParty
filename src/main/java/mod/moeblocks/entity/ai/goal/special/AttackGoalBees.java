@@ -13,7 +13,7 @@ import java.util.List;
 
 public class AttackGoalBees extends Goal {
     private final MoeEntity moe;
-    private List<BeeEntity> bees = new ArrayList<>();
+    private final List<BeeEntity> bees = new ArrayList<>();
 
     public AttackGoalBees(MoeEntity moe) {
         super();
@@ -36,9 +36,14 @@ public class AttackGoalBees extends Goal {
     public BeeEntity spawnBeeFrom(MobEntity entity) {
         BeeEntity bee = new BeeEntity(EntityType.BEE, entity.world);
         bee.setPositionAndRotation(entity.getPosX(), entity.getPosYEye(), entity.getPosZ(), entity.rotationYaw, entity.rotationPitch);
-        bee.setBeeAttacker(entity.getAttackTarget());
         entity.world.addEntity(bee);
+        this.setToAttack(bee, entity.getAttackTarget());
         return bee;
+    }
+
+    public void setToAttack(BeeEntity bee, LivingEntity entity) {
+        bee.setAngerTarget(entity.getUniqueID());
+        bee.setAttackTarget(entity);
     }
 
     public int getBeeCountFrom(LivingEntity entity) {
@@ -64,7 +69,7 @@ public class AttackGoalBees extends Goal {
                 bees.add(this.spawnBeeFrom(bee));
                 bee.remove();
             } else {
-                bee.setBeeAttacker(this.moe.getAttackTarget());
+                this.setToAttack(bee, this.moe.getAttackTarget());
             }
         });
         bees.forEach(bee -> this.bees.add(bee));

@@ -3,16 +3,17 @@ package mod.moeblocks.entity.util;
 import mod.moeblocks.entity.DieEntity;
 import mod.moeblocks.entity.ai.dere.*;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.function.Supplier;
 
 public enum Deres {
-    HIMEDERE(HimeDere::new, DieEntity.Face.ONE),
-    KUUDERE(KuuDere::new, DieEntity.Face.TWO),
-    TSUNDERE(TsunDere::new, DieEntity.Face.THREE),
-    YANDERE(YanDere::new, DieEntity.Face.FOUR),
-    DEREDERE(DereDere::new, DieEntity.Face.FIVE),
-    DANDERE(DanDere::new, DieEntity.Face.SIX);
+    HIMEDERE(Himedere::new, DieEntity.Face.ONE),
+    KUUDERE(Kuudere::new, DieEntity.Face.TWO),
+    TSUNDERE(Tsundere::new, DieEntity.Face.THREE),
+    YANDERE(Yandere::new, DieEntity.Face.FOUR),
+    DEREDERE(Deredere::new, DieEntity.Face.FIVE),
+    DANDERE(Dandere::new, DieEntity.Face.SIX);
 
     private final Supplier<? extends AbstractDere> dere;
 
@@ -27,6 +28,10 @@ public enum Deres {
 
     public AbstractDere get() {
         return this.dere.get();
+    }
+
+    public boolean matches(Enum<?>... deres) {
+        return Arrays.stream(deres).anyMatch(dere -> this == dere);
     }
 
     protected static class Registry {

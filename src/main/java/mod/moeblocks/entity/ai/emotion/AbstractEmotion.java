@@ -2,12 +2,18 @@ package mod.moeblocks.entity.ai.emotion;
 
 import mod.moeblocks.entity.ai.AbstractState;
 import mod.moeblocks.entity.util.Emotions;
-import mod.moeblocks.register.SoundEventsMoe;
+import mod.moeblocks.entity.util.VoiceLines;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.world.IWorld;
 
-public abstract class AbstractEmotion extends AbstractState {
+public class AbstractEmotion extends AbstractState {
     public SoundEvent getLivingSound() {
-        return SoundEventsMoe.EMOTION_NORMAL.get();
+        return VoiceLines.EMOTION_NORMAL.get(this.entity);
     }
 
     public String getPath() {
@@ -19,7 +25,64 @@ public abstract class AbstractEmotion extends AbstractState {
         return this.getKey().name();
     }
 
-    public Emotions getKey() {
-        return Emotions.NORMAL;
+    @Override
+    public Enum<?> getKey() {
+        return null;
+    }
+
+    @Override
+    public boolean matches(Enum<?>... keys) {
+        Emotions emotion = (Emotions) this.entity.getEmotion().getKey();
+        return emotion.matches(keys);
+    }
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public void tick() {
+
+    }
+
+    @Override
+    public void stop() {
+
+    }
+
+    @Override
+    public void read(CompoundNBT compound) {
+
+    }
+
+    @Override
+    public void write(CompoundNBT compound) {
+
+    }
+
+    @Override
+    public void onDeath(DamageSource cause) {
+
+    }
+
+    @Override
+    public void onSpawn(IWorld world) {
+
+    }
+
+    @Override
+    public boolean onDamage(DamageSource source, float amount) {
+        return false;
+    }
+
+    @Override
+    public boolean onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
+        return false;
+    }
+
+    @Override
+    public boolean isArmed() {
+        return false;
     }
 }

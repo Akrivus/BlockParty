@@ -39,6 +39,7 @@ public class MoeMod {
 
     private void onCommonSetup(final FMLCommonSetupEvent e) {
         DispenserBehaviors.register();
+        EntityTypesMoe.registerAttributes();
         MoeBlockAliases.register();
     }
 }

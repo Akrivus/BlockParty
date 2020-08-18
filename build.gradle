@@ -9,7 +9,6 @@ buildscript {
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
 version = new Date().format('yy.MM.dd')
@@ -17,7 +16,7 @@ archivesBaseName = 'MoeBlocks'
 group = 'mod.moeblocks'
 
 minecraft {
-    mappings channel: 'snapshot', version: '20200628-1.15.1'
+    mappings channel: 'snapshot', version: '20200723-1.16.1'
 
     runs {
         client {
@@ -60,7 +59,7 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.15.2-31.2.27'
+    minecraft 'net.minecraftforge:forge:1.16.2-33.0.5'
 }
 
 jar {
@@ -70,7 +69,7 @@ jar {
             "Implementation-Version": "${version}",
             "Implementation-Vendor" :"Akrivus",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-            "Specification-Title": "Moe Magic",
+            "Specification-Title": "MoeBlocks",
             "Specification-Vendor": "Akrivus",
             "Specification-Version": "1"
         ])

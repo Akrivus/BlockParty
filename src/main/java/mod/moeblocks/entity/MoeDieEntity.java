@@ -8,11 +8,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 import java.util.UUID;
 
@@ -35,8 +37,7 @@ public class MoeDieEntity extends DieEntity {
 
     @Override
     public boolean onActionTick() {
-        --this.timeUntilSpawned;
-        if (this.timeUntilSpawned < 0) {
+        if (--this.timeUntilSpawned < 0) {
             BlockState state = this.world.getBlockState(this.getPositionUnderneath());
             TileEntity extra = this.world.getTileEntity(this.getPositionUnderneath());
             if (state.equals(this.blockStateForSpawn)) {
@@ -47,6 +48,7 @@ public class MoeDieEntity extends DieEntity {
                 moe.setDere(this.dere);
                 moe.getRelationships().get(this.getPlayer() != null ? this.getPlayer().getUniqueID() : UUID.randomUUID()).addTrust(100);
                 if (this.world.addEntity(moe)) {
+                    moe.onInitialSpawn((ServerWorld) this.world, this.world.getDifficultyForLocation(this.getPosition()), SpawnReason.TRIGGERED, null, null);
                     this.world.setBlockState(this.getPositionUnderneath(), Blocks.AIR.getDefaultState());
                     return false;
                 }

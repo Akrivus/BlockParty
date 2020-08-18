@@ -9,12 +9,12 @@ public class RedstoneLampBehavior extends BasicBehavior {
     }
 
     @Override
-    public Behaviors getKey() {
-        return Behaviors.REDSTONE_LAMP;
+    public boolean isGlowing() {
+        return true;
     }
 
     @Override
-    public boolean isGlowing() {
-        return true;
+    public Behaviors getKey() {
+        return Behaviors.REDSTONE_LAMP;
     }
 }

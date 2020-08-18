@@ -1,24 +1,25 @@
 package mod.moeblocks.entity.ai;
 
+import mod.moeblocks.entity.util.VoiceLines;
 import mod.moeblocks.register.ItemsMoe;
-import mod.moeblocks.register.SoundEventsMoe;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
+import net.minecraft.world.IWorld;
 
 import java.util.List;
 import java.util.UUID;
 
 public class Relationship extends AbstractState implements Comparable<Relationship> {
     protected UUID uuid;
-    protected int affection;
-    protected int trust;
-    private int timeSinceSeen = 6001;
-    private int timeUntilCheck = -1;
+    protected float affection;
+    protected float trust;
+    private int timeSinceSeen;
+    private int timeUntilCheck;
 
     public Relationship() {
         this(null);
@@ -28,7 +29,7 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
         this(uuid, 0, 0);
     }
 
-    public Relationship(UUID uuid, int affection, int trust) {
+    public Relationship(UUID uuid, float affection, float trust) {
         this.uuid = uuid;
         this.affection = affection;
         this.trust = trust;
@@ -41,42 +42,47 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
 
     @Override
     public int compareTo(Relationship other) {
-        return Integer.compare(this.getLoyalty(), other.getLoyalty());
+        return Float.compare(this.getLoyalty(), other.getLoyalty());
     }
 
-    public int getLoyalty() {
-        return this.trust - this.moe.getStressStats().getStress() + this.affection;
+    public float getLoyalty() {
+        return this.trust - this.entity.getStressStats().getStress() + this.affection;
     }
 
     @Override
     public void start() {
-        this.moe.getRelationships().set(this.getUUID(), this);
+        this.entity.getRelationships().set(this.getUUID(), this);
     }
 
     @Override
     public void tick() {
-        if (this.timeUntilCheck < 0) {
-            this.timeUntilCheck = 200;
+        if (--this.timeUntilCheck < 0) {
+            this.timeUntilCheck = 20;
             LivingEntity host = this.getHost();
-            if (host != null && host.getDistance(this.moe) < 16.0F) {
-                if (this.timeSinceSeen > 6000) {
-                    this.moe.getDere().onHello(host, this);
-                    this.trust += 4;
-                } else if (this.moe.isBeingWatchedBy(host)) {
-                    this.moe.getDere().onStare(host, this);
-                    this.trust += 3;
-                } else if (host.getDistance(this.moe) < 4.0F) {
-                    this.trust += 2;
+            if (host != null && host.getDistance(this.entity) < 16.0F) {
+                this.entity.getStressStats().addStressSilently(this.getAnxiety() * -1.0F);
+                if (this.timeSinceSeen > 300) {
+                    this.timeSinceSeen = 0;
+                    this.onHello(host);
+                    this.addAffection(2.0F);
+                } else if (this.entity.isBeingWatchedBy(host)) {
+                    this.onStare(host);
+                    this.addAffection(0.1F);
+                } else if (host.getDistance(this.entity) < 4.0F) {
+                    this.addTrust(0.005F);
                 } else {
-                    this.trust += 1;
+                    this.addTrust(0.001F);
                 }
-            } else if (this.canDoChoresFor()) {
-                this.trust -= 1;
+            } else {
+                ++this.timeSinceSeen;
+                this.entity.getStressStats().addStressSilently(this.getAnxiety());
+                this.addTrust(-0.001F);
             }
-        } else {
-            ++this.timeSinceSeen;
-            --this.timeUntilCheck;
         }
+    }
+
+    public float getAnxiety() {
+        return (this.getAffection() / 20.0F) / this.entity.getRelationships().size() * 0.001F;
     }
 
     @Override
@@ -89,8 +95,8 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
         this.timeSinceSeen = compound.getInt("TimeSinceSeen");
         this.timeUntilCheck = compound.getInt("TimeUntilCheck");
         this.uuid = compound.getUniqueId("Host");
-        this.affection = compound.getInt("Affection");
-        this.trust = compound.getInt("Trust");
+        this.affection = compound.getFloat("Affection");
+        this.trust = compound.getFloat("Trust");
     }
 
     @Override
@@ -98,8 +104,18 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
         compound.putInt("TimeSinceSeen", this.timeSinceSeen);
         compound.putInt("TimeUntilCheck", this.timeUntilCheck);
         compound.putUniqueId("Host", this.uuid);
-        compound.putInt("Affection", this.affection);
-        compound.putInt("Trust", this.trust);
+        compound.putFloat("Affection", this.affection);
+        compound.putFloat("Trust", this.trust);
+    }
+
+    @Override
+    public void onDeath(DamageSource cause) {
+
+    }
+
+    @Override
+    public void onSpawn(IWorld world) {
+
     }
 
     @Override
@@ -110,17 +126,33 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
     @Override
     public boolean onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
         if (hand == Hand.MAIN_HAND && player.getUniqueID().equals(this.getUUID()) && this.canFollow()) {
-            if (stack.getItem().isIn(ItemsMoe.Tags.EQUIPPABLES) && !player.isSneaking()) {
-                this.moe.playSound(SoundEventsMoe.THANK_YOU.get());
-                return this.moe.tryEquipItem(stack);
+            if (player.isSneaking()) {
+                if (stack.getItem().isIn(ItemsMoe.Tags.EQUIPPABLES)) {
+                    if (this.entity.tryEquipItem(stack.copy())) {
+                        this.entity.playSound(VoiceLines.THANK_YOU.get(this.entity));
+                        this.entity.getRelationships().resetGiftTimer();
+                        float value = this.entity.getDere().getGiftValue(stack);
+                        if (stack.getItem().isIn(ItemsMoe.Tags.GIFTABLES)) {
+                            this.addAffection(value);
+                        } else {
+                            this.addTrust(value);
+                        }
+                    } else {
+                        this.entity.playSound(VoiceLines.NO.get(this.entity));
+                    }
+                    return true;
+                } else if (stack.isEmpty()) {
+                    this.entity.playSound(VoiceLines.HURT.get(this.entity));
+                    for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+                        ItemStack drop = this.entity.getItemStackFromSlot(slot);
+                        this.entity.entityDropItem(drop.split(drop.getCount()));
+                    }
+                    return true;
+                }
+                return false;
             }
-            if (player.equals(this.moe.getFollowTarget())) {
-                this.moe.playSound(SoundEventsMoe.NO.get());
-                this.moe.setFollowTarget(null);
-            } else {
-                this.moe.playSound(SoundEventsMoe.YES.get());
-                this.moe.setFollowTarget(player);
-            }
+            this.entity.playSound(VoiceLines.YES.get(this.entity));
+            this.entity.setFollowTarget(player);
             return true;
         }
         return false;
@@ -131,50 +163,48 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
         return false;
     }
 
-    @Override
-    public Enum<?> getKey() {
-        return null;
+    public boolean canFollow() {
+        return this.getLoyalty() > 0;
     }
 
-    public boolean canFollow() {
-        return this.getLoyalty() > 20;
+    public void addAffection(float affection) {
+        this.affection = Math.max(Math.min(this.affection + affection, 20.0F), -5.0F);
+    }
+
+    public void addTrust(float trust) {
+        this.trust = Math.max(Math.min(this.trust + trust, 20.0F), -5.0F);
     }
 
     public boolean canDoChoresFor() {
-        return this.getLoyalty() > 40;
+        return this.getLoyalty() > 4;
     }
 
     public LivingEntity getHost() {
-        Entity entity = this.moe.world.getServer().getWorld(this.moe.dimension).getEntityByUuid(this.getUUID());
-        if (entity instanceof LivingEntity) {
-            return (LivingEntity) entity;
-        } else {
-            return null;
-        }
+        return this.entity.getEntityFromUUID(this.getUUID());
+    }
+
+    public void onHello(LivingEntity host) {
+        this.entity.getDere().onHello(host, this);
+    }
+
+    public void onStare(LivingEntity host) {
+        this.entity.getDere().onStare(host, this);
     }
 
     public UUID getUUID() {
         return this.uuid;
     }
 
-    public void addAffection(int affection) {
-        this.affection += affection;
-    }
-
-    public int getAffection() {
+    public float getAffection() {
         return this.affection;
     }
 
-    public void addTrust(int trust) {
-        this.trust += trust;
-    }
-
-    public int getTrust() {
+    public float getTrust() {
         return this.trust;
     }
 
     public float getDistance() {
-        return 3.0F / (this.getLoyalty() / 100.0F);
+        return 3.0F / (this.getLoyalty() / 20.0F);
     }
 
     public boolean canHate() {
@@ -182,15 +212,15 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
     }
 
     public boolean canFightAlongside() {
-        return this.getLoyalty() > 60;
+        return this.getLoyalty() > 8;
     }
 
     public boolean canDefend() {
-        return this.getLoyalty() > 80;
+        return this.getLoyalty() > 12;
     }
 
     public boolean canDieFor() {
-        return this.getLoyalty() > 100;
+        return this.getLoyalty() > 16;
     }
 
     public boolean isPlayer() {

@@ -9,11 +9,12 @@ import mod.moeblocks.entity.MoeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.HeldItemLayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 
 public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> implements IRenderFactory<MoeEntity> {
@@ -35,12 +36,12 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
 
     @Override
     public ResourceLocation getEntityTexture(MoeEntity entity) {
-        return new ResourceLocation(MoeMod.ID, String.format("textures/entity/block/%s.png", entity.getBehavior().getPath()));
+        return new ResourceLocation(MoeMod.ID, String.format("textures/entity/moe/%s.png", entity.getBehavior().getPath()));
     }
 
     @Override
-    protected void renderName(MoeEntity entity, String name, MatrixStack stack, IRenderTypeBuffer buffer, int packedLight) {
-        String[] lines = new String[]{this.getHealth(entity), name};
+    protected void renderName(MoeEntity entity, ITextComponent name, MatrixStack stack, IRenderTypeBuffer buffer, int packedLight) {
+        String[] lines = new String[]{this.getHealth(entity), name.getString()};
         stack.push();
         stack.translate(0.0D, entity.getHeight() + 0.5F, 0.0D);
         stack.rotate(this.renderManager.getCameraOrientation());

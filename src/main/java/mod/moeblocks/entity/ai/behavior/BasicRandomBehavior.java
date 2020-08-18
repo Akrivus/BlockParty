@@ -12,8 +12,7 @@ public class BasicRandomBehavior extends BasicBehavior {
 
     @Override
     public void tick() {
-        --this.timeUntilRandom;
-        if (this.timeUntilRandom < 0) {
+        if (--this.timeUntilRandom < 0) {
             this.onRandomTick();
             this.setInterval();
         }

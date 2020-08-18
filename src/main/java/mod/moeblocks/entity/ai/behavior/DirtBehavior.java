@@ -25,9 +25,8 @@ public class DirtBehavior extends BasicRandomBehavior {
                 entity.sendBreakAnimation(hand);
             });
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

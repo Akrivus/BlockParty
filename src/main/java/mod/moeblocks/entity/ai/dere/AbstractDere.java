@@ -1,11 +1,16 @@
 package mod.moeblocks.entity.ai.dere;
 
 import mod.moeblocks.entity.ai.AbstractState;
-import mod.moeblocks.entity.ai.Relationship;
-import net.minecraft.entity.LivingEntity;
+import mod.moeblocks.entity.util.Deres;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
 import net.minecraft.world.BossInfo;
+import net.minecraft.world.IWorld;
 
-public abstract class AbstractDere extends AbstractState {
+public class AbstractDere extends AbstractState {
     public float[] getEyeColor() {
         return new float[]{1.0F, 1.0F, 1.0F};
     }
@@ -18,16 +23,73 @@ public abstract class AbstractDere extends AbstractState {
         return BossInfo.Color.WHITE;
     }
 
-    public void onHello(LivingEntity host, Relationship relationship) {
+    public float getGiftValue(ItemStack stack) {
+        return 0.0F;
+    }
+
+    @Override
+    public void start() {
 
     }
 
-    public void onStare(LivingEntity host, Relationship relationship) {
+    @Override
+    public void tick() {
 
+    }
+
+    @Override
+    public void stop() {
+
+    }
+
+    @Override
+    public void read(CompoundNBT compound) {
+
+    }
+
+    @Override
+    public void write(CompoundNBT compound) {
+
+    }
+
+    @Override
+    public void onDeath(DamageSource cause) {
+
+    }
+
+    @Override
+    public void onSpawn(IWorld world) {
+
+    }
+
+    @Override
+    public boolean onDamage(DamageSource source, float amount) {
+        return false;
+    }
+
+    @Override
+    public boolean onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
+        return false;
+    }
+
+    @Override
+    public boolean isArmed() {
+        return false;
     }
 
     @Override
     public String toString() {
         return this.getKey().name();
+    }
+
+    @Override
+    public Enum<?> getKey() {
+        return null;
+    }
+
+    @Override
+    public boolean matches(Enum<?>... keys) {
+        Deres dere = (Deres) this.entity.getDere().getKey();
+        return dere.matches(keys);
     }
 }

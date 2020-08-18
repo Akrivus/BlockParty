@@ -15,30 +15,30 @@
     "category": "player",
     "subtitle": "subtitle.moe.eat",
     "sounds": [
-      "moeblocks:eat1",
-      "moeblocks:eat2",
-      "moeblocks:eat3"
+      "moeblocks:entity/moe/eat1",
+      "moeblocks:entity/moe/eat2",
+      "moeblocks:entity/moe/eat3"
     ]
   },
   "entity.moe.emotion.angry": {
     "category": "player",
     "subtitle": "subtitle.moe.emotion.angry",
     "sounds": [
-      "moeblocks:angry1"
+      "moeblocks:entity/moe/angry1"
     ]
   },
   "entity.moe.emotion.begging": {
     "category": "player",
     "subtitle": "subtitle.moe.emotion.begging",
     "sounds": [
-      "moeblocks:begging1"
+      "moeblocks:entity/moe/begging1"
     ]
   },
   "entity.moe.emotion.confused": {
     "category": "player",
     "subtitle": "subtitle.moe.emotion.confused",
     "sounds": [
-      "moeblocks:confused1"
+      "moeblocks:entity/moe/confused1"
     ]
   },
   "entity.moe.emotion.crying": {
@@ -57,33 +57,33 @@
     "category": "player",
     "subtitle": "subtitle.moe.emotion.happy",
     "sounds": [
-      "moeblocks:happy1",
-      "moeblocks:happy2"
+      "moeblocks:entity/moe/happy1",
+      "moeblocks:entity/moe/happy2"
     ]
   },
   "entity.moe.emotion.mischievous": {
     "category": "player",
     "subtitle": "subtitle.moe.emotion.mischievous",
     "sounds": [
-      "moeblocks:mischievous1",
-      "moeblocks:mischievous2"
+      "moeblocks:entity/moe/mischievous1",
+      "moeblocks:entity/moe/mischievous2"
     ]
   },
   "entity.moe.emotion.normal": {
     "category": "player",
     "subtitle": "subtitle.moe.emotion.normal",
     "sounds": [
-      "moeblocks:normal1",
-      "moeblocks:normal2",
-      "moeblocks:normal3"
+      "moeblocks:entity/moe/normal1",
+      "moeblocks:entity/moe/normal2",
+      "moeblocks:entity/moe/normal3"
     ]
   },
   "entity.moe.emotion.pained": {
     "category": "player",
     "subtitle": "subtitle.moe.emotion.pained",
     "sounds": [
-      "moeblocks:pained1",
-      "moeblocks:pained2"
+      "moeblocks:entity/moe/pained1",
+      "moeblocks:entity/moe/pained2"
     ]
   },
   "entity.moe.emotion.psychotic": {
@@ -104,11 +104,17 @@
     "sounds": [
     ]
   },
+  "entity.moe.emotion.tired": {
+    "category": "player",
+    "subtitle": "subtitle.moe.emotion.tired",
+    "sounds": [
+    ]
+  },
   "entity.moe.greet.level_1": {
     "category": "player",
     "subtitle": "subtitle.moe.greet.level_1",
     "sounds": [
-      "moeblocks:greet1"
+      "moeblocks:entity/moe/greet1"
     ]
   },
   "entity.moe.greet.level_2": {
@@ -133,21 +139,21 @@
     "category": "player",
     "subtitle": "subtitle.moe.hurt",
     "sounds": [
-      "moeblocks:hurt1"
+      "moeblocks:entity/moe/hurt1"
     ]
   },
   "entity.moe.no": {
     "category": "player",
     "subtitle": "subtitle.moe.no",
     "sounds": [
-      "moeblocks:no1"
+      "moeblocks:entity/moe/no1"
     ]
   },
   "entity.moe.sing": {
     "category": "player",
     "subtitle": "subtitle.moe.sing",
     "sounds": [
-      "moeblocks:sing1"
+      "moeblocks:entity/moe/sing1"
     ]
   },
   "entity.moe.thank_you": {
@@ -160,8 +166,158 @@
     "category": "player",
     "subtitle": "subtitle.moe.yes",
     "sounds": [
-      "moeblocks:yes1",
-      "moeblocks:yes2"
+      "moeblocks:entity/moe/yes1",
+      "moeblocks:entity/moe/yes2"
+    ]
+  },
+  "entity.senpai.attack": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.attack",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.dead": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.dead",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.eat": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.eat",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.emotion.angry": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.emotion.angry",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.emotion.begging": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.emotion.begging",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.emotion.confused": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.emotion.confused",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.emotion.crying": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.emotion.crying",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.emotion.embarrassed": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.emotion.embarrassed",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.emotion.happy": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.emotion.happy",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.emotion.mischievous": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.emotion.mischievous",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.emotion.normal": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.emotion.normal",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.emotion.pained": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.emotion.pained",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.emotion.psychotic": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.emotion.psychotic",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.emotion.scared": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.emotion.scared",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.emotion.smitten": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.emotion.smitten",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.emotion.tired": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.emotion.tired",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.greet.level_1": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.greet.level_1",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.greet.level_2": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.greet.level_2",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.greet.level_3": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.greet.level_3",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.greet.level_4": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.greet.level_4",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.hurt": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.hurt",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.no": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.no",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.sing": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.sing",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.thank_you": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.thank_you",
+    "sounds": [
+    ]
+  },
+  "entity.senpai.yes": {
+    "category": "player",
+    "subtitle": "subtitle.senpai.yes",
+    "sounds": [
     ]
   }
 }

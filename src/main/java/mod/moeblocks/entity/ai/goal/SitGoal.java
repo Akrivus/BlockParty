@@ -1,29 +1,29 @@
 package mod.moeblocks.entity.ai.goal;
 
-import mod.moeblocks.entity.MoeEntity;
+import mod.moeblocks.entity.StateEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.EnumSet;
 
 public class SitGoal extends Goal {
-    private final MoeEntity moe;
+    private final StateEntity entity;
 
-    public SitGoal(MoeEntity moe) {
+    public SitGoal(StateEntity entity) {
         super();
         this.setMutexFlags(EnumSet.of(Flag.JUMP, Flag.MOVE));
-        this.moe = moe;
+        this.entity = entity;
     }
 
     @Override
     public boolean shouldExecute() {
-        return this.moe.isWaiting() && this.moe.getAttackTarget() == null && !this.moe.isWithinHomeDistanceCurrentPosition();
+        return this.entity.isWaiting() && this.entity.getAttackTarget() == null && !this.entity.isWithinHomeDistanceCurrentPosition();
     }
 
     @Override
     public void startExecuting() {
-        BlockPos pos = this.moe.getHomePosition();
-        this.moe.getNavigator().tryMoveToXYZ(pos.getX(), pos.getY(), pos.getZ(), 1.0F);
-        this.moe.setSprinting(false);
+        BlockPos pos = this.entity.getHomePosition();
+        this.entity.getNavigator().tryMoveToXYZ(pos.getX(), pos.getY(), pos.getZ(), 1.0F);
+        this.entity.setSprinting(false);
     }
 }

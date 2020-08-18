@@ -1,24 +1,43 @@
 package mod.moeblocks.entity.ai;
 
-import mod.moeblocks.entity.MoeEntity;
+import mod.moeblocks.entity.StateEntity;
+import net.minecraft.entity.LivingEntity;
 
 public abstract class AbstractState implements IMachineState {
-    protected MoeEntity moe;
+    protected StateEntity entity;
 
     @Override
-    public void start(MoeEntity moe) {
-        this.moe = moe;
+    public void start(StateEntity entity) {
+        this.entity = entity;
         this.start();
     }
 
     @Override
     public IMachineState stop(IMachineState swap) {
         this.stop();
-        swap.start(this.moe);
+        swap.start(this.entity);
         return swap;
     }
 
-    public void setMoe(MoeEntity moe) {
-        this.moe = moe;
+    @Override
+    public Enum<?> getKey() {
+        return null;
+    }
+
+    @Override
+    public boolean matches(Enum<?>... keys) {
+        return false;
+    }
+
+    public void setStateEntity(StateEntity entity) {
+        this.entity = entity;
+    }
+
+    public void onHello(LivingEntity host, Relationship relationship) {
+
+    }
+
+    public void onStare(LivingEntity host, Relationship relationship) {
+
     }
 }

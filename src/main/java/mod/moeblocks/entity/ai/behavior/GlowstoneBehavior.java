@@ -9,12 +9,12 @@ public class GlowstoneBehavior extends BasicBehavior {
     }
 
     @Override
-    public Behaviors getKey() {
-        return Behaviors.GLOWSTONE;
+    public boolean isGlowing() {
+        return true;
     }
 
     @Override
-    public boolean isGlowing() {
-        return true;
+    public Behaviors getKey() {
+        return Behaviors.GLOWSTONE;
     }
 }

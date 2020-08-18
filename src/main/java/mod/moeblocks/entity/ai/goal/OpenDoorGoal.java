@@ -1,7 +1,8 @@
 package mod.moeblocks.entity.ai.goal;
 
 
-import mod.moeblocks.entity.MoeEntity;
+import mod.moeblocks.entity.StateEntity;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DoorBlock;
 import net.minecraft.block.material.Material;
@@ -13,7 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class OpenDoorGoal extends Goal {
-    private final MoeEntity moe;
+    private final StateEntity entity;
     private BlockPos pos = BlockPos.ZERO;
     private boolean nearDoor;
     private int timeUntilClosed;
@@ -21,25 +22,25 @@ public class OpenDoorGoal extends Goal {
     private float x;
     private float z;
 
-    public OpenDoorGoal(MoeEntity moe) {
-        this.moe = moe;
+    public OpenDoorGoal(StateEntity entity) {
+        this.entity = entity;
     }
 
     @Override
     public boolean shouldExecute() {
-        if (this.moe.collidedHorizontally) {
-            PathNavigator navigator = this.moe.getNavigator();
+        if (this.entity.collidedHorizontally) {
+            PathNavigator navigator = this.entity.getNavigator();
             Path path = navigator.getPath();
             if (path != null && !path.isFinished()) {
                 for (int i = 0; i < Math.min(path.getCurrentPathIndex() + 2, path.getCurrentPathLength()); ++i) {
                     PathPoint point = path.getPathPointFromIndex(i);
                     this.pos = new BlockPos(point.x, point.y + 1, point.z);
-                    if (this.moe.getDistanceSq(this.pos.getX(), this.moe.getPosY(), this.pos.getZ()) < 2.25D) {
-                        return this.nearDoor = canOpenDoor(this.moe.world, this.pos);
+                    if (this.entity.getDistanceSq(this.pos.getX(), this.entity.getPosY(), this.pos.getZ()) < 2.25D) {
+                        return this.nearDoor = canOpenDoor(this.entity.world, this.pos);
                     }
                 }
-                this.pos = this.moe.getPosition().up();
-                this.nearDoor = canOpenDoor(this.moe.world, this.pos);
+                this.pos = this.entity.getPosition().up();
+                this.nearDoor = canOpenDoor(this.entity.world, this.pos);
                 return this.nearDoor;
             }
             return false;
@@ -55,17 +56,17 @@ public class OpenDoorGoal extends Goal {
     @Override
     public void startExecuting() {
         this.hasStoppedDoorInteraction = false;
-        this.x = (float) ((this.pos.getX() + 0.5F) - this.moe.getPosX());
-        this.z = (float) ((this.pos.getZ() + 0.5F) - this.moe.getPosZ());
+        this.x = (float) ((this.pos.getX() + 0.5F) - this.entity.getPosX());
+        this.z = (float) ((this.pos.getZ() + 0.5F) - this.entity.getPosZ());
         this.toggleDoor(true);
         this.timeUntilClosed = 20;
     }
 
     protected void toggleDoor(boolean open) {
-        BlockState state = this.moe.world.getBlockState(this.pos);
-        if (state.getBlock() instanceof DoorBlock) {
-            DoorBlock door = (DoorBlock) state.getBlock();
-            door.toggleDoor(this.moe.world, this.pos, open);
+        BlockState state = this.entity.world.getBlockState(this.pos);
+        Block block = state.getBlock();
+        if (block instanceof DoorBlock) {
+            ((DoorBlock) block).func_242663_a(this.entity.world, state, this.pos, open);
         }
     }
 
@@ -79,8 +80,8 @@ public class OpenDoorGoal extends Goal {
         if (this.hasStoppedDoorInteraction) {
             --this.timeUntilClosed;
         } else {
-            float dX = (float) ((this.pos.getX() + 0.5F) - this.moe.getPosX());
-            float dZ = (float) ((this.pos.getZ() + 0.5F) - this.moe.getPosZ());
+            float dX = (float) ((this.pos.getX() + 0.5F) - this.entity.getPosX());
+            float dZ = (float) ((this.pos.getZ() + 0.5F) - this.entity.getPosZ());
             float dD = this.x * dX + this.z * dZ;
             if (dD < 0.0F) {
                 this.hasStoppedDoorInteraction = true;

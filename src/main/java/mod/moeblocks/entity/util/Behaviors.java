@@ -11,8 +11,11 @@ import java.util.function.Supplier;
 public enum Behaviors {
     BEACON(BeaconBehavior::new, Blocks.BEACON),
     BEE_NEST(BeeNestBehavior::new, Blocks.BEE_NEST),
+    BEEHIVE(BeehiveBehavior::new, Blocks.BEEHIVE),
     BREWING_STAND(BrewingStandBehavior::new, Blocks.BREWING_STAND),
     BRICKS(BricksBehavior::new, Blocks.BRICKS),
+    CACTUS(CactusBehavior::new, Blocks.CACTUS),
+    CAKE(CakeBehavior::new, Blocks.CAKE),
     CARPET(CarpetBehavior::new, Blocks.BLACK_CARPET, Blocks.BLUE_CARPET, Blocks.BROWN_CARPET, Blocks.CYAN_CARPET, Blocks.GRAY_CARPET, Blocks.GREEN_CARPET, Blocks.LIGHT_BLUE_CARPET, Blocks.LIGHT_GRAY_CARPET, Blocks.LIME_CARPET, Blocks.MAGENTA_CARPET, Blocks.ORANGE_CARPET, Blocks.PINK_CARPET, Blocks.PURPLE_CARPET, Blocks.RED_CARPET, Blocks.WHITE_CARPET, Blocks.YELLOW_CARPET),
     COARSE_DIRT(CoarseDirtBehavior::new, Blocks.COARSE_DIRT),
     CONDUIT(ConduitBehavior::new, Blocks.CONDUIT),
@@ -30,6 +33,7 @@ public enum Behaviors {
     MAGMA_BLOCK(MagmaBlockBehavior::new, Blocks.MAGMA_BLOCK),
     MISSING(BasicBehavior::new),
     MYCELIUM(MyceliumBehavior::new, Blocks.MYCELIUM),
+    NETHER_BRICKS(NetherBricksBehavior::new, Blocks.NETHER_BRICK_FENCE, Blocks.NETHER_BRICK_SLAB, Blocks.NETHER_BRICK_STAIRS, Blocks.NETHER_BRICK_WALL, Blocks.NETHER_BRICKS, Blocks.RED_NETHER_BRICK_SLAB, Blocks.RED_NETHER_BRICK_STAIRS, Blocks.RED_NETHER_BRICK_WALL, Blocks.RED_NETHER_BRICKS),
     NOTE_BLOCK(NoteBlockBehavior::new, Blocks.NOTE_BLOCK),
     OBSERVER(ObserverBehavior::new, Blocks.OBSERVER),
     REDSTONE_BLOCK(RedstoneBlockBehavior::new, Blocks.REDSTONE_BLOCK),
@@ -37,7 +41,6 @@ public enum Behaviors {
     SEA_LANTERN(SeaLanternBehavior::new, Blocks.SEA_LANTERN),
     WET_SPONGE(WetSpongeBehavior::new, Blocks.WET_SPONGE),
     WOOL(WoolBehavior::new, Blocks.BLACK_WOOL, Blocks.BLUE_WOOL, Blocks.BROWN_WOOL, Blocks.CYAN_WOOL, Blocks.GRAY_WOOL, Blocks.GREEN_WOOL, Blocks.LIGHT_BLUE_WOOL, Blocks.LIGHT_GRAY_WOOL, Blocks.LIME_WOOL, Blocks.MAGENTA_WOOL, Blocks.ORANGE_WOOL, Blocks.PINK_WOOL, Blocks.PURPLE_WOOL, Blocks.RED_WOOL, Blocks.WHITE_WOOL, Blocks.YELLOW_WOOL);
-
 
     private final Supplier<? extends AbstractBehavior> behavior;
 

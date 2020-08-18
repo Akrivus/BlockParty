@@ -33,13 +33,12 @@ public class CarpetBehavior extends BasicBehavior {
 
     @Override
     public boolean onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
-        if (CARPET_TO_WOOL.values().contains(Block.getBlockFromItem(stack.getItem()))) {
+        if (CARPET_TO_WOOL.containsValue(Block.getBlockFromItem(stack.getItem()))) {
             this.moe.setBlockData(CARPET_TO_WOOL.get(Block.getBlockFromItem(stack.getItem())).getDefaultState());
             stack.shrink(1);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

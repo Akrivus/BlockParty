@@ -1,57 +1,46 @@
 package mod.moeblocks.entity.ai.goal;
 
-import mod.moeblocks.entity.MoeEntity;
+import mod.moeblocks.entity.StateEntity;
+import mod.moeblocks.util.DistanceCheck;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
 public class LookGoal extends Goal {
-    private final MoeEntity moe;
-    private LivingEntity entity;
+    private final StateEntity entity;
+    private LivingEntity target;
 
-    public LookGoal(MoeEntity moe) {
+    public LookGoal(StateEntity entity) {
         super();
         this.setMutexFlags(EnumSet.of(Flag.LOOK));
-        this.moe = moe;
+        this.entity = entity;
     }
 
     @Override
     public boolean shouldExecute() {
-        if (this.moe.getFollowTarget() != null) {
-            this.entity = this.moe.getFollowTarget();
-            return true;
-        } else if (this.moe.getAttackTarget() != null) {
-            this.entity = this.moe.getAttackTarget();
-            return true;
-        } else if (this.moe.ticksExisted % 20 == 0 && this.moe.world.rand.nextBoolean()) {
-            List<LivingEntity> victims = this.moe.world.getEntitiesWithinAABB(LivingEntity.class, this.moe.getBoundingBox().grow(8.0F, 4.0F, 8.0F));
-            Collections.shuffle(victims);
-            if (victims.isEmpty()) {
-                return false;
-            } else {
-                this.entity = victims.get(0);
-                return this.entity != null;
-            }
-        } else {
-            return false;
+        if (this.entity.isWaiting()) {
+            List<LivingEntity> victims = this.entity.world.getEntitiesWithinAABB(LivingEntity.class, this.entity.getBoundingBox().grow(8.0F, 4.0F, 8.0F));
+            return !victims.isEmpty();
         }
+        return false;
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.shouldExecute() && this.moe.canBeTarget(this.entity);
+        return this.entity.canBeTarget(this.target);
     }
 
     @Override
-    public void resetTask() {
-        this.entity = null;
+    public void startExecuting() {
+        List<LivingEntity> victims = this.entity.world.getEntitiesWithinAABB(LivingEntity.class, this.entity.getBoundingBox().grow(8.0F, 4.0F, 8.0F));
+        victims.sort(new DistanceCheck(this.entity));
+        this.target = victims.isEmpty() ? null : victims.get(0);
     }
 
     @Override
     public void tick() {
-        this.moe.getLookController().setLookPositionWithEntity(this.entity, 30.0F, 30.0F);
+        this.entity.see(this.target);
     }
 }

@@ -1,7 +1,7 @@
 package mod.moeblocks.entity.ai.behavior;
 
 import mod.moeblocks.entity.util.Behaviors;
-import mod.moeblocks.register.SoundEventsMoe;
+import mod.moeblocks.entity.util.VoiceLines;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.NoteBlock;
 import net.minecraft.entity.player.PlayerEntity;
@@ -36,16 +36,10 @@ public class NoteBlockBehavior extends BasicBehavior {
         if (hand == Hand.MAIN_HAND) {
             this.pitch = (float) (Math.pow(2.0D, ((this.note = Math.max(this.note + 1 % 25, 0)) - 12) / 12.0D));
             this.moe.world.addParticle(ParticleTypes.NOTE, this.moe.getPosXRandom(0.375D), this.moe.getPosYRandom() + 0.25D, this.moe.getPosZRandom(0.375D), this.note / 24.0D, 0.0D, 0.0D);
-            this.moe.playSound(SoundEventsMoe.SING.get());
+            this.moe.playSound(VoiceLines.SING.get(this.entity));
             return true;
-        } else {
-            return false;
         }
-    }
-
-    @Override
-    public Behaviors getKey() {
-        return Behaviors.NOTE_BLOCK;
+        return false;
     }
 
     @Override
@@ -56,5 +50,10 @@ public class NoteBlockBehavior extends BasicBehavior {
     @Override
     public String getFile() {
         return String.format("%s.%d", super.getFile(), this.note);
+    }
+
+    @Override
+    public Behaviors getKey() {
+        return Behaviors.NOTE_BLOCK;
     }
 }

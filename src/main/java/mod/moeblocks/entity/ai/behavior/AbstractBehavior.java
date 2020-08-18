@@ -1,27 +1,34 @@
 package mod.moeblocks.entity.ai.behavior;
 
-import mod.moeblocks.entity.MoeEntity;
-import mod.moeblocks.entity.ai.AbstractState;
+import mod.moeblocks.entity.StateEntity;
+import mod.moeblocks.entity.ai.AbstractMoeState;
 import mod.moeblocks.entity.ai.IMachineState;
 import mod.moeblocks.util.MoeBlockAliases;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.pathfinding.PathNodeType;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.world.IWorld;
 
-public abstract class AbstractBehavior extends AbstractState {
-    public CompoundNBT getExtraBlockData() {
-        return this.moe.getExtraBlockData();
-    }
-
+public class AbstractBehavior extends AbstractMoeState {
     @Override
-    public void start(MoeEntity moe) {
-        super.start(moe);
+    public void start(StateEntity entity) {
+        super.start(entity);
         if (!this.moe.world.isRemote()) {
-            this.moe.getAttribute(SharedMonsterAttributes.ARMOR).applyModifier(this.getArmorModifier());
+            float priority = this.moe.isReallyImmuneToFire() ? 0.0F : -1.0F;
+            this.moe.setPathPriority(PathNodeType.DAMAGE_FIRE, priority);
+            this.moe.setPathPriority(PathNodeType.DANGER_FIRE, priority);
+            this.moe.setPathPriority(PathNodeType.LAVA, priority);
+            this.moe.setPathPriority(PathNodeType.WATER, priority);
+            this.moe.getAttribute(Attributes.ARMOR).applyNonPersistentModifier(this.getArmorModifier());
             this.moe.setScale(this.getBlockVolume());
         }
     }
@@ -34,21 +41,71 @@ public abstract class AbstractBehavior extends AbstractState {
         return (float) (Math.cbrt(dX * dY * dZ));
     }
 
-    @Override
-    public IMachineState stop(IMachineState swap) {
-        if (!this.moe.world.isRemote() && this.moe != null) {
-            this.moe.getAttribute(SharedMonsterAttributes.ARMOR).removeModifier(this.moe.getUniqueID());
-            this.moe.setCanFly(false);
-        }
-        return super.stop(swap);
-    }
-
     public AttributeModifier getArmorModifier() {
         return new AttributeModifier(this.moe.getUniqueID(), "Block-based armor modifier", this.getBlockState().getBlockHardness(this.moe.world, this.moe.getPosition()) * 1.8F, AttributeModifier.Operation.ADDITION);
     }
 
     public BlockState getBlockState() {
         return this.moe.getBlockData();
+    }
+
+    @Override
+    public IMachineState stop(IMachineState swap) {
+        if (!this.moe.world.isRemote() && this.moe != null) {
+            this.moe.getAttribute(Attributes.ARMOR).removeModifier(this.moe.getUniqueID());
+            this.moe.setCanFly(false);
+        }
+        return super.stop(swap);
+    }
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public void tick() {
+
+    }
+
+    @Override
+    public void stop() {
+
+    }
+
+    @Override
+    public void read(CompoundNBT compound) {
+
+    }
+
+    @Override
+    public void write(CompoundNBT compound) {
+
+    }
+
+    @Override
+    public void onDeath(DamageSource cause) {
+
+    }
+
+    @Override
+    public void onSpawn(IWorld world) {
+
+    }
+
+    @Override
+    public boolean onDamage(DamageSource source, float amount) {
+        return false;
+    }
+
+    @Override
+    public boolean onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
+        return false;
+    }
+
+    @Override
+    public boolean isArmed() {
+        return false;
     }
 
     public Block getBlock() {
@@ -80,5 +137,15 @@ public abstract class AbstractBehavior extends AbstractState {
     @Override
     public String toString() {
         return this.getKey().name();
+    }
+
+    @Override
+    public Enum<?> getKey() {
+        return null;
+    }
+
+    @Override
+    public boolean matches(Enum<?>... keys) {
+        return false;
     }
 }

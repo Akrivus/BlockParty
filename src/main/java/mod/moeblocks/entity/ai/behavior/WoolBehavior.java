@@ -43,9 +43,8 @@ public class WoolBehavior extends BasicBehavior {
                 entity.sendBreakAnimation(hand);
             });
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

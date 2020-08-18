@@ -16,9 +16,8 @@ public class CoarseDirtBehavior extends BasicBehavior {
                 entity.sendBreakAnimation(hand);
             });
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "moeblocks:item/tsundere_senpai_spawn_egg"
+  }
+}

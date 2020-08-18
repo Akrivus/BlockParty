@@ -7,7 +7,6 @@ import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.IHasArm;
 import net.minecraft.client.renderer.entity.model.IHasHead;
 import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
 
@@ -226,8 +225,13 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
 
     @Override
     public void setRotationAngles(MoeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float yaw, float pitch) {
-        this.head.rotateAngleX = pitch * 0.0174532925F;
-        this.head.rotateAngleY = yaw * 0.0174532925F;
+        entity.getAnimation().setMoeRotationAngles(this, entity, limbSwing, limbSwingAmount, ageInTicks);
+        this.rightArm.rotateAngleX += MathHelper.sin(entity.ticksExisted * 0.067F) * 0.05F;
+        this.rightArm.rotateAngleZ += MathHelper.cos(entity.ticksExisted * 0.09F) * 0.05F + 0.05F;
+        this.leftArm.rotateAngleX -= MathHelper.sin(entity.ticksExisted * 0.067F) * 0.05F;
+        this.leftArm.rotateAngleZ -= MathHelper.cos(entity.ticksExisted * 0.09F) * 0.05F + 0.05F;
+        this.head.rotateAngleX += pitch * 0.0174532925F;
+        this.head.rotateAngleY += yaw * 0.0174532925F;
         this.headWear.copyModelAngles(this.head);
         this.hairWear.copyModelAngles(this.hair);
         this.rightBunWear.copyModelAngles(this.rightBun);
@@ -251,32 +255,65 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
     @Override
     public void setLivingAnimations(T entity, float limbSwing, float limbSwingAmount, float partialTicks) {
         super.setLivingAnimations(entity, limbSwing, limbSwingAmount, partialTicks);
+        this.head.rotateAngleX = this.head.rotateAngleY = this.head.rotateAngleZ = this.body.rotateAngleX = this.body.rotateAngleY = this.body.rotateAngleZ = 0.0F;
         this.rightArm.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + 3.14F) * 2.0F * limbSwingAmount * 0.5F;
-        this.rightArm.rotateAngleX += MathHelper.sin(entity.ticksExisted * 0.067F) * 0.05F;
-        this.rightArm.rotateAngleZ = -this.rightArm.rotateAngleX * 0.5F;
-        this.rightArm.rotateAngleZ += MathHelper.cos(entity.ticksExisted * 0.09F) * 0.05F + 0.05F;
+        this.rightArm.rotateAngleX -= MathHelper.sin(entity.swingProgress * 3.14F) * 2.2F - MathHelper.sin((1.0F - (1.0F - entity.swingProgress) * (1.0F - entity.swingProgress)) * 3.14F) * 0.4F + MathHelper.sin(entity.ticksExisted * 0.067F) * 0.05F;
+        this.rightArm.rotateAngleZ = 0.7853981633974483F;
         this.leftArm.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F) * 2.0F * limbSwingAmount * 0.5F;
-        this.leftArm.rotateAngleZ = -this.leftArm.rotateAngleX * 0.5F;
-        this.leftArm.rotateAngleX -= MathHelper.sin(entity.ticksExisted * 0.067F) * 0.05F;
-        this.leftArm.rotateAngleZ -= MathHelper.cos(entity.ticksExisted * 0.09F) * 0.05F + 0.05F;
-        this.rightArm.rotateAngleZ += 0.7853981633974483F;
-        this.leftArm.rotateAngleZ -= 0.7853981633974483F;
+        this.leftArm.rotateAngleX -= MathHelper.sin(entity.swingProgress * 3.14F) * 1.2F - MathHelper.sin((1.0F - (1.0F - entity.swingProgress) * (1.0F - entity.swingProgress)) * 3.14F) * 0.4F - MathHelper.sin(entity.ticksExisted * 0.067F) * 0.05F;
+        this.leftArm.rotateAngleZ = -0.7853981633974483F;
         this.rightWing.rotateAngleX = (this.leftWing.rotateAngleX = -0.23561947F);
-        this.rightWing.rotateAngleY = -(this.leftWing.rotateAngleY = entity.onGround ? 0.0F : 0.47123894F + MathHelper.cos(entity.ticksExisted * partialTicks) * 3.14F * 0.05F);
+        this.rightWing.rotateAngleY = -(this.leftWing.rotateAngleY = entity.isOnGround() ? 0.0F : 0.47123894F + MathHelper.cos(entity.ticksExisted * partialTicks) * 3.14F * 0.05F);
         this.rightWing.rotateAngleZ = -(this.leftWing.rotateAngleZ = -0.23561947F);
         this.rightLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
+        this.rightLeg.rotateAngleY = this.rightLeg.rotateAngleZ = 0.0F;
         this.leftLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + 3.14F) * 1.4F * limbSwingAmount;
+        this.leftLeg.rotateAngleY = this.leftLeg.rotateAngleZ = 0.0F;
         this.skirt.rotateAngleY = -this.leftLeg.rotateAngleX * 0.25F;
         this.tailBase.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F) * 2.0F * limbSwingAmount * 0.5F;
         this.tailBase.rotateAngleZ = -this.tailBase.rotateAngleX * 0.5F - MathHelper.cos(entity.ticksExisted * 0.09F) * 0.05F + 0.05F;
-        entity.getAnimation().render(entity, limbSwing, limbSwingAmount, partialTicks);
+        this.leftArm.rotateAngleZ -= MathHelper.cos(entity.ticksExisted * 0.09F) * 0.05F + 0.05F;
+
+        if (entity.isSneaking()) {
+            this.head.rotationPointY = 14.2F;
+            this.body.rotationPointY = 16.2F;
+            this.body.rotateAngleX = 0.5F;
+            this.rightArm.rotateAngleX += 0.4F;
+            this.rightArm.rotationPointY = 15.2F;
+            this.leftArm.rotateAngleX += 0.4F;
+            this.leftArm.rotationPointY = 15.2F;
+            this.rightLeg.rotationPointY = 19.2F;
+            this.rightLeg.rotationPointZ = 1.0F;
+            this.leftLeg.rotationPointY = 19.2F;
+            this.leftLeg.rotationPointZ = 1.0F;
+        } else {
+            this.head.rotationPointY = 12.0F;
+            this.body.rotationPointY = 15.0F;
+            this.body.rotateAngleX = 0.0F;
+            this.rightArm.rotationPointY = 12.0F;
+            this.leftArm.rotationPointY = 12.0F;
+            this.rightLeg.rotationPointY = 18.0F;
+            this.rightLeg.rotationPointZ = 0.0F;
+            this.leftLeg.rotationPointY = 18.0F;
+            this.leftLeg.rotationPointZ = 0.0F;
+        }
+        if (entity.isSitting()) {
+            this.rightArm.rotateAngleX -= 0.6283192F;
+            this.leftArm.rotateAngleX -= 0.6283192F;
+            this.rightLeg.rotateAngleX = -1.4137167F;
+            this.rightLeg.rotateAngleY = 0.3141592F;
+            this.rightLeg.rotateAngleZ = 0.0785398F;
+            this.leftLeg.rotateAngleX = -1.4137167F;
+            this.leftLeg.rotateAngleY = -0.3141592F;
+            this.leftLeg.rotateAngleZ = -0.0785398F;
+        }
     }
 
     @Override
     public void translateHand(HandSide side, MatrixStack stack) {
         float x = side == HandSide.RIGHT ? 1.0F : -1.0F;
-        float y = -0.125F;
-        float z = 0.0F;
+        float y = -0.15F;
+        float z = 0.025F;
         ModelRenderer arm = this.getArmForSide(side);
         arm.rotationPointX += x;
         arm.translateRotate(stack);
@@ -284,20 +321,12 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
         arm.rotationPointX -= x;
     }
 
-    protected ModelRenderer getArmForSide(HandSide side) {
+    public ModelRenderer getArmForSide(HandSide side) {
         return side == HandSide.LEFT ? this.leftArm : this.rightArm;
     }
 
     @Override
     public ModelRenderer getModelHead() {
         return this.head;
-    }
-
-    protected HandSide getMainHand(MoeEntity entity) {
-        HandSide side = entity.getPrimaryHand();
-        if (entity.swingingHand != Hand.MAIN_HAND) {
-            return side.opposite();
-        }
-        return side;
     }
 }

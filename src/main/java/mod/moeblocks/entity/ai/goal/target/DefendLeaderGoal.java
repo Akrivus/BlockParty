@@ -1,6 +1,6 @@
 package mod.moeblocks.entity.ai.goal.target;
 
-import mod.moeblocks.entity.MoeEntity;
+import mod.moeblocks.entity.StateEntity;
 import mod.moeblocks.entity.ai.Relationship;
 import mod.moeblocks.entity.ai.goal.RevengeGoal;
 import mod.moeblocks.util.DistanceCheck;
@@ -12,18 +12,18 @@ import java.util.stream.Collectors;
 
 public class DefendLeaderGoal extends RevengeGoal {
 
-    public DefendLeaderGoal(MoeEntity moe) {
-        super(moe);
+    public DefendLeaderGoal(StateEntity entity) {
+        super(entity);
     }
 
     @Override
     public boolean shouldExecute() {
-        LivingEntity leader = this.moe.getFollowTarget();
+        LivingEntity leader = this.entity.getFollowTarget();
         if (leader != null) {
-            Relationship relationship = this.moe.getRelationships().get(leader);
+            Relationship relationship = this.entity.getRelationships().get(leader);
             if (relationship.canDefend()) {
-                List<MobEntity> victims = this.moe.world.getEntitiesWithinAABB(MobEntity.class, this.moe.getBoundingBox().grow(16.0F, 4.0F, 16.0F)).stream().filter(victim -> relationship.canFightAlongside() && leader.equals(victim.getAttackTarget()) && this.moe.canAttack(victim) && (this.moe.isSuperiorTo(victim) || relationship.canDieFor())).collect(Collectors.toList());
-                victims.sort(new DistanceCheck(this.moe));
+                List<MobEntity> victims = this.entity.world.getEntitiesWithinAABB(MobEntity.class, this.entity.getBoundingBox().grow(16.0F, 4.0F, 16.0F)).stream().filter(victim -> relationship.canFightAlongside() && leader.equals(victim.getAttackTarget()) && this.entity.canAttack(victim) && (this.entity.isSuperiorTo(victim) || relationship.canDieFor())).collect(Collectors.toList());
+                victims.sort(new DistanceCheck(this.entity));
                 if (!victims.isEmpty()) {
                     this.victim = victims.get(0);
                     return true;

@@ -38,9 +38,8 @@ public class LogBehavior extends BasicBehavior {
                 entity.sendBreakAnimation(hand);
             });
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
