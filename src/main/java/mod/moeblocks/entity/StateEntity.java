@@ -17,6 +17,7 @@ import mod.moeblocks.entity.util.data.FoodStats;
 import mod.moeblocks.entity.util.data.Relationships;
 import mod.moeblocks.entity.util.data.StressStats;
 import mod.moeblocks.register.ItemsMoe;
+import mod.moeblocks.register.TagsMoe;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
@@ -124,13 +125,12 @@ public class StateEntity extends CreatureEntity {
     public void tick() {
         this.updateArmSwingProgress();
         super.tick();
-        if (this.world.isRemote()) {
-            this.getAnimation().tick(this);
-        } else {
+        if (this.isLocal()) {
             if (--this.timeUntilEmotional < 0) {
                 Triggers.REGISTRY.forEach(trigger -> trigger.fire(this));
-                --this.timeUntilEmotional;
             }
+        } else {
+            this.getAnimation().tick(this);
         }
     }
 
@@ -228,7 +228,7 @@ public class StateEntity extends CreatureEntity {
 
     @Override
     public boolean canPickUpItem(ItemStack stack) {
-        if (stack.getItem().isIn(ItemsMoe.Tags.EQUIPPABLES) || this.foodStats.canConsume(stack)) {
+        if (stack.getItem().isIn(TagsMoe.EQUIPPABLES) || this.foodStats.canConsume(stack)) {
             EquipmentSlotType slot = this.getSlotForStack(stack);
             ItemStack shift = this.getItemStackFromSlot(slot);
             if (ItemStack.areItemsEqual(shift, stack) && ItemStack.areItemStackTagsEqual(shift, stack)) {
@@ -242,16 +242,20 @@ public class StateEntity extends CreatureEntity {
 
     @Override
     public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
-        return this.runStates(state -> state.onInteract(player, player.getHeldItem(hand), hand)) ? ActionResultType.func_233537_a_(this.world.isRemote) : super.func_230254_b_(player, hand);
+        return this.runStates(state -> state.onInteract(player, player.getHeldItem(hand), hand)) ? ActionResultType.func_233537_a_(this.isRemote()) : super.func_230254_b_(player, hand);
     }
 
     @Override
     public boolean canAttack(LivingEntity target) {
-        return this.canBeTarget(target);
+        return this.canBeTarget(target) && this.getRelationships().get(target).canAttack();
     }
 
     public boolean canBeTarget(LivingEntity target) {
         return target != null && target.isAlive() && !target.equals(this);
+    }
+
+    public void resetAnimationState() {
+        this.setAnimation(this.getFollowTarget() != null ? Animations.DEFAULT : Animations.IDLE);
     }
 
     public LivingEntity getFollowTarget() {
@@ -259,19 +263,13 @@ public class StateEntity extends CreatureEntity {
     }
 
     public void setFollowTarget(LivingEntity leader) {
-        leader = (leader == null || leader.equals(this.getFollowTarget())) ? null : leader;
         this.setFollowTarget(leader == null ? null : leader.getUniqueID());
         this.setHomePosAndDistance(this.getOnPosition(), 32);
         this.resetAnimationState();
-        System.out.println(this.getFollowTarget());
     }
 
     protected void setFollowTarget(UUID uuid) {
         this.followTargetUUID = uuid;
-    }
-
-    public void resetAnimationState() {
-        this.setAnimation(this.getFollowTarget() != null ? Animations.DEFAULT : Animations.IDLE);
     }
 
     public LivingEntity getEntityFromUUID(UUID uuid) {
@@ -353,9 +351,28 @@ public class StateEntity extends CreatureEntity {
         this.targetSelector.addGoal(6, new TargetMobsGoal(this));
     }
 
+    public void toggleFollowTarget(LivingEntity leader) {
+        this.setFollowTarget((leader == null || leader.equals(this.getFollowTarget())) ? null : leader);
+    }
+
+    public boolean isStandingOn(BlockState state) {
+        BlockState stand = this.world.getBlockState(this.getPosition());
+        return state.getBlock() == stand.getBlock();
+    }
+
+    public boolean isLocal() {
+        return !this.isRemote();
+    }
+
+    public boolean isRemote() {
+        return this.world.isRemote();
+    }
+
     public void setEmotion(Emotions emotion, int timeout) {
-        this.setEmotion(emotion);
         this.setEmotionalTimeout(timeout);
+        if (timeout > 0) {
+            this.setEmotion(emotion);
+        }
     }
 
     public boolean tryEquipItem(ItemStack stack) {
@@ -444,7 +461,7 @@ public class StateEntity extends CreatureEntity {
     }
 
     public boolean isWieldingWeapons() {
-        return this.getHeldItem(Hand.MAIN_HAND).getItem().isIn(ItemsMoe.Tags.WEAPONS);
+        return this.getHeldItem(Hand.MAIN_HAND).getItem().isIn(TagsMoe.WEAPONS);
     }
 
     public boolean isBeingWatchedBy(LivingEntity entity) {
@@ -478,7 +495,7 @@ public class StateEntity extends CreatureEntity {
             ProjectileEntity model = this.getThrowableFromStack(stack);
             model.shoot(dX, dY + d * 0.2, dZ, 0.75F, 1.0F);
             this.playSound(SoundEvents.ENTITY_SNOWBALL_THROW);
-            this.world.addEntity((Entity) model);
+            this.world.addEntity(model);
             this.swingArm(Hand.MAIN_HAND);
         }
         stack.shrink(1);
@@ -549,16 +566,16 @@ public class StateEntity extends CreatureEntity {
         }
     }
 
-    public void see(Entity entity) {
-        this.getLookController().setLookPositionWithEntity(entity, 30.0F, this.getVerticalFaceSpeed());
-    }
-
     public void setMoveController(MovementController moveController) {
         this.moveController = moveController;
     }
 
     public void setNavigator(PathNavigator navigator) {
         this.navigator = navigator;
+    }
+
+    public void see(Entity entity) {
+        this.getLookController().setLookPositionWithEntity(entity, 30.0F, this.getVerticalFaceSpeed());
     }
 
     @Override

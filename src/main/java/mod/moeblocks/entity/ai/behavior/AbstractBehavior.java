@@ -15,6 +15,7 @@ import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IWorld;
 
@@ -22,7 +23,7 @@ public class AbstractBehavior extends AbstractMoeState {
     @Override
     public void start(StateEntity entity) {
         super.start(entity);
-        if (!this.moe.world.isRemote()) {
+        if (this.moe.isLocal()) {
             float priority = this.moe.isReallyImmuneToFire() ? 0.0F : -1.0F;
             this.moe.setPathPriority(PathNodeType.DAMAGE_FIRE, priority);
             this.moe.setPathPriority(PathNodeType.DANGER_FIRE, priority);
@@ -51,7 +52,7 @@ public class AbstractBehavior extends AbstractMoeState {
 
     @Override
     public IMachineState stop(IMachineState swap) {
-        if (!this.moe.world.isRemote() && this.moe != null) {
+        if (this.moe.isLocal() && this.moe != null) {
             this.moe.getAttribute(Attributes.ARMOR).removeModifier(this.moe.getUniqueID());
             this.moe.setCanFly(false);
         }
@@ -120,6 +121,10 @@ public class AbstractBehavior extends AbstractMoeState {
         float range = (this.moe.world.rand.nextFloat() - this.moe.world.rand.nextFloat()) * 0.2F;
         float mean = Math.max(-0.1F * this.getBlockState().getBlockHardness(this.moe.world, this.moe.getPosition()) / 1.0F * this.moe.getScale() + 1.2F, 0.9F);
         return range * 0.2F + mean + 1.0F - this.moe.getScale();
+    }
+
+    public SoundEvent getStepSound() {
+        return null;
     }
 
     public String getFolder() {

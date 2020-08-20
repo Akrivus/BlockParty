@@ -22,6 +22,9 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -95,6 +98,9 @@ public class MoeEntity extends StateEntity {
         super.livingTick();
         if (this.isBurning() && this.isReallyImmuneToFire()) {
             this.extinguish();
+        }
+        if (this.isStandingOn(this.getBlockData())) {
+            this.getStressStats().addStressSilently(-0.0001F);
         }
     }
 
@@ -178,6 +184,12 @@ public class MoeEntity extends StateEntity {
     @Override
     protected float getSoundPitch() {
         return this.getBehavior().getPitch();
+    }
+
+    @Override
+    protected void playStepSound(BlockPos pos, BlockState block) {
+        this.playSound(this.getBehavior().getStepSound(), 0.15F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
+        super.playStepSound(pos, block);
     }
 
     @Override

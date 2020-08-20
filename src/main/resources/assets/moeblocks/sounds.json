@@ -5,6 +5,15 @@
     "sounds": [
     ]
   },
+  "entity.moe.bell.step": {
+    "category": "player",
+    "subtitle": "subtitle.moe.bell.step",
+    "sounds": [
+      "moeblocks:entity/moe/bell/step1",
+      "moeblocks:entity/moe/bell/step2",
+      "moeblocks:entity/moe/bell/step3"
+    ]
+  },
   "entity.moe.dead": {
     "category": "player",
     "subtitle": "subtitle.moe.dead",

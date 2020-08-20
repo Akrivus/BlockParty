@@ -12,6 +12,7 @@ public enum Behaviors {
     BEACON(BeaconBehavior::new, Blocks.BEACON),
     BEE_NEST(BeeNestBehavior::new, Blocks.BEE_NEST),
     BEEHIVE(BeehiveBehavior::new, Blocks.BEEHIVE),
+    BELL(BellBehavior::new, Blocks.BELL),
     BREWING_STAND(BrewingStandBehavior::new, Blocks.BREWING_STAND),
     BRICKS(BricksBehavior::new, Blocks.BRICKS),
     CACTUS(CactusBehavior::new, Blocks.CACTUS),

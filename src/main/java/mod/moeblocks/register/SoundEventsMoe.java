@@ -11,6 +11,7 @@ public class SoundEventsMoe {
     public static final DeferredRegister<SoundEvent> REGISTRY = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, MoeMod.ID);
 
     public static final RegistryObject<SoundEvent> MOE_ATTACK = REGISTRY.register("entity.moe.attack", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.attack")));
+    public static final RegistryObject<SoundEvent> MOE_BELL_STEP = REGISTRY.register("entity.moe.bell.step", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.bell.step")));
     public static final RegistryObject<SoundEvent> MOE_DEAD = REGISTRY.register("entity.moe.dead", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.dead")));
     public static final RegistryObject<SoundEvent> MOE_EAT = REGISTRY.register("entity.moe.eat", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.eat")));
     public static final RegistryObject<SoundEvent> MOE_EMOTION_ANGRY = REGISTRY.register("entity.moe.emotion.angry", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.emotion.angry")));
