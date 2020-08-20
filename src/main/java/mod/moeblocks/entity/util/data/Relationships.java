@@ -3,6 +3,7 @@ package mod.moeblocks.entity.util.data;
 import mod.moeblocks.entity.ai.AbstractState;
 import mod.moeblocks.entity.ai.Relationship;
 import mod.moeblocks.register.ItemsMoe;
+import mod.moeblocks.register.TagsMoe;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -33,11 +34,10 @@ public class Relationships extends AbstractState implements Iterable<Relationshi
 
     @Override
     public void tick() {
-        if (this.hasGift && --this.timeUntilGiftReset < 0) {
-            this.hasGift = false;
-            if (this.entity.getHeldItem(Hand.OFF_HAND).getItem().isIn(ItemsMoe.Tags.GIFTABLES)) {
-                this.entity.setHeldItem(Hand.OFF_HAND, ItemStack.EMPTY);
-            }
+        ItemStack stack = this.entity.getHeldItem(Hand.OFF_HAND);
+        this.hasGift = stack.getItem().isIn(TagsMoe.GIFTABLES) && !stack.isFood();
+        if (this.entity.isLocal() && this.hasGift && --this.timeUntilGiftReset < 0) {
+            this.entity.setHeldItem(Hand.OFF_HAND, ItemStack.EMPTY);
         }
     }
 
@@ -127,5 +127,9 @@ public class Relationships extends AbstractState implements Iterable<Relationshi
 
     public int size() {
         return this.relationships.size();
+    }
+
+    public boolean isReadyForGifts() {
+        return !this.hasGift || this.timeUntilGiftReset < 0;
     }
 }

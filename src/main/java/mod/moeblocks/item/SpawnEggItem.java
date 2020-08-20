@@ -3,9 +3,9 @@ package mod.moeblocks.item;
 import mod.moeblocks.entity.MoeEntity;
 import mod.moeblocks.entity.StateEntity;
 import mod.moeblocks.entity.util.Deres;
-import mod.moeblocks.register.BlocksMoe;
 import mod.moeblocks.register.EntityTypesMoe;
 import mod.moeblocks.register.ItemsMoe;
+import mod.moeblocks.register.TagsMoe;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.SpawnReason;
@@ -36,13 +36,13 @@ public class SpawnEggItem extends Item {
         BlockPos pos = context.getPos();
         if (!world.isRemote()) {
             BlockState state = world.getBlockState(pos);
-            TileEntity extra = state.getBlock().isIn(BlocksMoe.Tags.MOEABLES) ? world.getTileEntity(pos) : null;
+            TileEntity extra = state.getBlock().isIn(TagsMoe.MOEABLES) ? world.getTileEntity(pos) : null;
             pos = pos.offset(context.getFace());
             StateEntity entity = this.type.get(world);
             entity.setPositionAndRotation(pos.getX() + 0.5F, pos.getY(), pos.getZ() + 0.5F, -player.rotationYaw, -player.rotationPitch);
             if (entity instanceof MoeEntity) {
                 MoeEntity moe = (MoeEntity) entity;
-                moe.setBlockData(state.getBlock().isIn(BlocksMoe.Tags.MOEABLES) ? state : Blocks.AIR.getDefaultState());
+                moe.setBlockData(state.getBlock().isIn(TagsMoe.MOEABLES) ? state : Blocks.AIR.getDefaultState());
                 moe.setExtraBlockData(extra != null ? extra.getTileData() : new CompoundNBT());
             }
             entity.setDere(this.dere);

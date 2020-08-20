@@ -48,13 +48,4 @@ public class ItemsMoe {
             return new ItemStack(ItemsMoe.MOE_DIE.get());
         }
     }
-
-    public static class Tags {
-        public static final ITag.INamedTag<Item> EQUIPPABLES = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "equippables"));
-        public static final ITag.INamedTag<Item> RELICS = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "relics"));
-        public static final ITag.INamedTag<Item> TREASURES = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "treasures"));
-        public static final ITag.INamedTag<Item> WEAPONS = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "weapons"));
-        public static final ITag.INamedTag<Item> WONDERS = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "wonders"));
-        public static final ITag.INamedTag<Item> GIFTABLES = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "giftables"));
-    }
 }

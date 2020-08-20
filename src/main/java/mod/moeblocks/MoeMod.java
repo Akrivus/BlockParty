@@ -22,15 +22,10 @@ public class MoeMod {
 
     private void registerRegisters(IEventBus bus) {
         ActivitiesMoe.REGISTRY.register(bus);
-        BlocksMoe.REGISTRY.register(bus);
         EntityTypesMoe.REGISTRY.register(bus);
         ItemsMoe.REGISTRY.register(bus);
-        MemoryModuleTypesMoe.REGISTRY.register(bus);
-        PointOfInterestTypesMoe.REGISTRY.register(bus);
         SchedulesMoe.REGISTRY.register(bus);
-        SensorTypesMoe.REGISTRY.register(bus);
         SoundEventsMoe.REGISTRY.register(bus);
-        TileEntityTypesMoe.REGISTRY.register(bus);
     }
 
     private void onClientSetup(final FMLClientSetupEvent e) {

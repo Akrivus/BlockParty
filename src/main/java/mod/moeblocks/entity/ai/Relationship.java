@@ -1,10 +1,13 @@
 package mod.moeblocks.entity.ai;
 
+import mod.moeblocks.entity.util.Emotions;
 import mod.moeblocks.entity.util.VoiceLines;
 import mod.moeblocks.register.ItemsMoe;
+import mod.moeblocks.register.TagsMoe;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
@@ -125,35 +128,41 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
 
     @Override
     public boolean onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
-        if (hand == Hand.MAIN_HAND && player.getUniqueID().equals(this.getUUID()) && this.canFollow()) {
-            if (player.isSneaking()) {
-                if (stack.getItem().isIn(ItemsMoe.Tags.EQUIPPABLES)) {
-                    if (this.entity.tryEquipItem(stack.copy())) {
+        Item item = stack.getItem();
+        if (hand == Hand.MAIN_HAND && player.getUniqueID().equals(this.getUUID())) {
+            if (item.isIn(TagsMoe.GIFTABLES)) {
+                if (this.entity.getRelationships().isReadyForGifts() && this.entity.getHeldItem(Hand.OFF_HAND).isEmpty()) {
+                    this.entity.setEmotion(Emotions.SMITTEN, (int) (200 * this.entity.getDere().getGiftValue(stack)));
+                    this.entity.setHeldItem(Hand.OFF_HAND, stack.split(1));
+                    this.entity.getRelationships().resetGiftTimer();
+                    return true;
+                } else {
+                    this.entity.playSound(VoiceLines.NO.get(this.entity));
+                    return false;
+                }
+            }
+            if (this.canFollow()) {
+                if (player.isSneaking() && item.isIn(TagsMoe.EQUIPPABLES)) {
+                    if (this.entity.tryEquipItem(stack)) {
                         this.entity.playSound(VoiceLines.THANK_YOU.get(this.entity));
                         this.entity.getRelationships().resetGiftTimer();
-                        float value = this.entity.getDere().getGiftValue(stack);
-                        if (stack.getItem().isIn(ItemsMoe.Tags.GIFTABLES)) {
-                            this.addAffection(value);
-                        } else {
-                            this.addTrust(value);
+                        this.addTrust(this.entity.getDere().getGiftValue(stack));
+                        return true;
+                    } else if (stack.isEmpty()) {
+                        for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+                            ItemStack drop = this.entity.getItemStackFromSlot(slot);
+                            this.entity.entityDropItem(drop.split(drop.getCount()));
                         }
+                        return true;
                     } else {
                         this.entity.playSound(VoiceLines.NO.get(this.entity));
+                        return false;
                     }
-                    return true;
-                } else if (stack.isEmpty()) {
-                    this.entity.playSound(VoiceLines.HURT.get(this.entity));
-                    for (EquipmentSlotType slot : EquipmentSlotType.values()) {
-                        ItemStack drop = this.entity.getItemStackFromSlot(slot);
-                        this.entity.entityDropItem(drop.split(drop.getCount()));
-                    }
-                    return true;
                 }
-                return false;
+                this.entity.playSound(VoiceLines.YES.get(this.entity));
+                this.entity.toggleFollowTarget(player);
+                return true;
             }
-            this.entity.playSound(VoiceLines.YES.get(this.entity));
-            this.entity.setFollowTarget(player);
-            return true;
         }
         return false;
     }
@@ -163,8 +172,10 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
         return false;
     }
 
+    public boolean canAttack() { return this.getLoyalty() < 2; }
+
     public boolean canFollow() {
-        return this.getLoyalty() > 0;
+        return this.getLoyalty() > 2;
     }
 
     public void addAffection(float affection) {
