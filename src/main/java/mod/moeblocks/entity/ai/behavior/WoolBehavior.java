@@ -38,7 +38,7 @@ public class WoolBehavior extends BasicBehavior {
         if (stack.getItem() instanceof ShearsItem) {
             this.moe.entityDropItem(this.moe.getBlockData().getBlock());
             this.moe.setBlockData(WOOL_TO_CARPET.get(this.moe.getBlockData().getBlock()).getDefaultState());
-            this.moe.setEmotion(Emotions.ANGRY);
+            this.moe.setEmotion(Emotions.ANGRY, 1200);
             stack.damageItem(1, player, entity -> {
                 entity.sendBreakAnimation(hand);
             });

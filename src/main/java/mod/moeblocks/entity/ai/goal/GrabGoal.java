@@ -1,6 +1,7 @@
 package mod.moeblocks.entity.ai.goal;
 
 import mod.moeblocks.entity.StateEntity;
+import mod.moeblocks.entity.util.Emotions;
 import mod.moeblocks.util.DistanceCheck;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.item.ItemEntity;
@@ -40,11 +41,13 @@ public class GrabGoal extends Goal {
     @Override
     public void startExecuting() {
         this.entity.getNavigator().setPath(this.path, 1.0F);
+        this.entity.setEmotion(Emotions.MISCHIEVOUS, 6000);
     }
 
     @Override
     public void resetTask() {
         this.entity.getNavigator().clearPath();
+        this.entity.setEmotionalTimeout(0);
         this.stack = null;
     }
 

@@ -19,7 +19,7 @@ public class StressStats extends AbstractState {
 
     @Override
     public void tick() {
-        this.addStressSilently((1.0F - this.entity.getHealth() / this.entity.getMaxHealth()) * 0.05F);
+        this.addStressSilently((1.0F - this.entity.getHealth() / this.entity.getMaxHealth()) * 0.05F * (this.entity.isSprinting() ? 2.0F : 1.0F));
         this.multiplier += 0.0001F;
     }
 
@@ -59,7 +59,6 @@ public class StressStats extends AbstractState {
 
     @Override
     public boolean onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
-        this.entity.setEmotionalTimeout(0);
         return false;
     }
 

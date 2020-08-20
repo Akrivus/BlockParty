@@ -33,7 +33,7 @@ public class LogBehavior extends BasicBehavior {
     public boolean onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
         if (stack.getItem() instanceof AxeItem) {
             this.moe.setBlockData(LOG_TO_STRIPPED.get(this.moe.getBlockData().getBlock()).getDefaultState());
-            this.moe.setEmotion(Emotions.ANGRY);
+            this.moe.setEmotion(Emotions.ANGRY, 1200);
             stack.damageItem(1, player, entity -> {
                 entity.sendBreakAnimation(hand);
             });
