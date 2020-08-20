@@ -11,13 +11,9 @@
     "minecraft:cooked_cod",
     "minecraft:cooked_salmon",
     "minecraft:dandelion",
-    "minecraft:diamond_hoe",
     "minecraft:dried_kelp",
-    "minecraft:firework_rocket",
     "minecraft:flower_pot",
-    "minecraft:golden_hoe",
     "minecraft:honeycomb",
-    "minecraft:iron_hoe",
     "minecraft:mushroom_stew",
     "minecraft:music_disc_cat",
     "minecraft:music_disc_far",
@@ -31,7 +27,6 @@
     "minecraft:stone_hoe",
     "minecraft:sugar",
     "minecraft:sunflower",
-    "minecraft:white_tulip",
-    "minecraft:wooden_hoe"
+    "minecraft:white_tulip"
   ]
 }
