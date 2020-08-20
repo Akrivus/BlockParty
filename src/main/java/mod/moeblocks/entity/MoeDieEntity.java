@@ -1,9 +1,9 @@
 package mod.moeblocks.entity;
 
 import mod.moeblocks.entity.util.Deres;
-import mod.moeblocks.register.BlocksMoe;
 import mod.moeblocks.register.EntityTypesMoe;
 import mod.moeblocks.register.ItemsMoe;
+import mod.moeblocks.register.TagsMoe;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
@@ -67,7 +67,7 @@ public class MoeDieEntity extends DieEntity {
 
     @Override
     public boolean onActionStart(BlockState state, BlockPos pos, Face face) {
-        if (state.getBlock().isIn(BlocksMoe.Tags.MOEABLES)) {
+        if (state.getBlock().isIn(TagsMoe.MOEABLES)) {
             this.blockStateForSpawn = state;
             this.dere = Deres.from(face);
             this.timeUntilSpawned = 30;
