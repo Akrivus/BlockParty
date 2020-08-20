@@ -20,12 +20,18 @@ public abstract class RevengeGoal extends TargetGoal {
         this.entity = entity;
     }
 
+    public abstract boolean preCheckTarget();
+
+    public boolean shouldExecute() {
+        return this.preCheckTarget() && this.entity.canAttack(this.victim);
+    }
+
     @Override
     public void startExecuting() {
-        if (this.isArmed(this.entity)) {
+        if (this.entity.runStates(state -> state.isArmed())) {
             this.entity.setAttackTarget(this.victim);
         } else {
-            List<StateEntity> states = this.entity.world.getEntitiesWithinAABB(StateEntity.class, this.entity.getBoundingBox().grow(8.0F, 4.0F, 8.0F)).stream().filter(state -> this.isArmed(state)).collect(Collectors.toList());
+            List<StateEntity> states = this.entity.world.getEntitiesWithinAABB(StateEntity.class, this.entity.getBoundingBox().grow(8.0F, 4.0F, 8.0F)).stream().filter(entity -> entity.runStates(state -> state.isArmed())).collect(Collectors.toList());
             if (states.isEmpty()) {
                 this.entity.setAvoidTarget(this.victim);
             } else {
@@ -34,15 +40,5 @@ public abstract class RevengeGoal extends TargetGoal {
                 }
             }
         }
-    }
-
-    public boolean isArmed(StateEntity entity) {
-        Iterator<AbstractState> it = this.entity.getStates();
-        while (it.hasNext()) {
-            if (it.next().isArmed()) {
-                return true;
-            }
-        }
-        return false;
     }
 }

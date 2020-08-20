@@ -12,7 +12,7 @@ public class AvengeSelfGoal extends RevengeGoal {
 
 
     @Override
-    public boolean shouldExecute() {
+    public boolean preCheckTarget() {
         LivingEntity victim = this.entity.getRevengeTarget();
         if (this.entity.canAttack(victim)) {
             if (this.entity.isSuperiorTo(victim)) {

@@ -17,12 +17,12 @@ public class DefendLeaderGoal extends RevengeGoal {
     }
 
     @Override
-    public boolean shouldExecute() {
+    public boolean preCheckTarget() {
         LivingEntity leader = this.entity.getFollowTarget();
         if (leader != null) {
             Relationship relationship = this.entity.getRelationships().get(leader);
             if (relationship.canDefend()) {
-                List<MobEntity> victims = this.entity.world.getEntitiesWithinAABB(MobEntity.class, this.entity.getBoundingBox().grow(16.0F, 4.0F, 16.0F)).stream().filter(victim -> relationship.canFightAlongside() && leader.equals(victim.getAttackTarget()) && this.entity.canAttack(victim) && (this.entity.isSuperiorTo(victim) || relationship.canDieFor())).collect(Collectors.toList());
+                List<MobEntity> victims = this.entity.world.getEntitiesWithinAABB(MobEntity.class, this.entity.getBoundingBox().grow(16.0F, 4.0F, 16.0F)).stream().filter(victim -> relationship.canFightAlongside() && leader.equals(victim.getAttackTarget()) && (this.entity.isSuperiorTo(victim) || relationship.canDieFor())).collect(Collectors.toList());
                 victims.sort(new DistanceCheck(this.entity));
                 if (!victims.isEmpty()) {
                     this.victim = victims.get(0);

@@ -22,7 +22,7 @@ public class AvoidGoal extends Goal {
     @Override
     public boolean shouldExecute() {
         LivingEntity victim = this.entity.getAvoidTarget();
-        if (this.entity.canBeTarget(victim) && this.entity.ticksExisted - this.entity.getAvoidTimer() < 600 && victim.getDistanceSq(this.entity) < 32) {
+        if (this.entity.canAttack(victim) && this.entity.ticksExisted - this.entity.getAvoidTimer() < 100 && victim.getDistanceSq(this.entity) < 32) {
             Vector3d path = RandomPositionGenerator.findRandomTargetBlockAwayFrom(this.entity, 16, 7, victim.getPositionVec());
             if (path == null || victim.getDistanceSq(path.x, path.y, path.z) < victim.getDistanceSq(this.entity)) {
                 return false;

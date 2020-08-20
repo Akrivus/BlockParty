@@ -15,8 +15,8 @@ public class DefendSelfGoal extends RevengeGoal {
     }
 
     @Override
-    public boolean shouldExecute() {
-        List<MobEntity> victims = this.entity.world.getEntitiesWithinAABB(MobEntity.class, this.entity.getBoundingBox().grow(16.0F, 4.0F, 16.0F)).stream().filter(victim -> this.entity.equals(victim.getAttackTarget()) && this.entity.canAttack(victim) && this.entity.isSuperiorTo(victim)).collect(Collectors.toList());
+    public boolean preCheckTarget() {
+        List<MobEntity> victims = this.entity.world.getEntitiesWithinAABB(MobEntity.class, this.entity.getBoundingBox().grow(16.0F, 4.0F, 16.0F)).stream().filter(victim -> this.entity.equals(victim.getAttackTarget()) && this.entity.isSuperiorTo(victim)).collect(Collectors.toList());
         victims.sort(new DistanceCheck(this.entity));
         if (!victims.isEmpty()) {
             this.victim = victims.get(0);
