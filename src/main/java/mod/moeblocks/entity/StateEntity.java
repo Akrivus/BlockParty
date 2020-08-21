@@ -424,7 +424,7 @@ public class StateEntity extends CreatureEntity {
     }
 
     public boolean isSuperiorTo(LivingEntity foe) {
-        if (foe != null) {
+        if (foe == null) {
             return false;
         }
         if (this.isMeleeFighter()) {
