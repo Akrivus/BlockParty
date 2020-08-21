@@ -7,12 +7,14 @@ import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.pathfinding.Path;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GrabGoal extends Goal {
     private final StateEntity entity;
     private ItemEntity stack;
     private Path path;
+    private int timeUntilGiveUp;
 
     public GrabGoal(StateEntity entity) {
         super();
@@ -35,13 +37,13 @@ public class GrabGoal extends Goal {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.entity.hasPath() && this.entity.canBeTarget(this.stack) && this.entity.canPickUpItem(this.stack.getItem());
+        return --this.timeUntilGiveUp > 0 && this.entity.hasPath() && this.entity.canBeTarget(this.stack) && this.entity.canPickUpItem(this.stack.getItem());
     }
 
     @Override
     public void startExecuting() {
+        this.entity.setEmotion(Emotions.MISCHIEVOUS, this.timeUntilGiveUp = 3600);
         this.entity.getNavigator().setPath(this.path, 1.0F);
-        this.entity.setEmotion(Emotions.MISCHIEVOUS, 6000);
     }
 
     @Override
@@ -52,12 +54,10 @@ public class GrabGoal extends Goal {
 
     @Override
     public void tick() {
-        if (this.entity.getEntitySenses().canSee(this.stack) && this.entity.getDistance(this.stack) < 1.0F) {
-            this.entity.see(this.stack);
-            if (this.entity.tryEquipItem(this.stack.getItem())) {
-                this.entity.onItemPickup(this.stack, this.stack.getItem().getCount());
-                this.stack.remove();
-            }
+        this.entity.turnToView(this.stack);
+        if (this.entity.getEntitySenses().canSee(this.stack) && this.entity.getDistance(this.stack) < 1.0F && this.entity.tryEquipItem(this.stack.getItem())) {
+            this.entity.onItemPickup(this.stack, this.stack.getItem().getCount());
+            this.stack.remove();
         }
     }
 }

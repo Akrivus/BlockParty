@@ -15,6 +15,7 @@ public class FoodStats extends AbstractState {
     private int food = 20;
     private float saturation = 5.0F;
     private float exhaustion;
+    private int timeUntilEat = 20;
     private int timer;
 
     @Override
@@ -24,9 +25,9 @@ public class FoodStats extends AbstractState {
 
     @Override
     public void tick() {
-        if (this.canConsume(this.entity.getHeldItem(Hand.OFF_HAND))) {
+        if (this.canConsume(this.entity.getHeldItem(Hand.OFF_HAND)) && --this.timeUntilEat < 0) {
             ItemStack stack = this.entity.getHeldItem(Hand.OFF_HAND);
-            this.entity.getStressStats().addStressSilently(-this.entity.getDere().getGiftValue(stack));
+            this.entity.getStressStats().addStressSilently(-this.entity.getDere().getGiftValue(stack) - 0.5F);
             this.entity.playSound(stack.getEatSound());
             this.consume(stack.getItem().getFood());
             stack.shrink(1);
@@ -112,6 +113,7 @@ public class FoodStats extends AbstractState {
     public void consume(Food food) {
         this.addStats(food.getHealing(), food.getSaturation());
         this.entity.playSound(VoiceLines.EAT.get(this.entity));
+        this.timeUntilEat = 20;
         food.getEffects().forEach(pair -> {
             if (pair.getFirst() != null && this.entity.world.rand.nextFloat() < pair.getSecond()) {
                 this.entity.addPotionEffect(pair.getFirst());
