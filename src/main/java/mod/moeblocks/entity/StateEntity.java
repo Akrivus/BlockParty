@@ -250,7 +250,7 @@ public class StateEntity extends CreatureEntity {
         return this.canBeTarget(target) && this.getRelationships().get(target).canAttack();
     }
 
-    public boolean canBeTarget(LivingEntity target) {
+    public boolean canBeTarget(Entity target) {
         return target != null && target.isAlive() && !target.equals(this);
     }
 
