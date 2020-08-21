@@ -1,6 +1,7 @@
 package mod.moeblocks.entity.util.data;
 
 import mod.moeblocks.entity.ai.AbstractState;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -67,6 +68,11 @@ public class StressStats extends AbstractState {
         return false;
     }
 
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        return false;
+    }
+
     public void addStress(float stress) {
         this.addStressSilently(stress);
         if (stress > 0) {
@@ -80,5 +86,13 @@ public class StressStats extends AbstractState {
 
     public float getStress() {
         return this.stress;
+    }
+
+    public boolean isCalm() {
+        return this.stress < 2.0F;
+    }
+
+    public boolean isStressed() {
+        return this.stress > 2.0F;
     }
 }

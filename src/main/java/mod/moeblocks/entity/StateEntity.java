@@ -41,6 +41,7 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
@@ -55,6 +56,7 @@ public class StateEntity extends CreatureEntity {
     public static final DataParameter<Integer> ANIMATION = EntityDataManager.createKey(StateEntity.class, DataSerializers.VARINT);
     public static final DataParameter<Integer> DERE = EntityDataManager.createKey(StateEntity.class, DataSerializers.VARINT);
     public static final DataParameter<Integer> EMOTION = EntityDataManager.createKey(StateEntity.class, DataSerializers.VARINT);
+    public static final DataParameter<Boolean> SITTING = EntityDataManager.createKey(StateEntity.class, DataSerializers.BOOLEAN);
     public AttackGoals.Melee attackGoal;
     protected Animation animation = new Animation();
     protected FoodStats foodStats = new FoodStats();
@@ -109,6 +111,7 @@ public class StateEntity extends CreatureEntity {
         this.dataManager.register(ANIMATION, Animations.DEFAULT.ordinal());
         this.dataManager.register(DERE, Deres.HIMEDERE.ordinal());
         this.dataManager.register(EMOTION, Emotions.NORMAL.ordinal());
+        this.dataManager.register(SITTING, false);
         this.registerStates();
     }
 
@@ -247,7 +250,7 @@ public class StateEntity extends CreatureEntity {
 
     @Override
     public boolean canAttack(LivingEntity target) {
-        return this.canBeTarget(target) && this.getRelationships().get(target).canAttack();
+        return this.canBeTarget(target) && this.runStates(state -> state.canAttack(target));
     }
 
     public boolean canBeTarget(Entity target) {
@@ -255,7 +258,7 @@ public class StateEntity extends CreatureEntity {
     }
 
     public void resetAnimationState() {
-        this.setAnimation(this.getFollowTarget() != null ? Animations.DEFAULT : Animations.IDLE);
+        this.setAnimation(this.getFollowTarget() != null ? Animations.DEFAULT : Animations.WAITING);
     }
 
     public LivingEntity getFollowTarget() {
@@ -400,6 +403,18 @@ public class StateEntity extends CreatureEntity {
         return false;
     }
 
+    protected void dropSpecialItems(DamageSource source, int looting, boolean hit) {
+
+    }
+
+    protected float getDropChance(EquipmentSlotType slot) {
+        return 0.0F;
+    }
+
+    protected void setEquipmentBasedOnDifficulty(DifficultyInstance difficulty) {
+
+    }
+
     public EquipmentSlotType getSlotForStack(ItemStack stack) {
         EquipmentSlotType slot = MobEntity.getSlotForItemStack(stack);
         if (this.isAmmo(stack.getItem()) || stack.isFood()) {
@@ -409,6 +424,9 @@ public class StateEntity extends CreatureEntity {
     }
 
     public boolean isSuperiorTo(LivingEntity foe) {
+        if (foe != null) {
+            return false;
+        }
         if (this.isMeleeFighter()) {
             double moeHOD = foe.getHealth() / this.getAttribute(Attributes.ATTACK_DAMAGE).getValue();
             double foeHOD = this.getHealth() + this.getTotalArmorValue() / 0.4F;
@@ -540,7 +558,11 @@ public class StateEntity extends CreatureEntity {
     }
 
     public boolean isSitting() {
-        return this.isPassenger() && (this.getRidingEntity() != null && this.getRidingEntity().shouldRiderSit());
+        return this.dataManager.get(SITTING) || this.isPassenger() && (this.getRidingEntity() != null && this.getRidingEntity().shouldRiderSit());
+    }
+
+    public void setSitting(boolean sitting) {
+        this.dataManager.set(SITTING, sitting);
     }
 
     public LivingEntity getAvoidTarget() {

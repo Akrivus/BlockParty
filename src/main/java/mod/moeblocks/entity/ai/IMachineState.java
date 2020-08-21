@@ -1,6 +1,7 @@
 package mod.moeblocks.entity.ai;
 
 import mod.moeblocks.entity.StateEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -36,6 +37,8 @@ public interface IMachineState {
     Enum<?> getKey();
 
     boolean matches(Enum<?>... keys);
+
+    boolean canAttack(LivingEntity target);
 
     String toString();
 }

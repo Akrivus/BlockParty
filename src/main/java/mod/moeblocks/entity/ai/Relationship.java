@@ -172,6 +172,11 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
         return false;
     }
 
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        return target.getUniqueID().equals(this.getUUID()) && this.canAttack();
+    }
+
     public boolean canAttack() { return this.getLoyalty() < 1; }
 
     public boolean canFollow() {

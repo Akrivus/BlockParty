@@ -3,6 +3,7 @@ package mod.moeblocks.entity.ai.emotion;
 import mod.moeblocks.entity.ai.AbstractState;
 import mod.moeblocks.entity.util.Emotions;
 import mod.moeblocks.entity.util.VoiceLines;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -34,6 +35,11 @@ public class AbstractEmotion extends AbstractState {
     public boolean matches(Enum<?>... keys) {
         Emotions emotion = (Emotions) this.entity.getEmotion().getKey();
         return emotion.matches(keys);
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        return false;
     }
 
     @Override

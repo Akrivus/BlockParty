@@ -6,6 +6,7 @@ import mod.moeblocks.entity.ai.IMachineState;
 import mod.moeblocks.util.MoeBlockAliases;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
@@ -151,6 +152,11 @@ public class AbstractBehavior extends AbstractMoeState {
 
     @Override
     public boolean matches(Enum<?>... keys) {
+        return false;
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
         return false;
     }
 }

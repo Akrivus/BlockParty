@@ -2,6 +2,7 @@ package mod.moeblocks.entity.util.data;
 
 import mod.moeblocks.entity.ai.AbstractState;
 import mod.moeblocks.entity.util.VoiceLines;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Food;
 import net.minecraft.item.ItemStack;
@@ -92,6 +93,11 @@ public class FoodStats extends AbstractState {
 
     @Override
     public boolean isArmed() {
+        return false;
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
         return false;
     }
 

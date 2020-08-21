@@ -2,6 +2,7 @@ package mod.moeblocks.entity.ai.dere;
 
 import mod.moeblocks.entity.ai.AbstractState;
 import mod.moeblocks.entity.util.Deres;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -91,5 +92,10 @@ public class AbstractDere extends AbstractState {
     public boolean matches(Enum<?>... keys) {
         Deres dere = (Deres) this.entity.getDere().getKey();
         return dere.matches(keys);
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        return false;
     }
 }
