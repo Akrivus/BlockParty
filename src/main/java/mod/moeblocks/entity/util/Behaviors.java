@@ -4,11 +4,13 @@ import mod.moeblocks.entity.ai.behavior.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.HoneyBlock;
 
 import java.util.HashMap;
 import java.util.function.Supplier;
 
 public enum Behaviors {
+    BAMBOO(BambooBehavior::new, Blocks.BAMBOO),
     BEACON(BeaconBehavior::new, Blocks.BEACON),
     BEE_NEST(BeeNestBehavior::new, Blocks.BEE_NEST),
     BEEHIVE(BeehiveBehavior::new, Blocks.BEEHIVE),
@@ -29,6 +31,7 @@ public enum Behaviors {
     GLAZED_TERRACOTTA(GlazedTerracottaBehavior::new, Blocks.BLACK_GLAZED_TERRACOTTA, Blocks.BLUE_GLAZED_TERRACOTTA, Blocks.BROWN_GLAZED_TERRACOTTA, Blocks.CYAN_GLAZED_TERRACOTTA, Blocks.GRAY_GLAZED_TERRACOTTA, Blocks.GREEN_GLAZED_TERRACOTTA, Blocks.LIGHT_BLUE_GLAZED_TERRACOTTA, Blocks.LIGHT_GRAY_GLAZED_TERRACOTTA, Blocks.LIME_GLAZED_TERRACOTTA, Blocks.MAGENTA_GLAZED_TERRACOTTA, Blocks.ORANGE_GLAZED_TERRACOTTA, Blocks.PINK_GLAZED_TERRACOTTA, Blocks.PURPLE_GLAZED_TERRACOTTA, Blocks.RED_GLAZED_TERRACOTTA, Blocks.WHITE_GLAZED_TERRACOTTA, Blocks.YELLOW_GLAZED_TERRACOTTA),
     GLOWSTONE(GlowstoneBehavior::new, Blocks.GLOWSTONE),
     GRASS_BLOCK(GrassBlockBehavior::new, Blocks.GRASS_BLOCK),
+    HONEY_BLOCK(HoneyBlockBehavior::new, Blocks.HONEY_BLOCK),
     HONEYCOMB_BLOCK(HoneycombBlockBehavior::new, Blocks.HONEYCOMB_BLOCK),
     LOG(LogBehavior::new, Blocks.ACACIA_LOG, Blocks.ACACIA_WOOD, Blocks.BIRCH_LOG, Blocks.BIRCH_WOOD, Blocks.DARK_OAK_LOG, Blocks.DARK_OAK_WOOD, Blocks.JUNGLE_LOG, Blocks.JUNGLE_WOOD, Blocks.OAK_LOG, Blocks.OAK_WOOD, Blocks.SPRUCE_LOG, Blocks.SPRUCE_WOOD),
     MAGMA_BLOCK(MagmaBlockBehavior::new, Blocks.MAGMA_BLOCK),
@@ -40,6 +43,7 @@ public enum Behaviors {
     REDSTONE_BLOCK(RedstoneBlockBehavior::new, Blocks.REDSTONE_BLOCK),
     REDSTONE_LAMP(RedstoneLampBehavior::new, Blocks.REDSTONE_LAMP),
     SEA_LANTERN(SeaLanternBehavior::new, Blocks.SEA_LANTERN),
+    SLIME_BLOCK(SlimeBlockBehavior::new, Blocks.SLIME_BLOCK),
     WET_SPONGE(WetSpongeBehavior::new, Blocks.WET_SPONGE),
     WOOL(WoolBehavior::new, Blocks.BLACK_WOOL, Blocks.BLUE_WOOL, Blocks.BROWN_WOOL, Blocks.CYAN_WOOL, Blocks.GRAY_WOOL, Blocks.GREEN_WOOL, Blocks.LIGHT_BLUE_WOOL, Blocks.LIGHT_GRAY_WOOL, Blocks.LIME_WOOL, Blocks.MAGENTA_WOOL, Blocks.ORANGE_WOOL, Blocks.PINK_WOOL, Blocks.PURPLE_WOOL, Blocks.RED_WOOL, Blocks.WHITE_WOOL, Blocks.YELLOW_WOOL);
 

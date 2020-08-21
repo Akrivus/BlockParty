@@ -1,7 +1,6 @@
 {
   "replace": false,
   "values": [
-    "minecraft:air",
     "minecraft:arrow",
     "minecraft:bow",
     "minecraft:crossbow",
@@ -10,8 +9,6 @@
     "minecraft:diamond_pickaxe",
     "minecraft:diamond_shovel",
     "minecraft:diamond_sword",
-    "minecraft:fire_charge",
-    "minecraft:firework_rocket",
     "minecraft:golden_axe",
     "minecraft:golden_hoe",
     "minecraft:golden_pickaxe",
@@ -28,7 +25,6 @@
     "minecraft:netherite_pickaxe",
     "minecraft:netherite_shovel",
     "minecraft:netherite_sword",
-    "minecraft:snowball",
     "minecraft:spectral_arrow",
     "minecraft:splash_potion",
     "minecraft:stone_axe",

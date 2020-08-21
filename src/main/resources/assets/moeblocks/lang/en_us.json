@@ -1,4 +1,6 @@
 {
+  "command.moe.following.no": "%1$s is no longer following you",
+  "command.moe.following.yes": "%1$s is now following you",
   "death.attack.yandere": "%1$s lost their laifu to %2$s's knaifu",
   "death.attack.vore": "%1$s was eaten by %2$s",
   "entity.moeblocks.generic": "%1$s-chan",
