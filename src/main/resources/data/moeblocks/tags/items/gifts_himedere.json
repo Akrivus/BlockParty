@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:clock",
+    "minecraft:compass",
+    "minecraft:diamond",
+    "minecraft:emerald",
+    "minecraft:enchanted_golden_apple",
+    "minecraft:ender_pearl",
+    "minecraft:glistering_melon_slice",
+    "minecraft:gold_ingot",
+    "minecraft:golden_apple",
+    "minecraft:golden_carrot",
+    "minecraft:music_disc_mall",
+    "minecraft:music_disc_mellohi",
+    "minecraft:nautilus_shell",
+    "minecraft:nether_star",
+    "minecraft:prismarine_crystals",
+    "minecraft:prismarine_shard"
+  ]
+}

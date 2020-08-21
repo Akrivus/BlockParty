@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:blaze_powder",
+    "minecraft:clock",
+    "minecraft:compass",
+    "minecraft:enchanted_book",
+    "minecraft:ghast_tear",
+    "minecraft:glistering_melon_slice",
+    "minecraft:magma_cream",
+    "minecraft:music_disc_strad",
+    "minecraft:music_disc_ward",
+    "minecraft:nether_star"
+  ]
+}

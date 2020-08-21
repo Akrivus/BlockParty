@@ -2,10 +2,13 @@ package mod.moeblocks.entity.ai.dere;
 
 import mod.moeblocks.entity.ai.AbstractState;
 import mod.moeblocks.entity.util.Deres;
+import mod.moeblocks.register.TagsMoe;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.world.BossInfo;
@@ -25,6 +28,13 @@ public class AbstractDere extends AbstractState {
     }
 
     public float getGiftValue(ItemStack stack) {
+        Item item = stack.getItem();
+        if (item.isIn(TagsMoe.GIFTS)) {
+            return 2.0F;
+        }
+        if (item.isIn(ItemTags.FLOWERS)) {
+            return 1.0F;
+        }
         return 0.0F;
     }
 
@@ -79,6 +89,11 @@ public class AbstractDere extends AbstractState {
     }
 
     @Override
+    public boolean canAttack(LivingEntity target) {
+        return false;
+    }
+
+    @Override
     public String toString() {
         return this.getKey().name();
     }
@@ -92,10 +107,5 @@ public class AbstractDere extends AbstractState {
     public boolean matches(Enum<?>... keys) {
         Deres dere = (Deres) this.entity.getDere().getKey();
         return dere.matches(keys);
-    }
-
-    @Override
-    public boolean canAttack(LivingEntity target) {
-        return false;
     }
 }

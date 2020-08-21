@@ -1,7 +1,6 @@
 package mod.moeblocks.entity.ai.dere;
 
 import mod.moeblocks.entity.util.Deres;
-import mod.moeblocks.register.ItemsMoe;
 import mod.moeblocks.register.TagsMoe;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -26,13 +25,10 @@ public class Kuudere extends AbstractDere {
     @Override
     public float getGiftValue(ItemStack stack) {
         Item item = stack.getItem();
-        if (item.isIn(TagsMoe.TREASURES)) {
-            return 1.0F;
-        } else if (item.isIn(TagsMoe.WONDERS)) {
-            return 0.5F;
-        } else {
-            return 0.1F;
+        if (item.isIn(TagsMoe.KUUDERE_GIFTS)) {
+            return 4.0F;
         }
+        return super.getGiftValue(stack);
     }
 
     @Override

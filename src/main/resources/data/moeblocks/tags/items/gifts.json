@@ -1,0 +1,33 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:cake",
+    "minecraft:cookie",
+    "minecraft:diamond",
+    "minecraft:emerald",
+    "minecraft:ender_pearl",
+    "minecraft:gold_ingot",
+    "minecraft:gold_nugget",
+    "minecraft:lapis_lazuli",
+    "minecraft:magma_cream",
+    "minecraft:music_disc_11",
+    "minecraft:music_disc_13",
+    "minecraft:music_disc_blocks",
+    "minecraft:music_disc_chirp",
+    "minecraft:music_disc_far",
+    "minecraft:music_disc_mellohi",
+    "minecraft:music_disc_stal",
+    "minecraft:music_disc_strad",
+    "minecraft:music_disc_wait",
+    "minecraft:music_disc_ward",
+    "minecraft:painting",
+    "minecraft:paper",
+    "minecraft:quartz",
+    "minecraft:rabbit_foot",
+    "minecraft:redstone",
+    "minecraft:scute",
+    "minecraft:sugar",
+    "minecraft:writable_book",
+    "minecraft:written_book"
+  ]
+}
