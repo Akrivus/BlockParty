@@ -1,12 +1,10 @@
 package mod.moeblocks.entity.ai.goal;
 
 import mod.moeblocks.entity.StateEntity;
-import mod.moeblocks.entity.ai.AbstractState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.TargetGoal;
 
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,11 +18,11 @@ public abstract class RevengeGoal extends TargetGoal {
         this.entity = entity;
     }
 
-    public abstract boolean preCheckTarget();
-
     public boolean shouldExecute() {
         return this.preCheckTarget() && this.entity.canAttack(this.victim);
     }
+
+    public abstract boolean preCheckTarget();
 
     @Override
     public void startExecuting() {
