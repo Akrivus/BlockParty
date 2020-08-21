@@ -38,11 +38,6 @@ public class AbstractEmotion extends AbstractState {
     }
 
     @Override
-    public boolean canAttack(LivingEntity target) {
-        return false;
-    }
-
-    @Override
     public void start() {
 
     }
@@ -89,6 +84,11 @@ public class AbstractEmotion extends AbstractState {
 
     @Override
     public boolean isArmed() {
+        return false;
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
         return false;
     }
 }
