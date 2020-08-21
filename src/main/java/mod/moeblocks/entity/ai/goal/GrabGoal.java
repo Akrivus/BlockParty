@@ -24,7 +24,7 @@ public class GrabGoal extends Goal {
         List<ItemEntity> items = this.entity.world.getEntitiesWithinAABB(ItemEntity.class, this.entity.getBoundingBox().grow(8.0D, 2.0D, 8.0D));
         items.sort(new DistanceCheck(this.entity));
         for (ItemEntity item : items) {
-            if (this.entity.canPickUpItem(item.getItem()) && item.isAlive() && !item.cannotPickup()) {
+            if (this.entity.canPickUpItem(item.getItem()) && this.entity.canBeTarget(item) && !item.cannotPickup()) {
                 this.path = this.entity.getNavigator().getPathToEntity(item, 0);
                 this.stack = item;
                 return true;
@@ -35,7 +35,7 @@ public class GrabGoal extends Goal {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.entity.hasPath() && this.entity.canPickUpItem(this.stack.getItem());
+        return this.entity.hasPath() && this.entity.canBeTarget(this.stack) && this.entity.canPickUpItem(this.stack.getItem());
     }
 
     @Override
