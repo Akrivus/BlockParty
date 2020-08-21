@@ -6,7 +6,7 @@ import mod.moeblocks.entity.MoeEntity;
 import mod.moeblocks.entity.util.Deres;
 import net.minecraft.util.math.MathHelper;
 
-public class IdleAnimation extends Animation {
+public class WaitingAnimation extends Animation {
     @Override
     public void setMoeRotationAngles(MoeModel model, MoeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks) {
         if (!entity.isSwingInProgress && limbSwingAmount - entity.prevLimbSwingAmount == 0.0F) {
@@ -44,6 +44,6 @@ public class IdleAnimation extends Animation {
 
     @Override
     public Animations getKey() {
-        return Animations.IDLE;
+        return Animations.WAITING;
     }
 }

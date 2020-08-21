@@ -15,7 +15,10 @@ import net.minecraft.world.IWorld;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class Relationships extends AbstractState implements Iterable<Relationship> {
     private final HashMap<UUID, Relationship> relationships = new HashMap<>();
@@ -63,18 +66,21 @@ public class Relationships extends AbstractState implements Iterable<Relationshi
         compound.putInt("TimeUntilGiftReset", this.timeUntilGiftReset);
         compound.putBoolean("HasGift", this.hasGift);
         ListNBT list = new ListNBT();
-        Iterator<Relationship> it = this.iterator();
-        while (it.hasNext()) {
+        this.iterate(relationship -> {
             CompoundNBT tag = new CompoundNBT();
-            it.next().write(tag);
+            relationship.write(tag);
             list.add(tag);
-        }
+            return true;
+        });
         compound.put("Relationships", list);
     }
 
     @Override
     public void onDeath(DamageSource cause) {
-
+        this.iterate(relationship -> {
+            relationship.onDeath(cause);
+            return true;
+        });
     }
 
     @Override
@@ -84,28 +90,36 @@ public class Relationships extends AbstractState implements Iterable<Relationshi
 
     @Override
     public boolean onDamage(DamageSource cause, float amount) {
-        return false;
+        return this.iterate(relationship -> relationship.onDamage(cause, amount));
     }
 
     @Override
     public boolean onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
-        Iterator<Relationship> it = this.iterator();
-        while (it.hasNext()) {
-            if (it.next().onInteract(player, stack, hand)) {
-                return true;
-            }
-        }
-        return false;
+        return this.iterate(relationship -> relationship.onInteract(player, stack, hand));
     }
 
     @Override
     public boolean isArmed() {
-        return false;
+        return this.iterate(relationship -> relationship.isArmed());
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        return this.iterate(relationship -> relationship.canAttack(target));
     }
 
     @Override
     public Iterator<Relationship> iterator() {
         return this.relationships.values().iterator();
+    }
+
+    public boolean iterate(Predicate<Relationship> function) {
+        boolean result = false;
+        Iterator<Relationship> it = this.iterator();
+        while (it.hasNext()) {
+            result |= function.test(it.next());
+        }
+        return result;
     }
 
     public Relationship get(LivingEntity entity) {
@@ -131,5 +145,10 @@ public class Relationships extends AbstractState implements Iterable<Relationshi
 
     public boolean isReadyForGifts() {
         return !this.hasGift || this.timeUntilGiftReset < 0;
+    }
+
+    public boolean isFavorite(LivingEntity target) {
+        List<Relationship> list = this.relationships.values().stream().sorted(Relationship::compareTo).collect(Collectors.toList());
+        return this.get(target).getLoyalty() == (list.isEmpty() ? 0 : list.get(0).getLoyalty());
     }
 }

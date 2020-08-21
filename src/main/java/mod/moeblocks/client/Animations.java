@@ -6,10 +6,8 @@ import java.util.function.Supplier;
 
 public enum Animations {
     AIM(AimAnimation::new),
-    CAST_SPELL(CastSpellAnimation::new),
-    DAB(DabAnimation::new),
     DEFAULT(Animation::new),
-    IDLE(IdleAnimation::new),
+    WAITING(WaitingAnimation::new),
     WAVE(WaveAnimation::new);
 
     private final Supplier<? extends Animation> animation;

@@ -48,12 +48,12 @@ public class GrabGoal extends Goal {
     public void resetTask() {
         this.entity.getNavigator().clearPath();
         this.entity.setEmotionalTimeout(0);
-        this.stack = null;
     }
 
     @Override
     public void tick() {
         if (this.entity.getEntitySenses().canSee(this.stack) && this.entity.getDistance(this.stack) < 1.0F) {
+            this.entity.see(this.stack);
             if (this.entity.tryEquipItem(this.stack.getItem())) {
                 this.entity.onItemPickup(this.stack, this.stack.getItem().getCount());
                 this.stack.remove();

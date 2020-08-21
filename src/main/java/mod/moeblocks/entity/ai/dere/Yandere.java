@@ -1,11 +1,19 @@
 package mod.moeblocks.entity.ai.dere;
 
+import mod.moeblocks.entity.StateEntity;
+import mod.moeblocks.entity.ai.goal.RevengeGoal;
 import mod.moeblocks.entity.util.Deres;
 import mod.moeblocks.register.ItemsMoe;
 import mod.moeblocks.register.TagsMoe;
+import mod.moeblocks.util.DistanceCheck;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.BossInfo;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Yandere extends AbstractDere {
     @Override
