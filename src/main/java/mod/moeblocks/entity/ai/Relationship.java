@@ -172,7 +172,7 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
         return false;
     }
 
-    public boolean canAttack() { return this.getLoyalty() < 2; }
+    public boolean canAttack() { return this.getLoyalty() < 1; }
 
     public boolean canFollow() {
         return this.getLoyalty() > 2;
