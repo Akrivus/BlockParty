@@ -1,6 +1,9 @@
 package mod.moeblocks.client;
 
-import mod.moeblocks.client.animation.*;
+import mod.moeblocks.client.animation.AimAnimation;
+import mod.moeblocks.client.animation.Animation;
+import mod.moeblocks.client.animation.WaitingAnimation;
+import mod.moeblocks.client.animation.WaveAnimation;
 
 import java.util.function.Supplier;
 

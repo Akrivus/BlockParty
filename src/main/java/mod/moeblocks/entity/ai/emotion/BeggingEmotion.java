@@ -1,6 +1,5 @@
 package mod.moeblocks.entity.ai.emotion;
 
-import mod.moeblocks.client.Animations;
 import mod.moeblocks.entity.util.Emotions;
 import mod.moeblocks.entity.util.VoiceLines;
 import net.minecraft.util.SoundEvent;

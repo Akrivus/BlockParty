@@ -18,8 +18,7 @@ public class TargetMobsGoal extends RevengeGoal {
     @Override
     public boolean preCheckTarget() {
         if (this.entity.isWaiting()) {
-            List<MobEntity> victims = this.entity.world.getEntitiesWithinAABB(MobEntity.class, this.entity.getBoundingBox().grow(8.0F, 4.0F, 8.0F)).stream().filter(victim -> victim instanceof IMob && this.entity.canAttack(victim) && this.entity.isSuperiorTo(victim)).collect(Collectors.toList());
-            victims.sort(new DistanceCheck(this.entity));
+            List<MobEntity> victims = this.entity.world.getEntitiesWithinAABB(MobEntity.class, this.entity.getBoundingBox().grow(8.0F, 2.0F, 8.0F)).stream().filter(victim -> victim instanceof IMob && this.entity.canAttack(victim) && this.entity.isSuperiorTo(victim)).sorted(new DistanceCheck(this.entity)).collect(Collectors.toList());
             this.victim = victims.isEmpty() ? null : victims.get(0);
             return true;
         }

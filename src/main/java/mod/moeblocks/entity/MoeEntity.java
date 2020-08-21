@@ -1,6 +1,5 @@
 package mod.moeblocks.entity;
 
-import mod.moeblocks.MoeMod;
 import mod.moeblocks.entity.ai.AbstractState;
 import mod.moeblocks.entity.ai.behavior.AbstractBehavior;
 import mod.moeblocks.entity.ai.behavior.BasicBehavior;
@@ -22,17 +21,11 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.event.entity.EntityEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -55,6 +48,35 @@ public class MoeEntity extends StateEntity {
         this.dataManager.register(BEHAVIOR, Behaviors.MISSING.ordinal());
         this.dataManager.register(BLOCK_STATE, Optional.of(Blocks.AIR.getDefaultState()));
         this.dataManager.register(SCALE, 1.0F);
+    }
+
+    @Override
+    protected float getSoundPitch() {
+        return this.getBehavior().getPitch();
+    }
+
+    @Override
+    public EntitySize getSize(Pose pose) {
+        return super.getSize(pose).scale(this.getScale());
+    }
+
+    public float getScale() {
+        return this.dataManager.get(SCALE);
+    }
+
+    public void setScale(float scale) {
+        this.dataManager.set(SCALE, scale);
+    }
+
+    @Override
+    protected float getStandingEyeHeight(Pose pose, EntitySize size) {
+        return 0.908203125F * this.getScale();
+    }
+
+    @Override
+    protected void playStepSound(BlockPos pos, BlockState block) {
+        this.playSound(this.getBehavior().getStepSound(), 0.15F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
+        super.playStepSound(pos, block);
     }
 
     @Override
@@ -163,7 +185,7 @@ public class MoeEntity extends StateEntity {
     }
 
     public BlockState getBlockData() {
-        return this.dataManager.get(BLOCK_STATE).get();
+        return this.dataManager.get(BLOCK_STATE).orElseGet(() -> Blocks.AIR.getDefaultState());
     }
 
     public void setBlockData(BlockState state) {
@@ -179,34 +201,5 @@ public class MoeEntity extends StateEntity {
             return new TranslationTextComponent("entity.moeblocks.generic", new ItemStack(this.getBlockData().getBlock()).getDisplayName().getString());
         }
         return component;
-    }
-
-    @Override
-    protected float getSoundPitch() {
-        return this.getBehavior().getPitch();
-    }
-
-    @Override
-    protected void playStepSound(BlockPos pos, BlockState block) {
-        this.playSound(this.getBehavior().getStepSound(), 0.15F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
-        super.playStepSound(pos, block);
-    }
-
-    @Override
-    public EntitySize getSize(Pose pose) {
-        return super.getSize(pose).scale(this.getScale());
-    }
-
-    public float getScale() {
-        return this.dataManager.get(SCALE);
-    }
-
-    public void setScale(float scale) {
-        this.dataManager.set(SCALE, scale);
-    }
-
-    @Override
-    protected float getStandingEyeHeight(Pose pose, EntitySize size) {
-        return 0.908203125F * this.getScale();
     }
 }

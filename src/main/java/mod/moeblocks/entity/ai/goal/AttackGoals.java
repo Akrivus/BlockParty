@@ -35,7 +35,7 @@ public class AttackGoals {
             if (this.entity.canBeTarget(victim)) {
                 this.entity.getNavigator().tryMoveToEntityLiving(victim, this.entity.getFollowSpeed(victim, 32.0F));
                 this.timeUntilAttacking = this.entity.getAttackCooldown();
-                this.entity.see(victim);
+                this.entity.turnToView(victim);
             }
         }
 
@@ -105,7 +105,7 @@ public class AttackGoals {
             if (this.entity.canBeTarget(victim)) {
                 if (this.entity.getEntitySenses().canSee(victim)) {
                     this.entity.setAnimation(Animations.AIM);
-                    this.entity.see(victim);
+                    this.entity.turnToView(victim);
                     if (--this.timeUntilSeen < 0 && --this.timeUntilAttacking < 0) {
                         this.entity.attackEntityFromRange(victim, 0.0F);
                     }

@@ -41,7 +41,7 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.Difficulty;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
@@ -178,7 +178,10 @@ public class StateEntity extends CreatureEntity {
     protected void dropLoot(DamageSource cause, boolean player) {
         this.entityDropItem(ItemsMoe.MOE_DIE.get());
         for (EquipmentSlotType slot : EquipmentSlotType.values()) {
-            this.entityDropItem(this.getItemStackFromSlot(slot));
+            ItemStack stack = this.getItemStackFromSlot(slot);
+            if (this.getDere().getGiftValue(stack) == 0.0F || stack.isFood()) {
+                this.entityDropItem(stack);
+            }
         }
     }
 
@@ -216,6 +219,18 @@ public class StateEntity extends CreatureEntity {
     @Override
     public boolean canDespawn(double distanceToClosestPlayer) {
         return false;
+    }
+
+    protected void dropSpecialItems(DamageSource source, int looting, boolean hit) {
+
+    }
+
+    protected float getDropChance(EquipmentSlotType slot) {
+        return 0.0F;
+    }
+
+    protected void setEquipmentBasedOnDifficulty(DifficultyInstance difficulty) {
+
     }
 
     @Override
@@ -276,12 +291,13 @@ public class StateEntity extends CreatureEntity {
     }
 
     public LivingEntity getEntityFromUUID(UUID uuid) {
-        Entity entity = ((ServerWorld) this.world).getEntityByUuid(uuid);
-        if (entity instanceof LivingEntity) {
-            return (LivingEntity) entity;
-        } else {
-            return null;
+        if (this.world instanceof ServerWorld) {
+            Entity entity = ((ServerWorld) this.world).getEntityByUuid(uuid);
+            if (entity instanceof LivingEntity) {
+                return (LivingEntity) entity;
+            }
         }
+        return null;
     }
 
     public boolean runStates(Predicate<AbstractState> function) {
@@ -345,6 +361,14 @@ public class StateEntity extends CreatureEntity {
         this.dataManager.set(ANIMATION, animation.ordinal());
     }
 
+    public boolean isLocal() {
+        return this.world instanceof ServerWorld;
+    }
+
+    public boolean isRemote() {
+        return this.world.isRemote();
+    }
+
     protected void registerTargets() {
         this.targetSelector.addGoal(1, new AvengeSelfGoal(this));
         this.targetSelector.addGoal(2, new AvengeLeaderGoal(this));
@@ -355,20 +379,16 @@ public class StateEntity extends CreatureEntity {
     }
 
     public void toggleFollowTarget(LivingEntity leader) {
-        this.setFollowTarget((leader == null || leader.equals(this.getFollowTarget())) ? null : leader);
+        LivingEntity target = (leader == null || leader.equals(this.getFollowTarget())) ? null : leader;
+        this.setFollowTarget(target);
+        if (leader instanceof PlayerEntity) {
+            this.say((PlayerEntity) leader, String.format("command.moe.following.%s", this.isWaiting() ? "no" : "yes"), this.getCustomName().getString());
+        }
     }
 
     public boolean isStandingOn(BlockState state) {
         BlockState stand = this.world.getBlockState(this.getPosition());
         return state.getBlock() == stand.getBlock();
-    }
-
-    public boolean isLocal() {
-        return !this.isRemote();
-    }
-
-    public boolean isRemote() {
-        return this.world.isRemote();
     }
 
     public void setEmotion(Emotions emotion, int timeout) {
@@ -395,24 +415,14 @@ public class StateEntity extends CreatureEntity {
                     return true;
                 }
             } else if (this.shouldExchangeEquipment(stack, shift)) {
-                this.entityDropItem(shift);
+                if (this.getDere().getGiftValue(stack) == 0.0F || stack.isFood()) {
+                    this.entityDropItem(shift);
+                }
                 this.setItemStackToSlot(slot, stack.split(1));
                 return stack.isEmpty();
             }
         }
         return false;
-    }
-
-    protected void dropSpecialItems(DamageSource source, int looting, boolean hit) {
-
-    }
-
-    protected float getDropChance(EquipmentSlotType slot) {
-        return 0.0F;
-    }
-
-    protected void setEquipmentBasedOnDifficulty(DifficultyInstance difficulty) {
-
     }
 
     public EquipmentSlotType getSlotForStack(ItemStack stack) {
@@ -565,6 +575,22 @@ public class StateEntity extends CreatureEntity {
         this.dataManager.set(SITTING, sitting);
     }
 
+    public double getCenteredRandomPosX() {
+        return this.getPosXRandom(this.getWidth() / 2.0F);
+    }
+
+    public double getCenteredRandomPosY() {
+        return this.getPosYRandom() + this.getHeight() / 2.0F;
+    }
+
+    public double getCenteredRandomPosZ() {
+        return this.getPosZRandom(this.getWidth() / 2.0F);
+    }
+
+    public double getGaussian(double factor) {
+        return this.rand.nextGaussian() * factor;
+    }
+
     public LivingEntity getAvoidTarget() {
         return this.avoidTarget;
     }
@@ -596,7 +622,7 @@ public class StateEntity extends CreatureEntity {
         this.navigator = navigator;
     }
 
-    public void see(Entity entity) {
+    public void turnToView(Entity entity) {
         this.getLookController().setLookPositionWithEntity(entity, 30.0F, this.getVerticalFaceSpeed());
     }
 
@@ -651,5 +677,9 @@ public class StateEntity extends CreatureEntity {
     @Override
     public boolean onLivingFall(float distance, float damageMultiplier) {
         return !this.canFly() || super.onLivingFall(distance, damageMultiplier);
+    }
+
+    public void say(PlayerEntity player, String key, Object... params) {
+        player.sendMessage(new TranslationTextComponent(key, params), this.getUniqueID());
     }
 }

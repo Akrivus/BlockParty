@@ -16,11 +16,12 @@ public class AvengeLeaderGoal extends RevengeGoal {
         LivingEntity leader = this.entity.getFollowTarget();
         if (leader != null) {
             Relationship relationship = this.entity.getRelationships().get(leader);
-            this.victim = leader.getRevengeTarget();
-            if (this.entity.isSuperiorTo(this.victim)) {
-                return relationship.canFightAlongside();
-            } else {
-                return relationship.canDieFor();
+            LivingEntity victim = this.entity.getRevengeTarget();
+            if (relationship.canFightAlongside() && this.entity.canAttack(victim)) {
+                if (relationship.canDieFor() || this.entity.isSuperiorTo(victim)) {
+                    this.victim = victim;
+                    return true;
+                }
             }
         }
         return false;

@@ -17,11 +17,12 @@ public class JoinLeaderGoal extends RevengeGoal {
         if (leader != null) {
             Relationship relationship = this.entity.getRelationships().get(leader);
             if (leader.ticksExisted - leader.getLastAttackedEntityTime() < 100) {
-                this.victim = leader.getLastAttackedEntity();
-                if (this.entity.isSuperiorTo(this.victim)) {
-                    return relationship.canFightAlongside();
-                } else {
-                    return relationship.canDieFor();
+                LivingEntity victim = leader.getLastAttackedEntity();
+                if (relationship.canFightAlongside() && this.entity.canAttack(victim)) {
+                    if (relationship.canDieFor() || this.entity.isSuperiorTo(victim)) {
+                        this.victim = victim;
+                        return true;
+                    }
                 }
             }
         }

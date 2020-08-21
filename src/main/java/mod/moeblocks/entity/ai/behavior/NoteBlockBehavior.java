@@ -35,7 +35,7 @@ public class NoteBlockBehavior extends BasicBehavior {
     public boolean onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
         if (hand == Hand.MAIN_HAND) {
             this.pitch = (float) (Math.pow(2.0D, ((this.note = Math.max(this.note + 1 % 25, 0)) - 12) / 12.0D));
-            this.moe.world.addParticle(ParticleTypes.NOTE, this.moe.getPosXRandom(0.375D), this.moe.getPosYRandom() + 0.25D, this.moe.getPosZRandom(0.375D), this.note / 24.0D, 0.0D, 0.0D);
+            this.moe.world.addParticle(ParticleTypes.NOTE,  this.moe.getCenteredRandomPosX(), this.moe.getPosYRandom(), this.moe.getCenteredRandomPosZ(), this.note / 24.0D, 0.0D, 0.0D);
             this.moe.playSound(VoiceLines.SING.get(this.entity));
             return true;
         }

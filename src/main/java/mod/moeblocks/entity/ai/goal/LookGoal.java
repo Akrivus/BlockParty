@@ -41,6 +41,6 @@ public class LookGoal extends Goal {
 
     @Override
     public void tick() {
-        this.entity.see(this.target);
+        this.entity.turnToView(this.target);
     }
 }

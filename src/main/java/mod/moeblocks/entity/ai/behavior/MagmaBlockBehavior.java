@@ -9,7 +9,7 @@ import net.minecraft.util.math.BlockPos;
 public class MagmaBlockBehavior extends BasicRandomBehavior {
     @Override
     public void tick() {
-        this.moe.world.addParticle(ParticleTypes.FLAME, this.moe.getPosXRandom(0.375D), this.moe.getPosYRandom(), this.moe.getPosZRandom(0.375D), 0.0D, 0.0D, 0.0D);
+        this.moe.world.addParticle(ParticleTypes.FLAME,  this.moe.getCenteredRandomPosX(), this.moe.getPosYRandom(), this.moe.getCenteredRandomPosZ(), 0.0D, 0.0D, 0.0D);
         super.tick();
     }
 

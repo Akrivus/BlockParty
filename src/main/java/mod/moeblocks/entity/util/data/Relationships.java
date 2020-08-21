@@ -2,8 +2,6 @@ package mod.moeblocks.entity.util.data;
 
 import mod.moeblocks.entity.ai.AbstractState;
 import mod.moeblocks.entity.ai.Relationship;
-import mod.moeblocks.register.ItemsMoe;
-import mod.moeblocks.register.TagsMoe;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -13,10 +11,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.world.IWorld;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -38,10 +33,14 @@ public class Relationships extends AbstractState implements Iterable<Relationshi
     @Override
     public void tick() {
         ItemStack stack = this.entity.getHeldItem(Hand.OFF_HAND);
-        this.hasGift = stack.getItem().isIn(TagsMoe.GIFTABLES) && !stack.isFood();
+        this.hasGift = this.entity.getDere().getGiftValue(stack) > 0 && !stack.isFood();
         if (this.entity.isLocal() && this.hasGift && --this.timeUntilGiftReset < 0) {
             this.entity.setHeldItem(Hand.OFF_HAND, ItemStack.EMPTY);
         }
+        this.iterate(relationship -> {
+            relationship.tick();
+            return true;
+        });
     }
 
     @Override
@@ -95,31 +94,17 @@ public class Relationships extends AbstractState implements Iterable<Relationshi
 
     @Override
     public boolean onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
-        return this.iterate(relationship -> relationship.onInteract(player, stack, hand));
+        return this.get(player).onInteract(player, stack, hand);
     }
 
     @Override
     public boolean isArmed() {
-        return this.iterate(relationship -> relationship.isArmed());
+        return this.iterate(Relationship::isArmed);
     }
 
     @Override
     public boolean canAttack(LivingEntity target) {
-        return this.iterate(relationship -> relationship.canAttack(target));
-    }
-
-    @Override
-    public Iterator<Relationship> iterator() {
-        return this.relationships.values().iterator();
-    }
-
-    public boolean iterate(Predicate<Relationship> function) {
-        boolean result = false;
-        Iterator<Relationship> it = this.iterator();
-        while (it.hasNext()) {
-            result |= function.test(it.next());
-        }
-        return result;
+        return this.get(target).canAttack();
     }
 
     public Relationship get(LivingEntity entity) {
@@ -133,6 +118,19 @@ public class Relationships extends AbstractState implements Iterable<Relationshi
             relationship.start(this.entity);
         }
         return relationship;
+    }
+
+    public boolean iterate(Predicate<Relationship> function) {
+        boolean result = false;
+        for (Relationship relationship : this) {
+            result |= function.test(relationship);
+        }
+        return result;
+    }
+
+    @Override
+    public Iterator<Relationship> iterator() {
+        return this.relationships.values().iterator();
     }
 
     public void set(UUID uuid, Relationship relationship) {

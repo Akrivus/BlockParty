@@ -110,6 +110,11 @@ public class AbstractBehavior extends AbstractMoeState {
         return false;
     }
 
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        return false;
+    }
+
     public Block getBlock() {
         return MoeBlockAliases.get(this.getBlockState().getBlock());
     }
@@ -152,11 +157,6 @@ public class AbstractBehavior extends AbstractMoeState {
 
     @Override
     public boolean matches(Enum<?>... keys) {
-        return false;
-    }
-
-    @Override
-    public boolean canAttack(LivingEntity target) {
         return false;
     }
 }

@@ -35,7 +35,7 @@ public class FollowGoal extends Goal {
     public void startExecuting() {
         LivingEntity target = this.entity.getFollowTarget();
         BlockPos pos = target.getPosition();
-        this.entity.see(target);
+        this.entity.turnToView(target);
         if (this.entity.getNavigator().tryMoveToXYZ(pos.getX(), pos.getY(), pos.getZ(), this.entity.getFollowSpeed(target, 8.0F))) {
             this.timeUntilMoveIn = this.entity.getNavigator().getPath().getCurrentPathLength() * 20 + 100;
         } else {

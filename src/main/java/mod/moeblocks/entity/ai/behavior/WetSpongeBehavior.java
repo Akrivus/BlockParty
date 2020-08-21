@@ -20,12 +20,12 @@ public class WetSpongeBehavior extends BasicBehavior {
     @Override
     public void tick() {
         if (this.moe.world.func_230315_m_().func_236040_e_() || this.moe.isBurning()) {
-            this.moe.world.addParticle(ParticleTypes.CLOUD, this.moe.getPosXRandom(0.375D), this.moe.getPosYRandom(), this.moe.getPosZRandom(0.375D), this.moe.world.rand.nextGaussian() * 0.02D, this.moe.world.rand.nextGaussian() * 0.02D, this.moe.world.rand.nextGaussian() * 0.02D);
+            this.moe.world.addParticle(ParticleTypes.CLOUD, this.moe.getCenteredRandomPosX(), this.moe.getPosYRandom(), this.moe.getCenteredRandomPosZ(), this.entity.getGaussian(0.02D), this.entity.getGaussian(0.02D), this.entity.getGaussian(0.02D));
             if (this.extinguish(this.moe.world, this.moe.getPosition())) {
                 this.moe.setBlockData(Blocks.SPONGE.getDefaultState());
             }
         } else {
-            this.moe.world.addParticle(ParticleTypes.DRIPPING_WATER, this.moe.getPosXRandom(0.375D), this.moe.getPosYRandom(), this.moe.getPosZRandom(0.375D), 0.0D, 0.0D, 0.0D);
+            this.moe.world.addParticle(ParticleTypes.DRIPPING_WATER, this.moe.getCenteredRandomPosX(), this.moe.getPosYRandom(), this.moe.getCenteredRandomPosZ(), 0.0D, 0.0D, 0.0D);
         }
     }
 
