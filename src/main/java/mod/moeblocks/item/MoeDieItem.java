@@ -1,7 +1,7 @@
 package mod.moeblocks.item;
 
 import mod.moeblocks.entity.MoeDieEntity;
-import mod.moeblocks.register.ItemsMoe;
+import mod.moeblocks.init.MoeItems;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 public class MoeDieItem extends Item {
 
     public MoeDieItem() {
-        super(new Item.Properties().group(ItemsMoe.Group.INSTANCE));
+        super(new Item.Properties().group(MoeItems.Group.INSTANCE));
     }
 
     @Override

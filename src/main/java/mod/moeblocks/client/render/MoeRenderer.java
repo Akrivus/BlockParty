@@ -4,6 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import mod.moeblocks.MoeMod;
 import mod.moeblocks.client.model.MoeModel;
 import mod.moeblocks.client.render.layer.MoeEmotionLayer;
+import mod.moeblocks.client.render.layer.MoeEyepatchLayer;
 import mod.moeblocks.client.render.layer.MoeGlowLayer;
 import mod.moeblocks.entity.MoeEntity;
 import net.minecraft.client.Minecraft;
@@ -24,6 +25,7 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
         this.addLayer(new HeldItemLayer<>(this));
         this.addLayer(new MoeEmotionLayer(this));
         this.addLayer(new MoeGlowLayer(this));
+        this.addLayer(new MoeEyepatchLayer(this));
     }
 
     @Override

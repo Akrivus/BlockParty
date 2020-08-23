@@ -2,7 +2,7 @@ package mod.moeblocks.entity.ai;
 
 import mod.moeblocks.entity.util.Emotions;
 import mod.moeblocks.entity.util.VoiceLines;
-import mod.moeblocks.register.TagsMoe;
+import mod.moeblocks.init.MoeTags;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -142,7 +142,7 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
         if (this.entity.isLocal() && hand == Hand.MAIN_HAND) {
             Item item = stack.getItem();
             if (player.isSneaking()) {
-                if (this.canFollow() && (stack.isEmpty() || item.isIn(TagsMoe.EQUIPPABLES))) {
+                if (this.canFollow() && (stack.isEmpty() || item.isIn(MoeTags.EQUIPPABLES))) {
                     if (this.entity.tryEquipItem(stack)) {
                         this.entity.playSound(VoiceLines.THANK_YOU.get(this.entity));
                         this.entity.getRelationships().resetGiftTimer();

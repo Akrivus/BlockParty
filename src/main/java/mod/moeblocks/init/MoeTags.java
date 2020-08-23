@@ -1,4 +1,4 @@
-package mod.moeblocks.register;
+package mod.moeblocks.init;
 
 import mod.moeblocks.MoeMod;
 import net.minecraft.block.Block;
@@ -8,7 +8,7 @@ import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 
-public class TagsMoe {
+public class MoeTags {
     public static final ITag.INamedTag<Block> MOEABLES = BlockTags.createOptional(new ResourceLocation(MoeMod.ID, "moeables"));
     public static final ITag.INamedTag<Item> EQUIPPABLES = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "equippables"));
     public static final ITag.INamedTag<Item> DANDERE_GIFTS = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "gifts_dandere"));

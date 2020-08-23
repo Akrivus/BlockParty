@@ -1,4 +1,4 @@
-package mod.moeblocks.register;
+package mod.moeblocks.init;
 
 import mod.moeblocks.MoeMod;
 import net.minecraft.util.ResourceLocation;
@@ -7,7 +7,7 @@ import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class SoundEventsMoe {
+public class MoeSounds {
     public static final DeferredRegister<SoundEvent> REGISTRY = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, MoeMod.ID);
 
     public static final RegistryObject<SoundEvent> MOE_ATTACK = REGISTRY.register("entity.moe.attack", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.attack")));

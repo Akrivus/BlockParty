@@ -1,4 +1,4 @@
-package mod.moeblocks.register;
+package mod.moeblocks.init;
 
 import mod.moeblocks.MoeMod;
 import mod.moeblocks.client.render.MoeDieRenderer;
@@ -16,7 +16,7 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class EntityTypesMoe {
+public class MoeEntities {
     public static final DeferredRegister<EntityType<?>> REGISTRY = DeferredRegister.create(ForgeRegistries.ENTITIES, MoeMod.ID);
 
     public static final RegistryObject<EntityType<MoeDieEntity>> MOE_DIE = REGISTRY.register("moe_die", () -> EntityType.Builder.<MoeDieEntity>create(MoeDieEntity::new, EntityClassification.MISC).size(0.375F, 0.375F).setTrackingRange(4).setUpdateInterval(10).setShouldReceiveVelocityUpdates(true).build("moe_die"));
@@ -24,9 +24,9 @@ public class EntityTypesMoe {
     public static final RegistryObject<EntityType<SenpaiEntity>> SENPAI = REGISTRY.register("senpai", () -> EntityType.Builder.create(SenpaiEntity::new, EntityClassification.CREATURE).size(0.60F, 1.80F).setTrackingRange(32).setUpdateInterval(2).build("senpai"));
 
     public static void registerEntityRenderingHandlers() {
-        RenderingRegistry.registerEntityRenderingHandler(EntityTypesMoe.MOE_DIE.get(), MoeDieRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(EntityTypesMoe.MOE.get(), MoeRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(EntityTypesMoe.SENPAI.get(), SenpaiRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(MoeEntities.MOE_DIE.get(), MoeDieRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(MoeEntities.MOE.get(), MoeRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(MoeEntities.SENPAI.get(), SenpaiRenderer::new);
     }
 
     public static void registerAttributes() {

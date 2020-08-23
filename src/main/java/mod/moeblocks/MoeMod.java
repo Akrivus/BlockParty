@@ -1,6 +1,6 @@
 package mod.moeblocks;
 
-import mod.moeblocks.register.*;
+import mod.moeblocks.init.*;
 import mod.moeblocks.util.DispenserBehaviors;
 import mod.moeblocks.util.MoeBlockAliases;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -8,10 +8,13 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
 
 @Mod(MoeMod.ID)
 public class MoeMod {
+    public static final String VERSION = "20.21.08";
     public static final String ID = "moeblocks";
+    public static final SimpleChannel CHANNEL = MoeMessages.register();
 
     public MoeMod() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -21,20 +24,20 @@ public class MoeMod {
     }
 
     private void registerRegisters(IEventBus bus) {
-        ActivitiesMoe.REGISTRY.register(bus);
-        EntityTypesMoe.REGISTRY.register(bus);
-        ItemsMoe.REGISTRY.register(bus);
-        SchedulesMoe.REGISTRY.register(bus);
-        SoundEventsMoe.REGISTRY.register(bus);
+        MoeActivities.REGISTRY.register(bus);
+        MoeEntities.REGISTRY.register(bus);
+        MoeItems.REGISTRY.register(bus);
+        MoeSchedules.REGISTRY.register(bus);
+        MoeSounds.REGISTRY.register(bus);
     }
 
     private void onClientSetup(final FMLClientSetupEvent e) {
-        EntityTypesMoe.registerEntityRenderingHandlers();
+        MoeEntities.registerEntityRenderingHandlers();
     }
 
     private void onCommonSetup(final FMLCommonSetupEvent e) {
         DispenserBehaviors.register();
-        EntityTypesMoe.registerAttributes();
+        MoeEntities.registerAttributes();
         MoeBlockAliases.register();
     }
 }

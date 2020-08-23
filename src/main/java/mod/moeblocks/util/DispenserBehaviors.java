@@ -1,7 +1,7 @@
 package mod.moeblocks.util;
 
 import mod.moeblocks.entity.MoeDieEntity;
-import mod.moeblocks.register.ItemsMoe;
+import mod.moeblocks.init.MoeItems;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.dispenser.ProjectileDispenseBehavior;
@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 
 public class DispenserBehaviors {
     public static void register() {
-        DispenserBlock.registerDispenseBehavior(ItemsMoe.MOE_DIE.get(), new Die());
+        DispenserBlock.registerDispenseBehavior(MoeItems.MOE_DIE.get(), new Die());
     }
 
     public static class Die extends ProjectileDispenseBehavior {

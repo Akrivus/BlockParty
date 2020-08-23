@@ -3,9 +3,9 @@ package mod.moeblocks.item;
 import mod.moeblocks.entity.MoeEntity;
 import mod.moeblocks.entity.StateEntity;
 import mod.moeblocks.entity.util.Deres;
-import mod.moeblocks.register.EntityTypesMoe;
-import mod.moeblocks.register.ItemsMoe;
-import mod.moeblocks.register.TagsMoe;
+import mod.moeblocks.init.MoeEntities;
+import mod.moeblocks.init.MoeItems;
+import mod.moeblocks.init.MoeTags;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.SpawnReason;
@@ -24,7 +24,7 @@ public class SpawnEggItem extends Item {
     protected final Deres dere;
 
     public SpawnEggItem(SpawnTypes type, Deres dere) {
-        super(new Properties().group(ItemsMoe.Group.INSTANCE));
+        super(new Properties().group(MoeItems.Group.INSTANCE));
         this.type = type;
         this.dere = dere;
     }
@@ -36,13 +36,13 @@ public class SpawnEggItem extends Item {
         BlockPos pos = context.getPos();
         if (!world.isRemote()) {
             BlockState state = world.getBlockState(pos);
-            TileEntity extra = state.getBlock().isIn(TagsMoe.MOEABLES) ? world.getTileEntity(pos) : null;
+            TileEntity extra = state.getBlock().isIn(MoeTags.MOEABLES) ? world.getTileEntity(pos) : null;
             pos = pos.offset(context.getFace());
             StateEntity entity = this.type.get(world);
             entity.setPositionAndRotation(pos.getX() + 0.5F, pos.getY(), pos.getZ() + 0.5F, -player.rotationYaw, -player.rotationPitch);
             if (entity instanceof MoeEntity) {
                 MoeEntity moe = (MoeEntity) entity;
-                moe.setBlockData(state.getBlock().isIn(TagsMoe.MOEABLES) ? state : Blocks.AIR.getDefaultState());
+                moe.setBlockData(state.getBlock().isIn(MoeTags.MOEABLES) ? state : Blocks.AIR.getDefaultState());
                 moe.setExtraBlockData(extra != null ? extra.getTileData() : new CompoundNBT());
             }
             entity.setDere(this.dere);
@@ -61,9 +61,9 @@ public class SpawnEggItem extends Item {
         public StateEntity get(World world) {
             switch (this) {
             case SENPAI:
-                return EntityTypesMoe.SENPAI.get().create(world);
+                return MoeEntities.SENPAI.get().create(world);
             default:
-                return EntityTypesMoe.MOE.get().create(world);
+                return MoeEntities.MOE.get().create(world);
             }
         }
     }

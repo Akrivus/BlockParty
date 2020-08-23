@@ -2,7 +2,7 @@ package mod.moeblocks.entity.ai.dere;
 
 import mod.moeblocks.entity.ai.AbstractState;
 import mod.moeblocks.entity.util.Deres;
-import mod.moeblocks.register.TagsMoe;
+import mod.moeblocks.init.MoeTags;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -29,7 +29,7 @@ public class AbstractDere extends AbstractState {
 
     public float getGiftValue(ItemStack stack) {
         Item item = stack.getItem();
-        if (item.isIn(TagsMoe.GIFTS)) {
+        if (item.isIn(MoeTags.GIFTS)) {
             return 2.0F;
         }
         if (item.isIn(ItemTags.FLOWERS)) {

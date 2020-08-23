@@ -1,7 +1,7 @@
 package mod.moeblocks.entity.ai.dere;
 
 import mod.moeblocks.entity.util.Deres;
-import mod.moeblocks.register.TagsMoe;
+import mod.moeblocks.init.MoeTags;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.BossInfo;
@@ -25,7 +25,7 @@ public class Tsundere extends AbstractDere {
     @Override
     public float getGiftValue(ItemStack stack) {
         Item item = stack.getItem();
-        if (item.isIn(TagsMoe.TSUNDERE_GIFTS)) {
+        if (item.isIn(MoeTags.TSUNDERE_GIFTS)) {
             return 4.0F;
         }
         return super.getGiftValue(stack);

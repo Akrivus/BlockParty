@@ -1,9 +1,9 @@
 package mod.moeblocks.entity;
 
 import mod.moeblocks.entity.util.Deres;
-import mod.moeblocks.register.EntityTypesMoe;
-import mod.moeblocks.register.ItemsMoe;
-import mod.moeblocks.register.TagsMoe;
+import mod.moeblocks.init.MoeEntities;
+import mod.moeblocks.init.MoeItems;
+import mod.moeblocks.init.MoeTags;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
@@ -28,11 +28,11 @@ public class MoeDieEntity extends DieEntity {
     }
 
     public MoeDieEntity(World world, double x, double y, double z) {
-        super(EntityTypesMoe.MOE_DIE.get(), world, x, y, z);
+        super(MoeEntities.MOE_DIE.get(), world, x, y, z);
     }
 
     public MoeDieEntity(World world, LivingEntity thrower) {
-        super(EntityTypesMoe.MOE_DIE.get(), world, thrower);
+        super(MoeEntities.MOE_DIE.get(), world, thrower);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class MoeDieEntity extends DieEntity {
             BlockState state = this.world.getBlockState(this.getPositionUnderneath());
             TileEntity extra = this.world.getTileEntity(this.getPositionUnderneath());
             if (state.equals(this.blockStateForSpawn)) {
-                MoeEntity moe = EntityTypesMoe.MOE.get().create(this.world);
+                MoeEntity moe = MoeEntities.MOE.get().create(this.world);
                 moe.setPositionAndRotation(this.getPosX(), this.getPosY(), this.getPosZ(), this.rotationYaw, this.rotationPitch);
                 moe.setBlockData(state);
                 moe.setExtraBlockData(extra != null ? extra.getTileData() : new CompoundNBT());
@@ -62,12 +62,12 @@ public class MoeDieEntity extends DieEntity {
 
     @Override
     protected Item getDefaultItem() {
-        return ItemsMoe.MOE_DIE.get();
+        return MoeItems.MOE_DIE.get();
     }
 
     @Override
     public boolean onActionStart(BlockState state, BlockPos pos, Face face) {
-        if (state.getBlock().isIn(TagsMoe.MOEABLES)) {
+        if (state.getBlock().isIn(MoeTags.MOEABLES)) {
             this.blockStateForSpawn = state;
             this.dere = Deres.from(face);
             this.timeUntilSpawned = 30;

@@ -1,4 +1,4 @@
-package mod.moeblocks.register;
+package mod.moeblocks.init;
 
 import mod.moeblocks.MoeMod;
 import mod.moeblocks.entity.util.Deres;
@@ -10,7 +10,7 @@ import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class ItemsMoe {
+public class MoeItems {
     public static final DeferredRegister<Item> REGISTRY = DeferredRegister.create(ForgeRegistries.ITEMS, MoeMod.ID);
     public static final RegistryObject<Item> BENTO_BOX = REGISTRY.register("bento_box", BentoBoxItem::new);
     public static final RegistryObject<Item> CELL_PHONE = REGISTRY.register("cell_phone", CellPhoneItem::new);
@@ -42,7 +42,7 @@ public class ItemsMoe {
 
         @Override
         public ItemStack createIcon() {
-            return new ItemStack(ItemsMoe.MOE_DIE.get());
+            return new ItemStack(MoeItems.MOE_DIE.get());
         }
     }
 }

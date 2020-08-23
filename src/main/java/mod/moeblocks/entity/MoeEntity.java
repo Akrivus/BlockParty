@@ -4,7 +4,7 @@ import mod.moeblocks.entity.ai.AbstractState;
 import mod.moeblocks.entity.ai.behavior.AbstractBehavior;
 import mod.moeblocks.entity.ai.behavior.BasicBehavior;
 import mod.moeblocks.entity.util.Behaviors;
-import mod.moeblocks.register.EntityTypesMoe;
+import mod.moeblocks.init.MoeEntities;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -84,7 +84,7 @@ public class MoeEntity extends StateEntity {
         CompoundNBT compound = new CompoundNBT();
         this.writeAdditional(compound);
         compound.remove("Attributes");
-        SenpaiEntity senpai = EntityTypesMoe.SENPAI.get().create(world);
+        SenpaiEntity senpai = MoeEntities.SENPAI.get().create(world);
         senpai.setPositionAndRotation(this.getPosX(), this.getPosY(), this.getPosZ(), -this.rotationYaw, -this.rotationPitch);
         senpai.read(compound);
         if (this.world.addEntity(senpai)) {
