@@ -9,15 +9,12 @@ import mod.moeblocks.entity.ai.emotion.AbstractEmotion;
 import mod.moeblocks.entity.ai.emotion.NormalEmotion;
 import mod.moeblocks.entity.ai.goal.*;
 import mod.moeblocks.entity.ai.goal.target.*;
-import mod.moeblocks.entity.util.Deres;
-import mod.moeblocks.entity.util.Emotions;
-import mod.moeblocks.entity.util.Triggers;
-import mod.moeblocks.entity.util.VoiceLines;
+import mod.moeblocks.entity.util.*;
 import mod.moeblocks.entity.util.data.FoodStats;
 import mod.moeblocks.entity.util.data.Relationships;
 import mod.moeblocks.entity.util.data.StressStats;
-import mod.moeblocks.register.ItemsMoe;
-import mod.moeblocks.register.TagsMoe;
+import mod.moeblocks.init.MoeItems;
+import mod.moeblocks.init.MoeTags;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
@@ -54,8 +51,10 @@ import java.util.function.Predicate;
 
 public class StateEntity extends CreatureEntity {
     public static final DataParameter<Integer> ANIMATION = EntityDataManager.createKey(StateEntity.class, DataSerializers.VARINT);
+    public static final DataParameter<Integer> BLOOD_TYPE = EntityDataManager.createKey(StateEntity.class, DataSerializers.VARINT);
     public static final DataParameter<Integer> DERE = EntityDataManager.createKey(StateEntity.class, DataSerializers.VARINT);
     public static final DataParameter<Integer> EMOTION = EntityDataManager.createKey(StateEntity.class, DataSerializers.VARINT);
+    public static final DataParameter<Boolean> EYEPATCH = EntityDataManager.createKey(StateEntity.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> SITTING = EntityDataManager.createKey(StateEntity.class, DataSerializers.BOOLEAN);
     public AttackGoals.Melee attackGoal;
     protected Animation animation = new Animation();
@@ -64,6 +63,7 @@ public class StateEntity extends CreatureEntity {
     protected StressStats stressStats = new StressStats();
     protected AbstractDere dere = new Himedere();
     protected AbstractEmotion emotion = new NormalEmotion();
+    private long timeBorn;
     private int timeUntilEmotional;
     private UUID followTargetUUID;
     private LivingEntity avoidTarget;
@@ -109,8 +109,10 @@ public class StateEntity extends CreatureEntity {
     public void registerData() {
         super.registerData();
         this.dataManager.register(ANIMATION, Animations.DEFAULT.ordinal());
+        this.dataManager.register(BLOOD_TYPE, BloodTypes.O.ordinal());
         this.dataManager.register(DERE, Deres.HIMEDERE.ordinal());
         this.dataManager.register(EMOTION, Emotions.NORMAL.ordinal());
+        this.dataManager.register(EYEPATCH, false);
         this.dataManager.register(SITTING, false);
         this.registerStates();
     }
@@ -146,9 +148,12 @@ public class StateEntity extends CreatureEntity {
     public void writeAdditional(CompoundNBT compound) {
         super.writeAdditional(compound);
         compound.putString("Animation", this.getAnimation().toString());
+        compound.putString("BloodType", this.getBloodType().toString());
         compound.putString("Dere", this.getDere().toString());
         compound.putString("Emotion", this.getEmotion().toString());
+        compound.putBoolean("HasEyepatch", this.hasEyepatch());
         compound.putInt("TimeUntilEmotional", this.getEmotionalTimeout());
+        compound.putLong("TimeBorn", this.timeBorn);
         this.runStates(state -> {
             state.write(compound);
             return true;
@@ -162,9 +167,12 @@ public class StateEntity extends CreatureEntity {
     public void readAdditional(CompoundNBT compound) {
         super.readAdditional(compound);
         this.setAnimation(Animations.valueOf(compound.getString("Animation")));
+        this.setBloodType(BloodTypes.valueOf(compound.getString("BloodType")));
         this.setDere(Deres.valueOf(compound.getString("Dere")));
         this.setEmotion(Emotions.valueOf(compound.getString("Emotion")));
         this.setEmotionalTimeout(compound.getInt("TimeUntilEmotional"));
+        this.setHasEyepatch(compound.getBoolean("HasEyepatch"));
+        this.timeBorn = compound.getLong("TimeBorn");
         this.runStates(state -> {
             state.read(compound);
             return true;
@@ -176,7 +184,7 @@ public class StateEntity extends CreatureEntity {
 
     @Override
     protected void dropLoot(DamageSource cause, boolean player) {
-        this.entityDropItem(ItemsMoe.MOE_DIE.get());
+        this.entityDropItem(MoeItems.MOE_DIE.get());
         for (EquipmentSlotType slot : EquipmentSlotType.values()) {
             ItemStack stack = this.getItemStackFromSlot(slot);
             if (this.getDere().getGiftValue(stack) == 0.0F || stack.isFood()) {
@@ -236,6 +244,8 @@ public class StateEntity extends CreatureEntity {
     @Override
     public ILivingEntityData onInitialSpawn(IServerWorld world, DifficultyInstance difficulty, SpawnReason reason, ILivingEntityData spawnData, CompoundNBT compound) {
         ILivingEntityData data = super.onInitialSpawn(world, difficulty, reason, spawnData, compound);
+        this.setBloodType(BloodTypes.weigh(this.world.rand));
+        this.timeBorn = world.getWorld().getGameTime();
         this.resetAnimationState();
         this.runStates(state -> {
             state.onSpawn(world);
@@ -246,7 +256,7 @@ public class StateEntity extends CreatureEntity {
 
     @Override
     public boolean canPickUpItem(ItemStack stack) {
-        if (stack.getItem().isIn(TagsMoe.EQUIPPABLES) || this.foodStats.canConsume(stack)) {
+        if (stack.getItem().isIn(MoeTags.EQUIPPABLES) || this.foodStats.canConsume(stack)) {
             EquipmentSlotType slot = this.getSlotForStack(stack);
             ItemStack shift = this.getItemStackFromSlot(slot);
             if (ItemStack.areItemsEqual(shift, stack) && ItemStack.areItemStackTagsEqual(shift, stack)) {
@@ -361,6 +371,14 @@ public class StateEntity extends CreatureEntity {
         this.dataManager.set(ANIMATION, animation.ordinal());
     }
 
+    public BloodTypes getBloodType() {
+        return BloodTypes.values()[this.dataManager.get(BLOOD_TYPE)];
+    }
+
+    public void setBloodType(BloodTypes bloodType) {
+        this.dataManager.set(BLOOD_TYPE, bloodType.ordinal());
+    }
+
     public boolean isLocal() {
         return this.world instanceof ServerWorld;
     }
@@ -382,8 +400,12 @@ public class StateEntity extends CreatureEntity {
         LivingEntity target = (leader == null || leader.equals(this.getFollowTarget())) ? null : leader;
         this.setFollowTarget(target);
         if (leader instanceof PlayerEntity) {
-            this.say((PlayerEntity) leader, String.format("command.moe.following.%s", this.isWaiting() ? "no" : "yes"), this.getCustomName().getString());
+            this.say((PlayerEntity) leader, String.format("command.moeblocks.moe.following.%s", this.isWaiting() ? "no" : "yes"), this.getPlainName());
         }
+    }
+
+    public String getPlainName() {
+        return this.getName().getString();
     }
 
     public boolean isStandingOn(BlockState state) {
@@ -396,6 +418,14 @@ public class StateEntity extends CreatureEntity {
         if (timeout > 0) {
             this.setEmotion(emotion);
         }
+    }
+
+    public void setHasEyepatch(boolean hasEyepatch) {
+        this.dataManager.set(EYEPATCH, hasEyepatch);
+    }
+
+    public boolean hasEyepatch() {
+        return this.dataManager.get(EYEPATCH);
     }
 
     public boolean tryEquipItem(ItemStack stack) {
@@ -449,6 +479,10 @@ public class StateEntity extends CreatureEntity {
         }
     }
 
+    public boolean isCompatible(StateEntity entity) {
+        return BloodTypes.isCompatible(this.getBloodType(), entity.getBloodType());
+    }
+
     public boolean isMeleeFighter() {
         return this.isWieldingWeapons() && !this.isRangedFighter();
     }
@@ -489,7 +523,7 @@ public class StateEntity extends CreatureEntity {
     }
 
     public boolean isWieldingWeapons() {
-        return this.getHeldItem(Hand.MAIN_HAND).getItem().isIn(TagsMoe.WEAPONS);
+        return this.getHeldItem(Hand.MAIN_HAND).getItem().isIn(MoeTags.WEAPONS);
     }
 
     public boolean isBeingWatchedBy(LivingEntity entity) {
