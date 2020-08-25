@@ -6,10 +6,10 @@ import net.minecraft.util.math.BlockPos;
 
 import java.util.EnumSet;
 
-public class SitGoal extends Goal {
+public class WaitGoal extends Goal {
     private final StateEntity entity;
 
-    public SitGoal(StateEntity entity) {
+    public WaitGoal(StateEntity entity) {
         super();
         this.setMutexFlags(EnumSet.of(Flag.JUMP, Flag.MOVE));
         this.entity = entity;

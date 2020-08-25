@@ -8,6 +8,7 @@ import mod.moeblocks.entity.ai.dere.Himedere;
 import mod.moeblocks.entity.ai.emotion.AbstractEmotion;
 import mod.moeblocks.entity.ai.emotion.NormalEmotion;
 import mod.moeblocks.entity.ai.goal.*;
+import mod.moeblocks.entity.ai.goal.engage.SocializeGoal;
 import mod.moeblocks.entity.ai.goal.target.*;
 import mod.moeblocks.entity.util.*;
 import mod.moeblocks.entity.util.data.FoodStats;
@@ -97,11 +98,12 @@ public class StateEntity extends CreatureEntity {
         this.goalSelector.addGoal(1, new OpenDoorGoal(this));
         this.goalSelector.addGoal(2, this.attackGoal = new AttackGoals.Melee(this));
         this.goalSelector.addGoal(2, new AttackGoals.Ranged(this));
-        this.goalSelector.addGoal(3, new LookGoal(this));
+        this.goalSelector.addGoal(3, new FollowGoal(this));
         this.goalSelector.addGoal(4, new AvoidGoal(this));
         this.goalSelector.addGoal(5, new GrabGoal(this));
-        this.goalSelector.addGoal(6, new SitGoal(this));
-        this.goalSelector.addGoal(7, new FollowGoal(this));
+        this.goalSelector.addGoal(6, new WaitGoal(this));
+        this.goalSelector.addGoal(7, new SocializeGoal(this));
+        this.goalSelector.addGoal(8, new LookGoal(this));
         this.registerTargets();
     }
 
@@ -656,8 +658,9 @@ public class StateEntity extends CreatureEntity {
         this.navigator = navigator;
     }
 
-    public void turnToView(Entity entity) {
+    public boolean canSee(Entity entity) {
         this.getLookController().setLookPositionWithEntity(entity, 30.0F, this.getVerticalFaceSpeed());
+        return this.getEntitySenses().canSee(entity);
     }
 
     @Override

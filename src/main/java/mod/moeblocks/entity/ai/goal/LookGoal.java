@@ -22,6 +22,8 @@ public class LookGoal extends Goal {
     public boolean shouldExecute() {
         if (this.entity.isWaiting()) {
             List<LivingEntity> victims = this.entity.world.getEntitiesWithinAABB(LivingEntity.class, this.entity.getBoundingBox().grow(8.0F, 4.0F, 8.0F));
+            victims.sort(new DistanceCheck(this.entity));
+            this.target = victims.isEmpty() ? null : victims.get(0);
             return !victims.isEmpty();
         }
         return false;
@@ -29,18 +31,19 @@ public class LookGoal extends Goal {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.entity.canBeTarget(this.target);
-    }
-
-    @Override
-    public void startExecuting() {
-        List<LivingEntity> victims = this.entity.world.getEntitiesWithinAABB(LivingEntity.class, this.entity.getBoundingBox().grow(8.0F, 4.0F, 8.0F));
-        victims.sort(new DistanceCheck(this.entity));
-        this.target = victims.isEmpty() ? null : victims.get(0);
+        return this.entity.isWaiting() && this.entity.canBeTarget(this.target);
     }
 
     @Override
     public void tick() {
-        this.entity.turnToView(this.target);
+        if (!this.entity.canSee(this.target)) {
+            this.entity.getNavigator().tryMoveToEntityLiving(this.target, 0.5D);
+            this.entity.setSneaking(true);
+        }
+    }
+
+    @Override
+    public void resetTask() {
+        this.entity.setSneaking(false);
     }
 }
