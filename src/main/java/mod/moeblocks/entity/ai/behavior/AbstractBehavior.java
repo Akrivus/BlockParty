@@ -40,7 +40,8 @@ public class AbstractBehavior extends AbstractMoeState {
         float dX = (float) (shape.getEnd(Direction.Axis.X) - shape.getStart(Direction.Axis.X));
         float dY = (float) (shape.getEnd(Direction.Axis.Y) - shape.getStart(Direction.Axis.Y));
         float dZ = (float) (shape.getEnd(Direction.Axis.Z) - shape.getStart(Direction.Axis.Z));
-        return (float) (Math.cbrt(dX * dY * dZ));
+        float volume = (float) (Math.cbrt(dX * dY * dZ));
+        return Float.isFinite(volume) ? Math.min(Math.max(volume, 0.25F), 1.5F) : 1.0F;
     }
 
     public AttributeModifier getArmorModifier() {
