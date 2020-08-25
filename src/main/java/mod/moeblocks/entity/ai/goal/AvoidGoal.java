@@ -36,7 +36,7 @@ public class AvoidGoal extends Goal {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.entity.hasPath() && this.entity.ticksExisted - this.entity.getAvoidTimer() < 600;
+        return this.entity.hasPath() && this.entity.ticksExisted - this.entity.getAvoidTimer() < 100;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class AvoidGoal extends Goal {
     }
 
     public float getSpeed() {
-        float speed = 8.0F / this.entity.getDistance(this.entity.getAvoidTarget());
+        float speed = 16.0F / this.entity.getDistance(this.entity.getAvoidTarget());
         this.entity.setSprinting(speed > 1.5F);
         return Math.min(speed, 2.0F);
     }
