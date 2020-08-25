@@ -181,7 +181,7 @@ public class MoeEntity extends StateEntity {
     }
 
     public void setExtraBlockData(CompoundNBT compound) {
-        this.extraBlockData = compound;
+        this.extraBlockData = compound == null ? new CompoundNBT() : compound;
     }
 
     public BlockState getBlockData() {
