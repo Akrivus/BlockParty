@@ -15,7 +15,7 @@ public class AttackGoals {
 
         public Melee(StateEntity entity) {
             super();
-            this.setMutexFlags(EnumSet.of(Flag.MOVE));
+            this.setMutexFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
             this.entity = entity;
         }
 
@@ -35,7 +35,6 @@ public class AttackGoals {
             if (this.entity.canBeTarget(victim)) {
                 this.entity.getNavigator().tryMoveToEntityLiving(victim, this.entity.getFollowSpeed(victim, 32.0F));
                 this.timeUntilAttacking = this.entity.getAttackCooldown();
-                this.entity.turnToView(victim);
             }
         }
 
@@ -47,16 +46,14 @@ public class AttackGoals {
         @Override
         public void tick() {
             LivingEntity victim = this.entity.getAttackTarget();
-            if (this.entity.canBeTarget(victim)) {
-                if (this.entity.getEntitySenses().canSee(victim) && this.entity.getDistance(victim) < 3.0F) {
-                    if (--this.timeUntilAttacking < 0) {
-                        this.entity.attackEntityAsMob(victim);
-                        this.entity.swingArm(Hand.MAIN_HAND);
-                        this.startExecuting();
-                    }
-                } else {
+            if (this.entity.canSee(victim) && this.entity.getDistance(victim) < 3.0F) {
+                if (--this.timeUntilAttacking < 0) {
+                    this.entity.attackEntityAsMob(victim);
+                    this.entity.swingArm(Hand.MAIN_HAND);
                     this.startExecuting();
                 }
+            } else {
+                this.startExecuting();
             }
         }
     }
@@ -91,7 +88,7 @@ public class AttackGoals {
         @Override
         public void startExecuting() {
             LivingEntity victim = this.entity.getAttackTarget();
-            if (victim != null) {
+            if (this.entity.canBeTarget(victim)) {
                 this.entity.getNavigator().tryMoveToEntityLiving(victim, this.entity.getFollowSpeed(victim, 256.0F) - 1.0F);
                 this.entity.resetAnimationState();
                 this.timeUntilAttacking = this.entity.getAttackCooldown();
@@ -102,16 +99,13 @@ public class AttackGoals {
         @Override
         public void tick() {
             LivingEntity victim = this.entity.getAttackTarget();
-            if (this.entity.canBeTarget(victim)) {
-                if (this.entity.getEntitySenses().canSee(victim)) {
-                    this.entity.setAnimation(Animations.AIM);
-                    this.entity.turnToView(victim);
-                    if (--this.timeUntilSeen < 0 && --this.timeUntilAttacking < 0) {
-                        this.entity.attackEntityFromRange(victim, 0.0F);
-                    }
-                } else {
-                    this.startExecuting();
+            this.entity.setAnimation(Animations.AIM);
+            if (this.entity.canSee(victim)) {
+                if (--this.timeUntilSeen < 0 && --this.timeUntilAttacking < 0) {
+                    this.entity.attackEntityFromRange(victim, 0.0F);
                 }
+            } else {
+                this.startExecuting();
             }
         }
     }
