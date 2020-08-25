@@ -9,7 +9,8 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 
 public class MoeTags {
-    public static final ITag.INamedTag<Block> MOEABLES = BlockTags.createOptional(new ResourceLocation(MoeMod.ID, "moeables"));
+    public static final ITag.INamedTag<Block> BLOCKS = BlockTags.createOptional(new ResourceLocation(MoeMod.ID, "blocks"));
+    public static final ITag.INamedTag<Block> DOORS = BlockTags.createOptional(new ResourceLocation(MoeMod.ID, "doors"));
     public static final ITag.INamedTag<Item> EQUIPPABLES = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "equippables"));
     public static final ITag.INamedTag<Item> DANDERE_GIFTS = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "gifts_dandere"));
     public static final ITag.INamedTag<Item> DEREDERE_GIFTS = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "gifts_deredere"));
