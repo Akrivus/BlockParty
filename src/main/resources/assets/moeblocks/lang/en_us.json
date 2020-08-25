@@ -1,6 +1,7 @@
 {
   "command.moeblocks.moe.following.no": "%1$s is no longer following you",
   "command.moeblocks.moe.following.yes": "%1$s is now following you",
+  "command.moeblocks.spawn_egg.failed": "%1$s is not a moe-able block",
   "death.attack.yandere": "%1$s lost their laifu to %2$s's knaifu",
   "death.attack.vore": "%1$s was eaten by %2$s",
   "entity.moeblocks.generic": "%1$s-chan",
