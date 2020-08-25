@@ -7,7 +7,11 @@ import net.minecraft.util.DamageSource;
 public class CactusBehavior extends BasicBehavior {
     @Override
     public void tick() {
-        this.moe.world.getEntitiesWithinAABB(LivingEntity.class, this.moe.getBoundingBox()).forEach(entity -> entity.attackEntityFrom(DamageSource.CACTUS, 1.0F));
+        this.moe.world.getEntitiesWithinAABB(LivingEntity.class, this.moe.getBoundingBox()).forEach(entity -> {
+            if (this.moe != entity && this.moe.canAttack(entity)) {
+                entity.attackEntityFrom(DamageSource.CACTUS, 1.0F);
+            }
+        });
         super.tick();
     }
 
