@@ -16,6 +16,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
@@ -31,28 +32,35 @@ public class SpawnEggItem extends Item {
 
     @Override
     public ActionResultType onItemUse(ItemUseContext context) {
-        World world = context.getWorld();
         PlayerEntity player = context.getPlayer();
-        BlockPos pos = context.getPos();
+        World world = context.getWorld();
         if (!world.isRemote()) {
-            BlockState state = world.getBlockState(pos);
-            TileEntity extra = state.getBlock().isIn(MoeTags.MOEABLES) ? world.getTileEntity(pos) : null;
-            pos = pos.offset(context.getFace());
+            BlockPos pos = context.getPos().offset(context.getFace());
             StateEntity entity = this.type.get(world);
             entity.setPositionAndRotation(pos.getX() + 0.5F, pos.getY(), pos.getZ() + 0.5F, -player.rotationYaw, -player.rotationPitch);
             if (entity instanceof MoeEntity) {
-                MoeEntity moe = (MoeEntity) entity;
-                moe.setBlockData(state.getBlock().isIn(MoeTags.MOEABLES) ? state : Blocks.AIR.getDefaultState());
-                moe.setExtraBlockData(extra != null ? extra.getTileData() : new CompoundNBT());
+                BlockPos block = context.getPos();
+                BlockState state = world.getBlockState(block);
+                if (state.getBlock().isIn(MoeTags.BLOCKS)) {
+                    MoeEntity moe = (MoeEntity) entity;
+                    moe.setBlockData(state);
+                    if (state.hasTileEntity()) {
+                        moe.setExtraBlockData(world.getTileEntity(block).getTileData());
+                    }
+                } else {
+                    player.sendStatusMessage(new TranslationTextComponent("command.moeblocks.spawn_egg.failed", state.getBlock().getTranslatedName().getString()), true);
+                    return ActionResultType.FAIL;
+                }
             }
-            entity.setDere(this.dere);
-            entity.getRelationships().get(player).addTrust(100);
             if (world.addEntity(entity)) {
                 entity.onInitialSpawn((ServerWorld) world, world.getDifficultyForLocation(pos), SpawnReason.SPAWN_EGG, null, null);
+                entity.getRelationships().get(player).addTrust(100);
+                entity.setDere(this.dere);
                 context.getItem().shrink(1);
+                return ActionResultType.CONSUME;
             }
         }
-        return ActionResultType.SUCCESS;
+        return ActionResultType.PASS;
     }
 
     public enum SpawnTypes {
