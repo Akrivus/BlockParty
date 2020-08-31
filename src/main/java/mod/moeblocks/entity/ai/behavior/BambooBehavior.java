@@ -5,7 +5,7 @@ import mod.moeblocks.entity.util.Behaviors;
 public class BambooBehavior extends AbstractBehavior {
     @Override
     public float getBlockVolume() {
-        return 0.9F;
+        return 1.0F;
     }
 
     @Override
