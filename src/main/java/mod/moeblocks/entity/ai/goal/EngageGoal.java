@@ -1,22 +1,18 @@
 package mod.moeblocks.entity.ai.goal;
 
 import mod.moeblocks.entity.StateEntity;
-import mod.moeblocks.entity.util.Emotions;
-import mod.moeblocks.util.DistanceCheck;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 
-import java.util.EnumSet;
 import java.util.List;
 
 public class EngageGoal<T extends LivingEntity> extends Goal {
     protected final StateEntity entity;
-    protected T target;
     private final Class<T> type;
+    protected T target;
+    protected boolean engaged;
     private int timeUntilEngaging;
     private int timeUntilEngaged;
-    private int timeUntilReset;
-    private boolean engaged;
 
     public EngageGoal(StateEntity entity, Class<T> type) {
         this.entity = entity;
@@ -31,7 +27,6 @@ public class EngageGoal<T extends LivingEntity> extends Goal {
             List<T> entities = this.entity.world.getEntitiesWithinAABB(this.type, this.entity.getBoundingBox().grow(8.0D, 2.0D, 8.0D));
             for (T entity : entities) {
                 if (this.entity.canBeTarget(entity) && this.canShareWith(entity)) {
-                    this.timeUntilEngaged = this.getEngagementTime();
                     this.target = entity;
                     return true;
                 }
@@ -42,12 +37,12 @@ public class EngageGoal<T extends LivingEntity> extends Goal {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.entity.canBeTarget(this.target) && (!this.engaged || --this.timeUntilReset < 0);
+        return this.entity.canBeTarget(this.target) && !this.engaged;
     }
 
     @Override
     public void startExecuting() {
-        this.timeUntilReset = this.getEngagementTime();
+        this.timeUntilEngaged = this.getEngagementTime();
         this.engaged = false;
     }
 
@@ -58,19 +53,16 @@ public class EngageGoal<T extends LivingEntity> extends Goal {
 
     @Override
     public void tick() {
-        if (this.entity.canSee(this.target) && this.entity.getDistance(this.target) > 8.0F) {
+        if (this.entity.getDistance(this.target) > 2.0F) {
             this.entity.getNavigator().tryMoveToEntityLiving(this.target, this.entity.getFollowSpeed(this.target, 32.0F));
-            --this.timeUntilEngaged;
-            this.engaged = this.timeUntilEngaged < 0;
-        } else if (this.engaged) {
+        } else if (this.entity.canSee(this.target)) {
             this.entity.getNavigator().clearPath();
-            this.engage();
-            --this.timeUntilReset;
+            if (this.engaged) {
+                this.engaged = --this.timeUntilEngaged < 0;
+            } else {
+                this.engage();
+            }
         }
-    }
-
-    public boolean canShareWith(T entity) {
-        return true;
     }
 
     public void engage() {
@@ -85,7 +77,7 @@ public class EngageGoal<T extends LivingEntity> extends Goal {
         return 20;
     }
 
-    public int getResetTime() {
-        return 20;
+    public boolean canShareWith(T entity) {
+        return true;
     }
 }

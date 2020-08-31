@@ -17,12 +17,6 @@ public class PsychoticEmotion extends AbstractEmotion {
     protected MurderGoal murderGoal;
 
     @Override
-    public void tick() {
-        this.entity.world.addParticle(ParticleTypes.EFFECT, this.entity.getCenteredRandomPosX(), this.entity.getCenteredRandomPosY(), this.entity.getPosZRandom(this.entity.getWidth() / 2.0F), 0.0F, this.entity.getGaussian(0.2D), 0.0F);
-        super.tick();
-    }
-
-    @Override
     public SoundEvent getLivingSound() {
         return VoiceLines.EMOTION_PSYCHOTIC.get(this.entity);
     }
@@ -35,6 +29,12 @@ public class PsychoticEmotion extends AbstractEmotion {
     @Override
     public void start() {
         this.entity.targetSelector.addGoal(7, this.murderGoal = new MurderGoal(this.entity));
+    }
+
+    @Override
+    public void tick() {
+        this.entity.world.addParticle(ParticleTypes.EFFECT, this.entity.getCenteredRandomPosX(), this.entity.getCenteredRandomPosY(), this.entity.getPosZRandom(this.entity.getWidth() / 2.0F), 0.0F, this.entity.getGaussian(0.2D), 0.0F);
+        super.tick();
     }
 
     @Override

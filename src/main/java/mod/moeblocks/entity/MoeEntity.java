@@ -73,6 +73,14 @@ public class MoeEntity extends StateEntity {
         return 0.908203125F * this.getScale();
     }
 
+    public AbstractBehavior getBehavior() {
+        return this.behavior;
+    }
+
+    public void setBehavior(Behaviors behavior) {
+        this.dataManager.set(BEHAVIOR, behavior.ordinal());
+    }
+
     @Override
     protected void playStepSound(BlockPos pos, BlockState block) {
         this.playSound(this.getBehavior().getStepSound(), 0.15F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
@@ -166,14 +174,6 @@ public class MoeEntity extends StateEntity {
 
     public TileEntity getTileEntity() {
         return this.getBlockData().hasTileEntity() ? TileEntity.readTileEntity(this.getBlockData(), this.getExtraBlockData()) : null;
-    }
-
-    public AbstractBehavior getBehavior() {
-        return this.behavior;
-    }
-
-    public void setBehavior(Behaviors behavior) {
-        this.dataManager.set(BEHAVIOR, behavior.ordinal());
     }
 
     public CompoundNBT getExtraBlockData() {

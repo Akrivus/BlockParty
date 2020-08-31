@@ -17,4 +17,9 @@ public class SenpaiEntity extends StateEntity {
         TranslationTextComponent component = new TranslationTextComponent(translation);
         return component;
     }
+
+    @Override
+    public int getBaseAge() {
+        return 16;
+    }
 }

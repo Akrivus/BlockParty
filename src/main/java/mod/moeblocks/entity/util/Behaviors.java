@@ -4,7 +4,6 @@ import mod.moeblocks.entity.ai.behavior.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.HoneyBlock;
 
 import java.util.HashMap;
 import java.util.function.Supplier;
@@ -39,11 +38,14 @@ public enum Behaviors {
     MYCELIUM(MyceliumBehavior::new, Blocks.MYCELIUM),
     NETHER_BRICKS(NetherBricksBehavior::new, Blocks.NETHER_BRICK_FENCE, Blocks.NETHER_BRICK_SLAB, Blocks.NETHER_BRICK_STAIRS, Blocks.NETHER_BRICK_WALL, Blocks.NETHER_BRICKS, Blocks.RED_NETHER_BRICK_SLAB, Blocks.RED_NETHER_BRICK_STAIRS, Blocks.RED_NETHER_BRICK_WALL, Blocks.RED_NETHER_BRICKS),
     NOTE_BLOCK(NoteBlockBehavior::new, Blocks.NOTE_BLOCK),
+    NYLIUM(NyliumBehavior::new, Blocks.CRIMSON_NYLIUM, Blocks.WARPED_NYLIUM),
     OBSERVER(ObserverBehavior::new, Blocks.OBSERVER),
     REDSTONE_BLOCK(RedstoneBlockBehavior::new, Blocks.REDSTONE_BLOCK),
     REDSTONE_LAMP(RedstoneLampBehavior::new, Blocks.REDSTONE_LAMP),
+    RESPAWN_ANCHOR(RespawnAnchorBehavior::new, Blocks.RESPAWN_ANCHOR),
     SEA_LANTERN(SeaLanternBehavior::new, Blocks.SEA_LANTERN),
     SLIME_BLOCK(SlimeBlockBehavior::new, Blocks.SLIME_BLOCK),
+    TNT(TNTBehavior::new, Blocks.TNT),
     WET_SPONGE(WetSpongeBehavior::new, Blocks.WET_SPONGE),
     WOOL(WoolBehavior::new, Blocks.BLACK_WOOL, Blocks.BLUE_WOOL, Blocks.BROWN_WOOL, Blocks.CYAN_WOOL, Blocks.GRAY_WOOL, Blocks.GREEN_WOOL, Blocks.LIGHT_BLUE_WOOL, Blocks.LIGHT_GRAY_WOOL, Blocks.LIME_WOOL, Blocks.MAGENTA_WOOL, Blocks.ORANGE_WOOL, Blocks.PINK_WOOL, Blocks.PURPLE_WOOL, Blocks.RED_WOOL, Blocks.WHITE_WOOL, Blocks.YELLOW_WOOL);
 

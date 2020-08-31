@@ -8,6 +8,7 @@ import mod.moeblocks.entity.ai.dere.Himedere;
 import mod.moeblocks.entity.ai.emotion.AbstractEmotion;
 import mod.moeblocks.entity.ai.emotion.NormalEmotion;
 import mod.moeblocks.entity.ai.goal.*;
+import mod.moeblocks.entity.ai.goal.engage.ShareGoals;
 import mod.moeblocks.entity.ai.goal.engage.SocializeGoal;
 import mod.moeblocks.entity.ai.goal.target.*;
 import mod.moeblocks.entity.util.*;
@@ -101,8 +102,10 @@ public class StateEntity extends CreatureEntity {
         this.goalSelector.addGoal(3, new FollowGoal(this));
         this.goalSelector.addGoal(4, new AvoidGoal(this));
         this.goalSelector.addGoal(5, new GrabGoal(this));
-        this.goalSelector.addGoal(6, new WaitGoal(this));
-        this.goalSelector.addGoal(7, new SocializeGoal(this));
+        this.goalSelector.addGoal(6, new ShareGoals.Moe(this));
+        this.goalSelector.addGoal(6, new ShareGoals.Player(this));
+        this.goalSelector.addGoal(6, new SocializeGoal(this));
+        this.goalSelector.addGoal(7, new WaitGoal(this));
         this.goalSelector.addGoal(8, new LookGoal(this));
         this.registerTargets();
     }
@@ -272,7 +275,10 @@ public class StateEntity extends CreatureEntity {
 
     @Override
     public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
-        return this.runStates(state -> state.onInteract(player, player.getHeldItem(hand), hand)) ? ActionResultType.func_233537_a_(this.isRemote()) : super.func_230254_b_(player, hand);
+        if (player.getHeldItem(hand).getItem() != MoeItems.YEARBOOK.get()) {
+            return this.runStates(state -> state.onInteract(player, player.getHeldItem(hand), hand)) ? ActionResultType.func_233537_a_(this.isRemote()) : super.func_230254_b_(player, hand);
+        }
+        return super.func_230254_b_(player, hand);
     }
 
     @Override
@@ -284,12 +290,24 @@ public class StateEntity extends CreatureEntity {
         return target != null && target.isAlive() && !target.equals(this);
     }
 
+    public boolean isRemote() {
+        return this.world.isRemote();
+    }
+
     public void resetAnimationState() {
         this.setAnimation(this.getFollowTarget() != null ? Animations.DEFAULT : Animations.WAITING);
     }
 
+    public void setHasEyepatch(boolean hasEyepatch) {
+        this.dataManager.set(EYEPATCH, hasEyepatch);
+    }
+
     public LivingEntity getFollowTarget() {
-        return this.getEntityFromUUID(this.followTargetUUID);
+        if (this.getLeashHolder() instanceof LivingEntity) {
+            return (LivingEntity) this.getLeashHolder();
+        } else {
+            return this.getEntityFromUUID(this.followTargetUUID);
+        }
     }
 
     public void setFollowTarget(LivingEntity leader) {
@@ -357,6 +375,18 @@ public class StateEntity extends CreatureEntity {
         this.timeUntilEmotional = timeout;
     }
 
+    public BloodTypes getBloodType() {
+        return BloodTypes.values()[this.dataManager.get(BLOOD_TYPE)];
+    }
+
+    public void setBloodType(BloodTypes bloodType) {
+        this.dataManager.set(BLOOD_TYPE, bloodType.ordinal());
+    }
+
+    public boolean hasEyepatch() {
+        return this.dataManager.get(EYEPATCH);
+    }
+
     public AbstractEmotion getEmotion() {
         return this.emotion;
     }
@@ -373,20 +403,8 @@ public class StateEntity extends CreatureEntity {
         this.dataManager.set(ANIMATION, animation.ordinal());
     }
 
-    public BloodTypes getBloodType() {
-        return BloodTypes.values()[this.dataManager.get(BLOOD_TYPE)];
-    }
-
-    public void setBloodType(BloodTypes bloodType) {
-        this.dataManager.set(BLOOD_TYPE, bloodType.ordinal());
-    }
-
     public boolean isLocal() {
         return this.world instanceof ServerWorld;
-    }
-
-    public boolean isRemote() {
-        return this.world.isRemote();
     }
 
     protected void registerTargets() {
@@ -420,14 +438,6 @@ public class StateEntity extends CreatureEntity {
         if (timeout > 0) {
             this.setEmotion(emotion);
         }
-    }
-
-    public void setHasEyepatch(boolean hasEyepatch) {
-        this.dataManager.set(EYEPATCH, hasEyepatch);
-    }
-
-    public boolean hasEyepatch() {
-        return this.dataManager.get(EYEPATCH);
     }
 
     public boolean tryEquipItem(ItemStack stack) {
@@ -481,10 +491,6 @@ public class StateEntity extends CreatureEntity {
         }
     }
 
-    public boolean isCompatible(StateEntity entity) {
-        return BloodTypes.isCompatible(this.getBloodType(), entity.getBloodType());
-    }
-
     public boolean isMeleeFighter() {
         return this.isWieldingWeapons() && !this.isRangedFighter();
     }
@@ -526,6 +532,10 @@ public class StateEntity extends CreatureEntity {
 
     public boolean isWieldingWeapons() {
         return this.getHeldItem(Hand.MAIN_HAND).getItem().isIn(MoeTags.WEAPONS);
+    }
+
+    public boolean isCompatible(StateEntity entity) {
+        return BloodTypes.isCompatible(this.getBloodType(), entity.getBloodType());
     }
 
     public boolean isBeingWatchedBy(LivingEntity entity) {
@@ -718,5 +728,13 @@ public class StateEntity extends CreatureEntity {
 
     public void say(PlayerEntity player, String key, Object... params) {
         player.sendMessage(new TranslationTextComponent(key, params), this.getUniqueID());
+    }
+
+    public int getAgeInYears() {
+        return this.getBaseAge() + (int)(this.world.getGameTime() - this.timeBorn) / 24000 / 366;
+    }
+
+    public int getBaseAge() {
+        return 14;
     }
 }

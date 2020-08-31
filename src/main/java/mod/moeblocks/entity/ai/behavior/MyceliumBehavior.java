@@ -8,7 +8,7 @@ import net.minecraft.util.math.BlockPos;
 public class MyceliumBehavior extends BasicRandomBehavior {
     @Override
     public void tick() {
-        this.moe.world.addParticle(ParticleTypes.MYCELIUM,  this.moe.getCenteredRandomPosX(), this.moe.getPosYRandom(), this.moe.getCenteredRandomPosZ(), 0.0D, 0.0D, 0.0D);
+        this.moe.world.addParticle(ParticleTypes.MYCELIUM, this.moe.getCenteredRandomPosX(), this.moe.getPosYRandom(), this.moe.getCenteredRandomPosZ(), 0.0D, 0.0D, 0.0D);
         super.tick();
     }
 

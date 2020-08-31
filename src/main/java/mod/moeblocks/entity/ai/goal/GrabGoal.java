@@ -7,7 +7,6 @@ import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.pathfinding.Path;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -50,17 +49,17 @@ public class GrabGoal extends Goal {
     }
 
     @Override
+    public void resetTask() {
+        this.entity.getNavigator().clearPath();
+        this.entity.setEmotionalTimeout(0);
+        this.entity.setSneaking(false);
+    }
+
+    @Override
     public void tick() {
         if (this.entity.getDistance(this.stack) < 1.0F && this.entity.tryEquipItem(this.stack.getItem())) {
             this.entity.onItemPickup(this.stack, this.stack.getItem().getCount());
             this.stack.remove();
         }
-    }
-
-    @Override
-    public void resetTask() {
-        this.entity.getNavigator().clearPath();
-        this.entity.setEmotionalTimeout(0);
-        this.entity.setSneaking(false);
     }
 }

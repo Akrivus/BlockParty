@@ -36,6 +36,7 @@ public class MoeSounds {
     public static final RegistryObject<SoundEvent> MOE_SING = REGISTRY.register("entity.moe.sing", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.sing")));
     public static final RegistryObject<SoundEvent> MOE_THANK_YOU = REGISTRY.register("entity.moe.thank_you", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.thank_you")));
     public static final RegistryObject<SoundEvent> MOE_YES = REGISTRY.register("entity.moe.yes", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.yes")));
+    public static final RegistryObject<SoundEvent> MUSIC_DISC_POMF_POMF = REGISTRY.register("music_disc.pomf_pomf", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "music_disc.pomf_pomf")));
     public static final RegistryObject<SoundEvent> SENPAI_ATTACK = REGISTRY.register("entity.senpai.attack", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.senpai.attack")));
     public static final RegistryObject<SoundEvent> SENPAI_DEAD = REGISTRY.register("entity.senpai.dead", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.senpai.dead")));
     public static final RegistryObject<SoundEvent> SENPAI_EAT = REGISTRY.register("entity.senpai.eat", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.senpai.eat")));
@@ -61,4 +62,5 @@ public class MoeSounds {
     public static final RegistryObject<SoundEvent> SENPAI_SING = REGISTRY.register("entity.senpai.sing", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.senpai.sing")));
     public static final RegistryObject<SoundEvent> SENPAI_THANK_YOU = REGISTRY.register("entity.senpai.thank_you", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.senpai.thank_you")));
     public static final RegistryObject<SoundEvent> SENPAI_YES = REGISTRY.register("entity.senpai.yes", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.senpai.yes")));
+    public static final RegistryObject<SoundEvent> YEARBOOK_SIGN = REGISTRY.register("item.yearbook.sign", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "itme.yearbook.sign")));
 }

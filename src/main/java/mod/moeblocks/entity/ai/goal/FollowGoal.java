@@ -3,7 +3,6 @@ package mod.moeblocks.entity.ai.goal;
 import mod.moeblocks.entity.StateEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.util.math.BlockPos;
 
 import java.util.EnumSet;
 

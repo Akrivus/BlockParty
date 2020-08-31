@@ -141,4 +141,8 @@ public class FoodStats extends AbstractState {
     public void addExhaustion(float exhaustion) {
         this.exhaustion += exhaustion;
     }
+
+    public float getFoodLevel() {
+        return this.food;
+    }
 }

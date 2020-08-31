@@ -52,6 +52,14 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
         return this.getTrust() - this.entity.getStressStats().getStress() + this.getAffection();
     }
 
+    public float getAffection() {
+        return this.affection + this.infatuation;
+    }
+
+    public float getTrust() {
+        return this.trust;
+    }
+
     @Override
     public void start() {
         this.entity.getRelationships().set(this.getUUID(), this);
@@ -89,10 +97,6 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
 
     public float getAnxiety() {
         return (this.getAffection() / 20.0F) / this.entity.getRelationships().size() * 0.001F;
-    }
-
-    public float getAffection() {
-        return this.affection + this.infatuation;
     }
 
     @Override
@@ -147,14 +151,13 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
                         this.entity.playSound(VoiceLines.THANK_YOU.get(this.entity));
                         this.entity.getRelationships().resetGiftTimer();
                         this.addTrust(this.entity.getDere().getGiftValue(stack));
-                        return true;
                     } else if (stack.isEmpty()) {
                         for (EquipmentSlotType slot : EquipmentSlotType.values()) {
                             ItemStack drop = this.entity.getItemStackFromSlot(slot);
                             this.entity.entityDropItem(drop.split(drop.getCount()));
                         }
-                        return true;
                     }
+                    return true;
                 }
                 float value = this.entity.getDere().getGiftValue(stack);
                 if (value > 0.0F) {
@@ -200,6 +203,19 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
         this.addInfatuation(infatuation);
     }
 
+    public boolean canDoChoresFor() {
+        return this.getLoyalty() > 4;
+    }
+
+    public PlayerEntity getPlayer() {
+        LivingEntity entity = this.getHost();
+        if (entity instanceof PlayerEntity) {
+            return (PlayerEntity) entity;
+        } else {
+            return null;
+        }
+    }
+
     public void addAffection(float affection) {
         this.affection = Math.max(Math.min(this.affection + affection, 20.0F), -5.0F);
     }
@@ -228,14 +244,6 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
         return this.uuid;
     }
 
-    public boolean canDoChoresFor() {
-        return this.getLoyalty() > 4;
-    }
-
-    public float getTrust() {
-        return this.trust;
-    }
-
     public float getDistance() {
         return 3.0F / (this.getLoyalty() / 20.0F);
     }
@@ -260,12 +268,7 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
         return this.getPlayer() != null;
     }
 
-    public PlayerEntity getPlayer() {
-        LivingEntity entity = this.getHost();
-        if (entity instanceof PlayerEntity) {
-            return (PlayerEntity) entity;
-        } else {
-            return null;
-        }
+    public int getLastSeen() {
+        return this.timeSinceSeen;
     }
 }

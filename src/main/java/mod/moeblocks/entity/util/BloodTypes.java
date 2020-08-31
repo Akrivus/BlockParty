@@ -1,8 +1,5 @@
 package mod.moeblocks.entity.util;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.biome.Biome;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

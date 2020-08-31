@@ -35,15 +35,15 @@ public class LookGoal extends Goal {
     }
 
     @Override
+    public void resetTask() {
+        this.entity.setSneaking(false);
+    }
+
+    @Override
     public void tick() {
         if (!this.entity.canSee(this.target)) {
             this.entity.getNavigator().tryMoveToEntityLiving(this.target, 0.5D);
             this.entity.setSneaking(true);
         }
-    }
-
-    @Override
-    public void resetTask() {
-        this.entity.setSneaking(false);
     }
 }

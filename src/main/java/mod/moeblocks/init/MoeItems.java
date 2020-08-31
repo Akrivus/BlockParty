@@ -2,10 +2,9 @@ package mod.moeblocks.init;
 
 import mod.moeblocks.MoeMod;
 import mod.moeblocks.entity.util.Deres;
+import mod.moeblocks.item.SpawnEggItem;
 import mod.moeblocks.item.*;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -24,6 +23,7 @@ public class MoeItems {
     public static final RegistryObject<Item> KUUDERE_MOE_SPAWN_EGG = REGISTRY.register("kuudere_moe_spawn_egg", () -> new SpawnEggItem(SpawnEggItem.SpawnTypes.MOE, Deres.KUUDERE));
     public static final RegistryObject<Item> KUUDERE_SENPAI_SPAWN_EGG = REGISTRY.register("kuudere_senpai_spawn_egg", () -> new SpawnEggItem(SpawnEggItem.SpawnTypes.SENPAI, Deres.KUUDERE));
     public static final RegistryObject<Item> MOE_DIE = REGISTRY.register("moe_die", MoeDieItem::new);
+    public static final RegistryObject<Item> MUSIC_DISC_POMP_POMF = REGISTRY.register("music_disc_pomf_pomf", () -> new MusicDiscItem(14, () -> MoeSounds.MUSIC_DISC_POMF_POMF.get(), new Item.Properties().maxStackSize(1).group(MoeItems.Group.INSTANCE).rarity(Rarity.EPIC)));
     public static final RegistryObject<Item> ONIGIRI = REGISTRY.register("onigiri", OnigiriItem::new);
     public static final RegistryObject<Item> PINK_BOW = REGISTRY.register("pink_bow", PinkBowItem::new);
     public static final RegistryObject<Item> TSUNDERE_MOE_SPAWN_EGG = REGISTRY.register("tsundere_moe_spawn_egg", () -> new SpawnEggItem(SpawnEggItem.SpawnTypes.MOE, Deres.TSUNDERE));
