@@ -328,5 +328,23 @@
     "subtitle": "subtitle.senpai.yes",
     "sounds": [
     ]
+  },
+  "music_disc.pomf_pomf": {
+    "category": "record",
+    "stream": true,
+    "sounds": [
+      "moeblocks:record/pomf_pomf"
+    ]
+  },
+  "item.yearbook.sign": {
+    "category": "player",
+    "subtitle": "subtitle.yearbook.sign",
+    "sounds": [
+      "moeblocks:item/yearbook/sign1",
+      "moeblocks:item/yearbook/sign2",
+      "moeblocks:item/yearbook/sign3",
+      "moeblocks:item/yearbook/sign4",
+      "moeblocks:item/yearbook/sign5"
+    ]
   }
 }

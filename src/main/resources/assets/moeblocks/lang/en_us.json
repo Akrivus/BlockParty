@@ -1,7 +1,10 @@
 {
   "command.moeblocks.moe.following.no": "%1$s is no longer following you",
   "command.moeblocks.moe.following.yes": "%1$s is now following you",
-  "command.moeblocks.spawn_egg.failed": "%1$s is not a moe-able block",
+  "command.moeblocks.spawn_egg.fail": "%1$s is not a moe-able block",
+  "command.moeblocks.yearbook.fail": "Yearbook full, please create another yearbook",
+  "command.moeblocks.yearbook.pass": "Yearbook empty, right click a Moe to add them",
+  "command.moeblocks.yearbook.success": "Yearbook signed, right click again to view",
   "death.attack.yandere": "%1$s lost their laifu to %2$s's knaifu",
   "death.attack.vore": "%1$s was eaten by %2$s",
   "entity.moeblocks.generic": "%1$s-chan",
@@ -230,6 +233,8 @@
   "item.moeblocks.kuudere_moe_spawn_egg": "Spawn Kuudere",
   "item.moeblocks.kuudere_senpai_spawn_egg": "Spawn Fukami-senpai",
   "item.moeblocks.moe_die": "Moe Die",
+  "item.moeblocks.music_disc_pomf_pomf": "Music Disc",
+  "item.moeblocks.music_disc_pomf_pomf.desc": "Nyanners - POMFPOMFPOMF =3",
   "item.moeblocks.onigiri": "Onigiri",
   "item.moeblocks.pink_bow": "Pink Bow",
   "item.moeblocks.tsundere_moe_spawn_egg": "Spawn Tsundere",
@@ -237,6 +242,9 @@
   "item.moeblocks.yandere_moe_spawn_egg": "Spawn Yandere",
   "item.moeblocks.yandere_senpai_spawn_egg": "Spawn Kurama-senpai",
   "item.moeblocks.yearbook": "Yearbook",
+  "item.moeblocks.yearbook.amount": "%1$d pages",
+  "item.moeblocks.yearbook.author": "Class of %1$s",
+  "item.moeblocks.yearbook.edition": "Book %1$s",
   "itemGroup.moeblocks": "Moe Blocks",
   "subtitle.moe.attack": "Moe fights",
   "subtitle.moe.bell.step": "Bell-chan jingles",
@@ -286,5 +294,6 @@
   "subtitle.senpai.no": "Senpai says 'iie'",
   "subtitle.senpai.sing": "Senpai sings",
   "subtitle.senpai.thank_you": "Senpai says 'arigato'",
-  "subtitle.senpai.yes": "Senpai says 'hai'"
+  "subtitle.senpai.yes": "Senpai says 'hai'",
+  "subtitle.yearbook.sign": "Yearbook being signed"
 }

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "###",
+    " X ",
+    " $ "
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:pink_dye"
+    },
+    "X": {
+      "item": "minecraft:book"
+    },
+    "$": {
+      "item": "minecraft:gold_ingot"
+    }
+  },
+  "result": {
+    "item": "moeblocks:yearbook"
+  }
+}
