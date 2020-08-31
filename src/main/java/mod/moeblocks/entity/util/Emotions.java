@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.function.Supplier;
 
 public enum Emotions {
-    ANGRY(AngryEmotion::new), BEGGING(BeggingEmotion::new), CONFUSED(ConfusedEmotion::new), CRYING(CryingEmotion::new), MISCHIEVOUS(MischievousEmotion::new), EMBARRASSED(EmbarrassedEmotion::new), HAPPY(HappyEmotion::new), NORMAL(NormalEmotion::new), PAINED(PainedEmotion::new), PSYCHOTIC(PsychoticEmotion::new), SCARED(ScaredEmotion::new), SMITTEN(SmittenEmotion::new), TIRED(TiredEmotion::new);
+    ANGRY(AngryEmotion::new), BEGGING(BeggingEmotion::new), CONFUSED(ConfusedEmotion::new), CRYING(CryingEmotion::new), DEAD(AbstractEmotion::new), MISCHIEVOUS(MischievousEmotion::new), EMBARRASSED(EmbarrassedEmotion::new), HAPPY(HappyEmotion::new), NORMAL(NormalEmotion::new), PAINED(PainedEmotion::new), PSYCHOTIC(PsychoticEmotion::new), SCARED(ScaredEmotion::new), SMITTEN(SmittenEmotion::new), TIRED(TiredEmotion::new);
 
     private final Supplier<? extends AbstractEmotion> emotion;
 
