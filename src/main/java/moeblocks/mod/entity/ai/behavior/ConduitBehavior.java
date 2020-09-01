@@ -4,6 +4,11 @@ import moeblocks.mod.entity.util.Behaviors;
 
 public class ConduitBehavior extends BasicBehavior {
     @Override
+    public float getBlockVolume() {
+        return 1.0F;
+    }
+
+    @Override
     public boolean isGlowing() {
         return true;
     }
