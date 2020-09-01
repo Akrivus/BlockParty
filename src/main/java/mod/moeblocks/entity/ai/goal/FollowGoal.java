@@ -1,6 +1,7 @@
 package mod.moeblocks.entity.ai.goal;
 
 import mod.moeblocks.entity.StateEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 
@@ -44,5 +45,16 @@ public class FollowGoal extends Goal {
     public void resetTask() {
         this.entity.getNavigator().clearPath();
         this.entity.setSprinting(false);
+    }
+
+    @Override
+    public void tick() {
+        LivingEntity target = this.entity.getFollowTarget();
+        if (target.isPassenger()) {
+            Entity steed = target.getRidingEntity();
+            this.entity.startRiding(steed);
+        } else if (this.entity.isPassenger()) {
+            this.entity.dismount();
+        }
     }
 }

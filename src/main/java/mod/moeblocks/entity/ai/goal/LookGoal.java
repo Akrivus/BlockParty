@@ -44,6 +44,8 @@ public class LookGoal extends Goal {
         if (!this.entity.canSee(this.target)) {
             this.entity.getNavigator().tryMoveToEntityLiving(this.target, 0.5D);
             this.entity.setSneaking(true);
+        } else {
+            this.entity.setSneaking(false);
         }
     }
 }

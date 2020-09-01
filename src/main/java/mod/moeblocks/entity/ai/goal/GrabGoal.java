@@ -59,6 +59,7 @@ public class GrabGoal extends Goal {
     public void tick() {
         if (this.entity.getDistance(this.stack) < 1.0F && this.entity.tryEquipItem(this.stack.getItem())) {
             this.entity.onItemPickup(this.stack, this.stack.getItem().getCount());
+            this.entity.setSneaking(false);
             this.stack.remove();
         }
     }

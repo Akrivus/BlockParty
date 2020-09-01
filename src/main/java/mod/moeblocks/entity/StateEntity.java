@@ -420,7 +420,8 @@ public class StateEntity extends CreatureEntity {
         LivingEntity target = (leader == null || leader.equals(this.getFollowTarget())) ? null : leader;
         this.setFollowTarget(target);
         if (leader instanceof PlayerEntity) {
-            this.say((PlayerEntity) leader, String.format("command.moeblocks.moe.following.%s", this.isWaiting() ? "no" : "yes"), this.getPlainName());
+            String decision = this.getFollowTarget() == null ? "no" : "yes";
+            this.say((PlayerEntity) leader, String.format("command.moeblocks.moe.following.%s", decision), this.getPlainName());
         }
     }
 
@@ -610,7 +611,7 @@ public class StateEntity extends CreatureEntity {
     }
 
     public boolean isWaiting() {
-        return this.getFollowTarget() == null;
+        return !this.canBeTarget(this.getFollowTarget()) || this.isCalm();
     }
 
     public boolean isSitting() {
@@ -669,8 +670,11 @@ public class StateEntity extends CreatureEntity {
     }
 
     public boolean canSee(Entity entity) {
-        this.getLookController().setLookPositionWithEntity(entity, 30.0F, this.getVerticalFaceSpeed());
-        return this.getEntitySenses().canSee(entity);
+        if (this.canBeTarget(entity)) {
+            this.getLookController().setLookPositionWithEntity(entity, 30.0F, this.getVerticalFaceSpeed());
+            return this.getEntitySenses().canSee(entity);
+        }
+        return false;
     }
 
     @Override
@@ -736,5 +740,13 @@ public class StateEntity extends CreatureEntity {
 
     public int getBaseAge() {
         return 14;
+    }
+
+    public boolean isFighting() {
+        return this.canBeTarget(this.getAttackTarget()) || this.canBeTarget(this.getRevengeTarget()) || this.canBeTarget(this.getAvoidTarget());
+    }
+
+    public boolean isCalm() {
+        return !this.isFighting();
     }
 }

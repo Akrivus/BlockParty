@@ -7,6 +7,7 @@ import mod.moeblocks.init.MoeEntities;
 import mod.moeblocks.init.MoeItems;
 import mod.moeblocks.init.MoeTags;
 import mod.moeblocks.util.PlayerUtils;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,6 +15,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
@@ -45,7 +47,9 @@ public class SpawnEggItem extends Item {
                         moe.setExtraBlockData(world.getTileEntity(block).getTileData());
                     }
                 } else {
-                    return PlayerUtils.showResult(player, entity, "command.moeblocks.spawn_egg", ActionResultType.FAIL);
+                    String name = state.getBlock().getTranslatedName().getString();
+                    player.sendStatusMessage(new TranslationTextComponent("command.moeblocks.spawn_egg.fail", name), true);
+                    return ActionResultType.FAIL;
                 }
             }
             if (world.addEntity(entity)) {

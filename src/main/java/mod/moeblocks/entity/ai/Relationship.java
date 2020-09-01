@@ -49,7 +49,7 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
     }
 
     public float getLoyalty() {
-        return this.getTrust() - this.entity.getStressStats().getStress() + this.getAffection();
+        return this.getTrust() - (this.entity.getStressStats().getStress() * 0.7F) + this.getAffection();
     }
 
     public float getAffection() {
