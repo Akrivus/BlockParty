@@ -37,6 +37,7 @@ public enum Behaviors {
     MISSING(BasicBehavior::new),
     MYCELIUM(MyceliumBehavior::new, Blocks.MYCELIUM),
     NETHER_BRICKS(NetherBricksBehavior::new, Blocks.NETHER_BRICK_FENCE, Blocks.NETHER_BRICK_SLAB, Blocks.NETHER_BRICK_STAIRS, Blocks.NETHER_BRICK_WALL, Blocks.NETHER_BRICKS, Blocks.RED_NETHER_BRICK_SLAB, Blocks.RED_NETHER_BRICK_STAIRS, Blocks.RED_NETHER_BRICK_WALL, Blocks.RED_NETHER_BRICKS),
+    NETHERITE(NetheriteBehavior::new, Blocks.NETHERITE_BLOCK),
     NOTE_BLOCK(NoteBlockBehavior::new, Blocks.NOTE_BLOCK),
     NYLIUM(NyliumBehavior::new, Blocks.CRIMSON_NYLIUM, Blocks.WARPED_NYLIUM),
     OBSERVER(ObserverBehavior::new, Blocks.OBSERVER),
