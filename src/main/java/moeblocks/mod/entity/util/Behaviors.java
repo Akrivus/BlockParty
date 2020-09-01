@@ -18,6 +18,7 @@ public enum Behaviors {
     BRICKS(BricksBehavior::new, Blocks.BRICKS),
     CACTUS(CactusBehavior::new, Blocks.CACTUS),
     CAKE(CakeBehavior::new, Blocks.CAKE),
+    CAMPFIRE(CampfireBehavior::new, Blocks.CAMPFIRE, Blocks.SOUL_CAMPFIRE),
     CARPET(CarpetBehavior::new, Blocks.BLACK_CARPET, Blocks.BLUE_CARPET, Blocks.BROWN_CARPET, Blocks.CYAN_CARPET, Blocks.GRAY_CARPET, Blocks.GREEN_CARPET, Blocks.LIGHT_BLUE_CARPET, Blocks.LIGHT_GRAY_CARPET, Blocks.LIME_CARPET, Blocks.MAGENTA_CARPET, Blocks.ORANGE_CARPET, Blocks.PINK_CARPET, Blocks.PURPLE_CARPET, Blocks.RED_CARPET, Blocks.WHITE_CARPET, Blocks.YELLOW_CARPET),
     COARSE_DIRT(CoarseDirtBehavior::new, Blocks.COARSE_DIRT),
     CONDUIT(ConduitBehavior::new, Blocks.CONDUIT),
