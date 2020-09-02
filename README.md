@@ -23,4 +23,4 @@ The personalities you can achieve with each dice roll are as follows:
 ## Important Links
 * Report issues on [on GitHub.](https://github.com/Akrivus/MoeBlocks/issues)
 * View our [Trello board.](https://trello.com/b/3G3TjQyi/moeblocks)
-* Join our [Discord.](https://www.youtube.com/watch?v=kffacxfA7G4)
+* Join our [Discord.](https://discord.gg/vYvScHx)
