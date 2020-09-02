@@ -1,6 +1,6 @@
 package moeblocks.mod.entity.ai.triggers;
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import moeblocks.mod.entity.util.Deres;
 import moeblocks.mod.entity.util.Emotions;
 
@@ -13,7 +13,7 @@ public class DereSpecificTrigger extends AbstractTrigger {
     }
 
     @Override
-    public boolean canTrigger(StateEntity entity) {
+    public boolean canTrigger(StudentEntity entity) {
         return super.canTrigger(entity) && entity.getDere().matches(this.deres);
     }
 
@@ -28,7 +28,7 @@ public class DereSpecificTrigger extends AbstractTrigger {
         }
 
         @Override
-        public void trigger(StateEntity entity) {
+        public void trigger(StudentEntity entity) {
             entity.setEmotion(this.emotion, this.timeout);
         }
     }

@@ -1,7 +1,7 @@
 package moeblocks.mod.entity.ai.goal;
 
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import moeblocks.mod.init.MoeTags;
 import net.minecraft.block.*;
 import net.minecraft.entity.ai.goal.Goal;
@@ -11,14 +11,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class OpenDoorGoal extends Goal {
-    private final StateEntity entity;
+    private final StudentEntity entity;
     private BlockPos pos = BlockPos.ZERO;
     private boolean hasStoppedDoorInteraction;
     private float x;
     private float z;
     private int timeUntilClosed;
 
-    public OpenDoorGoal(StateEntity entity) {
+    public OpenDoorGoal(StudentEntity entity) {
         this.entity = entity;
     }
 

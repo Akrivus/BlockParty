@@ -3,7 +3,7 @@ package moeblocks.mod.client.screen;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moeblocks.mod.MoeMod;
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import moeblocks.mod.item.YearbookItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
@@ -36,7 +36,7 @@ public class YearbookScreen extends Screen {
     private String pos;
     private String[] stats = new String[5];
     private String[] lines = new String[3];
-    private StateEntity entity;
+    private StudentEntity entity;
     private UUID player;
     private int page;
 

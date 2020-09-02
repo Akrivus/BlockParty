@@ -1,15 +1,15 @@
 package moeblocks.mod.entity.ai.goal.engage;
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import moeblocks.mod.entity.ai.goal.EngageGoal;
 
-public class SocializeGoal extends EngageGoal<StateEntity> {
-    public SocializeGoal(StateEntity entity) {
-        super(entity, StateEntity.class);
+public class SocializeGoal extends EngageGoal<StudentEntity> {
+    public SocializeGoal(StudentEntity entity) {
+        super(entity, StudentEntity.class);
     }
 
     @Override
-    public boolean canShareWith(StateEntity entity) {
+    public boolean canShareWith(StudentEntity entity) {
         return this.entity.isCompatible(entity);
     }
 

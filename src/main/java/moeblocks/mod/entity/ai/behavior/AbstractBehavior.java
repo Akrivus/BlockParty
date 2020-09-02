@@ -1,6 +1,6 @@
 package moeblocks.mod.entity.ai.behavior;
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import moeblocks.mod.entity.ai.AbstractMoeState;
 import moeblocks.mod.entity.ai.IMachineState;
 import moeblocks.mod.util.MoeBlockAliases;
@@ -22,7 +22,7 @@ import net.minecraft.world.IWorld;
 
 public class AbstractBehavior extends AbstractMoeState {
     @Override
-    public void start(StateEntity entity) {
+    public void start(StudentEntity entity) {
         super.start(entity);
         if (this.moe.isLocal()) {
             float priority = this.moe.isReallyImmuneToFire() ? 0.0F : -1.0F;

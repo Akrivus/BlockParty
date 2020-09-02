@@ -1,20 +1,23 @@
 package moeblocks.mod.entity.ai.goal;
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 
+import java.util.EnumSet;
 import java.util.List;
 
 public class EngageGoal<T extends LivingEntity> extends Goal {
-    protected final StateEntity entity;
+    protected final StudentEntity entity;
     private final Class<T> type;
     protected T target;
     protected boolean engaged;
     private int timeUntilEngaging;
     private int timeUntilEngaged;
 
-    public EngageGoal(StateEntity entity, Class<T> type) {
+    public EngageGoal(StudentEntity entity, Class<T> type) {
+        super();
+        this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE));
         this.entity = entity;
         this.type = type;
     }

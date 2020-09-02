@@ -1,18 +1,18 @@
 package moeblocks.mod.entity.ai.goal.engage;
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import moeblocks.mod.entity.ai.goal.EngageGoal;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 
 public class ShareGoals {
-    public static class Moe extends EngageGoal<StateEntity> {
-        public Moe(StateEntity entity) {
-            super(entity, StateEntity.class);
+    public static class Moe extends EngageGoal<StudentEntity> {
+        public Moe(StudentEntity entity) {
+            super(entity, StudentEntity.class);
         }
 
         @Override
-        public boolean canShareWith(StateEntity entity) {
+        public boolean canShareWith(StudentEntity entity) {
             return this.entity.getFoodStats().isSatiated() && this.entity.getRelationships().get(entity).canDoChoresFor() && this.entity.getHeldItem(Hand.OFF_HAND).isFood() && entity.getFoodStats().isHungry();
         }
 
@@ -34,7 +34,7 @@ public class ShareGoals {
     }
 
     public static class Player extends EngageGoal<PlayerEntity> {
-        public Player(StateEntity entity) {
+        public Player(StudentEntity entity) {
             super(entity, PlayerEntity.class);
         }
 

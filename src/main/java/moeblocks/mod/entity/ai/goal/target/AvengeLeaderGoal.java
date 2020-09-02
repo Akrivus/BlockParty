@@ -1,13 +1,13 @@
 package moeblocks.mod.entity.ai.goal.target;
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import moeblocks.mod.entity.ai.Relationship;
 import moeblocks.mod.entity.ai.goal.RevengeGoal;
 import net.minecraft.entity.LivingEntity;
 
 public class AvengeLeaderGoal extends RevengeGoal {
 
-    public AvengeLeaderGoal(StateEntity entity) {
+    public AvengeLeaderGoal(StudentEntity entity) {
         super(entity);
     }
 

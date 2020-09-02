@@ -5,7 +5,7 @@ import moeblocks.mod.client.model.MoeModel;
 import moeblocks.mod.client.model.SenpaiModel;
 import moeblocks.mod.entity.MoeEntity;
 import moeblocks.mod.entity.SenpaiEntity;
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 
 public class Animation {
 
@@ -21,7 +21,7 @@ public class Animation {
 
     }
 
-    public void tick(StateEntity entity) {
+    public void tick(StudentEntity entity) {
 
     }
 

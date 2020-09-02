@@ -1,6 +1,6 @@
 package moeblocks.mod.entity.ai.goal;
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.ai.goal.Goal;
@@ -10,10 +10,10 @@ import net.minecraft.util.math.vector.Vector3d;
 import java.util.EnumSet;
 
 public class AvoidGoal extends Goal {
-    private final StateEntity entity;
+    private final StudentEntity entity;
     private Path path;
 
-    public AvoidGoal(StateEntity entity) {
+    public AvoidGoal(StudentEntity entity) {
         super();
         this.setMutexFlags(EnumSet.of(Flag.MOVE));
         this.entity = entity;

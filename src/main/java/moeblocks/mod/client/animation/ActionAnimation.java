@@ -1,7 +1,7 @@
 package moeblocks.mod.client.animation;
 
 import moeblocks.mod.client.Animations;
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 
 public abstract class ActionAnimation extends Animation {
     protected int timeUntilComplete;
@@ -19,14 +19,14 @@ public abstract class ActionAnimation extends Animation {
     }
 
     @Override
-    public void tick(StateEntity entity) {
+    public void tick(StudentEntity entity) {
         if (--this.timeUntilComplete < 0) {
             entity.setAnimation(Animations.DEFAULT);
             this.onComplete(entity);
         }
     }
 
-    public void onComplete(StateEntity entity) {
+    public void onComplete(StudentEntity entity) {
 
     }
 }

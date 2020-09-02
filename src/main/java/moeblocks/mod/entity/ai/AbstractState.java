@@ -1,13 +1,13 @@
 package moeblocks.mod.entity.ai;
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import net.minecraft.entity.LivingEntity;
 
 public abstract class AbstractState implements IMachineState {
-    protected StateEntity entity;
+    protected StudentEntity entity;
 
     @Override
-    public void start(StateEntity entity) {
+    public void start(StudentEntity entity) {
         this.entity = entity;
         this.start();
     }
@@ -29,7 +29,7 @@ public abstract class AbstractState implements IMachineState {
         return false;
     }
 
-    public void setStateEntity(StateEntity entity) {
+    public void setStateEntity(StudentEntity entity) {
         this.entity = entity;
     }
 

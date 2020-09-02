@@ -1,6 +1,6 @@
 package moeblocks.mod.entity.ai.goal;
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import moeblocks.mod.entity.util.Emotions;
 import moeblocks.mod.util.DistanceCheck;
 import net.minecraft.entity.ai.goal.Goal;
@@ -11,14 +11,14 @@ import java.util.EnumSet;
 import java.util.List;
 
 public class GrabGoal extends Goal {
-    private final StateEntity entity;
+    private final StudentEntity entity;
     private ItemEntity stack;
     private Path path;
     private int timeUntilGiveUp;
 
-    public GrabGoal(StateEntity entity) {
+    public GrabGoal(StudentEntity entity) {
         super();
-        this.setMutexFlags(EnumSet.of(Flag.MOVE));
+        this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE));
         this.entity = entity;
     }
 
@@ -59,7 +59,6 @@ public class GrabGoal extends Goal {
     public void tick() {
         if (this.entity.getDistance(this.stack) < 1.0F && this.entity.tryEquipItem(this.stack.getItem())) {
             this.entity.onItemPickup(this.stack, this.stack.getItem().getCount());
-            this.entity.setSneaking(false);
             this.stack.remove();
         }
     }

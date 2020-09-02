@@ -1,6 +1,6 @@
 package moeblocks.mod.entity.ai.triggers;
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 
 public class AbstractTrigger implements Comparable<AbstractTrigger> {
     public final int priority;
@@ -9,7 +9,7 @@ public class AbstractTrigger implements Comparable<AbstractTrigger> {
         this.priority = priority;
     }
 
-    public boolean fire(StateEntity entity) {
+    public boolean fire(StudentEntity entity) {
         if (entity.getEmotionalTimeout() < 0 && this.canTrigger(entity)) {
             this.trigger(entity);
             return true;
@@ -17,15 +17,15 @@ public class AbstractTrigger implements Comparable<AbstractTrigger> {
         return false;
     }
 
-    public boolean canTrigger(StateEntity entity) {
+    public boolean canTrigger(StudentEntity entity) {
         return this.isTriggered(entity);
     }
 
-    public boolean isTriggered(StateEntity entity) {
+    public boolean isTriggered(StudentEntity entity) {
         return false;
     }
 
-    public void trigger(StateEntity entity) {
+    public void trigger(StudentEntity entity) {
 
     }
 

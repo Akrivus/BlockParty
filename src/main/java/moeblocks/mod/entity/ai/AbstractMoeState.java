@@ -1,13 +1,13 @@
 package moeblocks.mod.entity.ai;
 
 import moeblocks.mod.entity.MoeEntity;
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 
 public abstract class AbstractMoeState extends AbstractState {
     protected MoeEntity moe;
 
     @Override
-    public void start(StateEntity entity) {
+    public void start(StudentEntity entity) {
         this.moe = (MoeEntity) entity;
         this.start();
     }

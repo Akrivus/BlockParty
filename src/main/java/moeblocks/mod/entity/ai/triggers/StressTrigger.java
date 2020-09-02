@@ -1,6 +1,6 @@
 package moeblocks.mod.entity.ai.triggers;
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import moeblocks.mod.entity.util.Deres;
 import moeblocks.mod.entity.util.Emotions;
 
@@ -15,7 +15,7 @@ public class StressTrigger extends DereSpecificTrigger {
     }
 
     @Override
-    public boolean isTriggered(StateEntity entity) {
+    public boolean isTriggered(StudentEntity entity) {
         float stress = entity.getStressStats().getStress();
         return this.min < stress && stress < this.max;
     }
@@ -33,13 +33,13 @@ public class StressTrigger extends DereSpecificTrigger {
         }
 
         @Override
-        public boolean isTriggered(StateEntity entity) {
+        public boolean isTriggered(StudentEntity entity) {
             boolean defending = !this.defensive || entity.canBeTarget(entity.getRevengeTarget()) && this.defensive;
             return super.isTriggered(entity) && defending;
         }
 
         @Override
-        public void trigger(StateEntity entity) {
+        public void trigger(StudentEntity entity) {
             entity.setEmotion(this.emotion, this.timeout);
         }
     }

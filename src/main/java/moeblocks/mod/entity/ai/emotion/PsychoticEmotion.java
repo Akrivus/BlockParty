@@ -1,6 +1,6 @@
 package moeblocks.mod.entity.ai.emotion;
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import moeblocks.mod.entity.ai.goal.RevengeGoal;
 import moeblocks.mod.entity.util.Emotions;
 import moeblocks.mod.entity.util.VoiceLines;
@@ -55,7 +55,7 @@ public class PsychoticEmotion extends AbstractEmotion {
 
     static class MurderGoal extends RevengeGoal {
 
-        public MurderGoal(StateEntity entity) {
+        public MurderGoal(StudentEntity entity) {
             super(entity);
         }
 

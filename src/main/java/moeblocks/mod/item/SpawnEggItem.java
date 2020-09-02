@@ -1,7 +1,7 @@
 package moeblocks.mod.item;
 
 import moeblocks.mod.entity.MoeEntity;
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import moeblocks.mod.entity.util.Deres;
 import moeblocks.mod.init.MoeEntities;
 import moeblocks.mod.init.MoeItems;
@@ -33,7 +33,7 @@ public class SpawnEggItem extends Item {
         World world = context.getWorld();
         if (!world.isRemote()) {
             BlockPos pos = context.getPos().offset(context.getFace());
-            StateEntity entity = this.type.get(world);
+            StudentEntity entity = this.type.get(world);
             entity.setPositionAndRotation(pos.getX() + 0.5F, pos.getY(), pos.getZ() + 0.5F, -player.rotationYaw, -player.rotationPitch);
             if (entity instanceof MoeEntity) {
                 BlockPos block = context.getPos();
@@ -64,7 +64,7 @@ public class SpawnEggItem extends Item {
     public enum SpawnTypes {
         MOE, SENPAI;
 
-        public StateEntity get(World world) {
+        public StudentEntity get(World world) {
             switch (this) {
             case SENPAI:
                 return MoeEntities.SENPAI.get().create(world);

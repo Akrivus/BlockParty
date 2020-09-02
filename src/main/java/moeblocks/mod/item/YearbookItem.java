@@ -2,7 +2,7 @@ package moeblocks.mod.item;
 
 import moeblocks.mod.entity.MoeEntity;
 import moeblocks.mod.entity.SenpaiEntity;
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import moeblocks.mod.entity.data.CraftingData;
 import moeblocks.mod.init.MoeEntities;
 import moeblocks.mod.init.MoeItems;
@@ -70,10 +70,10 @@ public class YearbookItem extends Item {
         }
     }
 
-    public static StateEntity getPage(World world, ItemStack stack, int page) {
+    public static StudentEntity getPage(World world, ItemStack stack, int page) {
         CompoundNBT stem = getYearbookInfo(stack);
         CompoundNBT info = (CompoundNBT) stem.get(stem.keySet().toArray(new String[0])[page]);
-        StateEntity entity = info.contains("BlockData") ? new MoeEntity(MoeEntities.MOE.get(), world) : new SenpaiEntity(MoeEntities.SENPAI.get(), world);
+        StudentEntity entity = info.contains("BlockData") ? new MoeEntity(MoeEntities.MOE.get(), world) : new SenpaiEntity(MoeEntities.SENPAI.get(), world);
         entity.read(info);
         return entity;
     }
@@ -103,8 +103,8 @@ public class YearbookItem extends Item {
 
     @Override
     public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity target, Hand hand) {
-        if (target.world instanceof ServerWorld && target instanceof StateEntity) {
-            StateEntity entity = (StateEntity) target;
+        if (target.world instanceof ServerWorld && target instanceof StudentEntity) {
+            StudentEntity entity = (StudentEntity) target;
             updateYearbookInfo(stack, entity.world);
             int page = getPage(stack, entity);
             if (page < 0) {
@@ -127,18 +127,18 @@ public class YearbookItem extends Item {
             ServerWorld server = (ServerWorld) world;
             Iterator<String> it = stem.keySet().iterator();
             while (it.hasNext()) {
-                setPage(stack, (StateEntity) server.getEntityByUuid(UUID.fromString(it.next())));
+                setPage(stack, (StudentEntity) server.getEntityByUuid(UUID.fromString(it.next())));
             }
         }
     }
 
-    public static void setPage(ItemStack stack, StateEntity entity) {
+    public static void setPage(ItemStack stack, StudentEntity entity) {
         CompoundNBT stem = getYearbookInfo(stack);
         stem.put(entity.getUniqueID().toString(), entity.writeWithoutTypeId(new CompoundNBT()));
         setYearbookInfo(stack, stem);
     }
 
-    public static int getPage(ItemStack stack, StateEntity entity) {
+    public static int getPage(ItemStack stack, StudentEntity entity) {
         CompoundNBT stem = getYearbookInfo(stack);
         String[] keys = stem.keySet().toArray(new String[0]);
         for (int i = 0; i < keys.length; ++i) {

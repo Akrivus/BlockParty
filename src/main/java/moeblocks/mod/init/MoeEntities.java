@@ -7,7 +7,7 @@ import moeblocks.mod.client.render.SenpaiRenderer;
 import moeblocks.mod.entity.MoeDieEntity;
 import moeblocks.mod.entity.MoeEntity;
 import moeblocks.mod.entity.SenpaiEntity;
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
@@ -30,7 +30,7 @@ public class MoeEntities {
     }
 
     public static void registerAttributes() {
-        GlobalEntityTypeAttributes.put(SENPAI.get(), StateEntity.setCustomAttributes());
-        GlobalEntityTypeAttributes.put(MOE.get(), StateEntity.setCustomAttributes());
+        GlobalEntityTypeAttributes.put(SENPAI.get(), StudentEntity.setCustomAttributes());
+        GlobalEntityTypeAttributes.put(MOE.get(), StudentEntity.setCustomAttributes());
     }
 }

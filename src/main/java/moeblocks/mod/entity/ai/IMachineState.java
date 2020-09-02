@@ -1,6 +1,6 @@
 package moeblocks.mod.entity.ai;
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -10,7 +10,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.world.IWorld;
 
 public interface IMachineState {
-    void start(StateEntity entity);
+    void start(StudentEntity entity);
 
     IMachineState stop(IMachineState swap);
 

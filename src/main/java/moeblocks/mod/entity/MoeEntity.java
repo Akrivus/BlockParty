@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Optional;
 
-public class MoeEntity extends StateEntity {
+public class MoeEntity extends StudentEntity {
     public static final DataParameter<Integer> BEHAVIOR = EntityDataManager.createKey(MoeEntity.class, DataSerializers.VARINT);
     public static final DataParameter<Optional<BlockState>> BLOCK_STATE = EntityDataManager.createKey(MoeEntity.class, DataSerializers.OPTIONAL_BLOCK_STATE);
     public static final DataParameter<Float> SCALE = EntityDataManager.createKey(MoeEntity.class, DataSerializers.FLOAT);

@@ -6,7 +6,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
-public class SenpaiEntity extends StateEntity {
+public class SenpaiEntity extends StudentEntity {
     public SenpaiEntity(EntityType<? extends CreatureEntity> type, World world) {
         super(type, world);
     }

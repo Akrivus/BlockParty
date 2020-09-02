@@ -1,6 +1,6 @@
 package moeblocks.mod.entity.ai.goal.target;
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import moeblocks.mod.entity.ai.Relationship;
 import moeblocks.mod.entity.ai.goal.RevengeGoal;
 import moeblocks.mod.util.DistanceCheck;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class DefendLeaderGoal extends RevengeGoal {
 
-    public DefendLeaderGoal(StateEntity entity) {
+    public DefendLeaderGoal(StudentEntity entity) {
         super(entity);
     }
 

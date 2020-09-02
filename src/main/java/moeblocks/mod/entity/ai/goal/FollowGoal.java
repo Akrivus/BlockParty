@@ -1,6 +1,6 @@
 package moeblocks.mod.entity.ai.goal;
 
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
@@ -8,12 +8,12 @@ import net.minecraft.entity.ai.goal.Goal;
 import java.util.EnumSet;
 
 public class FollowGoal extends Goal {
-    private final StateEntity entity;
+    private final StudentEntity entity;
     private int timeUntilMoveIn;
 
-    public FollowGoal(StateEntity entity) {
+    public FollowGoal(StudentEntity entity) {
         super();
-        this.setMutexFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE));
         this.entity = entity;
     }
 

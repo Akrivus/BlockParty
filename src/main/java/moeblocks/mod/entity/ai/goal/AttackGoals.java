@@ -1,7 +1,7 @@
 package moeblocks.mod.entity.ai.goal;
 
 import moeblocks.mod.client.Animations;
-import moeblocks.mod.entity.StateEntity;
+import moeblocks.mod.entity.StudentEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.util.Hand;
@@ -10,12 +10,12 @@ import java.util.EnumSet;
 
 public class AttackGoals {
     public static class Melee extends Goal {
-        private final StateEntity entity;
+        private final StudentEntity entity;
         private int timeUntilAttacking;
 
-        public Melee(StateEntity entity) {
+        public Melee(StudentEntity entity) {
             super();
-            this.setMutexFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+            this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE));
             this.entity = entity;
         }
 
@@ -59,13 +59,13 @@ public class AttackGoals {
     }
 
     public static class Ranged extends Goal {
-        private final StateEntity entity;
+        private final StudentEntity entity;
         private int timeUntilAttacking;
         private int timeUntilSeen;
 
-        public Ranged(StateEntity entity) {
+        public Ranged(StudentEntity entity) {
             super();
-            this.setMutexFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+            this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE));
             this.entity = entity;
         }
 

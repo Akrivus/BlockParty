@@ -51,13 +51,13 @@ import java.util.Iterator;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public class StateEntity extends CreatureEntity {
-    public static final DataParameter<Integer> ANIMATION = EntityDataManager.createKey(StateEntity.class, DataSerializers.VARINT);
-    public static final DataParameter<Integer> BLOOD_TYPE = EntityDataManager.createKey(StateEntity.class, DataSerializers.VARINT);
-    public static final DataParameter<Integer> DERE = EntityDataManager.createKey(StateEntity.class, DataSerializers.VARINT);
-    public static final DataParameter<Integer> EMOTION = EntityDataManager.createKey(StateEntity.class, DataSerializers.VARINT);
-    public static final DataParameter<Boolean> EYEPATCH = EntityDataManager.createKey(StateEntity.class, DataSerializers.BOOLEAN);
-    public static final DataParameter<Boolean> SITTING = EntityDataManager.createKey(StateEntity.class, DataSerializers.BOOLEAN);
+public class StudentEntity extends CreatureEntity {
+    public static final DataParameter<Integer> ANIMATION = EntityDataManager.createKey(StudentEntity.class, DataSerializers.VARINT);
+    public static final DataParameter<Integer> BLOOD_TYPE = EntityDataManager.createKey(StudentEntity.class, DataSerializers.VARINT);
+    public static final DataParameter<Integer> DERE = EntityDataManager.createKey(StudentEntity.class, DataSerializers.VARINT);
+    public static final DataParameter<Integer> EMOTION = EntityDataManager.createKey(StudentEntity.class, DataSerializers.VARINT);
+    public static final DataParameter<Boolean> EYEPATCH = EntityDataManager.createKey(StudentEntity.class, DataSerializers.BOOLEAN);
+    public static final DataParameter<Boolean> SITTING = EntityDataManager.createKey(StudentEntity.class, DataSerializers.BOOLEAN);
     public AttackGoals.Melee attackGoal;
     protected Animation animation = new Animation();
     protected FoodStats foodStats = new FoodStats();
@@ -71,7 +71,7 @@ public class StateEntity extends CreatureEntity {
     private LivingEntity avoidTarget;
     private int avoidTimer;
 
-    protected StateEntity(EntityType<? extends CreatureEntity> type, World world) {
+    protected StudentEntity(EntityType<? extends CreatureEntity> type, World world) {
         super(type, world);
         this.setPathPriority(PathNodeType.DOOR_OPEN, 0.0F);
         this.setPathPriority(PathNodeType.DOOR_WOOD_CLOSED, 0.0F);
@@ -106,7 +106,6 @@ public class StateEntity extends CreatureEntity {
         this.goalSelector.addGoal(6, new ShareGoals.Player(this));
         this.goalSelector.addGoal(6, new SocializeGoal(this));
         this.goalSelector.addGoal(7, new WaitGoal(this));
-        this.goalSelector.addGoal(8, new LookGoal(this));
         this.registerTargets();
     }
 
@@ -535,7 +534,7 @@ public class StateEntity extends CreatureEntity {
         return this.getHeldItem(Hand.MAIN_HAND).getItem().isIn(MoeTags.WEAPONS);
     }
 
-    public boolean isCompatible(StateEntity entity) {
+    public boolean isCompatible(StudentEntity entity) {
         return BloodTypes.isCompatible(this.getBloodType(), entity.getBloodType());
     }
 
