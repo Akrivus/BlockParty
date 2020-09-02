@@ -133,9 +133,11 @@ public class YearbookItem extends Item {
     }
 
     public static void setPage(ItemStack stack, StudentEntity entity) {
-        CompoundNBT stem = getYearbookInfo(stack);
-        stem.put(entity.getUniqueID().toString(), entity.writeWithoutTypeId(new CompoundNBT()));
-        setYearbookInfo(stack, stem);
+        if (entity != null) {
+            CompoundNBT stem = getYearbookInfo(stack);
+            stem.put(entity.getUniqueID().toString(), entity.writeWithoutTypeId(new CompoundNBT()));
+            setYearbookInfo(stack, stem);
+        }
     }
 
     public static int getPage(ItemStack stack, StudentEntity entity) {
