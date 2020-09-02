@@ -14,6 +14,7 @@ public class MoeItems {
     public static final DeferredRegister<Item> REGISTRY = DeferredRegister.create(ForgeRegistries.ITEMS, MoeMod.ID);
     public static final RegistryObject<Item> BENTO_BOX = REGISTRY.register("bento_box", BentoBoxItem::new);
     public static final RegistryObject<Item> CELL_PHONE = REGISTRY.register("cell_phone", CellPhoneItem::new);
+    public static final RegistryObject<Item> CUPCAKE = REGISTRY.register("cupcake", CupcakeItem::new);
     public static final RegistryObject<Item> DANDERE_MOE_SPAWN_EGG = REGISTRY.register("dandere_moe_spawn_egg", () -> new moe.blocks.mod.item.SpawnEggItem(moe.blocks.mod.item.SpawnEggItem.SpawnTypes.MOE, Deres.DANDERE));
     public static final RegistryObject<Item> DANDERE_SENPAI_SPAWN_EGG = REGISTRY.register("dandere_senpai_spawn_egg", () -> new moe.blocks.mod.item.SpawnEggItem(moe.blocks.mod.item.SpawnEggItem.SpawnTypes.SENPAI, Deres.DANDERE));
     public static final RegistryObject<Item> DEREDERE_MOE_SPAWN_EGG = REGISTRY.register("deredere_moe_spawn_egg", () -> new moe.blocks.mod.item.SpawnEggItem(moe.blocks.mod.item.SpawnEggItem.SpawnTypes.MOE, Deres.DEREDERE));
