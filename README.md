@@ -1,12 +1,12 @@
-![Moe Blocks](./src/main/resources/moeblocks.png)
-# Moe Blocks
-Moe Blocks allows the player to create kawaii creatures known as **moes** (pronounced
+![MoeBlocks](./src/main/resources/moeblocks.png)
+# MoeBlocks
+MoeBlocks allows the player to create kawaii creatures known as **moes** (pronounced
 _mo-ays_), which act in various ways to gain the player's affection. Moes are
 created by rolling a **magical die** that forms the moe from the block it lands on.
 
 ## Instructions
-To create a Moe, you need to craft a Magical Die with the following recipe:
-![Magical Die Recipe](./src/main/resources/dice.png)
+To create a Moe, you need to craft a Moe Die with the following recipe:
+![Moe Die Recipe](./src/main/resources/dice.png)
 
 To throw the die, the player must right click with the die in hand, and it
 will fly into the air and roll until it loses momentum, creating the moe with
@@ -22,5 +22,5 @@ The personalities you can achieve with each dice roll are as follows:
 
 ## Important Links
 * Report issues on [on GitHub.](https://github.com/Akrivus/MoeBlocks/issues)
-* View our [Trello board.](https://trello.com/b/3G3TjQyi/moe-blocks)
+* View our [Trello board.](https://trello.com/b/3G3TjQyi/moeblocks)
 * Join our [Discord.](https://www.youtube.com/watch?v=kffacxfA7G4)
