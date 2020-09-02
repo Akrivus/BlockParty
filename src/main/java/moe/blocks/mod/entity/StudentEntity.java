@@ -102,15 +102,15 @@ public class StudentEntity extends CreatureEntity {
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new SwimGoal(this));
         this.goalSelector.addGoal(1, new OpenDoorGoal(this));
-        this.goalSelector.addGoal(2, new WaitGoal(this));
+        this.goalSelector.addGoal(2, this.attackGoal = new AttackGoals.Melee(this));
+        this.goalSelector.addGoal(2, new AttackGoals.Ranged(this));
+        this.goalSelector.addGoal(2, new GrabGoal(this));
         this.goalSelector.addGoal(3, new AvoidGoal(this));
-        this.goalSelector.addGoal(4, this.attackGoal = new AttackGoals.Melee(this));
-        this.goalSelector.addGoal(4, new AttackGoals.Ranged(this));
-        this.goalSelector.addGoal(5, new GrabGoal(this));
-        this.goalSelector.addGoal(6, new FollowGoal(this));
-        this.goalSelector.addGoal(7, new ShareGoals.Moe(this));
-        this.goalSelector.addGoal(7, new ShareGoals.Player(this));
-        this.goalSelector.addGoal(8, new SocializeGoal(this));
+        this.goalSelector.addGoal(4, new FollowGoal(this));
+        this.goalSelector.addGoal(6, new ShareGoals.Student(this));
+        this.goalSelector.addGoal(6, new ShareGoals.Player(this));
+        this.goalSelector.addGoal(7, new SocializeGoal(this));
+        this.goalSelector.addGoal(8, new WaitGoal(this));
         this.registerTargets();
     }
 
@@ -615,7 +615,7 @@ public class StudentEntity extends CreatureEntity {
     }
 
     public boolean isWaiting() {
-        return !this.canBeTarget(this.getFollowTarget()) || this.isCalm();
+        return !this.canBeTarget(this.getFollowTarget());
     }
 
     public boolean isSitting() {

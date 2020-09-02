@@ -43,7 +43,6 @@ public class GrabGoal extends Goal {
 
     @Override
     public void startExecuting() {
-        System.out.println(this.getClass().getName());
         this.entity.setEmotion(Emotions.MISCHIEVOUS, this.timeUntilGiveUp = 3600);
         this.entity.getNavigator().setPath(this.path, 0.5F);
         this.entity.setSneaking(true);

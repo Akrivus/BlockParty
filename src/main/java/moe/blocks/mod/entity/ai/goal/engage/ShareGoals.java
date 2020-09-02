@@ -6,8 +6,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 
 public class ShareGoals {
-    public static class Moe extends EngageGoal<StudentEntity> {
-        public Moe(StudentEntity entity) {
+    public static class Student extends EngageGoal<StudentEntity> {
+        public Student(StudentEntity entity) {
             super(entity, StudentEntity.class);
         }
 

@@ -44,7 +44,6 @@ public class OpenDoorGoal extends Goal {
 
     @Override
     public void startExecuting() {
-        System.out.println(this.getClass().getName());
         this.hasStoppedDoorInteraction = false;
         this.x = (float) ((this.pos.getX() + 0.5F) - this.entity.getPosX());
         this.z = (float) ((this.pos.getZ() + 0.5F) - this.entity.getPosZ());

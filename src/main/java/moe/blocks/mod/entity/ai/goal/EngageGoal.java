@@ -45,7 +45,6 @@ public class EngageGoal<T extends LivingEntity> extends Goal {
 
     @Override
     public void startExecuting() {
-        System.out.println(this.getClass().getName());
         this.timeUntilEngaged = this.getEngagementTime();
         this.engaged = false;
     }

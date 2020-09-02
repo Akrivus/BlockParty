@@ -26,7 +26,6 @@ public abstract class RevengeGoal extends TargetGoal {
 
     @Override
     public void startExecuting() {
-        System.out.println(this.getClass().getName());
         if (this.entity.runStates(state -> state.isArmed())) {
             this.entity.setAttackTarget(this.victim);
         } else {

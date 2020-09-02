@@ -27,15 +27,10 @@ public class WaitGoal extends Goal {
     @Override
     public boolean shouldExecute() {
         if (this.entity.isWaiting()) {
-            if (this.entity.canBeTarget(this.entity.getFollowTarget())) {
-                this.target = this.entity.getFollowTarget();
-                return true;
-            } else {
-                List<LivingEntity> victims = this.entity.world.getEntitiesWithinAABB(LivingEntity.class, this.entity.getBoundingBox().grow(8.0F, 4.0F, 8.0F));
-                victims.sort(new SorterAffection(this.entity));
-                this.target = victims.isEmpty() ? null : victims.get(0);
-                return !victims.isEmpty();
-            }
+            List<LivingEntity> victims = this.entity.world.getEntitiesWithinAABB(LivingEntity.class, this.entity.getBoundingBox().grow(8.0F, 4.0F, 8.0F));
+            victims.sort(new SorterAffection(this.entity));
+            this.target = victims.isEmpty() ? null : victims.get(0);
+            return !victims.isEmpty();
         }
         return false;
     }
@@ -45,9 +40,6 @@ public class WaitGoal extends Goal {
         if (this.entity.isWithinHomeDistanceCurrentPosition()) {
             if (this.entity.canBeTarget(this.target) && !this.entity.canSee(this.target)) {
                 this.entity.getNavigator().tryMoveToEntityLiving(this.target, 0.5D);
-                this.entity.setSneaking(true);
-            } else {
-                this.entity.setSneaking(false);
             }
         } else {
             BlockPos pos = this.entity.getHomePosition();
@@ -58,8 +50,8 @@ public class WaitGoal extends Goal {
 
     @Override
     public void tick() {
-        if (this.entity.canBeTarget(this.target) && this.entity.canSee(this.target)) {
-            this.entity.setSneaking(false);
+        if (this.entity.canBeTarget(this.target)) {
+            this.entity.canSee(this.target);
         }
     }
 }
