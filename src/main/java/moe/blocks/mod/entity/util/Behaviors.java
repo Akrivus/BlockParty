@@ -23,6 +23,7 @@ public enum Behaviors {
     CARPET(CarpetBehavior::new, Blocks.BLACK_CARPET, Blocks.BLUE_CARPET, Blocks.BROWN_CARPET, Blocks.CYAN_CARPET, Blocks.GRAY_CARPET, Blocks.GREEN_CARPET, Blocks.LIGHT_BLUE_CARPET, Blocks.LIGHT_GRAY_CARPET, Blocks.LIME_CARPET, Blocks.MAGENTA_CARPET, Blocks.ORANGE_CARPET, Blocks.PINK_CARPET, Blocks.PURPLE_CARPET, Blocks.RED_CARPET, Blocks.WHITE_CARPET, Blocks.YELLOW_CARPET),
     COARSE_DIRT(CoarseDirtBehavior::new, Blocks.COARSE_DIRT),
     CONDUIT(ConduitBehavior::new, Blocks.CONDUIT),
+    DARK_PRISMARINE(DarkPrismarineBehavior::new, Blocks.DARK_PRISMARINE),
     DEFAULT(BasicBehavior::new),
     DIRT(DirtBehavior::new, Blocks.DIRT),
     DRAGON_EGG(DragonEggBehavior::new, Blocks.DRAGON_EGG),
