@@ -48,6 +48,7 @@ public enum Behaviors {
     RESPAWN_ANCHOR(RespawnAnchorBehavior::new, Blocks.RESPAWN_ANCHOR),
     SEA_LANTERN(SeaLanternBehavior::new, Blocks.SEA_LANTERN),
     SLIME_BLOCK(SlimeBlockBehavior::new, Blocks.SLIME_BLOCK),
+    SHROOMLIGHT(ShroomlightBehavior::new, Blocks.SHROOMLIGHT),
     TNT(TNTBehavior::new, Blocks.TNT),
     WET_SPONGE(WetSpongeBehavior::new, Blocks.WET_SPONGE),
     WOOL(WoolBehavior::new, Blocks.BLACK_WOOL, Blocks.BLUE_WOOL, Blocks.BROWN_WOOL, Blocks.CYAN_WOOL, Blocks.GRAY_WOOL, Blocks.GREEN_WOOL, Blocks.LIGHT_BLUE_WOOL, Blocks.LIGHT_GRAY_WOOL, Blocks.LIME_WOOL, Blocks.MAGENTA_WOOL, Blocks.ORANGE_WOOL, Blocks.PINK_WOOL, Blocks.PURPLE_WOOL, Blocks.RED_WOOL, Blocks.WHITE_WOOL, Blocks.YELLOW_WOOL);
