@@ -1,7 +1,7 @@
 package moe.blocks.mod.entity.ai.goal.engage;
 
-import moe.blocks.mod.entity.ai.goal.EngageGoal;
 import moe.blocks.mod.entity.StudentEntity;
+import moe.blocks.mod.entity.ai.goal.EngageGoal;
 
 public class SocializeGoal extends EngageGoal<StudentEntity> {
     public SocializeGoal(StudentEntity entity) {
@@ -9,13 +9,13 @@ public class SocializeGoal extends EngageGoal<StudentEntity> {
     }
 
     @Override
-    public boolean canShareWith(StudentEntity entity) {
+    public boolean canMoveTo(StudentEntity entity) {
         return this.entity.isCompatible(entity);
     }
 
     @Override
     public void engage() {
-        this.engaged = true;
+        this.engaging = false;
     }
 
     @Override
@@ -24,7 +24,7 @@ public class SocializeGoal extends EngageGoal<StudentEntity> {
     }
 
     @Override
-    public int getEngagementTime() {
+    public int getResetDelay() {
         return 20;
     }
 }

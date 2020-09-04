@@ -2,7 +2,6 @@ package moe.blocks.mod.entity.util;
 
 import moe.blocks.mod.entity.DieEntity;
 import moe.blocks.mod.entity.ai.dere.*;
-import moe.blocks.mod.entity.ai.dere.*;
 
 import java.util.Arrays;
 import java.util.HashMap;

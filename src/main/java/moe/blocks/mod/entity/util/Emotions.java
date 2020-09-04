@@ -1,7 +1,6 @@
 package moe.blocks.mod.entity.util;
 
 import moe.blocks.mod.entity.ai.emotion.*;
-import moe.blocks.mod.entity.ai.emotion.*;
 
 import java.util.Arrays;
 import java.util.function.Supplier;

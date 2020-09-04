@@ -1,7 +1,7 @@
 package moe.blocks.mod.entity.ai.goal.engage;
 
-import moe.blocks.mod.entity.ai.goal.EngageGoal;
 import moe.blocks.mod.entity.StudentEntity;
+import moe.blocks.mod.entity.ai.goal.EngageGoal;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 
@@ -12,23 +12,23 @@ public class ShareGoals {
         }
 
         @Override
-        public boolean canShareWith(StudentEntity entity) {
+        public boolean canMoveTo(StudentEntity entity) {
             return this.entity.getFoodStats().isSatiated() && this.entity.getRelationships().get(entity).canDoChoresFor() && this.entity.getHeldItem(Hand.OFF_HAND).isFood() && entity.getFoodStats().isHungry();
         }
 
         @Override
         public void engage() {
             this.entity.entityDropItem(this.entity.getHeldItem(Hand.OFF_HAND).split(1));
-            this.engaged = true;
+            this.engaging = true;
         }
 
         @Override
         public int getEngagementInterval() {
-            return 20;
+            return 600;
         }
 
         @Override
-        public int getEngagementTime() {
+        public int getResetDelay() {
             return 100;
         }
     }
@@ -39,23 +39,23 @@ public class ShareGoals {
         }
 
         @Override
-        public boolean canShareWith(PlayerEntity entity) {
+        public boolean canMoveTo(PlayerEntity entity) {
             return this.entity.getFoodStats().isSatiated() && this.entity.getRelationships().get(entity).canDoChoresFor() && this.entity.getHeldItem(Hand.OFF_HAND).isFood() && entity.getFoodStats().needFood();
         }
 
         @Override
         public void engage() {
             this.entity.entityDropItem(this.entity.getHeldItem(Hand.OFF_HAND).split(1));
-            this.engaged = true;
+            this.engaging = true;
         }
 
         @Override
         public int getEngagementInterval() {
-            return 20;
+            return 600;
         }
 
         @Override
-        public int getEngagementTime() {
+        public int getResetDelay() {
             return 100;
         }
     }

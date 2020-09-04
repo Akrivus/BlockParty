@@ -3,8 +3,8 @@ package moe.blocks.mod.client.screen;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moe.blocks.mod.MoeMod;
-import moe.blocks.mod.item.YearbookItem;
 import moe.blocks.mod.entity.StudentEntity;
+import moe.blocks.mod.item.YearbookItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.audio.SoundHandler;
@@ -34,10 +34,10 @@ public class YearbookScreen extends Screen {
     private YearbookScreen.ChangePageButton buttonPrevPage;
     private String name;
     private String pos;
-    private String[] stats = new String[5];
-    private String[] lines = new String[3];
+    private final String[] stats = new String[5];
+    private final String[] lines = new String[3];
     private StudentEntity entity;
-    private UUID player;
+    private final UUID player;
     private int page;
 
     public YearbookScreen(ItemStack stack, UUID player) {
@@ -49,6 +49,10 @@ public class YearbookScreen extends Screen {
         this.stack = stack;
         this.player = player;
         this.page = page % this.getPageCount();
+    }
+
+    private int getPageCount() {
+        return YearbookItem.getPageCount(this.stack);
     }
 
     @Override
@@ -63,7 +67,7 @@ public class YearbookScreen extends Screen {
             this.font.drawString(stack, this.stats[x], this.width / 2 - 40 + x * 22 - this.font.getStringWidth(this.stats[x]), 105, 0);
         }
         for (int y = 0; y < this.lines.length; ++y) {
-            this.font.drawString(stack, this.lines[y], this.width / 2 - 47, 134 + 10 * y , 0);
+            this.font.drawString(stack, this.lines[y], this.width / 2 - 47, 134 + 10 * y, 0);
         }
         super.render(stack, mouseX, mouseY, partialTicks);
     }
@@ -109,7 +113,7 @@ public class YearbookScreen extends Screen {
     }
 
     public void renderEntity(int posX, int posY, float scale, float mouseX, float mouseY, LivingEntity entity) {
-        this.entity.rotationYaw = this.entity.rotationYawHead = 180.0F;
+        this.entity.rotationYaw = 0.75F * -(this.entity.rotationYawHead = 180.0F);
         this.entity.setPosition(this.minecraft.player.getPosX(), this.minecraft.player.getPosY(), this.minecraft.player.getPosZ());
         Quaternion forward = Vector3f.ZP.rotationDegrees(180.0F);
         Quaternion lateral = Vector3f.XP.rotationDegrees(0.0F);
@@ -136,10 +140,6 @@ public class YearbookScreen extends Screen {
             ++this.page;
         }
         this.updateButtons();
-    }
-
-    private int getPageCount() {
-        return YearbookItem.getPageCount(this.stack);
     }
 
     private void updateButtons() {

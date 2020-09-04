@@ -1,8 +1,8 @@
 package moe.blocks.mod.entity.ai;
 
+import moe.blocks.mod.entity.util.Emotions;
 import moe.blocks.mod.entity.util.VoiceLines;
 import moe.blocks.mod.init.MoeTags;
-import moe.blocks.mod.entity.util.Emotions;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -245,7 +245,7 @@ public class Relationship extends AbstractState implements Comparable<Relationsh
     }
 
     public float getDistance() {
-        return 3.0F / (this.getLoyalty() / 20.0F);
+        return 3.0F / (this.getLoyalty() / 20.0F) + 1.0F;
     }
 
     public boolean canHate() {

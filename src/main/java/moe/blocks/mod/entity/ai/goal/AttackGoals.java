@@ -3,110 +3,112 @@ package moe.blocks.mod.entity.ai.goal;
 import moe.blocks.mod.client.Animations;
 import moe.blocks.mod.entity.StudentEntity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.util.Hand;
 
-import java.util.EnumSet;
-
 public class AttackGoals {
-    public static class Melee extends Goal {
-        private final StudentEntity entity;
-        private int timeUntilAttacking;
+    public static class Melee extends FollowGoal {
+        private int timeUntilAttack;
 
         public Melee(StudentEntity entity) {
-            super();
-            this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE));
-            this.entity = entity;
+            super(entity);
         }
 
         @Override
         public boolean shouldExecute() {
-            return this.entity.isMeleeFighter() && this.entity.canBeTarget(this.entity.getAttackTarget());
-        }
-
-        @Override
-        public boolean shouldContinueExecuting() {
-            return this.shouldExecute() || !this.entity.hasPath();
+            this.target = this.entity.getAttackTarget();
+            if (this.entity.isMeleeFighter() && this.entity.canBeTarget(this.target) && this.canMoveTo(this.target)) {
+                this.path = this.entity.getNavigator().getPathToEntity(this.target, 0);
+                return this.path != null;
+            }
+            return false;
         }
 
         @Override
         public void startExecuting() {
-            LivingEntity victim = this.entity.getAttackTarget();
-            if (this.entity.canBeTarget(victim)) {
-                this.entity.getNavigator().tryMoveToEntityLiving(victim, this.entity.getFollowSpeed(victim, 32.0F));
-                this.timeUntilAttacking = this.entity.getAttackCooldown();
-            }
+            this.timeUntilAttack = this.entity.getAttackCooldown();
+            super.startExecuting();
         }
 
         @Override
-        public void resetTask() {
-            this.entity.getNavigator().clearPath();
-        }
-
-        @Override
-        public void tick() {
-            LivingEntity victim = this.entity.getAttackTarget();
-            if (this.entity.canSee(victim) && this.entity.getDistance(victim) < 3.0F) {
-                if (--this.timeUntilAttacking < 0) {
-                    this.entity.attackEntityAsMob(victim);
-                    this.entity.swingArm(Hand.MAIN_HAND);
+        public void onFollowed() {
+            this.timeUntilReset = 100;
+            if (--this.timeUntilAttack < 0) {
+                this.entity.attackEntityAsMob(this.target);
+                this.entity.swingArm(Hand.MAIN_HAND);
+                if (this.shouldExecute()) {
                     this.startExecuting();
                 }
-            } else {
-                this.startExecuting();
             }
+        }
+
+        @Override
+        public boolean canMoveTo(LivingEntity target) {
+            return this.entity.canSee(target);
+        }
+
+        @Override
+        public float getDistanceThreshhold() {
+            return 4.0F;
         }
     }
 
-    public static class Ranged extends Goal {
-        private final StudentEntity entity;
-        private int timeUntilAttacking;
+    public static class Ranged extends MoveGoal<LivingEntity> {
+        private int timeUntilFire;
         private int timeUntilSeen;
 
         public Ranged(StudentEntity entity) {
-            super();
-            this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE));
-            this.entity = entity;
+            super(entity, LivingEntity.class, 0.05F);
         }
 
         @Override
         public boolean shouldExecute() {
-            return this.entity.isRangedFighter() && this.entity.canBeTarget(this.entity.getAttackTarget());
+            this.target = this.entity.getAttackTarget();
+            if (this.entity.isRangedFighter() && this.entity.canBeTarget(this.target) && this.canMoveTo(this.target)) {
+                this.path = this.entity.getNavigator().getPathToEntity(this.target, 0);
+                return this.path != null;
+            }
+            return false;
         }
 
         @Override
         public boolean shouldContinueExecuting() {
-            return this.shouldExecute() && this.timeUntilAttacking >= 0;
+            return super.shouldContinueExecuting() && this.timeUntilFire >= 0;
         }
 
         @Override
         public void resetTask() {
-            this.entity.getNavigator().clearPath();
             this.entity.resetAnimationState();
+            super.resetTask();
         }
 
         @Override
         public void startExecuting() {
-            LivingEntity victim = this.entity.getAttackTarget();
-            if (this.entity.canBeTarget(victim)) {
-                this.entity.getNavigator().tryMoveToEntityLiving(victim, this.entity.getFollowSpeed(victim, 256.0F) - 1.0F);
-                this.entity.resetAnimationState();
-                this.timeUntilAttacking = this.entity.getAttackCooldown();
-                this.timeUntilSeen = 5;
+            this.entity.resetAnimationState();
+            this.timeUntilFire = this.entity.getAttackCooldown();
+            this.timeUntilSeen = 5;
+            super.startExecuting();
+        }
+
+        @Override
+        public void onFollowed() {
+            this.entity.setAnimation(Animations.AIM);
+            this.timeUntilReset = 100;
+            if (--this.timeUntilSeen < 0 && --this.timeUntilFire < 0) {
+                this.entity.attackEntityFromRange(this.target, 0.0F);
+                if (this.shouldExecute()) {
+                    this.startExecuting();
+                }
             }
         }
 
         @Override
-        public void tick() {
-            LivingEntity victim = this.entity.getAttackTarget();
-            this.entity.setAnimation(Animations.AIM);
-            if (this.entity.canSee(victim)) {
-                if (--this.timeUntilSeen < 0 && --this.timeUntilAttacking < 0) {
-                    this.entity.attackEntityFromRange(victim, 0.0F);
-                }
-            } else {
-                this.startExecuting();
-            }
+        public boolean canMoveTo(LivingEntity target) {
+            return this.entity.canSee(target);
+        }
+
+        @Override
+        public float getDistanceThreshhold() {
+            return 4.0F;
         }
     }
 }

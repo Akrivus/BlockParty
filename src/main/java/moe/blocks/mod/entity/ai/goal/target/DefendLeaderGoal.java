@@ -1,9 +1,9 @@
 package moe.blocks.mod.entity.ai.goal.target;
 
+import moe.blocks.mod.entity.StudentEntity;
 import moe.blocks.mod.entity.ai.Relationship;
 import moe.blocks.mod.entity.ai.goal.RevengeGoal;
 import moe.blocks.mod.util.SorterDistance;
-import moe.blocks.mod.entity.StudentEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 

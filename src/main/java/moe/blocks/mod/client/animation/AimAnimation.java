@@ -1,7 +1,7 @@
 package moe.blocks.mod.client.animation;
 
-import moe.blocks.mod.client.model.MoeModel;
 import moe.blocks.mod.client.Animations;
+import moe.blocks.mod.client.model.MoeModel;
 import moe.blocks.mod.entity.MoeEntity;
 
 public class AimAnimation extends Animation {

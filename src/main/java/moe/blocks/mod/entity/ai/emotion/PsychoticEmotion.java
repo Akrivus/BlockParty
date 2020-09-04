@@ -1,11 +1,11 @@
 package moe.blocks.mod.entity.ai.emotion;
 
-import moe.blocks.mod.entity.ai.goal.RevengeGoal;
-import moe.blocks.mod.entity.util.VoiceLines;
-import moe.blocks.mod.util.SorterDistance;
 import moe.blocks.mod.entity.StudentEntity;
+import moe.blocks.mod.entity.ai.goal.RevengeGoal;
 import moe.blocks.mod.entity.util.Emotions;
+import moe.blocks.mod.entity.util.VoiceLines;
 import moe.blocks.mod.entity.util.data.Relationships;
+import moe.blocks.mod.util.SorterDistance;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.SoundEvent;

@@ -14,10 +14,6 @@ import java.util.UUID;
 public class CraftingData extends WorldSavedData {
     public HashMap<UUID, Integer> numberOfYearbooks = new HashMap<>();
 
-    public CraftingData() {
-        super("crafting_data");
-    }
-
     public static CraftingData get(World world) {
         if (world instanceof ServerWorld) {
             ServerWorld server = world.getServer().getWorld(World.field_234918_g_);
@@ -26,6 +22,10 @@ public class CraftingData extends WorldSavedData {
         } else {
             return new CraftingData();
         }
+    }
+
+    public CraftingData() {
+        super("crafting_data");
     }
 
     @Override
@@ -52,21 +52,21 @@ public class CraftingData extends WorldSavedData {
         return compound;
     }
 
+    public int getNumberOfYearbooks(PlayerEntity player) {
+        return this.getNumberOfYearbooks(player.getUniqueID());
+    }
+
     public int getNumberOfYearbooks(UUID uuid) {
         return this.numberOfYearbooks.getOrDefault(uuid.toString(), 0);
     }
 
-    public int getNumberOfYearbooks(PlayerEntity player) {
-        return this.getNumberOfYearbooks(player.getUniqueID());
+    public int getYearbookEdition(PlayerEntity player) {
+        return this.getYearbookEdition(player.getUniqueID());
     }
 
     public int getYearbookEdition(UUID uuid) {
         int value = this.numberOfYearbooks.getOrDefault(uuid, 0) + 1;
         this.numberOfYearbooks.put(uuid, value);
         return value;
-    }
-
-    public int getYearbookEdition(PlayerEntity player) {
-        return this.getYearbookEdition(player.getUniqueID());
     }
 }

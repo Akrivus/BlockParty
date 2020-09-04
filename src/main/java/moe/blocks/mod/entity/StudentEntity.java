@@ -15,11 +15,8 @@ import moe.blocks.mod.entity.util.*;
 import moe.blocks.mod.entity.util.data.FoodStats;
 import moe.blocks.mod.entity.util.data.Relationships;
 import moe.blocks.mod.entity.util.data.StressStats;
-import moe.blocks.mod.init.MoeTags;
-import moe.blocks.mod.entity.ai.goal.*;
-import moe.blocks.mod.entity.ai.goal.target.*;
-import moe.blocks.mod.entity.util.*;
 import moe.blocks.mod.init.MoeItems;
+import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
@@ -31,6 +28,7 @@ import net.minecraft.entity.ai.goal.SwimGoal;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.*;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
@@ -62,13 +60,14 @@ public class StudentEntity extends CreatureEntity {
     public static final DataParameter<Integer> EMOTION = EntityDataManager.createKey(StudentEntity.class, DataSerializers.VARINT);
     public static final DataParameter<Boolean> EYEPATCH = EntityDataManager.createKey(StudentEntity.class, DataSerializers.BOOLEAN);
     public static final DataParameter<Boolean> SITTING = EntityDataManager.createKey(StudentEntity.class, DataSerializers.BOOLEAN);
-    public AttackGoals.Melee attackGoal;
+    public AttackGoals.Melee defaultAttackStyle;
     protected Animation animation = new Animation();
-    protected moe.blocks.mod.entity.util.data.FoodStats foodStats = new moe.blocks.mod.entity.util.data.FoodStats();
+    protected FoodStats foodStats = new FoodStats();
     protected Relationships relationships = new Relationships();
     protected StressStats stressStats = new StressStats();
     protected AbstractDere dere = new Himedere();
     protected AbstractEmotion emotion = new NormalEmotion();
+    private final Inventory brassiere = new Inventory(4);
     private long timeBorn;
     private int timeUntilEmotional;
     private UUID followTargetUUID;
@@ -100,17 +99,19 @@ public class StudentEntity extends CreatureEntity {
 
     @Override
     protected void registerGoals() {
+        this.defaultAttackStyle = new AttackGoals.Melee(this);
         this.goalSelector.addGoal(1, new SwimGoal(this));
         this.goalSelector.addGoal(1, new OpenDoorGoal(this));
-        this.goalSelector.addGoal(2, this.attackGoal = new AttackGoals.Melee(this));
         this.goalSelector.addGoal(2, new AttackGoals.Ranged(this));
-        this.goalSelector.addGoal(2, new GrabGoal(this));
-        this.goalSelector.addGoal(3, new AvoidGoal(this));
-        this.goalSelector.addGoal(4, new FollowGoal(this));
-        this.goalSelector.addGoal(6, new ShareGoals.Student(this));
-        this.goalSelector.addGoal(6, new ShareGoals.Player(this));
-        this.goalSelector.addGoal(7, new SocializeGoal(this));
-        this.goalSelector.addGoal(8, new WaitGoal(this));
+        this.goalSelector.addGoal(2, this.defaultAttackStyle);
+        this.goalSelector.addGoal(3, new GrabGoal(this));
+        this.goalSelector.addGoal(4, new AvoidGoal(this));
+        this.goalSelector.addGoal(5, new FollowGoal(this));
+        this.goalSelector.addGoal(6, new MineGoal(this));
+        this.goalSelector.addGoal(7, new ShareGoals.Student(this));
+        this.goalSelector.addGoal(7, new ShareGoals.Player(this));
+        this.goalSelector.addGoal(8, new SocializeGoal(this));
+        this.goalSelector.addGoal(9, new WaitGoal(this));
         this.registerTargets();
     }
 
@@ -161,14 +162,15 @@ public class StudentEntity extends CreatureEntity {
         compound.putString("Dere", this.getDere().toString());
         compound.putString("Emotion", this.getEmotion().toString());
         compound.putBoolean("HasEyepatch", this.hasEyepatch());
+        compound.put("Brassiere", this.brassiere.write());
         compound.putInt("TimeUntilEmotional", this.getEmotionalTimeout());
         compound.putLong("TimeBorn", this.timeBorn);
         this.runStates(state -> {
             state.write(compound);
             return true;
         });
-        if (this.getFollowTarget() != null) {
-            compound.putUniqueId("FollowTarget", this.getFollowTarget().getUniqueID());
+        if (this.followTargetUUID != null) {
+            compound.putUniqueId("FollowTarget", this.followTargetUUID);
         }
     }
 
@@ -181,6 +183,7 @@ public class StudentEntity extends CreatureEntity {
         this.setEmotion(Emotions.valueOf(compound.getString("Emotion")));
         this.setEmotionalTimeout(compound.getInt("TimeUntilEmotional"));
         this.setHasEyepatch(compound.getBoolean("HasEyepatch"));
+        this.brassiere.read(compound.getList("Brassiere", 10));
         this.timeBorn = compound.getLong("TimeBorn");
         this.runStates(state -> {
             state.read(compound);
@@ -302,10 +305,6 @@ public class StudentEntity extends CreatureEntity {
         this.setAnimation(this.getFollowTarget() != null ? Animations.DEFAULT : Animations.WAITING);
     }
 
-    public void setHasEyepatch(boolean hasEyepatch) {
-        this.dataManager.set(EYEPATCH, hasEyepatch);
-    }
-
     public LivingEntity getFollowTarget() {
         if (this.getLeashHolder() instanceof LivingEntity) {
             return (LivingEntity) this.getLeashHolder();
@@ -325,13 +324,17 @@ public class StudentEntity extends CreatureEntity {
     }
 
     public LivingEntity getEntityFromUUID(UUID uuid) {
-        if (this.world instanceof ServerWorld) {
+        if (uuid != null && this.world instanceof ServerWorld) {
             Entity entity = ((ServerWorld) this.world).getEntityByUuid(uuid);
             if (entity instanceof LivingEntity) {
                 return (LivingEntity) entity;
             }
         }
         return null;
+    }
+
+    public void setHasEyepatch(boolean hasEyepatch) {
+        this.dataManager.set(EYEPATCH, hasEyepatch);
     }
 
     public boolean runStates(Predicate<AbstractState> function) {
@@ -420,6 +423,24 @@ public class StudentEntity extends CreatureEntity {
         this.targetSelector.addGoal(6, new TargetMobsGoal(this));
     }
 
+    public Inventory getBrassiere() {
+        return this.brassiere;
+    }
+
+    public boolean setBrassiereItem(int slot, ItemStack stack) {
+        if (super.replaceItemInInventory(slot, stack)) {
+            return true;
+        } else {
+            int i = slot - 300;
+            if (i >= 0 && i < this.brassiere.getSizeInventory()) {
+                this.brassiere.setInventorySlotContents(i, stack);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
     public void toggleFollowTarget(LivingEntity leader) {
         LivingEntity target = (leader == null || leader.equals(this.getFollowTarget())) ? null : leader;
         this.setFollowTarget(target);
@@ -431,6 +452,10 @@ public class StudentEntity extends CreatureEntity {
 
     public String getPlainName() {
         return this.getName().getString();
+    }
+
+    public void say(PlayerEntity player, String key, Object... params) {
+        player.sendMessage(new TranslationTextComponent(key, params), this.getUniqueID());
     }
 
     public boolean isStandingOn(BlockState state) {
@@ -642,19 +667,6 @@ public class StudentEntity extends CreatureEntity {
         return this.rand.nextGaussian() * factor;
     }
 
-    public LivingEntity getAvoidTarget() {
-        return this.avoidTarget;
-    }
-
-    public void setAvoidTarget(LivingEntity target) {
-        this.avoidTarget = target;
-        this.avoidTimer = this.ticksExisted;
-    }
-
-    public int getAvoidTimer() {
-        return this.avoidTimer;
-    }
-
     public void setCanFly(boolean fly) {
         if (fly) {
             this.setMoveController(new FlyingMovementController(this, 10, false));
@@ -682,13 +694,10 @@ public class StudentEntity extends CreatureEntity {
     }
 
     @Override
-    public boolean isInvulnerableTo(DamageSource source) {
-        return this.canFly() && source == DamageSource.FALL;
-    }
-
-    @Override
-    public boolean hasCustomName() {
-        return true;
+    protected void updateFallState(double y, boolean onGround, BlockState state, BlockPos pos) {
+        if (!this.canFly()) {
+            super.updateFallState(y, onGround, state, pos);
+        }
     }
 
     public boolean canFly() {
@@ -696,18 +705,21 @@ public class StudentEntity extends CreatureEntity {
     }
 
     @Override
-    protected void updateFallState(double y, boolean onGround, BlockState state, BlockPos pos) {
-        if (!this.canFly()) {
-            super.updateFallState(y, onGround, state, pos);
-        }
-    }
-
-    @Override
     public boolean attackEntityFrom(DamageSource source, float amount) {
-        if (this.runStates(state -> state.onDamage(source, amount))) {
+        if (this.isInvulnerableTo(source) || this.runStates(state -> state.onDamage(source, amount))) {
             return false;
         }
         return super.attackEntityFrom(source, amount);
+    }
+
+    @Override
+    public boolean isInvulnerableTo(DamageSource source) {
+        return this.canFly() && source == DamageSource.FALL;
+    }
+
+    @Override
+    public boolean hasCustomName() {
+        return true;
     }
 
     @Override
@@ -734,23 +746,40 @@ public class StudentEntity extends CreatureEntity {
         return !this.canFly() || super.onLivingFall(distance, damageMultiplier);
     }
 
-    public void say(PlayerEntity player, String key, Object... params) {
-        player.sendMessage(new TranslationTextComponent(key, params), this.getUniqueID());
-    }
-
     public int getAgeInYears() {
-        return this.getBaseAge() + (int)(this.world.getGameTime() - this.timeBorn) / 24000 / 366;
+        return this.getBaseAge() + (int) (this.world.getGameTime() - this.timeBorn) / 24000 / 366;
     }
 
     public int getBaseAge() {
         return 14;
     }
 
+    public boolean isCalm() {
+        return !this.isFighting();
+    }
+
     public boolean isFighting() {
         return this.canBeTarget(this.getAttackTarget()) || this.canBeTarget(this.getRevengeTarget()) || this.canBeTarget(this.getAvoidTarget());
     }
 
-    public boolean isCalm() {
-        return !this.isFighting();
+    public LivingEntity getAvoidTarget() {
+        return this.avoidTarget;
+    }
+
+    public void setAvoidTarget(LivingEntity target) {
+        this.avoidTarget = target;
+        this.avoidTimer = this.ticksExisted;
+    }
+
+    public boolean isMiner() {
+        return this.getHeldItem(Hand.MAIN_HAND).getItem() instanceof PickaxeItem;
+    }
+
+    public boolean isAvoiding() {
+        return this.ticksExisted - this.getAvoidTimer() < 100;
+    }
+
+    public int getAvoidTimer() {
+        return this.avoidTimer;
     }
 }

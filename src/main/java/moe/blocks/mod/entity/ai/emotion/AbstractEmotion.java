@@ -1,8 +1,8 @@
 package moe.blocks.mod.entity.ai.emotion;
 
 import moe.blocks.mod.entity.ai.AbstractState;
-import moe.blocks.mod.entity.util.VoiceLines;
 import moe.blocks.mod.entity.util.Emotions;
+import moe.blocks.mod.entity.util.VoiceLines;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;

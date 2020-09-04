@@ -13,19 +13,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BeehiveBehavior extends BasicBehavior {
-    protected AttackGoal attackGoalBees;
+    protected AttackGoal defaultAttackStyleBees;
 
     @Override
     public void start() {
-        this.attackGoalBees = new AttackGoal(this.moe);
-        this.moe.goalSelector.addGoal(2, this.attackGoalBees);
-        this.moe.goalSelector.removeGoal(this.moe.attackGoal);
+        this.defaultAttackStyleBees = new AttackGoal(this.moe);
+        this.moe.goalSelector.addGoal(2, this.defaultAttackStyleBees);
+        this.moe.goalSelector.removeGoal(this.moe.defaultAttackStyle);
     }
 
     @Override
     public void stop() {
-        this.moe.goalSelector.removeGoal(this.attackGoalBees);
-        this.moe.goalSelector.addGoal(2, this.moe.attackGoal);
+        this.moe.goalSelector.removeGoal(this.defaultAttackStyleBees);
+        this.moe.goalSelector.addGoal(2, this.moe.defaultAttackStyle);
     }
 
     @Override

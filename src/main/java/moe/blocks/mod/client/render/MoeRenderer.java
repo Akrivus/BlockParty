@@ -1,11 +1,11 @@
 package moe.blocks.mod.client.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import moe.blocks.mod.client.render.layer.MoeEmotionLayer;
-import moe.blocks.mod.client.render.layer.MoeGlowLayer;
 import moe.blocks.mod.MoeMod;
 import moe.blocks.mod.client.model.MoeModel;
+import moe.blocks.mod.client.render.layer.MoeEmotionLayer;
 import moe.blocks.mod.client.render.layer.MoeEyepatchLayer;
+import moe.blocks.mod.client.render.layer.MoeGlowLayer;
 import moe.blocks.mod.entity.MoeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;

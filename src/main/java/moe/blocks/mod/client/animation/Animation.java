@@ -1,7 +1,7 @@
 package moe.blocks.mod.client.animation;
 
-import moe.blocks.mod.client.model.MoeModel;
 import moe.blocks.mod.client.Animations;
+import moe.blocks.mod.client.model.MoeModel;
 import moe.blocks.mod.client.model.SenpaiModel;
 import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.entity.SenpaiEntity;

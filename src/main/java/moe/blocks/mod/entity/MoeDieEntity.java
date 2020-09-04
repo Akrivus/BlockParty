@@ -1,9 +1,9 @@
 package moe.blocks.mod.entity;
 
-import moe.blocks.mod.init.MoeEntities;
-import moe.blocks.mod.init.MoeTags;
 import moe.blocks.mod.entity.util.Deres;
+import moe.blocks.mod.init.MoeEntities;
 import moe.blocks.mod.init.MoeItems;
+import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;

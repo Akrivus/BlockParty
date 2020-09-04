@@ -1,8 +1,8 @@
 package moe.blocks.mod.message;
 
-import moe.blocks.mod.item.YearbookItem;
 import moe.blocks.mod.client.screen.YearbookScreen;
 import moe.blocks.mod.init.MoeItems;
+import moe.blocks.mod.item.YearbookItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -22,14 +22,14 @@ public class OpenYearbookMessage {
         this(stack, player.getUniqueID(), 0);
     }
 
-    public OpenYearbookMessage(ItemStack stack, PlayerEntity player, int page) {
-        this(stack, player.getUniqueID(), page);
-    }
-
     public OpenYearbookMessage(ItemStack stack, UUID uuid, int page) {
         this.stack = stack;
         this.uuid = uuid;
         this.page = page;
+    }
+
+    public OpenYearbookMessage(ItemStack stack, PlayerEntity player, int page) {
+        this(stack, player.getUniqueID(), page);
     }
 
     public static OpenYearbookMessage decode(PacketBuffer buffer) {

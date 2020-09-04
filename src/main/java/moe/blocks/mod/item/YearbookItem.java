@@ -1,15 +1,15 @@
 package moe.blocks.mod.item;
 
-import moe.blocks.mod.entity.data.CraftingData;
-import moe.blocks.mod.util.RomanNumeral;
 import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.entity.SenpaiEntity;
 import moe.blocks.mod.entity.StudentEntity;
+import moe.blocks.mod.entity.data.CraftingData;
 import moe.blocks.mod.init.MoeEntities;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeMessages;
 import moe.blocks.mod.message.OpenYearbookMessage;
 import moe.blocks.mod.util.PlayerUtils;
+import moe.blocks.mod.util.RomanNumeral;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -37,39 +37,6 @@ public class YearbookItem extends Item {
         super(new Properties().group(MoeItems.Group.INSTANCE));
     }
 
-    @Override
-    public void onCreated(ItemStack stack, World world, PlayerEntity player) {
-        CompoundNBT compound = stack.hasTag() ? stack.getShareTag() : new CompoundNBT();
-        compound.putString("Author", player.getName().getString());
-        compound.putString("Edition", RomanNumeral.toRoman(CraftingData.get(world).getYearbookEdition(player)));
-        stack.setTag(compound);
-    }
-
-    @Override @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
-        tooltip.add((new TranslationTextComponent("item.moeblocks.yearbook.amount", getPageCount(stack))).mergeStyle(TextFormatting.GRAY));
-        tooltip.add((new TranslationTextComponent("item.moeblocks.yearbook.author", getAuthorName(stack))).mergeStyle(TextFormatting.GRAY));
-        tooltip.add((new TranslationTextComponent("item.moeblocks.yearbook.edition", getEdition(stack))).mergeStyle(TextFormatting.GRAY));
-    }
-
-    public static String getAuthorName(ItemStack stack) {
-        CompoundNBT check = stack.getShareTag();
-        if (check != null && check.contains("Author")) {
-            return check.getString("Author");
-        } else {
-            return "null";
-        }
-    }
-
-    public static String getEdition(ItemStack stack) {
-        CompoundNBT check = stack.getShareTag();
-        if (check != null && check.contains("Edition")) {
-            return check.getString("Edition");
-        } else {
-            return "I";
-        }
-    }
-
     public static StudentEntity getPage(World world, ItemStack stack, int page) {
         CompoundNBT stem = getYearbookInfo(stack);
         CompoundNBT info = (CompoundNBT) stem.get(stem.keySet().toArray(new String[0])[page]);
@@ -78,16 +45,15 @@ public class YearbookItem extends Item {
         return entity;
     }
 
-    public static CompoundNBT getYearbookInfo(ItemStack stack) {
-        CompoundNBT check = stack.getShareTag();
-        if (check != null && check.contains("YearbookInfo")) {
-            return (CompoundNBT) (check.get("YearbookInfo"));
+    public static int getPage(ItemStack stack, StudentEntity entity) {
+        CompoundNBT stem = getYearbookInfo(stack);
+        String[] keys = stem.keySet().toArray(new String[0]);
+        for (int i = 0; i < keys.length; ++i) {
+            if (UUID.fromString(keys[i]).equals(entity.getUniqueID())) {
+                return i;
+            }
         }
-        return new CompoundNBT();
-    }
-
-    public static int getPageCount(ItemStack stack) {
-        return getYearbookInfo(stack).keySet().size();
+        return -1;
     }
 
     @Override
@@ -121,6 +87,52 @@ public class YearbookItem extends Item {
         return ActionResultType.SUCCESS;
     }
 
+    @Override
+    public void onCreated(ItemStack stack, World world, PlayerEntity player) {
+        CompoundNBT compound = stack.hasTag() ? stack.getShareTag() : new CompoundNBT();
+        compound.putString("Author", player.getName().getString());
+        compound.putString("Edition", RomanNumeral.toRoman(CraftingData.get(world).getYearbookEdition(player)));
+        stack.setTag(compound);
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void addInformation(ItemStack stack, World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
+        tooltip.add((new TranslationTextComponent("item.moeblocks.yearbook.amount", getPageCount(stack))).mergeStyle(TextFormatting.GRAY));
+        tooltip.add((new TranslationTextComponent("item.moeblocks.yearbook.author", getAuthorName(stack))).mergeStyle(TextFormatting.GRAY));
+        tooltip.add((new TranslationTextComponent("item.moeblocks.yearbook.edition", getEdition(stack))).mergeStyle(TextFormatting.GRAY));
+    }
+
+    public static String getAuthorName(ItemStack stack) {
+        CompoundNBT check = stack.getShareTag();
+        if (check != null && check.contains("Author")) {
+            return check.getString("Author");
+        } else {
+            return "null";
+        }
+    }
+
+    public static String getEdition(ItemStack stack) {
+        CompoundNBT check = stack.getShareTag();
+        if (check != null && check.contains("Edition")) {
+            return check.getString("Edition");
+        } else {
+            return "I";
+        }
+    }
+
+    public static int getPageCount(ItemStack stack) {
+        return getYearbookInfo(stack).keySet().size();
+    }
+
+    public static CompoundNBT getYearbookInfo(ItemStack stack) {
+        CompoundNBT check = stack.getShareTag();
+        if (check != null && check.contains("YearbookInfo")) {
+            return (CompoundNBT) (check.get("YearbookInfo"));
+        }
+        return new CompoundNBT();
+    }
+
     public static void updateYearbookInfo(ItemStack stack, World world) {
         CompoundNBT stem = getYearbookInfo(stack);
         if (world instanceof ServerWorld) {
@@ -138,17 +150,6 @@ public class YearbookItem extends Item {
             stem.put(entity.getUniqueID().toString(), entity.writeWithoutTypeId(new CompoundNBT()));
             setYearbookInfo(stack, stem);
         }
-    }
-
-    public static int getPage(ItemStack stack, StudentEntity entity) {
-        CompoundNBT stem = getYearbookInfo(stack);
-        String[] keys = stem.keySet().toArray(new String[0]);
-        for (int i = 0; i < keys.length; ++i) {
-            if (UUID.fromString(keys[i]).equals(entity.getUniqueID())) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     public static void setYearbookInfo(ItemStack stack, CompoundNBT compound) {

@@ -1,7 +1,6 @@
 package moe.blocks.mod.entity.util;
 
 import moe.blocks.mod.entity.ai.behavior.*;
-import moe.blocks.mod.entity.ai.behavior.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
