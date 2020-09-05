@@ -3,9 +3,9 @@ package moe.blocks.mod.client.animation;
 import moe.blocks.mod.client.Animations;
 import moe.blocks.mod.client.model.MoeModel;
 import moe.blocks.mod.client.model.SenpaiModel;
+import moe.blocks.mod.entity.FiniteEntity;
 import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.entity.SenpaiEntity;
-import moe.blocks.mod.entity.StudentEntity;
 
 public class Animation {
 
@@ -21,7 +21,7 @@ public class Animation {
 
     }
 
-    public void tick(StudentEntity entity) {
+    public void tick(FiniteEntity entity) {
 
     }
 

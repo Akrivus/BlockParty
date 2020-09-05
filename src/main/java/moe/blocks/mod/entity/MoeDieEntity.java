@@ -46,7 +46,7 @@ public class MoeDieEntity extends DieEntity {
                 moe.setBlockData(state);
                 moe.setExtraBlockData(extra != null ? extra.getTileData() : new CompoundNBT());
                 moe.setDere(this.dere);
-                moe.getRelationships().get(this.getPlayer() != null ? this.getPlayer().getUniqueID() : UUID.randomUUID()).addTrust(100);
+                moe.getDatingState().get(this.getPlayer() != null ? this.getPlayer().getUniqueID() : UUID.randomUUID()).addTrust(100);
                 if (this.world.addEntity(moe)) {
                     moe.onInitialSpawn((ServerWorld) this.world, this.world.getDifficultyForLocation(this.getPosition()), SpawnReason.TRIGGERED, null, null);
                     this.world.setBlockState(this.getPositionUnderneath(), Blocks.AIR.getDefaultState());

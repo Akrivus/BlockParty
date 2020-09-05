@@ -1,15 +1,14 @@
 package moe.blocks.mod.item;
 
+import moe.blocks.mod.entity.FiniteEntity;
 import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.entity.SenpaiEntity;
-import moe.blocks.mod.entity.StudentEntity;
-import moe.blocks.mod.entity.data.CraftingData;
+import moe.blocks.mod.world.data.CraftingData;
 import moe.blocks.mod.init.MoeEntities;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeMessages;
 import moe.blocks.mod.message.OpenYearbookMessage;
-import moe.blocks.mod.util.PlayerUtils;
-import moe.blocks.mod.util.RomanNumeral;
+import moe.blocks.mod.util.RomanNumerals;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -37,15 +36,15 @@ public class YearbookItem extends Item {
         super(new Properties().group(MoeItems.Group.INSTANCE));
     }
 
-    public static StudentEntity getPage(World world, ItemStack stack, int page) {
+    public static FiniteEntity getPage(World world, ItemStack stack, int page) {
         CompoundNBT stem = getYearbookInfo(stack);
         CompoundNBT info = (CompoundNBT) stem.get(stem.keySet().toArray(new String[0])[page]);
-        StudentEntity entity = info.contains("BlockData") ? new MoeEntity(MoeEntities.MOE.get(), world) : new SenpaiEntity(MoeEntities.SENPAI.get(), world);
+        FiniteEntity entity = info.contains("BlockData") ? new MoeEntity(MoeEntities.MOE.get(), world) : new SenpaiEntity(MoeEntities.SENPAI.get(), world);
         entity.read(info);
         return entity;
     }
 
-    public static int getPage(ItemStack stack, StudentEntity entity) {
+    public static int getPage(ItemStack stack, FiniteEntity entity) {
         CompoundNBT stem = getYearbookInfo(stack);
         String[] keys = stem.keySet().toArray(new String[0]);
         for (int i = 0; i < keys.length; ++i) {
@@ -69,14 +68,15 @@ public class YearbookItem extends Item {
 
     @Override
     public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity target, Hand hand) {
-        if (target.world instanceof ServerWorld && target instanceof StudentEntity) {
-            StudentEntity entity = (StudentEntity) target;
+        if (target.world instanceof ServerWorld && target instanceof FiniteEntity) {
+            FiniteEntity entity = (FiniteEntity) target;
             updateYearbookInfo(stack, entity.world);
             int page = getPage(stack, entity);
             if (page < 0) {
                 page = getPageCount(stack);
                 if (page > 50) {
-                    return PlayerUtils.showResult(player, entity, "command.moeblocks.yearbook", ActionResultType.FAIL);
+                    player.sendStatusMessage(new TranslationTextComponent("command.moeblocks.yearbook.fail", entity.getPlainName()), true);
+                    return ActionResultType.FAIL;
                 } else {
                     setPage(stack, entity);
                 }
@@ -91,7 +91,7 @@ public class YearbookItem extends Item {
     public void onCreated(ItemStack stack, World world, PlayerEntity player) {
         CompoundNBT compound = stack.hasTag() ? stack.getShareTag() : new CompoundNBT();
         compound.putString("Author", player.getName().getString());
-        compound.putString("Edition", RomanNumeral.toRoman(CraftingData.get(world).getYearbookEdition(player)));
+        compound.putString("Edition", RomanNumerals.convert(CraftingData.get(world).getYearbookEdition(player)));
         stack.setTag(compound);
     }
 
@@ -139,12 +139,12 @@ public class YearbookItem extends Item {
             ServerWorld server = (ServerWorld) world;
             Iterator<String> it = stem.keySet().iterator();
             while (it.hasNext()) {
-                setPage(stack, (StudentEntity) server.getEntityByUuid(UUID.fromString(it.next())));
+                setPage(stack, (FiniteEntity) server.getEntityByUuid(UUID.fromString(it.next())));
             }
         }
     }
 
-    public static void setPage(ItemStack stack, StudentEntity entity) {
+    public static void setPage(ItemStack stack, FiniteEntity entity) {
         if (entity != null) {
             CompoundNBT stem = getYearbookInfo(stack);
             stem.put(entity.getUniqueID().toString(), entity.writeWithoutTypeId(new CompoundNBT()));

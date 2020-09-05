@@ -1,8 +1,8 @@
 package moe.blocks.mod.entity;
 
-import moe.blocks.mod.entity.ai.AbstractState;
-import moe.blocks.mod.entity.ai.behavior.AbstractBehavior;
-import moe.blocks.mod.entity.ai.behavior.BasicBehavior;
+import moe.blocks.mod.entity.state.AbstractState;
+import moe.blocks.mod.entity.behavior.AbstractBehavior;
+import moe.blocks.mod.entity.behavior.BasicBehavior;
 import moe.blocks.mod.entity.util.Behaviors;
 import moe.blocks.mod.init.MoeEntities;
 import net.minecraft.block.Block;
@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Optional;
 
-public class MoeEntity extends StudentEntity {
+public class MoeEntity extends FiniteEntity {
     public static final DataParameter<Integer> BEHAVIOR = EntityDataManager.createKey(MoeEntity.class, DataSerializers.VARINT);
     public static final DataParameter<Optional<BlockState>> BLOCK_STATE = EntityDataManager.createKey(MoeEntity.class, DataSerializers.OPTIONAL_BLOCK_STATE);
     public static final DataParameter<Float> SCALE = EntityDataManager.createKey(MoeEntity.class, DataSerializers.FLOAT);
@@ -130,19 +130,19 @@ public class MoeEntity extends StudentEntity {
             this.extinguish();
         }
         if (this.isStandingOn(this.getBlockData())) {
-            this.getStressStats().addStressSilently(-0.0001F);
+            this.getStressState().addStressSilently(-0.0001F);
         }
     }
 
     @Override
     public Iterator<AbstractState> getStates() {
         ArrayList<AbstractState> states = new ArrayList<>();
-        states.add(this.getRelationships());
-        states.add(this.getFoodStats());
+        states.add(this.getDatingState());
+        states.add(this.getFoodState());
         states.add(this.getBehavior());
         states.add(this.getDere());
         states.add(this.getEmotion());
-        states.add(this.getStressStats());
+        states.add(this.getStressState());
         return states.iterator();
     }
 

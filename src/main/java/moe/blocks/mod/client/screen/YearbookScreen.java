@@ -3,7 +3,7 @@ package moe.blocks.mod.client.screen;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moe.blocks.mod.MoeMod;
-import moe.blocks.mod.entity.StudentEntity;
+import moe.blocks.mod.entity.FiniteEntity;
 import moe.blocks.mod.item.YearbookItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
@@ -36,7 +36,7 @@ public class YearbookScreen extends Screen {
     private String pos;
     private final String[] stats = new String[5];
     private final String[] lines = new String[3];
-    private StudentEntity entity;
+    private FiniteEntity entity;
     private final UUID player;
     private int page;
 
@@ -147,13 +147,13 @@ public class YearbookScreen extends Screen {
         this.name = String.format("%s", this.entity.getPlainName());
         this.pos = String.format("%.0f %.0f %.0f", this.entity.getPosX(), this.entity.getPosY(), this.entity.getPosZ());
         this.stats[0] = String.format("%.0f", this.entity.getHealth());
-        this.stats[1] = String.format("%.0f", this.entity.getFoodStats().getFoodLevel());
-        this.stats[2] = String.format("%.0f", this.entity.getRelationships().get(this.player).getTrust());
-        this.stats[3] = String.format("%.0f", this.entity.getRelationships().get(this.player).getAffection());
-        this.stats[4] = String.format("%.0f", this.entity.getStressStats().getStress());
+        this.stats[1] = String.format("%.0f", this.entity.getFoodState().getFoodLevel());
+        this.stats[2] = String.format("%.0f", this.entity.getDatingState().get(this.player).getTrust());
+        this.stats[3] = String.format("%.0f", this.entity.getDatingState().get(this.player).getAffection());
+        this.stats[4] = String.format("%.0f", this.entity.getStressState().getStress());
         this.lines[0] = String.format("%d years old", this.entity.getAgeInYears());
         this.lines[1] = String.format("Blood type %s", this.entity.getBloodType().toString());
-        this.lines[2] = String.format("Seen %d days ago", this.entity.getRelationships().get(this.player).getLastSeen() / 24000);
+        this.lines[2] = String.format("Seen %d days ago", this.entity.getDatingState().get(this.player).getLastSeen() / 24000);
         this.buttonNextPage.visible = this.page < this.getPageCount() - 1;
         this.buttonPrevPage.visible = this.page > 0;
     }

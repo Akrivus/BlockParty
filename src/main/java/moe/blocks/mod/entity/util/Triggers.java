@@ -1,7 +1,7 @@
 package moe.blocks.mod.entity.util;
 
-import moe.blocks.mod.entity.ai.triggers.AbstractTrigger;
-import moe.blocks.mod.entity.ai.triggers.StressTrigger;
+import moe.blocks.mod.entity.trigger.AbstractTrigger;
+import moe.blocks.mod.entity.trigger.StressTrigger;
 
 import java.util.ArrayList;
 import java.util.List;

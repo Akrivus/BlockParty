@@ -1,8 +1,8 @@
 package moe.blocks.mod;
 
 import moe.blocks.mod.init.*;
-import moe.blocks.mod.util.DispenserBehaviors;
-import moe.blocks.mod.util.MoeBlockAliases;
+import moe.blocks.mod.init.DispenserBehaviors;
+import moe.blocks.mod.init.MoeBlockAliases;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;

@@ -1,7 +1,7 @@
 package moe.blocks.mod.item;
 
+import moe.blocks.mod.entity.FiniteEntity;
 import moe.blocks.mod.entity.MoeEntity;
-import moe.blocks.mod.entity.StudentEntity;
 import moe.blocks.mod.entity.util.Deres;
 import moe.blocks.mod.init.MoeEntities;
 import moe.blocks.mod.init.MoeItems;
@@ -33,7 +33,7 @@ public class SpawnEggItem extends Item {
         World world = context.getWorld();
         if (!world.isRemote()) {
             BlockPos pos = context.getPos().offset(context.getFace());
-            StudentEntity entity = this.type.get(world);
+            FiniteEntity entity = this.type.get(world);
             entity.setPositionAndRotation(pos.getX() + 0.5F, pos.getY(), pos.getZ() + 0.5F, -player.rotationYaw, -player.rotationPitch);
             if (entity instanceof MoeEntity) {
                 BlockPos block = context.getPos();
@@ -52,7 +52,7 @@ public class SpawnEggItem extends Item {
             }
             if (world.addEntity(entity)) {
                 entity.onInitialSpawn((ServerWorld) world, world.getDifficultyForLocation(pos), SpawnReason.SPAWN_EGG, null, null);
-                entity.getRelationships().get(player).addTrust(100);
+                entity.getDatingState().get(player).addTrust(100);
                 entity.setDere(this.dere);
                 context.getItem().shrink(1);
                 return ActionResultType.CONSUME;
@@ -64,7 +64,7 @@ public class SpawnEggItem extends Item {
     public enum SpawnTypes {
         MOE, SENPAI;
 
-        public StudentEntity get(World world) {
+        public FiniteEntity get(World world) {
             switch (this) {
             case SENPAI:
                 return MoeEntities.SENPAI.get().create(world);
