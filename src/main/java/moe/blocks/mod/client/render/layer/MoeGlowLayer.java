@@ -4,6 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import moe.blocks.mod.MoeMod;
 import moe.blocks.mod.client.model.MoeModel;
 import moe.blocks.mod.entity.MoeEntity;
+import moe.blocks.mod.init.MoeBlocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -23,7 +24,7 @@ public class MoeGlowLayer extends LayerRenderer<MoeEntity, MoeModel<MoeEntity>> 
 
     @Override
     public void render(MatrixStack stack, IRenderTypeBuffer buffer, int packedLight, MoeEntity entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (entity.getBehavior().isGlowing() && this.isWithinDistance(entity.getPositionVec()) && !entity.isInvisible()) {
+        if (entity.isBlockGlowing() && this.isWithinDistance(entity.getPositionVec()) && !entity.isInvisible()) {
             this.getEntityModel().render(stack, buffer.getBuffer(RenderType.getEyes(this.getTexture(entity))), 15728640, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
@@ -34,6 +35,6 @@ public class MoeGlowLayer extends LayerRenderer<MoeEntity, MoeModel<MoeEntity>> 
     }
 
     public ResourceLocation getTexture(MoeEntity entity) {
-        return new ResourceLocation(MoeMod.ID, String.format("textures/entity/moe/%s.glow.png", entity.getBehavior().getPath()));
+        return MoeBlocks.getNameOf(entity.getBlockData(), "glow");
     }
 }

@@ -7,9 +7,11 @@ import moe.blocks.mod.client.render.SenpaiRenderer;
 import moe.blocks.mod.entity.MoeDieEntity;
 import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.entity.SenpaiEntity;
-import moe.blocks.mod.entity.FiniteEntity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.AttributeModifierMap;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -30,7 +32,11 @@ public class MoeEntities {
     }
 
     public static void registerAttributes() {
-        GlobalEntityTypeAttributes.put(SENPAI.get(), FiniteEntity.setCustomAttributes());
-        GlobalEntityTypeAttributes.put(MOE.get(), FiniteEntity.setCustomAttributes());
+        GlobalEntityTypeAttributes.put(SENPAI.get(), MoeEntities.getMap().createMutableAttribute(Attributes.MAX_HEALTH, 20.0F).createMutableAttribute(Attributes.MOVEMENT_SPEED, 0.3F).create());
+        GlobalEntityTypeAttributes.put(MOE.get(), MoeEntities.getMap().createMutableAttribute(Attributes.MAX_HEALTH, 15.0F).createMutableAttribute(Attributes.MOVEMENT_SPEED, 0.4F).create());
+    }
+
+    private static AttributeModifierMap.MutableAttribute getMap() {
+        return MobEntity.func_233666_p_().createMutableAttribute(Attributes.ATTACK_DAMAGE, 2.0F).createMutableAttribute(Attributes.ATTACK_SPEED, 4.0F).createMutableAttribute(Attributes.FOLLOW_RANGE, 256.0D).createMutableAttribute(Attributes.FLYING_SPEED, 1.5F);
     }
 }

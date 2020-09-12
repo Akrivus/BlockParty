@@ -91,8 +91,7 @@
     "category": "player",
     "subtitle": "subtitle.moe.emotion.pained",
     "sounds": [
-      "moeblocks:entity/moe/pained1",
-      "moeblocks:entity/moe/pained2"
+      "moeblocks:entity/moe/pained1"
     ]
   },
   "entity.moe.emotion.psychotic": {

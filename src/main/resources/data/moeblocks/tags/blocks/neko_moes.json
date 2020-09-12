@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:andesite",
+    "minecraft:bell",
+    "minecraft:campfire",
+    "minecraft:chest",
+    "minecraft:coal_ore",
+    "minecraft:crafting_table",
+    "minecraft:diamond_ore",
+    "minecraft:diorite",
+    "minecraft:emerald_ore",
+    "minecraft:gold_ore",
+    "minecraft:granite",
+    "minecraft:lapis_ore",
+    "minecraft:magma_block",
+    "minecraft:redstone_ore",
+    "minecraft:smithing_table",
+    "minecraft:trapped_chest"
+  ]
+}

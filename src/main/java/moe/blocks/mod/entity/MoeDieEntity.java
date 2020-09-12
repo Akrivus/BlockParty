@@ -1,6 +1,7 @@
 package moe.blocks.mod.entity;
 
-import moe.blocks.mod.entity.util.Deres;
+import moe.blocks.mod.entity.ai.automata.state.Deres;
+import moe.blocks.mod.entity.partial.DieEntity;
 import moe.blocks.mod.init.MoeEntities;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeTags;
@@ -15,8 +16,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-
-import java.util.UUID;
 
 public class MoeDieEntity extends DieEntity {
     protected BlockState blockStateForSpawn;
@@ -46,7 +45,7 @@ public class MoeDieEntity extends DieEntity {
                 moe.setBlockData(state);
                 moe.setExtraBlockData(extra != null ? extra.getTileData() : new CompoundNBT());
                 moe.setDere(this.dere);
-                moe.getDatingState().get(this.getPlayer() != null ? this.getPlayer().getUniqueID() : UUID.randomUUID()).addTrust(100);
+                //moe.getDatingState().get(this.getPlayer() != null ? this.getPlayer().getUniqueID() : UUID.randomUUID()).addTrust(100);
                 if (this.world.addEntity(moe)) {
                     moe.onInitialSpawn((ServerWorld) this.world, this.world.getDifficultyForLocation(this.getPosition()), SpawnReason.TRIGGERED, null, null);
                     this.world.setBlockState(this.getPositionUnderneath(), Blocks.AIR.getDefaultState());
@@ -67,9 +66,9 @@ public class MoeDieEntity extends DieEntity {
 
     @Override
     public boolean onActionStart(BlockState state, BlockPos pos, Face face) {
-        if (state.getBlock().isIn(MoeTags.BLOCKS)) {
+        if (state.getBlock().isIn(MoeTags.MOEABLES)) {
             this.blockStateForSpawn = state;
-            this.dere = Deres.from(face);
+            this.dere = Deres.get(face);
             this.timeUntilSpawned = 30;
             return true;
         }

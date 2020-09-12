@@ -1,12 +1,12 @@
 package moe.blocks.mod.client.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import moe.blocks.mod.MoeMod;
 import moe.blocks.mod.client.model.MoeModel;
 import moe.blocks.mod.client.render.layer.MoeEmotionLayer;
-import moe.blocks.mod.client.render.layer.MoeEyepatchLayer;
 import moe.blocks.mod.client.render.layer.MoeGlowLayer;
+import moe.blocks.mod.client.render.layer.MoeSleepingLayer;
 import moe.blocks.mod.entity.MoeEntity;
+import moe.blocks.mod.init.MoeBlocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -24,8 +24,8 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
         super(manager, new MoeModel<>(), 0.25F);
         this.addLayer(new HeldItemLayer<>(this));
         this.addLayer(new MoeEmotionLayer(this));
+        this.addLayer(new MoeSleepingLayer(this));
         this.addLayer(new MoeGlowLayer(this));
-        this.addLayer(new MoeEyepatchLayer(this));
     }
 
     @Override
@@ -38,7 +38,7 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
 
     @Override
     public ResourceLocation getEntityTexture(MoeEntity entity) {
-        return new ResourceLocation(MoeMod.ID, String.format("textures/entity/moe/%s.png", entity.getBehavior().getPath()));
+        return MoeBlocks.getNameOf(entity.getBlockData());
     }
 
     @Override
@@ -52,10 +52,9 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
             FontRenderer font = this.getFontRendererFromRenderManager();
             int x = -font.getStringWidth(lines[i]) / 2;
             int y = i * -10;
-            int color = this.getColor(entity);
             Matrix4f matrix = stack.getLast().getMatrix();
             int alpha = (int) (Minecraft.getInstance().gameSettings.getTextBackgroundOpacity(0.25F) * 255.0F) << 24;
-            font.renderString(lines[i], x, y, color, false, matrix, buffer, false, alpha, packedLight);
+            font.renderString(lines[i], x, y, 0xFFFFFFFF, false, matrix, buffer, false, alpha, packedLight);
         }
         stack.pop();
     }
@@ -64,10 +63,6 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
         int health = (int) Math.ceil(entity.getHealth());
         int max = (int) Math.ceil(entity.getMaxHealth());
         return String.format("%d / %d", health, max);
-    }
-
-    public int getColor(MoeEntity entity) {
-        return entity.getDere().getNameColor();
     }
 
     @Override

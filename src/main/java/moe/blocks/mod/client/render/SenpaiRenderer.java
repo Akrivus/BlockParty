@@ -2,7 +2,6 @@ package moe.blocks.mod.client.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import moe.blocks.mod.MoeMod;
-import moe.blocks.mod.client.model.SenpaiModel;
 import moe.blocks.mod.entity.SenpaiEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -10,15 +9,16 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.HeldItemLayer;
+import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 
-public class SenpaiRenderer extends MobRenderer<SenpaiEntity, SenpaiModel> implements IRenderFactory<SenpaiEntity> {
+public class SenpaiRenderer extends MobRenderer<SenpaiEntity, PlayerModel<SenpaiEntity>> implements IRenderFactory<SenpaiEntity> {
 
     public SenpaiRenderer(EntityRendererManager manager) {
-        super(manager, new SenpaiModel(), 0.5F);
+        super(manager, new PlayerModel<>(0.0F, true), 0.5F);
         this.addLayer(new HeldItemLayer<>(this));
     }
 
@@ -59,11 +59,11 @@ public class SenpaiRenderer extends MobRenderer<SenpaiEntity, SenpaiModel> imple
     }
 
     public int getColor(SenpaiEntity entity) {
-        return entity.getDere().getNameColor();
+        return 0xffffff;
     }
 
     @Override
-    public MobRenderer<SenpaiEntity, SenpaiModel> createRenderFor(EntityRendererManager manager) {
+    public MobRenderer<SenpaiEntity, PlayerModel<SenpaiEntity>> createRenderFor(EntityRendererManager manager) {
         return new SenpaiRenderer(manager);
     }
 }

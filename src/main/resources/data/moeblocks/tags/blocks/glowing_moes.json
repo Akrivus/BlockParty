@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:beacon",
+    "minecraft:brewing_stand",
+    "minecraft:bricks",
+    "minecraft:conduit",
+    "minecraft:dragon_egg",
+    "minecraft:furnace",
+    "minecraft:magma_block",
+    "minecraft:netherite_block",
+    "minecraft:crimson_nylium",
+    "minecraft:warped_nylium",
+    "minecraft:observer",
+    "minecraft:redstone_block",
+    "minecraft:redstone_lamp",
+    "minecraft:respawn_anchor",
+    "minecraft:sea_lantern",
+    "minecraft:shroomlight"
+  ]
+}

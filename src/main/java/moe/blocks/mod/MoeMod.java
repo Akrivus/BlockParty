@@ -1,8 +1,6 @@
 package moe.blocks.mod;
 
 import moe.blocks.mod.init.*;
-import moe.blocks.mod.init.DispenserBehaviors;
-import moe.blocks.mod.init.MoeBlockAliases;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -38,6 +36,6 @@ public class MoeMod {
     private void onCommonSetup(final FMLCommonSetupEvent e) {
         DispenserBehaviors.register();
         MoeEntities.registerAttributes();
-        MoeBlockAliases.register();
+        MoeBlocks.register();
     }
 }

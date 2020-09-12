@@ -1,7 +1,7 @@
 package moe.blocks.mod.init;
 
 import moe.blocks.mod.MoeMod;
-import moe.blocks.mod.message.OpenYearbookMessage;
+import moe.blocks.mod.message.SOpenYearBook;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.NetworkManager;
@@ -22,7 +22,7 @@ public class MoeMessages {
     private static int currentMessageID = 1;
 
     static {
-        MESSAGES.add(new MessageContainer<>(OpenYearbookMessage.class, OpenYearbookMessage::decode, OpenYearbookMessage::encode, OpenYearbookMessage::handle));
+        MESSAGES.add(new MessageContainer<>(SOpenYearBook.class, SOpenYearBook::decode, SOpenYearBook::encode, SOpenYearBook::handle));
     }
 
     public static SimpleChannel register() {

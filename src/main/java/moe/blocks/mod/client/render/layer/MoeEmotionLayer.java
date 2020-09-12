@@ -21,7 +21,7 @@ public class MoeEmotionLayer extends LayerRenderer<MoeEntity, MoeModel<MoeEntity
 
     @Override
     public void render(MatrixStack stack, IRenderTypeBuffer buffer, int packedLight, MoeEntity entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (this.isWithinDistance(entity.getPositionVec()) && !entity.isInvisible()) {
+        if (this.isWithinDistance(entity.getPositionVec()) && !entity.isInvisible() && !entity.isSleeping()) {
             this.getEntityModel().render(stack, buffer.getBuffer(RenderType.getEntityCutout(this.getEyesTexture(entity))), packedLight, LivingRenderer.getPackedOverlay(entity, 0.0F), this.getRGB(entity, 0), this.getRGB(entity, 1), this.getRGB(entity, 2), 1.0F);
             this.getEntityModel().render(stack, buffer.getBuffer(RenderType.getEntityTranslucent(this.getFaceTexture(entity))), packedLight, LivingRenderer.getPackedOverlay(entity, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
         }
@@ -33,14 +33,14 @@ public class MoeEmotionLayer extends LayerRenderer<MoeEntity, MoeModel<MoeEntity
     }
 
     public ResourceLocation getEyesTexture(MoeEntity entity) {
-        return new ResourceLocation(MoeMod.ID, String.format("textures/entity/moe/emotions/%s.eyes.png", entity.getEmotion().getPath()));
+        return new ResourceLocation(MoeMod.ID, String.format("textures/entity/moe/emotions/%s.eyes.png", entity.getEmotion().toString().toLowerCase()));
     }
 
     public float getRGB(MoeEntity entity, int index) {
-        return entity.getDere().getEyeColor()[index];
+        return entity.getEyeColor()[index];
     }
 
     public ResourceLocation getFaceTexture(MoeEntity entity) {
-        return new ResourceLocation(MoeMod.ID, String.format("textures/entity/moe/emotions/%s.png", entity.getEmotion().getPath()));
+        return new ResourceLocation(MoeMod.ID, String.format("textures/entity/moe/emotions/%s.png", entity.getEmotion().toString().toLowerCase()));
     }
 }

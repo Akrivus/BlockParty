@@ -3,7 +3,7 @@ package moe.blocks.mod.client.render;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import moe.blocks.mod.MoeMod;
-import moe.blocks.mod.client.model.DieModel;
+import moe.blocks.mod.client.model.DieCubeModel;
 import moe.blocks.mod.entity.MoeDieEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -14,7 +14,7 @@ import net.minecraftforge.fml.client.registry.IRenderFactory;
 
 public class MoeDieRenderer extends EntityRenderer<MoeDieEntity> implements IRenderFactory<MoeDieEntity> {
     public static ResourceLocation DIE_TEXTURE = new ResourceLocation(MoeMod.ID, "textures/entity/moe_die.png");
-    protected final DieModel<MoeDieEntity> model = new DieModel<>();
+    protected final DieCubeModel<MoeDieEntity> model = new DieCubeModel<>();
 
     public MoeDieRenderer(EntityRendererManager manager) {
         super(manager);

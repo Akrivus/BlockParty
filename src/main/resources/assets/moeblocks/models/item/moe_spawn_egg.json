@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "moeblocks:item/moe_spawn_egg"
+  }
+}

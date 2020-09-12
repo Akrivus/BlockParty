@@ -1,7 +1,6 @@
 package moe.blocks.mod.init;
 
 import moe.blocks.mod.entity.MoeDieEntity;
-import moe.blocks.mod.init.MoeItems;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.dispenser.ProjectileDispenseBehavior;
