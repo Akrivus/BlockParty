@@ -1,7 +1,7 @@
 package moe.blocks.mod.init;
 
 import moe.blocks.mod.MoeMod;
-import moe.blocks.mod.message.SOpenYearBook;
+import moe.blocks.mod.message.YearbookMessages;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.NetworkManager;
@@ -13,16 +13,17 @@ import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class MoeMessages {
-    private static final ArrayList<MessageContainer<?>> MESSAGES = new ArrayList<>();
+    private static final List<MessageContainer<?>> MESSAGES = new ArrayList<>();
     private static int currentMessageID = 1;
 
     static {
-        MESSAGES.add(new MessageContainer<>(SOpenYearBook.class, SOpenYearBook::decode, SOpenYearBook::encode, SOpenYearBook::handle));
+        MESSAGES.add(new MessageContainer<>(YearbookMessages.Open.class, YearbookMessages.Open::decode, YearbookMessages.Open::encode, YearbookMessages.Open::handle));
     }
 
     public static SimpleChannel register() {

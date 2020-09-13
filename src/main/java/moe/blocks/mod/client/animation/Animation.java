@@ -3,19 +3,17 @@ package moe.blocks.mod.client.animation;
 import moe.blocks.mod.client.Animations;
 import moe.blocks.mod.client.model.MoeModel;
 import moe.blocks.mod.entity.MoeEntity;
-import moe.blocks.mod.entity.partial.InteractiveEntity;
+import moe.blocks.mod.entity.partial.InteractEntity;
 
-public class Animation {
+public abstract class Animation {
 
-    public void setMoeRotationAngles(MoeModel model, MoeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks) {
-
-    }
+    public abstract void setMoeRotationAngles(MoeModel model, MoeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks);
 
     public void render() {
 
     }
 
-    public void tick(InteractiveEntity entity) {
+    public void tick(InteractEntity entity) {
 
     }
 
@@ -24,7 +22,5 @@ public class Animation {
         return this.getKey().name();
     }
 
-    public Animations getKey() {
-        return Animations.DEFAULT;
-    }
+    public abstract Animations getKey();
 }

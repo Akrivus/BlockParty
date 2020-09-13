@@ -23,7 +23,7 @@ public enum BloodTypes {
     }
 
     public static BloodTypes weigh(Random rand) {
-        ArrayList<BloodTypes> weights = new ArrayList<>();
+        List<BloodTypes> weights = new ArrayList<>();
         for (BloodTypes bloodType : BloodTypes.values()) {
             weights.addAll(bloodType.weights);
         }

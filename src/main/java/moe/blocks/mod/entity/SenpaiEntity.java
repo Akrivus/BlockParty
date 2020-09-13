@@ -1,7 +1,6 @@
 package moe.blocks.mod.entity;
 
 import moe.blocks.mod.entity.partial.CharacterEntity;
-import moe.blocks.mod.entity.partial.InteractiveEntity;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;

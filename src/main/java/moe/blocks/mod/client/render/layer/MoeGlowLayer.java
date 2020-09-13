@@ -1,7 +1,6 @@
 package moe.blocks.mod.client.render.layer;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import moe.blocks.mod.MoeMod;
 import moe.blocks.mod.client.model.MoeModel;
 import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.init.MoeBlocks;

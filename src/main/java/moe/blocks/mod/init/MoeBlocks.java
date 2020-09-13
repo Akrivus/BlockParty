@@ -5,7 +5,6 @@ import net.minecraft.block.*;
 import net.minecraft.state.Property;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraftforge.fml.RegistryObject;
 
 import java.util.HashMap;
 

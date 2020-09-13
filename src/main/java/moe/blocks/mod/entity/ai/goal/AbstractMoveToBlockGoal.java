@@ -37,6 +37,7 @@ public abstract class AbstractMoveToBlockGoal<T extends NPCEntity> extends Goal 
     @Override
     public boolean shouldExecute() {
         if (++this.timeUntilReset > 100 && this.isHoldingCorrectItem(this.entity.getHeldItem(Hand.MAIN_HAND))) {
+            this.world.getProfiler().startSection("findBlocks");
             for (int y = 0; y < this.height; ++y) {
                 for (int x = 0; x < this.width; ++x) {
                     for (int z = 0; z < this.width; ++z) { if (this.setEdgePos(x, y, z)) { break; } }
@@ -50,13 +51,14 @@ public abstract class AbstractMoveToBlockGoal<T extends NPCEntity> extends Goal 
             this.edges.sort(new BlockDistance(this.entity));
             for (BlockPos edge : this.edges) {
                 if (this.canMoveTo(edge, this.world.getBlockState(edge))) {
-                    this.pos = edge;
-                    this.path = this.entity.getNavigator().getPathToPos(this.pos, 0);
-                    return this.path != null;
+                    this.path = this.entity.getNavigator().getPathToPos((this.pos = edge), 0);
+                    if (this.path != null) { break; }
                 }
             }
+            this.world.getProfiler().endSection();
         }
-        return false;
+        this.edges.clear();
+        return this.path != null;
     }
 
     protected abstract boolean isHoldingCorrectItem(ItemStack stack);
@@ -71,7 +73,7 @@ public abstract class AbstractMoveToBlockGoal<T extends NPCEntity> extends Goal 
 
     @Override
     public boolean shouldContinueExecuting() {
-        return --this.timeUntilReset > 0 && this.world.getBlockState(this.pos).equals(this.state);
+        return --this.timeUntilReset > 0 && this.entity.hasPath();
     }
 
     @Override
@@ -83,7 +85,7 @@ public abstract class AbstractMoveToBlockGoal<T extends NPCEntity> extends Goal 
     @Override
     public void resetTask() {
         this.entity.getNavigator().clearPath();
-        this.edges.clear();
+        this.path = null;
     }
 
     @Override

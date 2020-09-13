@@ -1,13 +1,23 @@
 package moe.blocks.mod.entity.partial;
 
-import moe.blocks.mod.dating.Characters;
-import moe.blocks.mod.entity.ai.BloodTypes;
+import moe.blocks.mod.dating.Interactions;
+import moe.blocks.mod.dating.Relationship;
+import moe.blocks.mod.dating.Tropes;
+import moe.blocks.mod.dating.convo.Reactions;
+import moe.blocks.mod.entity.ai.automata.State;
+import moe.blocks.mod.entity.ai.automata.States;
+import moe.blocks.mod.entity.ai.automata.state.Emotions;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ILivingEntityData;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -15,10 +25,46 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 
-public abstract class CharacterEntity extends InteractiveEntity {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+public abstract class CharacterEntity extends InteractEntity {
+    protected final List<Relationship> relationships = new ArrayList<>();
 
     protected CharacterEntity(EntityType<? extends CreatureEntity> type, World world) {
         super(type, world);
+    }
+
+    @Override
+    public ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
+        if (this.isRemote() || hand == Hand.OFF_HAND) { return ActionResultType.PASS; }
+        Relationship relationship = this.getRelationshipWith(player);
+        this.setNextState(States.REACTION, relationship.getReaction(Interactions.HEADPAT));
+        if (relationship.can(Relationship.Actions.FOLLOW)) {
+            this.setFollowTarget(player.equals(this.getFollowTarget()) ? null : player);
+        }
+        return ActionResultType.SUCCESS;
+    }
+
+    @Override
+    public void writeAdditional(CompoundNBT compound) {
+        super.writeAdditional(compound);
+        ListNBT relationships = new ListNBT();
+        this.relationships.forEach(relationship -> relationships.add(relationship.write(new CompoundNBT())));
+        compound.put("Relationships", relationships);
+    }
+
+    @Override
+    public void readAdditional(CompoundNBT compound) {
+        super.readAdditional(compound);
+        ListNBT relationships = compound.getList("Relationships", 10);
+        relationships.forEach(relationship -> this.relationships.add(new Relationship(relationship)));
+    }
+
+    @Override
+    public void registerStates(HashMap<States, State> states) {
+        states.put(States.REACTION, Reactions.NONE.state.start(this));
     }
 
     @Override
@@ -38,11 +84,6 @@ public abstract class CharacterEntity extends InteractiveEntity {
     }
 
     @Override
-    public boolean getAlwaysRenderNameTagForRender() {
-        return Minecraft.getInstance().player.getDistance(this) < 8.0F;
-    }
-
-    @Override
     public boolean hasCustomName() {
         return true;
     }
@@ -55,8 +96,25 @@ public abstract class CharacterEntity extends InteractiveEntity {
         return this.getGender() == Gender.FEMININE ? "chan" : "kun";
     }
 
-    public Characters getCharacter() {
-        return Characters.get(this.getDere(), this.getBloodType());
+    @Override
+    public boolean getAlwaysRenderNameTagForRender() {
+        return Minecraft.getInstance().player.getDistance(this) < 8.0F;
+    }
+
+    public Tropes getTrope() {
+        return Tropes.get(this.getDere(), this.getBloodType());
+    }
+
+    public Relationship getRelationshipWith(PlayerEntity player) {
+        return this.relationships.stream().filter(relationship -> relationship.isPlayer(player)).findFirst().orElse(new Relationship(player));
+    }
+
+    @Override
+    public void tick() {
+        super.livingTick();
+        this.world.getProfiler().startSection("relationships");
+        this.relationships.forEach(relationship -> relationship.tick());
+        this.world.getProfiler().endSection();
     }
 
     public enum Gender {

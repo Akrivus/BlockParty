@@ -1,7 +1,7 @@
 package moe.blocks.mod.util;
 
 import moe.blocks.mod.entity.MoeEntity;
-import moe.blocks.mod.entity.partial.InteractiveEntity;
+import moe.blocks.mod.entity.partial.InteractEntity;
 import moe.blocks.mod.init.MoeSounds;
 import net.minecraft.util.SoundEvent;
 
@@ -40,7 +40,7 @@ public enum VoiceLines {
         this.senpai = moe;
     }
 
-    public SoundEvent get(InteractiveEntity entity) {
+    public SoundEvent get(InteractEntity entity) {
         return entity instanceof MoeEntity ? this.moe : this.senpai;
     }
 }

@@ -5,6 +5,7 @@ import moe.blocks.mod.entity.partial.NPCEntity;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.*;
 import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.math.BlockPos;
@@ -56,12 +57,15 @@ public class OpenDoorGoal extends Goal {
         Block block = state.getBlock();
         if (block instanceof FenceGateBlock) {
             this.entity.world.setBlockState(this.pos, state.with(FenceGateBlock.OPEN, open));
+            this.entity.world.playEvent(null, open ? 1008 : 1014, this.pos, 0);
         }
         if (block instanceof DoorBlock) {
             this.entity.world.setBlockState(this.pos, state.with(DoorBlock.OPEN, open));
+            this.entity.world.playEvent(null, open ? 1006 : 1012, this.pos, 0);
         }
         if (block instanceof TrapDoorBlock) {
             this.entity.world.setBlockState(this.pos, state.with(TrapDoorBlock.OPEN, open));
+            this.entity.world.playEvent(null, open ? 1007 : 1013, this.pos, 0);
         }
     }
 

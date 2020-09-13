@@ -2,13 +2,11 @@ package moe.blocks.mod.item;
 
 import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.entity.SenpaiEntity;
-import moe.blocks.mod.entity.partial.InteractiveEntity;
+import moe.blocks.mod.entity.partial.InteractEntity;
 import moe.blocks.mod.init.MoeEntities;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeMessages;
-import moe.blocks.mod.message.SOpenYearBook;
-import moe.blocks.mod.util.RomanNumerals;
-import moe.blocks.mod.world.data.CraftingData;
+import moe.blocks.mod.message.YearbookMessages;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -36,10 +34,10 @@ public class YearBookItem extends Item {
         super(new Properties().group(MoeItems.Group.INSTANCE));
     }
 
-    public static InteractiveEntity getPage(World world, ItemStack stack, int page) {
+    public static InteractEntity getPage(World world, ItemStack stack, int page) {
         CompoundNBT stem = getYearbookInfo(stack);
         CompoundNBT info = (CompoundNBT) stem.get(stem.keySet().toArray(new String[0])[page]);
-        InteractiveEntity entity = info.contains("BlockData") ? new MoeEntity(MoeEntities.MOE.get(), world) : new SenpaiEntity(MoeEntities.SENPAI.get(), world);
+        InteractEntity entity = info.contains("BlockData") ? new MoeEntity(MoeEntities.MOE.get(), world) : new SenpaiEntity(MoeEntities.SENPAI.get(), world);
         entity.read(info);
         return entity;
     }
@@ -52,7 +50,7 @@ public class YearBookItem extends Item {
         return new CompoundNBT();
     }
 
-    public static int getPage(ItemStack stack, InteractiveEntity entity) {
+    public static int getPage(ItemStack stack, InteractEntity entity) {
         CompoundNBT stem = getYearbookInfo(stack);
         String[] keys = stem.keySet().toArray(new String[0]);
         for (int i = 0; i < keys.length; ++i) {
@@ -68,7 +66,7 @@ public class YearBookItem extends Item {
         if (world instanceof ServerWorld) {
             ItemStack stack = player.getHeldItem(hand);
             updateYearbookInfo(stack, world);
-            MoeMessages.send(new SOpenYearBook(stack, player));
+            MoeMessages.send(new YearbookMessages.Open(stack, player));
             return ActionResult.resultSuccess(stack);
         }
         return super.onItemRightClick(world, player, hand);
@@ -76,8 +74,8 @@ public class YearBookItem extends Item {
 
     @Override
     public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity target, Hand hand) {
-        if (target.world instanceof ServerWorld && target instanceof InteractiveEntity) {
-            InteractiveEntity entity = (InteractiveEntity) target;
+        if (target.world instanceof ServerWorld && target instanceof InteractEntity) {
+            InteractEntity entity = (InteractEntity) target;
             updateYearbookInfo(stack, entity.world);
             int page = getPage(stack, entity);
             if (page < 0) {
@@ -90,7 +88,7 @@ public class YearBookItem extends Item {
                 }
             }
             player.setHeldItem(hand, stack);
-            MoeMessages.send(new SOpenYearBook(stack, player, page));
+            MoeMessages.send(new YearbookMessages.Open(stack, player, page));
         }
         return ActionResultType.SUCCESS;
     }
@@ -99,7 +97,7 @@ public class YearBookItem extends Item {
     public void onCreated(ItemStack stack, World world, PlayerEntity player) {
         CompoundNBT compound = stack.hasTag() ? stack.getShareTag() : new CompoundNBT();
         compound.putString("Author", player.getName().getString());
-        compound.putString("Edition", RomanNumerals.convert(CraftingData.get(world).getYearbookEdition(player)));
+        //compound.putString("Edition", RomanNumerals.convert(YearBookData.get(world).getYearbookEdition(player)));
         stack.setTag(compound);
     }
 
@@ -139,12 +137,12 @@ public class YearBookItem extends Item {
             ServerWorld server = (ServerWorld) world;
             Iterator<String> it = stem.keySet().iterator();
             while (it.hasNext()) {
-                setPage(stack, (InteractiveEntity) server.getEntityByUuid(UUID.fromString(it.next())));
+                setPage(stack, (InteractEntity) server.getEntityByUuid(UUID.fromString(it.next())));
             }
         }
     }
 
-    public static void setPage(ItemStack stack, InteractiveEntity entity) {
+    public static void setPage(ItemStack stack, InteractEntity entity) {
         if (entity != null) {
             CompoundNBT stem = getYearbookInfo(stack);
             stem.put(entity.getUniqueID().toString(), entity.writeWithoutTypeId(new CompoundNBT()));

@@ -39,10 +39,12 @@ import net.minecraft.world.server.ServerWorld;
 
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class NPCEntity extends CreatureEntity {
     public static final DataParameter<Boolean> SITTING = EntityDataManager.createKey(NPCEntity.class, DataSerializers.BOOLEAN);
     protected HashMap<States, State> states;
+    protected Consumer<NPCEntity> nextTickOp;
     protected long age;
     private float hungerLevel = 20.0F;
     private float saturation = 5.0F;
@@ -122,6 +124,12 @@ public class NPCEntity extends CreatureEntity {
         this.updateArmSwingProgress();
         super.livingTick();
         ++this.age;
+        if (this.nextTickOp != null) {
+            this.world.getProfiler().startSection("nextTickOp");
+            this.nextTickOp.accept(this);
+            this.nextTickOp = null;
+            this.world.getProfiler().endSection();
+        }
         if (++this.timeSinceSleep > 24000) {
             this.addStressLevel(0.0005F);
         }
@@ -131,40 +139,18 @@ public class NPCEntity extends CreatureEntity {
         this.stressLevel = Math.min(this.stressLevel + stressLevel, 20.0F);
     }
 
-    @Override
-    public void updateAITasks() {
-        if (this.updateItemState) { this.updateItemState(); }
-        super.updateAITasks();
-    }
-
     public void updateItemState() {
         this.setNextState(States.HELD_ITEM, ItemStates.get(this.getHeldItem(Hand.MAIN_HAND)).state);
         this.updateItemState = false;
     }
 
-    @Override
-    protected float getDropChance(EquipmentSlotType slot) {
-        return 0.0F;
-    }
-
-    @Override
-    protected void setEquipmentBasedOnDifficulty(DifficultyInstance difficulty) {
-
-    }
-
-    @Override
-    public boolean canPickUpItem(ItemStack stack) {
-        return true;
-    }
-
-    @Override
-    public boolean canAttack(LivingEntity target) {
-        return this.canBeTarget(target);
-    }
-
     public State setNextState(States key, State state) {
         if (this.states.get(key) != null) { this.states.get(key).clean(this); }
         return this.states.put(key, state.start(this));
+    }
+
+    public void setNextTickOp(Consumer<NPCEntity> nextTickOp) {
+        this.nextTickOp = nextTickOp;
     }
 
     protected void registerStates(HashMap<States, State> states) {
@@ -226,15 +212,11 @@ public class NPCEntity extends CreatureEntity {
     }
 
     public boolean canSee(Entity entity) {
-        if (this.canBeTarget(entity)) {
-            this.getLookController().setLookPositionWithEntity(entity, 30.0F, this.getVerticalFaceSpeed());
-            return this.getEntitySenses().canSee(entity);
+        if (this.canBeTarget(entity) && this.getEntitySenses().canSee(entity)) {
+            this.getLookController().setLookPositionWithEntity(entity, this.getHorizontalFaceSpeed(), this.getVerticalFaceSpeed());
+            return true;
         }
         return false;
-    }
-
-    public boolean canBeTarget(Entity target) {
-        return target != null && target.isAlive() && !target.equals(this) && !target.isOnSameTeam(this);
     }
 
     @Override
@@ -383,6 +365,30 @@ public class NPCEntity extends CreatureEntity {
     }
 
     @Override
+    protected float getDropChance(EquipmentSlotType slot) {
+        return 0.0F;
+    }
+
+    @Override
+    protected void setEquipmentBasedOnDifficulty(DifficultyInstance difficulty) {
+
+    }
+
+    @Override
+    public boolean canPickUpItem(ItemStack stack) {
+        return true;
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        return this.canBeTarget(target);
+    }
+
+    public boolean canBeTarget(Entity target) {
+        return target != null && target.isAlive() && !target.equals(this);
+    }
+
+    @Override
     protected boolean shouldExchangeEquipment(ItemStack candidate, ItemStack existing) {
         EquipmentSlotType slot = this.getSlotForStack(candidate);
         if (EnchantmentHelper.hasBindingCurse(existing)) {
@@ -418,6 +424,12 @@ public class NPCEntity extends CreatureEntity {
         return false;
     }
 
+    @Override
+    public void updateAITasks() {
+        if (this.updateItemState) { this.updateItemState(); }
+        super.updateAITasks();
+    }
+
     public EquipmentSlotType getSlotForStack(ItemStack stack) {
         EquipmentSlotType slot = MobEntity.getSlotForItemStack(stack);
         if (this.isAmmo(stack.getItem()) || stack.isFood()) {
@@ -432,7 +444,8 @@ public class NPCEntity extends CreatureEntity {
 
     public LivingEntity getEntityFromUUID(UUID uuid) {
         if (uuid != null && this.world instanceof ServerWorld) {
-            Entity entity = ((ServerWorld) this.world).getEntityByUuid(uuid);
+            ServerWorld server = (ServerWorld) this.world;
+            Entity entity = server.getEntityByUuid(uuid);
             if (entity instanceof LivingEntity) {
                 return (LivingEntity) entity;
             }

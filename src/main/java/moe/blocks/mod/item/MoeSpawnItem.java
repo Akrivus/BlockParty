@@ -2,7 +2,6 @@ package moe.blocks.mod.item;
 
 import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.entity.ai.automata.state.Deres;
-import moe.blocks.mod.entity.partial.InteractiveEntity;
 import moe.blocks.mod.init.MoeEntities;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeTags;
@@ -13,7 +12,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 

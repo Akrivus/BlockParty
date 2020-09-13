@@ -12,6 +12,7 @@ public abstract class AbstractFollowEntityGoal<E extends NPCEntity, T extends En
     protected final Class<T> type;
     protected final double speed;
     protected T target;
+    protected int timeUntilReset;
 
     public AbstractFollowEntityGoal(E entity, Class<T> type, double speed) {
         this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE));
@@ -23,25 +24,29 @@ public abstract class AbstractFollowEntityGoal<E extends NPCEntity, T extends En
     @Override
     public boolean shouldExecute() {
         T target = this.getTarget();
-        if (this.entity.canBeTarget(target) && this.canFollow(target)) { this.target = target; }
-        return this.target != null;
+        if (this.entity.canBeTarget(target) && this.entity.getDistance(target) > this.getFollowDistance(target) && this.canFollow(target)) {
+            this.target = target;
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.entity.hasPath() && this.entity.canBeTarget(this.target) && this.target.equals(this.getTarget()) && this.canFollow(this.target);
+        return this.entity.hasPath() && this.entity.canBeTarget(this.target) && this.entity.getDistance(this.target) > this.getFollowDistance(this.target);
     }
 
     public abstract T getTarget();
 
+    public abstract boolean canFollow(T target);
+
     @Override
     public void startExecuting() {
-        this.entity.getNavigator().tryMoveToEntityLiving(this.target, this.speed);
-        this.entity.getLookController().setLookPositionWithEntity(this.target, this.entity.getHorizontalFaceSpeed(), this.entity.getVerticalFaceSpeed());
-        this.onFollow();
+        if (this.entity.getNavigator().tryMoveToEntityLiving(this.target, this.speed)) {
+            this.timeUntilReset = 200;
+            this.onFollow();
+        }
     }
-
-    public abstract boolean canFollow(T target);
 
     @Override
     public void resetTask() {
@@ -51,13 +56,14 @@ public abstract class AbstractFollowEntityGoal<E extends NPCEntity, T extends En
 
     @Override
     public void tick() {
-        if (this.entity.getDistance(this.target) > this.getReachDistance()) { this.startExecuting(); }
-        if (this.entity.getDistance(this.target) < this.getReachDistance()) { this.onArrival(); }
+        this.entity.canSee(this.target);
+        if (this.entity.getDistance(this.target) < this.getFollowDistance(this.target)) {
+            this.timeUntilReset = 0;
+            this.onArrival();
+        }
     }
 
-    public float getReachDistance() {
-        return (float) (Math.pow(this.entity.getWidth() * 2.0F, 2) + this.target.getWidth());
-    }
+    public abstract float getFollowDistance(T target);
 
     public abstract void onFollow();
 

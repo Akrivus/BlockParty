@@ -1,10 +1,11 @@
-package moe.blocks.mod.client.animation;
+package moe.blocks.mod.client.animation.state;
 
 import moe.blocks.mod.client.Animations;
+import moe.blocks.mod.client.animation.Animation;
 import moe.blocks.mod.client.model.MoeModel;
 import moe.blocks.mod.entity.MoeEntity;
 
-public class AimAnimation extends Animation {
+public class Aim extends Animation {
 
     @Override
     public void setMoeRotationAngles(MoeModel model, MoeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks) {

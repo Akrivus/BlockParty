@@ -1,11 +1,9 @@
 package moe.blocks.mod.entity;
 
-import moe.blocks.mod.dating.Characters;
 import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.ai.automata.state.BlockStates;
 import moe.blocks.mod.entity.ai.automata.state.Deres;
 import moe.blocks.mod.entity.partial.CharacterEntity;
-import moe.blocks.mod.entity.partial.InteractiveEntity;
 import moe.blocks.mod.init.MoeBlocks;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.Block;
@@ -28,9 +26,10 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.*;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.LanguageMap;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import org.apache.commons.codec.language.bm.Lang;
 
 import java.util.Optional;
 
@@ -51,6 +50,30 @@ public class MoeEntity extends CharacterEntity {
     }
 
     @Override
+    public void livingTick() {
+        super.livingTick();
+        if (this.isBurning() && this.isReallyImmuneToFire()) {
+            this.extinguish();
+        }
+    }
+
+    @Override
+    public int getBaseAge() {
+        return (int) ((this.getScale() + 3.75F) / 2);
+    }
+
+    @Override
+    public void notifyDataManagerChange(DataParameter<?> key) {
+        if (BLOCK_STATE.equals(key) && this.isLocal()) { this.setNextState(States.BLOCK_STATE, BlockStates.get(this.getBlockData()).state); }
+        if (SCALE.equals(key)) { this.recalculateSize(); }
+        super.notifyDataManagerChange(key);
+    }
+
+    public boolean isReallyImmuneToFire() {
+        return !this.getBlockData().getMaterial().isFlammable();
+    }
+
+    @Override
     public void writeAdditional(CompoundNBT compound) {
         super.writeAdditional(compound);
         compound.putInt("BlockData", Block.getStateId(this.getBlockData()));
@@ -64,21 +87,23 @@ public class MoeEntity extends CharacterEntity {
         this.setExtraBlockData((CompoundNBT) compound.get("ExtraBlockData"));
     }
 
-    @Override
-    public void livingTick() {
-        super.livingTick();
-        if (this.isBurning() && this.isReallyImmuneToFire()) {
-            this.extinguish();
-        }
+    public Gender getGender() {
+        return this.getBlockData().isIn(MoeTags.MALE_MOES) ? Gender.MASCULINE : Gender.FEMININE;
     }
 
     @Override
-    public ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
-        return ActionResultType.PASS;
+    public String getTribeName() {
+        String key = String.format("entity.moeblocks.%s", this.getBlockName());
+        LanguageMap map = LanguageMap.getInstance();
+        if (!map.func_230506_b_(key)) { key = String.format("block.%s", this.getBlockName()); }
+        return map.func_230503_a_(key);
     }
 
-    public boolean isReallyImmuneToFire() {
-        return !this.getBlockData().getMaterial().isFlammable();
+    @Override
+    public String getHonorific() {
+        if (this.getBlockData().isIn(MoeTags.FULLSIZED_MOES)) { return super.getHonorific(); }
+        if (this.getBlockData().isIn(MoeTags.BABY_MOES)) { return "tan"; }
+        return this.getScale() < 1.0F ? "tan" : super.getHonorific();
     }
 
     public CompoundNBT getExtraBlockData() {
@@ -112,31 +137,6 @@ public class MoeEntity extends CharacterEntity {
         return this.getBlockData().hasTileEntity() ? TileEntity.readTileEntity(this.getBlockData(), this.getExtraBlockData()) : null;
     }
 
-    @Override
-    public void notifyDataManagerChange(DataParameter<?> key) {
-        if (BLOCK_STATE.equals(key) && this.isLocal()) { this.setNextState(States.BLOCK_STATE, BlockStates.get(this.getBlockData()).state); }
-        if (SCALE.equals(key)) { this.recalculateSize(); }
-        super.notifyDataManagerChange(key);
-    }
-
-    @Override
-    public EntitySize getSize(Pose pose) {
-        return super.getSize(pose).scale(this.getScale());
-    }
-
-    public float getScale() {
-        return this.dataManager.get(SCALE);
-    }
-
-    public void setScale(float scale) {
-        this.dataManager.set(SCALE, scale);
-    }
-
-    @Override
-    protected float getStandingEyeHeight(Pose pose, EntitySize size) {
-        return 0.908203125F * this.getScale();
-    }
-
     public boolean isBlockGlowing() {
         return this.getBlockData().isIn(MoeTags.GLOWING_MOES);
     }
@@ -166,6 +166,12 @@ public class MoeEntity extends CharacterEntity {
     }
 
     @Override
+    protected void playStepSound(BlockPos pos, BlockState block) {
+        this.playSound(MoeBlocks.getStepSound(this.getBlockData()), 0.15F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
+        super.playStepSound(pos, block);
+    }
+
+    @Override
     public boolean isImmuneToFire() {
         return this.getBlockData().isFlammable(this.world, this.getPosition(), this.getHorizontalFacing());
     }
@@ -178,44 +184,32 @@ public class MoeEntity extends CharacterEntity {
         return new TranslationTextComponent(key);
     }
 
-    @Override
-    public String getTribeName() {
-        String key = String.format("entity.moeblocks.%s", this.getBlockName());
-        LanguageMap map = LanguageMap.getInstance();
-        if (!map.func_230506_b_(key)) { key = String.format("block.%s", this.getBlockName()); }
-        return map.func_230503_a_(key);
-    }
-
-    @Override
-    public String getHonorific() {
-        if (this.getBlockData().isIn(MoeTags.FULLSIZED_MOES)) { return super.getHonorific(); }
-        if (this.getBlockData().isIn(MoeTags.BABY_MOES)) { return "tan"; }
-        return this.getScale() < 1.0F ? "tan" : super.getHonorific();
-    }
-
     public String getBlockName() {
         ResourceLocation block = MoeBlocks.get(this.getBlockData().getBlock()).getRegistryName();
         return String.format("%s.%s", block.getNamespace(), block.getPath());
     }
 
-    public Gender getGender() {
-        return this.getBlockData().isIn(MoeTags.MALE_MOES) ? Gender.MASCULINE : Gender.FEMININE;
-    }
-
-    @Override
-    public int getBaseAge() {
-        return (int)((this.getScale() + 3.75F) / 2);
-    }
-
-    @Override
-    protected void playStepSound(BlockPos pos, BlockState block) {
-        this.playSound(MoeBlocks.getStepSound(this.getBlockData()), 0.15F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
-        super.playStepSound(pos, block);
-    }
-
     @Override
     public float getSoundPitch() {
-        float hardness = (1.0F - (float)(this.getAttributeValue(Attributes.ARMOR) + 1.0F) / 31.0F) * 0.25F;
+        float hardness = (1.0F - (float) (this.getAttributeValue(Attributes.ARMOR) + 1.0F) / 31.0F) * 0.25F;
         return super.getSoundPitch() + hardness + (1.0F - this.getScale());
+    }
+
+    @Override
+    public EntitySize getSize(Pose pose) {
+        return super.getSize(pose).scale(this.getScale());
+    }
+
+    public float getScale() {
+        return this.dataManager.get(SCALE);
+    }
+
+    public void setScale(float scale) {
+        this.dataManager.set(SCALE, scale);
+    }
+
+    @Override
+    protected float getStandingEyeHeight(Pose pose, EntitySize size) {
+        return 0.908203125F * this.getScale();
     }
 }

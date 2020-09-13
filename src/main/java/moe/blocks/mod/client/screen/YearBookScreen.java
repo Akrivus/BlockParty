@@ -3,7 +3,7 @@ package moe.blocks.mod.client.screen;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moe.blocks.mod.MoeMod;
-import moe.blocks.mod.entity.partial.InteractiveEntity;
+import moe.blocks.mod.entity.partial.InteractEntity;
 import moe.blocks.mod.item.YearBookItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
@@ -37,7 +37,7 @@ public class YearBookScreen extends Screen {
     private YearBookScreen.ChangePageButton buttonPrevPage;
     private String name;
     private String pos;
-    private InteractiveEntity entity;
+    private InteractEntity entity;
     private int page;
 
     public YearBookScreen(ItemStack stack, UUID player) {

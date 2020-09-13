@@ -15,7 +15,6 @@ public abstract class AbstractMoveToEntityGoal<E extends NPCEntity, T extends En
     protected final Class<T> type;
     protected final double speed;
     protected T target;
-    protected Path path;
     protected int timeUntilReset;
 
     public AbstractMoveToEntityGoal(E entity, Class<T> type, double speed) {
@@ -27,13 +26,12 @@ public abstract class AbstractMoveToEntityGoal<E extends NPCEntity, T extends En
 
     @Override
     public boolean shouldExecute() {
-        List<T> targets = this.entity.world.getEntitiesWithinAABB(this.type, this.entity.getBoundingBox().grow(8.0D, 2.0D, 8.0D));
+        List<T> targets = this.entity.world.getEntitiesWithinAABB(this.type, this.entity.getBoundingBox().grow(4.0D, 2.0D, 4.0D));
         targets.sort(new EntityDistance(this.entity));
         for (T target : targets) {
             if (this.entity.canBeTarget(target) && this.entity.getDistance(target) > this.getDistanceThreshhold() && this.canMoveTo(target)) {
                 this.target = target;
-                this.path = this.entity.getNavigator().getPathToEntity(this.target, 0);
-                return this.path != null;
+                return true;
             }
         }
         return false;
@@ -41,13 +39,12 @@ public abstract class AbstractMoveToEntityGoal<E extends NPCEntity, T extends En
 
     @Override
     public boolean shouldContinueExecuting() {
-        return --this.timeUntilReset > 0 && this.entity.canBeTarget(this.target) && this.canMoveTo(this.target);
+        return --this.timeUntilReset > 0 && this.entity.canBeTarget(this.target);
     }
 
     @Override
     public void startExecuting() {
-        this.entity.getNavigator().setPath(this.path, this.speed);
-        this.timeUntilReset = 200;
+        if (this.entity.getNavigator().tryMoveToEntityLiving(this.target, this.speed)) { this.timeUntilReset = 200; }
     }
 
     @Override
@@ -57,13 +54,13 @@ public abstract class AbstractMoveToEntityGoal<E extends NPCEntity, T extends En
 
     @Override
     public void tick() {
-        if (this.entity.getDistance(this.target) < this.getReachDistance()) {
+        if (this.entity.canSee(this.target) && this.entity.getDistance(this.target) < this.getFollowDistance(this.target)) {
             this.timeUntilReset = 0;
             this.onArrival();
         }
     }
 
-    public float getReachDistance() {
+    public float getFollowDistance(T target) {
         return (float) (Math.pow(this.entity.getWidth() * 2.0F, 2) + this.target.getWidth());
     }
 

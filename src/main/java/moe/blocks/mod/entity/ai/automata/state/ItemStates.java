@@ -9,14 +9,12 @@ import moe.blocks.mod.entity.ai.goal.items.MineOresGoal;
 import moe.blocks.mod.entity.ai.goal.target.HostileMobsTarget;
 import moe.blocks.mod.entity.partial.NPCEntity;
 import moe.blocks.mod.init.MoeTags;
-import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.ITag;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Predicate;
 
 public enum ItemStates {
     DEFAULT(new BlankState()),
@@ -47,13 +45,13 @@ public enum ItemStates {
 
     public final State state;
 
+    ItemStates(State state, ITag.INamedTag<Item> tag) {
+        this(state, tag.getAllElements().toArray(new Item[0]));
+    }
+
     ItemStates(State state, Item... items) {
         this.state = state;
         for (Item item : items) { Registry.SET.put(item, this); }
-    }
-
-    ItemStates(State state, ITag.INamedTag<Item> tag) {
-        this(state, tag.getAllElements().toArray(new Item[0]));
     }
 
     public static ItemStates get(ItemStack stack) {

@@ -1,7 +1,6 @@
 package moe.blocks.mod.entity.ai.automata;
 
 import moe.blocks.mod.entity.MoeEntity;
-import moe.blocks.mod.entity.partial.NPCEntity;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.attributes.AttributeModifier;

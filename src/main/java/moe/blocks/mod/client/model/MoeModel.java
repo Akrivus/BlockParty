@@ -320,7 +320,7 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
         this.leftArm.rotateAngleX += this.body.rotateAngleY;
         this.rightArm.rotateAngleY += this.body.rotateAngleY;
         this.leftArm.rotateAngleY += this.body.rotateAngleY;
-        swingProgress = (float)(1.0F - Math.pow(Math.pow(1.0F - swingProgress, 2), 2));
+        swingProgress = (float) (1.0F - Math.pow(Math.pow(1.0F - swingProgress, 2), 2));
         float swingRotation = MathHelper.sin(swingProgress * 3.14F);
         float swingHeadings = swingRotation * -(this.head.rotateAngleX - 0.7F) * 0.5F;
         ModelRenderer arm = this.getArmForSide(hand);

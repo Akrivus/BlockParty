@@ -1,6 +1,6 @@
 package moe.blocks.mod.entity.ai.goal;
 
-import moe.blocks.mod.entity.partial.InteractiveEntity;
+import moe.blocks.mod.entity.partial.InteractEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.util.math.BlockPos;
@@ -8,10 +8,10 @@ import net.minecraft.util.math.BlockPos;
 import java.util.EnumSet;
 
 public class WaitGoal extends Goal {
-    private final InteractiveEntity entity;
+    private final InteractEntity entity;
     private LivingEntity target;
 
-    public WaitGoal(InteractiveEntity entity) {
+    public WaitGoal(InteractEntity entity) {
         this.setMutexFlags(EnumSet.of(Flag.JUMP, Flag.LOOK, Flag.MOVE));
         this.entity = entity;
     }

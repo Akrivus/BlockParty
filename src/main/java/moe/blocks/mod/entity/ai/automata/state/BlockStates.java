@@ -4,7 +4,6 @@ import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.entity.ai.automata.BlockBasedState;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
-import moe.blocks.mod.entity.partial.NPCEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 

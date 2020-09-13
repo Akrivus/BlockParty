@@ -1,7 +1,6 @@
 package moe.blocks.mod.init;
 
 import moe.blocks.mod.MoeMod;
-import moe.blocks.mod.item.MoeSpawnItem;
 import moe.blocks.mod.item.*;
 import net.minecraft.item.*;
 import net.minecraftforge.fml.RegistryObject;

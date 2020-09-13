@@ -1,50 +1,48 @@
 package moe.blocks.mod.entity.ai.automata.state;
 
-import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.partial.DieEntity;
-import moe.blocks.mod.entity.partial.InteractiveEntity;
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.partial.InteractEntity;
 import net.minecraft.block.material.MaterialColor;
 
 import java.util.HashMap;
 import java.util.List;
 
 public enum Deres {
-    HIMEDERE(new State<InteractiveEntity>() {
+    HIMEDERE(new State<InteractEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, InteractiveEntity entity) {
+        public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
     }, DieEntity.Face.ONE),
-    KUUDERE(new State<InteractiveEntity>() {
+    KUUDERE(new State<InteractEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, InteractiveEntity entity) {
+        public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
     }, DieEntity.Face.TWO),
-    TSUNDERE(new State<InteractiveEntity>() {
+    TSUNDERE(new State<InteractEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, InteractiveEntity entity) {
+        public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
     }, DieEntity.Face.THREE),
-    YANDERE(new State<InteractiveEntity>() {
+    YANDERE(new State<InteractEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, InteractiveEntity entity) {
+        public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
     }, DieEntity.Face.FOUR),
-    DEREDERE(new State<InteractiveEntity>() {
+    DEREDERE(new State<InteractEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, InteractiveEntity entity) {
+        public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
     }, DieEntity.Face.FIVE),
-    DANDERE(new State<InteractiveEntity>() {
+    DANDERE(new State<InteractEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, InteractiveEntity entity) {
+        public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
     }, DieEntity.Face.SIX);
