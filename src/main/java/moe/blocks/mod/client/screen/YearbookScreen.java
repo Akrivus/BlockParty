@@ -1,10 +1,14 @@
 package moe.blocks.mod.client.screen;
 
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moe.blocks.mod.MoeMod;
+import moe.blocks.mod.data.yearbook.Book;
+import moe.blocks.mod.data.yearbook.Page;
+import moe.blocks.mod.entity.partial.CharacterEntity;
 import moe.blocks.mod.entity.partial.InteractEntity;
-import moe.blocks.mod.item.YearBookItem;
+import moe.blocks.mod.item.YearbookItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.audio.SoundHandler;
@@ -16,50 +20,47 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
-public class YearBookScreen extends Screen {
+public class YearbookScreen extends Screen {
     public static final ResourceLocation YEARBOOK_TEXTURES = new ResourceLocation(MoeMod.ID, "textures/gui/yearbook.png");
-    private final ItemStack stack;
+    private final Book book;
+    private int pageNumber;
+    private Page page;
     private final String[] stats = new String[5];
     private final String[] lines = new String[3];
-    private final UUID player;
-    private YearBookScreen.ChangePageButton buttonNextPage;
-    private YearBookScreen.ChangePageButton buttonPrevPage;
+    private YearbookScreen.ChangePageButton buttonNextPage;
+    private YearbookScreen.ChangePageButton buttonPrevPage;
     private String name;
     private String pos;
-    private InteractEntity entity;
-    private int page;
+    private CharacterEntity entity;
 
-    public YearBookScreen(ItemStack stack, UUID player) {
-        this(stack, player, 0);
-    }
-
-    public YearBookScreen(ItemStack stack, UUID player, int page) {
+    public YearbookScreen(Book book, int pageNumber) {
         super(NarratorChatListener.EMPTY);
-        this.stack = stack;
-        this.player = player;
-        this.page = page % this.getPageCount();
-    }
-
-    private int getPageCount() {
-        return YearBookItem.getPageCount(this.stack);
+        this.book = book;
+        this.pageNumber = pageNumber;
     }
 
     @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(stack);
         this.renderPortrait(stack);
-        this.renderEntity(this.width / 2, 90, 40.0F, 0, 0, this.entity);
+        this.renderEntity(this.width / 2, 90, 40.0F, this.entity);
         this.renderBook(stack);
         this.font.drawString(stack, this.name, (this.width - this.font.getStringWidth(this.name)) / 2, 92, 0);
         this.font.drawString(stack, this.pos, (this.width - this.font.getStringWidth(this.pos)) / 2, 123, 0);
@@ -69,7 +70,20 @@ public class YearBookScreen extends Screen {
         for (int y = 0; y < this.lines.length; ++y) {
             this.font.drawString(stack, this.lines[y], this.width / 2 - 47, 134 + 10 * y, 0);
         }
+        this.renderTooltips(stack, mouseX, mouseY);
         super.render(stack, mouseX, mouseY, partialTicks);
+    }
+
+    public void renderTooltips(MatrixStack stack, int mouseX, int mouseY) {
+        List<ITextComponent> text = new ArrayList<>();
+        if (102 < mouseY && mouseY < 112) {
+            if (this.width / 2 - 53 < mouseX && mouseX < this.width / 2 - 31) { text.add(new TranslationTextComponent("gui.moeblocks.label.health")); }
+            if (this.width / 2 - 31 < mouseX && mouseX < this.width / 2 + -9) { text.add(new TranslationTextComponent("gui.moeblocks.label.hunger")); }
+            if (this.width / 2 + -9 < mouseX && mouseX < this.width / 2 + 13) { text.add(new TranslationTextComponent("gui.moeblocks.label.trust")); }
+            if (this.width / 2 + 13 < mouseX && mouseX < this.width / 2 + 35) { text.add(new TranslationTextComponent("gui.moeblocks.label.affection")); }
+            if (this.width / 2 + 35 < mouseX && mouseX < this.width / 2 + 57) { text.add(new TranslationTextComponent("gui.moeblocks.label.stress")); }
+        }
+        if (text.size() > 0) { this.renderTooltip(stack, Lists.transform(text, ITextComponent::func_241878_f), mouseX, mouseY); }
     }
 
     public void renderPortrait(MatrixStack stack) {
@@ -112,7 +126,7 @@ public class YearBookScreen extends Screen {
         this.updateButtons();
     }
 
-    public void renderEntity(int posX, int posY, float scale, float mouseX, float mouseY, LivingEntity entity) {
+    public void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
         this.entity.rotationYaw = 0.75F * -(this.entity.rotationYawHead = 180.0F);
         this.entity.setPosition(this.minecraft.player.getPosX(), this.minecraft.player.getPosY(), this.minecraft.player.getPosZ());
         Quaternion forward = Vector3f.ZP.rotationDegrees(180.0F);
@@ -136,34 +150,29 @@ public class YearBookScreen extends Screen {
     }
 
     protected void nextPage() {
-        if (this.page < this.getPageCount() - 1) {
-            ++this.page;
-        }
+        if (this.pageNumber < this.book.getPageCount() - 1) { ++this.pageNumber; }
         this.updateButtons();
     }
 
     private void updateButtons() {
-        this.entity = YearBookItem.getPage(this.minecraft.world, this.stack, this.page);
-        /**
-         this.name = String.format("%s", this.entity.getPlainName());
-         this.pos = String.format("%.0f %.0f %.0f", this.entity.getPosX(), this.entity.getPosY(), this.entity.getPosZ());
-         this.stats[0] = String.format("%.0f", this.entity.getHealth());
-         this.stats[1] = String.format("%.0f", this.entity.getFoodState().getFoodLevel());
-         this.stats[2] = String.format("%.0f", this.entity.getDatingState().get(this.player).getTrust());
-         this.stats[3] = String.format("%.0f", this.entity.getDatingState().get(this.player).getAffection());
-         this.stats[4] = String.format("%.0f", this.entity.getStressState().getStress());
-         this.lines[0] = String.format("%d years old", this.entity.getAgeInYears());
-         this.lines[1] = String.format("Blood type %s", this.entity.getBloodType().toString());
-         this.lines[2] = String.format("Seen %d days ago", this.entity.getDatingState().get(this.player).getLastSeen() / 24000);
-         **/
-        this.buttonNextPage.visible = this.page < this.getPageCount() - 1;
-        this.buttonPrevPage.visible = this.page > 0;
+        this.page = this.book.getPages()[this.pageNumber];
+        this.entity = this.page.getCharacter(this.minecraft.world);
+        this.name = String.format("%s", this.entity.getFullName());
+        this.pos = String.format("%.0f %.0f %.0f", this.entity.getPosX(), this.entity.getPosY(), this.entity.getPosZ());
+        this.stats[0] = String.format("%.0f", this.entity.getHealth());
+        this.stats[1] = String.format("%.0f", this.entity.getHunger());
+        this.stats[2] = String.format("%.0f", this.page.getTrust());
+        this.stats[3] = String.format("%.0f", this.page.getAffection());
+        this.stats[4] = String.format("%.0f", this.entity.getStress());
+        this.lines[0] = String.format("%d years old", this.entity.getAgeInYears());
+        this.lines[1] = String.format("Blood type %s", this.entity.getBloodType().toString());
+        this.lines[2] = String.format("Seen %d days ago", 2);
+        this.buttonNextPage.visible = this.pageNumber < this.book.getPageCount() - 1;
+        this.buttonPrevPage.visible = this.pageNumber > 0;
     }
 
     protected void prevPage() {
-        if (this.page > 0) {
-            --this.page;
-        }
+        if (this.pageNumber > 0) { --this.pageNumber; }
         this.updateButtons();
     }
 
@@ -179,7 +188,7 @@ public class YearBookScreen extends Screen {
         @Override
         public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            Minecraft.getInstance().getTextureManager().bindTexture(YearBookScreen.YEARBOOK_TEXTURES);
+            Minecraft.getInstance().getTextureManager().bindTexture(YearbookScreen.YEARBOOK_TEXTURES);
             int x = this.delta > 0 ? 248 : 169;
             int y = this.isHovered() ? 36 : 64;
             this.blit(stack, this.x, this.y, x, y, 23, 13);

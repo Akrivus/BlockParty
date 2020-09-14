@@ -1,4 +1,4 @@
-package moe.blocks.mod.dating;
+package moe.blocks.mod.data.dating;
 
 import moe.blocks.mod.entity.ai.automata.ReactiveState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -17,8 +17,8 @@ public class Relationship {
     protected float trust;
     protected int timeSinceInteraction;
 
-    public Relationship(PlayerEntity player) {
-        this.playerUUID = player.getUniqueID();
+    public Relationship(UUID uuid) {
+        this.playerUUID = uuid;
     }
 
     public Relationship(INBT compound) {
@@ -77,6 +77,10 @@ public class Relationship {
         if (this.interactions.getOrDefault(interaction, 0) <= 0) { this.affection += interaction.getAffection(); }
         this.interactions.put(interaction, interaction.getCooldown());
         return interaction.reaction.state;
+    }
+
+    public boolean isUUID(UUID uuid) {
+        return this.playerUUID.equals(uuid);
     }
 
     public enum Phases {

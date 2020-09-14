@@ -1,4 +1,4 @@
-package moe.blocks.mod.dating;
+package moe.blocks.mod.data.dating;
 
 import moe.blocks.mod.entity.ai.BloodTypes;
 import moe.blocks.mod.entity.ai.automata.state.Deres;

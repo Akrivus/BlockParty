@@ -46,10 +46,10 @@ public class NPCEntity extends CreatureEntity {
     protected HashMap<States, State> states;
     protected Consumer<NPCEntity> nextTickOp;
     protected long age;
-    private float hungerLevel = 20.0F;
+    private float hunger = 20.0F;
     private float saturation = 5.0F;
     private float exhaustion;
-    private float stressLevel;
+    private float stress;
     private float relaxation;
     private int timeSinceSleep;
     private LivingEntity avoidTarget;
@@ -91,10 +91,10 @@ public class NPCEntity extends CreatureEntity {
     @Override
     public void writeAdditional(CompoundNBT compound) {
         super.writeAdditional(compound);
-        compound.putFloat("HungerLevel", this.hungerLevel);
+        compound.putFloat("Hunger", this.hunger);
         compound.putFloat("Saturation", this.saturation);
         compound.putFloat("Exhaustion", this.exhaustion);
-        compound.putFloat("StressLevel", this.stressLevel);
+        compound.putFloat("Stress", this.stress);
         compound.putFloat("Relaxation", this.relaxation);
         compound.putLong("Age", this.age);
     }
@@ -102,10 +102,10 @@ public class NPCEntity extends CreatureEntity {
     @Override
     public void readAdditional(CompoundNBT compound) {
         super.readAdditional(compound);
-        this.hungerLevel = compound.getFloat("HungerLevel");
+        this.hunger = compound.getFloat("Hunger");
         this.saturation = compound.getFloat("Saturation");
         this.exhaustion = compound.getFloat("Exhaustion");
-        this.stressLevel = compound.getFloat("StressLevel");
+        this.stress = compound.getFloat("Stress");
         this.relaxation = compound.getFloat("Relaxation");
         this.age = compound.getInt("Age");
         this.updateItemState();
@@ -123,20 +123,18 @@ public class NPCEntity extends CreatureEntity {
     public void livingTick() {
         this.updateArmSwingProgress();
         super.livingTick();
-        ++this.age;
-        if (this.nextTickOp != null) {
-            this.world.getProfiler().startSection("nextTickOp");
-            this.nextTickOp.accept(this);
-            this.nextTickOp = null;
-            this.world.getProfiler().endSection();
-        }
-        if (++this.timeSinceSleep > 24000) {
-            this.addStressLevel(0.0005F);
+        if (this.isLocal()) {
+            ++this.age;
+            if (++this.timeSinceSleep > 24000) { this.addStress(0.0005F); }
+            if (this.nextTickOp != null) {
+                this.nextTickOp.accept(this);
+                this.nextTickOp = null;
+            }
         }
     }
 
-    public void addStressLevel(float stressLevel) {
-        this.stressLevel = Math.min(this.stressLevel + stressLevel, 20.0F);
+    public void addStress(float stress) {
+        this.stress = Math.min(this.stress + stress, 20.0F);
     }
 
     public void updateItemState() {
@@ -145,8 +143,11 @@ public class NPCEntity extends CreatureEntity {
     }
 
     public State setNextState(States key, State state) {
-        if (this.states.get(key) != null) { this.states.get(key).clean(this); }
-        return this.states.put(key, state.start(this));
+        if (this.states != null) {
+            if (this.states.get(key) != null) { this.states.get(key).clean(this); }
+            return this.states.put(key, state.start(this));
+        }
+        return null;
     }
 
     public void setNextTickOp(Consumer<NPCEntity> nextTickOp) {
@@ -154,7 +155,7 @@ public class NPCEntity extends CreatureEntity {
     }
 
     protected void registerStates(HashMap<States, State> states) {
-        states.put(States.HELD_ITEM, ItemStates.DEFAULT.state.start(this));
+        states.put(States.HELD_ITEM, null);
     }
 
     public void attackEntityFromRange(LivingEntity victim, double factor) {
@@ -267,7 +268,7 @@ public class NPCEntity extends CreatureEntity {
     }
 
     public void addHungerLevel(float hungerLevel) {
-        this.hungerLevel = Math.min(this.hungerLevel + hungerLevel, 20.0F);
+        this.hunger = Math.min(this.hunger + hungerLevel, 20.0F);
     }
 
     public void addSaturation(float saturation) {
@@ -279,7 +280,7 @@ public class NPCEntity extends CreatureEntity {
     }
 
     public boolean isHungry() {
-        return this.hungerLevel < 19.0F;
+        return this.hunger < 19.0F;
     }
 
     public void addExhaustion(float exhaustion) {
@@ -324,16 +325,16 @@ public class NPCEntity extends CreatureEntity {
         return this.world instanceof ServerWorld;
     }
 
-    public float getStressLevel() {
-        return this.stressLevel;
+    public float getStress() {
+        return this.stress;
     }
 
-    public float getHungerLevel() {
-        return this.hungerLevel;
+    public float getHunger() {
+        return this.hunger;
     }
 
     public boolean isFull() {
-        return this.hungerLevel > 19.0F;
+        return this.hunger > 19.0F;
     }
 
     public boolean tryEquipItem(ItemStack stack) {

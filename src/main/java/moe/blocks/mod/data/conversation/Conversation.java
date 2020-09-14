@@ -1,7 +1,7 @@
-package moe.blocks.mod.dating.convo;
+package moe.blocks.mod.data.conversation;
 
 import moe.blocks.mod.client.Animations;
-import moe.blocks.mod.dating.Tropes;
+import moe.blocks.mod.data.dating.Tropes;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
 
 public class Conversation {

@@ -113,11 +113,19 @@ public abstract class InteractEntity extends NPCEntity {
     }
 
     @Override
+    public void tick() {
+        super.tick();
+        if (this.isRemote()) { this.getAnimation().tick(this); }
+    }
+
+    @Override
     public void livingTick() {
-        this.getAnimation().tick(this);
         super.livingTick();
         if (this.isLocal()) {
             if (--this.timeUntilEmotionExpires < 0) { this.setEmotion(Emotions.NORMAL, 24000); }
+            this.world.getEntitiesWithinAABB(PlayerEntity.class, this.getBoundingBox().expand(8.0F, 4.0F, 8.0F)).stream().sorted(new EntityDistance(this)).forEach(player -> {
+                if (this.isBeingWatchedBy(player)) { this.setStareTarget(player); }
+            });
         }
     }
 

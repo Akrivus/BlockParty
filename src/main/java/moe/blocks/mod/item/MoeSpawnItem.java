@@ -12,6 +12,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
@@ -41,6 +42,7 @@ public class MoeSpawnItem extends Item {
                 return ActionResultType.CONSUME;
             }
         }
+        player.sendStatusMessage(new TranslationTextComponent("command.moeblocks.spawn_egg.error"), true);
         return ActionResultType.FAIL;
     }
 }

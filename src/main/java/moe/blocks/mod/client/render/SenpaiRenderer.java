@@ -44,10 +44,9 @@ public class SenpaiRenderer extends MobRenderer<SenpaiEntity, PlayerModel<Senpai
             FontRenderer font = this.getFontRendererFromRenderManager();
             int x = -font.getStringWidth(lines[i]) / 2;
             int y = i * -10;
-            int color = this.getColor(entity);
             Matrix4f matrix = stack.getLast().getMatrix();
             int alpha = (int) (Minecraft.getInstance().gameSettings.getTextBackgroundOpacity(0.25F) * 255.0F) << 24;
-            font.renderString(lines[i], x, y, color, false, matrix, buffer, false, alpha, packedLight);
+            font.renderString(lines[i], x, y, 0xFFFFFFFF, false, matrix, buffer, false, alpha, packedLight);
         }
         stack.pop();
     }
@@ -56,10 +55,6 @@ public class SenpaiRenderer extends MobRenderer<SenpaiEntity, PlayerModel<Senpai
         int health = (int) Math.ceil(entity.getHealth());
         int max = (int) Math.ceil(entity.getMaxHealth());
         return String.format("%d / %d", health, max);
-    }
-
-    public int getColor(SenpaiEntity entity) {
-        return 0xffffff;
     }
 
     @Override

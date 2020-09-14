@@ -1,12 +1,18 @@
 package moe.blocks.mod.entity.partial;
 
-import moe.blocks.mod.dating.Interactions;
-import moe.blocks.mod.dating.Relationship;
-import moe.blocks.mod.dating.Tropes;
-import moe.blocks.mod.dating.convo.Reactions;
+import moe.blocks.mod.data.Yearbooks;
+import moe.blocks.mod.data.dating.Interactions;
+import moe.blocks.mod.data.dating.Relationship;
+import moe.blocks.mod.data.dating.Tropes;
+import moe.blocks.mod.data.conversation.Reactions;
+import moe.blocks.mod.data.yearbook.Book;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.ai.automata.States;
-import moe.blocks.mod.entity.ai.automata.state.Emotions;
+import moe.blocks.mod.init.MoeItems;
+import moe.blocks.mod.init.MoeMessages;
+import moe.blocks.mod.message.YearbookMessage;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.EntityType;
@@ -17,6 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -28,9 +35,12 @@ import net.minecraft.world.World;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public abstract class CharacterEntity extends InteractEntity {
     protected final List<Relationship> relationships = new ArrayList<>();
+    protected String givenName;
+    public boolean isInYearbook = false;
 
     protected CharacterEntity(EntityType<? extends CreatureEntity> type, World world) {
         super(type, world);
@@ -53,6 +63,7 @@ public abstract class CharacterEntity extends InteractEntity {
         ListNBT relationships = new ListNBT();
         this.relationships.forEach(relationship -> relationships.add(relationship.write(new CompoundNBT())));
         compound.put("Relationships", relationships);
+        compound.putString("GivenName", this.getGivenName());
     }
 
     @Override
@@ -60,18 +71,25 @@ public abstract class CharacterEntity extends InteractEntity {
         super.readAdditional(compound);
         ListNBT relationships = compound.getList("Relationships", 10);
         relationships.forEach(relationship -> this.relationships.add(new Relationship(relationship)));
+        this.givenName = compound.getString("GivenName");
+    }
+
+    @Override
+    public boolean writeUnlessRemoved(CompoundNBT compound) {
+        if (!super.writeUnlessRemoved(compound)) { return false; }
+        if (!this.isInYearbook) { this.syncYearbooks(); }
+        return true;
+    }
+
+    public boolean writeWithoutSync(CompoundNBT compound) {
+        this.isInYearbook = true;
+        this.writeUnlessRemoved(compound);
+        return this.isInYearbook = false;
     }
 
     @Override
     public void registerStates(HashMap<States, State> states) {
-        states.put(States.REACTION, Reactions.NONE.state.start(this));
-    }
-
-    @Override
-    public ILivingEntityData onInitialSpawn(IServerWorld world, DifficultyInstance difficulty, SpawnReason reason, ILivingEntityData spawnData, CompoundNBT compound) {
-        ILivingEntityData data = super.onInitialSpawn(world, difficulty, reason, spawnData, compound);
-        this.setCustomName(new StringTextComponent(this.getGender().getName()));
-        return data;
+        states.put(States.REACTION, null);
     }
 
     public Gender getGender() {
@@ -80,7 +98,7 @@ public abstract class CharacterEntity extends InteractEntity {
 
     @Override
     public ITextComponent getName() {
-        return new TranslationTextComponent("entity.moeblocks.generic", this.getTribeName(), this.getHonorific());
+        return new TranslationTextComponent("entity.moeblocks.generic", this.getFamilyName(), this.getHonorific());
     }
 
     @Override
@@ -88,8 +106,13 @@ public abstract class CharacterEntity extends InteractEntity {
         return true;
     }
 
-    public String getTribeName() {
+    public String getFamilyName() {
         return "Chara";
+    }
+
+    public String getGivenName() {
+        if (this.givenName != null) { return this.givenName; }
+        return this.givenName = this.getGender().getName();
     }
 
     public String getHonorific() {
@@ -98,7 +121,7 @@ public abstract class CharacterEntity extends InteractEntity {
 
     @Override
     public boolean getAlwaysRenderNameTagForRender() {
-        return Minecraft.getInstance().player.getDistance(this) < 8.0F;
+        return !this.isInYearbook && Minecraft.getInstance().player.getDistance(this) < 8.0F;
     }
 
     public Tropes getTrope() {
@@ -106,15 +129,49 @@ public abstract class CharacterEntity extends InteractEntity {
     }
 
     public Relationship getRelationshipWith(PlayerEntity player) {
-        return this.relationships.stream().filter(relationship -> relationship.isPlayer(player)).findFirst().orElse(new Relationship(player));
+        return this.getRelationshipWith(player.getUniqueID());
+    }
+
+    public Relationship getRelationshipWith(UUID uuid) {
+        return this.relationships.stream().filter(relationship -> relationship.isUUID(uuid)).findFirst().orElse(new Relationship(uuid));
     }
 
     @Override
-    public void tick() {
+    public void livingTick() {
         super.livingTick();
         this.world.getProfiler().startSection("relationships");
         this.relationships.forEach(relationship -> relationship.tick());
         this.world.getProfiler().endSection();
+    }
+
+    @Override
+    public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
+        if (this.isLocal() && player.getHeldItem(hand).getItem() == MoeItems.YEARBOOK.get()) {
+            Book book = Yearbooks.get(player);
+            book.setPageIgnorantly(this, player.getUniqueID());
+            MoeMessages.send(new YearbookMessage.Open(book, book.getPageNumber(this.getUniqueID())));
+            return ActionResultType.SUCCESS;
+        } else {
+            return super.func_230254_b_(player, hand);
+        }
+    }
+
+    @Override
+    public void onDeath(DamageSource cause) {
+        this.syncYearbooks();
+        super.onDeath(cause);
+    }
+
+    public void syncYearbooks() {
+        if (this.isLocal()) { Yearbooks.sync(this); }
+    }
+
+    public String getFullName() {
+        return String.format("%s %s", this.getFamilyName(), this.getGivenName());
+    }
+
+    public BlockState getBlockData() {
+        return Blocks.AIR.getDefaultState();
     }
 
     public enum Gender {

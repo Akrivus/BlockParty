@@ -1,5 +1,6 @@
 package moe.blocks.mod.entity;
 
+import moe.blocks.mod.client.Animations;
 import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.ai.automata.state.BlockStates;
 import moe.blocks.mod.entity.ai.automata.state.Deres;
@@ -50,41 +51,31 @@ public class MoeEntity extends CharacterEntity {
     }
 
     @Override
-    public void livingTick() {
-        super.livingTick();
-        if (this.isBurning() && this.isReallyImmuneToFire()) {
-            this.extinguish();
-        }
-    }
-
-    @Override
     public int getBaseAge() {
-        return (int) ((this.getScale() + 3.75F) / 2);
+        return (int) (this.getScale() * 5) + 13;
     }
 
     @Override
     public void notifyDataManagerChange(DataParameter<?> key) {
-        if (BLOCK_STATE.equals(key) && this.isLocal()) { this.setNextState(States.BLOCK_STATE, BlockStates.get(this.getBlockData()).state); }
+        if (BLOCK_STATE.equals(key)) { this.setNextState(States.BLOCK_STATE, BlockStates.get(this.getBlockData()).state); }
         if (SCALE.equals(key)) { this.recalculateSize(); }
         super.notifyDataManagerChange(key);
     }
 
-    public boolean isReallyImmuneToFire() {
-        return !this.getBlockData().getMaterial().isFlammable();
-    }
-
     @Override
     public void writeAdditional(CompoundNBT compound) {
-        super.writeAdditional(compound);
         compound.putInt("BlockData", Block.getStateId(this.getBlockData()));
         compound.put("ExtraBlockData", this.getExtraBlockData());
+        compound.putFloat("Scale", this.getScale());
+        super.writeAdditional(compound);
     }
 
     @Override
     public void readAdditional(CompoundNBT compound) {
-        super.readAdditional(compound);
         this.setBlockData(Block.getStateById(compound.getInt("BlockData")));
         this.setExtraBlockData((CompoundNBT) compound.get("ExtraBlockData"));
+        this.setScale(compound.getFloat("Scale"));
+        super.readAdditional(compound);
     }
 
     public Gender getGender() {
@@ -92,7 +83,7 @@ public class MoeEntity extends CharacterEntity {
     }
 
     @Override
-    public String getTribeName() {
+    public String getFamilyName() {
         String key = String.format("entity.moeblocks.%s", this.getBlockName());
         LanguageMap map = LanguageMap.getInstance();
         if (!map.func_230506_b_(key)) { key = String.format("block.%s", this.getBlockName()); }
@@ -114,8 +105,9 @@ public class MoeEntity extends CharacterEntity {
         this.extraBlockData = compound == null ? new CompoundNBT() : compound;
     }
 
+    @Override
     public BlockState getBlockData() {
-        return this.dataManager.get(BLOCK_STATE).orElseGet(() -> Blocks.AIR.getDefaultState());
+        return this.dataManager.get(BLOCK_STATE).orElseGet(() -> super.getBlockData());
     }
 
     public void setBlockData(BlockState state) {
@@ -130,7 +122,7 @@ public class MoeEntity extends CharacterEntity {
 
     @Override
     public boolean isInvulnerableTo(DamageSource source) {
-        return super.isInvulnerableTo(source) || this.isReallyImmuneToFire() && source.isFireDamage() || source == DamageSource.DROWN;
+        return super.isInvulnerableTo(source) || source == DamageSource.DROWN;
     }
 
     public TileEntity getTileEntity() {
@@ -177,11 +169,11 @@ public class MoeEntity extends CharacterEntity {
     }
 
     @Override
-    public ITextComponent getCustomName() {
+    public String getGivenName() {
         String key = String.format("entity.moeblocks.%s.name", this.getBlockName());
         LanguageMap map = LanguageMap.getInstance();
-        if (!map.func_230506_b_(key)) { return super.getCustomName(); }
-        return new TranslationTextComponent(key);
+        if (!map.func_230506_b_(key)) { return super.getGivenName(); }
+        return map.func_230503_a_(key);
     }
 
     public String getBlockName() {

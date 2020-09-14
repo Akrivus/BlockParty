@@ -1,6 +1,6 @@
 package moe.blocks.mod.entity.ai.goal;
 
-import moe.blocks.mod.dating.convo.Reactions;
+import moe.blocks.mod.data.conversation.Reactions;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.partial.CharacterEntity;

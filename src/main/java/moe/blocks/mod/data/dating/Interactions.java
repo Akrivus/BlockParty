@@ -1,6 +1,6 @@
-package moe.blocks.mod.dating;
+package moe.blocks.mod.data.dating;
 
-import moe.blocks.mod.dating.convo.Reactions;
+import moe.blocks.mod.data.conversation.Reactions;
 
 public enum Interactions {
     HEADPAT(2.0F, 6000, Reactions.RELAX),

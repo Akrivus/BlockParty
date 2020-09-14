@@ -33,7 +33,7 @@ public class MoeEntities {
 
     public static void registerAttributes() {
         GlobalEntityTypeAttributes.put(SENPAI.get(), MoeEntities.getMap().createMutableAttribute(Attributes.MAX_HEALTH, 20.0F).createMutableAttribute(Attributes.MOVEMENT_SPEED, 0.3F).create());
-        GlobalEntityTypeAttributes.put(MOE.get(), MoeEntities.getMap().createMutableAttribute(Attributes.MAX_HEALTH, 15.0F).createMutableAttribute(Attributes.MOVEMENT_SPEED, 0.4F).create());
+        GlobalEntityTypeAttributes.put(MOE.get(), MoeEntities.getMap().createMutableAttribute(Attributes.MAX_HEALTH, 20.0F).createMutableAttribute(Attributes.MOVEMENT_SPEED, 0.4F).create());
     }
 
     private static AttributeModifierMap.MutableAttribute getMap() {

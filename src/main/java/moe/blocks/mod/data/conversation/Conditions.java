@@ -1,4 +1,4 @@
-package moe.blocks.mod.dating.convo;
+package moe.blocks.mod.data.conversation;
 
 import moe.blocks.mod.entity.partial.CharacterEntity;
 import net.minecraft.entity.player.PlayerEntity;
