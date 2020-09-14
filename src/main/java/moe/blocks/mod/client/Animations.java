@@ -1,7 +1,7 @@
 package moe.blocks.mod.client;
 
-import moe.blocks.mod.client.animation.state.*;
 import moe.blocks.mod.client.animation.Animation;
+import moe.blocks.mod.client.animation.state.*;
 
 import java.util.function.Supplier;
 

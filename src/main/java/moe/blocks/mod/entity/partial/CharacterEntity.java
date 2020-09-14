@@ -4,7 +4,6 @@ import moe.blocks.mod.data.Yearbooks;
 import moe.blocks.mod.data.dating.Interactions;
 import moe.blocks.mod.data.dating.Relationship;
 import moe.blocks.mod.data.dating.Tropes;
-import moe.blocks.mod.data.conversation.Reactions;
 import moe.blocks.mod.data.yearbook.Book;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.ai.automata.States;
@@ -16,8 +15,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ILivingEntityData;
-import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -26,10 +23,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -39,22 +33,11 @@ import java.util.UUID;
 
 public abstract class CharacterEntity extends InteractEntity {
     protected final List<Relationship> relationships = new ArrayList<>();
-    protected String givenName;
     public boolean isInYearbook = false;
+    protected String givenName;
 
     protected CharacterEntity(EntityType<? extends CreatureEntity> type, World world) {
         super(type, world);
-    }
-
-    @Override
-    public ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
-        if (this.isRemote() || hand == Hand.OFF_HAND) { return ActionResultType.PASS; }
-        Relationship relationship = this.getRelationshipWith(player);
-        this.setNextState(States.REACTION, relationship.getReaction(Interactions.HEADPAT));
-        if (relationship.can(Relationship.Actions.FOLLOW)) {
-            this.setFollowTarget(player.equals(this.getFollowTarget()) ? null : player);
-        }
-        return ActionResultType.SUCCESS;
     }
 
     @Override
@@ -75,10 +58,56 @@ public abstract class CharacterEntity extends InteractEntity {
     }
 
     @Override
-    public boolean writeUnlessRemoved(CompoundNBT compound) {
-        if (!super.writeUnlessRemoved(compound)) { return false; }
-        if (!this.isInYearbook) { this.syncYearbooks(); }
-        return true;
+    public void livingTick() {
+        super.livingTick();
+        this.world.getProfiler().startSection("relationships");
+        this.relationships.forEach(relationship -> relationship.tick());
+        this.world.getProfiler().endSection();
+    }
+
+    @Override
+    public void registerStates(HashMap<States, State> states) {
+        states.put(States.REACTION, null);
+    }
+
+    @Override
+    public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
+        if (this.isLocal() && player.getHeldItem(hand).getItem() == MoeItems.YEARBOOK.get()) {
+            Book book = Yearbooks.get(player);
+            book.setPageIgnorantly(this, player.getUniqueID());
+            MoeMessages.send(new YearbookMessage.Open(book, book.getPageNumber(this.getUniqueID())));
+            return ActionResultType.SUCCESS;
+        } else {
+            return super.func_230254_b_(player, hand);
+        }
+    }
+
+    @Override
+    public ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
+        if (this.isRemote() || hand == Hand.OFF_HAND) { return ActionResultType.PASS; }
+        Relationship relationship = this.getRelationshipWith(player);
+        this.setNextState(States.REACTION, relationship.getReaction(Interactions.HEADPAT));
+        if (relationship.can(Relationship.Actions.FOLLOW)) {
+            this.setFollowTarget(player.equals(this.getFollowTarget()) ? null : player);
+        }
+        return ActionResultType.SUCCESS;
+    }
+
+    public Relationship getRelationshipWith(PlayerEntity player) {
+        return this.getRelationshipWith(player.getUniqueID());
+    }
+
+    public Relationship getRelationshipWith(UUID uuid) {
+        return this.relationships.stream().filter(relationship -> relationship.isUUID(uuid)).findFirst().orElse(new Relationship(uuid));
+    }
+
+    public String getGivenName() {
+        if (this.givenName != null) { return this.givenName; }
+        return this.givenName = this.getGender().getName();
+    }
+
+    public Gender getGender() {
+        return Gender.FEMININE;
     }
 
     public boolean writeWithoutSync(CompoundNBT compound) {
@@ -88,12 +117,10 @@ public abstract class CharacterEntity extends InteractEntity {
     }
 
     @Override
-    public void registerStates(HashMap<States, State> states) {
-        states.put(States.REACTION, null);
-    }
-
-    public Gender getGender() {
-        return Gender.FEMININE;
+    public boolean writeUnlessRemoved(CompoundNBT compound) {
+        if (!super.writeUnlessRemoved(compound)) { return false; }
+        if (!this.isInYearbook) { this.syncYearbooks(); }
+        return true;
     }
 
     @Override
@@ -110,50 +137,16 @@ public abstract class CharacterEntity extends InteractEntity {
         return "Chara";
     }
 
-    public String getGivenName() {
-        if (this.givenName != null) { return this.givenName; }
-        return this.givenName = this.getGender().getName();
-    }
-
     public String getHonorific() {
         return this.getGender() == Gender.FEMININE ? "chan" : "kun";
     }
 
-    @Override
-    public boolean getAlwaysRenderNameTagForRender() {
-        return !this.isInYearbook && Minecraft.getInstance().player.getDistance(this) < 8.0F;
+    public void syncYearbooks() {
+        if (this.isLocal()) { Yearbooks.sync(this); }
     }
 
     public Tropes getTrope() {
         return Tropes.get(this.getDere(), this.getBloodType());
-    }
-
-    public Relationship getRelationshipWith(PlayerEntity player) {
-        return this.getRelationshipWith(player.getUniqueID());
-    }
-
-    public Relationship getRelationshipWith(UUID uuid) {
-        return this.relationships.stream().filter(relationship -> relationship.isUUID(uuid)).findFirst().orElse(new Relationship(uuid));
-    }
-
-    @Override
-    public void livingTick() {
-        super.livingTick();
-        this.world.getProfiler().startSection("relationships");
-        this.relationships.forEach(relationship -> relationship.tick());
-        this.world.getProfiler().endSection();
-    }
-
-    @Override
-    public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
-        if (this.isLocal() && player.getHeldItem(hand).getItem() == MoeItems.YEARBOOK.get()) {
-            Book book = Yearbooks.get(player);
-            book.setPageIgnorantly(this, player.getUniqueID());
-            MoeMessages.send(new YearbookMessage.Open(book, book.getPageNumber(this.getUniqueID())));
-            return ActionResultType.SUCCESS;
-        } else {
-            return super.func_230254_b_(player, hand);
-        }
     }
 
     @Override
@@ -162,8 +155,9 @@ public abstract class CharacterEntity extends InteractEntity {
         super.onDeath(cause);
     }
 
-    public void syncYearbooks() {
-        if (this.isLocal()) { Yearbooks.sync(this); }
+    @Override
+    public boolean getAlwaysRenderNameTagForRender() {
+        return !this.isInYearbook && Minecraft.getInstance().player.getDistance(this) < 8.0F;
     }
 
     public String getFullName() {

@@ -5,7 +5,9 @@ import moe.blocks.mod.entity.partial.CharacterEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class Book {
     private final Map<UUID, Page> pages = new LinkedHashMap<>();
@@ -15,10 +17,6 @@ public class Book {
         this(data, new CompoundNBT());
     }
 
-    public Book(INBT nbt) {
-        this(null, nbt);
-    }
-
     public Book(Yearbooks data, INBT nbt) {
         this.data = data;
         CompoundNBT compound = (CompoundNBT) nbt;
@@ -26,6 +24,10 @@ public class Book {
             UUID uuid = UUID.fromString(key);
             this.pages.put(uuid, new Page(uuid, compound.get(key)));
         });
+    }
+
+    public Book(INBT nbt) {
+        this(null, nbt);
     }
 
     public CompoundNBT write() {
@@ -48,12 +50,12 @@ public class Book {
         this.data.set(uuid, this);
     }
 
-    public Page[] getPages() {
-        return this.pages.values().toArray(new Page[0]);
-    }
-
     public int getPageCount() {
         return this.getPages().length;
+    }
+
+    public Page[] getPages() {
+        return this.pages.values().toArray(new Page[0]);
     }
 
     public int getPageNumber(UUID uuid) {

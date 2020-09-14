@@ -27,13 +27,13 @@ public class BasicAttackGoal<E extends NPCEntity> extends AbstractFollowEntityGo
     }
 
     @Override
-    public void onFollow() {
-
+    public float getFollowDistance(LivingEntity target) {
+        return (float) (Math.pow(this.entity.getWidth() * 2.0F, 2) + target.getWidth());
     }
 
     @Override
-    public float getFollowDistance(LivingEntity target) {
-        return (float) (Math.pow(this.entity.getWidth() * 2.0F, 2) + target.getWidth());
+    public void onFollow() {
+
     }
 
     @Override

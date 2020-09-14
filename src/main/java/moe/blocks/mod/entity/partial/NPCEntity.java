@@ -137,6 +137,10 @@ public class NPCEntity extends CreatureEntity {
         this.stress = Math.min(this.stress + stress, 20.0F);
     }
 
+    public boolean isLocal() {
+        return this.world instanceof ServerWorld;
+    }
+
     public void updateItemState() {
         this.setNextState(States.HELD_ITEM, ItemStates.get(this.getHeldItem(Hand.MAIN_HAND)).state);
         this.updateItemState = false;
@@ -150,12 +154,12 @@ public class NPCEntity extends CreatureEntity {
         return null;
     }
 
-    public void setNextTickOp(Consumer<NPCEntity> nextTickOp) {
-        this.nextTickOp = nextTickOp;
-    }
-
     protected void registerStates(HashMap<States, State> states) {
         states.put(States.HELD_ITEM, null);
+    }
+
+    public void setNextTickOp(Consumer<NPCEntity> nextTickOp) {
+        this.nextTickOp = nextTickOp;
     }
 
     public void attackEntityFromRange(LivingEntity victim, double factor) {
@@ -218,6 +222,10 @@ public class NPCEntity extends CreatureEntity {
             return true;
         }
         return false;
+    }
+
+    public boolean canBeTarget(Entity target) {
+        return target != null && target.isAlive() && !target.equals(this);
     }
 
     @Override
@@ -321,10 +329,6 @@ public class NPCEntity extends CreatureEntity {
         return this.world.isRemote();
     }
 
-    public boolean isLocal() {
-        return this.world instanceof ServerWorld;
-    }
-
     public float getStress() {
         return this.stress;
     }
@@ -383,10 +387,6 @@ public class NPCEntity extends CreatureEntity {
     @Override
     public boolean canAttack(LivingEntity target) {
         return this.canBeTarget(target);
-    }
-
-    public boolean canBeTarget(Entity target) {
-        return target != null && target.isAlive() && !target.equals(this);
     }
 
     @Override

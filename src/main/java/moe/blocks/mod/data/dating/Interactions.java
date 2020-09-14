@@ -8,9 +8,9 @@ public enum Interactions {
     GOOD_GIFT(4.0F, 18000, Reactions.NONE),
     SAVED_LIFE(5.0F, 24000, Reactions.NONE);
 
+    public final Reactions reaction;
     private final float affection;
     private final int cooldown;
-    public final Reactions reaction;
 
     Interactions(float affection, int cooldown, Reactions reaction) {
         this.affection = affection;

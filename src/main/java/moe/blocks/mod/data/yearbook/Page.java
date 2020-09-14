@@ -1,18 +1,10 @@
 package moe.blocks.mod.data.yearbook;
 
 import moe.blocks.mod.data.dating.Relationship;
-import moe.blocks.mod.entity.MoeEntity;
-import moe.blocks.mod.entity.SenpaiEntity;
-import moe.blocks.mod.entity.ai.BloodTypes;
-import moe.blocks.mod.entity.ai.automata.state.Emotions;
 import moe.blocks.mod.entity.partial.CharacterEntity;
 import moe.blocks.mod.init.MoeEntities;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.UUID;
@@ -45,8 +37,7 @@ public class Page {
     }
 
     public CharacterEntity getCharacter(World world) {
-        EntityType type = this.character.contains("BlockData") ? MoeEntities.MOE.get() : MoeEntities.SENPAI.get();
-        CharacterEntity character = (CharacterEntity) type.create(world);
+        CharacterEntity character = MoeEntities.MOE.get().create(world);
         character.isInYearbook = true;
         character.read(this.character);
         return character;

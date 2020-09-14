@@ -1,35 +1,32 @@
 package moe.blocks.mod.entity;
 
-import moe.blocks.mod.client.Animations;
 import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.ai.automata.state.BlockStates;
 import moe.blocks.mod.entity.ai.automata.state.Deres;
 import moe.blocks.mod.entity.partial.CharacterEntity;
 import moe.blocks.mod.init.MoeBlocks;
+import moe.blocks.mod.init.MoeSounds;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.material.MaterialColor;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.LanguageMap;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 import java.util.Optional;
@@ -63,6 +60,23 @@ public class MoeEntity extends CharacterEntity {
     }
 
     @Override
+    public BlockState getBlockData() {
+        return this.dataManager.get(BLOCK_STATE).orElseGet(() -> super.getBlockData());
+    }
+
+    public void setBlockData(BlockState state) {
+        this.dataManager.set(BLOCK_STATE, Optional.of(state));
+    }
+
+    public float getScale() {
+        return this.dataManager.get(SCALE);
+    }
+
+    public void setScale(float scale) {
+        this.dataManager.set(SCALE, scale);
+    }
+
+    @Override
     public void writeAdditional(CompoundNBT compound) {
         compound.putInt("BlockData", Block.getStateId(this.getBlockData()));
         compound.put("ExtraBlockData", this.getExtraBlockData());
@@ -76,6 +90,14 @@ public class MoeEntity extends CharacterEntity {
         this.setExtraBlockData((CompoundNBT) compound.get("ExtraBlockData"));
         this.setScale(compound.getFloat("Scale"));
         super.readAdditional(compound);
+    }
+
+    @Override
+    public String getGivenName() {
+        String key = String.format("entity.moeblocks.%s.name", this.getBlockName());
+        LanguageMap map = LanguageMap.getInstance();
+        if (!map.func_230506_b_(key)) { return super.getGivenName(); }
+        return map.func_230503_a_(key);
     }
 
     public Gender getGender() {
@@ -97,21 +119,17 @@ public class MoeEntity extends CharacterEntity {
         return this.getScale() < 1.0F ? "tan" : super.getHonorific();
     }
 
+    public String getBlockName() {
+        ResourceLocation block = MoeBlocks.get(this.getBlockData().getBlock()).getRegistryName();
+        return String.format("%s.%s", block.getNamespace(), block.getPath());
+    }
+
     public CompoundNBT getExtraBlockData() {
         return this.extraBlockData;
     }
 
     public void setExtraBlockData(CompoundNBT compound) {
         this.extraBlockData = compound == null ? new CompoundNBT() : compound;
-    }
-
-    @Override
-    public BlockState getBlockData() {
-        return this.dataManager.get(BLOCK_STATE).orElseGet(() -> super.getBlockData());
-    }
-
-    public void setBlockData(BlockState state) {
-        this.dataManager.set(BLOCK_STATE, Optional.of(state));
     }
 
     @Override
@@ -169,16 +187,22 @@ public class MoeEntity extends CharacterEntity {
     }
 
     @Override
-    public String getGivenName() {
-        String key = String.format("entity.moeblocks.%s.name", this.getBlockName());
-        LanguageMap map = LanguageMap.getInstance();
-        if (!map.func_230506_b_(key)) { return super.getGivenName(); }
-        return map.func_230503_a_(key);
+    public boolean attackEntityAsMob(Entity entity) {
+        if (super.attackEntityAsMob(entity)) {
+            this.playSound(MoeSounds.MOE_ATTACK.get());
+            return true;
+        }
+        return false;
     }
 
-    public String getBlockName() {
-        ResourceLocation block = MoeBlocks.get(this.getBlockData().getBlock()).getRegistryName();
-        return String.format("%s.%s", block.getNamespace(), block.getPath());
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return MoeSounds.MOE_HURT.get();
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return MoeSounds.MOE_DEAD.get();
     }
 
     @Override
@@ -190,14 +214,6 @@ public class MoeEntity extends CharacterEntity {
     @Override
     public EntitySize getSize(Pose pose) {
         return super.getSize(pose).scale(this.getScale());
-    }
-
-    public float getScale() {
-        return this.dataManager.get(SCALE);
-    }
-
-    public void setScale(float scale) {
-        this.dataManager.set(SCALE, scale);
     }
 
     @Override

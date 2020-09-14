@@ -16,12 +16,6 @@ public abstract class ReactiveGoal extends Goal implements IStateGoal {
     }
 
     @Override
-    public void startExecuting() {
-        this.execute();
-        if (this.status == null) { this.status = Task.Status.RUNNING; }
-    }
-
-    @Override
     public boolean shouldExecute() {
         return this.status != Task.Status.STOPPED;
     }
@@ -32,14 +26,20 @@ public abstract class ReactiveGoal extends Goal implements IStateGoal {
     }
 
     @Override
+    public void startExecuting() {
+        this.execute();
+        if (this.status == null) { this.status = Task.Status.RUNNING; }
+    }
+
+    @Override
     public void resetTask() {
         this.entity.setNextTickOp(me -> me.setNextState(States.REACTION, Reactions.NONE.state));
     }
+
+    public abstract void execute();
 
     @Override
     public int getPriority() {
         return 0x1;
     }
-
-    public abstract void execute();
 }

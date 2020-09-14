@@ -5,7 +5,6 @@ import moe.blocks.mod.entity.partial.NPCEntity;
 import moe.blocks.mod.util.sort.EntityDistance;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.pathfinding.Path;
 
 import java.util.EnumSet;
 import java.util.List;

@@ -2,19 +2,13 @@ package moe.blocks.mod.message;
 
 import moe.blocks.mod.client.screen.YearbookScreen;
 import moe.blocks.mod.data.yearbook.Book;
-import moe.blocks.mod.data.yearbook.Page;
 import moe.blocks.mod.init.MoeItems;
-import moe.blocks.mod.item.YearbookItem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-import java.util.UUID;
 import java.util.function.Supplier;
 
 public class YearbookMessage {

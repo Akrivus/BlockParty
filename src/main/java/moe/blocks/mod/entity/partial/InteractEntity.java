@@ -9,7 +9,6 @@ import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.ai.automata.state.Deres;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
 import moe.blocks.mod.entity.ai.goal.FollowTargetGoal;
-import moe.blocks.mod.util.VoiceLines;
 import moe.blocks.mod.util.sort.EntityDistance;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.*;
@@ -22,9 +21,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.ActionResultType;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
-import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -35,7 +32,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 public abstract class InteractEntity extends NPCEntity {
@@ -113,12 +109,6 @@ public abstract class InteractEntity extends NPCEntity {
     }
 
     @Override
-    public void tick() {
-        super.tick();
-        if (this.isRemote()) { this.getAnimation().tick(this); }
-    }
-
-    @Override
     public void livingTick() {
         super.livingTick();
         if (this.isLocal()) {
@@ -172,23 +162,6 @@ public abstract class InteractEntity extends NPCEntity {
         this.dataManager.set(ANIMATION, animation.name());
     }
 
-    @Override
-    public ILivingEntityData onInitialSpawn(IServerWorld world, DifficultyInstance difficulty, SpawnReason reason, ILivingEntityData spawnData, CompoundNBT compound) {
-        ILivingEntityData data = super.onInitialSpawn(world, difficulty, reason, spawnData, compound);
-        this.setBloodType(BloodTypes.weigh(this.rand));
-        this.resetAnimationState();
-        return data;
-    }
-
-    @Override
-    public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
-        ActionResultType result = this.onInteract(player, player.getHeldItem(hand), hand);
-        if (result.isSuccessOrConsume()) { this.setInteractTarget(player); }
-        return result;
-    }
-
-    public abstract ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand);
-
     public PlayerEntity getInteractTarget() {
         return this.interactTarget;
     }
@@ -219,32 +192,6 @@ public abstract class InteractEntity extends NPCEntity {
         return BloodTypes.isCompatible(this.getBloodType(), entity.getBloodType());
     }
 
-    public void resetAnimationState() {
-        this.setAnimation(this.isFollowing() ? Animations.DEFAULT : Animations.IDLE);
-    }
-
-    public boolean isFollowing() {
-        return this.canBeTarget(this.getFollowTarget());
-    }
-
-    public LivingEntity getFollowTarget() {
-        if (this.followTargetUUID == null) { return null; }
-        if (this.followTarget == null) {
-            this.followTarget = this.getEntityFromUUID(this.followTargetUUID);
-        }
-        return this.followTarget;
-    }
-
-    public void setFollowTarget(LivingEntity target) {
-        this.setFollowTarget(target != null ? target.getUniqueID() : null);
-        this.followTarget = target;
-        this.resetAnimationState();
-    }
-
-    public void setFollowTarget(UUID target) {
-        this.followTargetUUID = target;
-    }
-
     public BlockState getBlockTarget() {
         return this.blockTarget;
     }
@@ -264,21 +211,17 @@ public abstract class InteractEntity extends NPCEntity {
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource source) {
-        return VoiceLines.HURT.get(this);
-    }
-
-    @Override
-    protected SoundEvent getDeathSound() {
-        return VoiceLines.DEAD.get(this);
-    }
-
-    @Override
     public void notifyDataManagerChange(DataParameter<?> key) {
         if (ANIMATION.equals(key)) { this.animation = Animations.valueOf(this.dataManager.get(ANIMATION)).get(); }
         if (DERE.equals(key) && this.isLocal()) { this.setNextState(States.DERE, this.getDere().state); }
         if (EMOTION.equals(key) && this.isLocal()) { this.setNextState(States.EMOTION, this.getEmotion().state); }
         super.notifyDataManagerChange(key);
+    }
+
+    @Override
+    public void startSleeping(BlockPos pos) {
+        this.setHomePosAndDistance(pos, 96);
+        super.startSleeping(pos);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -317,19 +260,62 @@ public abstract class InteractEntity extends NPCEntity {
         }
     }
 
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.isRemote()) { this.getAnimation().tick(this); }
+    }
+
+    @Override
+    public ILivingEntityData onInitialSpawn(IServerWorld world, DifficultyInstance difficulty, SpawnReason reason, ILivingEntityData spawnData, CompoundNBT compound) {
+        ILivingEntityData data = super.onInitialSpawn(world, difficulty, reason, spawnData, compound);
+        this.setBloodType(BloodTypes.weigh(this.rand));
+        this.resetAnimationState();
+        return data;
+    }
+
+    @Override
+    public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
+        ActionResultType result = this.onInteract(player, player.getHeldItem(hand), hand);
+        if (result.isSuccessOrConsume()) { this.setInteractTarget(player); }
+        return result;
+    }
+
+    public abstract ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand);
+
+    public void resetAnimationState() {
+        this.setAnimation(this.isFollowing() ? Animations.DEFAULT : Animations.IDLE);
+    }
+
+    public boolean isFollowing() {
+        return this.canBeTarget(this.getFollowTarget());
+    }
+
+    public LivingEntity getFollowTarget() {
+        if (this.followTargetUUID == null) { return null; }
+        if (this.followTarget == null) {
+            this.followTarget = this.getEntityFromUUID(this.followTargetUUID);
+        }
+        return this.followTarget;
+    }
+
+    public void setFollowTarget(LivingEntity target) {
+        this.setFollowTarget(target != null ? target.getUniqueID() : null);
+        this.followTarget = target;
+        this.resetAnimationState();
+    }
+
+    public void setFollowTarget(UUID target) {
+        this.followTargetUUID = target;
+    }
+
     @OnlyIn(Dist.CLIENT)
     protected void setParticles(IParticleData particle) {
-        for(int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 5; ++i) {
             double d0 = this.rand.nextGaussian() * 0.02D;
             double d1 = this.rand.nextGaussian() * 0.02D;
             double d2 = this.rand.nextGaussian() * 0.02D;
             this.world.addParticle(particle, this.getPosXRandom(1.0D), this.getPosYRandom() + 1.0D, this.getPosZRandom(1.0D), d0, d1, d2);
         }
-    }
-
-    @Override
-    public void startSleeping(BlockPos pos) {
-        this.setHomePosAndDistance(pos, 96);
-        super.startSleeping(pos);
     }
 }

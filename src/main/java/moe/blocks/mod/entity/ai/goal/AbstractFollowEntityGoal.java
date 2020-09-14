@@ -36,10 +36,6 @@ public abstract class AbstractFollowEntityGoal<E extends NPCEntity, T extends En
         return this.entity.hasPath() && this.entity.canBeTarget(this.target) && this.entity.getDistance(this.target) > this.getFollowDistance(this.target);
     }
 
-    public abstract T getTarget();
-
-    public abstract boolean canFollow(T target);
-
     @Override
     public void startExecuting() {
         if (this.entity.getNavigator().tryMoveToEntityLiving(this.target, this.speed)) {
@@ -63,9 +59,13 @@ public abstract class AbstractFollowEntityGoal<E extends NPCEntity, T extends En
         }
     }
 
-    public abstract float getFollowDistance(T target);
+    public abstract void onArrival();
 
     public abstract void onFollow();
 
-    public abstract void onArrival();
+    public abstract T getTarget();
+
+    public abstract boolean canFollow(T target);
+
+    public abstract float getFollowDistance(T target);
 }

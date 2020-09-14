@@ -7,8 +7,6 @@ import moe.blocks.mod.MoeMod;
 import moe.blocks.mod.data.yearbook.Book;
 import moe.blocks.mod.data.yearbook.Page;
 import moe.blocks.mod.entity.partial.CharacterEntity;
-import moe.blocks.mod.entity.partial.InteractEntity;
-import moe.blocks.mod.item.YearbookItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.audio.SoundHandler;
@@ -19,8 +17,6 @@ import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.vector.Quaternion;
@@ -33,17 +29,15 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 public class YearbookScreen extends Screen {
     public static final ResourceLocation YEARBOOK_TEXTURES = new ResourceLocation(MoeMod.ID, "textures/gui/yearbook.png");
     private final Book book;
-    private int pageNumber;
-    private Page page;
     private final String[] stats = new String[5];
     private final String[] lines = new String[3];
+    private int pageNumber;
+    private Page page;
     private YearbookScreen.ChangePageButton buttonNextPage;
     private YearbookScreen.ChangePageButton buttonPrevPage;
     private String name;
@@ -126,29 +120,6 @@ public class YearbookScreen extends Screen {
         this.updateButtons();
     }
 
-    public void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
-        this.entity.rotationYaw = 0.75F * -(this.entity.rotationYawHead = 180.0F);
-        this.entity.setPosition(this.minecraft.player.getPosX(), this.minecraft.player.getPosY(), this.minecraft.player.getPosZ());
-        Quaternion forward = Vector3f.ZP.rotationDegrees(180.0F);
-        Quaternion lateral = Vector3f.XP.rotationDegrees(0.0F);
-        forward.multiply(lateral);
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(posX, posY, 1050.0F);
-        RenderSystem.scalef(1.0F, 1.0F, -1.0F);
-        MatrixStack stack = new MatrixStack();
-        stack.translate(0.0D, 0.0D, 1000.0D);
-        stack.scale(scale, scale, scale);
-        stack.rotate(forward);
-        EntityRendererManager renderer = this.minecraft.getRenderManager();
-        renderer.setCameraOrientation(lateral);
-        renderer.setRenderShadow(false);
-        IRenderTypeBuffer.Impl buffer = this.minecraft.getRenderTypeBuffers().getBufferSource();
-        renderer.renderEntityStatic(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, stack, buffer, 15728880);
-        buffer.finish();
-        renderer.setRenderShadow(true);
-        RenderSystem.popMatrix();
-    }
-
     protected void nextPage() {
         if (this.pageNumber < this.book.getPageCount() - 1) { ++this.pageNumber; }
         this.updateButtons();
@@ -174,6 +145,29 @@ public class YearbookScreen extends Screen {
     protected void prevPage() {
         if (this.pageNumber > 0) { --this.pageNumber; }
         this.updateButtons();
+    }
+
+    public void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
+        this.entity.rotationYaw = 0.75F * -(this.entity.rotationYawHead = 180.0F);
+        this.entity.setPosition(this.minecraft.player.getPosX(), this.minecraft.player.getPosY(), this.minecraft.player.getPosZ());
+        Quaternion forward = Vector3f.ZP.rotationDegrees(180.0F);
+        Quaternion lateral = Vector3f.XP.rotationDegrees(0.0F);
+        forward.multiply(lateral);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(posX, posY, 1050.0F);
+        RenderSystem.scalef(1.0F, 1.0F, -1.0F);
+        MatrixStack stack = new MatrixStack();
+        stack.translate(0.0D, 0.0D, 1000.0D);
+        stack.scale(scale, scale, scale);
+        stack.rotate(forward);
+        EntityRendererManager renderer = this.minecraft.getRenderManager();
+        renderer.setCameraOrientation(lateral);
+        renderer.setRenderShadow(false);
+        IRenderTypeBuffer.Impl buffer = this.minecraft.getRenderTypeBuffers().getBufferSource();
+        renderer.renderEntityStatic(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, stack, buffer, 15728880);
+        buffer.finish();
+        renderer.setRenderShadow(true);
+        RenderSystem.popMatrix();
     }
 
     @OnlyIn(Dist.CLIENT)

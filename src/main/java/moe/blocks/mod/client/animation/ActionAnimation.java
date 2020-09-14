@@ -1,6 +1,5 @@
 package moe.blocks.mod.client.animation;
 
-import moe.blocks.mod.client.Animations;
 import moe.blocks.mod.entity.partial.InteractEntity;
 
 public abstract class ActionAnimation extends Animation {
