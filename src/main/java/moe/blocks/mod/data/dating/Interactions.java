@@ -9,17 +9,17 @@ public enum Interactions {
     SAVED_LIFE(5.0F, 24000, Reactions.NONE);
 
     public final Reactions reaction;
-    private final float affection;
+    private final float love;
     private final int cooldown;
 
-    Interactions(float affection, int cooldown, Reactions reaction) {
-        this.affection = affection;
+    Interactions(float love, int cooldown, Reactions reaction) {
+        this.love = love;
         this.cooldown = cooldown;
         this.reaction = reaction;
     }
 
-    public float getAffection() {
-        return this.affection;
+    public float getLove() {
+        return this.love;
     }
 
     public int getCooldown() {

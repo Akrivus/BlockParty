@@ -37,5 +37,5 @@ public class MoeSounds {
     public static final RegistryObject<SoundEvent> MOE_THANK_YOU = REGISTRY.register("entity.moe.thank_you", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.thank_you")));
     public static final RegistryObject<SoundEvent> MOE_YES = REGISTRY.register("entity.moe.yes", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.yes")));
     public static final RegistryObject<SoundEvent> MUSIC_DISC_POMF_POMF = REGISTRY.register("music_disc.pomf_pomf", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "music_disc.pomf_pomf")));
-    public static final RegistryObject<SoundEvent> YEARBOOK_SIGN = REGISTRY.register("item.yearbook.sign", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "itme.yearbook.sign")));
+    public static final RegistryObject<SoundEvent> YEARBOOK_REMOVE_PAGE = REGISTRY.register("item.yearbook.remove_page", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "item.yearbook.remove_page")));
 }

@@ -2,6 +2,7 @@ package moe.blocks.mod.data.yearbook;
 
 import moe.blocks.mod.data.Yearbooks;
 import moe.blocks.mod.entity.partial.CharacterEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 
@@ -22,7 +23,7 @@ public class Book {
         CompoundNBT compound = (CompoundNBT) nbt;
         compound.keySet().forEach(key -> {
             UUID uuid = UUID.fromString(key);
-            this.pages.put(uuid, new Page(uuid, compound.get(key)));
+            this.pages.put(uuid, new Page(compound.get(key), uuid));
         });
     }
 
@@ -41,17 +42,26 @@ public class Book {
     }
 
     public void setPageIgnorantly(CharacterEntity entity, UUID uuid) {
-        this.pages.put(entity.getUniqueID(), new Page(entity, entity.getRelationshipWith(uuid)));
+        this.pages.put(entity.getUniqueID(), new Page(entity, uuid));
         this.data.set(uuid, this);
     }
 
-    public void ripPage(CharacterEntity entity, UUID uuid) {
-        this.pages.remove(entity.getUniqueID());
+    public Page ripPage(UUID pageUUID, UUID uuid) {
+        Page page = this.pages.remove(pageUUID);
         this.data.set(uuid, this);
+        return page;
+    }
+
+    public Page ripPage(UUID pageUUID, PlayerEntity player) {
+        return this.ripPage(pageUUID, player.getUniqueID());
     }
 
     public int getPageCount() {
         return this.getPages().length;
+    }
+
+    public Page getPage(UUID uuid) {
+        return this.pages.get(uuid);
     }
 
     public Page[] getPages() {
@@ -64,5 +74,9 @@ public class Book {
             if (page.getUUID().equals(uuid)) { return i; }
         }
         return 0;
+    }
+
+    public boolean isEmpty() {
+        return this.getPageCount() == 0;
     }
 }

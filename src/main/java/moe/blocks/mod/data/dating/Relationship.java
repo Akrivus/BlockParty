@@ -1,6 +1,7 @@
 package moe.blocks.mod.data.dating;
 
 import moe.blocks.mod.entity.ai.automata.ReactiveState;
+import moe.blocks.mod.util.Trans;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
@@ -13,8 +14,7 @@ public class Relationship {
     protected final List<Relationship> rivals = new ArrayList<>();
     protected UUID playerUUID;
     protected Phases phase;
-    protected float affection;
-    protected float trust;
+    protected float love;
     protected int timeSinceInteraction;
 
     public Relationship(UUID uuid) {
@@ -37,10 +37,10 @@ public class Relationship {
         this.interactions.forEach((interaction, timeout) -> --timeout);
         if (++this.timeSinceInteraction > 24000) {
             this.timeSinceInteraction = 0;
-            this.affection -= this.getPhase().getDecay();
-            if (this.affection < 0.0F) { this.affection = 0.0F; }
-            if (this.affection >= 20.0F) {
-                this.affection = 20.0F;
+            this.love -= this.getPhase().getDecay();
+            if (this.love < 0.0F) { this.love = 0.0F; }
+            if (this.love >= 20.0F) {
+                this.love = 20.0F;
             }
         }
     }
@@ -53,16 +53,8 @@ public class Relationship {
         this.phase = phase;
     }
 
-    public float getAffection() {
-        return this.affection;
-    }
-
-    public float getTrust() {
-        return this.trust;
-    }
-
-    public boolean isPlayer(PlayerEntity entity) {
-        return this.playerUUID.equals(entity.getUniqueID());
+    public float getLove() {
+        return this.love;
     }
 
     public PlayerEntity getPlayer(World world) {
@@ -70,11 +62,11 @@ public class Relationship {
     }
 
     public boolean can(Actions action) {
-        return action.inRange(this.affection);
+        return action.inRange(this.love);
     }
 
     public ReactiveState getReaction(Interactions interaction) {
-        if (this.interactions.getOrDefault(interaction, 0) <= 0) { this.affection += interaction.getAffection(); }
+        if (this.interactions.getOrDefault(interaction, 0) <= 0) { this.love += interaction.getLove(); }
         this.interactions.put(interaction, interaction.getCooldown());
         return interaction.reaction.state;
     }
@@ -97,6 +89,15 @@ public class Relationship {
         }
     }
 
+    public enum Status {
+        SINGLE, TAKEN, DEAD;
+
+        @Override
+        public String toString() {
+            return Trans.late(String.format("debug.moeblocks.status.%s", this.name().toLowerCase()));
+        }
+    }
+
     public enum Actions {
         FOLLOW(2.0F), FIGHT(3.0F);
 
@@ -106,8 +107,8 @@ public class Relationship {
             this.min = min;
         }
 
-        public boolean inRange(float affection) {
-            return this.min <= affection;
+        public boolean inRange(float love) {
+            return this.min <= love;
         }
     }
 }

@@ -185,15 +185,11 @@
       "moeblocks:record/pomf_pomf"
     ]
   },
-  "item.yearbook.sign": {
+  "item.yearbook.remove_page": {
     "category": "player",
-    "subtitle": "subtitle.yearbook.sign",
+    "subtitle": "subtitle.yearbook.remove_page",
     "sounds": [
-      "moeblocks:item/yearbook/sign1",
-      "moeblocks:item/yearbook/sign2",
-      "moeblocks:item/yearbook/sign3",
-      "moeblocks:item/yearbook/sign4",
-      "moeblocks:item/yearbook/sign5"
+      "moeblocks:item/yearbook/remove_page"
     ]
   }
 }

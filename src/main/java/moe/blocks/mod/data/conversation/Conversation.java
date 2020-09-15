@@ -52,7 +52,7 @@ public class Conversation {
 
     public static class Reward {
         public boolean dropHeldItem;
-        public float affection;
+        public float love;
         public float trust;
         public float stress;
     }

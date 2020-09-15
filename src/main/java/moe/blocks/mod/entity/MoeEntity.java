@@ -7,6 +7,7 @@ import moe.blocks.mod.entity.partial.CharacterEntity;
 import moe.blocks.mod.init.MoeBlocks;
 import moe.blocks.mod.init.MoeSounds;
 import moe.blocks.mod.init.MoeTags;
+import moe.blocks.mod.util.Trans;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -30,6 +31,7 @@ import net.minecraft.util.text.LanguageMap;
 import net.minecraft.world.World;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class MoeEntity extends CharacterEntity {
     public static final DataParameter<Optional<BlockState>> BLOCK_STATE = EntityDataManager.createKey(MoeEntity.class, DataSerializers.OPTIONAL_BLOCK_STATE);
@@ -93,11 +95,16 @@ public class MoeEntity extends CharacterEntity {
     }
 
     @Override
+    public void setYearbookPage(CompoundNBT compound, UUID uuid) {
+        super.setYearbookPage(compound, uuid);
+        compound.putInt("BlockData", Block.getStateId(this.getBlockData()));
+        compound.put("ExtraBlockData", this.getExtraBlockData());
+        compound.putFloat("Scale", 1.0F);
+    }
+
+    @Override
     public String getGivenName() {
-        String key = String.format("entity.moeblocks.%s.name", this.getBlockName());
-        LanguageMap map = LanguageMap.getInstance();
-        if (!map.func_230506_b_(key)) { return super.getGivenName(); }
-        return map.func_230503_a_(key);
+        return Trans.lator(String.format("entity.moeblocks.%s.name", this.getBlockName()), super.getGivenName());
     }
 
     public Gender getGender() {
@@ -106,10 +113,7 @@ public class MoeEntity extends CharacterEntity {
 
     @Override
     public String getFamilyName() {
-        String key = String.format("entity.moeblocks.%s", this.getBlockName());
-        LanguageMap map = LanguageMap.getInstance();
-        if (!map.func_230506_b_(key)) { key = String.format("block.%s", this.getBlockName()); }
-        return map.func_230503_a_(key);
+        return Trans.lator(String.format("entity.moeblocks.%s", this.getBlockName()), String.format("block.%s", this.getBlockName()));
     }
 
     @Override

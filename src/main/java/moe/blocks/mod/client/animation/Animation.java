@@ -17,10 +17,9 @@ public abstract class Animation {
 
     }
 
-    @Override
-    public String toString() {
+    public abstract Animations getKey();
+
+    public String name() {
         return this.getKey().name();
     }
-
-    public abstract Animations getKey();
 }

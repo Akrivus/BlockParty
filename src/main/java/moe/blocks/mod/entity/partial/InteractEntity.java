@@ -72,10 +72,10 @@ public abstract class InteractEntity extends NPCEntity {
     @Override
     public void writeAdditional(CompoundNBT compound) {
         super.writeAdditional(compound);
-        compound.putString("Animation", this.getAnimation().toString());
-        compound.putString("BloodType", this.getBloodType().toString());
-        compound.putString("Dere", this.getDere().toString());
-        compound.putString("Emotion", this.getEmotion().toString());
+        compound.putString("Animation", this.getAnimation().name());
+        compound.putString("BloodType", this.getBloodType().name());
+        compound.putString("Dere", this.getDere().name());
+        compound.putString("Emotion", this.getEmotion().name());
         compound.putInt("EmotionTimer", this.timeUntilEmotionExpires);
         if (this.followTargetUUID != null) {
             compound.putUniqueId("FollowTarget", this.followTargetUUID);

@@ -1,8 +1,12 @@
 package moe.blocks.mod.data.yearbook;
 
 import moe.blocks.mod.data.dating.Relationship;
+import moe.blocks.mod.entity.ai.BloodTypes;
+import moe.blocks.mod.entity.ai.automata.state.Deres;
+import moe.blocks.mod.entity.ai.automata.state.Emotions;
 import moe.blocks.mod.entity.partial.CharacterEntity;
 import moe.blocks.mod.init.MoeEntities;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.world.World;
@@ -11,47 +15,70 @@ import java.util.UUID;
 
 public class Page {
     private final CompoundNBT character;
-    private final float affection;
-    private final float trust;
     private final UUID uuid;
 
-    public Page(UUID uuid, INBT compound) {
+    public Page(INBT compound, UUID uuid) {
         this.character = (CompoundNBT) compound;
-        this.affection = this.character.getFloat("Affection");
-        this.trust = this.character.getFloat("Trust");
         this.uuid = uuid;
     }
 
-    public Page(CharacterEntity entity, Relationship relationship) {
-        entity.writeWithoutSync(this.character = new CompoundNBT());
-        this.affection = relationship.getAffection();
-        this.trust = relationship.getTrust();
+    public Page(CharacterEntity entity, UUID uuid) {
+        entity.setYearbookPage(this.character = new CompoundNBT(), uuid);
         this.uuid = entity.getUniqueID();
     }
 
     public CompoundNBT write() {
-        CompoundNBT compound = this.character;
-        compound.putFloat("Affection", this.affection);
-        compound.putFloat("Trust", this.trust);
-        return compound;
+        return this.character;
     }
 
-    public CharacterEntity getCharacter(World world) {
-        CharacterEntity character = MoeEntities.MOE.get().create(world);
+    public CharacterEntity getCharacter(Minecraft minecraft) {
+        CharacterEntity character = MoeEntities.MOE.get().create(minecraft.world);
+        character.readAdditional(this.character);
+        character.setPosition(minecraft.player.getPosX(), minecraft.player.getPosY(), minecraft.player.getPosZ());
+        character.rotationYaw = 0.75F * -(character.rotationYawHead = 180.0F);
+        if (this.getDere() == Deres.YANDERE) { character.setEmotion(Emotions.PSYCHOTIC, 0); }
+        if (this.getDere() == Deres.DANDERE) { character.setEmotion(Emotions.HAPPY, 0); }
         character.isInYearbook = true;
-        character.read(this.character);
         return character;
-    }
-
-    public float getAffection() {
-        return this.affection;
-    }
-
-    public float getTrust() {
-        return this.trust;
     }
 
     public UUID getUUID() {
         return this.uuid;
+    }
+
+    public String getName(CharacterEntity character) {
+        return character.getFullName();
+    }
+
+    public float getHealth() {
+        return this.character.getFloat("Health");
+    }
+
+    public float getHunger() {
+        return this.character.getFloat("Hunger");
+    }
+
+    public float getLove() {
+        return this.character.getFloat("Love");
+    }
+
+    public float getStress() {
+        return this.character.getFloat("Stress");
+    }
+
+    public Deres getDere() {
+        return Deres.valueOf(this.character.getString("Dere"));
+    }
+
+    public Relationship.Status getStatus() {
+        return Relationship.Status.valueOf(this.character.getString("Status"));
+    }
+
+    public BloodTypes getBloodType() {
+        return BloodTypes.valueOf(this.character.getString("BloodType"));
+    }
+
+    public int getAge() {
+        return this.character.getInt("AgeInYears");
     }
 }

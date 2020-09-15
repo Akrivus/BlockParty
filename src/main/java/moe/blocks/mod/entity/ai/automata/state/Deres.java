@@ -4,6 +4,7 @@ import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.partial.DieEntity;
 import moe.blocks.mod.entity.partial.InteractEntity;
+import moe.blocks.mod.util.Trans;
 import net.minecraft.block.material.MaterialColor;
 
 import java.util.HashMap;
@@ -52,6 +53,11 @@ public enum Deres {
     Deres(State state, DieEntity.Face face) {
         this.state = state;
         Registry.SET.put(face, this);
+    }
+
+    @Override
+    public String toString() {
+        return Trans.late(String.format("debug.moeblocks.deres.%s", this.name().toLowerCase()));
     }
 
     public static Deres get(DieEntity.Face face) {

@@ -36,7 +36,7 @@ public class Yearbooks extends WorldSavedData {
         super(name);
     }
 
-    public static Book get(PlayerEntity player) {
+    public static Book getBook(PlayerEntity player) {
         Yearbooks data = getInstance(player.world);
         if (data != null) { return data.books.getOrDefault(player.getUniqueID(), new Book(data)); }
         return null;

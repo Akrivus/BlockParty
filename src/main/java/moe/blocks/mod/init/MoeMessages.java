@@ -1,7 +1,8 @@
 package moe.blocks.mod.init;
 
 import moe.blocks.mod.MoeMod;
-import moe.blocks.mod.message.YearbookMessage;
+import moe.blocks.mod.message.CRemovePageFromYearbook;
+import moe.blocks.mod.message.SOpenYearbook;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.NetworkManager;
@@ -23,11 +24,12 @@ public class MoeMessages {
     private static int currentMessageID = 1;
 
     static {
-        MESSAGES.add(new MessageContainer<>(YearbookMessage.class, YearbookMessage.Open::decode, YearbookMessage.Open::encode, YearbookMessage.Open::handle));
+        MESSAGES.add(new MessageContainer<>(CRemovePageFromYearbook.class, CRemovePageFromYearbook::new, CRemovePageFromYearbook::encode, CRemovePageFromYearbook::handleContext));
+        MESSAGES.add(new MessageContainer<>(SOpenYearbook.class, SOpenYearbook::new, SOpenYearbook::encode, SOpenYearbook::handleContext));
     }
 
     public static SimpleChannel register() {
-        SimpleChannel channel = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(MoeMod.ID, "gui")).clientAcceptedVersions(version -> true).serverAcceptedVersions(version -> true).networkProtocolVersion(() -> MoeMod.VERSION).simpleChannel();
+        SimpleChannel channel = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(MoeMod.ID, "network")).clientAcceptedVersions(version -> true).serverAcceptedVersions(version -> true).networkProtocolVersion(() -> MoeMod.VERSION).simpleChannel();
         MESSAGES.forEach(message -> channel.messageBuilder(message.getPacketClass(), message.getID()).decoder(message.getDecoder()).encoder(message.getEncoder()).consumer(message.getHandler()).add());
         return channel;
     }

@@ -1,5 +1,6 @@
 package moe.blocks.mod.entity.partial;
 
+import moe.blocks.mod.client.Animations;
 import moe.blocks.mod.data.Yearbooks;
 import moe.blocks.mod.data.dating.Interactions;
 import moe.blocks.mod.data.dating.Relationship;
@@ -7,12 +8,12 @@ import moe.blocks.mod.data.dating.Tropes;
 import moe.blocks.mod.data.yearbook.Book;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.ai.automata.States;
+import moe.blocks.mod.entity.ai.automata.state.Emotions;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeMessages;
-import moe.blocks.mod.message.YearbookMessage;
+import moe.blocks.mod.message.SOpenYearbook;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -73,9 +74,9 @@ public abstract class CharacterEntity extends InteractEntity {
     @Override
     public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
         if (this.isLocal() && player.getHeldItem(hand).getItem() == MoeItems.YEARBOOK.get()) {
-            Book book = Yearbooks.get(player);
+            Book book = Yearbooks.getBook(player);
             book.setPageIgnorantly(this, player.getUniqueID());
-            MoeMessages.send(new YearbookMessage.Open(book, book.getPageNumber(this.getUniqueID())));
+            MoeMessages.send(new SOpenYearbook(book, this.getUniqueID()));
             return ActionResultType.SUCCESS;
         } else {
             return super.func_230254_b_(player, hand);
@@ -110,17 +111,25 @@ public abstract class CharacterEntity extends InteractEntity {
         return Gender.FEMININE;
     }
 
-    public boolean writeWithoutSync(CompoundNBT compound) {
-        this.isInYearbook = true;
-        this.writeUnlessRemoved(compound);
-        return this.isInYearbook = false;
+    public void setYearbookPage(CompoundNBT compound, UUID uuid) {
+        compound.putString("GivenName", this.getGivenName());
+        compound.putString("FamilyName", this.getFamilyName());
+        compound.putString("Animation", Animations.IDLE.name());
+        compound.putString("Emotion", Emotions.NORMAL.name());
+        compound.putFloat("Health", this.getHealth());
+        compound.putFloat("Hunger", this.getHunger());
+        compound.putFloat("Stress", this.getStress());
+        compound.putFloat("Love", this.getRelationshipWith(uuid).getLove());
+        compound.putString("Dere", this.getDere().name());
+        compound.putString("Status", this.getRelationshipStatus().name());
+        compound.putString("BloodType", this.getBloodType().name());
+        compound.putInt("AgeInYears", this.getAgeInYears());
     }
 
-    @Override
-    public boolean writeUnlessRemoved(CompoundNBT compound) {
-        if (!super.writeUnlessRemoved(compound)) { return false; }
-        if (!this.isInYearbook) { this.syncYearbooks(); }
-        return true;
+    public Relationship.Status getRelationshipStatus() {
+        if (this.getHealth() <= 0.0F) { return Relationship.Status.DEAD; }
+        for (Relationship r : this.relationships) { if (r.getPhase() == Relationship.Phases.CONFESSION) { return Relationship.Status.TAKEN; } }
+        return Relationship.Status.SINGLE;
     }
 
     @Override
@@ -157,7 +166,7 @@ public abstract class CharacterEntity extends InteractEntity {
 
     @Override
     public boolean getAlwaysRenderNameTagForRender() {
-        return !this.isInYearbook && Minecraft.getInstance().player.getDistance(this) < 8.0F;
+        return true;
     }
 
     public String getFullName() {
@@ -166,6 +175,10 @@ public abstract class CharacterEntity extends InteractEntity {
 
     public BlockState getBlockData() {
         return Blocks.AIR.getDefaultState();
+    }
+
+    public boolean isDead() {
+        return this.getRelationshipStatus() == Relationship.Status.DEAD;
     }
 
     public enum Gender {
