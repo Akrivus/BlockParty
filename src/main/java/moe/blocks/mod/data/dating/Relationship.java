@@ -11,7 +11,6 @@ import java.util.*;
 
 public class Relationship {
     protected final Map<Interactions, Integer> interactions = new HashMap<>();
-    protected final List<Relationship> rivals = new ArrayList<>();
     protected UUID playerUUID;
     protected Phases phase;
     protected float love;
@@ -27,9 +26,18 @@ public class Relationship {
 
     public Relationship(CompoundNBT compound) {
         this.phase = Phases.valueOf(compound.getString("Phase"));
+        this.love = compound.getFloat("Love");
+        this.timeSinceInteraction = compound.getInt("TimeSinceInteraction");
+        for (Interactions interaction : Interactions.values()) {
+            if (compound.contains(interaction.getKey())) { this.interactions.put(interaction, compound.getInt(interaction.getKey())); }
+        }
     }
 
     public CompoundNBT write(CompoundNBT compound) {
+        compound.putString("Phase", this.getPhase().name());
+        compound.putFloat("Love", this.getLove());
+        compound.putInt("TimeSinceInteraction", this.timeSinceInteraction);
+        this.interactions.forEach((interaction, timeout) -> compound.putInt(interaction.getKey(), timeout));
         return compound;
     }
 
@@ -39,7 +47,7 @@ public class Relationship {
             this.timeSinceInteraction = 0;
             this.love -= this.getPhase().getDecay();
             if (this.love < 0.0F) { this.love = 0.0F; }
-            if (this.love >= 20.0F) {
+            if (this.love > 20.0F) {
                 this.love = 20.0F;
             }
         }
@@ -66,7 +74,7 @@ public class Relationship {
     }
 
     public ReactiveState getReaction(Interactions interaction) {
-        if (this.interactions.getOrDefault(interaction, 0) <= 0) { this.love += interaction.getLove(); }
+        if (this.interactions.getOrDefault(interaction, -1) < 0) { this.love += interaction.getLove(); }
         this.interactions.put(interaction, interaction.getCooldown());
         return interaction.reaction.state;
     }
