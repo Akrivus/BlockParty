@@ -76,7 +76,7 @@ public abstract class CharacterEntity extends InteractEntity {
         if (this.isLocal() && player.getHeldItem(hand).getItem() == MoeItems.YEARBOOK.get()) {
             Book book = Yearbooks.getBook(player);
             book.setPageIgnorantly(this, player.getUniqueID());
-            MoeMessages.send(new SOpenYearbook(book, this.getUniqueID()));
+            MoeMessages.send(new SOpenYearbook(book, book.getPageNumber(this.getUniqueID())));
             return ActionResultType.SUCCESS;
         } else {
             return super.func_230254_b_(player, hand);

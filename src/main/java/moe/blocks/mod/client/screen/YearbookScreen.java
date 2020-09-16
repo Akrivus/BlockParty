@@ -41,8 +41,7 @@ public class YearbookScreen extends Screen {
     private final String[] stats = new String[4];
     private final String[] lines = new String[4];
     private final Book book;
-    private final Page[] pages;
-    private int pageNumber = 0;
+    private int pageNumber;
     private Page page;
     private YearbookScreen.ChangePageButton buttonNextPage;
     private YearbookScreen.ChangePageButton buttonPrevPage;
@@ -50,13 +49,10 @@ public class YearbookScreen extends Screen {
     private String name;
     private CharacterEntity entity;
 
-    public YearbookScreen(Book book, UUID pageID) {
+    public YearbookScreen(Book book, int pageNumber) {
         super(NarratorChatListener.EMPTY);
         this.book = book;
-        this.pages = book.getPages();
-        for (int i = 0; i < this.pages.length; ++i) {
-            if (this.pages[i].getUUID().equals(pageID)) { this.pageNumber = i; }
-        }
+        this.pageNumber = pageNumber;
     }
 
     @Override
@@ -127,7 +123,7 @@ public class YearbookScreen extends Screen {
     protected void init() {
         this.addButton(new Button(this.width / 2 - 68, 196, 136, 20, DialogTexts.field_240632_c_, (button) -> this.minecraft.displayGuiScreen(null)));
         this.buttonNextPage = this.addButton(new ChangePageButton((this.width - 146) / 2 + 122, 52, 1, (button) -> {
-            if (this.pageNumber < this.pages.length - 1) { ++this.pageNumber; }
+            if (this.pageNumber < this.book.getPageCount() - 1) { ++this.pageNumber; }
             this.updateButtons();
         }));
         this.buttonPrevPage = this.addButton(new ChangePageButton((this.width - 146) / 2 + 21, 52, -1, (button) -> {
@@ -142,7 +138,7 @@ public class YearbookScreen extends Screen {
     }
 
     private void updateButtons() {
-        this.page = this.pages[this.pageNumber];
+        this.page = this.book.getPage(this.pageNumber);
         this.entity = this.page.getCharacter(this.minecraft);
         this.name = this.page.getName(this.entity);
         this.stats[0] = String.format("%.0f", this.page.getHealth());
@@ -153,7 +149,7 @@ public class YearbookScreen extends Screen {
         this.lines[1] = String.format(Trans.late("gui.moeblocks.label.blood"), this.page.getBloodType().toString());
         this.lines[2] = String.format(Trans.late("gui.moeblocks.label.age"), this.page.getAge());
         this.lines[3] = String.format(Trans.late("gui.moeblocks.label.status"), this.page.getStatus().toString());
-        this.buttonNextPage.visible = this.pageNumber < this.pages.length - 1;
+        this.buttonNextPage.visible = this.pageNumber < this.book.getPageCount() - 1;
         this.buttonPrevPage.visible = this.pageNumber > 0;
     }
 

@@ -49,7 +49,7 @@ public class Yearbooks extends WorldSavedData {
 
     @Override
     public void read(CompoundNBT compound) {
-        compound.keySet().forEach(key -> this.books.put(UUID.fromString(key), new Book(this, compound.get(key))));
+        compound.keySet().forEach(key -> this.books.put(UUID.fromString(key), new Book(this, (CompoundNBT) compound.get(key))));
     }
 
     @Override

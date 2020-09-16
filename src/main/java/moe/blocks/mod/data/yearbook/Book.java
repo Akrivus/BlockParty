@@ -5,78 +5,90 @@ import moe.blocks.mod.entity.partial.CharacterEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class Book {
-    private final Map<UUID, Page> pages = new LinkedHashMap<>();
+    private final List<Page> pages = new ArrayList<>();
     private Yearbooks data;
 
     public Book(Yearbooks data) {
         this(data, new CompoundNBT());
     }
 
-    public Book(Yearbooks data, INBT nbt) {
+    public Book(Yearbooks data, CompoundNBT compound) {
         this.data = data;
-        CompoundNBT compound = (CompoundNBT) nbt;
-        compound.keySet().forEach(key -> {
-            UUID uuid = UUID.fromString(key);
-            this.pages.put(uuid, new Page(compound.get(key), uuid));
+        ListNBT list = compound.getList("Pages", 10);
+        list.forEach(nbt -> {
+            this.pages.add(new Page((CompoundNBT) nbt));
         });
     }
 
     public Book(INBT nbt) {
-        this(null, nbt);
+        this(null, (CompoundNBT) nbt);
     }
 
     public CompoundNBT write() {
         CompoundNBT compound = new CompoundNBT();
-        this.pages.keySet().forEach(key -> compound.put(key.toString(), this.pages.get(key).write()));
+        ListNBT pages = new ListNBT();
+        this.pages.forEach(page -> pages.add(page.write()));
+        compound.put("Pages", pages);
         return compound;
     }
 
-    public void setPageCautiously(CharacterEntity entity, UUID uuid) {
-        if (this.pages.containsKey(entity.getUniqueID())) { this.setPageIgnorantly(entity, uuid); }
+    public boolean setPageCautiously(CharacterEntity entity, UUID uuid) {
+        Page page = this.getPage(entity.getUniqueID());
+        if (page == null) { return false; }
+        this.pages.set(this.pages.indexOf(page), new Page(entity, uuid));
+        this.data.set(uuid, this);
+        return true;
     }
 
     public void setPageIgnorantly(CharacterEntity entity, UUID uuid) {
-        this.pages.put(entity.getUniqueID(), new Page(entity, uuid));
-        this.data.set(uuid, this);
+        if (this.setPageCautiously(entity, uuid)) { return; }
+        this.pages.add(new Page(entity, uuid));
+        this.setDirty(uuid);
     }
 
-    public Page ripPage(UUID pageUUID, UUID uuid) {
-        Page page = this.pages.remove(pageUUID);
-        this.data.set(uuid, this);
+    public Page removePage(UUID pageUUID, UUID uuid) {
+        Page page = this.getPage(pageUUID);
+        if (page == null) { return null; }
+        this.pages.remove(page);
+        this.setDirty(uuid);
         return page;
     }
 
-    public Page ripPage(UUID pageUUID, PlayerEntity player) {
-        return this.ripPage(pageUUID, player.getUniqueID());
+    public Page removePage(UUID pageUUID, PlayerEntity player) {
+        return this.removePage(pageUUID, player.getUniqueID());
     }
 
     public int getPageCount() {
-        return this.getPages().length;
+        return this.pages.size();
     }
 
     public Page getPage(UUID uuid) {
-        return this.pages.get(uuid);
+        return this.pages.stream().filter(page -> page.getUUID().equals(uuid)).findFirst().orElse(null);
     }
 
-    public Page[] getPages() {
-        return this.pages.values().toArray(new Page[0]);
+    public List<Page> getPages() {
+        return this.pages;
+    }
+
+    public void setDirty(UUID uuid) {
+        this.data.set(uuid, this);
     }
 
     public int getPageNumber(UUID uuid) {
-        for (int i = 0; i < this.getPages().length; ++i) {
-            Page page = this.getPages()[i];
-            if (page.getUUID().equals(uuid)) { return i; }
-        }
-        return 0;
+        Page page = this.getPage(uuid);
+        return this.pages.indexOf(page);
     }
 
     public boolean isEmpty() {
         return this.getPageCount() == 0;
+    }
+
+    public Page getPage(int pageNumber) {
+        return this.pages.get(pageNumber);
     }
 }

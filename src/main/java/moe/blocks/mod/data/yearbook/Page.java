@@ -17,9 +17,9 @@ public class Page {
     private final CompoundNBT character;
     private final UUID uuid;
 
-    public Page(INBT compound, UUID uuid) {
+    public Page(INBT compound) {
         this.character = (CompoundNBT) compound;
-        this.uuid = uuid;
+        this.uuid = this.character.getUniqueId("PageUUID");
     }
 
     public Page(CharacterEntity entity, UUID uuid) {
@@ -28,6 +28,7 @@ public class Page {
     }
 
     public CompoundNBT write() {
+        this.character.putUniqueId("PageUUID", this.uuid);
         return this.character;
     }
 

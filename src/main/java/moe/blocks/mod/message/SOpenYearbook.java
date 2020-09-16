@@ -19,40 +19,37 @@ import java.util.function.Supplier;
 
 public class SOpenYearbook {
     protected final Book book;
-    protected final UUID pageUUID;
+    protected final int pageNumber;
 
-    public SOpenYearbook(Book book, UUID pageUUID) {
+    public SOpenYearbook(Book book, int pageNumber) {
         this.book = book;
-        this.pageUUID = pageUUID;
-    }
-
-    public SOpenYearbook(Book book) {
-        this(book, book.isEmpty() ? new UUID(0, 0) : book.getPages()[0].getUUID());
+        this.pageNumber = pageNumber;
     }
 
     public SOpenYearbook(PacketBuffer buffer) {
-        this(new Book(buffer.readCompoundTag()), buffer.readUniqueId());
+        this(new Book(buffer.readCompoundTag()), buffer.readInt());
     }
 
     public Book getBook() {
         return this.book;
     }
 
-    public UUID getPageUUID() {
-        return this.pageUUID;
+    public int getPageNumber() {
+        return this.pageNumber;
     }
 
     public static void encode(SOpenYearbook message, PacketBuffer buffer) {
         buffer.writeCompoundTag(message.getBook().write());
-        buffer.writeUniqueId(message.getPageUUID());
+        buffer.writeInt(message.getPageNumber());
     }
 
     public static void handle(SOpenYearbook message, NetworkEvent.Context context, Minecraft mc) {
         if (mc.player.getHeldItem(Hand.MAIN_HAND).getItem() != MoeItems.YEARBOOK.get()) { return; }
+        if (mc.currentScreen instanceof YearbookScreen) { return; } // Fixes indexes not persisting
         if (message.getBook().isEmpty()) {
             mc.player.sendStatusMessage(new TranslationTextComponent("command.moeblocks.yearbook.error"), true);
         } else {
-            mc.displayGuiScreen(new YearbookScreen(message.getBook(), message.getPageUUID()));
+            mc.displayGuiScreen(new YearbookScreen(message.getBook(), message.getPageNumber()));
         }
     }
 

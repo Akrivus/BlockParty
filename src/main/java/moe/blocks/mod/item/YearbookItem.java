@@ -1,6 +1,7 @@
 package moe.blocks.mod.item;
 
 import moe.blocks.mod.data.Yearbooks;
+import moe.blocks.mod.data.yearbook.Book;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeMessages;
 import moe.blocks.mod.message.SOpenYearbook;
@@ -11,6 +12,8 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
+import java.util.UUID;
+
 public class YearbookItem extends Item {
 
     public YearbookItem() {
@@ -20,7 +23,8 @@ public class YearbookItem extends Item {
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
         if (world.isRemote()) { return super.onItemRightClick(world, player, hand); }
-        MoeMessages.send(new SOpenYearbook(Yearbooks.getBook(player)));
+        Book book = Yearbooks.getBook(player);
+        MoeMessages.send(new SOpenYearbook(book, 0));
         return ActionResult.resultSuccess(player.getHeldItem(hand));
     }
 }
