@@ -38,7 +38,7 @@ public class Page {
         character.setPosition(minecraft.player.getPosX(), minecraft.player.getPosY(), minecraft.player.getPosZ());
         character.rotationYaw = 0.75F * -(character.rotationYawHead = 180.0F);
         if (this.getDere() == Deres.YANDERE) { character.setEmotion(Emotions.PSYCHOTIC, 0); }
-        if (this.getDere() == Deres.DANDERE) { character.setEmotion(Emotions.HAPPY, 0); }
+        if (this.getDere() == Deres.DEREDERE) { character.setEmotion(Emotions.HAPPY, 0); }
         character.isInYearbook = true;
         return character;
     }

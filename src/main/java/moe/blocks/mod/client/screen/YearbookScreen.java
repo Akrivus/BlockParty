@@ -121,7 +121,7 @@ public class YearbookScreen extends Screen {
 
     @Override
     protected void init() {
-        this.addButton(new Button(this.width / 2 - 68, 196, 136, 20, DialogTexts.field_240632_c_, (button) -> this.minecraft.displayGuiScreen(null)));
+        this.addButton(new Button(this.width / 2 - 68, 196, 136, 20, DialogTexts.GUI_DONE, (button) -> this.minecraft.displayGuiScreen(null)));
         this.buttonNextPage = this.addButton(new ChangePageButton((this.width - 146) / 2 + 122, 52, 1, (button) -> {
             if (this.pageNumber < this.book.getPageCount() - 1) { ++this.pageNumber; }
             this.updateButtons();

@@ -23,7 +23,7 @@ public class Yearbooks extends WorldSavedData {
 
     public static Yearbooks getInstance(World world) {
         if (world.isRemote()) { return null; }
-        ServerWorld server = ((ServerWorld) world).getServer().getWorld(World.field_234918_g_);
+        ServerWorld server = ((ServerWorld) world).getServer().getWorld(World.OVERWORLD);
         DimensionSavedDataManager storage = server.getSavedData();
         return storage.getOrCreate(Yearbooks::new, KEY);
     }
