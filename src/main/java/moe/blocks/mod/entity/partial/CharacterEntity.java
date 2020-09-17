@@ -5,7 +5,6 @@ import moe.blocks.mod.data.Yearbooks;
 import moe.blocks.mod.data.dating.Interactions;
 import moe.blocks.mod.data.dating.Relationship;
 import moe.blocks.mod.data.dating.Tropes;
-import moe.blocks.mod.data.yearbook.Book;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
@@ -74,7 +73,7 @@ public abstract class CharacterEntity extends InteractEntity {
     @Override
     public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
         if (this.isLocal() && player.getHeldItem(hand).getItem() == MoeItems.YEARBOOK.get()) {
-            Book book = Yearbooks.getBook(player);
+            Yearbooks.Book book = Yearbooks.getBook(player);
             book.setPageIgnorantly(this, player.getUniqueID());
             MoeMessages.send(new SOpenYearbook(book, book.getPageNumber(this.getUniqueID())));
             return ActionResultType.SUCCESS;

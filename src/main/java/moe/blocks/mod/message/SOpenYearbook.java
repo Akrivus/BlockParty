@@ -1,36 +1,30 @@
 package moe.blocks.mod.message;
 
 import moe.blocks.mod.client.screen.YearbookScreen;
-import moe.blocks.mod.data.yearbook.Book;
+import moe.blocks.mod.data.Yearbooks;
 import moe.blocks.mod.init.MoeItems;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-import java.time.Year;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 public class SOpenYearbook {
-    protected final Book book;
+    protected final Yearbooks.Book book;
     protected final int pageNumber;
 
-    public SOpenYearbook(Book book, int pageNumber) {
+    public SOpenYearbook(Yearbooks.Book book, int pageNumber) {
         this.book = book;
         this.pageNumber = pageNumber;
     }
 
     public SOpenYearbook(PacketBuffer buffer) {
-        this(new Book(buffer.readCompoundTag()), buffer.readInt());
+        this(new Yearbooks.Book(buffer.readCompoundTag()), buffer.readInt());
     }
 
-    public Book getBook() {
+    public Yearbooks.Book getBook() {
         return this.book;
     }
 

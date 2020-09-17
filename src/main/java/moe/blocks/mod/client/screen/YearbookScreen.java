@@ -4,8 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moe.blocks.mod.MoeMod;
-import moe.blocks.mod.data.yearbook.Book;
-import moe.blocks.mod.data.yearbook.Page;
+import moe.blocks.mod.data.Yearbooks;
 import moe.blocks.mod.entity.partial.CharacterEntity;
 import moe.blocks.mod.init.MoeMessages;
 import moe.blocks.mod.init.MoeSounds;
@@ -34,22 +33,21 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class YearbookScreen extends Screen {
     public static final ResourceLocation YEARBOOK_TEXTURES = new ResourceLocation(MoeMod.ID, "textures/gui/yearbook.png");
     private final String[] stats = new String[4];
     private final String[] lines = new String[4];
-    private final Book book;
+    private final Yearbooks.Book book;
     private int pageNumber;
-    private Page page;
+    private Yearbooks.Page page;
     private YearbookScreen.ChangePageButton buttonNextPage;
     private YearbookScreen.ChangePageButton buttonPrevPage;
     private YearbookScreen.RemovePageButton buttonRemovePage;
     private String name;
     private CharacterEntity entity;
 
-    public YearbookScreen(Book book, int pageNumber) {
+    public YearbookScreen(Yearbooks.Book book, int pageNumber) {
         super(NarratorChatListener.EMPTY);
         this.book = book;
         this.pageNumber = pageNumber;
