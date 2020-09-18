@@ -13,7 +13,7 @@ apply plugin: 'maven-publish'
 
 version = new Date().format('yy.MM.dd')
 archivesBaseName = 'MoeBlocks'
-group = 'moeblocks.mod'
+group = 'moe.blocks.mod'
 
 minecraft {
     mappings channel: 'snapshot', version: '20200916-1.16.2'
