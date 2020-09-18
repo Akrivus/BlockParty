@@ -38,6 +38,7 @@ public class BasicAttackGoal<E extends NPCEntity> extends AbstractFollowEntityGo
 
     @Override
     public void onArrival() {
-        if (this.entity.attackEntityAsMob(this.target)) { this.entity.swingArm(Hand.MAIN_HAND); }
+        this.entity.attackEntityAsMob(this.target);
+        this.entity.swingArm(Hand.MAIN_HAND);
     }
 }
