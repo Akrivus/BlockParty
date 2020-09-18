@@ -10,12 +10,14 @@ import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeMessages;
+import moe.blocks.mod.item.CellPhoneItem;
 import moe.blocks.mod.message.SOpenYearbook;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -71,26 +73,14 @@ public abstract class CharacterEntity extends InteractEntity {
     }
 
     @Override
-    public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
-        if (this.isLocal() && player.getHeldItem(hand).getItem() == MoeItems.YEARBOOK.get()) {
-            Yearbooks.Book book = Yearbooks.getBook(player);
-            book.setPageIgnorantly(this, player.getUniqueID());
-            MoeMessages.send(new SOpenYearbook(book, book.getPageNumber(this.getUniqueID())));
-            return ActionResultType.SUCCESS;
-        } else {
-            return super.func_230254_b_(player, hand);
-        }
-    }
-
-    @Override
     public ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
-        if (this.isRemote() || hand == Hand.OFF_HAND) { return ActionResultType.PASS; }
-        Relationship relationship = this.getRelationshipWith(player);
-        this.setNextState(States.REACTION, relationship.getReaction(Interactions.HEADPAT));
-        if (relationship.can(Relationship.Actions.FOLLOW)) {
-            this.setFollowTarget(player.equals(this.getFollowTarget()) ? null : player);
+        if (stack.getItem() != MoeItems.CELL_PHONE.get() && stack.getItem() != MoeItems.YEARBOOK.get() && this.isLocal()) {
+            Relationship relationship = this.getRelationshipWith(player);
+            this.setNextState(States.REACTION, relationship.getReaction(Interactions.HEADPAT));
+            if (relationship.can(Relationship.Actions.FOLLOW)) { this.setFollowTarget(player.equals(this.getFollowTarget()) ? null : player); }
+            return ActionResultType.SUCCESS;
         }
-        return ActionResultType.SUCCESS;
+        return ActionResultType.PASS;
     }
 
     public Relationship getRelationshipWith(PlayerEntity player) {
@@ -178,6 +168,12 @@ public abstract class CharacterEntity extends InteractEntity {
 
     public boolean isDead() {
         return this.getRelationshipStatus() == Relationship.Status.DEAD;
+    }
+
+    public CompoundNBT setPhoneContact(CompoundNBT compound) {
+        compound.putString("Name", this.getGivenName());
+        compound.putUniqueId("UUID", this.getUniqueID());
+        return compound;
     }
 
     public enum Gender {

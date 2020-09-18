@@ -41,9 +41,9 @@ public class YearbookScreen extends Screen {
     private final Yearbooks.Book book;
     private int pageNumber;
     private Yearbooks.Page page;
-    private YearbookScreen.ChangePageButton buttonNextPage;
-    private YearbookScreen.ChangePageButton buttonPrevPage;
-    private YearbookScreen.RemovePageButton buttonRemovePage;
+    private Button buttonPreviousPage;
+    private Button buttonNextPage;
+    private Button buttonRemovePage;
     private String name;
     private CharacterEntity entity;
 
@@ -103,13 +103,13 @@ public class YearbookScreen extends Screen {
             return true;
         } else {
             switch (keyCode) {
+            case GLFW.GLFW_KEY_LEFT:
+            case GLFW.GLFW_KEY_A:
+                this.buttonPreviousPage.onPress();
+                return true;
             case GLFW.GLFW_KEY_RIGHT:
             case GLFW.GLFW_KEY_D:
                 this.buttonNextPage.onPress();
-                return true;
-            case GLFW.GLFW_KEY_LEFT:
-            case GLFW.GLFW_KEY_A:
-                this.buttonPrevPage.onPress();
                 return true;
             default:
                 return false;
@@ -120,12 +120,12 @@ public class YearbookScreen extends Screen {
     @Override
     protected void init() {
         this.addButton(new Button(this.width / 2 - 68, 196, 136, 20, DialogTexts.GUI_DONE, (button) -> this.minecraft.displayGuiScreen(null)));
-        this.buttonNextPage = this.addButton(new ChangePageButton((this.width - 146) / 2 + 122, 52, 1, (button) -> {
-            if (this.pageNumber < this.book.getPageCount() - 1) { ++this.pageNumber; }
+        this.buttonPreviousPage = this.addButton(new ChangePageButton((this.width - 146) / 2 + 21, 52, -1, (button) -> {
+            if (this.pageNumber > 0) { --this.pageNumber; }
             this.updateButtons();
         }));
-        this.buttonPrevPage = this.addButton(new ChangePageButton((this.width - 146) / 2 + 21, 52, -1, (button) -> {
-            if (this.pageNumber > 0) { --this.pageNumber; }
+        this.buttonNextPage = this.addButton(new ChangePageButton((this.width - 146) / 2 + 122, 52, 1, (button) -> {
+            if (this.pageNumber < this.book.getPageCount() - 1) { ++this.pageNumber; }
             this.updateButtons();
         }));
         this.buttonRemovePage = this.addButton(new RemovePageButton((this.width - 146) / 2 + 118, 13, (button) -> {
@@ -147,8 +147,8 @@ public class YearbookScreen extends Screen {
         this.lines[1] = String.format(Trans.late("gui.moeblocks.label.blood"), this.page.getBloodType().toString());
         this.lines[2] = String.format(Trans.late("gui.moeblocks.label.age"), this.page.getAge());
         this.lines[3] = String.format(Trans.late("gui.moeblocks.label.status"), this.page.getStatus().toString());
+        this.buttonPreviousPage.visible = this.pageNumber > 0;
         this.buttonNextPage.visible = this.pageNumber < this.book.getPageCount() - 1;
-        this.buttonPrevPage.visible = this.pageNumber > 0;
     }
 
     public void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
@@ -192,8 +192,8 @@ public class YearbookScreen extends Screen {
         }
 
         @Override
-        public void playDownSound(SoundHandler soundHandler) {
-            soundHandler.play(SimpleSound.master(SoundEvents.ITEM_BOOK_PAGE_TURN, 1.0F));
+        public void playDownSound(SoundHandler sound) {
+            sound.play(SimpleSound.master(SoundEvents.ITEM_BOOK_PAGE_TURN, 1.0F));
         }
     }
 
@@ -212,8 +212,8 @@ public class YearbookScreen extends Screen {
         }
 
         @Override
-        public void playDownSound(SoundHandler soundHandler) {
-            soundHandler.play(SimpleSound.master(MoeSounds.YEARBOOK_REMOVE_PAGE.get(), 1.0F));
+        public void playDownSound(SoundHandler sound) {
+            sound.play(SimpleSound.master(MoeSounds.YEARBOOK_REMOVE_PAGE.get(), 1.0F));
         }
     }
 }

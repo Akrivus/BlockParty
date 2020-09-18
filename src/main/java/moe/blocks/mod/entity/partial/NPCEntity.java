@@ -444,17 +444,19 @@ public class NPCEntity extends CreatureEntity {
     }
 
     public LivingEntity getEntityFromUUID(UUID uuid) {
-        if (uuid != null && this.world instanceof ServerWorld) {
-            ServerWorld server = (ServerWorld) this.world;
-            Entity entity = server.getEntityByUuid(uuid);
-            if (entity instanceof LivingEntity) {
-                return (LivingEntity) entity;
-            }
-        }
-        return null;
+        return getEntityFromUUID(LivingEntity.class, this.world, uuid);
     }
 
     public boolean isVengeful() {
         return this.ticksExisted - this.getRevengeTimer() < 500;
+    }
+
+    public static <T extends LivingEntity> T getEntityFromUUID(Class<T> type, World world, UUID uuid) {
+        if (uuid != null && world instanceof ServerWorld) {
+            ServerWorld server = (ServerWorld) world;
+            Entity entity = server.getEntityByUuid(uuid);
+            if (type.isInstance(entity)) { return (T) entity; }
+        }
+        return null;
     }
 }

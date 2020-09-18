@@ -12,16 +12,22 @@ import net.minecraftforge.fml.network.NetworkEvent;
 import java.util.function.Supplier;
 
 public class SOpenYearbook {
+    protected final Hand hand;
     protected final Yearbooks.Book book;
     protected final int pageNumber;
 
-    public SOpenYearbook(Yearbooks.Book book, int pageNumber) {
+    public SOpenYearbook(Hand hand, Yearbooks.Book book, int pageNumber) {
+        this.hand = hand;
         this.book = book;
         this.pageNumber = pageNumber;
     }
 
     public SOpenYearbook(PacketBuffer buffer) {
-        this(new Yearbooks.Book(buffer.readCompoundTag()), buffer.readInt());
+        this(buffer.readEnumValue(Hand.class), new Yearbooks.Book(buffer.readCompoundTag()), buffer.readInt());
+    }
+
+    public Hand getHand() {
+        return this.hand;
     }
 
     public Yearbooks.Book getBook() {
@@ -33,12 +39,13 @@ public class SOpenYearbook {
     }
 
     public static void encode(SOpenYearbook message, PacketBuffer buffer) {
+        buffer.writeEnumValue(message.getHand());
         buffer.writeCompoundTag(message.getBook().write());
         buffer.writeInt(message.getPageNumber());
     }
 
     public static void handle(SOpenYearbook message, NetworkEvent.Context context, Minecraft mc) {
-        if (mc.player.getHeldItem(Hand.MAIN_HAND).getItem() != MoeItems.YEARBOOK.get()) { return; }
+        if (mc.player.getHeldItem(message.getHand()).getItem() != MoeItems.YEARBOOK.get()) { return; }
         if (mc.currentScreen instanceof YearbookScreen) { return; } // Fixes indexes not persisting
         if (message.getBook().isEmpty()) {
             mc.player.sendStatusMessage(new TranslationTextComponent("command.moeblocks.yearbook.error"), true);

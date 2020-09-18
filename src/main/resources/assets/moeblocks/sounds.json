@@ -178,11 +178,27 @@
       "moeblocks:entity/moe/yes2"
     ]
   },
-  "music_disc.pomf_pomf": {
-    "category": "record",
-    "stream": true,
+  "item.cell_phone.button": {
+    "category": "player",
+    "subtitle": "subtitle.cell_phone.button",
     "sounds": [
-      "moeblocks:record/pomf_pomf"
+      "moeblocks:item/cell_phone/button1",
+      "moeblocks:item/cell_phone/button2",
+      "moeblocks:item/cell_phone/button3"
+    ]
+  },
+  "item.cell_phone.dial": {
+    "category": "player",
+    "subtitle": "subtitle.cell_phone.dial",
+    "sounds": [
+      "moeblocks:item/cell_phone/dial"
+    ]
+  },
+  "item.cell_phone.ring": {
+    "category": "player",
+    "subtitle": "subtitle.cell_phone.ring",
+    "sounds": [
+      "moeblocks:item/cell_phone/ring"
     ]
   },
   "item.yearbook.remove_page": {
@@ -190,6 +206,13 @@
     "subtitle": "subtitle.yearbook.remove_page",
     "sounds": [
       "moeblocks:item/yearbook/remove_page"
+    ]
+  },
+  "music_disc.pomf_pomf": {
+    "category": "record",
+    "stream": true,
+    "sounds": [
+      "moeblocks:record/pomf_pomf"
     ]
   }
 }

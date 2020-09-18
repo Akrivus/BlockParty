@@ -10,6 +10,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class MoeSounds {
     public static final DeferredRegister<SoundEvent> REGISTRY = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, MoeMod.ID);
 
+    public static final RegistryObject<SoundEvent> CELL_PHONE_BUTTON = REGISTRY.register("item.cell_phone.button", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "item.cell_phone.button")));
+    public static final RegistryObject<SoundEvent> CELL_PHONE_DIAL = REGISTRY.register("item.cell_phone.dial", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "item.cell_phone.dial")));
+    public static final RegistryObject<SoundEvent> CELL_PHONE_RING = REGISTRY.register("item.cell_phone.ring", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "item.cell_phone.ring")));
     public static final RegistryObject<SoundEvent> MOE_ATTACK = REGISTRY.register("entity.moe.attack", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.attack")));
     public static final RegistryObject<SoundEvent> MOE_BELL_STEP = REGISTRY.register("entity.moe.bell.step", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.bell.step")));
     public static final RegistryObject<SoundEvent> MOE_DEAD = REGISTRY.register("entity.moe.dead", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.dead")));

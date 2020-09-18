@@ -32,7 +32,6 @@ public class CRemovePageFromYearbook {
     }
 
     public static void handle(CRemovePageFromYearbook message, NetworkEvent.Context context, ServerPlayerEntity player) {
-        if (player.getHeldItem(Hand.MAIN_HAND).getItem() != MoeItems.YEARBOOK.get()) { return; }
         ItemStack stack = new ItemStack(MoeItems.YEARBOOK_PAGE.get());
         YearbookPageItem.setPage(stack, Yearbooks.getBook(player).removePage(message.getPageUUID(), player));
         if (!player.addItemStackToInventory(stack)) { player.entityDropItem(stack); }

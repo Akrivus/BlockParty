@@ -162,17 +162,19 @@ public class Yearbooks extends WorldSavedData {
             return compound;
         }
 
-        public void setPageIgnorantly(CharacterEntity entity, UUID uuid) {
-            if (this.setPageCautiously(entity, uuid)) { return; }
-            this.pages.add(new Page(entity, uuid));
-            this.setDirty(uuid);
+        public int setPageIgnorantly(CharacterEntity entity, UUID uuid) {
+            if (!this.setPageCautiously(entity, uuid)) {
+                this.pages.add(new Page(entity, uuid));
+                this.setDirty(uuid);
+            }
+            return this.getPageNumber(uuid);
         }
 
         public boolean setPageCautiously(CharacterEntity entity, UUID uuid) {
             Page page = this.getPage(entity.getUniqueID());
             if (page == null) { return false; }
             this.pages.set(this.pages.indexOf(page), new Page(entity, uuid));
-            this.data.set(uuid, this);
+            this.setDirty(uuid);
             return true;
         }
 
