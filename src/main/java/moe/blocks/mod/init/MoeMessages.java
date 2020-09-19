@@ -1,6 +1,8 @@
 package moe.blocks.mod.init;
 
 import moe.blocks.mod.MoeMod;
+import moe.blocks.mod.message.CPhoneRemoveMoe;
+import moe.blocks.mod.message.CPhoneTeleportMoe;
 import moe.blocks.mod.message.CRemovePageFromYearbook;
 import moe.blocks.mod.message.SOpenYearbook;
 import net.minecraft.entity.player.PlayerEntity;
@@ -26,6 +28,8 @@ public class MoeMessages {
     static {
         MESSAGES.add(new MessageContainer<>(CRemovePageFromYearbook.class, CRemovePageFromYearbook::new, CRemovePageFromYearbook::encode, CRemovePageFromYearbook::handleContext));
         MESSAGES.add(new MessageContainer<>(SOpenYearbook.class, SOpenYearbook::new, SOpenYearbook::encode, SOpenYearbook::handleContext));
+        MESSAGES.add(new MessageContainer<>(CPhoneRemoveMoe.class, CPhoneRemoveMoe::new, CPhoneRemoveMoe::encode, CPhoneRemoveMoe::handleContext));
+        MESSAGES.add(new MessageContainer<>(CPhoneTeleportMoe.class, CPhoneTeleportMoe::new, CPhoneTeleportMoe::encode, CPhoneTeleportMoe::handleContext));
     }
 
     public static SimpleChannel register() {

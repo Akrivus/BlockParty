@@ -1,4 +1,5 @@
 {
+  "command.moeblocks.cell_phone.error": "You have reached a number that has been disconnected or unavailable.",
   "command.moeblocks.moe.following.no": "%1$s is no longer following you",
   "command.moeblocks.moe.following.yes": "%1$s is now following you",
   "command.moeblocks.spawn_egg.error": "%1$s is not a moe-able block",

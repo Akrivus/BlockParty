@@ -27,6 +27,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class CellPhoneItem extends Item {
 
@@ -63,6 +64,22 @@ public class CellPhoneItem extends Item {
         if (!compound.contains("Contacts")) { compound.put("Contacts", new ListNBT()); }
         ListNBT nbt = compound.getList("Contacts", 10);
         nbt.add(entity.setPhoneContact(new CompoundNBT()));
+        compound.put("Contacts", nbt);
+        stack.setTag(compound);
+        return stack;
+    }
+
+    public static ItemStack removeContact(UUID uuid, ItemStack stack) {
+        CompoundNBT compound = stack.getOrCreateTag();
+        if (!compound.contains("Contacts")) { compound.put("Contacts", new ListNBT()); }
+        ListNBT nbt = compound.getList("Contacts", 10);
+        for (int i = 0; i < nbt.size(); ++i) {
+            CompoundNBT contact = (CompoundNBT) nbt.get(i);
+            if (contact.getUniqueId("UUID").equals(uuid)) {
+                nbt.remove(i);
+                --i;
+            }
+        }
         compound.put("Contacts", nbt);
         stack.setTag(compound);
         return stack;

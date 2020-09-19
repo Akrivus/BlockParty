@@ -23,7 +23,7 @@ public class YearbookItem extends Item {
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
         Yearbooks.Book book = Yearbooks.getBook(player);
-        if (!world.isRemote()) { MoeMessages.send(new SOpenYearbook(hand, book, 0)); }
+        if (!world.isRemote()) { MoeMessages.send(player, new SOpenYearbook(hand, book, 0)); }
         return ActionResult.resultSuccess(player.getHeldItem(hand));
     }
 
@@ -33,7 +33,7 @@ public class YearbookItem extends Item {
         CharacterEntity character = (CharacterEntity) entity;
         if (character.isLocal()) {
             Yearbooks.Book book = Yearbooks.getBook(player);
-            MoeMessages.send(new SOpenYearbook(hand, book, book.setPageIgnorantly(character, player.getUniqueID())));
+            MoeMessages.send(player, new SOpenYearbook(hand, book, book.setPageIgnorantly(character, player.getUniqueID())));
         }
         return ActionResultType.SUCCESS;
     }

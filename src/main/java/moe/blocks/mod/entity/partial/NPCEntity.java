@@ -1,5 +1,6 @@
 package moe.blocks.mod.entity.partial;
 
+import moe.blocks.mod.data.Yearbooks;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.ai.automata.state.ItemStates;
@@ -31,13 +32,18 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -453,9 +459,11 @@ public class NPCEntity extends CreatureEntity {
 
     public static <T extends LivingEntity> T getEntityFromUUID(Class<T> type, World world, UUID uuid) {
         if (uuid != null && world instanceof ServerWorld) {
-            ServerWorld server = (ServerWorld) world;
-            Entity entity = server.getEntityByUuid(uuid);
-            if (type.isInstance(entity)) { return (T) entity; }
+            Chunk chunk = world.getChunkAt(Yearbooks.getInstance(world).get(uuid));
+            ChunkPos pos = chunk.getPos();
+            List<T> entities = new ArrayList<>();
+            chunk.getEntitiesOfTypeWithinAABB(type, new AxisAlignedBB(pos.getXStart(), 0, pos.getZStart(), pos.getXEnd(), 255, pos.getZEnd()), entities, (entity) -> entity.getUniqueID().equals(uuid));
+            if (entities.size() > 0) { return entities.get(0); }
         }
         return null;
     }

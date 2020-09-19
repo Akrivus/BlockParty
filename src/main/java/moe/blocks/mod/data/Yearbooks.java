@@ -11,6 +11,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.DimensionSavedDataManager;
@@ -20,10 +22,13 @@ import java.util.*;
 
 public class Yearbooks extends WorldSavedData {
     private static final String KEY = "yearbooks";
+    private final Map<UUID, BlockPos> positions = new HashMap<>();
     private final Map<UUID, Book> books = new HashMap<>();
 
     public static void sync(CharacterEntity entity) {
-        getInstance(entity.world).books.forEach((uuid, book) -> book.setPageCautiously(entity, uuid));
+        Yearbooks instance = getInstance(entity.world);
+        instance.books.forEach((uuid, book) -> book.setPageCautiously(entity, uuid));
+        instance.positions.put(entity.getUniqueID(), entity.getPosition());
     }
 
     public static Yearbooks getInstance(World world) {
@@ -52,14 +57,21 @@ public class Yearbooks extends WorldSavedData {
         this.markDirty();
     }
 
+    public BlockPos get(UUID uuid) {
+        if (!this.positions.containsKey(uuid)) { return BlockPos.ZERO; }
+        return this.positions.get(uuid);
+    }
+
     @Override
     public void read(CompoundNBT compound) {
         compound.keySet().forEach(key -> this.books.put(UUID.fromString(key), new Book(this, (CompoundNBT) compound.get(key))));
+        compound.keySet().forEach(key -> this.positions.put(UUID.fromString(key), BlockPos.fromLong(compound.getLong(key))));
     }
 
     @Override
     public CompoundNBT write(CompoundNBT compound) {
         this.books.keySet().forEach(key -> compound.put(key.toString(), this.books.get(key).write()));
+        this.positions.keySet().forEach(key -> compound.putLong(key.toString(), this.positions.get(key).toLong()));
         return compound;
     }
 

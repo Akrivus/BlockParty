@@ -4,50 +4,54 @@ import moe.blocks.mod.data.Yearbooks;
 import moe.blocks.mod.data.dating.Relationship;
 import moe.blocks.mod.entity.partial.CharacterEntity;
 import moe.blocks.mod.init.MoeItems;
+import moe.blocks.mod.init.MoeSounds;
 import moe.blocks.mod.item.YearbookPageItem;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.UUID;
 import java.util.function.Supplier;
 
 public class CPhoneTeleportMoe {
-    protected final Hand hand;
     protected final UUID moeUUID;
 
-    public CPhoneTeleportMoe(Hand hand, UUID moeUUID) {
-        this.hand = hand;
+    public CPhoneTeleportMoe(UUID moeUUID) {
         this.moeUUID = moeUUID;
+        Minecraft.getInstance().player.playSound(MoeSounds.CELL_PHONE_RING.get(), 1.0F, 1.0F);
     }
 
     public CPhoneTeleportMoe(PacketBuffer buffer) {
-        this(buffer.readEnumValue(Hand.class), buffer.readUniqueId());
-    }
-
-    public Hand getHand() {
-        return this.hand;
+        this(buffer.readUniqueId());
     }
 
     public UUID getMoeUUID() {
         return this.moeUUID;
     }
 
-    public static void encode(CPhoneRemoveMoe message, PacketBuffer buffer) {
+    public static void encode(CPhoneTeleportMoe message, PacketBuffer buffer) {
         buffer.writeUniqueId(message.getMoeUUID());
     }
 
-    public static void handle(CPhoneRemoveMoe message, NetworkEvent.Context context, ServerPlayerEntity player) {
-        if (player.getHeldItem(message.getHand()).getItem() != MoeItems.CELL_PHONE.get()) { return; }
-        CharacterEntity character = CharacterEntity.getEntityFromUUID(CharacterEntity.class, player.world, message.getMoeUUID());
-        if (character.getRelationshipWith(player).can(Relationship.Actions.TELEPORT)) {
-            character.attemptTeleport(player.getPosXRandom(4.0F), player.getPosY(), player.getPosXRandom(4.0F), true);
+    public static void handle(CPhoneTeleportMoe message, NetworkEvent.Context context, ServerPlayerEntity player) {
+        CharacterEntity character = CharacterEntity.getEntityFromUUID(CharacterEntity.class, player.getServerWorld(), message.getMoeUUID());
+        if (character == null) {
+            player.sendStatusMessage(new TranslationTextComponent("command.moeblocks.cell_phone.error"), true);
+            player.playSound(MoeSounds.CELL_PHONE_DIAL.get(), 1.0F, 1.0F);
+        } else {
+            double x = player.getPosX() - Math.sin(0.0174532925F * player.rotationYaw) * 1.44;
+            double z = player.getPosZ() + Math.cos(0.0174532925F * player.rotationYaw) * 1.44;
+            float yaw = (float) Math.atan2(player.getPosX() - x, player.getPosZ() - z);
+            character.setPositionAndRotation(x, player.getPosY() + 1.0F, z, yaw, -player.rotationPitch);
         }
     }
 
-    public static void handleContext(CPhoneRemoveMoe message, Supplier<NetworkEvent.Context> context) {
+    public static void handleContext(CPhoneTeleportMoe message, Supplier<NetworkEvent.Context> context) {
         context.get().enqueueWork(() -> handle(message, context.get(), context.get().getSender()));
         context.get().setPacketHandled(true);
     }

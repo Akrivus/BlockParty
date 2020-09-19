@@ -49,6 +49,7 @@ public abstract class CharacterEntity extends InteractEntity {
         this.relationships.forEach(relationship -> relationships.add(relationship.write(new CompoundNBT())));
         compound.put("Relationships", relationships);
         compound.putString("GivenName", this.getGivenName());
+        this.syncYearbooks();
     }
 
     @Override
@@ -70,6 +71,13 @@ public abstract class CharacterEntity extends InteractEntity {
     @Override
     public void registerStates(HashMap<States, State> states) {
         states.put(States.REACTION, null);
+    }
+
+    @Override
+    public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
+        ActionResultType result = super.func_230254_b_(player, hand);
+        if (result.isSuccessOrConsume()) { this.syncYearbooks(); }
+        return result;
     }
 
     @Override
