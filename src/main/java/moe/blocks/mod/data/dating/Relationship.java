@@ -7,7 +7,9 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.world.World;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class Relationship {
     protected final Map<Interactions, Integer> interactions = new HashMap<>();
@@ -41,18 +43,6 @@ public class Relationship {
         return compound;
     }
 
-    public void tick() {
-        this.interactions.forEach((interaction, timeout) -> --timeout);
-        if (++this.timeSinceInteraction > 24000) {
-            this.timeSinceInteraction = 0;
-            this.love -= this.getPhase().getDecay();
-            if (this.love < 0.0F) { this.love = 0.0F; }
-            if (this.love > 20.0F) {
-                this.love = 20.0F;
-            }
-        }
-    }
-
     public Phases getPhase() {
         return this.phase;
     }
@@ -63,6 +53,18 @@ public class Relationship {
 
     public float getLove() {
         return this.love;
+    }
+
+    public void tick() {
+        this.interactions.forEach((interaction, timeout) -> --timeout);
+        if (++this.timeSinceInteraction > 24000) {
+            this.timeSinceInteraction = 0;
+            this.love -= this.getPhase().getDecay();
+            if (this.love < 0.0F) { this.love = 0.0F; }
+            if (this.love > 20.0F) {
+                this.love = 20.0F;
+            }
+        }
     }
 
     public PlayerEntity getPlayer(World world) {

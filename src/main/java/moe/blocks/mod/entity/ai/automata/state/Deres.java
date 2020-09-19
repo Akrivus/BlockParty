@@ -55,11 +55,6 @@ public enum Deres {
         Registry.SET.put(face, this);
     }
 
-    @Override
-    public String toString() {
-        return Trans.late(String.format("debug.moeblocks.deres.%s", this.name().toLowerCase()));
-    }
-
     public static Deres get(DieEntity.Face face) {
         return Registry.SET.getOrDefault(face, HIMEDERE);
     }
@@ -79,6 +74,11 @@ public enum Deres {
         default:
             return MaterialColor.YELLOW;
         }
+    }
+
+    @Override
+    public String toString() {
+        return Trans.late(String.format("debug.moeblocks.deres.%s", this.name().toLowerCase()));
     }
 
     protected static class Registry {

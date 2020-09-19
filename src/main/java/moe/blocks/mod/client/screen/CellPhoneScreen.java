@@ -17,9 +17,6 @@ import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -76,12 +73,6 @@ public class CellPhoneScreen extends Screen {
         }
     }
 
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        if (delta < 0) { this.buttonScrollDown.onPress(); }
-        if (delta > 0) { this.buttonScrollUp.onPress(); }
-        return delta != 0;
-    }
-
     @Override
     protected void init() {
         this.addButton(new Button(this.width / 2 - 54, 190, 108, 20, DialogTexts.GUI_DONE, (button) -> this.minecraft.displayGuiScreen(null)));
@@ -99,6 +90,25 @@ public class CellPhoneScreen extends Screen {
             this.setSelected(this.selected - 1);
             this.updateButtons();
         }));
+        this.updateButtons();
+    }
+
+    public void setSelected(int index) {
+        this.lastSelected = this.selected;
+        this.selected = index % this.contacts.size();
+        int shift = this.selected - this.skip;
+        if (shift < 0 || shift > 3) {
+            this.setScroll(1);
+        } else {
+            this.updateButtons();
+        }
+    }
+
+    public void setScroll(int delta) {
+        this.skip += 4 * delta;
+        int range = this.contacts.size() - 1;
+        if (this.skip < 0) { this.skip = range - range % 4; }
+        if (this.skip > range) { this.skip = 0; }
         this.updateButtons();
     }
 
@@ -121,27 +131,64 @@ public class CellPhoneScreen extends Screen {
     public void renderScrollBar(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
-        int y = (int)(Math.min((double) this.skip / (this.contacts.size() - this.contacts.size() % 4), 1.0) * 35);
+        int y = (int) (Math.min((double) this.skip / (this.contacts.size() - this.contacts.size() % 4), 1.0) * 35);
         this.blit(stack, this.width / 2 + 37, 40 + y, 108, 82, 7, 15);
     }
 
-    public void setSelected(int index) {
-        this.lastSelected = this.selected;
-        this.selected = index % this.contacts.size();
-        int shift = this.selected - this.skip;
-        if (shift < 0 || shift > 3) {
-            this.setScroll(1);
-        } else {
-            this.updateButtons();
-        }
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        if (delta < 0) { this.buttonScrollDown.onPress(); }
+        if (delta > 0) { this.buttonScrollUp.onPress(); }
+        return delta != 0;
     }
 
-    public void setScroll(int delta) {
-        this.skip += 4 * delta;
-        int range = this.contacts.size() - 1;
-        if (this.skip < 0) { this.skip = range - range % 4; }
-        if (this.skip > range) { this.skip = 0; }
-        this.updateButtons();
+    public static class ContactEntry {
+        protected String name;
+        protected UUID uuid;
+        protected Button button;
+
+        public ContactEntry(INBT tag) {
+            CompoundNBT compound = (CompoundNBT) tag;
+            this.name = compound.getString("Name");
+            this.uuid = compound.getUniqueId("UUID");
+        }
+
+        public void init(CellPhoneScreen screen) {
+            this.button = new ContactButton(screen, screen.contacts.indexOf(this), this);
+        }
+
+        @OnlyIn(Dist.CLIENT)
+        public class ContactButton extends Button {
+            private final CellPhoneScreen parent;
+            private final int index;
+            private final ContactEntry contact;
+
+            public ContactButton(CellPhoneScreen parent, int index, ContactEntry contact) {
+                super(0, 0, 81, 15, StringTextComponent.EMPTY, (button) -> {
+                    MoeMessages.send(new CPhoneTeleportMoe(contact.uuid));
+                    Minecraft.getInstance().displayGuiScreen(null);
+                });
+                this.parent = parent;
+                this.index = index;
+                this.contact = contact;
+            }
+
+            @Override
+            public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                Minecraft.getInstance().getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
+                int y = this.isHovered() ? 98 : 115;
+                this.blit(stack, this.x, this.y, 108, y, 81, 15);
+                Minecraft.getInstance().fontRenderer.drawString(stack, this.contact.name, this.x + 10, this.y + 4, this.isHovered() ? 0xffffff : 0);
+            }
+
+            @Override
+            public boolean isHovered() {
+                return super.isHovered() || this.parent.selected == this.index;
+            }
+
+            @Override
+            public void playDownSound(SoundHandler sound) { }
+        }
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -187,55 +234,5 @@ public class CellPhoneScreen extends Screen {
 
         @Override
         public void playDownSound(SoundHandler sound) { }
-    }
-
-    public static class ContactEntry {
-        protected String name;
-        protected UUID uuid;
-        protected Button button;
-
-        public ContactEntry(INBT tag) {
-            CompoundNBT compound = (CompoundNBT) tag;
-            this.name = compound.getString("Name");
-            this.uuid = compound.getUniqueId("UUID");
-        }
-
-        public void init(CellPhoneScreen screen) {
-            this.button = new ContactButton(screen, screen.contacts.indexOf(this), this);
-        }
-
-        @OnlyIn(Dist.CLIENT)
-        public class ContactButton extends Button {
-            private final CellPhoneScreen parent;
-            private final int index;
-            private final ContactEntry contact;
-
-            public ContactButton(CellPhoneScreen parent, int index, ContactEntry contact) {
-                super(0, 0, 81, 15, StringTextComponent.EMPTY, (button) -> {
-                    MoeMessages.send(new CPhoneTeleportMoe(contact.uuid));
-                    Minecraft.getInstance().displayGuiScreen(null);
-                });
-                this.parent = parent;
-                this.index = index;
-                this.contact = contact;
-            }
-
-            @Override
-            public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                Minecraft.getInstance().getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
-                int y = this.isHovered() ? 98 : 115;
-                this.blit(stack, this.x, this.y, 108, y, 81, 15);
-                Minecraft.getInstance().fontRenderer.drawString(stack, this.contact.name, this.x + 10, this.y + 4, this.isHovered() ? 0xffffff : 0);
-            }
-
-            @Override
-            public void playDownSound(SoundHandler sound) { }
-
-            @Override
-            public boolean isHovered() {
-                return super.isHovered() || this.parent.selected == this.index;
-            }
-        }
     }
 }

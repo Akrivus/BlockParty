@@ -17,6 +17,17 @@ public class BasicAttackGoal<E extends NPCEntity> extends AbstractFollowEntityGo
     }
 
     @Override
+    public void onArrival() {
+        this.entity.attackEntityAsMob(this.target);
+        this.entity.swingArm(Hand.MAIN_HAND);
+    }
+
+    @Override
+    public void onFollow() {
+
+    }
+
+    @Override
     public LivingEntity getTarget() {
         return this.entity.getAttackTarget();
     }
@@ -29,16 +40,5 @@ public class BasicAttackGoal<E extends NPCEntity> extends AbstractFollowEntityGo
     @Override
     public float getFollowDistance(LivingEntity target) {
         return (float) (Math.pow(this.entity.getWidth() * 2.0F, 2) + target.getWidth());
-    }
-
-    @Override
-    public void onFollow() {
-
-    }
-
-    @Override
-    public void onArrival() {
-        this.entity.attackEntityAsMob(this.target);
-        this.entity.swingArm(Hand.MAIN_HAND);
     }
 }

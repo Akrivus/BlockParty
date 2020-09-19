@@ -16,14 +16,20 @@ public class SOpenYearbook {
     protected final Yearbooks.Book book;
     protected final int pageNumber;
 
+    public SOpenYearbook(PacketBuffer buffer) {
+        this(buffer.readEnumValue(Hand.class), new Yearbooks.Book(buffer.readCompoundTag()), buffer.readInt());
+    }
+
     public SOpenYearbook(Hand hand, Yearbooks.Book book, int pageNumber) {
         this.hand = hand;
         this.book = book;
         this.pageNumber = pageNumber;
     }
 
-    public SOpenYearbook(PacketBuffer buffer) {
-        this(buffer.readEnumValue(Hand.class), new Yearbooks.Book(buffer.readCompoundTag()), buffer.readInt());
+    public static void encode(SOpenYearbook message, PacketBuffer buffer) {
+        buffer.writeEnumValue(message.getHand());
+        buffer.writeCompoundTag(message.getBook().write());
+        buffer.writeInt(message.getPageNumber());
     }
 
     public Hand getHand() {
@@ -38,10 +44,9 @@ public class SOpenYearbook {
         return this.pageNumber;
     }
 
-    public static void encode(SOpenYearbook message, PacketBuffer buffer) {
-        buffer.writeEnumValue(message.getHand());
-        buffer.writeCompoundTag(message.getBook().write());
-        buffer.writeInt(message.getPageNumber());
+    public static void handleContext(SOpenYearbook message, Supplier<NetworkEvent.Context> context) {
+        context.get().enqueueWork(() -> handle(message, context.get(), Minecraft.getInstance()));
+        context.get().setPacketHandled(true);
     }
 
     public static void handle(SOpenYearbook message, NetworkEvent.Context context, Minecraft mc) {
@@ -52,10 +57,5 @@ public class SOpenYearbook {
         } else {
             mc.displayGuiScreen(new YearbookScreen(message.getBook(), message.getPageNumber()));
         }
-    }
-
-    public static void handleContext(SOpenYearbook message, Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> handle(message, context.get(), Minecraft.getInstance()));
-        context.get().setPacketHandled(true);
     }
 }

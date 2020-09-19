@@ -17,9 +17,9 @@ public abstract class Animation {
 
     }
 
-    public abstract Animations getKey();
-
     public String name() {
         return this.getKey().name();
     }
+
+    public abstract Animations getKey();
 }

@@ -1,12 +1,7 @@
 package moe.blocks.mod.message;
 
-import moe.blocks.mod.data.Yearbooks;
-import moe.blocks.mod.data.dating.Relationship;
-import moe.blocks.mod.entity.partial.CharacterEntity;
 import moe.blocks.mod.init.MoeItems;
-import moe.blocks.mod.init.MoeSounds;
 import moe.blocks.mod.item.CellPhoneItem;
-import moe.blocks.mod.item.YearbookPageItem;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
@@ -19,20 +14,25 @@ import java.util.function.Supplier;
 public class CPhoneRemoveMoe {
     protected final UUID moeUUID;
 
+    public CPhoneRemoveMoe(PacketBuffer buffer) {
+        this(buffer.readUniqueId());
+    }
+
     public CPhoneRemoveMoe(UUID moeUUID) {
         this.moeUUID = moeUUID;
     }
 
-    public CPhoneRemoveMoe(PacketBuffer buffer) {
-        this(buffer.readUniqueId());
+    public static void encode(CPhoneRemoveMoe message, PacketBuffer buffer) {
+        buffer.writeUniqueId(message.getMoeUUID());
     }
 
     public UUID getMoeUUID() {
         return this.moeUUID;
     }
 
-    public static void encode(CPhoneRemoveMoe message, PacketBuffer buffer) {
-        buffer.writeUniqueId(message.getMoeUUID());
+    public static void handleContext(CPhoneRemoveMoe message, Supplier<NetworkEvent.Context> context) {
+        context.get().enqueueWork(() -> handle(message, context.get(), context.get().getSender()));
+        context.get().setPacketHandled(true);
     }
 
     public static void handle(CPhoneRemoveMoe message, NetworkEvent.Context context, ServerPlayerEntity player) {
@@ -41,10 +41,5 @@ public class CPhoneRemoveMoe {
         if (stack.getItem() == MoeItems.CELL_PHONE.get()) {
             CellPhoneItem.removeContact(message.getMoeUUID(), stack);
         }
-    }
-
-    public static void handleContext(CPhoneRemoveMoe message, Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> handle(message, context.get(), context.get().getSender()));
-        context.get().setPacketHandled(true);
     }
 }

@@ -17,6 +17,10 @@ public class YearbookPageItem extends Item {
         super(new Properties().maxStackSize(1));
     }
 
+    public static void setPage(ItemStack stack, Yearbooks.Page page) {
+        stack.setTag(page.write());
+    }
+
     @Override
     public void addInformation(ItemStack stack, World world, List<ITextComponent> list, ITooltipFlag flag) {
         if (stack.hasTag()) {
@@ -24,9 +28,5 @@ public class YearbookPageItem extends Item {
             String name = String.format("%s %s", tag.getString("FamilyName"), tag.getString("GivenName"));
             list.add(new StringTextComponent(name).mergeStyle(TextFormatting.GRAY));
         }
-    }
-
-    public static void setPage(ItemStack stack, Yearbooks.Page page) {
-        stack.setTag(page.write());
     }
 }

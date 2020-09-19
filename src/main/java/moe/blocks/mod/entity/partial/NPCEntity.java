@@ -453,10 +453,6 @@ public class NPCEntity extends CreatureEntity {
         return getEntityFromUUID(LivingEntity.class, this.world, uuid);
     }
 
-    public boolean isVengeful() {
-        return this.ticksExisted - this.getRevengeTimer() < 500;
-    }
-
     public static <T extends LivingEntity> T getEntityFromUUID(Class<T> type, World world, UUID uuid) {
         if (uuid != null && world instanceof ServerWorld) {
             Chunk chunk = world.getChunkAt(Yearbooks.getInstance(world).get(uuid));
@@ -466,5 +462,9 @@ public class NPCEntity extends CreatureEntity {
             if (entities.size() > 0) { return entities.get(0); }
         }
         return null;
+    }
+
+    public boolean isVengeful() {
+        return this.ticksExisted - this.getRevengeTimer() < 500;
     }
 }

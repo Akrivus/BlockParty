@@ -27,7 +27,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.LanguageMap;
 import net.minecraft.world.World;
 
 import java.util.Optional;
@@ -95,20 +94,20 @@ public class MoeEntity extends CharacterEntity {
     }
 
     @Override
-    public void setYearbookPage(CompoundNBT compound, UUID uuid) {
-        super.setYearbookPage(compound, uuid);
-        compound.putInt("BlockData", Block.getStateId(this.getBlockData()));
-        compound.put("ExtraBlockData", this.getExtraBlockData());
-        compound.putFloat("Scale", 1.0F);
-    }
-
-    @Override
     public String getGivenName() {
         return Trans.lator(String.format("entity.moeblocks.%s.name", this.getBlockName()), super.getGivenName());
     }
 
     public Gender getGender() {
         return this.getBlockData().isIn(MoeTags.MALE_MOES) ? Gender.MASCULINE : Gender.FEMININE;
+    }
+
+    @Override
+    public void setYearbookPage(CompoundNBT compound, UUID uuid) {
+        super.setYearbookPage(compound, uuid);
+        compound.putInt("BlockData", Block.getStateId(this.getBlockData()));
+        compound.put("ExtraBlockData", this.getExtraBlockData());
+        compound.putFloat("Scale", 1.0F);
     }
 
     @Override

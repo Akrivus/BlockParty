@@ -9,15 +9,11 @@ import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
 import moe.blocks.mod.init.MoeItems;
-import moe.blocks.mod.init.MoeMessages;
-import moe.blocks.mod.item.CellPhoneItem;
-import moe.blocks.mod.message.SOpenYearbook;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -108,6 +104,10 @@ public abstract class CharacterEntity extends InteractEntity {
         return Gender.FEMININE;
     }
 
+    public void syncYearbooks() {
+        if (this.isLocal()) { Yearbooks.sync(this); }
+    }
+
     public void setYearbookPage(CompoundNBT compound, UUID uuid) {
         compound.putString("GivenName", this.getGivenName());
         compound.putString("FamilyName", this.getFamilyName());
@@ -129,6 +129,10 @@ public abstract class CharacterEntity extends InteractEntity {
         return Relationship.Status.SINGLE;
     }
 
+    public String getFamilyName() {
+        return "Chara";
+    }
+
     @Override
     public ITextComponent getName() {
         return new TranslationTextComponent("entity.moeblocks.generic", this.getFamilyName(), this.getHonorific());
@@ -139,16 +143,8 @@ public abstract class CharacterEntity extends InteractEntity {
         return true;
     }
 
-    public String getFamilyName() {
-        return "Chara";
-    }
-
     public String getHonorific() {
         return this.getGender() == Gender.FEMININE ? "chan" : "kun";
-    }
-
-    public void syncYearbooks() {
-        if (this.isLocal()) { Yearbooks.sync(this); }
     }
 
     public Tropes getTrope() {

@@ -1,17 +1,10 @@
 package moe.blocks.mod.message;
 
-import moe.blocks.mod.data.Yearbooks;
-import moe.blocks.mod.data.dating.Relationship;
 import moe.blocks.mod.entity.partial.CharacterEntity;
-import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeSounds;
-import moe.blocks.mod.item.YearbookPageItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -21,21 +14,26 @@ import java.util.function.Supplier;
 public class CPhoneTeleportMoe {
     protected final UUID moeUUID;
 
+    public CPhoneTeleportMoe(PacketBuffer buffer) {
+        this(buffer.readUniqueId());
+    }
+
     public CPhoneTeleportMoe(UUID moeUUID) {
         this.moeUUID = moeUUID;
         Minecraft.getInstance().player.playSound(MoeSounds.CELL_PHONE_RING.get(), 1.0F, 1.0F);
     }
 
-    public CPhoneTeleportMoe(PacketBuffer buffer) {
-        this(buffer.readUniqueId());
+    public static void encode(CPhoneTeleportMoe message, PacketBuffer buffer) {
+        buffer.writeUniqueId(message.getMoeUUID());
     }
 
     public UUID getMoeUUID() {
         return this.moeUUID;
     }
 
-    public static void encode(CPhoneTeleportMoe message, PacketBuffer buffer) {
-        buffer.writeUniqueId(message.getMoeUUID());
+    public static void handleContext(CPhoneTeleportMoe message, Supplier<NetworkEvent.Context> context) {
+        context.get().enqueueWork(() -> handle(message, context.get(), context.get().getSender()));
+        context.get().setPacketHandled(true);
     }
 
     public static void handle(CPhoneTeleportMoe message, NetworkEvent.Context context, ServerPlayerEntity player) {
@@ -49,10 +47,5 @@ public class CPhoneTeleportMoe {
             float yaw = (float) Math.atan2(player.getPosX() - x, player.getPosZ() - z);
             character.setPositionAndRotation(x, player.getPosY() + 1.0F, z, yaw, -player.rotationPitch);
         }
-    }
-
-    public static void handleContext(CPhoneTeleportMoe message, Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> handle(message, context.get(), context.get().getSender()));
-        context.get().setPacketHandled(true);
     }
 }
