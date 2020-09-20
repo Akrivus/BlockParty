@@ -21,13 +21,15 @@ import java.util.*;
 
 public class Yearbooks extends WorldSavedData {
     private static final String KEY = "yearbooks";
-    private final Map<UUID, BlockPos> positions = new HashMap<>();
+    private final Map<UUID, BlockPos> cells = new HashMap<>();
     private final Map<UUID, Book> books = new HashMap<>();
 
     public static void sync(CharacterEntity entity) {
         Yearbooks instance = getInstance(entity.world);
-        instance.books.forEach((uuid, book) -> book.setPageCautiously(entity, uuid));
-        instance.positions.put(entity.getUniqueID(), entity.getPosition());
+        if (instance != null) {
+            instance.books.forEach((uuid, book) -> book.setPageCautiously(entity, uuid));
+            instance.cells.put(entity.getUniqueID(), entity.getPosition());
+        }
     }
 
     public static Yearbooks getInstance(World world) {
@@ -57,20 +59,26 @@ public class Yearbooks extends WorldSavedData {
     }
 
     public BlockPos get(UUID uuid) {
-        if (!this.positions.containsKey(uuid)) { return BlockPos.ZERO; }
-        return this.positions.get(uuid);
+        if (!this.cells.containsKey(uuid)) { return BlockPos.ZERO; }
+        return this.cells.get(uuid);
     }
 
     @Override
     public void read(CompoundNBT compound) {
-        compound.keySet().forEach(key -> this.books.put(UUID.fromString(key), new Book(this, (CompoundNBT) compound.get(key))));
-        compound.keySet().forEach(key -> this.positions.put(UUID.fromString(key), BlockPos.fromLong(compound.getLong(key))));
+        CompoundNBT books = compound.getCompound("Books");
+        books.keySet().forEach(key -> this.books.put(UUID.fromString(key), new Book(this, (CompoundNBT) books.get(key))));
+        CompoundNBT cells = compound.getCompound("Cells");
+        cells.keySet().forEach(key -> this.cells.put(UUID.fromString(key), BlockPos.fromLong(cells.getLong(key))));
     }
 
     @Override
     public CompoundNBT write(CompoundNBT compound) {
-        this.books.keySet().forEach(key -> compound.put(key.toString(), this.books.get(key).write()));
-        this.positions.keySet().forEach(key -> compound.putLong(key.toString(), this.positions.get(key).toLong()));
+        CompoundNBT books = new CompoundNBT();
+        this.books.keySet().forEach(key -> books.put(key.toString(), this.books.get(key).write()));
+        compound.put("Books", books);
+        CompoundNBT cells = new CompoundNBT();
+        this.cells.keySet().forEach(key -> cells.putLong(key.toString(), this.cells.get(key).toLong()));
+        compound.put("Cells", cells);
         return compound;
     }
 
@@ -97,7 +105,6 @@ public class Yearbooks extends WorldSavedData {
             CharacterEntity character = MoeEntities.MOE.get().create(minecraft.world);
             character.readAdditional(this.character);
             character.setPosition(minecraft.player.getPosX(), minecraft.player.getPosY(), minecraft.player.getPosZ());
-            character.rotationYaw = 0.75F * -(character.rotationYawHead = 180.0F);
             if (this.getDere() == Deres.YANDERE) { character.setEmotion(Emotions.PSYCHOTIC, 0); }
             if (this.getDere() == Deres.DEREDERE) { character.setEmotion(Emotions.HAPPY, 0); }
             character.isInYearbook = true;
@@ -174,11 +181,9 @@ public class Yearbooks extends WorldSavedData {
         }
 
         public int setPageIgnorantly(CharacterEntity entity, UUID uuid) {
-            if (!this.setPageCautiously(entity, uuid)) {
-                this.pages.add(new Page(entity, uuid));
-                this.setDirty(uuid);
-            }
-            return this.getPageNumber(uuid);
+            if (!this.setPageCautiously(entity, uuid)) { this.pages.add(new Page(entity, uuid)); }
+            this.setDirty(uuid);
+            return this.getPageNumber(entity.getUniqueID());
         }
 
         public boolean setPageCautiously(CharacterEntity entity, UUID uuid) {

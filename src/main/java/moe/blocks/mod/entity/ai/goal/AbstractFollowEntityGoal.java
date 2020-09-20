@@ -53,7 +53,7 @@ public abstract class AbstractFollowEntityGoal<E extends NPCEntity, T extends En
     @Override
     public void tick() {
         this.entity.canSee(this.target);
-        if (this.entity.getDistance(this.target) < this.getFollowDistance(this.target)) {
+        if (this.entity.getDistance(this.target) < this.getFollowDistance(this.target) + 0.1F) {
             this.timeUntilReset = 0;
             this.onArrival();
         }

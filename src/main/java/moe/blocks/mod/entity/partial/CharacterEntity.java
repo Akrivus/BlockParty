@@ -5,6 +5,7 @@ import moe.blocks.mod.data.Yearbooks;
 import moe.blocks.mod.data.dating.Interactions;
 import moe.blocks.mod.data.dating.Relationship;
 import moe.blocks.mod.data.dating.Tropes;
+import moe.blocks.mod.entity.ai.BloodTypes;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
@@ -13,6 +14,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ILivingEntityData;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -20,8 +23,11 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -32,6 +38,7 @@ import java.util.UUID;
 public abstract class CharacterEntity extends InteractEntity {
     protected final List<Relationship> relationships = new ArrayList<>();
     public boolean isInYearbook = false;
+    protected ChunkPos lastRecordedPos;
     protected String givenName;
 
     protected CharacterEntity(EntityType<? extends CreatureEntity> type, World world) {
@@ -44,6 +51,7 @@ public abstract class CharacterEntity extends InteractEntity {
         ListNBT relationships = new ListNBT();
         this.relationships.forEach(relationship -> relationships.add(relationship.write(new CompoundNBT())));
         compound.put("Relationships", relationships);
+        compound.putLong("LastRecordedPos", this.lastRecordedPos.asLong());
         compound.putString("GivenName", this.getGivenName());
         this.syncYearbooks();
     }
@@ -53,15 +61,26 @@ public abstract class CharacterEntity extends InteractEntity {
         super.readAdditional(compound);
         ListNBT relationships = compound.getList("Relationships", 10);
         relationships.forEach(relationship -> this.relationships.add(new Relationship(relationship)));
+        this.lastRecordedPos = new ChunkPos(compound.getLong("LastRecordedPos"));
         this.givenName = compound.getString("GivenName");
+    }
+
+    @Override
+    public ILivingEntityData onInitialSpawn(IServerWorld world, DifficultyInstance difficulty, SpawnReason reason, ILivingEntityData spawnData, CompoundNBT compound) {
+        ILivingEntityData data = super.onInitialSpawn(world, difficulty, reason, spawnData, compound);
+        Yearbooks.sync(this);
+        return data;
     }
 
     @Override
     public void livingTick() {
         super.livingTick();
-        this.world.getProfiler().startSection("relationships");
         this.relationships.forEach(relationship -> relationship.tick());
-        this.world.getProfiler().endSection();
+        ChunkPos pos = new ChunkPos(this.getPosition());
+        if (pos != this.lastRecordedPos) {
+            Yearbooks.sync(this);
+            this.lastRecordedPos = pos;
+        }
     }
 
     @Override
@@ -78,7 +97,8 @@ public abstract class CharacterEntity extends InteractEntity {
 
     @Override
     public ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
-        if (stack.getItem() != MoeItems.CELL_PHONE.get() && stack.getItem() != MoeItems.YEARBOOK.get() && this.isLocal()) {
+        if (stack.getItem() == MoeItems.CELL_PHONE.get() || stack.getItem() == MoeItems.YEARBOOK.get()) { return ActionResultType.FAIL; }
+        if (this.isLocal()) {
             Relationship relationship = this.getRelationshipWith(player);
             this.setNextState(States.REACTION, relationship.getReaction(Interactions.HEADPAT));
             if (relationship.can(Relationship.Actions.FOLLOW)) { this.setFollowTarget(player.equals(this.getFollowTarget()) ? null : player); }

@@ -1,5 +1,6 @@
 package moe.blocks.mod.client.screen;
 
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moe.blocks.mod.MoeMod;
@@ -17,18 +18,20 @@ import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class CellPhoneScreen extends Screen {
     public static final ResourceLocation CELL_PHONE_TEXTURES = new ResourceLocation(MoeMod.ID, "textures/gui/cell_phone.png");
     protected final List<ContactEntry> contacts;
-    protected int lastSelected;
     protected int selected = 0;
     protected int skip;
     protected Button buttonScrollDown;
@@ -51,6 +54,7 @@ public class CellPhoneScreen extends Screen {
         this.renderPhone(stack);
         this.renderScrollBar(stack);
         super.render(stack, mouseX, mouseY, partialTicks);
+        this.renderTooltips(stack, mouseX, mouseY);
     }
 
     @Override
@@ -82,26 +86,24 @@ public class CellPhoneScreen extends Screen {
         this.buttonDelete = this.addButton(new PhoneButton(this.width / 2 + 30, 105, 3, (button) -> this.setSelected(this.selected - 1)));
         this.buttonMenu = this.addButton(new PhoneButton(this.width / 2 - 27, 105, 1, (button) -> this.setSelected(0)));
         this.buttonAccept = this.addButton(new PhoneButton(this.width / 2 - 46, 105, 0, (button) -> {
-            if (this.contacts.size() > 0) { MoeMessages.send(new CPhoneTeleportMoe(this.contacts.get(this.selected).uuid)); }
+            MoeMessages.send(new CPhoneTeleportMoe(this.contacts.get(this.selected).uuid));
             Minecraft.getInstance().displayGuiScreen(null);
         }));
         this.buttonDecline = this.addButton(new PhoneButton(this.width / 2 + 11, 105, 4, (button) -> {
-            if (this.contacts.size() > 0) { MoeMessages.send(new CPhoneRemoveMoe(this.contacts.remove(this.selected).uuid)); }
-            this.setSelected(this.selected - 1);
-            this.updateButtons();
+            ContactEntry removed = this.contacts.remove(this.selected);
+            MoeMessages.send(new CPhoneRemoveMoe(removed.uuid));
+            this.buttons.remove(removed.button);
+            this.setSelected(this.skip);
         }));
         this.updateButtons();
     }
 
     public void setSelected(int index) {
-        this.lastSelected = this.selected;
-        this.selected = index % this.contacts.size();
+        if (index < 0) { index = this.contacts.size() + index; }
+        this.selected = this.contacts.isEmpty() ? 0 : index % this.contacts.size();
         int shift = this.selected - this.skip;
-        if (shift < 0 || shift > 3) {
-            this.setScroll(1);
-        } else {
-            this.updateButtons();
-        }
+        if (shift < 0 || shift > 3) { this.setScroll(1); }
+        this.updateButtons();
     }
 
     public void setScroll(int delta) {
@@ -113,12 +115,17 @@ public class CellPhoneScreen extends Screen {
     }
 
     private void updateButtons() {
-        this.contacts.forEach((contact) -> this.buttons.remove(contact.button));
-        for (int y = this.skip; y < Math.min(this.skip + 4, this.contacts.size()); ++y) {
-            Button button = this.contacts.get(y).button;
-            button.x = this.width / 2 - 45;
-            button.y = 32 + (y % 4) * 17;
-            this.addButton(button);
+        if (this.contacts.isEmpty()) {
+            this.minecraft.player.sendStatusMessage(new TranslationTextComponent("gui.moeblocks.error.cell_phone"), true);
+            this.minecraft.displayGuiScreen(null);
+        } else {
+            this.contacts.forEach((contact) -> this.buttons.remove(contact.button));
+            for (int y = this.skip; y < Math.min(this.skip + 4, this.contacts.size()); ++y) {
+                Button button = this.contacts.get(y).button;
+                button.x = this.width / 2 - 45;
+                button.y = 32 + (y % 4) * 17;
+                this.addButton(button);
+            }
         }
     }
 
@@ -135,6 +142,17 @@ public class CellPhoneScreen extends Screen {
         this.blit(stack, this.width / 2 + 37, 40 + y, 108, 82, 7, 15);
     }
 
+    public void renderTooltips(MatrixStack stack, int mouseX, int mouseY) {
+        List<ITextComponent> text = new ArrayList<>();
+        if (this.buttonSelect.isHovered()) { text.add(new TranslationTextComponent("gui.moeblocks.button.select")); }
+        if (this.buttonDelete.isHovered()) { text.add(new TranslationTextComponent("gui.moeblocks.button.delete")); }
+        if (this.buttonMenu.isHovered()) { text.add(new TranslationTextComponent("gui.moeblocks.button.menu")); }
+        if (this.buttonAccept.isHovered()) { text.add(new TranslationTextComponent("gui.moeblocks.button.accept")); }
+        if (this.buttonDecline.isHovered()) { text.add(new TranslationTextComponent("gui.moeblocks.button.decline")); }
+        if (text.size() > 0) { this.renderTooltip(stack, Lists.transform(text, ITextComponent::func_241878_f), mouseX, mouseY); }
+    }
+
+    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         if (delta < 0) { this.buttonScrollDown.onPress(); }
         if (delta > 0) { this.buttonScrollUp.onPress(); }
@@ -153,22 +171,20 @@ public class CellPhoneScreen extends Screen {
         }
 
         public void init(CellPhoneScreen screen) {
-            this.button = new ContactButton(screen, screen.contacts.indexOf(this), this);
+            this.button = new ContactButton(screen, this, screen.contacts.indexOf(this));
         }
 
         @OnlyIn(Dist.CLIENT)
         public class ContactButton extends Button {
             private final CellPhoneScreen parent;
-            private final int index;
             private final ContactEntry contact;
 
-            public ContactButton(CellPhoneScreen parent, int index, ContactEntry contact) {
+            public ContactButton(CellPhoneScreen parent, ContactEntry contact, int index) {
                 super(0, 0, 81, 15, StringTextComponent.EMPTY, (button) -> {
                     MoeMessages.send(new CPhoneTeleportMoe(contact.uuid));
                     Minecraft.getInstance().displayGuiScreen(null);
                 });
                 this.parent = parent;
-                this.index = index;
                 this.contact = contact;
             }
 
@@ -183,7 +199,7 @@ public class CellPhoneScreen extends Screen {
 
             @Override
             public boolean isHovered() {
-                return super.isHovered() || this.parent.selected == this.index;
+                return super.isHovered() || this.parent.contacts.indexOf(this.contact) == this.parent.selected;
             }
 
             @Override

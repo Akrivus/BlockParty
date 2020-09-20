@@ -12,8 +12,13 @@ public class BasicAttackGoal<E extends NPCEntity> extends AbstractFollowEntityGo
     }
 
     @Override
+    public boolean shouldContinueExecuting() {
+        return super.shouldContinueExecuting() && this.target.equals(this.getTarget());
+    }
+
+    @Override
     public int getPriority() {
-        return 0x6;
+        return 0x3;
     }
 
     @Override

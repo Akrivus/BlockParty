@@ -72,14 +72,14 @@ public class NPCEntity extends CreatureEntity {
     @Override
     protected void registerGoals() {
         this.targetSelector.addGoal(0x1, new RevengeTarget(this));
-        this.goalSelector.addGoal(0x1, new SwimGoal(this));
-        this.goalSelector.addGoal(0x1, new OpenDoorGoal(this));
-        this.goalSelector.addGoal(0x2, new SleepInBedGoal(this));
-        this.goalSelector.addGoal(0x3, new ConsumeGoal(this));
-        this.goalSelector.addGoal(0x4, new AvoidTargetGoal(this));
-        this.goalSelector.addGoal(0x5, new GrabFoodGoal<>(this));
-        this.goalSelector.addGoal(0x5, new GrabItemsGoal<>(this));
-        this.goalSelector.addGoal(0x6, new BasicAttackGoal(this));
+        this.goalSelector.addGoal(0x1, new SleepInBedGoal(this));
+        this.goalSelector.addGoal(0x2, new SwimGoal(this));
+        this.goalSelector.addGoal(0x2, new OpenDoorGoal(this));
+        this.goalSelector.addGoal(0x3, new BasicAttackGoal(this));
+        this.goalSelector.addGoal(0x4, new ConsumeGoal(this));
+        this.goalSelector.addGoal(0x5, new AvoidTargetGoal(this));
+        this.goalSelector.addGoal(0x6, new GrabFoodGoal<>(this));
+        this.goalSelector.addGoal(0x6, new GrabItemsGoal<>(this));
         this.registerStates(this.states = new HashMap<>());
     }
 

@@ -38,14 +38,13 @@ public class CPhoneTeleportMoe {
 
     public static void handle(CPhoneTeleportMoe message, NetworkEvent.Context context, ServerPlayerEntity player) {
         CharacterEntity character = CharacterEntity.getEntityFromUUID(CharacterEntity.class, player.getServerWorld(), message.getMoeUUID());
-        if (character == null) {
-            player.sendStatusMessage(new TranslationTextComponent("command.moeblocks.cell_phone.error"), true);
-            player.playSound(MoeSounds.CELL_PHONE_DIAL.get(), 1.0F, 1.0F);
-        } else {
+        if (character != null) {
             double x = player.getPosX() - Math.sin(0.0174532925F * player.rotationYaw) * 1.44;
             double z = player.getPosZ() + Math.cos(0.0174532925F * player.rotationYaw) * 1.44;
             float yaw = (float) Math.atan2(player.getPosX() - x, player.getPosZ() - z);
             character.setPositionAndRotation(x, player.getPosY() + 1.0F, z, yaw, -player.rotationPitch);
+        } else {
+            // pull up some sort of dialogue GUI
         }
     }
 }

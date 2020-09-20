@@ -52,10 +52,6 @@ public class SOpenYearbook {
     public static void handle(SOpenYearbook message, NetworkEvent.Context context, Minecraft mc) {
         if (mc.player.getHeldItem(message.getHand()).getItem() != MoeItems.YEARBOOK.get()) { return; }
         if (mc.currentScreen instanceof YearbookScreen) { return; } // Fixes indexes not persisting
-        if (message.getBook().isEmpty()) {
-            mc.player.sendStatusMessage(new TranslationTextComponent("command.moeblocks.yearbook.error"), true);
-        } else {
-            mc.displayGuiScreen(new YearbookScreen(message.getBook(), message.getPageNumber()));
-        }
+        mc.displayGuiScreen(new YearbookScreen(message.getBook(), message.getPageNumber()));
     }
 }

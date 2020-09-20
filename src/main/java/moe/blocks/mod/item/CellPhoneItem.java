@@ -10,6 +10,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
@@ -63,9 +64,12 @@ public class CellPhoneItem extends Item {
         CompoundNBT compound = stack.getOrCreateTag();
         if (!compound.contains("Contacts")) { compound.put("Contacts", new ListNBT()); }
         ListNBT nbt = compound.getList("Contacts", 10);
-        nbt.add(entity.setPhoneContact(new CompoundNBT()));
-        compound.put("Contacts", nbt);
-        stack.setTag(compound);
+        CompoundNBT tag = entity.setPhoneContact(new CompoundNBT());
+        if (!nbt.contains(tag)) {
+            nbt.add(tag);
+            compound.put("Contacts", nbt);
+            stack.setTag(compound);
+        }
         return stack;
     }
 

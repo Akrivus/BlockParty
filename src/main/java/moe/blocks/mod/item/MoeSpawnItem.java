@@ -5,6 +5,7 @@ import moe.blocks.mod.entity.ai.automata.state.Deres;
 import moe.blocks.mod.init.MoeEntities;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeTags;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;
@@ -30,10 +31,14 @@ public class MoeSpawnItem extends Item {
         MoeEntity moe = MoeEntities.MOE.get().create(world);
         BlockPos pos = context.getPos();
         BlockState state = world.getBlockState(pos);
+        int attempts = 0;
+        while (attempts < 3 && !state.getBlock().isIn(MoeTags.MOEABLES)) {
+            state = world.getBlockState(pos = pos.down(++attempts));
+        }
         if (state.getBlock().isIn(MoeTags.MOEABLES)) {
             if (state.hasTileEntity()) { moe.setExtraBlockData(world.getTileEntity(pos).getTileData()); }
             moe.setBlockData(state);
-            pos = pos.offset(context.getFace());
+            pos = context.getPos().offset(context.getFace());
             moe.setPositionAndRotation(pos.getX() + 0.5F, pos.getY(), pos.getZ() + 0.5F, player.rotationYaw, -player.rotationPitch);
             if (world.addEntity(moe)) {
                 moe.onInitialSpawn((ServerWorld) world, world.getDifficultyForLocation(pos), SpawnReason.SPAWN_EGG, null, null);
@@ -42,7 +47,7 @@ public class MoeSpawnItem extends Item {
                 return ActionResultType.CONSUME;
             }
         }
-        player.sendStatusMessage(new TranslationTextComponent("command.moeblocks.spawn_egg.error"), true);
+        player.sendStatusMessage(new TranslationTextComponent("command.moeblocks.spawn.error"), true);
         return ActionResultType.FAIL;
     }
 }

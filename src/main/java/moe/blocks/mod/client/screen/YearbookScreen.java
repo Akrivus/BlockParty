@@ -66,13 +66,13 @@ public class YearbookScreen extends Screen {
         for (int y = 0; y < this.lines.length; ++y) {
             this.font.drawString(stack, this.lines[y], this.width / 2 - 40 - (y > 0 ? 5 : y), 124 + 10 * y, 0);
         }
-        this.renderTooltips(stack, mouseX, mouseY);
         super.render(stack, mouseX, mouseY, partialTicks);
+        this.renderTooltips(stack, mouseX, mouseY);
     }
 
     public void renderTooltips(MatrixStack stack, int mouseX, int mouseY) {
         List<ITextComponent> text = new ArrayList<>();
-        if (this.buttonRemovePage.isHovered()) { text.add(new TranslationTextComponent("gui.moeblocks.label.remove")); }
+        if (this.buttonRemovePage.isHovered()) { text.add(new TranslationTextComponent("gui.moeblocks.button.remove")); }
         if (102 < mouseY && mouseY < 112) {
             if (this.width / 2 - 50 < mouseX && mouseX < this.width / 2 - 24) { text.add(new TranslationTextComponent("gui.moeblocks.label.health")); }
             if (this.width / 2 - 24 < mouseX && mouseX < this.width / 2 + -2) { text.add(new TranslationTextComponent("gui.moeblocks.label.hunger")); }
@@ -89,6 +89,24 @@ public class YearbookScreen extends Screen {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(YEARBOOK_TEXTURES);
         this.blit(stack, (this.width - 60) / 2 + 3, 28, 183, 26, 58, 58);
+    }
+
+    public void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
+        if (entity == null) { return; }
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(posX, posY, 1050.0F);
+        RenderSystem.scalef(-1.0F, -1.0F, -1.0F);
+        MatrixStack stack = new MatrixStack();
+        stack.translate(0.0D, 0.0D, 1000.0D);
+        stack.scale(scale, scale, scale);
+        stack.rotate(new Quaternion(0.0F, -1.0F, 0.0F, 0.0F));
+        EntityRendererManager renderer = this.minecraft.getRenderManager();
+        renderer.setRenderShadow(false);
+        IRenderTypeBuffer.Impl buffer = this.minecraft.getRenderTypeBuffers().getBufferSource();
+        renderer.renderEntityStatic(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, stack, buffer, 0xf000f0);
+        buffer.finish();
+        renderer.setRenderShadow(true);
+        RenderSystem.popMatrix();
     }
 
     public void renderBook(MatrixStack stack) {
@@ -136,41 +154,24 @@ public class YearbookScreen extends Screen {
     }
 
     private void updateButtons() {
-        this.page = this.book.getPage(this.pageNumber);
-        this.entity = this.page.getCharacter(this.minecraft);
-        this.name = this.page.getName(this.entity);
-        this.stats[0] = String.format("%.0f", this.page.getHealth());
-        this.stats[1] = String.format("%.0f", this.page.getHunger());
-        this.stats[2] = String.format("%.0f", this.page.getLove());
-        this.stats[3] = String.format("%.0f", this.page.getStress());
-        this.lines[0] = String.format(Trans.late("gui.moeblocks.label.dere"), this.page.getDere().toString());
-        this.lines[1] = String.format(Trans.late("gui.moeblocks.label.blood"), this.page.getBloodType().toString());
-        this.lines[2] = String.format(Trans.late("gui.moeblocks.label.age"), this.page.getAge());
-        this.lines[3] = String.format(Trans.late("gui.moeblocks.label.status"), this.page.getStatus().toString());
-        this.buttonPreviousPage.visible = this.pageNumber > 0;
-        this.buttonNextPage.visible = this.pageNumber < this.book.getPageCount() - 1;
-    }
-
-    public void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
-        if (entity == null) { return; }
-        Quaternion forward = Vector3f.ZP.rotationDegrees(180.0F);
-        Quaternion lateral = Vector3f.XP.rotationDegrees(0.0F);
-        forward.multiply(lateral);
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(posX, posY, 1050.0F);
-        RenderSystem.scalef(1.0F, 1.0F, -1.0F);
-        MatrixStack stack = new MatrixStack();
-        stack.translate(0.0D, 0.0D, 1000.0D);
-        stack.scale(scale, scale, scale);
-        stack.rotate(forward);
-        EntityRendererManager renderer = this.minecraft.getRenderManager();
-        renderer.setCameraOrientation(lateral);
-        renderer.setRenderShadow(false);
-        IRenderTypeBuffer.Impl buffer = this.minecraft.getRenderTypeBuffers().getBufferSource();
-        renderer.renderEntityStatic(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, stack, buffer, 0xf000f0);
-        buffer.finish();
-        renderer.setRenderShadow(true);
-        RenderSystem.popMatrix();
+        if (this.book.isEmpty()) {
+            this.minecraft.player.sendStatusMessage(new TranslationTextComponent("gui.moeblocks.error.yearbook"), true);
+            this.minecraft.displayGuiScreen(null);
+        } else {
+            this.page = this.book.getPage(this.pageNumber);
+            this.entity = this.page.getCharacter(this.minecraft);
+            this.name = this.page.getName(this.entity);
+            this.stats[0] = String.format("%.0f", this.page.getHealth());
+            this.stats[1] = String.format("%.0f", this.page.getHunger());
+            this.stats[2] = String.format("%.0f", this.page.getLove());
+            this.stats[3] = String.format("%.0f", this.page.getStress());
+            this.lines[0] = String.format(Trans.late("gui.moeblocks.label.dere"), this.page.getDere().toString());
+            this.lines[1] = String.format(Trans.late("gui.moeblocks.label.blood"), this.page.getBloodType().toString());
+            this.lines[2] = String.format(Trans.late("gui.moeblocks.label.age"), this.page.getAge());
+            this.lines[3] = String.format(Trans.late("gui.moeblocks.label.status"), this.page.getStatus().toString());
+            this.buttonPreviousPage.visible = this.pageNumber > 0;
+            this.buttonNextPage.visible = this.pageNumber < this.book.getPageCount() - 1;
+        }
     }
 
     @OnlyIn(Dist.CLIENT)
