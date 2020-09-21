@@ -45,6 +45,7 @@ public abstract class CharacterEntity extends InteractEntity {
 
     protected CharacterEntity(EntityType<? extends CreatureEntity> type, World world) {
         super(type, world);
+        this.brassiere = new Inventory(5);
     }
 
     @Override
