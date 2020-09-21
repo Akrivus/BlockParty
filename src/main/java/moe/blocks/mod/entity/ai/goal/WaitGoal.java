@@ -2,6 +2,7 @@ package moe.blocks.mod.entity.ai.goal;
 
 import moe.blocks.mod.entity.partial.InteractEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.util.math.BlockPos;
 
@@ -9,7 +10,6 @@ import java.util.EnumSet;
 
 public class WaitGoal extends Goal {
     private final InteractEntity entity;
-    private LivingEntity target;
 
     public WaitGoal(InteractEntity entity) {
         this.setMutexFlags(EnumSet.of(Flag.JUMP, Flag.LOOK, Flag.MOVE));
@@ -18,12 +18,9 @@ public class WaitGoal extends Goal {
 
     @Override
     public boolean shouldExecute() {
-        return !this.entity.isFollowing();
-    }
-
-    @Override
-    public boolean shouldContinueExecuting() {
-        return this.entity.isWithinHomeDistanceCurrentPosition();
+        if (this.entity.isWithinHomeDistanceCurrentPosition()) { return false; }
+        if (this.entity.isFollowing()) { return false; }
+        return !this.entity.canBeTarget(this.entity.getAttackTarget());
     }
 
     @Override

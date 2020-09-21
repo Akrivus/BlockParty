@@ -94,6 +94,12 @@ public class MoeEntity extends CharacterEntity {
     }
 
     @Override
+    public CupSize setCupSize() {
+        if (this.getHonorific().equals("kun") || this.getScale() < 0.55F) { return CupSize.A; }
+        return CupSize.B;
+    }
+
+    @Override
     public String getGivenName() {
         return Trans.lator(String.format("entity.moeblocks.%s.name", this.getBlockName()), super.getGivenName());
     }

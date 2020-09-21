@@ -17,6 +17,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ILivingEntityData;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -40,6 +41,7 @@ public abstract class CharacterEntity extends InteractEntity {
     public boolean isInYearbook = false;
     protected ChunkPos lastRecordedPos;
     protected String givenName;
+    protected Inventory brassiere;
 
     protected CharacterEntity(EntityType<? extends CreatureEntity> type, World world) {
         super(type, world);
@@ -53,6 +55,8 @@ public abstract class CharacterEntity extends InteractEntity {
         compound.put("Relationships", relationships);
         compound.putLong("LastRecordedPos", this.lastRecordedPos.asLong());
         compound.putString("GivenName", this.getGivenName());
+        compound.putString("CupSize", this.getCupSize().name());
+        compound.put("Brassiere", this.brassiere.write());
         this.syncYearbooks();
     }
 
@@ -63,6 +67,35 @@ public abstract class CharacterEntity extends InteractEntity {
         relationships.forEach(relationship -> this.relationships.add(new Relationship(relationship)));
         this.lastRecordedPos = new ChunkPos(compound.getLong("LastRecordedPos"));
         this.givenName = compound.getString("GivenName");
+        this.setBrassiere(CupSize.valueOf(compound.getString("CupSize")));
+        this.brassiere.read(compound.getList("Inventory", 10));
+    }
+
+    protected void setBrassiere(CupSize cup) {
+        List<ItemStack> items = new ArrayList<>();
+        for (int i = 0; this.brassiere != null && i < this.brassiere.getSizeInventory(); ++i) { items.add(this.brassiere.getStackInSlot(i)); }
+        this.brassiere = new Inventory(cup.getSize());
+        for (ItemStack stack : items) {
+            if (this.brassiere.func_233541_b_(stack)) {
+                this.brassiere.addItem(stack);
+            } else {
+                this.entityDropItem(stack);
+            }
+        }
+    }
+
+    public Inventory getBrassiere() {
+        return this.brassiere;
+    }
+
+    public abstract CupSize setCupSize();
+
+    public void setCupSize(CupSize cup) {
+        this.setBrassiere(cup);
+    }
+
+    public CupSize getCupSize() {
+        return CupSize.get(this.brassiere.getSizeInventory());
     }
 
     @Override
@@ -212,6 +245,25 @@ public abstract class CharacterEntity extends InteractEntity {
 
         public String getName() {
             return this.names[(int) (Math.random() * this.names.length)];
+        }
+    }
+
+    public enum CupSize {
+        A(0), B(5), C(9), D(27), DD(54);
+
+        private final int size;
+
+        CupSize(int size) {
+            this.size = size;
+        }
+
+        public int getSize() {
+            return this.size;
+        }
+
+        public static CupSize get(int size) {
+            for (CupSize cup : CupSize.values()) { if (cup.getSize() == size) { return cup; } }
+            return CupSize.A;
         }
     }
 }

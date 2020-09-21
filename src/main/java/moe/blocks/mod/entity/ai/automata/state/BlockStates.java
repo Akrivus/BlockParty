@@ -4,6 +4,7 @@ import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.entity.ai.automata.BlockBasedState;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
+import moe.blocks.mod.entity.partial.CharacterEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 
@@ -11,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public enum BlockStates {
-    DEFAULT(new BlockBasedState() {
+    DEFAULT(new BlockBasedState(CharacterEntity.CupSize.B) {
         @Override
         public void apply(List<IStateGoal> goals, MoeEntity entity) {
 

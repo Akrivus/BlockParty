@@ -1,5 +1,6 @@
-package moe.blocks.mod.entity.ai.goal;
+package moe.blocks.mod.entity.ai.goal.sleep;
 
+import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
 import moe.blocks.mod.entity.partial.NPCEntity;
 import net.minecraft.block.BedBlock;
 import net.minecraft.block.BlockState;
@@ -9,15 +10,15 @@ import net.minecraft.util.math.BlockPos;
 
 import java.util.EnumSet;
 
-public class SleepInBedGoal extends AbstractMoveToBlockGoal<NPCEntity> {
-    public SleepInBedGoal(NPCEntity entity) {
+public class FindBedGoal extends AbstractMoveToBlockGoal<NPCEntity> {
+    public FindBedGoal(NPCEntity entity) {
         super(entity, 4, 8);
         this.setMutexFlags(EnumSet.of(Flag.JUMP, Flag.LOOK, Flag.MOVE));
     }
 
     @Override
     public boolean shouldExecute() {
-        if (this.world.isDaytime()) { return false; }
+        if (this.world.isDaytime() || this.entity.isSleeping()) { return false; }
         if (this.entity.isWithinHomeDistanceCurrentPosition()) {
             this.pos = this.entity.getHomePosition();
             if (this.canMoveTo(this.pos, this.world.getBlockState(this.pos))) {
@@ -35,15 +36,8 @@ public class SleepInBedGoal extends AbstractMoveToBlockGoal<NPCEntity> {
 
     @Override
     public boolean shouldContinueExecuting() {
-        if (this.world.isDaytime()) { return false; }
-        if (this.entity.isSleeping()) { return true; }
+        if (this.world.isDaytime() || this.entity.isSleeping()) { return false; }
         return super.shouldContinueExecuting();
-    }
-
-    @Override
-    public void resetTask() {
-        this.entity.clearBedPosition();
-        super.resetTask();
     }
 
     @Override
@@ -58,6 +52,6 @@ public class SleepInBedGoal extends AbstractMoveToBlockGoal<NPCEntity> {
 
     @Override
     public int getPriority() {
-        return 0x2;
+        return 0x7;
     }
 }

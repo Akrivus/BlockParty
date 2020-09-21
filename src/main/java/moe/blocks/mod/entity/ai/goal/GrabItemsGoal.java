@@ -32,18 +32,23 @@ public class GrabItemsGoal<E extends NPCEntity> extends AbstractMoveToEntityGoal
     }
 
     @Override
-    public float getDistanceThreshhold() {
-        return 0.6F;
+    public float getStrikeZone(ItemEntity target) {
+        return this.entity.getStrikingDistance(target.getWidth());
+    }
+
+    @Override
+    public float getSafeZone(ItemEntity target) {
+        return 0.0F;
     }
 
     @Override
     public boolean canMoveTo(ItemEntity item) {
-        if (item.removed || item.getItem().isEmpty() || item.cannotPickup()) { return false; }
+        if (item == null || item.removed || item.getItem().isEmpty() || item.cannotPickup()) { return false; }
         return this.canPickUp(item.getItem()) && this.entity.canSee(item);
     }
 
     public boolean canPickUp(ItemStack stack) {
-        return stack.getItem().isIn(MoeTags.EQUIPPABLES);
+        return this.entity.canPickUpItem(stack);
     }
 
     @Override

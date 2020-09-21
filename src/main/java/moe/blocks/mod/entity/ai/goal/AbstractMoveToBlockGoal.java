@@ -90,7 +90,7 @@ public abstract class AbstractMoveToBlockGoal<T extends NPCEntity> extends Goal 
 
     @Override
     public void tick() {
-        if (this.entity.getPosition().withinDistance(this.pos, 1.8F)) { this.onArrival(); }
+        if (this.entity.getPosition().withinDistance(this.pos, this.entity.getBlockStrikingDistance())) { this.onArrival(); }
     }
 
     public abstract void onArrival();

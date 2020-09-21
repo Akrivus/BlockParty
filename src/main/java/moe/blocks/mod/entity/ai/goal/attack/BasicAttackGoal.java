@@ -1,19 +1,15 @@
 package moe.blocks.mod.entity.ai.goal.attack;
 
 import moe.blocks.mod.entity.ai.goal.AbstractFollowEntityGoal;
+import moe.blocks.mod.entity.ai.goal.AbstractMoveToEntityGoal;
 import moe.blocks.mod.entity.partial.NPCEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 
-public class BasicAttackGoal<E extends NPCEntity> extends AbstractFollowEntityGoal<NPCEntity, LivingEntity> {
+public class BasicAttackGoal<E extends NPCEntity> extends AbstractMoveToEntityGoal<NPCEntity, LivingEntity> {
 
     public BasicAttackGoal(E entity) {
         super(entity, LivingEntity.class, 1.0);
-    }
-
-    @Override
-    public boolean shouldContinueExecuting() {
-        return super.shouldContinueExecuting() && this.target.equals(this.getTarget());
     }
 
     @Override
@@ -28,22 +24,17 @@ public class BasicAttackGoal<E extends NPCEntity> extends AbstractFollowEntityGo
     }
 
     @Override
-    public void onFollow() {
-
+    public float getStrikeZone(LivingEntity target) {
+        return this.entity.getStrikingDistance(target);
     }
 
     @Override
-    public LivingEntity getTarget() {
-        return this.entity.getAttackTarget();
+    public float getSafeZone(LivingEntity target) {
+        return 0.0F;
     }
 
     @Override
-    public boolean canFollow(LivingEntity target) {
-        return this.entity.canAttack(target);
-    }
-
-    @Override
-    public float getFollowDistance(LivingEntity target) {
-        return (float) (Math.pow(this.entity.getWidth() * 2.0F, 2) + target.getWidth());
+    public boolean canMoveTo(LivingEntity target) {
+        return target.equals(this.entity.getAttackTarget());
     }
 }

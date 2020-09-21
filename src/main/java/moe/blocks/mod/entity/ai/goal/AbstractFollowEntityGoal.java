@@ -24,7 +24,7 @@ public abstract class AbstractFollowEntityGoal<E extends NPCEntity, T extends En
     @Override
     public boolean shouldExecute() {
         T target = this.getTarget();
-        if (this.entity.canBeTarget(target) && this.entity.getDistance(target) > this.getFollowDistance(target) && this.canFollow(target)) {
+        if (this.entity.canBeTarget(target) && this.entity.getDistance(target) > this.getSafeZone(target) && this.canFollow(target)) {
             this.target = target;
             return true;
         }
@@ -33,7 +33,7 @@ public abstract class AbstractFollowEntityGoal<E extends NPCEntity, T extends En
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.entity.hasPath() && this.entity.canBeTarget(this.target) && this.entity.getDistance(this.target) > this.getFollowDistance(this.target);
+        return this.entity.hasPath() && this.entity.canBeTarget(this.target) && this.entity.getDistance(this.target) > this.getStrikeZone(this.target);
     }
 
     @Override
@@ -53,7 +53,7 @@ public abstract class AbstractFollowEntityGoal<E extends NPCEntity, T extends En
     @Override
     public void tick() {
         this.entity.canSee(this.target);
-        if (this.entity.getDistance(this.target) < this.getFollowDistance(this.target) + 0.1F) {
+        if (this.entity.getDistance(this.target) < this.getStrikeZone(this.target)) {
             this.timeUntilReset = 0;
             this.onArrival();
         }
@@ -67,5 +67,7 @@ public abstract class AbstractFollowEntityGoal<E extends NPCEntity, T extends En
 
     public abstract boolean canFollow(T target);
 
-    public abstract float getFollowDistance(T target);
+    public abstract float getStrikeZone(T target);
+
+    public abstract float getSafeZone(T target);
 }

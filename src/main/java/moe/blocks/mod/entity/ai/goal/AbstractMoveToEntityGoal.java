@@ -25,10 +25,10 @@ public abstract class AbstractMoveToEntityGoal<E extends NPCEntity, T extends En
 
     @Override
     public boolean shouldExecute() {
-        List<T> targets = this.entity.world.getEntitiesWithinAABB(this.type, this.entity.getBoundingBox().grow(4.0D, 2.0D, 4.0D));
+        List<T> targets = this.entity.world.getEntitiesWithinAABB(this.type, this.entity.getBoundingBox().grow(8.0D, 2.0D, 8.0D));
         targets.sort(new EntityDistance(this.entity));
         for (T target : targets) {
-            if (this.entity.canBeTarget(target) && this.entity.getDistance(target) > this.getDistanceThreshhold() && this.canMoveTo(target)) {
+            if (this.entity.canBeTarget(target) && this.entity.getDistance(target) > this.getSafeZone(target) && this.canMoveTo(target)) {
                 this.target = target;
                 return true;
             }
@@ -53,19 +53,17 @@ public abstract class AbstractMoveToEntityGoal<E extends NPCEntity, T extends En
 
     @Override
     public void tick() {
-        if (this.entity.canSee(this.target) && this.entity.getDistance(this.target) < this.getFollowDistance(this.target)) {
+        if (this.entity.canSee(this.target) && this.entity.getDistance(this.target) < this.getStrikeZone(this.target)) {
             this.timeUntilReset = 0;
             this.onArrival();
         }
     }
 
-    public float getFollowDistance(T target) {
-        return (float) (Math.pow(this.entity.getWidth() * 2.0F, 2) + this.target.getWidth());
-    }
-
     public abstract void onArrival();
 
-    public abstract float getDistanceThreshhold();
+    public abstract float getStrikeZone(T target);
+
+    public abstract float getSafeZone(T target);
 
     public abstract boolean canMoveTo(T target);
 }

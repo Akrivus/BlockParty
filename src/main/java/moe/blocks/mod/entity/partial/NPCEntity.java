@@ -7,6 +7,8 @@ import moe.blocks.mod.entity.ai.automata.state.ItemStates;
 import moe.blocks.mod.entity.ai.goal.*;
 import moe.blocks.mod.entity.ai.goal.attack.BasicAttackGoal;
 import moe.blocks.mod.entity.ai.goal.items.ConsumeGoal;
+import moe.blocks.mod.entity.ai.goal.sleep.FindBedGoal;
+import moe.blocks.mod.entity.ai.goal.sleep.WakeUpGoal;
 import moe.blocks.mod.entity.ai.goal.target.RevengeTarget;
 import moe.blocks.mod.init.MoeItems;
 import net.minecraft.block.BlockState;
@@ -60,7 +62,7 @@ public class NPCEntity extends CreatureEntity {
     private int timeSinceSleep;
     private LivingEntity avoidTarget;
     private int avoidTimer;
-    private boolean updateItemState;
+    private boolean updateItemState = true;
 
     protected NPCEntity(EntityType<? extends CreatureEntity> type, World world) {
         super(type, world);
@@ -72,7 +74,7 @@ public class NPCEntity extends CreatureEntity {
     @Override
     protected void registerGoals() {
         this.targetSelector.addGoal(0x1, new RevengeTarget(this));
-        this.goalSelector.addGoal(0x1, new SleepInBedGoal(this));
+        this.goalSelector.addGoal(0x1, new WakeUpGoal(this));
         this.goalSelector.addGoal(0x2, new SwimGoal(this));
         this.goalSelector.addGoal(0x2, new OpenDoorGoal(this));
         this.goalSelector.addGoal(0x3, new BasicAttackGoal(this));
@@ -80,6 +82,7 @@ public class NPCEntity extends CreatureEntity {
         this.goalSelector.addGoal(0x5, new AvoidTargetGoal(this));
         this.goalSelector.addGoal(0x6, new GrabFoodGoal<>(this));
         this.goalSelector.addGoal(0x6, new GrabItemsGoal<>(this));
+        this.goalSelector.addGoal(0x7, new FindBedGoal(this));
         this.registerStates(this.states = new HashMap<>());
     }
 
@@ -114,7 +117,6 @@ public class NPCEntity extends CreatureEntity {
         this.stress = compound.getFloat("Stress");
         this.relaxation = compound.getFloat("Relaxation");
         this.age = compound.getInt("Age");
-        this.updateItemState();
     }
 
     @Override
@@ -387,7 +389,13 @@ public class NPCEntity extends CreatureEntity {
 
     @Override
     public boolean canPickUpItem(ItemStack stack) {
-        return true;
+        EquipmentSlotType slot = this.getSlotForStack(stack);
+        ItemStack shift = this.getItemStackFromSlot(slot);
+        int max = shift.getMaxStackSize();
+        if (ItemStack.areItemsEqual(shift, stack) && ItemStack.areItemStackTagsEqual(shift, stack) && shift.getCount() < max) {
+            return shift.getCount() + stack.getCount() <= max;
+        }
+        return this.shouldExchangeEquipment(stack, shift);
     }
 
     @Override
@@ -443,6 +451,18 @@ public class NPCEntity extends CreatureEntity {
             slot = EquipmentSlotType.OFFHAND;
         }
         return slot;
+    }
+
+    public float getStrikingDistance(float distance) {
+        return (float) (Math.pow(this.getWidth() * 2.0F, 2) + distance);
+    }
+
+    public float getStrikingDistance(Entity target) {
+        return this.getStrikingDistance(target.getWidth());
+    }
+
+    public float getBlockStrikingDistance() {
+        return this.getStrikingDistance(1.0F);
     }
 
     public boolean isAmmo(Item item) {

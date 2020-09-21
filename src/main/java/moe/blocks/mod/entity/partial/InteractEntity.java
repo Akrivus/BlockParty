@@ -9,6 +9,7 @@ import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.ai.automata.state.Deres;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
 import moe.blocks.mod.entity.ai.goal.FollowTargetGoal;
+import moe.blocks.mod.entity.ai.goal.WaitGoal;
 import moe.blocks.mod.util.sort.EntityDistance;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.*;
@@ -56,6 +57,7 @@ public abstract class InteractEntity extends NPCEntity {
 
     @Override
     public void registerGoals() {
+        this.goalSelector.addGoal(0x1, new WaitGoal(this));
         this.goalSelector.addGoal(0x7, new FollowTargetGoal(this));
         super.registerGoals();
     }
