@@ -11,6 +11,7 @@ import moe.blocks.mod.entity.ai.goal.sleep.FindBedGoal;
 import moe.blocks.mod.entity.ai.goal.sleep.WakeUpGoal;
 import moe.blocks.mod.entity.ai.goal.target.RevengeTarget;
 import moe.blocks.mod.init.MoeItems;
+import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
@@ -30,6 +31,7 @@ import net.minecraft.pathfinding.FlyingPathNavigator;
 import net.minecraft.pathfinding.GroundPathNavigator;
 import net.minecraft.pathfinding.PathNavigator;
 import net.minecraft.pathfinding.PathNodeType;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
@@ -365,8 +367,9 @@ public class NPCEntity extends CreatureEntity {
                 return true;
             }
         } else if (this.shouldExchangeEquipment(stack, shift)) {
+            this.entityDropItem(shift);
             this.setItemStackToSlot(slot, stack.split(1));
-            return stack.isEmpty();
+            return true;
         }
         return false;
     }
@@ -405,24 +408,30 @@ public class NPCEntity extends CreatureEntity {
 
     @Override
     protected boolean shouldExchangeEquipment(ItemStack candidate, ItemStack existing) {
+        if (EnchantmentHelper.hasBindingCurse(existing)) { return false; }
         EquipmentSlotType slot = this.getSlotForStack(candidate);
-        if (EnchantmentHelper.hasBindingCurse(existing)) {
-            return false;
-        } else if (slot == EquipmentSlotType.OFFHAND && this.canConsume(candidate)) {
-            return true;
-        } else if (existing.getItem() instanceof TieredItem && candidate.getItem() instanceof TieredItem) {
-            IItemTier inbound = ((TieredItem) candidate.getItem()).getTier();
-            IItemTier current = ((TieredItem) existing.getItem()).getTier();
-            return inbound.getHarvestLevel() > current.getHarvestLevel() || inbound.getAttackDamage() > current.getAttackDamage() || inbound.getMaxUses() > current.getMaxUses();
-        } else if (existing.getItem() instanceof ArmorItem) {
-            ArmorItem inbound = (ArmorItem) candidate.getItem();
-            ArmorItem current = (ArmorItem) existing.getItem();
-            return inbound.getDamageReduceAmount() > current.getDamageReduceAmount() || inbound.func_234657_f_() > current.func_234657_f_();
-        } else if (this.isWieldingBow()) {
-            return slot == EquipmentSlotType.OFFHAND ? candidate.getItem() instanceof ArrowItem : !this.hasAmmo();
-        } else {
-            return slot != EquipmentSlotType.OFFHAND && existing.isEmpty();
+        if (slot == EquipmentSlotType.OFFHAND) {
+            if (this.canConsume(candidate)) { return true; }
+            if (this.isWieldingBow()) { return candidate.getItem().isIn(ItemTags.ARROWS); }
+            return this.isFavoriteItem(candidate);
         }
+        if (existing.getItem().getClass() == candidate.getItem().getClass()) {
+            if (existing.getItem() instanceof TieredItem) {
+                IItemTier a = ((TieredItem) candidate.getItem()).getTier();
+                IItemTier b = ((TieredItem) existing.getItem()).getTier();
+                return a.getAttackDamage() > b.getAttackDamage();
+            }
+            if (existing.getItem() instanceof ArmorItem) {
+                ArmorItem a = (ArmorItem) candidate.getItem();
+                ArmorItem b = (ArmorItem) existing.getItem();
+                return a.getDamageReduceAmount() > b.getDamageReduceAmount();
+            }
+        }
+        return this.isFavoriteItem(candidate) || existing.isEmpty();
+    }
+
+    public boolean isFavoriteItem(ItemStack stack) {
+        return false;
     }
 
     public boolean isWieldingBow() {
@@ -447,7 +456,7 @@ public class NPCEntity extends CreatureEntity {
 
     public EquipmentSlotType getSlotForStack(ItemStack stack) {
         EquipmentSlotType slot = MobEntity.getSlotForItemStack(stack);
-        if (this.isAmmo(stack.getItem()) || stack.isFood()) {
+        if (stack.getItem().isIn(MoeTags.OFFHAND_ITEMS) || stack.isFood()) {
             slot = EquipmentSlotType.OFFHAND;
         }
         return slot;

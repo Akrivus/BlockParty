@@ -36,12 +36,12 @@ public enum ItemStates {
             goals.add(new MineOresGoal(entity));
         }
     }, MoeTags.MINING_TOOLS),
-    RANGE_WEAPONS(new State<NPCEntity>() {
+    RANGED_WEAPONS(new State<NPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, NPCEntity entity) {
             goals.add(new BowAttackGoal(entity));
         }
-    }, MoeTags.RANGE_WEAPONS);
+    }, MoeTags.RANGED_WEAPONS);
 
     public final State state;
 

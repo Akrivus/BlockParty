@@ -48,7 +48,7 @@ public class GrabItemsGoal<E extends NPCEntity> extends AbstractMoveToEntityGoal
     }
 
     public boolean canPickUp(ItemStack stack) {
-        return this.entity.canPickUpItem(stack);
+        return stack.getItem().isIn(MoeTags.EQUIPPABLES) && this.entity.canPickUpItem(stack);
     }
 
     @Override

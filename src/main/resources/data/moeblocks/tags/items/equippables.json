@@ -2,10 +2,11 @@
   "replace": false,
   "values": [
     "#minecraft:arrows",
+    "#moeblocks:breeding_tools",
     "#moeblocks:farming_tools",
     "#moeblocks:melee_weapons",
     "#moeblocks:mining_tools",
-    "#moeblocks:range_weapons",
+    "#moeblocks:ranged_weapons",
     "minecraft:egg",
     "minecraft:ender_pearl",
     "minecraft:potion",

@@ -45,7 +45,7 @@ public abstract class CharacterEntity extends InteractEntity {
 
     protected CharacterEntity(EntityType<? extends CreatureEntity> type, World world) {
         super(type, world);
-        this.brassiere = new Inventory(5);
+        this.setBrassiere(CupSize.B);
     }
 
     @Override
@@ -68,7 +68,7 @@ public abstract class CharacterEntity extends InteractEntity {
         relationships.forEach(relationship -> this.relationships.add(new Relationship(relationship)));
         this.lastRecordedPos = new ChunkPos(compound.getLong("LastRecordedPos"));
         this.givenName = compound.getString("GivenName");
-        this.setBrassiere(CupSize.valueOf(compound.getString("CupSize")));
+        this.setBrassiere(compound.contains("CupSize") ? CupSize.valueOf(compound.getString("CupSize")) : CupSize.B);
         this.brassiere.read(compound.getList("Inventory", 10));
     }
 
@@ -97,6 +97,11 @@ public abstract class CharacterEntity extends InteractEntity {
 
     public CupSize getCupSize() {
         return CupSize.get(this.brassiere.getSizeInventory());
+    }
+
+    @Override
+    public boolean isFavoriteItem(ItemStack stack) {
+        return this.getDere().isFavorite(stack);
     }
 
     @Override
