@@ -2,8 +2,6 @@ package moe.blocks.mod.entity.ai.goal;
 
 import moe.blocks.mod.entity.partial.CharacterEntity;
 import moe.blocks.mod.entity.partial.NPCEntity;
-import moe.blocks.mod.init.MoeTags;
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.ITag;
@@ -23,13 +21,6 @@ public class TryStuffItemGoal<E extends NPCEntity> extends TryEquipItemGoal<E> {
     }
 
     @Override
-    public boolean canPickUp(ItemStack stack) {
-        if (this.entity instanceof CharacterEntity && this.character == null) { this.character = (CharacterEntity) entity; }
-        if (this.character == null) { return false; }
-        return this.check.test(stack) && this.character.getBrassiere().func_233541_b_(stack);
-    }
-
-    @Override
     public void onArrival() {
         this.entity.onItemPickup(this.target, this.target.getItem().getCount());
         ItemStack loot = this.character.getBrassiere().addItem(this.target.getItem());
@@ -38,5 +29,12 @@ public class TryStuffItemGoal<E extends NPCEntity> extends TryEquipItemGoal<E> {
         } else {
             this.target.getItem().setCount(loot.getCount());
         }
+    }
+
+    @Override
+    public boolean canPickUp(ItemStack stack) {
+        if (this.entity instanceof CharacterEntity && this.character == null) { this.character = (CharacterEntity) entity; }
+        if (this.character == null) { return false; }
+        return this.check.test(stack) && this.character.getBrassiere().func_233541_b_(stack);
     }
 }

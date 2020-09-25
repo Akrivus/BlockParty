@@ -2,18 +2,11 @@ package moe.blocks.mod.entity.ai.goal.items;
 
 import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
 import moe.blocks.mod.entity.partial.CharacterEntity;
-import moe.blocks.mod.entity.partial.NPCEntity;
-import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.BlockState;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tileentity.EnderChestTileEntity;
 import net.minecraft.tileentity.HopperTileEntity;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.Tags;
 
 public class DumpChestGoal extends AbstractMoveToBlockGoal<CharacterEntity> {
 

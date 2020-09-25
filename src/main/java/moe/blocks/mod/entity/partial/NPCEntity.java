@@ -4,7 +4,9 @@ import moe.blocks.mod.data.Yearbooks;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.ai.automata.state.ItemStates;
-import moe.blocks.mod.entity.ai.goal.*;
+import moe.blocks.mod.entity.ai.goal.AvoidTargetGoal;
+import moe.blocks.mod.entity.ai.goal.OpenDoorGoal;
+import moe.blocks.mod.entity.ai.goal.TryEquipItemGoal;
 import moe.blocks.mod.entity.ai.goal.attack.BasicAttackGoal;
 import moe.blocks.mod.entity.ai.goal.items.ConsumeGoal;
 import moe.blocks.mod.entity.ai.goal.sleep.FindBedGoal;
@@ -149,19 +151,6 @@ public class NPCEntity extends CreatureEntity {
 
     public boolean isLocal() {
         return this.world instanceof ServerWorld;
-    }
-
-    public void updateItemState() {
-        this.setNextState(States.HELD_ITEM, ItemStates.get(this.getHeldItem(Hand.MAIN_HAND)).state);
-        this.updateItemState = false;
-    }
-
-    public State setNextState(States key, State state) {
-        if (this.states != null) {
-            if (this.states.get(key) != null) { this.states.get(key).clean(this); }
-            return this.states.put(key, state.start(this));
-        }
-        return null;
     }
 
     protected void registerStates(HashMap<States, State> states) {
@@ -439,10 +428,6 @@ public class NPCEntity extends CreatureEntity {
         return item == Items.BOW || item == Items.CROSSBOW;
     }
 
-    public boolean hasAmmo() {
-        return this.isAmmo(this.getHeldItem(Hand.OFF_HAND).getItem());
-    }
-
     @Override
     public boolean canDespawn(double distanceToClosestPlayer) {
         return false;
@@ -454,6 +439,19 @@ public class NPCEntity extends CreatureEntity {
         super.updateAITasks();
     }
 
+    public void updateItemState() {
+        this.setNextState(States.HELD_ITEM, ItemStates.get(this.getHeldItem(Hand.MAIN_HAND)).state);
+        this.updateItemState = false;
+    }
+
+    public State setNextState(States key, State state) {
+        if (this.states != null) {
+            if (this.states.get(key) != null) { this.states.get(key).clean(this); }
+            return this.states.put(key, state.start(this));
+        }
+        return null;
+    }
+
     public EquipmentSlotType getSlotForStack(ItemStack stack) {
         EquipmentSlotType slot = MobEntity.getSlotForItemStack(stack);
         if (stack.getItem().isIn(MoeTags.OFFHAND_ITEMS) || stack.isFood()) {
@@ -462,20 +460,24 @@ public class NPCEntity extends CreatureEntity {
         return slot;
     }
 
-    public float getStrikingDistance(float distance) {
-        return (float) (Math.pow(this.getWidth() * 2.0F, 2) + distance);
+    public boolean hasAmmo() {
+        return this.isAmmo(this.getHeldItem(Hand.OFF_HAND).getItem());
+    }
+
+    public boolean isAmmo(Item item) {
+        return item == Items.ARROW || item == Items.SPECTRAL_ARROW || item == Items.TIPPED_ARROW;
     }
 
     public float getStrikingDistance(Entity target) {
         return this.getStrikingDistance(target.getWidth());
     }
 
-    public float getBlockStrikingDistance() {
-        return this.getStrikingDistance(1.0F);
+    public float getStrikingDistance(float distance) {
+        return (float) (Math.pow(this.getWidth() * 2.0F, 2) + distance);
     }
 
-    public boolean isAmmo(Item item) {
-        return item == Items.ARROW || item == Items.SPECTRAL_ARROW || item == Items.TIPPED_ARROW;
+    public float getBlockStrikingDistance() {
+        return this.getStrikingDistance(1.0F);
     }
 
     public LivingEntity getEntityFromUUID(UUID uuid) {

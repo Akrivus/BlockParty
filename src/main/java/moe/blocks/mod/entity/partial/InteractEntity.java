@@ -33,7 +33,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.UUID;
 
 public abstract class InteractEntity extends NPCEntity {

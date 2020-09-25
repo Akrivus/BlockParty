@@ -5,7 +5,6 @@ import moe.blocks.mod.entity.ai.automata.state.Deres;
 import moe.blocks.mod.init.MoeEntities;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeTags;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;

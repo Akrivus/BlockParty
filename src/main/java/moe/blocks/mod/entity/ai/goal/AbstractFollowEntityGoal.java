@@ -63,11 +63,11 @@ public abstract class AbstractFollowEntityGoal<E extends NPCEntity, T extends En
 
     public abstract void onFollow();
 
+    public abstract float getStrikeZone(T target);
+
     public abstract T getTarget();
 
     public abstract boolean canFollow(T target);
-
-    public abstract float getStrikeZone(T target);
 
     public abstract float getSafeZone(T target);
 }

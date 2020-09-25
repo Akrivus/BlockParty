@@ -12,17 +12,17 @@ import java.util.function.Predicate;
 public class TryEquipItemGoal<E extends NPCEntity> extends AbstractMoveToEntityGoal<E, ItemEntity> {
     protected final Predicate<ItemStack> check;
 
-    public TryEquipItemGoal(E entity, Predicate<ItemStack> check) {
-        super(entity, ItemEntity.class, 0.5D);
-        this.check = check;
+    public TryEquipItemGoal(E entity) {
+        this(entity, MoeTags.EQUIPPABLES);
     }
 
     public TryEquipItemGoal(E entity, ITag.INamedTag<Item> tag) {
         this(entity, (stack) -> stack.getItem().isIn(tag));
     }
 
-    public TryEquipItemGoal(E entity) {
-        this(entity, MoeTags.EQUIPPABLES);
+    public TryEquipItemGoal(E entity, Predicate<ItemStack> check) {
+        super(entity, ItemEntity.class, 0.5D);
+        this.check = check;
     }
 
     @Override

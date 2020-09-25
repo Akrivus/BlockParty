@@ -67,31 +67,6 @@ public enum Deres {
         this.tools = tools;
     }
 
-    public float getGiftFactor(ItemStack stack) {
-        if (this.isLoved(stack)) { return 2.0F; }
-        if (this.isLiked(stack)) { return 1.0F; }
-        if (this.isHated(stack)) {
-            return -1.0F;
-        }
-        return 0.0F;
-    }
-
-    public boolean isFavorite(ItemStack stack) {
-        return stack.getItem().isIn(this.tools);
-    }
-
-    public boolean isLoved(ItemStack stack) {
-        return stack.getItem().isIn(MoeTags.LOVED_GIFTS.get(this));
-    }
-
-    public boolean isLiked(ItemStack stack) {
-        return stack.getItem().isIn(MoeTags.LIKED_GIFTS.get(this));
-    }
-
-    public boolean isHated(ItemStack stack) {
-        return stack.getItem().isIn(MoeTags.HATED_GIFTS.get(this));
-    }
-
     public static Deres get(DieEntity.Face face) {
         return Registry.SET.getOrDefault(face, HIMEDERE);
     }
@@ -111,6 +86,31 @@ public enum Deres {
         default:
             return MaterialColor.YELLOW;
         }
+    }
+
+    public float getGiftFactor(ItemStack stack) {
+        if (this.isLoved(stack)) { return 2.0F; }
+        if (this.isLiked(stack)) { return 1.0F; }
+        if (this.isHated(stack)) {
+            return -1.0F;
+        }
+        return 0.0F;
+    }
+
+    public boolean isLoved(ItemStack stack) {
+        return stack.getItem().isIn(MoeTags.LOVED_GIFTS.get(this));
+    }
+
+    public boolean isLiked(ItemStack stack) {
+        return stack.getItem().isIn(MoeTags.LIKED_GIFTS.get(this));
+    }
+
+    public boolean isHated(ItemStack stack) {
+        return stack.getItem().isIn(MoeTags.HATED_GIFTS.get(this));
+    }
+
+    public boolean isFavorite(ItemStack stack) {
+        return stack.getItem().isIn(this.tools);
     }
 
     @Override

@@ -1,17 +1,11 @@
 package moe.blocks.mod.entity.ai.goal.sleep;
 
-import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
 import moe.blocks.mod.entity.partial.NPCEntity;
-import net.minecraft.block.BedBlock;
-import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.monster.MonsterEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.properties.BedPart;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import java.util.EnumSet;
 import java.util.Optional;
 
 public class WakeUpGoal extends Goal {

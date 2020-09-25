@@ -1,8 +1,6 @@
 package moe.blocks.mod.entity.ai.goal;
 
 import moe.blocks.mod.entity.partial.InteractEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.util.math.BlockPos;
 

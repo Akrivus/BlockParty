@@ -1,15 +1,9 @@
 package moe.blocks.mod.entity.ai.goal.items;
 
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
-import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
 import moe.blocks.mod.entity.partial.CharacterEntity;
-import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.HopperTileEntity;
-import net.minecraft.util.math.BlockPos;
 
 public class OpenChestGoal extends Goal implements IStateGoal {
     protected final CharacterEntity entity;
