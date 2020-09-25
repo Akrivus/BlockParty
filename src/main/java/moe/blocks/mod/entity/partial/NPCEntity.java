@@ -82,9 +82,9 @@ public class NPCEntity extends CreatureEntity {
         this.goalSelector.addGoal(0x3, new BasicAttackGoal(this));
         this.goalSelector.addGoal(0x4, new ConsumeGoal(this));
         this.goalSelector.addGoal(0x5, new AvoidTargetGoal(this));
-        this.goalSelector.addGoal(0x6, new GrabFoodGoal<>(this));
-        this.goalSelector.addGoal(0x6, new GrabItemsGoal<>(this));
-        this.goalSelector.addGoal(0x7, new FindBedGoal(this));
+        this.goalSelector.addGoal(0x6, new TryEquipItemGoal<>(this, (stack) -> stack.isFood()));
+        this.goalSelector.addGoal(0x6, new TryEquipItemGoal<>(this));
+        this.goalSelector.addGoal(0x9, new FindBedGoal(this));
         this.registerStates(this.states = new HashMap<>());
     }
 

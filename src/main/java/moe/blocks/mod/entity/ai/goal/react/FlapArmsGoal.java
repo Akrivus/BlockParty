@@ -6,8 +6,8 @@ import moe.blocks.mod.entity.ai.goal.ReactiveGoal;
 import moe.blocks.mod.entity.partial.CharacterEntity;
 import net.minecraft.entity.ai.brain.task.Task;
 
-public class RelaxGoal extends ReactiveGoal {
-    public RelaxGoal(CharacterEntity entity) {
+public class FlapArmsGoal extends ReactiveGoal {
+    public FlapArmsGoal(CharacterEntity entity) {
         super(entity);
     }
 
@@ -15,7 +15,7 @@ public class RelaxGoal extends ReactiveGoal {
     public void execute() {
         this.entity.canSee(this.entity.getInteractTarget());
         this.entity.setEmotion(Emotions.HAPPY, 20, this.entity.getInteractTarget());
-        this.entity.setAnimation(Animations.JELLY_ARMS);
+        this.entity.setAnimation(Animations.FLAP_ARMS);
         this.status = Task.Status.STOPPED;
     }
 }

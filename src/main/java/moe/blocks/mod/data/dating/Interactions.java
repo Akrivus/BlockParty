@@ -3,10 +3,7 @@ package moe.blocks.mod.data.dating;
 import moe.blocks.mod.data.conversation.Reactions;
 
 public enum Interactions {
-    HEADPAT(2.0F, 6000, Reactions.RELAX),
-    NEUTRAL_GIFT(3.0F, 8000, Reactions.NONE),
-    GOOD_GIFT(4.0F, 18000, Reactions.NONE),
-    SAVED_LIFE(5.0F, 24000, Reactions.NONE);
+    HEADPAT(2.0F, 6000, Reactions.FLAP_ARMS);
 
     public final Reactions reaction;
     private final float love;

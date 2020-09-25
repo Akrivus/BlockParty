@@ -6,7 +6,7 @@ import moe.blocks.mod.client.model.MoeModel;
 import moe.blocks.mod.entity.MoeEntity;
 import net.minecraft.util.math.MathHelper;
 
-public class JellyArms extends ActionAnimation {
+public class FlapArms extends ActionAnimation {
     @Override
     public int getInterval() {
         return 20;
@@ -22,6 +22,6 @@ public class JellyArms extends ActionAnimation {
 
     @Override
     public Animations getKey() {
-        return Animations.JELLY_ARMS;
+        return Animations.FLAP_ARMS;
     }
 }

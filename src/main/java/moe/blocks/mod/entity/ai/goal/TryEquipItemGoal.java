@@ -3,12 +3,26 @@ package moe.blocks.mod.entity.ai.goal;
 import moe.blocks.mod.entity.partial.NPCEntity;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tags.ITag;
 
-public class GrabItemsGoal<E extends NPCEntity> extends AbstractMoveToEntityGoal<E, ItemEntity> {
+import java.util.function.Predicate;
 
-    public GrabItemsGoal(E entity) {
+public class TryEquipItemGoal<E extends NPCEntity> extends AbstractMoveToEntityGoal<E, ItemEntity> {
+    protected final Predicate<ItemStack> check;
+
+    public TryEquipItemGoal(E entity, Predicate<ItemStack> check) {
         super(entity, ItemEntity.class, 0.5D);
+        this.check = check;
+    }
+
+    public TryEquipItemGoal(E entity, ITag.INamedTag<Item> tag) {
+        this(entity, (stack) -> stack.getItem().isIn(tag));
+    }
+
+    public TryEquipItemGoal(E entity) {
+        this(entity, MoeTags.EQUIPPABLES);
     }
 
     @Override
@@ -48,11 +62,11 @@ public class GrabItemsGoal<E extends NPCEntity> extends AbstractMoveToEntityGoal
     }
 
     public boolean canPickUp(ItemStack stack) {
-        return stack.getItem().isIn(MoeTags.EQUIPPABLES) && this.entity.canPickUpItem(stack);
+        return this.check.test(stack) && this.entity.canPickUpItem(stack);
     }
 
     @Override
     public int getPriority() {
-        return 0x5;
+        return 0x6;
     }
 }

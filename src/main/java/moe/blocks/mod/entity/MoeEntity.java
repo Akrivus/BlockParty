@@ -17,6 +17,10 @@ import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
@@ -91,12 +95,6 @@ public class MoeEntity extends CharacterEntity {
         this.setExtraBlockData((CompoundNBT) compound.get("ExtraBlockData"));
         this.setScale(compound.getFloat("Scale"));
         super.readAdditional(compound);
-    }
-
-    @Override
-    public CupSize setCupSize() {
-        if (this.getHonorific().equals("kun") || this.getScale() < 0.55F) { return CupSize.A; }
-        return CupSize.B;
     }
 
     @Override
@@ -228,5 +226,10 @@ public class MoeEntity extends CharacterEntity {
     @Override
     protected float getStandingEyeHeight(Pose pose, EntitySize size) {
         return 0.908203125F * this.getScale();
+    }
+
+    @Override
+    public void onInventoryChanged(IInventory inventory) {
+
     }
 }

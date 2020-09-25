@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:ancient_debris",
+    "minecraft:coal",
+    "minecraft:diamond",
+    "minecraft:emerald",
+    "minecraft:glowstone_dust",
+    "minecraft:gold_ore",
+    "minecraft:iron_ore",
+    "minecraft:lapis_lazuli",
+    "minecraft:nether_gold_ore",
+    "minecraft:quartz",
+    "minecraft:redstone"
+  ]
+}

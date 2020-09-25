@@ -8,8 +8,8 @@ import java.util.function.Supplier;
 public enum Animations {
     AIM(Aim::new),
     DEFAULT(Default::new),
+    FLAP_ARMS(FlapArms::new),
     IDLE(Idle::new),
-    JELLY_ARMS(JellyArms::new),
     WAVE(Wave::new);
 
     private final Supplier<? extends Animation> animation;

@@ -33,6 +33,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.UUID;
 
 public abstract class InteractEntity extends NPCEntity {
@@ -113,7 +114,10 @@ public abstract class InteractEntity extends NPCEntity {
     @Override
     public void livingTick() {
         super.livingTick();
-        if (this.isLocal()) {
+        if (this.isSleeping()) {
+            this.setMotion(Vector3d.ZERO);
+            this.addStress(-0.001F);
+        } else if (this.isLocal()) {
             if (--this.timeUntilEmotionExpires < 0) { this.setEmotion(Emotions.NORMAL, 24000); }
             this.world.getEntitiesWithinAABB(PlayerEntity.class, this.getBoundingBox().expand(8.0F, 4.0F, 8.0F)).stream().sorted(new EntityDistance(this)).forEach(player -> {
                 if (this.isBeingWatchedBy(player)) { this.setStareTarget(player); }
@@ -222,6 +226,7 @@ public abstract class InteractEntity extends NPCEntity {
 
     @Override
     public void startSleeping(BlockPos pos) {
+        this.timeUntilEmotionExpires = 0;
         this.setHomePosAndDistance(pos, 96);
         super.startSleeping(pos);
     }

@@ -3,6 +3,7 @@ package moe.blocks.mod.entity.ai.automata.state;
 import moe.blocks.mod.entity.ai.automata.BlankState;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
+import moe.blocks.mod.entity.ai.goal.TryStuffItemGoal;
 import moe.blocks.mod.entity.ai.goal.attack.BowAttackGoal;
 import moe.blocks.mod.entity.ai.goal.items.HarvestCropsGoal;
 import moe.blocks.mod.entity.ai.goal.items.MineOresGoal;
@@ -21,24 +22,28 @@ public enum ItemStates {
     FARMING_TOOLS(new State<NPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, NPCEntity entity) {
+            goals.add(new TryStuffItemGoal(entity, MoeTags.DROPPED_CROPS));
             goals.add(new HarvestCropsGoal(entity));
         }
     }, MoeTags.FARMING_TOOLS),
     MELEE_WEAPONS(new State<NPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, NPCEntity entity) {
+            goals.add(new TryStuffItemGoal(entity, MoeTags.DROPPED_LOOT));
             goals.add(new HostileMobsTarget(entity));
         }
     }, MoeTags.MELEE_WEAPONS),
     MINING_TOOLS(new State<NPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, NPCEntity entity) {
+            goals.add(new TryStuffItemGoal(entity, MoeTags.DROPPED_ORES));
             goals.add(new MineOresGoal(entity));
         }
     }, MoeTags.MINING_TOOLS),
     RANGED_WEAPONS(new State<NPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, NPCEntity entity) {
+            goals.add(new TryStuffItemGoal(entity, MoeTags.DROPPED_LOOT));
             goals.add(new BowAttackGoal(entity));
         }
     }, MoeTags.RANGED_WEAPONS);
