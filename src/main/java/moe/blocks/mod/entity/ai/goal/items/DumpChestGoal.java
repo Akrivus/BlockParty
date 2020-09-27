@@ -4,6 +4,7 @@ import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
 import moe.blocks.mod.entity.partial.CharacterEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -22,18 +23,18 @@ public class DumpChestGoal extends AbstractMoveToBlockGoal<CharacterEntity> {
     @Override
     public void onArrival() {
         if (!this.canMoveTo(this.pos, this.state)) { return; }
-        IInventory inv = HopperTileEntity.getInventoryAtPosition(this.world, this.pos);
-        for (int x = 0; x < this.entity.getCupSize().getSize(); ++x) {
-            ItemStack bra = this.entity.getBrassiere().getStackInSlot(x);
+        IInventory chest = HopperTileEntity.getInventoryAtPosition(this.world, this.pos);
+        Inventory inventory = this.entity.getBrassiere();
+        for (int x = 0; x < inventory.getSizeInventory(); ++x) {
+            ItemStack bra = inventory.getStackInSlot(x);
             if (bra.isEmpty()) { continue; }
-            for (int y = 0; y < inv.getSizeInventory(); ++y) {
-                ItemStack stack = inv.getStackInSlot(y);
-                if (stack.getItem() == bra.getItem()) {
+            for (int y = 0; y < chest.getSizeInventory(); ++y) {
+                ItemStack stack = chest.getStackInSlot(y);
+                if (stack.getItem() == bra.getItem() || stack.isEmpty()) {
                     ItemStack contents = new ItemStack(bra.getItem(), stack.getCount() + bra.getCount());
-                    inv.setInventorySlotContents(y, contents);
+                    chest.setInventorySlotContents(y, contents);
                     bra.setCount(contents.getMaxStackSize() - contents.getCount());
-                } else if (stack.isEmpty()) {
-                    inv.setInventorySlotContents(y, bra.split(bra.getCount()));
+                    break;
                 }
             }
         }

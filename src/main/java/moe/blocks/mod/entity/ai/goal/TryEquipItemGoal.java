@@ -26,18 +26,6 @@ public class TryEquipItemGoal<E extends NPCEntity> extends AbstractMoveToEntityG
     }
 
     @Override
-    public void startExecuting() {
-        this.entity.setSneaking(true);
-        super.startExecuting();
-    }
-
-    @Override
-    public void resetTask() {
-        this.entity.setSneaking(false);
-        super.resetTask();
-    }
-
-    @Override
     public void onArrival() {
         if (this.entity.tryEquipItem(this.target.getItem())) {
             this.entity.onItemPickup(this.target, this.target.getItem().getCount());

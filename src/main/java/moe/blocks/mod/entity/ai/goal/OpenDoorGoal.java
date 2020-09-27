@@ -39,7 +39,7 @@ public class OpenDoorGoal extends Goal {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return !this.hasStoppedDoorInteraction && this.timeUntilClosed > 0;
+        return !this.hasStoppedDoorInteraction && --this.timeUntilClosed > 0;
     }
 
     @Override
@@ -75,18 +75,14 @@ public class OpenDoorGoal extends Goal {
 
     @Override
     public void tick() {
-        if (this.hasStoppedDoorInteraction) {
-            --this.timeUntilClosed;
-        } else {
-            float dX = (float) ((this.pos.getX() + 0.5F) - this.entity.getPosX());
-            float dZ = (float) ((this.pos.getZ() + 0.5F) - this.entity.getPosZ());
-            float dD = this.x * dX + this.z * dZ;
-            this.hasStoppedDoorInteraction = dD < 0.0F;
-        }
+        float dX = (float) ((this.pos.getX() + 0.5F) - this.entity.getPosX());
+        float dZ = (float) ((this.pos.getZ() + 0.5F) - this.entity.getPosZ());
+        float dD = this.x * dX + this.z * dZ;
+        this.hasStoppedDoorInteraction = dD < 0.0F;
     }
 
     public static boolean canOpenDoor(World world, BlockPos pos) {
         BlockState state = world.getBlockState(pos);
-        return state.getBlock().isIn(MoeTags.OPENABLE_DOORS);
+        return state.getBlock().isIn(MoeTags.DOORS);
     }
 }

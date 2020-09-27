@@ -21,10 +21,10 @@ public abstract class BlockBasedState extends State<MoeEntity> {
     public State start(MoeEntity entity) {
         BlockState block = entity.getBlockData();
         entity.getAttribute(Attributes.ARMOR).applyNonPersistentModifier(this.getArmorModifier(entity, block));
-        entity.setScale(block.isIn(MoeTags.FULLSIZED_MOES) ? 1.0F : this.getBlockVolume(entity));
+        entity.setScale(block.isIn(MoeTags.FULLSIZED) ? 1.0F : this.getBlockVolume(entity));
         entity.setPathPriority(PathNodeType.DAMAGE_FIRE, entity.isImmuneToFire() ? 0.0F : -1.0F);
         entity.setPathPriority(PathNodeType.DANGER_FIRE, entity.isImmuneToFire() ? 0.0F : -1.0F);
-        entity.setCanFly(block.isIn(MoeTags.WINGED_MOES));
+        entity.setCanFly(block.isIn(MoeTags.WINGED));
         entity.setCupSize(this.cupSize);
         return super.start(entity);
     }

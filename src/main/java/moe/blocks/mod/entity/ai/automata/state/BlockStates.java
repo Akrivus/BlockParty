@@ -4,6 +4,8 @@ import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.entity.ai.automata.BlockBasedState;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
+import moe.blocks.mod.entity.ai.goal.TryStuffItemGoal;
+import moe.blocks.mod.entity.ai.goal.blocks.OpenChestGoal;
 import moe.blocks.mod.entity.partial.CharacterEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -16,6 +18,25 @@ public enum BlockStates {
         @Override
         public void apply(List<IStateGoal> goals, MoeEntity entity) {
 
+        }
+    }),
+    CHEST(new BlockBasedState(CharacterEntity.CupSize.DD) {
+        @Override
+        public void apply(List<IStateGoal> goals, MoeEntity entity) {
+            goals.add(new OpenChestGoal(entity));
+        }
+    }),
+    TRAPPED_CHEST(new BlockBasedState(CharacterEntity.CupSize.D) {
+        @Override
+        public void apply(List<IStateGoal> goals, MoeEntity entity) {
+            goals.add(new OpenChestGoal(entity));
+        }
+    }),
+    HOPPER(new BlockBasedState(CharacterEntity.CupSize.C) {
+        @Override
+        public void apply(List<IStateGoal> goals, MoeEntity entity) {
+            goals.add(new TryStuffItemGoal<>(entity, stack -> true));
+            goals.add(new OpenChestGoal(entity));
         }
     });
 

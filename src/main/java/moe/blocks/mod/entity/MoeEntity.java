@@ -38,7 +38,7 @@ public class MoeEntity extends CharacterEntity {
     public static final DataParameter<Float> SCALE = EntityDataManager.createKey(MoeEntity.class, DataSerializers.FLOAT);
     protected CompoundNBT extraBlockData = new CompoundNBT();
 
-    public MoeEntity(EntityType<MoeEntity> type, World world) {
+    public MoeEntity(EntityType<? extends MoeEntity> type, World world) {
         super(type, world);
     }
 
@@ -100,7 +100,7 @@ public class MoeEntity extends CharacterEntity {
     }
 
     public Gender getGender() {
-        return this.getBlockData().isIn(MoeTags.MALE_MOES) ? Gender.MASCULINE : Gender.FEMININE;
+        return this.getBlockData().isIn(MoeTags.MALE) ? Gender.MASCULINE : Gender.FEMININE;
     }
 
     @Override
@@ -118,8 +118,8 @@ public class MoeEntity extends CharacterEntity {
 
     @Override
     public String getHonorific() {
-        if (this.getBlockData().isIn(MoeTags.FULLSIZED_MOES)) { return super.getHonorific(); }
-        if (this.getBlockData().isIn(MoeTags.BABY_MOES)) { return "tan"; }
+        if (this.getBlockData().isIn(MoeTags.FULLSIZED)) { return super.getHonorific(); }
+        if (this.getBlockData().isIn(MoeTags.BABY)) { return "tan"; }
         return this.getScale() < 1.0F ? "tan" : super.getHonorific();
     }
 
@@ -152,7 +152,7 @@ public class MoeEntity extends CharacterEntity {
     }
 
     public boolean isBlockGlowing() {
-        return this.getBlockData().isIn(MoeTags.GLOWING_MOES);
+        return this.getBlockData().isIn(MoeTags.GLOWING);
     }
 
     public float[] getEyeColor() {

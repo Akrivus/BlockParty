@@ -13,7 +13,6 @@ public class TryStuffItemGoal<E extends NPCEntity> extends TryEquipItemGoal<E> {
 
     public TryStuffItemGoal(E entity, Predicate<ItemStack> check) {
         super(entity, check);
-        if (entity instanceof CharacterEntity) { this.character = (CharacterEntity) entity; }
     }
 
     public TryStuffItemGoal(E entity, ITag.INamedTag<Item> tag) {

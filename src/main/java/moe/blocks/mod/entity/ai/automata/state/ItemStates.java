@@ -3,11 +3,14 @@ package moe.blocks.mod.entity.ai.automata.state;
 import moe.blocks.mod.entity.ai.automata.BlankState;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
+import moe.blocks.mod.entity.ai.goal.SetHomingDistanceGoal;
 import moe.blocks.mod.entity.ai.goal.TryStuffItemGoal;
 import moe.blocks.mod.entity.ai.goal.attack.BowAttackGoal;
 import moe.blocks.mod.entity.ai.goal.items.HarvestCropsGoal;
 import moe.blocks.mod.entity.ai.goal.items.MineOresGoal;
+import moe.blocks.mod.entity.ai.goal.items.ReplaceCropsGoal;
 import moe.blocks.mod.entity.ai.goal.target.HostileMobsTarget;
+import moe.blocks.mod.entity.partial.CharacterEntity;
 import moe.blocks.mod.entity.partial.NPCEntity;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.item.Item;
@@ -18,35 +21,45 @@ import java.util.HashMap;
 import java.util.List;
 
 public enum ItemStates {
-    DEFAULT(new BlankState()),
-    FARMING_TOOLS(new State<NPCEntity>() {
+    DEFAULT(new State<NPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, NPCEntity entity) {
-            goals.add(new TryStuffItemGoal(entity, MoeTags.DROPPED_CROPS));
-            goals.add(new HarvestCropsGoal(entity));
+            goals.add(new SetHomingDistanceGoal(entity, 16));
         }
-    }, MoeTags.FARMING_TOOLS),
-    MELEE_WEAPONS(new State<NPCEntity>() {
+    }),
+    FARMER(new State<CharacterEntity>() {
+        @Override
+        public void apply(List<IStateGoal> goals, CharacterEntity entity) {
+            goals.add(new SetHomingDistanceGoal(entity, 16));
+            goals.add(new TryStuffItemGoal(entity, MoeTags.CROPS));
+            goals.add(new HarvestCropsGoal(entity));
+            goals.add(new ReplaceCropsGoal(entity));
+        }
+    }, MoeTags.FARMER),
+    FIGHTER(new State<NPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, NPCEntity entity) {
-            goals.add(new TryStuffItemGoal(entity, MoeTags.DROPPED_LOOT));
+            goals.add(new SetHomingDistanceGoal(entity, 32));
+            goals.add(new TryStuffItemGoal(entity, MoeTags.LOOT));
             goals.add(new HostileMobsTarget(entity));
         }
-    }, MoeTags.MELEE_WEAPONS),
-    MINING_TOOLS(new State<NPCEntity>() {
+    }, MoeTags.FIGHTER),
+    MINER(new State<NPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, NPCEntity entity) {
-            goals.add(new TryStuffItemGoal(entity, MoeTags.DROPPED_ORES));
+            goals.add(new SetHomingDistanceGoal(entity, 64));
+            goals.add(new TryStuffItemGoal(entity, MoeTags.ORES));
             goals.add(new MineOresGoal(entity));
         }
-    }, MoeTags.MINING_TOOLS),
-    RANGED_WEAPONS(new State<NPCEntity>() {
+    }, MoeTags.MINER),
+    ARCHER(new State<NPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, NPCEntity entity) {
-            goals.add(new TryStuffItemGoal(entity, MoeTags.DROPPED_LOOT));
+            goals.add(new SetHomingDistanceGoal(entity, 32));
+            goals.add(new TryStuffItemGoal(entity, MoeTags.LOOT));
             goals.add(new BowAttackGoal(entity));
         }
-    }, MoeTags.RANGED_WEAPONS);
+    }, MoeTags.ARCHER);
 
     public final State state;
 

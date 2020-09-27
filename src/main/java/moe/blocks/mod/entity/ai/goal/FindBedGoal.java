@@ -1,29 +1,30 @@
-package moe.blocks.mod.entity.ai.goal.sleep;
+package moe.blocks.mod.entity.ai.goal;
 
 import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
 import moe.blocks.mod.entity.partial.NPCEntity;
 import net.minecraft.block.BedBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.properties.BedPart;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.EnumSet;
+import java.util.Optional;
 
 public class FindBedGoal extends AbstractMoveToBlockGoal<NPCEntity> {
     public FindBedGoal(NPCEntity entity) {
-        super(entity, 4, 8);
-        this.setMutexFlags(EnumSet.of(Flag.JUMP, Flag.LOOK, Flag.MOVE));
+        super(entity, 5, 16);
     }
 
     @Override
     public boolean shouldExecute() {
-        if (this.world.isDaytime() || this.entity.isSleeping()) { return false; }
-        if (this.entity.isWithinHomeDistanceCurrentPosition()) {
+        if (this.world.isDaytime()) { return false; }
+        if (this.entity.getHomeDistance() < 256) {
             this.pos = this.entity.getHomePosition();
             if (this.canMoveTo(this.pos, this.world.getBlockState(this.pos))) {
                 this.path = this.entity.getNavigator().getPathToPos(this.pos, 0);
-                return this.path != null;
+                if (this.path != null) { return true; }
             }
         }
         return super.shouldExecute();
@@ -36,7 +37,7 @@ public class FindBedGoal extends AbstractMoveToBlockGoal<NPCEntity> {
 
     @Override
     public boolean shouldContinueExecuting() {
-        if (this.world.isDaytime() || this.entity.isSleeping()) { return false; }
+        if (this.world.isDaytime()) { return false; }
         return super.shouldContinueExecuting();
     }
 
@@ -52,6 +53,6 @@ public class FindBedGoal extends AbstractMoveToBlockGoal<NPCEntity> {
 
     @Override
     public int getPriority() {
-        return 0x7;
+        return 0x9;
     }
 }

@@ -16,7 +16,7 @@ public class MineOresGoal extends AbstractMoveToBlockGoal<NPCEntity> {
 
     @Override
     protected boolean isHoldingCorrectItem(ItemStack stack) {
-        return stack.getItem().isIn(MoeTags.MINING_TOOLS);
+        return stack.getItem().isIn(MoeTags.MINER);
     }
 
     @Override

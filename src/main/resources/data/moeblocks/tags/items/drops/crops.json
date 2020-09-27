@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "#moeblocks:drops/seeds",
+    "minecraft:beetroot",
+    "minecraft:melon_slice",
+    "minecraft:poisonous_potato",
+    "minecraft:pumpkin",
+    "minecraft:wheat"
+  ]
+}

@@ -29,6 +29,7 @@ public class Yearbooks extends WorldSavedData {
         if (instance != null) {
             instance.books.forEach((uuid, book) -> book.setPageCautiously(entity, uuid));
             instance.cells.put(entity.getUniqueID(), entity.getPosition());
+            instance.markDirty();
         }
     }
 

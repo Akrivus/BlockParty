@@ -28,7 +28,7 @@ public class HarvestCropsGoal extends AbstractMoveToBlockGoal<NPCEntity> {
     public boolean canMoveTo(BlockPos pos, BlockState state) {
         Block block = state.getBlock();
         if (block instanceof NetherWartBlock) { return state.get(NetherWartBlock.AGE) == 3; }
-        if (block instanceof BeetrootBlock) { return state.get(BeetrootBlock.AGE) == 3; }
+        if (block instanceof BeetrootBlock) { return state.get(BeetrootBlock.BEETROOT_AGE) == 3; }
         if (block instanceof CropsBlock) { return state.get(CropsBlock.AGE) == 7; }
         return block == Blocks.MELON || block == Blocks.PUMPKIN;
     }

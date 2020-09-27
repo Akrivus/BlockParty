@@ -9,7 +9,8 @@ import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.ai.automata.state.Deres;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
 import moe.blocks.mod.entity.ai.goal.FollowTargetGoal;
-import moe.blocks.mod.entity.ai.goal.WaitGoal;
+import moe.blocks.mod.entity.ai.goal.LookAtInteractiveGoal;
+import moe.blocks.mod.entity.ai.goal.TravelGoal;
 import moe.blocks.mod.util.sort.EntityDistance;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.*;
@@ -57,8 +58,9 @@ public abstract class InteractEntity extends NPCEntity {
 
     @Override
     public void registerGoals() {
-        this.goalSelector.addGoal(0x1, new WaitGoal(this));
-        this.goalSelector.addGoal(0x7, new FollowTargetGoal(this));
+        this.goalSelector.addGoal(0x1, new LookAtInteractiveGoal(this));
+        this.goalSelector.addGoal(0x6, new FollowTargetGoal(this));
+        this.goalSelector.addGoal(0x9, new TravelGoal(this));
         super.registerGoals();
     }
 
@@ -113,14 +115,17 @@ public abstract class InteractEntity extends NPCEntity {
     @Override
     public void livingTick() {
         super.livingTick();
-        if (this.isSleeping()) {
-            this.setMotion(Vector3d.ZERO);
-            this.addStress(-0.001F);
-        } else if (this.isLocal()) {
+        this.getAnimation().tick(this);
+        if (this.isLocal()) {
             if (--this.timeUntilEmotionExpires < 0) { this.setEmotion(Emotions.NORMAL, 24000); }
             this.world.getEntitiesWithinAABB(PlayerEntity.class, this.getBoundingBox().expand(8.0F, 4.0F, 8.0F)).stream().sorted(new EntityDistance(this)).forEach(player -> {
                 if (this.isBeingWatchedBy(player)) { this.setStareTarget(player); }
             });
+        }
+        if (this.isSleeping()) {
+            if (this.world.isDaytime()) { this.wakeUp(); }
+            this.setMotion(Vector3d.ZERO);
+            this.addStress(-0.001F);
         }
     }
 
@@ -226,7 +231,7 @@ public abstract class InteractEntity extends NPCEntity {
     @Override
     public void startSleeping(BlockPos pos) {
         this.timeUntilEmotionExpires = 0;
-        this.setHomePosAndDistance(pos, 96);
+        this.setHomePosition(pos);
         super.startSleeping(pos);
     }
 
@@ -267,14 +272,9 @@ public abstract class InteractEntity extends NPCEntity {
     }
 
     @Override
-    public void tick() {
-        super.tick();
-        if (this.isRemote()) { this.getAnimation().tick(this); }
-    }
-
-    @Override
     public ILivingEntityData onInitialSpawn(IServerWorld world, DifficultyInstance difficulty, SpawnReason reason, ILivingEntityData spawnData, CompoundNBT compound) {
         ILivingEntityData data = super.onInitialSpawn(world, difficulty, reason, spawnData, compound);
+        this.setHomePosition(this.getPosition());
         this.setBloodType(BloodTypes.weigh(this.rand));
         this.resetAnimationState();
         return data;

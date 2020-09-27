@@ -109,7 +109,7 @@ public class Relationship {
     }
 
     public enum Actions {
-        FOLLOW(2.0F), FIGHT(3.0F), TELEPORT(4.0F);
+        FOLLOW(2.0F), FIGHT(3.0F), TELEPORT(4.0F), LOOK_IN_BRA(6.0F);
 
         private final float min;
 

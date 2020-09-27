@@ -1,17 +1,11 @@
 {
   "replace": false,
   "values": [
-    "#minecraft:arrows",
-    "#moeblocks:breeding_tools",
-    "#moeblocks:farming_tools",
-    "#moeblocks:melee_weapons",
-    "#moeblocks:mining_tools",
-    "#moeblocks:ranged_weapons",
-    "minecraft:egg",
-    "minecraft:ender_pearl",
-    "minecraft:potion",
-    "minecraft:lingering_potion",
-    "minecraft:snowball",
-    "minecraft:splash_potion"
+    "#moeblocks:tools/archer",
+    "#moeblocks:tools/breeder",
+    "#moeblocks:tools/farmer",
+    "#moeblocks:tools/fighter",
+    "#moeblocks:tools/miner",
+    "#moeblocks:tools/offhand"
   ]
 }

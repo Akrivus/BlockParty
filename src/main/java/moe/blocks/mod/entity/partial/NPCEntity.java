@@ -4,13 +4,9 @@ import moe.blocks.mod.data.Yearbooks;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.ai.automata.state.ItemStates;
-import moe.blocks.mod.entity.ai.goal.AvoidTargetGoal;
-import moe.blocks.mod.entity.ai.goal.OpenDoorGoal;
-import moe.blocks.mod.entity.ai.goal.TryEquipItemGoal;
+import moe.blocks.mod.entity.ai.goal.*;
 import moe.blocks.mod.entity.ai.goal.attack.BasicAttackGoal;
 import moe.blocks.mod.entity.ai.goal.items.ConsumeGoal;
-import moe.blocks.mod.entity.ai.goal.sleep.FindBedGoal;
-import moe.blocks.mod.entity.ai.goal.sleep.WakeUpGoal;
 import moe.blocks.mod.entity.ai.goal.target.RevengeTarget;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeTags;
@@ -42,6 +38,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -78,15 +75,15 @@ public class NPCEntity extends CreatureEntity {
     @Override
     protected void registerGoals() {
         this.targetSelector.addGoal(0x1, new RevengeTarget(this));
-        this.goalSelector.addGoal(0x1, new WakeUpGoal(this));
-        this.goalSelector.addGoal(0x2, new SwimGoal(this));
-        this.goalSelector.addGoal(0x2, new OpenDoorGoal(this));
-        this.goalSelector.addGoal(0x3, new BasicAttackGoal(this));
-        this.goalSelector.addGoal(0x4, new ConsumeGoal(this));
-        this.goalSelector.addGoal(0x5, new AvoidTargetGoal(this));
-        this.goalSelector.addGoal(0x6, new TryEquipItemGoal<>(this, (stack) -> stack.isFood()));
-        this.goalSelector.addGoal(0x6, new TryEquipItemGoal<>(this));
-        this.goalSelector.addGoal(0x9, new FindBedGoal(this));
+        this.goalSelector.addGoal(0x0, new OpenDoorGoal(this));
+        this.goalSelector.addGoal(0x0, new SleepGoal(this));
+        this.goalSelector.addGoal(0x0, new SwimGoal(this));
+        this.goalSelector.addGoal(0x2, new BasicAttackGoal(this));
+        this.goalSelector.addGoal(0x3, new ConsumeGoal(this));
+        this.goalSelector.addGoal(0x4, new AvoidTargetGoal(this));
+        this.goalSelector.addGoal(0x5, new TryEquipItemGoal<>(this, (stack) -> stack.isFood()));
+        this.goalSelector.addGoal(0x5, new TryEquipItemGoal<>(this));
+        this.goalSelector.addGoal(0x8, new FindBedGoal(this));
         this.registerStates(this.states = new HashMap<>());
     }
 
@@ -213,6 +210,9 @@ public class NPCEntity extends CreatureEntity {
 
     public void setNavigator(PathNavigator navigator) {
         this.navigator = navigator;
+        if (this.navigator instanceof GroundPathNavigator) {
+            ((GroundPathNavigator) this.navigator).setBreakDoors(true);
+        }
     }
 
     public boolean canSee(Entity entity) {
@@ -365,8 +365,8 @@ public class NPCEntity extends CreatureEntity {
 
     @Override
     public void setItemStackToSlot(EquipmentSlotType slot, ItemStack stack) {
+        this.updateItemState |= (slot == EquipmentSlotType.MAINHAND && ItemStack.areItemsEqual(stack, this.getHeldItem(Hand.MAIN_HAND)));
         super.setItemStackToSlot(slot, stack);
-        this.updateItemState |= slot == EquipmentSlotType.MAINHAND;
     }
 
     @Override
@@ -454,7 +454,7 @@ public class NPCEntity extends CreatureEntity {
 
     public EquipmentSlotType getSlotForStack(ItemStack stack) {
         EquipmentSlotType slot = MobEntity.getSlotForItemStack(stack);
-        if (stack.getItem().isIn(MoeTags.OFFHAND_ITEMS) || stack.isFood()) {
+        if (stack.getItem().isIn(MoeTags.OFFHAND) || stack.isFood()) {
             slot = EquipmentSlotType.OFFHAND;
         }
         return slot;
@@ -497,5 +497,21 @@ public class NPCEntity extends CreatureEntity {
 
     public boolean isVengeful() {
         return this.ticksExisted - this.getRevengeTimer() < 500;
+    }
+
+    public ChunkPos getChunkPos() {
+        return new ChunkPos(this.getPosition());
+    }
+
+    public void setHomePosition(BlockPos pos) {
+        this.setHomePosAndDistance(pos, (int) this.getMaximumHomeDistance());
+    }
+
+    public void setHomingDistance(int distance) {
+        this.setHomePosAndDistance(this.getHomePosition(), distance);
+    }
+
+    public double getHomeDistance() {
+        return Math.sqrt(this.getDistanceSq(Vector3d.copyCentered(this.getHomePosition())));
     }
 }

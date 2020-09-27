@@ -9,7 +9,6 @@ import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
 import moe.blocks.mod.entity.ai.goal.items.DumpChestGoal;
-import moe.blocks.mod.entity.ai.goal.items.OpenChestGoal;
 import moe.blocks.mod.init.MoeItems;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -57,8 +56,7 @@ public abstract class CharacterEntity extends InteractEntity implements IInvento
 
     @Override
     public void registerGoals() {
-        this.goalSelector.addGoal(0x1, new OpenChestGoal(this));
-        this.goalSelector.addGoal(0x6, new DumpChestGoal(this));
+        this.goalSelector.addGoal(0x7, new DumpChestGoal(this));
         super.registerGoals();
     }
 
@@ -89,8 +87,8 @@ public abstract class CharacterEntity extends InteractEntity implements IInvento
     public void livingTick() {
         super.livingTick();
         this.relationships.forEach(relationship -> relationship.tick());
-        ChunkPos pos = new ChunkPos(this.getPosition());
-        if (pos != this.lastRecordedPos) {
+        ChunkPos pos = this.getChunkPos();
+        if (!pos.equals(this.lastRecordedPos)) {
             Yearbooks.sync(this);
             this.lastRecordedPos = pos;
         }

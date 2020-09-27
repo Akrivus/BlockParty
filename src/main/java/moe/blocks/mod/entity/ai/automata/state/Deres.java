@@ -23,46 +23,46 @@ public enum Deres {
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, DieEntity.Face.ONE, MoeTags.FARMING_TOOLS),
+    }, DieEntity.Face.ONE, MoeTags.FARMER),
     KUUDERE(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, DieEntity.Face.TWO, MoeTags.RANGED_WEAPONS),
+    }, DieEntity.Face.TWO, MoeTags.ARCHER),
     TSUNDERE(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, DieEntity.Face.THREE, MoeTags.MELEE_WEAPONS),
+    }, DieEntity.Face.THREE, MoeTags.FIGHTER),
     YANDERE(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, DieEntity.Face.FOUR, MoeTags.MELEE_WEAPONS),
+    }, DieEntity.Face.FOUR, MoeTags.FIGHTER),
     DEREDERE(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, DieEntity.Face.FIVE, MoeTags.BREEDING_TOOLS),
+    }, DieEntity.Face.FIVE, MoeTags.BREEDER),
     DANDERE(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, DieEntity.Face.SIX, MoeTags.MINING_TOOLS);
+    }, DieEntity.Face.SIX, MoeTags.MINER);
 
     public final State state;
     private final ITag.INamedTag<Item> tools;
 
     Deres(State state, DieEntity.Face face, ITag.INamedTag<Item> tools) {
         this.state = state;
-        MoeTags.LOVED_GIFTS.put(this, ItemTags.createOptional(new ResourceLocation(MoeMod.ID, String.format("loved_by_%s", this.name().toLowerCase()))));
-        MoeTags.LIKED_GIFTS.put(this, ItemTags.createOptional(new ResourceLocation(MoeMod.ID, String.format("liked_by_%s", this.name().toLowerCase()))));
-        MoeTags.HATED_GIFTS.put(this, ItemTags.createOptional(new ResourceLocation(MoeMod.ID, String.format("hated_by_%s", this.name().toLowerCase()))));
+        MoeTags.LOVED_GIFTS.put(this, ItemTags.createOptional(new ResourceLocation(MoeMod.ID, String.format("gifts/loved/%s", this.name().toLowerCase()))));
+        MoeTags.LIKED_GIFTS.put(this, ItemTags.createOptional(new ResourceLocation(MoeMod.ID, String.format("gifts/liked/%s", this.name().toLowerCase()))));
+        MoeTags.HATED_GIFTS.put(this, ItemTags.createOptional(new ResourceLocation(MoeMod.ID, String.format("gifts/hated/%s", this.name().toLowerCase()))));
         Registry.SET.put(face, this);
         this.tools = tools;
     }

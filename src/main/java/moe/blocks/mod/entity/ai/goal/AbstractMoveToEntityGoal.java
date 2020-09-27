@@ -25,7 +25,7 @@ public abstract class AbstractMoveToEntityGoal<E extends NPCEntity, T extends En
 
     @Override
     public boolean shouldExecute() {
-        List<T> targets = this.entity.world.getEntitiesWithinAABB(this.type, this.entity.getBoundingBox().grow(8.0D, 2.0D, 8.0D));
+        List<T> targets = this.entity.world.getLoadedEntitiesWithinAABB(this.type, this.entity.getBoundingBox().grow(8.0D, 2.0D, 8.0D));
         targets.sort(new EntityDistance(this.entity));
         for (T target : targets) {
             if (this.entity.canBeTarget(target) && this.entity.getDistance(target) > this.getSafeZone(target) && this.canMoveTo(target)) {
