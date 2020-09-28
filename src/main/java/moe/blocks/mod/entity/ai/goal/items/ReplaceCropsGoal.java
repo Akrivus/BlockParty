@@ -49,11 +49,6 @@ public class ReplaceCropsGoal extends AbstractMoveToBlockGoal<CharacterEntity> {
     }
 
     @Override
-    protected boolean isHoldingCorrectItem(ItemStack stack) {
-        return stack.getItem() instanceof HoeItem;
-    }
-
-    @Override
     public void onArrival() {
         if (this.world.setBlockState(this.pos.up(), this.plant.getPlant(this.world, this.pos))) {
             this.entity.swingArm(Hand.MAIN_HAND);

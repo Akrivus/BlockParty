@@ -11,12 +11,7 @@ import net.minecraft.util.math.BlockPos;
 public class MineOresGoal extends AbstractMoveToBlockGoal<NPCEntity> {
 
     public MineOresGoal(NPCEntity entity) {
-        super(entity, 4, 8);
-    }
-
-    @Override
-    protected boolean isHoldingCorrectItem(ItemStack stack) {
-        return stack.getItem().isIn(MoeTags.MINER);
+        super(entity, 7, 16);
     }
 
     @Override

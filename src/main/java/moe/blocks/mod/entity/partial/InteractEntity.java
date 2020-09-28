@@ -10,7 +10,9 @@ import moe.blocks.mod.entity.ai.automata.state.Deres;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
 import moe.blocks.mod.entity.ai.goal.FollowTargetGoal;
 import moe.blocks.mod.entity.ai.goal.LookAtInteractiveGoal;
-import moe.blocks.mod.entity.ai.goal.TravelGoal;
+import moe.blocks.mod.entity.ai.goal.StayHomeGoal;
+import moe.blocks.mod.entity.ai.goal.WanderGoal;
+import moe.blocks.mod.entity.ai.trigger.Trigger;
 import moe.blocks.mod.util.sort.EntityDistance;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.*;
@@ -60,7 +62,8 @@ public abstract class InteractEntity extends NPCEntity {
     public void registerGoals() {
         this.goalSelector.addGoal(0x1, new LookAtInteractiveGoal(this));
         this.goalSelector.addGoal(0x6, new FollowTargetGoal(this));
-        this.goalSelector.addGoal(0x9, new TravelGoal(this));
+        this.goalSelector.addGoal(0xA, new StayHomeGoal(this));
+        this.goalSelector.addGoal(0xB, new WanderGoal(this));
         super.registerGoals();
     }
 
@@ -98,10 +101,7 @@ public abstract class InteractEntity extends NPCEntity {
         }
     }
 
-    public void setEmotion(Emotions emotion, int timeout) {
-        this.setEmotion(emotion, timeout, null);
-    }
-
+    @Override
     public void setEmotion(Emotions emotion, int timeout, PlayerEntity entity) {
         this.dataManager.set(EMOTION, emotion.name());
         this.timeUntilEmotionExpires = timeout;
@@ -118,14 +118,10 @@ public abstract class InteractEntity extends NPCEntity {
         this.getAnimation().tick(this);
         if (this.isLocal()) {
             if (--this.timeUntilEmotionExpires < 0) { this.setEmotion(Emotions.NORMAL, 24000); }
+            Trigger.REGISTRY.forEach(trigger -> { if (--this.timeUntilTriggered < 0) { this.timeUntilTriggered = trigger.fire(this); } });
             this.world.getEntitiesWithinAABB(PlayerEntity.class, this.getBoundingBox().expand(8.0F, 4.0F, 8.0F)).stream().sorted(new EntityDistance(this)).forEach(player -> {
                 if (this.isBeingWatchedBy(player)) { this.setStareTarget(player); }
             });
-        }
-        if (this.isSleeping()) {
-            if (this.world.isDaytime()) { this.wakeUp(); }
-            this.setMotion(Vector3d.ZERO);
-            this.addStress(-0.001F);
         }
     }
 
@@ -233,6 +229,7 @@ public abstract class InteractEntity extends NPCEntity {
         this.timeUntilEmotionExpires = 0;
         this.setHomePosition(pos);
         super.startSleeping(pos);
+        this.addStress(-0.0001F);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -274,7 +271,7 @@ public abstract class InteractEntity extends NPCEntity {
     @Override
     public ILivingEntityData onInitialSpawn(IServerWorld world, DifficultyInstance difficulty, SpawnReason reason, ILivingEntityData spawnData, CompoundNBT compound) {
         ILivingEntityData data = super.onInitialSpawn(world, difficulty, reason, spawnData, compound);
-        this.setHomePosition(this.getPosition());
+        this.setHomePosAndDistance(this.getPosition(), 16);
         this.setBloodType(BloodTypes.weigh(this.rand));
         this.resetAnimationState();
         return data;
@@ -313,6 +310,12 @@ public abstract class InteractEntity extends NPCEntity {
 
     public void setFollowTarget(UUID target) {
         this.followTargetUUID = target;
+    }
+
+    @Override
+    public boolean canWander() {
+        if (this.isFollowing() || this.isInteracted()) { return false; }
+        return super.canWander();
     }
 
     @OnlyIn(Dist.CLIENT)

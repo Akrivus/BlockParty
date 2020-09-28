@@ -25,14 +25,10 @@ public class OpenDoorGoal extends Goal {
     @Override
     public boolean shouldExecute() {
         Path path = this.entity.getNavigator().getPath();
-        if (path != null && !path.isFinished() && (this.entity.collidedHorizontally || this.entity.collidedVertically)) {
-            for (int i = 0; i < Math.min(path.getCurrentPathIndex() + 2, path.getCurrentPathLength()); ++i) {
-                PathPoint point = path.getPathPointFromIndex(i);
-                this.pos = new BlockPos(point.x, point.y + 1, point.z);
-                if (this.entity.getDistanceSq(this.pos.getX(), this.entity.getPosY(), this.pos.getZ()) < 2.25D) {
-                    return canOpenDoor(this.entity.world, this.pos);
-                }
-            }
+        if (path == null || path.isFinished() || !this.entity.collidedHorizontally) { return false; }
+        for (int i = 0; i < 2; ++i) {
+            this.pos = this.entity.getPosition().offset(this.entity.getHorizontalFacing(), i);
+            if (canOpenDoor(this.entity.world, this.pos)) { return true; }
         }
         return false;
     }
@@ -78,11 +74,10 @@ public class OpenDoorGoal extends Goal {
         float dX = (float) ((this.pos.getX() + 0.5F) - this.entity.getPosX());
         float dZ = (float) ((this.pos.getZ() + 0.5F) - this.entity.getPosZ());
         float dD = this.x * dX + this.z * dZ;
-        this.hasStoppedDoorInteraction = dD < 0.0F;
+        this.hasStoppedDoorInteraction |= dD < 0.0F;
     }
 
     public static boolean canOpenDoor(World world, BlockPos pos) {
-        BlockState state = world.getBlockState(pos);
-        return state.getBlock().isIn(MoeTags.DOORS);
+        return world.getBlockState(pos).isIn(MoeTags.DOORS);
     }
 }

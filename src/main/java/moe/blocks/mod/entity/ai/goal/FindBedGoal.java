@@ -14,12 +14,12 @@ import java.util.Optional;
 
 public class FindBedGoal extends AbstractMoveToBlockGoal<NPCEntity> {
     public FindBedGoal(NPCEntity entity) {
-        super(entity, 5, 16);
+        super(entity, 7, 16);
     }
 
     @Override
     public boolean shouldExecute() {
-        if (this.world.isDaytime()) { return false; }
+        if (this.world.isDaytime() || !this.entity.canWander()) { return false; }
         if (this.entity.getHomeDistance() < 256) {
             this.pos = this.entity.getHomePosition();
             if (this.canMoveTo(this.pos, this.world.getBlockState(this.pos))) {
@@ -28,11 +28,6 @@ public class FindBedGoal extends AbstractMoveToBlockGoal<NPCEntity> {
             }
         }
         return super.shouldExecute();
-    }
-
-    @Override
-    protected boolean isHoldingCorrectItem(ItemStack stack) {
-        return true;
     }
 
     @Override

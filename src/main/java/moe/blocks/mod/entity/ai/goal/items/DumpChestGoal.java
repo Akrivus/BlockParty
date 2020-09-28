@@ -12,12 +12,8 @@ import net.minecraft.util.math.BlockPos;
 public class DumpChestGoal extends AbstractMoveToBlockGoal<CharacterEntity> {
 
     public DumpChestGoal(CharacterEntity entity) {
-        super(entity, 4, 8);
-    }
-
-    @Override
-    protected boolean isHoldingCorrectItem(ItemStack stack) {
-        return this.entity.getHomePosition().withinDistance(this.entity.getPosition(), 8.0F);
+        super(entity, 3, 8);
+        this.timeUntilNextMove = 12000;
     }
 
     @Override
@@ -34,6 +30,7 @@ public class DumpChestGoal extends AbstractMoveToBlockGoal<CharacterEntity> {
                     ItemStack contents = new ItemStack(bra.getItem(), stack.getCount() + bra.getCount());
                     chest.setInventorySlotContents(y, contents);
                     bra.setCount(contents.getMaxStackSize() - contents.getCount());
+                    inventory.setInventorySlotContents(x, bra);
                     break;
                 }
             }
@@ -44,7 +41,7 @@ public class DumpChestGoal extends AbstractMoveToBlockGoal<CharacterEntity> {
     public boolean canMoveTo(BlockPos pos, BlockState state) {
         IInventory inv = HopperTileEntity.getInventoryAtPosition(this.world, pos);
         if (inv == null) { return false; }
-        for (int x = 0; x < this.entity.getCupSize().getSize(); ++x) {
+        for (int x = 0; x < this.entity.getBrassiere().getSizeInventory(); ++x) {
             ItemStack bra = this.entity.getBrassiere().getStackInSlot(x);
             if (bra.isEmpty()) { continue; }
             boolean flag = false;
@@ -62,6 +59,6 @@ public class DumpChestGoal extends AbstractMoveToBlockGoal<CharacterEntity> {
 
     @Override
     public int getPriority() {
-        return 0x7;
+        return 0x8;
     }
 }

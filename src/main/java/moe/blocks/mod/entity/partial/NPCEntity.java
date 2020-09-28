@@ -3,11 +3,13 @@ package moe.blocks.mod.entity.partial;
 import moe.blocks.mod.data.Yearbooks;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.ai.automata.States;
+import moe.blocks.mod.entity.ai.automata.state.Emotions;
 import moe.blocks.mod.entity.ai.automata.state.ItemStates;
 import moe.blocks.mod.entity.ai.goal.*;
 import moe.blocks.mod.entity.ai.goal.attack.BasicAttackGoal;
 import moe.blocks.mod.entity.ai.goal.items.ConsumeGoal;
 import moe.blocks.mod.entity.ai.goal.target.RevengeTarget;
+import moe.blocks.mod.entity.ai.trigger.Trigger;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.BlockState;
@@ -17,6 +19,7 @@ import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.controller.FlyingMovementController;
 import net.minecraft.entity.ai.controller.MovementController;
 import net.minecraft.entity.ai.goal.SwimGoal;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.entity.projectile.ProjectileHelper;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -50,10 +53,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class NPCEntity extends CreatureEntity {
+public abstract class NPCEntity extends CreatureEntity {
     public static final DataParameter<Boolean> SITTING = EntityDataManager.createKey(NPCEntity.class, DataSerializers.BOOLEAN);
     protected HashMap<States, State> states;
     protected Consumer<NPCEntity> nextTickOp;
+    protected int timeUntilTriggered;
     protected long age;
     private float hunger = 20.0F;
     private float saturation = 5.0F;
@@ -70,6 +74,8 @@ public class NPCEntity extends CreatureEntity {
         this.setPathPriority(PathNodeType.DOOR_OPEN, 0.0F);
         this.setPathPriority(PathNodeType.DOOR_WOOD_CLOSED, 0.0F);
         this.setPathPriority(PathNodeType.TRAPDOOR, 0.0F);
+        this.setHomePosAndDistance(this.getPosition(), 16);
+        this.stepHeight = 1.0F;
     }
 
     @Override
@@ -101,6 +107,7 @@ public class NPCEntity extends CreatureEntity {
     @Override
     public void writeAdditional(CompoundNBT compound) {
         super.writeAdditional(compound);
+        compound.putLong("HomePosition", this.getHomePosition().toLong());
         compound.putFloat("Hunger", this.hunger);
         compound.putFloat("Saturation", this.saturation);
         compound.putFloat("Exhaustion", this.exhaustion);
@@ -112,6 +119,7 @@ public class NPCEntity extends CreatureEntity {
     @Override
     public void readAdditional(CompoundNBT compound) {
         super.readAdditional(compound);
+        this.setHomePosition(BlockPos.fromLong(compound.getLong("HomePosition")));
         this.hunger = compound.getFloat("Hunger");
         this.saturation = compound.getFloat("Saturation");
         this.exhaustion = compound.getFloat("Exhaustion");
@@ -499,7 +507,11 @@ public class NPCEntity extends CreatureEntity {
         return this.ticksExisted - this.getRevengeTimer() < 500;
     }
 
-    public ChunkPos getChunkPos() {
+    public boolean isAttacking() {
+        return this.canBeTarget(this.getAttackTarget());
+    }
+
+    public ChunkPos getChunkPosition() {
         return new ChunkPos(this.getPosition());
     }
 
@@ -507,11 +519,22 @@ public class NPCEntity extends CreatureEntity {
         this.setHomePosAndDistance(pos, (int) this.getMaximumHomeDistance());
     }
 
-    public void setHomingDistance(int distance) {
-        this.setHomePosAndDistance(this.getHomePosition(), distance);
-    }
-
     public double getHomeDistance() {
         return Math.sqrt(this.getDistanceSq(Vector3d.copyCentered(this.getHomePosition())));
+    }
+
+    public boolean isTimeTo() {
+        return !this.world.isDaytime();
+    }
+
+    public abstract void setEmotion(Emotions emotion, int timeout, PlayerEntity entity);
+
+    public void setEmotion(Emotions emotion, int timeout) {
+        this.setEmotion(emotion, timeout, null);
+    }
+
+    public boolean canWander() {
+        if (this.isAttacking() || this.isVengeful() || this.isSleeping()) { return false; }
+        return 16 > this.getHomeDistance() || this.getHomeDistance() > 256;
     }
 }

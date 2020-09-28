@@ -20,7 +20,7 @@ public class RevengeTarget extends AbstractStateTarget {
 
     @Override
     public boolean setTarget() {
-        return this.entity.isVengeful() && this.entity.canAttack(this.entity.getRevengeTarget());
+        return this.entity.isVengeful() && this.entity.canAttack(this.target = this.entity.getRevengeTarget());
     }
 
     @Override

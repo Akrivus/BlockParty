@@ -1,9 +1,7 @@
 package moe.blocks.mod.entity.ai.automata.state;
 
-import moe.blocks.mod.entity.ai.automata.BlankState;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
-import moe.blocks.mod.entity.ai.goal.SetHomingDistanceGoal;
 import moe.blocks.mod.entity.ai.goal.TryStuffItemGoal;
 import moe.blocks.mod.entity.ai.goal.attack.BowAttackGoal;
 import moe.blocks.mod.entity.ai.goal.items.HarvestCropsGoal;
@@ -24,13 +22,12 @@ public enum ItemStates {
     DEFAULT(new State<NPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, NPCEntity entity) {
-            goals.add(new SetHomingDistanceGoal(entity, 16));
+
         }
     }),
     FARMER(new State<CharacterEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, CharacterEntity entity) {
-            goals.add(new SetHomingDistanceGoal(entity, 16));
             goals.add(new TryStuffItemGoal(entity, MoeTags.CROPS));
             goals.add(new HarvestCropsGoal(entity));
             goals.add(new ReplaceCropsGoal(entity));
@@ -39,7 +36,6 @@ public enum ItemStates {
     FIGHTER(new State<NPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, NPCEntity entity) {
-            goals.add(new SetHomingDistanceGoal(entity, 32));
             goals.add(new TryStuffItemGoal(entity, MoeTags.LOOT));
             goals.add(new HostileMobsTarget(entity));
         }
@@ -47,7 +43,6 @@ public enum ItemStates {
     MINER(new State<NPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, NPCEntity entity) {
-            goals.add(new SetHomingDistanceGoal(entity, 64));
             goals.add(new TryStuffItemGoal(entity, MoeTags.ORES));
             goals.add(new MineOresGoal(entity));
         }
@@ -55,7 +50,6 @@ public enum ItemStates {
     ARCHER(new State<NPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, NPCEntity entity) {
-            goals.add(new SetHomingDistanceGoal(entity, 32));
             goals.add(new TryStuffItemGoal(entity, MoeTags.LOOT));
             goals.add(new BowAttackGoal(entity));
         }

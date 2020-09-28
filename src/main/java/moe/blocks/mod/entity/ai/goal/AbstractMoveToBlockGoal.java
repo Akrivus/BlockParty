@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -21,10 +22,11 @@ public abstract class AbstractMoveToBlockGoal<T extends NPCEntity> extends Goal 
     protected final World world;
     protected final int height;
     protected final int width;
+    protected int timeUntilNextMove = 100;
+    protected int timeUntilReset;
     protected Path path;
     protected BlockPos pos;
     protected BlockState state;
-    private int timeUntilReset;
 
     public AbstractMoveToBlockGoal(T entity, int height, int radius) {
         this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE));
@@ -36,16 +38,16 @@ public abstract class AbstractMoveToBlockGoal<T extends NPCEntity> extends Goal 
 
     @Override
     public boolean shouldExecute() {
-        if (++this.timeUntilReset > 100 && this.isHoldingCorrectItem(this.entity.getHeldItem(Hand.MAIN_HAND))) {
+        if (++this.timeUntilReset > this.timeUntilNextMove) {
             this.world.getProfiler().startSection("findBlocks");
             for (int y = 0; y < this.height; ++y) {
                 for (int x = 0; x < this.width; ++x) {
-                    for (int z = 0; z < this.width; ++z) { if (this.setEdgePos(x, y, z)) { break; } }
                     for (int z = 0; z < this.width; ++z) { if (this.setEdgePos(x, y, -z)) { break; } }
+                    for (int z = 0; z < this.width; ++z) { if (this.setEdgePos(x, y, z)) { break; } }
                 }
                 for (int x = 0; x < this.width; ++x) {
-                    for (int z = 0; z < this.width; ++z) { if (this.setEdgePos(-x, y, z)) { break; } }
                     for (int z = 0; z > this.width; ++z) { if (this.setEdgePos(-x, y, -z)) { break; } }
+                    for (int z = 0; z < this.width; ++z) { if (this.setEdgePos(-x, y, z)) { break; } }
                 }
             }
             this.edges.sort(new BlockDistance(this.entity));
@@ -61,10 +63,9 @@ public abstract class AbstractMoveToBlockGoal<T extends NPCEntity> extends Goal 
         return this.path != null;
     }
 
-    protected abstract boolean isHoldingCorrectItem(ItemStack stack);
-
     private boolean setEdgePos(int x, int y, int z) {
         BlockPos pos = this.entity.getPosition().add(x, y, z);
+        if (!this.entity.getChunkPosition().equals(new ChunkPos(pos))) { return false; }
         BlockState state = this.world.getBlockState(pos);
         if (state.isAir(this.world, pos)) { return false; }
         this.edges.add(pos);

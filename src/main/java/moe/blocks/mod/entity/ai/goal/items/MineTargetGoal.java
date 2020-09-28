@@ -14,7 +14,6 @@ public class MineTargetGoal extends AbstractMoveToBlockGoal<InteractEntity> {
         super(entity, 4, 8);
     }
 
-    @Override
     protected boolean isHoldingCorrectItem(ItemStack stack) {
         BlockState state = this.entity.getBlockTarget();
         if (state != null) {
@@ -42,6 +41,7 @@ public class MineTargetGoal extends AbstractMoveToBlockGoal<InteractEntity> {
 
     @Override
     public boolean canMoveTo(BlockPos pos, BlockState state) {
+        if (this.isHoldingCorrectItem(this.entity.getHeldItem(Hand.MAIN_HAND))) { return false; }
         return state.getBlock().equals(this.entity.getBlockTarget());
     }
 

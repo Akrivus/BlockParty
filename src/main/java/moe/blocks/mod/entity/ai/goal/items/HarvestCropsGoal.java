@@ -11,12 +11,7 @@ import net.minecraft.util.math.BlockPos;
 public class HarvestCropsGoal extends AbstractMoveToBlockGoal<NPCEntity> {
 
     public HarvestCropsGoal(NPCEntity entity) {
-        super(entity, 4, 8);
-    }
-
-    @Override
-    protected boolean isHoldingCorrectItem(ItemStack stack) {
-        return stack.getItem() instanceof HoeItem;
+        super(entity, 7, 16);
     }
 
     @Override

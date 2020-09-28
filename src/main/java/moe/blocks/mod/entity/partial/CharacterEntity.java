@@ -56,7 +56,7 @@ public abstract class CharacterEntity extends InteractEntity implements IInvento
 
     @Override
     public void registerGoals() {
-        this.goalSelector.addGoal(0x7, new DumpChestGoal(this));
+        this.goalSelector.addGoal(0x8, new DumpChestGoal(this));
         super.registerGoals();
     }
 
@@ -87,7 +87,7 @@ public abstract class CharacterEntity extends InteractEntity implements IInvento
     public void livingTick() {
         super.livingTick();
         this.relationships.forEach(relationship -> relationship.tick());
-        ChunkPos pos = this.getChunkPos();
+        ChunkPos pos = this.getChunkPosition();
         if (!pos.equals(this.lastRecordedPos)) {
             Yearbooks.sync(this);
             this.lastRecordedPos = pos;
@@ -212,6 +212,10 @@ public abstract class CharacterEntity extends InteractEntity implements IInvento
     public void onDeath(DamageSource cause) {
         this.syncYearbooks();
         super.onDeath(cause);
+        for (int i = 0; i < this.getBrassiere().getSizeInventory(); ++i) {
+            ItemStack stack = this.getBrassiere().getStackInSlot(i);
+            if (!stack.isEmpty()) { this.entityDropItem(stack); }
+        }
     }
 
     @Override
