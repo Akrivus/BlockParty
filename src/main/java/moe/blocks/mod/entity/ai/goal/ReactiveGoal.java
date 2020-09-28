@@ -33,7 +33,7 @@ public abstract class ReactiveGoal extends Goal implements IStateGoal {
 
     @Override
     public void resetTask() {
-        this.entity.setNextTickOp(me -> me.setNextState(States.REACTION, Reactions.NONE.state));
+        this.entity.addNextTickOp(me -> me.setNextState(States.REACTION, Reactions.NONE.state));
     }
 
     public abstract void execute();

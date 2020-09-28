@@ -47,16 +47,13 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 public abstract class NPCEntity extends CreatureEntity {
     public static final DataParameter<Boolean> SITTING = EntityDataManager.createKey(NPCEntity.class, DataSerializers.BOOLEAN);
     protected HashMap<States, State> states;
-    protected Consumer<NPCEntity> nextTickOp;
+    protected Queue<Consumer<NPCEntity>> nextTickOps = new LinkedList<>();
     protected int timeUntilTriggered;
     protected long age;
     private float hunger = 20.0F;
@@ -141,12 +138,10 @@ public abstract class NPCEntity extends CreatureEntity {
         this.updateArmSwingProgress();
         super.livingTick();
         if (this.isLocal()) {
-            ++this.age;
             if (++this.timeSinceSleep > 24000) { this.addStress(0.0005F); }
-            if (this.nextTickOp != null) {
-                this.nextTickOp.accept(this);
-                this.nextTickOp = null;
-            }
+            Consumer<NPCEntity> op = this.nextTickOps.poll();
+            if (op != null) { op.accept(this); }
+            ++this.age;
         }
     }
 
@@ -162,8 +157,8 @@ public abstract class NPCEntity extends CreatureEntity {
         states.put(States.HELD_ITEM, null);
     }
 
-    public void setNextTickOp(Consumer<NPCEntity> nextTickOp) {
-        this.nextTickOp = nextTickOp;
+    public void addNextTickOp(Consumer<NPCEntity> op) {
+        this.nextTickOps.add(op);
     }
 
     public void attackEntityFromRange(LivingEntity victim, double factor) {
@@ -373,7 +368,7 @@ public abstract class NPCEntity extends CreatureEntity {
 
     @Override
     public void setItemStackToSlot(EquipmentSlotType slot, ItemStack stack) {
-        this.updateItemState |= (slot == EquipmentSlotType.MAINHAND && ItemStack.areItemsEqual(stack, this.getHeldItem(Hand.MAIN_HAND)));
+        this.updateItemState |= (slot == EquipmentSlotType.MAINHAND);
         super.setItemStackToSlot(slot, stack);
     }
 
@@ -452,12 +447,13 @@ public abstract class NPCEntity extends CreatureEntity {
         this.updateItemState = false;
     }
 
-    public State setNextState(States key, State state) {
-        if (this.states != null) {
-            if (this.states.get(key) != null) { this.states.get(key).clean(this); }
-            return this.states.put(key, state.start(this));
-        }
-        return null;
+    public void setNextState(States key, State state) {
+        this.addNextTickOp((entity) -> {
+            if (this.states != null) {
+                if (this.states.get(key) != null) { this.states.get(key).clean(this); }
+                this.states.put(key, state.start(this));
+            }
+        });
     }
 
     public EquipmentSlotType getSlotForStack(ItemStack stack) {

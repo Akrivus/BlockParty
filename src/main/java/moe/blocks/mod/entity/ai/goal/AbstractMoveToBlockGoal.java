@@ -65,7 +65,6 @@ public abstract class AbstractMoveToBlockGoal<T extends NPCEntity> extends Goal 
 
     private boolean setEdgePos(int x, int y, int z) {
         BlockPos pos = this.entity.getPosition().add(x, y, z);
-        if (!this.entity.getChunkPosition().equals(new ChunkPos(pos))) { return false; }
         BlockState state = this.world.getBlockState(pos);
         if (state.isAir(this.world, pos)) { return false; }
         this.edges.add(pos);
