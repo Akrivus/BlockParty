@@ -314,7 +314,7 @@ public abstract class InteractEntity extends NPCEntity {
 
     @Override
     public boolean canWander() {
-        if (this.isFollowing() || this.isInteracted()) { return false; }
+        if (this.isFollowing() || this.isInteracted() || this.hasPath()) { return false; }
         return super.canWander();
     }
 

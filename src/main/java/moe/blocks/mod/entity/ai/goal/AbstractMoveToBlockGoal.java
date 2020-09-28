@@ -29,7 +29,7 @@ public abstract class AbstractMoveToBlockGoal<T extends NPCEntity> extends Goal 
     protected BlockState state;
 
     public AbstractMoveToBlockGoal(T entity, int height, int radius) {
-        this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE));
+        this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE, Flag.JUMP));
         this.entity = entity;
         this.world = entity.world;
         this.height = height;
@@ -65,6 +65,7 @@ public abstract class AbstractMoveToBlockGoal<T extends NPCEntity> extends Goal 
 
     private boolean setEdgePos(int x, int y, int z) {
         BlockPos pos = this.entity.getPosition().add(x, y, z);
+        if (!this.world.isBlockLoaded(pos)) { return false; }
         BlockState state = this.world.getBlockState(pos);
         if (state.isAir(this.world, pos)) { return false; }
         this.edges.add(pos);

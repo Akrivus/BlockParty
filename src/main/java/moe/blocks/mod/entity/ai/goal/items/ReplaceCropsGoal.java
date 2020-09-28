@@ -39,6 +39,7 @@ public class ReplaceCropsGoal extends AbstractMoveToBlockGoal<CharacterEntity> {
 
     public ReplaceCropsGoal(CharacterEntity entity) {
         super(entity, 4, 8);
+        this.timeUntilNextMove = 20;
     }
 
     @Override

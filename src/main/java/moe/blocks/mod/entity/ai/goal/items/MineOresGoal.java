@@ -12,6 +12,7 @@ public class MineOresGoal extends AbstractMoveToBlockGoal<NPCEntity> {
 
     public MineOresGoal(NPCEntity entity) {
         super(entity, 7, 16);
+        this.timeUntilNextMove = 20;
     }
 
     @Override

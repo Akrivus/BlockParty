@@ -15,7 +15,7 @@ public abstract class AbstractFollowEntityGoal<E extends NPCEntity, T extends En
     protected int timeUntilReset;
 
     public AbstractFollowEntityGoal(E entity, Class<T> type, double speed) {
-        this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE));
+        this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE, Flag.JUMP));
         this.entity = entity;
         this.type = type;
         this.speed = speed;

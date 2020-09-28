@@ -19,7 +19,7 @@ public class WanderGoal extends Goal {
 
     @Override
     public boolean shouldExecute() {
-        if (this.entity.ticksExisted % (this.entity.world.rand.nextInt(9) * 20 + 20) == 0) { return false; }
+        if (this.entity.ticksExisted % (this.entity.world.rand.nextInt(9) * 20 + 20) != 0) { return false; }
         if (!this.entity.canWander()) { return false; }
         this.pos = RandomPositionGenerator.findRandomTarget(this.entity, (int) this.entity.getHomeDistance(), 7);
         return this.pos != null && this.entity.isWithinHomeDistanceFromPosition(new BlockPos(this.pos));

@@ -12,6 +12,7 @@ public class HarvestCropsGoal extends AbstractMoveToBlockGoal<NPCEntity> {
 
     public HarvestCropsGoal(NPCEntity entity) {
         super(entity, 7, 16);
+        this.timeUntilNextMove = 20;
     }
 
     @Override
