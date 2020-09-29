@@ -14,79 +14,79 @@ public enum Emotions {
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, MoeSounds.MOE_EMOTION_ANGRY.get(), 100),
+    }, MoeSounds.MOE_YELL.get(), 100),
     BEGGING(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, MoeSounds.MOE_EMOTION_BEGGING.get(), 101),
+    }, MoeSounds.MOE_MOAN.get(), 101),
     CONFUSED(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, MoeSounds.MOE_EMOTION_CONFUSED.get(), 102),
+    }, MoeSounds.MOE_NO.get(), 102),
     CRYING(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, MoeSounds.MOE_EMOTION_CRYING.get(), 103),
+    }, MoeSounds.MOE_SOB.get(), 103),
     MISCHIEVOUS(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, MoeSounds.MOE_EMOTION_MISCHIEVOUS.get(), 104),
+    }, MoeSounds.MOE_LAUGH.get(), 104),
     EMBARRASSED(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, MoeSounds.MOE_EMOTION_EMBARRASSED.get(), 105),
+    }, MoeSounds.MOE_HURT.get(), 105),
     HAPPY(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, MoeSounds.MOE_EMOTION_HAPPY.get(), 106),
+    }, MoeSounds.MOE_LAUGH.get(), 106),
     NORMAL(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, MoeSounds.MOE_EMOTION_NORMAL.get(), 107),
+    }, MoeSounds.MOE_AMBIENT.get(), 107),
     PAINED(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, MoeSounds.MOE_EMOTION_PAINED.get(), 108),
+    }, MoeSounds.MOE_HURT.get(), 108),
     PSYCHOTIC(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, MoeSounds.MOE_EMOTION_PSYCHOTIC.get(), 109),
+    }, MoeSounds.MOE_SCREAM.get(), 109),
     SCARED(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, MoeSounds.MOE_EMOTION_SCARED.get(), 110),
+    }, MoeSounds.MOE_SCREAM.get(), 110),
     SMITTEN(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, MoeSounds.MOE_EMOTION_SMITTEN.get(), 111),
+    }, MoeSounds.MOE_MOAN.get(), 111),
     TIRED(new State<InteractEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, InteractEntity entity) {
 
         }
-    }, MoeSounds.MOE_EMOTION_TIRED.get(), 112);
+    }, MoeSounds.MOE_YAWN.get(), 112);
 
     public final State state;
     public final SoundEvent sound;

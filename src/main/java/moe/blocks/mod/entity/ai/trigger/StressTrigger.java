@@ -5,47 +5,27 @@ import moe.blocks.mod.entity.ai.automata.state.Emotions;
 import moe.blocks.mod.entity.partial.InteractEntity;
 
 public abstract class StressTrigger extends DereSpecificTrigger {
-    private final float min;
-    private final float max;
-
     public StressTrigger(int priority, float min, float max, Deres... deres) {
-        super(priority, deres);
-        this.min = min;
-        this.max = max;
-    }
-
-    @Override
-    public boolean canTrigger(InteractEntity entity) {
-        float stress = entity.getStress();
-        return this.min < stress && stress < this.max;
+        super(priority, (entity) -> min <= entity.getStress() && entity.getStress() <= max, deres);
     }
 
     public static class Emotional extends StressTrigger {
         private final Emotions emotion;
-        private final int timeout;
-        private final boolean defensive;
 
-        public Emotional(int priority, Emotions emotion, int timeout, float min, float max, boolean defensive, Deres... deres) {
+        public Emotional(int priority, Emotions emotion, float min, float max, Deres... deres) {
             super(priority, min, max, deres);
+            this.and((entity) -> entity.getEmotion() == Emotions.NORMAL);
             this.emotion = emotion;
-            this.timeout = timeout;
-            this.defensive = defensive;
-        }
-
-        @Override
-        public boolean canTrigger(InteractEntity entity) {
-            boolean defending = !this.defensive || entity.canBeTarget(entity.getRevengeTarget()) && this.defensive;
-            return super.canTrigger(entity) && defending;
         }
 
         @Override
         public void trigger(InteractEntity entity) {
-            entity.setEmotion(this.emotion, this.timeout);
+            entity.setEmotion(this.emotion, entity.getTalkInterval());
         }
 
         @Override
         public int getDelay(InteractEntity entity) {
-            return this.timeout;
+            return entity.getTalkInterval();
         }
     }
 }

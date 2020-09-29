@@ -18,7 +18,7 @@ public class SleepGoal extends Goal {
 
     @Override
     public boolean shouldExecute() {
-        return this.entity.isSleeping() && !this.entity.world.isDaytime();
+        return this.entity.isSleeping() && !this.entity.isTimeToSleep();
     }
 
     @Override

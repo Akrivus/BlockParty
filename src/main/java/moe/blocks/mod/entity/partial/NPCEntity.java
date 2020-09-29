@@ -310,6 +310,11 @@ public abstract class NPCEntity extends CreatureEntity {
         return this.canBeTarget(this.getAttackTarget()) || this.canBeTarget(this.getRevengeTarget()) || this.canBeTarget(this.getAvoidTarget());
     }
 
+    public boolean canFight() {
+        Item item = this.getHeldItem(Hand.MAIN_HAND).getItem();
+        return item.isIn(MoeTags.WEAPONS);
+    }
+
     public LivingEntity getAvoidTarget() {
         return this.avoidTarget;
     }
@@ -519,8 +524,8 @@ public abstract class NPCEntity extends CreatureEntity {
         return Math.sqrt(this.getDistanceSq(Vector3d.copyCentered(this.getHomePosition())));
     }
 
-    public boolean isTimeTo() {
-        return !this.world.isDaytime();
+    public boolean isTimeToSleep() {
+        return this.canWander() && !this.world.isDaytime();
     }
 
     public abstract void setEmotion(Emotions emotion, int timeout, PlayerEntity entity);
@@ -530,7 +535,7 @@ public abstract class NPCEntity extends CreatureEntity {
     }
 
     public boolean canWander() {
-        if (this.isAttacking() || this.isVengeful() || this.isSleeping()) { return false; }
+        if (this.isFighting() || this.isVengeful() || this.isSleeping()) { return false; }
         return 16 > this.getHomeDistance() || this.getHomeDistance() > 256;
     }
 }

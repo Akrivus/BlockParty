@@ -1,8 +1,13 @@
 {
-  "entity.moe.attack": {
+  "entity.moe.ambient": {
     "category": "player",
-    "subtitle": "subtitle.moe.attack",
+    "subtitle": "subtitle.moe.ambient",
     "sounds": [
+      "moeblocks:entity/moe1",
+      "moeblocks:entity/moe7",
+      "moeblocks:entity/moe11",
+      "moeblocks:entity/moe66",
+      "moeblocks:entity/moe69"
     ]
   },
   "entity.moe.bell.step": {
@@ -18,164 +23,138 @@
     "category": "player",
     "subtitle": "subtitle.moe.dead",
     "sounds": [
+      "moeblocks:entity/moe33",
+      "moeblocks:entity/moe34",
+      "moeblocks:entity/moe35",
+      "moeblocks:entity/moe36",
+      "moeblocks:entity/moe51",
+      "moeblocks:entity/moe52"
     ]
   },
   "entity.moe.eat": {
     "category": "player",
     "subtitle": "subtitle.moe.eat",
     "sounds": [
-      "moeblocks:entity/moe/eat1",
-      "moeblocks:entity/moe/eat2",
-      "moeblocks:entity/moe/eat3"
-    ]
-  },
-  "entity.moe.emotion.angry": {
-    "category": "player",
-    "subtitle": "subtitle.moe.emotion.angry",
-    "sounds": [
-      "moeblocks:entity/moe/angry1"
-    ]
-  },
-  "entity.moe.emotion.begging": {
-    "category": "player",
-    "subtitle": "subtitle.moe.emotion.begging",
-    "sounds": [
-      "moeblocks:entity/moe/begging1"
-    ]
-  },
-  "entity.moe.emotion.confused": {
-    "category": "player",
-    "subtitle": "subtitle.moe.emotion.confused",
-    "sounds": [
-      "moeblocks:entity/moe/confused1"
-    ]
-  },
-  "entity.moe.emotion.crying": {
-    "category": "player",
-    "subtitle": "subtitle.moe.emotion.crying",
-    "sounds": [
-    ]
-  },
-  "entity.moe.emotion.embarrassed": {
-    "category": "player",
-    "subtitle": "subtitle.moe.emotion.embarrassed",
-    "sounds": [
-    ]
-  },
-  "entity.moe.emotion.happy": {
-    "category": "player",
-    "subtitle": "subtitle.moe.emotion.happy",
-    "sounds": [
-      "moeblocks:entity/moe/happy1",
-      "moeblocks:entity/moe/happy2"
-    ]
-  },
-  "entity.moe.emotion.mischievous": {
-    "category": "player",
-    "subtitle": "subtitle.moe.emotion.mischievous",
-    "sounds": [
-      "moeblocks:entity/moe/mischievous1",
-      "moeblocks:entity/moe/mischievous2"
-    ]
-  },
-  "entity.moe.emotion.normal": {
-    "category": "player",
-    "subtitle": "subtitle.moe.emotion.normal",
-    "sounds": [
-      "moeblocks:entity/moe/normal1",
-      "moeblocks:entity/moe/normal2",
-      "moeblocks:entity/moe/normal3"
-    ]
-  },
-  "entity.moe.emotion.pained": {
-    "category": "player",
-    "subtitle": "subtitle.moe.emotion.pained",
-    "sounds": [
-      "moeblocks:entity/moe/pained1"
-    ]
-  },
-  "entity.moe.emotion.psychotic": {
-    "category": "player",
-    "subtitle": "subtitle.moe.emotion.psychotic",
-    "sounds": [
-    ]
-  },
-  "entity.moe.emotion.scared": {
-    "category": "player",
-    "subtitle": "subtitle.moe.emotion.scared",
-    "sounds": [
-    ]
-  },
-  "entity.moe.emotion.smitten": {
-    "category": "player",
-    "subtitle": "subtitle.moe.emotion.smitten",
-    "sounds": [
-    ]
-  },
-  "entity.moe.emotion.tired": {
-    "category": "player",
-    "subtitle": "subtitle.moe.emotion.tired",
-    "sounds": [
-    ]
-  },
-  "entity.moe.greet.level_1": {
-    "category": "player",
-    "subtitle": "subtitle.moe.greet.level_1",
-    "sounds": [
-      "moeblocks:entity/moe/greet1"
-    ]
-  },
-  "entity.moe.greet.level_2": {
-    "category": "player",
-    "subtitle": "subtitle.moe.greet.level_2",
-    "sounds": [
-    ]
-  },
-  "entity.moe.greet.level_3": {
-    "category": "player",
-    "subtitle": "subtitle.moe.greet.level_3",
-    "sounds": [
-    ]
-  },
-  "entity.moe.greet.level_4": {
-    "category": "player",
-    "subtitle": "subtitle.moe.greet.level_4",
-    "sounds": [
+      "moeblocks:entity/moe12",
+      "moeblocks:entity/moe13",
+      "moeblocks:entity/moe15",
+      "moeblocks:entity/moe67"
     ]
   },
   "entity.moe.hurt": {
     "category": "player",
     "subtitle": "subtitle.moe.hurt",
     "sounds": [
-      "moeblocks:entity/moe/hurt1"
+      "moeblocks:entity/moe3",
+      "moeblocks:entity/moe4",
+      "moeblocks:entity/moe5",
+      "moeblocks:entity/moe16",
+      "moeblocks:entity/moe38",
+      "moeblocks:entity/moe41",
+      "moeblocks:entity/moe42",
+      "moeblocks:entity/moe63"
+    ]
+  },
+  "entity.moe.laugh": {
+    "category": "player",
+    "subtitle": "subtitle.moe.laugh",
+    "sounds": [
+      "moeblocks:entity/moe2",
+      "moeblocks:entity/moe8",
+      "moeblocks:entity/moe10",
+      "moeblocks:entity/moe18",
+      "moeblocks:entity/moe37",
+      "moeblocks:entity/moe43"
+    ]
+  },
+  "entity.moe.moan": {
+    "category": "player",
+    "subtitle": "subtitle.moe.moan",
+    "sounds": [
+      "moeblocks:entity/moe14",
+      "moeblocks:entity/moe26",
+      "moeblocks:entity/moe27",
+      "moeblocks:entity/moe29",
+      "moeblocks:entity/moe32",
+      "moeblocks:entity/moe39",
+      "moeblocks:entity/moe48"
     ]
   },
   "entity.moe.no": {
     "category": "player",
     "subtitle": "subtitle.moe.no",
     "sounds": [
-      "moeblocks:entity/moe/no1"
+      "moeblocks:entity/moe23",
+      "moeblocks:entity/moe24",
+      "moeblocks:entity/moe25",
+      "moeblocks:entity/moe30",
+      "moeblocks:entity/moe44",
+      "moeblocks:entity/moe61"
+    ]
+  },
+  "entity.moe.scream": {
+    "category": "player",
+    "subtitle": "subtitle.moe.scream",
+    "sounds": [
+      "moeblocks:entity/moe20",
+      "moeblocks:entity/moe21",
+      "moeblocks:entity/moe22",
+      "moeblocks:entity/moe28",
+      "moeblocks:entity/moe40",
+      "moeblocks:entity/moe49"
     ]
   },
   "entity.moe.sing": {
     "category": "player",
     "subtitle": "subtitle.moe.sing",
     "sounds": [
-      "moeblocks:entity/moe/sing1"
+      "moeblocks:entity/moe50",
+      "moeblocks:entity/moe70"
     ]
   },
-  "entity.moe.thank_you": {
+  "entity.moe.sob": {
     "category": "player",
-    "subtitle": "subtitle.moe.thank_you",
+    "subtitle": "subtitle.moe.sob",
     "sounds": [
+      "moeblocks:entity/moe54",
+      "moeblocks:entity/moe55",
+      "moeblocks:entity/moe62"
+    ]
+  },
+  "entity.moe.yawn": {
+    "category": "player",
+    "subtitle": "subtitle.moe.yawn",
+    "sounds": [
+      "moeblocks:entity/moe6",
+      "moeblocks:entity/moe9",
+      "moeblocks:entity/moe19",
+      "moeblocks:entity/moe45",
+      "moeblocks:entity/moe46",
+      "moeblocks:entity/moe47"
+    ]
+  },
+  "entity.moe.yell": {
+    "category": "player",
+    "subtitle": "subtitle.moe.yell",
+    "sounds": [
+      "moeblocks:entity/moe31",
+      "moeblocks:entity/moe53",
+      "moeblocks:entity/moe56",
+      "moeblocks:entity/moe57",
+      "moeblocks:entity/moe58",
+      "moeblocks:entity/moe65",
+      "moeblocks:entity/moe71"
     ]
   },
   "entity.moe.yes": {
     "category": "player",
     "subtitle": "subtitle.moe.yes",
     "sounds": [
-      "moeblocks:entity/moe/yes1",
-      "moeblocks:entity/moe/yes2"
+      "moeblocks:entity/moe17",
+      "moeblocks:entity/moe59",
+      "moeblocks:entity/moe60",
+      "moeblocks:entity/moe64",
+      "moeblocks:entity/moe68"
     ]
   },
   "item.cell_phone.button": {

@@ -193,7 +193,7 @@ public class MoeEntity extends CharacterEntity {
     @Override
     public boolean attackEntityAsMob(Entity entity) {
         if (super.attackEntityAsMob(entity)) {
-            this.playSound(MoeSounds.MOE_ATTACK.get());
+            this.playSound(MoeSounds.MOE_YELL.get());
             return true;
         }
         return false;
@@ -207,6 +207,11 @@ public class MoeEntity extends CharacterEntity {
     @Override
     protected SoundEvent getDeathSound() {
         return MoeSounds.MOE_DEAD.get();
+    }
+
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return this.getEmotion().sound;
     }
 
     @Override

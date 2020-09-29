@@ -33,6 +33,7 @@ public class MoeTags {
     public static final ITag.INamedTag<Item> OFFHAND = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "tools/offhand"));
     public static final ITag.INamedTag<Item> ORES = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "drops/ores"));
     public static final ITag.INamedTag<Item> SEEDS = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "drops/seeds"));
+    public static final ITag.INamedTag<Item> WEAPONS = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "tools/weapons"));
 
     public static final Map<Deres, ITag.INamedTag<Item>> LOVED_GIFTS = new HashMap<>();
     public static final Map<Deres, ITag.INamedTag<Item>> LIKED_GIFTS = new HashMap<>();

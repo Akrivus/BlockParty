@@ -121,6 +121,6 @@ public class MoeBlocks {
     }
 
     public static SoundEvent getStepSound(BlockState block) {
-        return STEP_SOUNDS.getOrDefault(block, block.getSoundType().getStepSound());
+        return STEP_SOUNDS.getOrDefault(block.getBlock(), block.getSoundType().getStepSound());
     }
 }

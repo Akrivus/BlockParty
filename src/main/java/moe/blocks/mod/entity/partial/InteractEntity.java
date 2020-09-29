@@ -318,6 +318,16 @@ public abstract class InteractEntity extends NPCEntity {
         return super.canWander();
     }
 
+    public boolean isNightWatch() {
+        return this.world.getGameTime() / 24000 % 4 == this.getBloodType().ordinal();
+    }
+
+    @Override
+    public boolean isTimeToSleep() {
+        if (this.canFight() && this.isNightWatch()) { return false; }
+        return super.isTimeToSleep();
+    }
+
     @OnlyIn(Dist.CLIENT)
     protected void setParticles(IParticleData particle) {
         for (int i = 0; i < 5; ++i) {
