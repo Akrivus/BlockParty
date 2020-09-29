@@ -207,12 +207,5 @@
     "sounds": [
       "moeblocks:item/yearbook/remove_page"
     ]
-  },
-  "music_disc.pomf_pomf": {
-    "category": "record",
-    "stream": true,
-    "sounds": [
-      "moeblocks:record/pomf_pomf"
-    ]
   }
 }

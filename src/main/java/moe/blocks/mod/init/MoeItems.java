@@ -16,7 +16,6 @@ public class MoeItems {
     public static final RegistryObject<Item> KNAIFU = REGISTRY.register("knaifu", KnaifuItem::new);
     public static final RegistryObject<Item> MOE_DIE = REGISTRY.register("moe_die", MoeDieItem::new);
     public static final RegistryObject<Item> MOE_SPAWN_EGG = REGISTRY.register("moe_spawn_egg", MoeSpawnItem::new);
-    public static final RegistryObject<Item> MUSIC_DISC_POMP_POMF = REGISTRY.register("music_disc_pomf_pomf", () -> new MusicDiscItem(14, () -> MoeSounds.MUSIC_DISC_POMF_POMF.get(), new Item.Properties().maxStackSize(1).group(MoeItems.Group.INSTANCE).rarity(Rarity.EPIC)));
     public static final RegistryObject<Item> ONIGIRI = REGISTRY.register("onigiri", OnigiriItem::new);
     public static final RegistryObject<Item> OPENED_LETTER = REGISTRY.register("opened_letter", LetterItem::new);
     public static final RegistryObject<Item> PINK_BOW = REGISTRY.register("pink_bow", PinkBowItem::new);
