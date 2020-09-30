@@ -13,6 +13,7 @@ import moe.blocks.mod.entity.ai.trigger.Trigger;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -45,6 +46,8 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.*;
@@ -55,13 +58,13 @@ public abstract class NPCEntity extends CreatureEntity {
     protected HashMap<States, State> states;
     protected Queue<Consumer<NPCEntity>> nextTickOps = new LinkedList<>();
     protected int timeUntilTriggered;
+    protected int timeSinceSleep;
     protected long age;
     private float hunger = 20.0F;
     private float saturation = 5.0F;
     private float exhaustion;
     private float stress;
     private float relaxation;
-    private int timeSinceSleep;
     private LivingEntity avoidTarget;
     private int avoidTimer;
     private boolean updateItemState = true;
@@ -98,7 +101,7 @@ public abstract class NPCEntity extends CreatureEntity {
 
     @Override
     public int getTalkInterval() {
-        return 900 + this.rand.nextInt(600);
+        return 200 + this.rand.nextInt(400);
     }
 
     @Override
@@ -139,14 +142,16 @@ public abstract class NPCEntity extends CreatureEntity {
         super.livingTick();
         if (this.isLocal()) {
             if (++this.timeSinceSleep > 24000) { this.addStress(0.0005F); }
-            Consumer<NPCEntity> op = this.nextTickOps.poll();
-            if (op != null) { op.accept(this); }
             ++this.age;
         }
     }
 
+    public void setStress(float stress) {
+        this.stress = Math.max(Math.min(stress, 20.0F), 0.0F);
+    }
+
     public void addStress(float stress) {
-        this.stress = Math.min(this.stress + stress, 20.0F);
+        this.setStress(this.stress + stress);
     }
 
     public boolean isLocal() {
@@ -444,7 +449,8 @@ public abstract class NPCEntity extends CreatureEntity {
     @Override
     public void updateAITasks() {
         if (this.updateItemState) { this.updateItemState(); }
-        super.updateAITasks();
+        Consumer<NPCEntity> op = this.nextTickOps.poll();
+        if (op != null) { op.accept(this); }
     }
 
     public void updateItemState() {
@@ -534,8 +540,26 @@ public abstract class NPCEntity extends CreatureEntity {
         this.setEmotion(emotion, timeout, null);
     }
 
+    @Override
+    public void playAmbientSound() {
+        if (!this.isSleeping()) { super.playAmbientSound(); }
+    }
+
     public boolean canWander() {
         if (this.isFighting() || this.isVengeful() || this.isSleeping()) { return false; }
         return 16 > this.getHomeDistance() || this.getHomeDistance() > 256;
+    }
+
+    public boolean isThreadSafe() {
+        return this.world.getServer().getExecutionThread().equals(Thread.currentThread());
+    }
+
+    public IChunk getChunk(ChunkPos pos) {
+        return this.isThreadSafe() ? this.world.getChunk(pos.x, pos.z, ChunkStatus.FULL, false) : null;
+    }
+
+    public BlockState getBlockState(BlockPos pos) {
+        IChunk chunk = this.getChunk(new ChunkPos(pos));
+        return chunk == null ? Blocks.AIR.getDefaultState() : chunk.getBlockState(pos);
     }
 }

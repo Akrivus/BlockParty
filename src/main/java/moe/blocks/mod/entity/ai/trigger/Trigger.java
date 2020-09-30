@@ -16,7 +16,7 @@ public class Trigger {
         REGISTRY.add(new StressTrigger.Emotional(1, Emotions.SCARED, 8.0F, 12.0F, Deres.values()));
         REGISTRY.add(new StressTrigger.Emotional(1, Emotions.TIRED, 4.0F, 8.0F, Deres.values()));
         REGISTRY.add(new DereSpecificTrigger.Emotional(4, Emotions.TIRED, 20, (entity) -> entity.isTimeToSleep(), Deres.values()));
-        REGISTRY.add(new DereSpecificTrigger.Emotional(4, Emotions.NORMAL, 100, Deres.values()));
+        REGISTRY.add(new DereSpecificTrigger.Emotional(5, Emotions.NORMAL, 100, Deres.values()));
         REGISTRY.sort(AbstractTrigger::compareTo);
     }
 }

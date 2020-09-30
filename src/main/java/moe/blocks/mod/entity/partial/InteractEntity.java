@@ -117,11 +117,8 @@ public abstract class InteractEntity extends NPCEntity {
         super.livingTick();
         this.getAnimation().tick(this);
         if (this.isLocal()) {
-            if (--this.timeUntilEmotionExpires < 0) { this.setEmotion(Emotions.NORMAL, 24000); }
-            Trigger.REGISTRY.forEach(trigger -> { if (--this.timeUntilTriggered < 0) { this.timeUntilTriggered = trigger.fire(this); } });
-            this.world.getEntitiesWithinAABB(PlayerEntity.class, this.getBoundingBox().expand(8.0F, 4.0F, 8.0F)).stream().sorted(new EntityDistance(this)).forEach(player -> {
-                if (this.isBeingWatchedBy(player)) { this.setStareTarget(player); }
-            });
+            this.updateEmotionalState();
+            this.updateStareState();
         }
     }
 
@@ -132,7 +129,20 @@ public abstract class InteractEntity extends NPCEntity {
         super.registerStates(states);
     }
 
+    public void updateStareState() {
+        PlayerEntity player = this.world.getClosestPlayer(this, 8.0D);
+        if (this.isBeingWatchedBy(player)) { this.setStareTarget(player); }
+    }
+
+    public void updateEmotionalState() {
+        if (--this.timeUntilEmotionExpires < 0) { this.setEmotion(Emotions.NORMAL, this.getTalkInterval()); }
+        for (int i = 0; --this.timeUntilTriggered < 0 && i < Trigger.REGISTRY.size(); ++i) {
+            this.timeUntilTriggered = Trigger.REGISTRY.get(i).fire(this);
+        }
+    }
+
     public boolean isBeingWatchedBy(LivingEntity entity) {
+        if (!this.canBeTarget(entity)) { return false; }
         Vector3d look = entity.getLook(1.0F).normalize();
         Vector3d cast = new Vector3d(this.getPosX() - entity.getPosX(), this.getPosYEye() - entity.getPosYEye(), this.getPosZ() - entity.getPosZ());
         double distance = cast.length();
@@ -227,6 +237,7 @@ public abstract class InteractEntity extends NPCEntity {
     @Override
     public void startSleeping(BlockPos pos) {
         this.timeUntilEmotionExpires = 0;
+        this.timeSinceSleep = 0;
         this.setHomePosition(pos);
         super.startSleeping(pos);
         this.addStress(-0.0001F);

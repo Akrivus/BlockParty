@@ -55,6 +55,14 @@ public class Relationship {
         return this.love;
     }
 
+    public void setLove(float love) {
+        this.love = Math.max(Math.min(love, 20.0F), 0.0F);
+    }
+
+    public void addLove(float love) {
+        this.setLove(this.love + love);
+    }
+
     public void tick() {
         this.interactions.forEach((interaction, timeout) -> --timeout);
         if (++this.timeSinceInteraction > 24000) {
@@ -76,7 +84,7 @@ public class Relationship {
     }
 
     public ReactiveState getReaction(Interactions interaction) {
-        if (this.interactions.getOrDefault(interaction, -1) < 0) { this.love += interaction.getLove(); }
+        if (this.interactions.getOrDefault(interaction, -1) < 0) { this.addLove(interaction.getLove()); }
         this.interactions.put(interaction, interaction.getCooldown());
         return interaction.reaction.state;
     }

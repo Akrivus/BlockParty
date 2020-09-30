@@ -12,7 +12,7 @@ public abstract class DereSpecificTrigger extends AbstractTrigger {
 
     public DereSpecificTrigger(int priority, Predicate<InteractEntity> function, Deres... deres) {
         super(priority, (entity) -> Arrays.stream(deres).anyMatch(dere -> entity.getDere() == dere));
-        this.function.and(function);
+        this.setAdditionalFunction(function);
         this.deres = deres;
     }
 
@@ -28,7 +28,7 @@ public abstract class DereSpecificTrigger extends AbstractTrigger {
 
         public Emotional(int priority, Emotions emotion, int timeout, Predicate<InteractEntity> function, Deres... deres) {
             this(priority, emotion, timeout, deres);
-            this.function.and(function);
+            this.setAdditionalFunction(function);
         }
 
         @Override

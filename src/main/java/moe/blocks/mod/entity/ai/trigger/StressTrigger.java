@@ -6,7 +6,7 @@ import moe.blocks.mod.entity.partial.InteractEntity;
 
 public abstract class StressTrigger extends DereSpecificTrigger {
     public StressTrigger(int priority, float min, float max, Deres... deres) {
-        super(priority, (entity) -> min <= entity.getStress() && entity.getStress() <= max, deres);
+        super(priority, (entity) -> min < entity.getStress() && entity.getStress() < max, deres);
     }
 
     public static class Emotional extends StressTrigger {
@@ -14,7 +14,7 @@ public abstract class StressTrigger extends DereSpecificTrigger {
 
         public Emotional(int priority, Emotions emotion, float min, float max, Deres... deres) {
             super(priority, min, max, deres);
-            this.and((entity) -> entity.getEmotion() == Emotions.NORMAL);
+            this.setAdditionalFunction((entity) -> entity.getEmotion() == Emotions.NORMAL);
             this.emotion = emotion;
         }
 

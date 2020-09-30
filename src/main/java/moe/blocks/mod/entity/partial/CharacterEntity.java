@@ -89,7 +89,7 @@ public abstract class CharacterEntity extends InteractEntity implements IInvento
         this.relationships.forEach(relationship -> relationship.tick());
         ChunkPos pos = this.getChunkPosition();
         if (!pos.equals(this.lastRecordedPos)) {
-            Yearbooks.sync(this);
+            this.syncYearbooks();
             this.lastRecordedPos = pos;
         }
     }
@@ -116,17 +116,15 @@ public abstract class CharacterEntity extends InteractEntity implements IInvento
     @Override
     public ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
         if (stack.getItem() == MoeItems.CELL_PHONE.get() || stack.getItem() == MoeItems.YEARBOOK.get()) { return ActionResultType.FAIL; }
-        if (this.isLocal()) {
-            if (player.isSneaking()) {
-                Relationship relationship = this.getRelationshipWith(player);
-                this.setNextState(States.REACTION, relationship.getReaction(Interactions.HEADPAT));
-                if (relationship.can(Relationship.Actions.FOLLOW)) {
-                    this.setFollowTarget(player.equals(this.getFollowTarget()) ? null : player);
-                }
+        if (this.isRemote()) { return ActionResultType.PASS; }
+        if (player.isSneaking()) {
+            Relationship relationship = this.getRelationshipWith(player);
+            this.setNextState(States.REACTION, relationship.getReaction(Interactions.HEADPAT));
+            if (relationship.can(Relationship.Actions.FOLLOW)) {
+                this.setFollowTarget(player.equals(this.getFollowTarget()) ? null : player);
             }
-            return ActionResultType.SUCCESS;
         }
-        return ActionResultType.PASS;
+        return ActionResultType.SUCCESS;
     }
 
     public Relationship getRelationshipWith(PlayerEntity player) {
@@ -157,7 +155,7 @@ public abstract class CharacterEntity extends InteractEntity implements IInvento
     }
 
     public void syncYearbooks() {
-        if (this.isLocal()) { Yearbooks.sync(this); }
+        if (this.isLocal() && !this.isInYearbook) { Yearbooks.sync(this); }
     }
 
     @Override
@@ -216,6 +214,18 @@ public abstract class CharacterEntity extends InteractEntity implements IInvento
             ItemStack stack = this.getBrassiere().getStackInSlot(i);
             if (!stack.isEmpty()) { this.entityDropItem(stack); }
         }
+    }
+
+    @Override
+    public void setHealth(float health) {
+        this.syncYearbooks();
+        super.setHealth(health);
+    }
+
+    @Override
+    public void setStress(float stress) {
+        this.syncYearbooks();
+        super.setStress(stress);
     }
 
     @Override

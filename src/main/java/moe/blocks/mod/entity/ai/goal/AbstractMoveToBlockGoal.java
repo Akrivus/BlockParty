@@ -11,6 +11,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.IChunk;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -38,6 +40,7 @@ public abstract class AbstractMoveToBlockGoal<T extends NPCEntity> extends Goal 
 
     @Override
     public boolean shouldExecute() {
+        if (!this.entity.isThreadSafe()) { return false; }
         if (++this.timeUntilReset > this.timeUntilNextMove) {
             this.world.getProfiler().startSection("findBlocks");
             for (int y = 0; y < this.height; ++y) {
@@ -65,20 +68,22 @@ public abstract class AbstractMoveToBlockGoal<T extends NPCEntity> extends Goal 
 
     private boolean setEdgePos(int x, int y, int z) {
         BlockPos pos = this.entity.getPosition().add(x, y, z);
-        if (!this.world.isBlockLoaded(pos)) { return false; }
-        BlockState state = this.world.getBlockState(pos);
-        if (state.isAir(this.world, pos)) { return false; }
+        IChunk chunk = this.entity.getChunk(new ChunkPos(pos));
+        if (chunk == null) { return false; }
+        BlockState state = chunk.getBlockState(pos);
+        if (state.isAir(chunk, pos)) { return false; }
         this.edges.add(pos);
-        return state.isOpaqueCube(this.world, pos);
+        return state.isOpaqueCube(chunk, pos);
     }
 
     @Override
     public boolean shouldContinueExecuting() {
-        return --this.timeUntilReset > 0 && this.entity.hasPath();
+        return this.entity.isThreadSafe() && --this.timeUntilReset > 0 && this.entity.hasPath();
     }
 
     @Override
     public void startExecuting() {
+        if (!this.entity.isThreadSafe()) { return; }
         this.entity.getLookController().setLookPosition(this.pos.getX(), this.pos.getY(), this.pos.getZ());
         this.entity.getNavigator().setPath(this.path, 1.0F);
     }
@@ -91,7 +96,7 @@ public abstract class AbstractMoveToBlockGoal<T extends NPCEntity> extends Goal 
 
     @Override
     public void tick() {
-        if (this.entity.getPosition().withinDistance(this.pos, this.entity.getBlockStrikingDistance())) { this.onArrival(); }
+        if (this.entity.isThreadSafe() && this.entity.getPosition().withinDistance(this.pos, this.entity.getBlockStrikingDistance())) { this.onArrival(); }
     }
 
     public abstract void onArrival();

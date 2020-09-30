@@ -25,7 +25,7 @@ public abstract class AbstractTrigger implements Comparable<AbstractTrigger> {
 
     public abstract int getDelay(InteractEntity entity);
 
-    public void and(Predicate<InteractEntity> function) {
+    public void setAdditionalFunction(Predicate<InteractEntity> function) {
         this.function = this.function.and(function);
     }
 
