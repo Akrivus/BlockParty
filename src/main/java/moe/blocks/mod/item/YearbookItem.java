@@ -22,8 +22,7 @@ public class YearbookItem extends Item {
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
-        Yearbooks.Book book = Yearbooks.getBook(player);
-        if (!world.isRemote()) { MoeMessages.send(player, new SOpenYearbook(hand, book, 0)); }
+        if (!world.isRemote()) { MoeMessages.send(player, new SOpenYearbook(hand, Yearbooks.getBook(player), 0)); }
         return ActionResult.resultSuccess(player.getHeldItem(hand));
     }
 

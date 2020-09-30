@@ -37,10 +37,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public abstract class CharacterEntity extends InteractEntity implements IInventoryChangedListener, INamedContainerProvider {
     protected final List<Relationship> relationships = new ArrayList<>();
@@ -132,7 +129,10 @@ public abstract class CharacterEntity extends InteractEntity implements IInvento
     }
 
     public Relationship getRelationshipWith(UUID uuid) {
-        return this.relationships.stream().filter(relationship -> relationship.isUUID(uuid)).findFirst().orElse(new Relationship(uuid));
+        Optional<Relationship> optional = this.relationships.stream().filter(index -> index.isUUID(uuid)).findFirst();
+        if (optional.isPresent()) { return optional.get(); }
+        this.relationships.add(new Relationship(uuid));
+        return this.getRelationshipWith(uuid);
     }
 
     public CupSize getCupSize() {

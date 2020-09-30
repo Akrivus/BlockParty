@@ -13,8 +13,8 @@ import java.util.UUID;
 
 public class Relationship {
     protected final Map<Interactions, Integer> interactions = new HashMap<>();
+    protected Phases phase = Phases.INTRODUCTION;
     protected UUID playerUUID;
-    protected Phases phase;
     protected float love;
     protected int timeSinceInteraction;
 

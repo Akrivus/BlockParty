@@ -61,9 +61,7 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
     }
 
     public String getHealth(MoeEntity entity) {
-        int health = (int) Math.ceil(entity.getHealth());
-        int max = (int) Math.ceil(entity.getMaxHealth());
-        return String.format("%d / %d", health, max);
+        return String.format("%d / %d", (int) entity.getHealth(), (int) entity.getMaxHealth());
     }
 
     @Override
