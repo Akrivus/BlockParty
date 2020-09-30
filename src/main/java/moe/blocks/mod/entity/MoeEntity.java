@@ -191,15 +191,6 @@ public class MoeEntity extends CharacterEntity {
     }
 
     @Override
-    public boolean attackEntityAsMob(Entity entity) {
-        if (super.attackEntityAsMob(entity)) {
-            this.playSound(MoeSounds.MOE_YELL.get());
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     protected SoundEvent getHurtSound(DamageSource source) {
         return MoeSounds.MOE_HURT.get();
     }
@@ -207,11 +198,6 @@ public class MoeEntity extends CharacterEntity {
     @Override
     protected SoundEvent getDeathSound() {
         return MoeSounds.MOE_DEAD.get();
-    }
-
-    @Override
-    protected SoundEvent getAmbientSound() {
-        return this.getEmotion().sound;
     }
 
     @Override
@@ -228,6 +214,20 @@ public class MoeEntity extends CharacterEntity {
     @Override
     protected float getStandingEyeHeight(Pose pose, EntitySize size) {
         return 0.908203125F * this.getScale();
+    }
+
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return this.getEmotion().sound;
+    }
+
+    @Override
+    public boolean attackEntityAsMob(Entity entity) {
+        if (super.attackEntityAsMob(entity)) {
+            this.playSound(MoeSounds.MOE_YELL.get());
+            return true;
+        }
+        return false;
     }
 
     @Override

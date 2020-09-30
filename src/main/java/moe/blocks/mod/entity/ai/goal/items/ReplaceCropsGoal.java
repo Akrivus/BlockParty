@@ -2,16 +2,17 @@ package moe.blocks.mod.entity.ai.goal.items;
 
 import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
 import moe.blocks.mod.entity.partial.CharacterEntity;
-import moe.blocks.mod.entity.partial.NPCEntity;
 import moe.blocks.mod.init.MoeTags;
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.PlantType;
@@ -20,10 +21,9 @@ import net.minecraftforge.common.Tags;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 
 public class ReplaceCropsGoal extends AbstractMoveToBlockGoal<CharacterEntity> {
-    private static Map<PlantType, BiPredicate<World, BlockPos>> blocksForPlant = new HashMap<>();
+    private static final Map<PlantType, BiPredicate<World, BlockPos>> blocksForPlant = new HashMap<>();
 
     static {
         blocksForPlant.put(PlantType.CAVE, (world, pos) -> world.getBlockState(pos).getBlock().equals(Blocks.MYCELIUM) || world.getLight(pos) < 12);
@@ -74,14 +74,14 @@ public class ReplaceCropsGoal extends AbstractMoveToBlockGoal<CharacterEntity> {
         return false;
     }
 
-    @Override
-    public int getPriority() {
-        return 0x7;
-    }
-
     public IPlantable getPlant(Item item) {
         Block block = Block.getBlockFromItem(item);
         if (block instanceof IPlantable) { return (IPlantable) block; }
         return (world, pos) -> Blocks.WHEAT.getDefaultState();
+    }
+
+    @Override
+    public int getPriority() {
+        return 0x7;
     }
 }

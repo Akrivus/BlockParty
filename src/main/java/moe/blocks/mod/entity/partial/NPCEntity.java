@@ -9,7 +9,6 @@ import moe.blocks.mod.entity.ai.goal.*;
 import moe.blocks.mod.entity.ai.goal.attack.BasicAttackGoal;
 import moe.blocks.mod.entity.ai.goal.items.ConsumeGoal;
 import moe.blocks.mod.entity.ai.goal.target.RevengeTarget;
-import moe.blocks.mod.entity.ai.trigger.Trigger;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.BlockState;
@@ -105,6 +104,11 @@ public abstract class NPCEntity extends CreatureEntity {
     }
 
     @Override
+    public void playAmbientSound() {
+        if (!this.isSleeping()) { super.playAmbientSound(); }
+    }
+
+    @Override
     public void writeAdditional(CompoundNBT compound) {
         super.writeAdditional(compound);
         compound.putLong("HomePosition", this.getHomePosition().toLong());
@@ -146,10 +150,6 @@ public abstract class NPCEntity extends CreatureEntity {
         }
     }
 
-    public void setStress(float stress) {
-        this.stress = Math.max(Math.min(stress, 20.0F), 0.0F);
-    }
-
     public void addStress(float stress) {
         this.setStress(this.stress + stress);
     }
@@ -158,12 +158,12 @@ public abstract class NPCEntity extends CreatureEntity {
         return this.world instanceof ServerWorld;
     }
 
-    protected void registerStates(HashMap<States, State> states) {
-        states.put(States.HELD_ITEM, null);
+    public void setHomePosition(BlockPos pos) {
+        this.setHomePosAndDistance(pos, (int) this.getMaximumHomeDistance());
     }
 
-    public void addNextTickOp(Consumer<NPCEntity> op) {
-        this.nextTickOps.add(op);
+    protected void registerStates(HashMap<States, State> states) {
+        states.put(States.HELD_ITEM, null);
     }
 
     public void attackEntityFromRange(LivingEntity victim, double factor) {
@@ -315,11 +315,6 @@ public abstract class NPCEntity extends CreatureEntity {
         return this.canBeTarget(this.getAttackTarget()) || this.canBeTarget(this.getRevengeTarget()) || this.canBeTarget(this.getAvoidTarget());
     }
 
-    public boolean canFight() {
-        Item item = this.getHeldItem(Hand.MAIN_HAND).getItem();
-        return item.isIn(MoeTags.WEAPONS);
-    }
-
     public LivingEntity getAvoidTarget() {
         return this.avoidTarget;
     }
@@ -327,6 +322,11 @@ public abstract class NPCEntity extends CreatureEntity {
     public void setAvoidTarget(LivingEntity target) {
         this.avoidTarget = target;
         this.avoidTimer = this.ticksExisted;
+    }
+
+    public boolean canFight() {
+        Item item = this.getHeldItem(Hand.MAIN_HAND).getItem();
+        return item.isIn(MoeTags.WEAPONS);
     }
 
     public boolean isAvoiding() {
@@ -343,6 +343,10 @@ public abstract class NPCEntity extends CreatureEntity {
 
     public float getStress() {
         return this.stress;
+    }
+
+    public void setStress(float stress) {
+        this.stress = Math.max(Math.min(stress, 20.0F), 0.0F);
     }
 
     public float getHunger() {
@@ -467,6 +471,10 @@ public abstract class NPCEntity extends CreatureEntity {
         });
     }
 
+    public void addNextTickOp(Consumer<NPCEntity> op) {
+        this.nextTickOps.add(op);
+    }
+
     public EquipmentSlotType getSlotForStack(ItemStack stack) {
         EquipmentSlotType slot = MobEntity.getSlotForItemStack(stack);
         if (stack.getItem().isIn(MoeTags.OFFHAND) || stack.isFood()) {
@@ -510,10 +518,6 @@ public abstract class NPCEntity extends CreatureEntity {
         return null;
     }
 
-    public boolean isVengeful() {
-        return this.ticksExisted - this.getRevengeTimer() < 500;
-    }
-
     public boolean isAttacking() {
         return this.canBeTarget(this.getAttackTarget());
     }
@@ -522,27 +526,8 @@ public abstract class NPCEntity extends CreatureEntity {
         return new ChunkPos(this.getPosition());
     }
 
-    public void setHomePosition(BlockPos pos) {
-        this.setHomePosAndDistance(pos, (int) this.getMaximumHomeDistance());
-    }
-
-    public double getHomeDistance() {
-        return Math.sqrt(this.getDistanceSq(Vector3d.copyCentered(this.getHomePosition())));
-    }
-
     public boolean isTimeToSleep() {
         return this.canWander() && !this.world.isDaytime();
-    }
-
-    public abstract void setEmotion(Emotions emotion, int timeout, PlayerEntity entity);
-
-    public void setEmotion(Emotions emotion, int timeout) {
-        this.setEmotion(emotion, timeout, null);
-    }
-
-    @Override
-    public void playAmbientSound() {
-        if (!this.isSleeping()) { super.playAmbientSound(); }
     }
 
     public boolean canWander() {
@@ -550,16 +535,30 @@ public abstract class NPCEntity extends CreatureEntity {
         return 16 > this.getHomeDistance() || this.getHomeDistance() > 256;
     }
 
-    public boolean isThreadSafe() {
-        return this.world.getServer().getExecutionThread().equals(Thread.currentThread());
+    public boolean isVengeful() {
+        return this.ticksExisted - this.getRevengeTimer() < 500;
+    }
+
+    public double getHomeDistance() {
+        return Math.sqrt(this.getDistanceSq(Vector3d.copyCentered(this.getHomePosition())));
+    }
+
+    public void setEmotion(Emotions emotion, int timeout) {
+        this.setEmotion(emotion, timeout, null);
+    }
+
+    public abstract void setEmotion(Emotions emotion, int timeout, PlayerEntity entity);
+
+    public BlockState getBlockState(BlockPos pos) {
+        IChunk chunk = this.getChunk(new ChunkPos(pos));
+        return chunk == null ? Blocks.AIR.getDefaultState() : chunk.getBlockState(pos);
     }
 
     public IChunk getChunk(ChunkPos pos) {
         return this.isThreadSafe() ? this.world.getChunk(pos.x, pos.z, ChunkStatus.FULL, false) : null;
     }
 
-    public BlockState getBlockState(BlockPos pos) {
-        IChunk chunk = this.getChunk(new ChunkPos(pos));
-        return chunk == null ? Blocks.AIR.getDefaultState() : chunk.getBlockState(pos);
+    public boolean isThreadSafe() {
+        return this.world.getServer().getExecutionThread().equals(Thread.currentThread());
     }
 }

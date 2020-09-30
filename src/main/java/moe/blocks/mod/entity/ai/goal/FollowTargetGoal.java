@@ -29,6 +29,11 @@ public class FollowTargetGoal extends AbstractFollowEntityGoal<InteractEntity, L
     }
 
     @Override
+    public float getStrikeZone(LivingEntity target) {
+        return 4.0F;
+    }
+
+    @Override
     public LivingEntity getTarget() {
         return this.entity.getFollowTarget();
     }
@@ -36,11 +41,6 @@ public class FollowTargetGoal extends AbstractFollowEntityGoal<InteractEntity, L
     @Override
     public boolean canFollow(LivingEntity target) {
         return true;
-    }
-
-    @Override
-    public float getStrikeZone(LivingEntity target) {
-        return 4.0F;
     }
 
     @Override

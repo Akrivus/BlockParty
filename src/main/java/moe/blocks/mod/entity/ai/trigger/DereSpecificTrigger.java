@@ -20,15 +20,15 @@ public abstract class DereSpecificTrigger extends AbstractTrigger {
         private final Emotions emotion;
         private final int timeout;
 
+        public Emotional(int priority, Emotions emotion, int timeout, Predicate<InteractEntity> function, Deres... deres) {
+            this(priority, emotion, timeout, deres);
+            this.setAdditionalFunction(function);
+        }
+
         public Emotional(int priority, Emotions emotion, int timeout, Deres... deres) {
             super(priority, (entity) -> entity.getEmotion() == Emotions.NORMAL, deres);
             this.emotion = emotion;
             this.timeout = timeout;
-        }
-
-        public Emotional(int priority, Emotions emotion, int timeout, Predicate<InteractEntity> function, Deres... deres) {
-            this(priority, emotion, timeout, deres);
-            this.setAdditionalFunction(function);
         }
 
         @Override

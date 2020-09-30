@@ -158,11 +158,6 @@ public abstract class CharacterEntity extends InteractEntity implements IInvento
         if (this.isLocal() && !this.isInYearbook) { Yearbooks.sync(this); }
     }
 
-    @Override
-    public boolean isFavoriteItem(ItemStack stack) {
-        return this.getDere().isFavorite(stack);
-    }
-
     public void setYearbookPage(CompoundNBT compound, UUID uuid) {
         compound.putString("GivenName", this.getGivenName());
         compound.putString("FamilyName", this.getFamilyName());
@@ -207,6 +202,12 @@ public abstract class CharacterEntity extends InteractEntity implements IInvento
     }
 
     @Override
+    public void setHealth(float health) {
+        this.syncYearbooks();
+        super.setHealth(health);
+    }
+
+    @Override
     public void onDeath(DamageSource cause) {
         this.syncYearbooks();
         super.onDeath(cause);
@@ -217,9 +218,18 @@ public abstract class CharacterEntity extends InteractEntity implements IInvento
     }
 
     @Override
-    public void setHealth(float health) {
-        this.syncYearbooks();
-        super.setHealth(health);
+    public boolean getAlwaysRenderNameTagForRender() {
+        return true;
+    }
+
+    public Inventory getBrassiere() {
+        return this.brassiere;
+    }
+
+    protected void setBrassiere(CompoundNBT compound) {
+        CupSize cup = compound.contains("CupSize") ? CupSize.valueOf(compound.getString("CupSize")) : CupSize.B;
+        this.brassiere = new Inventory(cup.getSize());
+        this.brassiere.read(compound.getList("Brassiere", 10));
     }
 
     @Override
@@ -229,8 +239,8 @@ public abstract class CharacterEntity extends InteractEntity implements IInvento
     }
 
     @Override
-    public boolean getAlwaysRenderNameTagForRender() {
-        return true;
+    public boolean isFavoriteItem(ItemStack stack) {
+        return this.getDere().isFavorite(stack);
     }
 
     public String getFullName() {
@@ -254,16 +264,6 @@ public abstract class CharacterEntity extends InteractEntity implements IInvento
     @Override
     public Container createMenu(int id, PlayerInventory inventory, PlayerEntity player) {
         return this.getCupSize().getContainer(id, inventory, this.getBrassiere());
-    }
-
-    public Inventory getBrassiere() {
-        return this.brassiere;
-    }
-
-    protected void setBrassiere(CompoundNBT compound) {
-        CupSize cup = compound.contains("CupSize") ? CupSize.valueOf(compound.getString("CupSize")) : CupSize.B;
-        this.brassiere = new Inventory(cup.getSize());
-        this.brassiere.read(compound.getList("Brassiere", 10));
     }
 
     public enum Gender {

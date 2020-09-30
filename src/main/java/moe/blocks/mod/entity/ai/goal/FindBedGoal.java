@@ -1,16 +1,10 @@
 package moe.blocks.mod.entity.ai.goal;
 
-import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
 import moe.blocks.mod.entity.partial.NPCEntity;
 import net.minecraft.block.BedBlock;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.monster.MonsterEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.state.properties.BedPart;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.EnumSet;
-import java.util.Optional;
 
 public class FindBedGoal extends AbstractMoveToBlockGoal<NPCEntity> {
     public FindBedGoal(NPCEntity entity) {

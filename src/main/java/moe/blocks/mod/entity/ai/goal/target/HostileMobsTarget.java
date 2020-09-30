@@ -6,7 +6,6 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.monster.IMob;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class HostileMobsTarget extends AbstractStateTarget {
 

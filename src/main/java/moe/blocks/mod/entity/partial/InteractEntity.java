@@ -13,7 +13,6 @@ import moe.blocks.mod.entity.ai.goal.LookAtInteractiveGoal;
 import moe.blocks.mod.entity.ai.goal.StayHomeGoal;
 import moe.blocks.mod.entity.ai.goal.WanderGoal;
 import moe.blocks.mod.entity.ai.trigger.Trigger;
-import moe.blocks.mod.util.sort.EntityDistance;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.PlayerEntity;
@@ -102,17 +101,6 @@ public abstract class InteractEntity extends NPCEntity {
     }
 
     @Override
-    public void setEmotion(Emotions emotion, int timeout, PlayerEntity entity) {
-        this.dataManager.set(EMOTION, emotion.name());
-        this.timeUntilEmotionExpires = timeout;
-        this.emotionTarget = entity;
-        if (entity != null) {
-            this.world.setEntityState(this, (byte) emotion.id);
-            this.playSound(emotion.sound);
-        }
-    }
-
-    @Override
     public void livingTick() {
         super.livingTick();
         this.getAnimation().tick(this);
@@ -129,16 +117,40 @@ public abstract class InteractEntity extends NPCEntity {
         super.registerStates(states);
     }
 
+    @Override
+    public boolean isTimeToSleep() {
+        if (this.canFight() && this.isNightWatch()) { return false; }
+        return super.isTimeToSleep();
+    }
+
+    @Override
+    public boolean canWander() {
+        if (this.isFollowing() || this.isInteracted() || this.hasPath()) { return false; }
+        return super.canWander();
+    }
+
+    @Override
+    public void setEmotion(Emotions emotion, int timeout, PlayerEntity entity) {
+        this.dataManager.set(EMOTION, emotion.name());
+        this.timeUntilEmotionExpires = timeout;
+        this.emotionTarget = entity;
+        if (entity != null) {
+            this.world.setEntityState(this, (byte) emotion.id);
+            this.playSound(emotion.sound);
+        }
+    }
+
+    public boolean isInteracted() {
+        return this.ticksExisted - this.timeOfInteraction < 20;
+    }
+
+    public boolean isNightWatch() {
+        return this.world.getGameTime() / 24000 % 4 == this.getBloodType().ordinal();
+    }
+
     public void updateStareState() {
         PlayerEntity player = this.world.getClosestPlayer(this, 8.0D);
         if (this.isBeingWatchedBy(player)) { this.setStareTarget(player); }
-    }
-
-    public void updateEmotionalState() {
-        if (--this.timeUntilEmotionExpires < 0) { this.setEmotion(Emotions.NORMAL, this.getTalkInterval()); }
-        for (int i = 0; --this.timeUntilTriggered < 0 && i < Trigger.REGISTRY.size(); ++i) {
-            this.timeUntilTriggered = Trigger.REGISTRY.get(i).fire(this);
-        }
     }
 
     public boolean isBeingWatchedBy(LivingEntity entity) {
@@ -148,6 +160,13 @@ public abstract class InteractEntity extends NPCEntity {
         double distance = cast.length();
         double sum = look.dotProduct(cast.normalize());
         return sum > 1.0D - 0.025D / distance && entity.canEntityBeSeen(this);
+    }
+
+    public void updateEmotionalState() {
+        if (--this.timeUntilEmotionExpires < 0) { this.setEmotion(Emotions.NORMAL, this.getTalkInterval()); }
+        for (int i = 0; --this.timeUntilTriggered < 0 && i < Trigger.REGISTRY.size(); ++i) {
+            this.timeUntilTriggered = Trigger.REGISTRY.get(i).fire(this);
+        }
     }
 
     public Emotions getEmotion() {
@@ -185,10 +204,6 @@ public abstract class InteractEntity extends NPCEntity {
     public void setInteractTarget(PlayerEntity player) {
         this.interactTarget = player;
         this.timeOfInteraction = this.ticksExisted;
-    }
-
-    public boolean isInteracted() {
-        return this.ticksExisted - this.timeOfInteraction < 20;
     }
 
     public LivingEntity getStareTarget() {
@@ -321,22 +336,6 @@ public abstract class InteractEntity extends NPCEntity {
 
     public void setFollowTarget(UUID target) {
         this.followTargetUUID = target;
-    }
-
-    @Override
-    public boolean canWander() {
-        if (this.isFollowing() || this.isInteracted() || this.hasPath()) { return false; }
-        return super.canWander();
-    }
-
-    public boolean isNightWatch() {
-        return this.world.getGameTime() / 24000 % 4 == this.getBloodType().ordinal();
-    }
-
-    @Override
-    public boolean isTimeToSleep() {
-        if (this.canFight() && this.isNightWatch()) { return false; }
-        return super.isTimeToSleep();
     }
 
     @OnlyIn(Dist.CLIENT)

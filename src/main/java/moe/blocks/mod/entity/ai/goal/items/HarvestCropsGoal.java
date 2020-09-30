@@ -3,8 +3,6 @@ package moe.blocks.mod.entity.ai.goal.items;
 import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
 import moe.blocks.mod.entity.partial.NPCEntity;
 import net.minecraft.block.*;
-import net.minecraft.item.HoeItem;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 

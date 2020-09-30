@@ -2,13 +2,10 @@ package moe.blocks.mod.entity.ai.goal.target;
 
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.partial.NPCEntity;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.EnumSet;
-import java.util.List;
 
 public abstract class AbstractStateTarget extends Goal implements IStateGoal {
     protected final NPCEntity entity;

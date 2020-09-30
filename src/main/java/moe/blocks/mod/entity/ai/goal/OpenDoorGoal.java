@@ -6,7 +6,6 @@ import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.*;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.pathfinding.Path;
-import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
