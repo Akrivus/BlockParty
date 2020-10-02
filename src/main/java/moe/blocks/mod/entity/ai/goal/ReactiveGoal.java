@@ -3,15 +3,15 @@ package moe.blocks.mod.entity.ai.goal;
 import moe.blocks.mod.data.conversation.Reactions;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.States;
-import moe.blocks.mod.entity.partial.CharacterEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.entity.ai.brain.task.Task;
 import net.minecraft.entity.ai.goal.Goal;
 
 public abstract class ReactiveGoal extends Goal implements IStateGoal {
-    protected final CharacterEntity entity;
+    protected final AbstractNPCEntity entity;
     protected Task.Status status;
 
-    public ReactiveGoal(CharacterEntity entity) {
+    public ReactiveGoal(AbstractNPCEntity entity) {
         this.entity = entity;
     }
 

@@ -1,17 +1,17 @@
 package moe.blocks.mod.entity.ai.goal.target;
 
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
 
 public abstract class AbstractStateTarget extends Goal implements IStateGoal {
-    protected final NPCEntity entity;
+    protected final AbstractNPCEntity entity;
     protected LivingEntity target;
 
-    public AbstractStateTarget(NPCEntity entity) {
+    public AbstractStateTarget(AbstractNPCEntity entity) {
         this.entity = entity;
         this.setMutexFlags(EnumSet.of(Flag.TARGET));
     }

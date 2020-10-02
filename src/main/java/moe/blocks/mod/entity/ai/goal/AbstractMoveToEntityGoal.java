@@ -1,7 +1,7 @@
 package moe.blocks.mod.entity.ai.goal;
 
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.util.sort.EntityDistance;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.goal.Goal;
@@ -9,7 +9,7 @@ import net.minecraft.entity.ai.goal.Goal;
 import java.util.EnumSet;
 import java.util.List;
 
-public abstract class AbstractMoveToEntityGoal<E extends NPCEntity, T extends Entity> extends Goal implements IStateGoal {
+public abstract class AbstractMoveToEntityGoal<E extends AbstractNPCEntity, T extends Entity> extends Goal implements IStateGoal {
     protected final E entity;
     protected final Class<T> type;
     protected final double speed;

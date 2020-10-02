@@ -8,8 +8,7 @@ import moe.blocks.mod.entity.ai.goal.items.HarvestCropsGoal;
 import moe.blocks.mod.entity.ai.goal.items.MineOresGoal;
 import moe.blocks.mod.entity.ai.goal.items.ReplaceCropsGoal;
 import moe.blocks.mod.entity.ai.goal.target.HostileMobsTarget;
-import moe.blocks.mod.entity.partial.CharacterEntity;
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -19,37 +18,37 @@ import java.util.HashMap;
 import java.util.List;
 
 public enum ItemStates {
-    DEFAULT(new State<NPCEntity>() {
+    DEFAULT(new State<AbstractNPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, NPCEntity entity) {
+        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
     }),
-    FARMER(new State<CharacterEntity>() {
+    FARMER(new State<AbstractNPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, CharacterEntity entity) {
+        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
             goals.add(new TryStuffItemGoal(entity, MoeTags.CROPS));
             goals.add(new HarvestCropsGoal(entity));
             goals.add(new ReplaceCropsGoal(entity));
         }
     }, MoeTags.FARMER),
-    FIGHTER(new State<NPCEntity>() {
+    FIGHTER(new State<AbstractNPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, NPCEntity entity) {
+        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
             goals.add(new TryStuffItemGoal(entity, MoeTags.LOOT));
             goals.add(new HostileMobsTarget(entity));
         }
     }, MoeTags.FIGHTER),
-    MINER(new State<NPCEntity>() {
+    MINER(new State<AbstractNPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, NPCEntity entity) {
+        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
             goals.add(new TryStuffItemGoal(entity, MoeTags.ORES));
             goals.add(new MineOresGoal(entity));
         }
     }, MoeTags.MINER),
-    ARCHER(new State<NPCEntity>() {
+    ARCHER(new State<AbstractNPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, NPCEntity entity) {
+        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
             goals.add(new TryStuffItemGoal(entity, MoeTags.LOOT));
             goals.add(new BowAttackGoal(entity));
         }

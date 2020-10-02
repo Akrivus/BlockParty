@@ -3,15 +3,15 @@ package moe.blocks.mod.entity.ai.goal.blocks;
 import moe.blocks.mod.data.dating.Relationship;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
-import moe.blocks.mod.entity.partial.CharacterEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class OpenChestGoal extends Goal implements IStateGoal {
-    protected final CharacterEntity entity;
+    protected final AbstractNPCEntity entity;
     protected PlayerEntity player;
 
-    public OpenChestGoal(CharacterEntity entity) {
+    public OpenChestGoal(AbstractNPCEntity entity) {
         this.entity = entity;
     }
 

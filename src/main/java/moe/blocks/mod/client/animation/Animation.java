@@ -3,7 +3,7 @@ package moe.blocks.mod.client.animation;
 import moe.blocks.mod.client.Animations;
 import moe.blocks.mod.client.model.MoeModel;
 import moe.blocks.mod.entity.MoeEntity;
-import moe.blocks.mod.entity.partial.InteractEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 
 public abstract class Animation {
 
@@ -13,7 +13,7 @@ public abstract class Animation {
 
     }
 
-    public void tick(InteractEntity entity) {
+    public void tick(AbstractNPCEntity entity) {
 
     }
 

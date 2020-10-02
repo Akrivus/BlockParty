@@ -1,13 +1,13 @@
 package moe.blocks.mod.entity.ai.goal;
 
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.block.BedBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.properties.BedPart;
 import net.minecraft.util.math.BlockPos;
 
-public class FindBedGoal extends AbstractMoveToBlockGoal<NPCEntity> {
-    public FindBedGoal(NPCEntity entity) {
+public class FindBedGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity> {
+    public FindBedGoal(AbstractNPCEntity entity) {
         super(entity, 7, 16);
     }
 

@@ -1,10 +1,10 @@
 package moe.blocks.mod.entity.ai.goal.target;
 
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 
 public class RevengeTarget extends AbstractStateTarget {
 
-    public RevengeTarget(NPCEntity entity) {
+    public RevengeTarget(AbstractNPCEntity entity) {
         super(entity);
     }
 

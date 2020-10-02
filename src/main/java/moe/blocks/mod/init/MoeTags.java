@@ -22,6 +22,7 @@ public class MoeTags {
     public static final ITag.INamedTag<Block> MOEABLES = BlockTags.createOptional(new ResourceLocation(MoeMod.ID, "moeables"));
     public static final ITag.INamedTag<Block> NEKO = BlockTags.createOptional(new ResourceLocation(MoeMod.ID, "moes/neko"));
     public static final ITag.INamedTag<Block> WINGED = BlockTags.createOptional(new ResourceLocation(MoeMod.ID, "moes/winged"));
+    public static final ITag.INamedTag<Item> ADMIN = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "tools/admin"));
     public static final ITag.INamedTag<Item> ARCHER = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "tools/archer"));
     public static final ITag.INamedTag<Item> BREEDER = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "tools/breeder"));
     public static final ITag.INamedTag<Item> CROPS = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "drops/crops"));

@@ -1,6 +1,6 @@
 package moe.blocks.mod.entity.ai.goal;
 
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.Item;
@@ -9,7 +9,7 @@ import net.minecraft.tags.ITag;
 
 import java.util.function.Predicate;
 
-public class TryEquipItemGoal<E extends NPCEntity> extends AbstractMoveToEntityGoal<E, ItemEntity> {
+public class TryEquipItemGoal<E extends AbstractNPCEntity> extends AbstractMoveToEntityGoal<E, ItemEntity> {
     protected final Predicate<ItemStack> check;
 
     public TryEquipItemGoal(E entity) {

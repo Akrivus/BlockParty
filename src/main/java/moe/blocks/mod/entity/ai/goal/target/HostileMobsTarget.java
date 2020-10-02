@@ -1,6 +1,6 @@
 package moe.blocks.mod.entity.ai.goal.target;
 
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.util.sort.EntityDistance;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.monster.IMob;
@@ -9,7 +9,7 @@ import java.util.List;
 
 public class HostileMobsTarget extends AbstractStateTarget {
 
-    public HostileMobsTarget(NPCEntity entity) {
+    public HostileMobsTarget(AbstractNPCEntity entity) {
         super(entity);
     }
 

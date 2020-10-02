@@ -1,6 +1,6 @@
 package moe.blocks.mod.client.animation;
 
-import moe.blocks.mod.entity.partial.InteractEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 
 public abstract class ActionAnimation extends Animation {
     protected int timeUntilComplete;
@@ -16,14 +16,14 @@ public abstract class ActionAnimation extends Animation {
     public abstract int getInterval();
 
     @Override
-    public void tick(InteractEntity entity) {
+    public void tick(AbstractNPCEntity entity) {
         if (--this.timeUntilComplete < 0) {
             entity.resetAnimationState();
             this.onComplete(entity);
         }
     }
 
-    public void onComplete(InteractEntity entity) {
+    public void onComplete(AbstractNPCEntity entity) {
 
     }
 }

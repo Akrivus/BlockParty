@@ -1,6 +1,6 @@
 package moe.blocks.mod.message;
 
-import moe.blocks.mod.entity.partial.CharacterEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.init.MoeSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -36,7 +36,7 @@ public class CPhoneTeleportMoe {
     }
 
     public static void handle(CPhoneTeleportMoe message, NetworkEvent.Context context, ServerPlayerEntity player) {
-        CharacterEntity character = CharacterEntity.getEntityFromUUID(CharacterEntity.class, player.getServerWorld(), message.getMoeUUID());
+        AbstractNPCEntity character = AbstractNPCEntity.getEntityFromUUID(AbstractNPCEntity.class, player.getServerWorld(), message.getMoeUUID());
         if (character != null) {
             double x = player.getPosX() - Math.sin(0.0174532925F * player.rotationYaw) * 1.44;
             double z = player.getPosZ() + Math.cos(0.0174532925F * player.rotationYaw) * 1.44;

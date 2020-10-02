@@ -1,7 +1,6 @@
 package moe.blocks.mod.entity.ai.automata;
 
 import moe.blocks.mod.entity.MoeEntity;
-import moe.blocks.mod.entity.partial.CharacterEntity;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -11,9 +10,9 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.math.shapes.VoxelShape;
 
 public abstract class BlockBasedState extends State<MoeEntity> {
-    protected final CharacterEntity.CupSize cupSize;
+    protected final MoeEntity.CupSizes cupSize;
 
-    public BlockBasedState(CharacterEntity.CupSize cupSize) {
+    public BlockBasedState(MoeEntity.CupSizes cupSize) {
         this.cupSize = cupSize;
     }
 
@@ -32,7 +31,7 @@ public abstract class BlockBasedState extends State<MoeEntity> {
     @Override
     public State clean(MoeEntity entity) {
         entity.getAttribute(Attributes.ARMOR).removeModifier(entity.getUniqueID());
-        entity.setCupSize(CharacterEntity.CupSize.B);
+        entity.setCupSize(MoeEntity.CupSizes.B);
         return super.clean(entity);
     }
 

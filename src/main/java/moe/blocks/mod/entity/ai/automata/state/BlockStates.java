@@ -6,7 +6,6 @@ import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.ai.goal.TryStuffItemGoal;
 import moe.blocks.mod.entity.ai.goal.blocks.OpenChestGoal;
-import moe.blocks.mod.entity.partial.CharacterEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 
@@ -14,25 +13,25 @@ import java.util.HashMap;
 import java.util.List;
 
 public enum BlockStates {
-    DEFAULT(new BlockBasedState(CharacterEntity.CupSize.B) {
+    DEFAULT(new BlockBasedState(MoeEntity.CupSizes.B) {
         @Override
         public void apply(List<IStateGoal> goals, MoeEntity entity) {
 
         }
     }),
-    CHEST(new BlockBasedState(CharacterEntity.CupSize.DD) {
+    CHEST(new BlockBasedState(MoeEntity.CupSizes.DD) {
         @Override
         public void apply(List<IStateGoal> goals, MoeEntity entity) {
             goals.add(new OpenChestGoal(entity));
         }
     }),
-    TRAPPED_CHEST(new BlockBasedState(CharacterEntity.CupSize.D) {
+    TRAPPED_CHEST(new BlockBasedState(MoeEntity.CupSizes.D) {
         @Override
         public void apply(List<IStateGoal> goals, MoeEntity entity) {
             goals.add(new OpenChestGoal(entity));
         }
     }),
-    HOPPER(new BlockBasedState(CharacterEntity.CupSize.C) {
+    HOPPER(new BlockBasedState(MoeEntity.CupSizes.C) {
         @Override
         public void apply(List<IStateGoal> goals, MoeEntity entity) {
             goals.add(new TryStuffItemGoal<>(entity, stack -> true));

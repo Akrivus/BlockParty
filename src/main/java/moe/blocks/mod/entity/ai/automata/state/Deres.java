@@ -3,8 +3,7 @@ package moe.blocks.mod.entity.ai.automata.state;
 import moe.blocks.mod.MoeMod;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
-import moe.blocks.mod.entity.partial.DieEntity;
-import moe.blocks.mod.entity.partial.InteractEntity;
+import moe.blocks.mod.entity.AbstractDieEntity;
 import moe.blocks.mod.init.MoeTags;
 import moe.blocks.mod.util.Trans;
 import net.minecraft.block.material.MaterialColor;
@@ -18,47 +17,47 @@ import java.util.HashMap;
 import java.util.List;
 
 public enum Deres {
-    HIMEDERE(new State<InteractEntity>() {
+    HIMEDERE(new State<NPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, InteractEntity entity) {
+        public void apply(List<IStateGoal> goals, NPCEntity entity) {
 
         }
-    }, DieEntity.Face.ONE, MoeTags.FARMER),
-    KUUDERE(new State<InteractEntity>() {
+    }, AbstractDieEntity.Face.ONE, MoeTags.FARMER),
+    KUUDERE(new State<NPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, InteractEntity entity) {
+        public void apply(List<IStateGoal> goals, NPCEntity entity) {
 
         }
-    }, DieEntity.Face.TWO, MoeTags.ARCHER),
-    TSUNDERE(new State<InteractEntity>() {
+    }, AbstractDieEntity.Face.TWO, MoeTags.ARCHER),
+    TSUNDERE(new State<NPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, InteractEntity entity) {
+        public void apply(List<IStateGoal> goals, NPCEntity entity) {
 
         }
-    }, DieEntity.Face.THREE, MoeTags.FIGHTER),
-    YANDERE(new State<InteractEntity>() {
+    }, AbstractDieEntity.Face.THREE, MoeTags.FIGHTER),
+    YANDERE(new State<NPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, InteractEntity entity) {
+        public void apply(List<IStateGoal> goals, NPCEntity entity) {
 
         }
-    }, DieEntity.Face.FOUR, MoeTags.FIGHTER),
-    DEREDERE(new State<InteractEntity>() {
+    }, AbstractDieEntity.Face.FOUR, MoeTags.FIGHTER),
+    DEREDERE(new State<NPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, InteractEntity entity) {
+        public void apply(List<IStateGoal> goals, NPCEntity entity) {
 
         }
-    }, DieEntity.Face.FIVE, MoeTags.BREEDER),
-    DANDERE(new State<InteractEntity>() {
+    }, AbstractDieEntity.Face.FIVE, MoeTags.BREEDER),
+    DANDERE(new State<NPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, InteractEntity entity) {
+        public void apply(List<IStateGoal> goals, NPCEntity entity) {
 
         }
-    }, DieEntity.Face.SIX, MoeTags.MINER);
+    }, AbstractDieEntity.Face.SIX, MoeTags.MINER);
 
     public final State state;
     private final ITag.INamedTag<Item> tools;
 
-    Deres(State state, DieEntity.Face face, ITag.INamedTag<Item> tools) {
+    Deres(State state, AbstractDieEntity.Face face, ITag.INamedTag<Item> tools) {
         this.state = state;
         MoeTags.LOVED_GIFTS.put(this, ItemTags.createOptional(new ResourceLocation(MoeMod.ID, String.format("gifts/loved/%s", this.name().toLowerCase()))));
         MoeTags.LIKED_GIFTS.put(this, ItemTags.createOptional(new ResourceLocation(MoeMod.ID, String.format("gifts/liked/%s", this.name().toLowerCase()))));
@@ -67,7 +66,7 @@ public enum Deres {
         this.tools = tools;
     }
 
-    public static Deres get(DieEntity.Face face) {
+    public static Deres get(AbstractDieEntity.Face face) {
         return Registry.SET.getOrDefault(face, HIMEDERE);
     }
 
@@ -119,6 +118,6 @@ public enum Deres {
     }
 
     protected static class Registry {
-        public static HashMap<DieEntity.Face, Deres> SET = new HashMap<>();
+        public static HashMap<AbstractDieEntity.Face, Deres> SET = new HashMap<>();
     }
 }

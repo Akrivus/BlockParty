@@ -1,6 +1,6 @@
 package moe.blocks.mod.data.conversation;
 
-import moe.blocks.mod.entity.partial.CharacterEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.function.BiPredicate;
@@ -8,13 +8,13 @@ import java.util.function.BiPredicate;
 public enum Conditions {
     ALWAYS((character, player) -> true);
 
-    private final BiPredicate<CharacterEntity, PlayerEntity> condition;
+    private final BiPredicate<AbstractNPCEntity, PlayerEntity> condition;
 
-    Conditions(BiPredicate<CharacterEntity, PlayerEntity> condition) {
+    Conditions(BiPredicate<AbstractNPCEntity, PlayerEntity> condition) {
         this.condition = condition;
     }
 
-    public boolean test(CharacterEntity character, PlayerEntity player) {
+    public boolean test(AbstractNPCEntity character, PlayerEntity player) {
         return this.condition.test(character, player);
     }
 }

@@ -1,12 +1,12 @@
 package moe.blocks.mod.entity.ai.goal;
 
-import moe.blocks.mod.entity.partial.InteractEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.pathfinding.PathNodeType;
 
-public class FollowTargetGoal extends AbstractFollowEntityGoal<InteractEntity, LivingEntity> {
+public class FollowTargetGoal extends AbstractFollowEntityGoal<AbstractNPCEntity, LivingEntity> {
 
-    public FollowTargetGoal(InteractEntity entity) {
+    public FollowTargetGoal(AbstractNPCEntity entity) {
         super(entity, LivingEntity.class, 1.1D);
     }
 

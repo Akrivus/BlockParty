@@ -1,14 +1,14 @@
 package moe.blocks.mod.entity.ai.goal;
 
-import moe.blocks.mod.entity.partial.InteractEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
 
 public class LookAtInteractiveGoal extends Goal {
-    private final InteractEntity entity;
+    private final AbstractNPCEntity entity;
 
-    public LookAtInteractiveGoal(InteractEntity entity) {
+    public LookAtInteractiveGoal(AbstractNPCEntity entity) {
         this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE));
         this.entity = entity;
     }

@@ -1,14 +1,14 @@
 package moe.blocks.mod.entity.ai.automata;
 
 import moe.blocks.mod.entity.ai.goal.target.AbstractStateTarget;
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.GoalSelector;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class State<E extends NPCEntity> {
+public abstract class State<E extends AbstractNPCEntity> {
     private final List<IStateGoal> goals;
 
     public State() {

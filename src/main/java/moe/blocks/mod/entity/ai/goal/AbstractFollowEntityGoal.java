@@ -1,13 +1,13 @@
 package moe.blocks.mod.entity.ai.goal;
 
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
 
-public abstract class AbstractFollowEntityGoal<E extends NPCEntity, T extends Entity> extends Goal implements IStateGoal {
+public abstract class AbstractFollowEntityGoal<E extends AbstractNPCEntity, T extends Entity> extends Goal implements IStateGoal {
     protected final E entity;
     protected final Class<T> type;
     protected final double speed;

@@ -2,11 +2,11 @@ package moe.blocks.mod.client.model;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import moe.blocks.mod.entity.partial.DieEntity;
+import moe.blocks.mod.entity.AbstractDieEntity;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 
-public class DieCubeModel<T extends DieEntity> extends EntityModel<T> {
+public class DieCubeModel<T extends AbstractDieEntity> extends EntityModel<T> {
     public ModelRenderer die;
 
     public DieCubeModel() {
@@ -22,7 +22,7 @@ public class DieCubeModel<T extends DieEntity> extends EntityModel<T> {
     }
 
     @Override
-    public void setRotationAngles(DieEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float yaw, float pitch) {
+    public void setRotationAngles(AbstractDieEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float yaw, float pitch) {
         this.die.rotateAngleX = entity.getRotations().getX() * 0.0174533F;
         this.die.rotateAngleY = entity.getRotations().getY() * 0.0174533F;
         this.die.rotateAngleZ = entity.getRotations().getZ() * 0.0174533F;

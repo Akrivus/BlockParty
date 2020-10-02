@@ -1,7 +1,6 @@
 package moe.blocks.mod.entity;
 
 import moe.blocks.mod.entity.ai.automata.state.Deres;
-import moe.blocks.mod.entity.partial.DieEntity;
 import moe.blocks.mod.init.MoeEntities;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeTags;
@@ -17,7 +16,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
-public class MoeDieEntity extends DieEntity {
+public class MoeDieEntity extends AbstractDieEntity {
     protected BlockState blockStateForSpawn;
     protected Deres dere;
     protected int timeUntilSpawned;

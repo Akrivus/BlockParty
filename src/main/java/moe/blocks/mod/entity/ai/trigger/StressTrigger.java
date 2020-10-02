@@ -2,7 +2,7 @@ package moe.blocks.mod.entity.ai.trigger;
 
 import moe.blocks.mod.entity.ai.automata.state.Deres;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
-import moe.blocks.mod.entity.partial.InteractEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 
 public abstract class StressTrigger extends DereSpecificTrigger {
     public StressTrigger(int priority, float min, float max, Deres... deres) {
@@ -19,12 +19,12 @@ public abstract class StressTrigger extends DereSpecificTrigger {
         }
 
         @Override
-        public void trigger(InteractEntity entity) {
+        public void trigger(AbstractNPCEntity entity) {
             entity.setEmotion(this.emotion, entity.getTalkInterval());
         }
 
         @Override
-        public int getDelay(InteractEntity entity) {
+        public int getDelay(AbstractNPCEntity entity) {
             return entity.getTalkInterval();
         }
     }

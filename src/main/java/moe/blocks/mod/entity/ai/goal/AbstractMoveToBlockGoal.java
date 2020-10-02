@@ -1,7 +1,7 @@
 package moe.blocks.mod.entity.ai.goal;
 
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.util.sort.BlockDistance;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.goal.Goal;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-public abstract class AbstractMoveToBlockGoal<T extends NPCEntity> extends Goal implements IStateGoal {
+public abstract class AbstractMoveToBlockGoal<T extends AbstractNPCEntity> extends Goal implements IStateGoal {
     protected final List<BlockPos> edges = new ArrayList<>();
     protected final T entity;
     protected final World world;

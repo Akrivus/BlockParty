@@ -1,14 +1,14 @@
 package moe.blocks.mod.entity.ai.goal;
 
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
 
 public class SleepGoal extends Goal {
-    private final NPCEntity entity;
+    private final AbstractNPCEntity entity;
 
-    public SleepGoal(NPCEntity entity) {
+    public SleepGoal(AbstractNPCEntity entity) {
         this.setMutexFlags(EnumSet.of(Flag.JUMP, Flag.LOOK, Flag.MOVE));
         this.entity = entity;
     }

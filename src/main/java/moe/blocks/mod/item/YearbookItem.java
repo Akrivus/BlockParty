@@ -1,7 +1,7 @@
 package moe.blocks.mod.item;
 
 import moe.blocks.mod.data.Yearbooks;
-import moe.blocks.mod.entity.partial.CharacterEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeMessages;
 import moe.blocks.mod.message.SOpenYearbook;
@@ -28,8 +28,8 @@ public class YearbookItem extends Item {
 
     @Override
     public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
-        if (!(entity instanceof CharacterEntity)) { return ActionResultType.PASS; }
-        CharacterEntity character = (CharacterEntity) entity;
+        if (!(entity instanceof AbstractNPCEntity)) { return ActionResultType.PASS; }
+        AbstractNPCEntity character = (AbstractNPCEntity) entity;
         if (character.isLocal()) {
             Yearbooks.Book book = Yearbooks.getBook(player);
             MoeMessages.send(player, new SOpenYearbook(hand, book, book.setPageIgnorantly(character, player.getUniqueID())));

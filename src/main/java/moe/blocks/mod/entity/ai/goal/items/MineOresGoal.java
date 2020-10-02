@@ -1,15 +1,15 @@
 package moe.blocks.mod.entity.ai.goal.items;
 
 import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
-public class MineOresGoal extends AbstractMoveToBlockGoal<NPCEntity> {
+public class MineOresGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity> {
 
-    public MineOresGoal(NPCEntity entity) {
+    public MineOresGoal(AbstractNPCEntity entity) {
         super(entity, 7, 16);
         this.timeUntilNextMove = 20;
     }

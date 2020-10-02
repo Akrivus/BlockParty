@@ -4,7 +4,7 @@ import moe.blocks.mod.data.dating.Relationship;
 import moe.blocks.mod.entity.ai.BloodTypes;
 import moe.blocks.mod.entity.ai.automata.state.Deres;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
-import moe.blocks.mod.entity.partial.CharacterEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.init.MoeEntities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,7 +24,7 @@ public class Yearbooks extends WorldSavedData {
     private final Map<UUID, BlockPos> cells = new HashMap<>();
     private final Map<UUID, Book> books = new HashMap<>();
 
-    public static void sync(CharacterEntity entity) {
+    public static void sync(AbstractNPCEntity entity) {
         Yearbooks instance = getInstance(entity.world);
         if (instance != null) {
             instance.books.forEach((uuid, book) -> book.setPageCautiously(entity, uuid));
@@ -92,7 +92,7 @@ public class Yearbooks extends WorldSavedData {
             this.uuid = this.character.getUniqueId("PageUUID");
         }
 
-        public Page(CharacterEntity entity, UUID uuid) {
+        public Page(AbstractNPCEntity entity, UUID uuid) {
             entity.setYearbookPage(this.character = new CompoundNBT(), uuid);
             this.uuid = entity.getUniqueID();
         }
@@ -102,8 +102,8 @@ public class Yearbooks extends WorldSavedData {
             return this.character;
         }
 
-        public CharacterEntity getCharacter(Minecraft minecraft) {
-            CharacterEntity character = MoeEntities.MOE.get().create(minecraft.world);
+        public AbstractNPCEntity getCharacter(Minecraft minecraft) {
+            AbstractNPCEntity character = MoeEntities.MOE.get().create(minecraft.world);
             character.readAdditional(this.character);
             character.setPosition(minecraft.player.getPosX(), minecraft.player.getPosY(), minecraft.player.getPosZ());
             if (this.getDere() == Deres.YANDERE) { character.setEmotion(Emotions.PSYCHOTIC, 0); }
@@ -120,7 +120,7 @@ public class Yearbooks extends WorldSavedData {
             return this.uuid;
         }
 
-        public String getName(CharacterEntity character) {
+        public String getName(AbstractNPCEntity character) {
             return character.getFullName();
         }
 
@@ -181,13 +181,13 @@ public class Yearbooks extends WorldSavedData {
             return compound;
         }
 
-        public int setPageIgnorantly(CharacterEntity entity, UUID uuid) {
+        public int setPageIgnorantly(AbstractNPCEntity entity, UUID uuid) {
             if (!this.setPageCautiously(entity, uuid)) { this.pages.add(new Page(entity, uuid)); }
             this.setDirty(uuid);
             return this.getPageNumber(entity.getUniqueID());
         }
 
-        public boolean setPageCautiously(CharacterEntity entity, UUID uuid) {
+        public boolean setPageCautiously(AbstractNPCEntity entity, UUID uuid) {
             Page page = this.getPage(entity.getUniqueID());
             if (page == null) { return false; }
             this.pages.set(this.pages.indexOf(page), new Page(entity, uuid));

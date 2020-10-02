@@ -1,4 +1,4 @@
-package moe.blocks.mod.entity.partial;
+package moe.blocks.mod.entity;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -19,8 +19,8 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 import java.util.HashMap;
 
-public abstract class DieEntity extends ProjectileItemEntity {
-    private static final DataParameter<Rotations> ROTATIONS = EntityDataManager.createKey(DieEntity.class, DataSerializers.ROTATIONS);
+public abstract class AbstractDieEntity extends ProjectileItemEntity {
+    private static final DataParameter<Rotations> ROTATIONS = EntityDataManager.createKey(AbstractDieEntity.class, DataSerializers.ROTATIONS);
     private static final HashMap<Vector3i, Face> DIE_FACE = new HashMap<>();
 
     static {
@@ -94,15 +94,15 @@ public abstract class DieEntity extends ProjectileItemEntity {
     private boolean landed;
     private Vector3i rotation;
 
-    public DieEntity(EntityType<? extends DieEntity> type, World world) {
+    public AbstractDieEntity(EntityType<? extends AbstractDieEntity> type, World world) {
         super(type, world);
     }
 
-    public DieEntity(EntityType<? extends DieEntity> type, World world, double x, double y, double z) {
+    public AbstractDieEntity(EntityType<? extends AbstractDieEntity> type, World world, double x, double y, double z) {
         super(type, x, y, z, world);
     }
 
-    public DieEntity(EntityType<? extends DieEntity> type, World world, LivingEntity thrower) {
+    public AbstractDieEntity(EntityType<? extends AbstractDieEntity> type, World world, LivingEntity thrower) {
         super(type, thrower, world);
     }
 

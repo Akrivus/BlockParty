@@ -5,7 +5,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moe.blocks.mod.MoeMod;
 import moe.blocks.mod.data.Yearbooks;
-import moe.blocks.mod.entity.partial.CharacterEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.init.MoeMessages;
 import moe.blocks.mod.init.MoeSounds;
 import moe.blocks.mod.message.CRemovePageFromYearbook;
@@ -44,7 +44,7 @@ public class YearbookScreen extends Screen {
     private Button buttonNextPage;
     private Button buttonRemovePage;
     private String name;
-    private CharacterEntity entity;
+    private AbstractNPCEntity entity;
 
     public YearbookScreen(Yearbooks.Book book, int pageNumber) {
         super(NarratorChatListener.EMPTY);

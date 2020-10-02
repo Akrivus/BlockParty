@@ -1,11 +1,11 @@
 package moe.blocks.mod.entity.ai.goal.attack;
 
 import moe.blocks.mod.entity.ai.goal.AbstractMoveToEntityGoal;
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 
-public class BasicAttackGoal<E extends NPCEntity> extends AbstractMoveToEntityGoal<NPCEntity, LivingEntity> {
+public class BasicAttackGoal<E extends AbstractNPCEntity> extends AbstractMoveToEntityGoal<AbstractNPCEntity, LivingEntity> {
 
     public BasicAttackGoal(E entity) {
         super(entity, LivingEntity.class, 1.0);

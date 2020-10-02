@@ -1,14 +1,14 @@
 package moe.blocks.mod.entity.ai.goal.items;
 
 import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.block.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
-public class HarvestCropsGoal extends AbstractMoveToBlockGoal<NPCEntity> {
+public class HarvestCropsGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity> {
 
-    public HarvestCropsGoal(NPCEntity entity) {
+    public HarvestCropsGoal(AbstractNPCEntity entity) {
         super(entity, 7, 16);
         this.timeUntilNextMove = 20;
     }

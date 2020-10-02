@@ -2,7 +2,7 @@ package moe.blocks.mod.item;
 
 import moe.blocks.mod.MoeMod;
 import moe.blocks.mod.client.screen.CellPhoneScreen;
-import moe.blocks.mod.entity.partial.CharacterEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.init.MoeItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.LivingEntity;
@@ -54,12 +54,12 @@ public class CellPhoneItem extends Item {
 
     @Override
     public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
-        if (!(entity instanceof CharacterEntity)) { return ActionResultType.PASS; }
-        player.setHeldItem(hand, addContact((CharacterEntity) entity, stack));
+        if (!(entity instanceof AbstractNPCEntity)) { return ActionResultType.PASS; }
+        player.setHeldItem(hand, addContact((AbstractNPCEntity) entity, stack));
         return ActionResultType.SUCCESS;
     }
 
-    public static ItemStack addContact(CharacterEntity entity, ItemStack stack) {
+    public static ItemStack addContact(AbstractNPCEntity entity, ItemStack stack) {
         CompoundNBT compound = stack.getOrCreateTag();
         if (!compound.contains("Contacts")) { compound.put("Contacts", new ListNBT()); }
         ListNBT nbt = compound.getList("Contacts", 10);

@@ -1,7 +1,8 @@
 package moe.blocks.mod.entity.ai.goal.items;
 
+import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
-import moe.blocks.mod.entity.partial.CharacterEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Inventory;
@@ -9,9 +10,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.util.math.BlockPos;
 
-public class DumpChestGoal extends AbstractMoveToBlockGoal<CharacterEntity> {
+public class DumpChestGoal extends AbstractMoveToBlockGoal<MoeEntity> {
 
-    public DumpChestGoal(CharacterEntity entity) {
+    public DumpChestGoal(MoeEntity entity) {
         super(entity, 3, 8);
         this.timeUntilNextMove = 12000;
     }

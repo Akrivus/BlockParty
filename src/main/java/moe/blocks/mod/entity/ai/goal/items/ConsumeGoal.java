@@ -1,13 +1,13 @@
 package moe.blocks.mod.entity.ai.goal.items;
 
-import moe.blocks.mod.entity.partial.NPCEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.util.Hand;
 
 public class ConsumeGoal extends Goal {
-    protected final NPCEntity entity;
+    protected final AbstractNPCEntity entity;
 
-    public ConsumeGoal(NPCEntity entity) {
+    public ConsumeGoal(AbstractNPCEntity entity) {
         this.entity = entity;
     }
 

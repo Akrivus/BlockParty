@@ -1,6 +1,6 @@
 package moe.blocks.mod.entity.ai.goal;
 
-import moe.blocks.mod.entity.partial.InteractEntity;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.util.math.BlockPos;
@@ -9,10 +9,10 @@ import net.minecraft.util.math.vector.Vector3d;
 import java.util.EnumSet;
 
 public class WanderGoal extends Goal {
-    private final InteractEntity entity;
+    private final AbstractNPCEntity entity;
     private Vector3d pos;
 
-    public WanderGoal(InteractEntity entity) {
+    public WanderGoal(AbstractNPCEntity entity) {
         this.setMutexFlags(EnumSet.of(Flag.MOVE));
         this.entity = entity;
     }
