@@ -1,7 +1,7 @@
 package moe.blocks.mod.entity.ai.goal;
 
-import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.AbstractNPCEntity;
+import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.util.sort.BlockDistance;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.goal.Goal;

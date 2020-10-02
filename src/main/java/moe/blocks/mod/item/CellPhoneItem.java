@@ -29,22 +29,6 @@ public class CellPhoneItem extends Item {
         super(new Properties().group(MoeItems.Group.INSTANCE));
     }
 
-    public static ItemStack removeContact(UUID uuid, ItemStack stack) {
-        CompoundNBT compound = stack.getOrCreateTag();
-        if (!compound.contains("Contacts")) { compound.put("Contacts", new ListNBT()); }
-        ListNBT nbt = compound.getList("Contacts", 10);
-        for (int i = 0; i < nbt.size(); ++i) {
-            CompoundNBT contact = (CompoundNBT) nbt.get(i);
-            if (contact.getUniqueId("UUID").equals(uuid)) {
-                nbt.remove(i);
-                --i;
-            }
-        }
-        compound.put("Contacts", nbt);
-        stack.setTag(compound);
-        return stack;
-    }
-
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getHeldItem(hand);
@@ -80,6 +64,22 @@ public class CellPhoneItem extends Item {
         nbt.forEach(tag -> list.add(new CellPhoneScreen.ContactEntry(tag)));
         compound.put("Contacts", nbt);
         return list;
+    }
+
+    public static ItemStack removeContact(UUID uuid, ItemStack stack) {
+        CompoundNBT compound = stack.getOrCreateTag();
+        if (!compound.contains("Contacts")) { compound.put("Contacts", new ListNBT()); }
+        ListNBT nbt = compound.getList("Contacts", 10);
+        for (int i = 0; i < nbt.size(); ++i) {
+            CompoundNBT contact = (CompoundNBT) nbt.get(i);
+            if (contact.getUniqueId("UUID").equals(uuid)) {
+                nbt.remove(i);
+                --i;
+            }
+        }
+        compound.put("Contacts", nbt);
+        stack.setTag(compound);
+        return stack;
     }
 
     @Mod.EventBusSubscriber(modid = MoeMod.ID)

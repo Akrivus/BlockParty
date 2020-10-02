@@ -1,7 +1,7 @@
 package moe.blocks.mod.entity.ai.goal.attack;
 
-import moe.blocks.mod.entity.ai.goal.AbstractMoveToEntityGoal;
 import moe.blocks.mod.entity.AbstractNPCEntity;
+import moe.blocks.mod.entity.ai.goal.AbstractMoveToEntityGoal;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 

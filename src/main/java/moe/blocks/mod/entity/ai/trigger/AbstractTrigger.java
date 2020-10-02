@@ -13,6 +13,11 @@ public abstract class AbstractTrigger implements Comparable<AbstractTrigger> {
         this.function = function;
     }
 
+    @Override
+    public int compareTo(AbstractTrigger other) {
+        return Integer.compare(this.priority, other.priority);
+    }
+
     public int fire(AbstractNPCEntity entity) {
         if (this.function.test(entity)) {
             this.trigger(entity);
@@ -27,10 +32,5 @@ public abstract class AbstractTrigger implements Comparable<AbstractTrigger> {
 
     public void setAdditionalFunction(Predicate<AbstractNPCEntity> function) {
         this.function = this.function.and(function);
-    }
-
-    @Override
-    public int compareTo(AbstractTrigger other) {
-        return Integer.compare(this.priority, other.priority);
     }
 }

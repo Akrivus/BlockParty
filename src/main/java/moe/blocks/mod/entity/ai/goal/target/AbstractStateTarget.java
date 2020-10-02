@@ -1,7 +1,7 @@
 package moe.blocks.mod.entity.ai.goal.target;
 
-import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.AbstractNPCEntity;
+import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 

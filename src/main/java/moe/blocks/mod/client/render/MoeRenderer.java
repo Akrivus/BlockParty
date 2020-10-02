@@ -29,11 +29,8 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
     }
 
     @Override
-    public void preRenderCallback(MoeEntity entity, MatrixStack stack, float partialTickTime) {
-        super.preRenderCallback(entity, stack, partialTickTime);
-        stack.scale(entity.getScale(), entity.getScale(), entity.getScale());
-        stack.scale(0.9375F, 0.9375F, 0.9375F);
-        this.shadowSize = entity.getScale() * 0.25F;
+    public MobRenderer<MoeEntity, MoeModel<MoeEntity>> createRenderFor(EntityRendererManager manager) {
+        return new MoeRenderer(manager);
     }
 
     @Override
@@ -65,7 +62,10 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
     }
 
     @Override
-    public MobRenderer<MoeEntity, MoeModel<MoeEntity>> createRenderFor(EntityRendererManager manager) {
-        return new MoeRenderer(manager);
+    public void preRenderCallback(MoeEntity entity, MatrixStack stack, float partialTickTime) {
+        super.preRenderCallback(entity, stack, partialTickTime);
+        stack.scale(entity.getScale(), entity.getScale(), entity.getScale());
+        stack.scale(0.9375F, 0.9375F, 0.9375F);
+        this.shadowSize = entity.getScale() * 0.25F;
     }
 }

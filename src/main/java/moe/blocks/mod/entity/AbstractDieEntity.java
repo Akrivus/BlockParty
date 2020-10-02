@@ -107,6 +107,62 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
     }
 
     @Override
+    protected void onImpact(RayTraceResult result) {
+        if (!this.world.isRemote()) {
+            if (--this.totalHops < 0 && result.getType() == RayTraceResult.Type.BLOCK) {
+                if (this.world.isAirBlock(this.getPositionUnderneath())) {
+                    this.bounce();
+                } else {
+                    BlockRayTraceResult block = (BlockRayTraceResult) result;
+                    BlockPos pos = block.getPos();
+                    BlockState state = this.world.getBlockState(pos);
+                    if (this.isLanded() && this.onActionStart(state, pos, this.getFaceFromAngle())) {
+                        this.setRotations(this.rotation.getX(), this.rotation.getY(), this.rotation.getZ());
+                        this.setVelocity(0, 0, 0);
+                        this.setMotion(Vector3d.ZERO);
+                        this.setNoGravity(true);
+                    } else {
+                        this.landed = false;
+                        this.bounce();
+                    }
+                }
+            } else if (result.getType() == RayTraceResult.Type.ENTITY) {
+                EntityRayTraceResult trace = (EntityRayTraceResult) result;
+                Entity entity = trace.getEntity();
+                this.setMotion(this.bounce().mul(entity.getMotion()));
+            } else {
+                this.bounce();
+            }
+        }
+    }
+
+    @Override
+    protected void registerData() {
+        super.registerData();
+        this.dataManager.register(ROTATIONS, new Rotations(this.rand.nextFloat() * 360.0F, this.rand.nextFloat() * 360.0F, this.rand.nextFloat() * 360.0F));
+    }
+
+    @Override
+    public void writeAdditional(CompoundNBT compound) {
+        super.writeAdditional(compound);
+        compound.put("Rotations", this.getRotations().writeToNBT());
+    }
+
+    @Override
+    public void readAdditional(CompoundNBT compound) {
+        super.readAdditional(compound);
+        this.setRotations(new Rotations(compound.getList("Rotations", 5)));
+    }
+
+    public Rotations getRotations() {
+        return this.dataManager.get(ROTATIONS);
+    }
+
+    public void setRotations(Rotations rotations) {
+        this.dataManager.set(ROTATIONS, rotations);
+    }
+
+    @Override
     public void tick() {
         super.tick();
         if (!this.world.isRemote()) {
@@ -143,68 +199,8 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
         this.setRotations(x, y, z);
     }
 
-    public Rotations getRotations() {
-        return this.dataManager.get(ROTATIONS);
-    }
-
-    public void setRotations(Rotations rotations) {
-        this.dataManager.set(ROTATIONS, rotations);
-    }
-
     public void setRotations(float x, float y, float z) {
         this.setRotations(new Rotations(x, y, z));
-    }
-
-    @Override
-    protected void onImpact(RayTraceResult result) {
-        if (!this.world.isRemote()) {
-            if (--this.totalHops < 0 && result.getType() == RayTraceResult.Type.BLOCK) {
-                if (this.world.isAirBlock(this.getPositionUnderneath())) {
-                    this.bounce();
-                } else {
-                    BlockRayTraceResult block = (BlockRayTraceResult) result;
-                    BlockPos pos = block.getPos();
-                    BlockState state = this.world.getBlockState(pos);
-                    if (this.isLanded() && this.onActionStart(state, pos, this.getFaceFromAngle())) {
-                        this.setRotations(this.rotation.getX(), this.rotation.getY(), this.rotation.getZ());
-                        this.setVelocity(0, 0, 0);
-                        this.setMotion(Vector3d.ZERO);
-                        this.setNoGravity(true);
-                    } else {
-                        this.landed = false;
-                        this.bounce();
-                    }
-                }
-            } else if (result.getType() == RayTraceResult.Type.ENTITY) {
-                EntityRayTraceResult trace = (EntityRayTraceResult) result;
-                Entity entity = trace.getEntity();
-                this.setMotion(this.bounce().mul(entity.getMotion()));
-            } else {
-                this.bounce();
-            }
-        }
-    }
-
-    public boolean onActionStart(BlockState state, BlockPos pos, Face face) {
-        return false;
-    }
-
-    @Override
-    protected void registerData() {
-        super.registerData();
-        this.dataManager.register(ROTATIONS, new Rotations(this.rand.nextFloat() * 360.0F, this.rand.nextFloat() * 360.0F, this.rand.nextFloat() * 360.0F));
-    }
-
-    @Override
-    public void writeAdditional(CompoundNBT compound) {
-        super.writeAdditional(compound);
-        compound.put("Rotations", this.getRotations().writeToNBT());
-    }
-
-    @Override
-    public void readAdditional(CompoundNBT compound) {
-        super.readAdditional(compound);
-        this.setRotations(new Rotations(compound.getList("Rotations", 5)));
     }
 
     public Vector3d bounce() {
@@ -213,9 +209,7 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
         return motion;
     }
 
-    public boolean isLanded() {
-        return this.landed || (this.landed = this.getFaceFromAngle() != null);
-    }
+    public abstract boolean onActionStart(BlockState state, BlockPos pos, Face face);
 
     public Face getFaceFromAngle() {
         int x = 90 * (Math.round(this.getRotations().getX() / 90));
@@ -230,6 +224,10 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
             return (PlayerEntity) this.func_234616_v_();
         }
         return null;
+    }
+
+    public boolean isLanded() {
+        return this.landed || (this.landed = this.getFaceFromAngle() != null);
     }
 
     public enum Face {

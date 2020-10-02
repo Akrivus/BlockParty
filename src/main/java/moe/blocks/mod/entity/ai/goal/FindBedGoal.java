@@ -12,6 +12,11 @@ public class FindBedGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity> {
     }
 
     @Override
+    public int getPriority() {
+        return 0x9;
+    }
+
+    @Override
     public boolean shouldExecute() {
         if (!this.entity.isTimeToSleep()) { return false; }
         if (this.entity.getHomeDistance() < 256) {
@@ -38,10 +43,5 @@ public class FindBedGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity> {
     @Override
     public boolean canMoveTo(BlockPos pos, BlockState state) {
         return state.isBed(this.world, pos, this.entity) && !state.get(BedBlock.OCCUPIED) && state.get(BedBlock.PART) == BedPart.HEAD;
-    }
-
-    @Override
-    public int getPriority() {
-        return 0x9;
     }
 }

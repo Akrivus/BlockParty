@@ -22,6 +22,11 @@ public class MoeDieRenderer extends EntityRenderer<MoeDieEntity> implements IRen
     }
 
     @Override
+    public EntityRenderer<MoeDieEntity> createRenderFor(EntityRendererManager manager) {
+        return new MoeDieRenderer(manager);
+    }
+
+    @Override
     public void render(MoeDieEntity die, float yaw, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffer, int packedLight) {
         stack.push();
         stack.scale(0.375F, 0.375F, 0.375F);
@@ -36,10 +41,5 @@ public class MoeDieRenderer extends EntityRenderer<MoeDieEntity> implements IRen
     @Override
     public ResourceLocation getEntityTexture(MoeDieEntity entity) {
         return DIE_TEXTURE;
-    }
-
-    @Override
-    public EntityRenderer<MoeDieEntity> createRenderFor(EntityRendererManager manager) {
-        return new MoeDieRenderer(manager);
     }
 }

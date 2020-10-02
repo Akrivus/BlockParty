@@ -35,6 +35,40 @@ public class Relationship {
         }
     }
 
+    public boolean can(Actions action) {
+        return action.inRange(this.love);
+    }
+
+    public PlayerEntity getPlayer(World world) {
+        return world.getPlayerByUuid(this.playerUUID);
+    }
+
+    public ReactiveState getReaction(Interactions interaction) {
+        if (this.interactions.getOrDefault(interaction, -1) < 0) { this.addLove(interaction.getLove()); }
+        this.interactions.put(interaction, interaction.getCooldown());
+        return interaction.reaction.state;
+    }
+
+    public void addLove(float love) {
+        this.setLove(this.love + love);
+    }
+
+    public boolean isUUID(UUID uuid) {
+        return this.playerUUID.equals(uuid);
+    }
+
+    public void tick() {
+        this.interactions.forEach((interaction, timeout) -> --timeout);
+        if (++this.timeSinceInteraction > 24000) {
+            this.timeSinceInteraction = 0;
+            this.love -= this.getPhase().getDecay();
+            if (this.love < 0.0F) { this.love = 0.0F; }
+            if (this.love > 20.0F) {
+                this.love = 20.0F;
+            }
+        }
+    }
+
     public CompoundNBT write(CompoundNBT compound) {
         compound.putString("Phase", this.getPhase().name());
         compound.putFloat("Love", this.getLove());
@@ -57,40 +91,6 @@ public class Relationship {
 
     public void setLove(float love) {
         this.love = Math.max(Math.min(love, 20.0F), 0.0F);
-    }
-
-    public void tick() {
-        this.interactions.forEach((interaction, timeout) -> --timeout);
-        if (++this.timeSinceInteraction > 24000) {
-            this.timeSinceInteraction = 0;
-            this.love -= this.getPhase().getDecay();
-            if (this.love < 0.0F) { this.love = 0.0F; }
-            if (this.love > 20.0F) {
-                this.love = 20.0F;
-            }
-        }
-    }
-
-    public PlayerEntity getPlayer(World world) {
-        return world.getPlayerByUuid(this.playerUUID);
-    }
-
-    public boolean can(Actions action) {
-        return action.inRange(this.love);
-    }
-
-    public ReactiveState getReaction(Interactions interaction) {
-        if (this.interactions.getOrDefault(interaction, -1) < 0) { this.addLove(interaction.getLove()); }
-        this.interactions.put(interaction, interaction.getCooldown());
-        return interaction.reaction.state;
-    }
-
-    public void addLove(float love) {
-        this.setLove(this.love + love);
-    }
-
-    public boolean isUUID(UUID uuid) {
-        return this.playerUUID.equals(uuid);
     }
 
     public enum Phases {

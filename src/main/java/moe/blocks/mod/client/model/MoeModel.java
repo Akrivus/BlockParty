@@ -209,6 +209,11 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
     }
 
     @Override
+    public ModelRenderer getModelHead() {
+        return this.head;
+    }
+
+    @Override
     public void render(MatrixStack stack, IVertexBuilder buffer, int light, int overlay, float red, float green, float blue, float alpha) {
         this.body.render(stack, buffer, light, overlay, red, green, blue, alpha);
         this.bodyWear.render(stack, buffer, light, overlay, red, green, blue, alpha);
@@ -348,10 +353,5 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
         arm.translateRotate(stack);
         stack.translate(z, y, z);
         arm.rotationPointX -= x;
-    }
-
-    @Override
-    public ModelRenderer getModelHead() {
-        return this.head;
     }
 }

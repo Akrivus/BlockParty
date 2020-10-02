@@ -17,6 +17,13 @@ public abstract class BlockBasedState extends State<MoeEntity> {
     }
 
     @Override
+    public State clean(MoeEntity entity) {
+        entity.getAttribute(Attributes.ARMOR).removeModifier(entity.getUniqueID());
+        entity.setCupSize(MoeEntity.CupSizes.B);
+        return super.clean(entity);
+    }
+
+    @Override
     public State start(MoeEntity entity) {
         BlockState block = entity.getBlockData();
         entity.getAttribute(Attributes.ARMOR).applyNonPersistentModifier(this.getArmorModifier(entity, block));
@@ -26,13 +33,6 @@ public abstract class BlockBasedState extends State<MoeEntity> {
         entity.setCanFly(block.isIn(MoeTags.WINGED));
         entity.setCupSize(this.cupSize);
         return super.start(entity);
-    }
-
-    @Override
-    public State clean(MoeEntity entity) {
-        entity.getAttribute(Attributes.ARMOR).removeModifier(entity.getUniqueID());
-        entity.setCupSize(MoeEntity.CupSizes.B);
-        return super.clean(entity);
     }
 
     public float getBlockVolume(MoeEntity moe) {

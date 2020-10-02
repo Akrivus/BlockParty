@@ -2,7 +2,6 @@ package moe.blocks.mod.entity.ai.goal.items;
 
 import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
-import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Inventory;
@@ -15,6 +14,11 @@ public class DumpChestGoal extends AbstractMoveToBlockGoal<MoeEntity> {
     public DumpChestGoal(MoeEntity entity) {
         super(entity, 3, 8);
         this.timeUntilNextMove = 12000;
+    }
+
+    @Override
+    public int getPriority() {
+        return 0x8;
     }
 
     @Override
@@ -56,10 +60,5 @@ public class DumpChestGoal extends AbstractMoveToBlockGoal<MoeEntity> {
             if (flag) { return true; }
         }
         return false;
-    }
-
-    @Override
-    public int getPriority() {
-        return 0x8;
     }
 }

@@ -76,12 +76,12 @@ public class MoeMessages {
             return this.handler;
         }
 
-        public Class getPacketClass() {
-            return this.packetClass;
-        }
-
         public int getID() {
             return this.messageID;
+        }
+
+        public Class getPacketClass() {
+            return this.packetClass;
         }
     }
 }

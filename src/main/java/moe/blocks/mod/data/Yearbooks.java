@@ -1,10 +1,10 @@
 package moe.blocks.mod.data;
 
 import moe.blocks.mod.data.dating.Relationship;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.entity.ai.BloodTypes;
 import moe.blocks.mod.entity.ai.automata.state.Deres;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
-import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.init.MoeEntities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
@@ -23,6 +23,35 @@ public class Yearbooks extends WorldSavedData {
     private static final String KEY = "yearbooks";
     private final Map<UUID, BlockPos> cells = new HashMap<>();
     private final Map<UUID, Book> books = new HashMap<>();
+
+    @Override
+    public void read(CompoundNBT compound) {
+        CompoundNBT books = compound.getCompound("Books");
+        books.keySet().forEach(key -> this.books.put(UUID.fromString(key), new Book(this, (CompoundNBT) books.get(key))));
+        CompoundNBT cells = compound.getCompound("Cells");
+        cells.keySet().forEach(key -> this.cells.put(UUID.fromString(key), BlockPos.fromLong(cells.getLong(key))));
+    }
+
+    @Override
+    public CompoundNBT write(CompoundNBT compound) {
+        CompoundNBT books = new CompoundNBT();
+        this.books.keySet().forEach(key -> books.put(key.toString(), this.books.get(key).write()));
+        compound.put("Books", books);
+        CompoundNBT cells = new CompoundNBT();
+        this.cells.keySet().forEach(key -> cells.putLong(key.toString(), this.cells.get(key).toLong()));
+        compound.put("Cells", cells);
+        return compound;
+    }
+
+    public BlockPos get(UUID uuid) {
+        if (!this.cells.containsKey(uuid)) { return BlockPos.ZERO; }
+        return this.cells.get(uuid);
+    }
+
+    public void set(UUID uuid, Book book) {
+        this.books.put(uuid, book);
+        this.markDirty();
+    }
 
     public static void sync(AbstractNPCEntity entity) {
         Yearbooks instance = getInstance(entity.world);
@@ -54,35 +83,6 @@ public class Yearbooks extends WorldSavedData {
         return null;
     }
 
-    public void set(UUID uuid, Book book) {
-        this.books.put(uuid, book);
-        this.markDirty();
-    }
-
-    public BlockPos get(UUID uuid) {
-        if (!this.cells.containsKey(uuid)) { return BlockPos.ZERO; }
-        return this.cells.get(uuid);
-    }
-
-    @Override
-    public void read(CompoundNBT compound) {
-        CompoundNBT books = compound.getCompound("Books");
-        books.keySet().forEach(key -> this.books.put(UUID.fromString(key), new Book(this, (CompoundNBT) books.get(key))));
-        CompoundNBT cells = compound.getCompound("Cells");
-        cells.keySet().forEach(key -> this.cells.put(UUID.fromString(key), BlockPos.fromLong(cells.getLong(key))));
-    }
-
-    @Override
-    public CompoundNBT write(CompoundNBT compound) {
-        CompoundNBT books = new CompoundNBT();
-        this.books.keySet().forEach(key -> books.put(key.toString(), this.books.get(key).write()));
-        compound.put("Books", books);
-        CompoundNBT cells = new CompoundNBT();
-        this.cells.keySet().forEach(key -> cells.putLong(key.toString(), this.cells.get(key).toLong()));
-        compound.put("Cells", cells);
-        return compound;
-    }
-
     public static class Page {
         private final CompoundNBT character;
         private final UUID uuid;
@@ -95,11 +95,6 @@ public class Yearbooks extends WorldSavedData {
         public Page(AbstractNPCEntity entity, UUID uuid) {
             entity.setYearbookPage(this.character = new CompoundNBT(), uuid);
             this.uuid = entity.getUniqueID();
-        }
-
-        public CompoundNBT write() {
-            this.character.putUniqueId("PageUUID", this.uuid);
-            return this.character;
         }
 
         public AbstractNPCEntity getCharacter(Minecraft minecraft) {
@@ -116,12 +111,21 @@ public class Yearbooks extends WorldSavedData {
             return Deres.valueOf(this.character.getString("Dere"));
         }
 
-        public UUID getUUID() {
-            return this.uuid;
-        }
-
         public String getName(AbstractNPCEntity character) {
             return character.getFullName();
+        }
+
+        public CompoundNBT write() {
+            this.character.putUniqueId("PageUUID", this.uuid);
+            return this.character;
+        }
+
+        public int getAge() {
+            return this.character.getInt("AgeInYears");
+        }
+
+        public BloodTypes getBloodType() {
+            return BloodTypes.valueOf(this.character.getString("BloodType"));
         }
 
         public float getHealth() {
@@ -136,20 +140,16 @@ public class Yearbooks extends WorldSavedData {
             return this.character.getFloat("Love");
         }
 
-        public float getStress() {
-            return this.character.getFloat("Stress");
-        }
-
         public Relationship.Status getStatus() {
             return Relationship.Status.valueOf(this.character.getString("Status"));
         }
 
-        public BloodTypes getBloodType() {
-            return BloodTypes.valueOf(this.character.getString("BloodType"));
+        public float getStress() {
+            return this.character.getFloat("Stress");
         }
 
-        public int getAge() {
-            return this.character.getInt("AgeInYears");
+        public UUID getUUID() {
+            return this.uuid;
         }
     }
 
@@ -173,12 +173,20 @@ public class Yearbooks extends WorldSavedData {
             this(null, (CompoundNBT) nbt);
         }
 
-        public CompoundNBT write() {
-            CompoundNBT compound = new CompoundNBT();
-            ListNBT pages = new ListNBT();
-            this.pages.forEach(page -> pages.add(page.write()));
-            compound.put("Pages", pages);
-            return compound;
+        public Page getPage(int pageNumber) {
+            return this.pages.get(pageNumber);
+        }
+
+        public Page removePage(UUID pageUUID, PlayerEntity player) {
+            return this.removePage(pageUUID, player.getUniqueID());
+        }
+
+        public Page removePage(UUID pageUUID, UUID uuid) {
+            Page page = this.getPage(pageUUID);
+            if (page == null) { return null; }
+            this.pages.remove(page);
+            this.setDirty(uuid);
+            return page;
         }
 
         public int setPageIgnorantly(AbstractNPCEntity entity, UUID uuid) {
@@ -208,16 +216,12 @@ public class Yearbooks extends WorldSavedData {
             return this.pages.indexOf(page);
         }
 
-        public Page removePage(UUID pageUUID, PlayerEntity player) {
-            return this.removePage(pageUUID, player.getUniqueID());
-        }
-
-        public Page removePage(UUID pageUUID, UUID uuid) {
-            Page page = this.getPage(pageUUID);
-            if (page == null) { return null; }
-            this.pages.remove(page);
-            this.setDirty(uuid);
-            return page;
+        public CompoundNBT write() {
+            CompoundNBT compound = new CompoundNBT();
+            ListNBT pages = new ListNBT();
+            this.pages.forEach(page -> pages.add(page.write()));
+            compound.put("Pages", pages);
+            return compound;
         }
 
         public List<Page> getPages() {
@@ -230,10 +234,6 @@ public class Yearbooks extends WorldSavedData {
 
         public int getPageCount() {
             return this.pages.size();
-        }
-
-        public Page getPage(int pageNumber) {
-            return this.pages.get(pageNumber);
         }
     }
 }

@@ -49,6 +49,13 @@ public class CellPhoneScreen extends Screen {
     }
 
     @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        if (delta < 0) { this.buttonScrollDown.onPress(); }
+        if (delta > 0) { this.buttonScrollUp.onPress(); }
+        return delta != 0;
+    }
+
+    @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(stack);
         this.renderPhone(stack);
@@ -152,11 +159,49 @@ public class CellPhoneScreen extends Screen {
         if (text.size() > 0) { this.renderTooltip(stack, Lists.transform(text, ITextComponent::func_241878_f), mouseX, mouseY); }
     }
 
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        if (delta < 0) { this.buttonScrollDown.onPress(); }
-        if (delta > 0) { this.buttonScrollUp.onPress(); }
-        return delta != 0;
+    @OnlyIn(Dist.CLIENT)
+    public class PhoneButton extends Button {
+        private final int index;
+
+        public PhoneButton(int x, int y, int index, Button.IPressable button) {
+            super(x, y, 15, 11, StringTextComponent.EMPTY, button);
+            this.index = index;
+        }
+
+        @Override
+        public void playDownSound(SoundHandler sound) {
+            sound.play(SimpleSound.master(MoeSounds.CELL_PHONE_BUTTON.get(), 1.0F));
+        }
+
+        @Override
+        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            Minecraft.getInstance().getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
+            int x = 8 + this.index * 19;
+            int y = this.isHovered() ? 183 : 103;
+            this.blit(stack, this.x, this.y, x, y, 15, 11);
+        }
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public class ScrollButton extends Button {
+        public ScrollButton(CellPhoneScreen parent, int x, int y, int delta) {
+            super(x, y, 7, 7, StringTextComponent.EMPTY, (button) -> {
+                parent.setScroll(delta);
+                parent.setSelected(parent.skip);
+            });
+        }
+
+        @Override
+        public void playDownSound(SoundHandler sound) { }
+
+        @Override
+        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            Minecraft.getInstance().getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
+            int x = this.isHovered() ? 116 : 108;
+            this.blit(stack, this.x, this.y, x, 73, 7, 7);
+        }
     }
 
     public static class ContactEntry {
@@ -205,50 +250,5 @@ public class CellPhoneScreen extends Screen {
             @Override
             public void playDownSound(SoundHandler sound) { }
         }
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public class PhoneButton extends Button {
-        private final int index;
-
-        public PhoneButton(int x, int y, int index, Button.IPressable button) {
-            super(x, y, 15, 11, StringTextComponent.EMPTY, button);
-            this.index = index;
-        }
-
-        @Override
-        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            Minecraft.getInstance().getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
-            int x = 8 + this.index * 19;
-            int y = this.isHovered() ? 183 : 103;
-            this.blit(stack, this.x, this.y, x, y, 15, 11);
-        }
-
-        @Override
-        public void playDownSound(SoundHandler sound) {
-            sound.play(SimpleSound.master(MoeSounds.CELL_PHONE_BUTTON.get(), 1.0F));
-        }
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public class ScrollButton extends Button {
-        public ScrollButton(CellPhoneScreen parent, int x, int y, int delta) {
-            super(x, y, 7, 7, StringTextComponent.EMPTY, (button) -> {
-                parent.setScroll(delta);
-                parent.setSelected(parent.skip);
-            });
-        }
-
-        @Override
-        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            Minecraft.getInstance().getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
-            int x = this.isHovered() ? 116 : 108;
-            this.blit(stack, this.x, this.y, x, 73, 7, 7);
-        }
-
-        @Override
-        public void playDownSound(SoundHandler sound) { }
     }
 }

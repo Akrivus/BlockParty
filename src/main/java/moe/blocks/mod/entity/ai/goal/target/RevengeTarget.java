@@ -9,6 +9,11 @@ public class RevengeTarget extends AbstractStateTarget {
     }
 
     @Override
+    public int getPriority() {
+        return 0x1;
+    }
+
+    @Override
     public boolean shouldContinueExecuting() {
         return this.entity.isVengeful() && super.shouldContinueExecuting();
     }
@@ -21,10 +26,5 @@ public class RevengeTarget extends AbstractStateTarget {
     @Override
     public boolean setTarget() {
         return this.entity.isVengeful() && this.entity.canAttack(this.target = this.entity.getRevengeTarget());
-    }
-
-    @Override
-    public int getPriority() {
-        return 0x1;
     }
 }

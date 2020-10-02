@@ -1,8 +1,8 @@
 package moe.blocks.mod.entity.ai.trigger;
 
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.entity.ai.automata.state.Deres;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
-import moe.blocks.mod.entity.AbstractNPCEntity;
 
 public abstract class StressTrigger extends DereSpecificTrigger {
     public StressTrigger(int priority, float min, float max, Deres... deres) {

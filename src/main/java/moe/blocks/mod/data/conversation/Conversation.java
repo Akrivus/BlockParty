@@ -9,17 +9,17 @@ public class Conversation {
     public String[] tropes;
     public Dialogue dialogue;
 
-    public Conditions getCondition() {
-        if (this.condition == null) { return Conditions.ALWAYS; }
-        return Conditions.valueOf(this.condition.toUpperCase());
-    }
-
     public boolean isTrope(Tropes trope) {
         if (this.tropes == null) { return true; }
         for (String name : this.tropes) {
             if (trope == Tropes.valueOf(name.toUpperCase())) { return true; }
         }
         return false;
+    }
+
+    public Conditions getCondition() {
+        if (this.condition == null) { return Conditions.ALWAYS; }
+        return Conditions.valueOf(this.condition.toUpperCase());
     }
 
     public static class Dialogue {

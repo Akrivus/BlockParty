@@ -1,9 +1,9 @@
 package moe.blocks.mod.entity.ai.goal.react;
 
 import moe.blocks.mod.client.Animations;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
 import moe.blocks.mod.entity.ai.goal.ReactiveGoal;
-import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.entity.ai.brain.task.Task;
 
 public class FlapArmsGoal extends ReactiveGoal {

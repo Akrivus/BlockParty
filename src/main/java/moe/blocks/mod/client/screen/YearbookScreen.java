@@ -183,17 +183,17 @@ public class YearbookScreen extends Screen {
         }
 
         @Override
+        public void playDownSound(SoundHandler sound) {
+            sound.play(SimpleSound.master(SoundEvents.ITEM_BOOK_PAGE_TURN, 1.0F));
+        }
+
+        @Override
         public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             Minecraft.getInstance().getTextureManager().bindTexture(YearbookScreen.YEARBOOK_TEXTURES);
             int x = this.delta > 0 ? 248 : 169;
             int y = this.isHovered() ? 36 : 64;
             this.blit(stack, this.x, this.y, x, y, 7, 10);
-        }
-
-        @Override
-        public void playDownSound(SoundHandler sound) {
-            sound.play(SimpleSound.master(SoundEvents.ITEM_BOOK_PAGE_TURN, 1.0F));
         }
     }
 
@@ -204,16 +204,16 @@ public class YearbookScreen extends Screen {
         }
 
         @Override
+        public void playDownSound(SoundHandler sound) {
+            sound.play(SimpleSound.master(MoeSounds.YEARBOOK_REMOVE_PAGE.get(), 1.0F));
+        }
+
+        @Override
         public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             Minecraft.getInstance().getTextureManager().bindTexture(YearbookScreen.YEARBOOK_TEXTURES);
             int x = this.isHovered() ? 169 : 138;
             this.blit(stack, this.x, this.y, x, 11, 13, 13);
-        }
-
-        @Override
-        public void playDownSound(SoundHandler sound) {
-            sound.play(SimpleSound.master(MoeSounds.YEARBOOK_REMOVE_PAGE.get(), 1.0F));
         }
     }
 }

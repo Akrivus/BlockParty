@@ -1,10 +1,10 @@
 package moe.blocks.mod.entity.ai.automata.state;
 
 import moe.blocks.mod.MoeMod;
+import moe.blocks.mod.entity.AbstractDieEntity;
 import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
-import moe.blocks.mod.entity.AbstractDieEntity;
 import moe.blocks.mod.init.MoeTags;
 import moe.blocks.mod.util.Trans;
 import net.minecraft.block.material.MaterialColor;
@@ -67,25 +67,9 @@ public enum Deres {
         this.tools = tools;
     }
 
-    public static Deres get(AbstractDieEntity.Face face) {
-        return Registry.SET.getOrDefault(face, HIMEDERE);
-    }
-
-    public static MaterialColor getAura(Deres dere) {
-        switch (dere) {
-        case HIMEDERE:
-            return MaterialColor.PURPLE;
-        case KUUDERE:
-            return MaterialColor.BLUE;
-        case TSUNDERE:
-            return MaterialColor.ADOBE;
-        case YANDERE:
-            return MaterialColor.RED;
-        case DEREDERE:
-            return MaterialColor.GREEN;
-        default:
-            return MaterialColor.YELLOW;
-        }
+    @Override
+    public String toString() {
+        return Trans.late(String.format("debug.moeblocks.deres.%s", this.name().toLowerCase()));
     }
 
     public float getGiftFactor(ItemStack stack) {
@@ -113,9 +97,25 @@ public enum Deres {
         return stack.getItem().isIn(this.tools);
     }
 
-    @Override
-    public String toString() {
-        return Trans.late(String.format("debug.moeblocks.deres.%s", this.name().toLowerCase()));
+    public static Deres get(AbstractDieEntity.Face face) {
+        return Registry.SET.getOrDefault(face, HIMEDERE);
+    }
+
+    public static MaterialColor getAura(Deres dere) {
+        switch (dere) {
+        case HIMEDERE:
+            return MaterialColor.PURPLE;
+        case KUUDERE:
+            return MaterialColor.BLUE;
+        case TSUNDERE:
+            return MaterialColor.ADOBE;
+        case YANDERE:
+            return MaterialColor.RED;
+        case DEREDERE:
+            return MaterialColor.GREEN;
+        default:
+            return MaterialColor.YELLOW;
+        }
     }
 
     protected static class Registry {

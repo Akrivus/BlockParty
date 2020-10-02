@@ -1,7 +1,7 @@
 package moe.blocks.mod.entity.ai.automata;
 
-import moe.blocks.mod.entity.ai.goal.ReactiveGoal;
 import moe.blocks.mod.entity.AbstractNPCEntity;
+import moe.blocks.mod.entity.ai.goal.ReactiveGoal;
 
 import java.util.List;
 

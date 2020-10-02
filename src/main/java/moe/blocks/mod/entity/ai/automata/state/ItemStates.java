@@ -1,5 +1,6 @@
 package moe.blocks.mod.entity.ai.automata.state;
 
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
@@ -9,7 +10,6 @@ import moe.blocks.mod.entity.ai.goal.items.HarvestCropsGoal;
 import moe.blocks.mod.entity.ai.goal.items.MineOresGoal;
 import moe.blocks.mod.entity.ai.goal.items.ReplaceCropsGoal;
 import moe.blocks.mod.entity.ai.goal.target.HostileMobsTarget;
-import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

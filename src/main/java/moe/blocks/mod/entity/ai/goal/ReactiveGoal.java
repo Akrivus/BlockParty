@@ -1,9 +1,9 @@
 package moe.blocks.mod.entity.ai.goal;
 
 import moe.blocks.mod.data.conversation.Reactions;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.States;
-import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.entity.ai.brain.task.Task;
 import net.minecraft.entity.ai.goal.Goal;
 
@@ -13,6 +13,11 @@ public abstract class ReactiveGoal extends Goal implements IStateGoal {
 
     public ReactiveGoal(AbstractNPCEntity entity) {
         this.entity = entity;
+    }
+
+    @Override
+    public int getPriority() {
+        return 0x1;
     }
 
     @Override
@@ -37,9 +42,4 @@ public abstract class ReactiveGoal extends Goal implements IStateGoal {
     }
 
     public abstract void execute();
-
-    @Override
-    public int getPriority() {
-        return 0x1;
-    }
 }

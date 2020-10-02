@@ -1,9 +1,9 @@
 package moe.blocks.mod.data.conversation;
 
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.entity.ai.automata.ReactiveState;
 import moe.blocks.mod.entity.ai.goal.ReactiveGoal;
 import moe.blocks.mod.entity.ai.goal.react.FlapArmsGoal;
-import moe.blocks.mod.entity.AbstractNPCEntity;
 
 public enum Reactions {
     NONE(new ReactiveState() {

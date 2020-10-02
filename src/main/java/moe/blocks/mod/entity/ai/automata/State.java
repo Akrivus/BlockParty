@@ -1,7 +1,7 @@
 package moe.blocks.mod.entity.ai.automata;
 
-import moe.blocks.mod.entity.ai.goal.target.AbstractStateTarget;
 import moe.blocks.mod.entity.AbstractNPCEntity;
+import moe.blocks.mod.entity.ai.goal.target.AbstractStateTarget;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.GoalSelector;
 
@@ -14,19 +14,6 @@ public abstract class State<E extends AbstractNPCEntity> {
     public State() {
         this.goals = new ArrayList<>();
     }
-
-    public State start(E entity) {
-        entity.world.getProfiler().startSection("stateStart");
-        this.apply(this.goals, entity);
-        this.goals.forEach(goal -> {
-            GoalSelector selector = goal instanceof AbstractStateTarget ? entity.targetSelector : entity.goalSelector;
-            selector.addGoal(goal.getPriority(), (Goal) goal);
-        });
-        entity.world.getProfiler().endSection();
-        return this;
-    }
-
-    public abstract void apply(List<IStateGoal> goals, E entity);
 
     public State clean(E entity) {
         entity.world.getProfiler().startSection("stateClean");
@@ -42,4 +29,17 @@ public abstract class State<E extends AbstractNPCEntity> {
     public void reset(E entity) {
 
     }
+
+    public State start(E entity) {
+        entity.world.getProfiler().startSection("stateStart");
+        this.apply(this.goals, entity);
+        this.goals.forEach(goal -> {
+            GoalSelector selector = goal instanceof AbstractStateTarget ? entity.targetSelector : entity.goalSelector;
+            selector.addGoal(goal.getPriority(), (Goal) goal);
+        });
+        entity.world.getProfiler().endSection();
+        return this;
+    }
+
+    public abstract void apply(List<IStateGoal> goals, E entity);
 }

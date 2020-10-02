@@ -133,6 +133,14 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return this.getGender() == Genders.FEMININE ? "chan" : "kun";
     }
 
+    public Genders getGender() {
+        return Genders.FEMININE;
+    }
+
+    public String getFamilyName() {
+        return "Chara";
+    }
+
     @Override
     public void registerGoals() {
         this.goalSelector.addGoal(0x0, new OpenDoorGoal(this));
@@ -304,14 +312,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.playSound(sound, this.getSoundVolume(), this.getSoundPitch());
     }
 
-    public void syncYearbooks() {
-        if (this.isLocal() && !this.isInYearbook) { Yearbooks.sync(this); }
-    }
-
-    public boolean isLocal() {
-        return this.world instanceof ServerWorld;
-    }
-
     public Emotions getEmotion() {
         return Emotions.valueOf(this.dataManager.get(EMOTION));
     }
@@ -322,6 +322,27 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public void setAnimation(Animations animation) {
         this.dataManager.set(ANIMATION, animation.name());
+    }
+
+    public String getGivenName() {
+        if (this.givenName != null) { return this.givenName; }
+        return this.givenName = this.getGender().getName();
+    }
+
+    public Deres getDere() {
+        return Deres.valueOf(this.dataManager.get(DERE));
+    }
+
+    public void setDere(Deres dere) {
+        this.dataManager.set(DERE, dere.name());
+    }
+
+    public BloodTypes getBloodType() {
+        return BloodTypes.valueOf(this.dataManager.get(BLOOD_TYPE));
+    }
+
+    public void setBloodType(BloodTypes bloodType) {
+        this.dataManager.set(BLOOD_TYPE, bloodType.name());
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -343,6 +364,14 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public void setHealth(float health) {
         this.syncYearbooks();
         super.setHealth(health);
+    }
+
+    public void syncYearbooks() {
+        if (this.isLocal() && !this.isInYearbook) { Yearbooks.sync(this); }
+    }
+
+    public boolean isLocal() {
+        return this.world instanceof ServerWorld;
     }
 
     @Override
@@ -421,6 +450,27 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.saturation = Math.min(this.saturation + saturation, 20.0F);
     }
 
+    public boolean canConsume(ItemStack stack) {
+        return stack.isFood() && (this.isHungry() || stack.getItem().getFood().canEatWhenFull());
+    }
+
+    public boolean isHungry() {
+        return this.hunger < 19.0F;
+    }
+
+    public void setNextState(States key, State state) {
+        this.addNextTickOp((entity) -> {
+            if (this.states != null) {
+                if (this.states.get(key) != null) { this.states.get(key).clean(this); }
+                this.states.put(key, state.start(this));
+            }
+        });
+    }
+
+    public void addNextTickOp(Consumer<AbstractNPCEntity> op) {
+        this.nextTickOps.add(op);
+    }
+
     public void addExhaustion(float exhaustion) {
         this.exhaustion += exhaustion;
     }
@@ -480,6 +530,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public float getStrikingDistance(Entity target) {
         return this.getStrikingDistance(target.getWidth());
+    }
+
+    public float getStrikingDistance(float distance) {
+        return (float) (Math.pow(this.getWidth() * 2.0F, 2) + distance);
     }
 
     public boolean hasAmmo() {
@@ -619,6 +673,46 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.setAnimation(this.isFollowing() ? Animations.DEFAULT : Animations.IDLE);
     }
 
+    public boolean isFollowing() {
+        return this.canBeTarget(this.getFollowTarget());
+    }
+
+    public LivingEntity getFollowTarget() {
+        if (this.followTargetUUID == null) { return null; }
+        if (this.followTarget == null) {
+            this.followTarget = this.getEntityFromUUID(this.followTargetUUID);
+        }
+        return this.followTarget;
+    }
+
+    public LivingEntity getEntityFromUUID(UUID uuid) {
+        return getEntityFromUUID(LivingEntity.class, this.world, uuid);
+    }
+
+    public static <T extends LivingEntity> T getEntityFromUUID(Class<T> type, World world, UUID uuid) {
+        if (uuid != null && world instanceof ServerWorld) {
+            BlockPos moe = Yearbooks.getInstance(world).get(uuid);
+            int eX, bX, x, eZ, bZ, z;
+            eX = 16 + (bX = 16 * (x = moe.getX() << 4));
+            eZ = 16 + (bZ = 16 * (z = moe.getZ() << 4));
+            IChunk chunk = world.getChunk(x, z, ChunkStatus.FULL, false);
+            if (chunk == null) { return null; }
+            List<T> entities = world.getLoadedEntitiesWithinAABB(type, new AxisAlignedBB(bX, 0, bZ, eX, 255, eZ), (entity) -> entity.getUniqueID().equals(uuid));
+            if (entities.size() > 0) { return entities.get(0); }
+        }
+        return null;
+    }
+
+    public void setFollowTarget(LivingEntity target) {
+        this.setFollowTarget(target != null ? target.getUniqueID() : null);
+        this.followTarget = target;
+        this.resetAnimationState();
+    }
+
+    public void setFollowTarget(UUID target) {
+        this.followTargetUUID = target;
+    }
+
     @Override
     protected boolean shouldExchangeEquipment(ItemStack candidate, ItemStack existing) {
         if (EnchantmentHelper.hasBindingCurse(existing)) { return false; }
@@ -658,27 +752,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public void updateItemState() {
         this.setNextState(States.HELD_ITEM, ItemStates.get(this.getHeldItem(Hand.MAIN_HAND)).state);
         this.updateItemState = false;
-    }
-
-    public void setNextState(States key, State state) {
-        this.addNextTickOp((entity) -> {
-            if (this.states != null) {
-                if (this.states.get(key) != null) { this.states.get(key).clean(this); }
-                this.states.put(key, state.start(this));
-            }
-        });
-    }
-
-    public void addNextTickOp(Consumer<AbstractNPCEntity> op) {
-        this.nextTickOps.add(op);
-    }
-
-    public boolean canConsume(ItemStack stack) {
-        return stack.isFood() && (this.isHungry() || stack.getItem().getFood().canEatWhenFull());
-    }
-
-    public boolean isHungry() {
-        return this.hunger < 19.0F;
     }
 
     public boolean isFavoriteItem(ItemStack stack) {
@@ -744,10 +817,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return this.getStrikingDistance(1.0F);
     }
 
-    public float getStrikingDistance(float distance) {
-        return (float) (Math.pow(this.getWidth() * 2.0F, 2) + distance);
-    }
-
     public BlockState getBlockTarget() {
         return this.blockTarget;
     }
@@ -774,19 +843,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public String getFullName() {
         return String.format("%s %s", this.getFamilyName(), this.getGivenName());
-    }
-
-    public String getFamilyName() {
-        return "Chara";
-    }
-
-    public String getGivenName() {
-        if (this.givenName != null) { return this.givenName; }
-        return this.givenName = this.getGender().getName();
-    }
-
-    public Genders getGender() {
-        return Genders.FEMININE;
     }
 
     public float getHunger() {
@@ -822,22 +878,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public Tropes getTrope() {
         return Tropes.get(this.getDere(), this.getBloodType());
-    }
-
-    public Deres getDere() {
-        return Deres.valueOf(this.dataManager.get(DERE));
-    }
-
-    public void setDere(Deres dere) {
-        this.dataManager.set(DERE, dere.name());
-    }
-
-    public BloodTypes getBloodType() {
-        return BloodTypes.valueOf(this.dataManager.get(BLOOD_TYPE));
-    }
-
-    public void setBloodType(BloodTypes bloodType) {
-        this.dataManager.set(BLOOD_TYPE, bloodType.name());
     }
 
     public boolean isAtEase() {
@@ -922,46 +962,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public boolean isInteracted() {
         return this.ticksExisted - this.timeOfInteraction < 20;
-    }
-
-    public boolean isFollowing() {
-        return this.canBeTarget(this.getFollowTarget());
-    }
-
-    public LivingEntity getFollowTarget() {
-        if (this.followTargetUUID == null) { return null; }
-        if (this.followTarget == null) {
-            this.followTarget = this.getEntityFromUUID(this.followTargetUUID);
-        }
-        return this.followTarget;
-    }
-
-    public LivingEntity getEntityFromUUID(UUID uuid) {
-        return getEntityFromUUID(LivingEntity.class, this.world, uuid);
-    }
-
-    public static <T extends LivingEntity> T getEntityFromUUID(Class<T> type, World world, UUID uuid) {
-        if (uuid != null && world instanceof ServerWorld) {
-            BlockPos moe = Yearbooks.getInstance(world).get(uuid);
-            int eX, bX, x, eZ, bZ, z;
-            eX = 16 + (bX = 16 * (x = moe.getX() << 4));
-            eZ = 16 + (bZ = 16 * (z = moe.getZ() << 4));
-            IChunk chunk = world.getChunk(x, z, ChunkStatus.FULL, false);
-            if (chunk == null) { return null; }
-            List<T> entities = world.getLoadedEntitiesWithinAABB(type, new AxisAlignedBB(bX, 0, bZ, eX, 255, eZ), (entity) -> entity.getUniqueID().equals(uuid));
-            if (entities.size() > 0) { return entities.get(0); }
-        }
-        return null;
-    }
-
-    public void setFollowTarget(LivingEntity target) {
-        this.setFollowTarget(target != null ? target.getUniqueID() : null);
-        this.followTarget = target;
-        this.resetAnimationState();
-    }
-
-    public void setFollowTarget(UUID target) {
-        this.followTargetUUID = target;
     }
 
     public boolean isNightWatch() {

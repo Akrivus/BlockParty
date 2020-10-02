@@ -1,7 +1,7 @@
 package moe.blocks.mod.entity.ai.goal.items;
 
-import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
 import moe.blocks.mod.entity.MoeEntity;
+import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -43,6 +43,11 @@ public class ReplaceCropsGoal extends AbstractMoveToBlockGoal<MoeEntity> {
     }
 
     @Override
+    public int getPriority() {
+        return 0x7;
+    }
+
+    @Override
     public void resetTask() {
         this.plant = null;
         this.stack = null;
@@ -78,10 +83,5 @@ public class ReplaceCropsGoal extends AbstractMoveToBlockGoal<MoeEntity> {
         Block block = Block.getBlockFromItem(item);
         if (block instanceof IPlantable) { return (IPlantable) block; }
         return (world, pos) -> Blocks.WHEAT.getDefaultState();
-    }
-
-    @Override
-    public int getPriority() {
-        return 0x7;
     }
 }

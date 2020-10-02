@@ -11,6 +11,11 @@ public class FollowTargetGoal extends AbstractFollowEntityGoal<AbstractNPCEntity
     }
 
     @Override
+    public int getPriority() {
+        return 0x7;
+    }
+
+    @Override
     public void resetTask() {
         this.entity.setPathPriority(PathNodeType.WATER, -1.0F);
         super.resetTask();
@@ -46,10 +51,5 @@ public class FollowTargetGoal extends AbstractFollowEntityGoal<AbstractNPCEntity
     @Override
     public float getSafeZone(LivingEntity target) {
         return 4.0F;
-    }
-
-    @Override
-    public int getPriority() {
-        return 0x7;
     }
 }

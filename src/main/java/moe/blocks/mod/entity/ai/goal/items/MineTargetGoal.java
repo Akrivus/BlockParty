@@ -1,7 +1,7 @@
 package moe.blocks.mod.entity.ai.goal.items;
 
-import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
 import moe.blocks.mod.entity.AbstractNPCEntity;
+import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.*;
 import net.minecraft.util.Hand;
@@ -12,6 +12,11 @@ public class MineTargetGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity> {
 
     public MineTargetGoal(AbstractNPCEntity entity) {
         super(entity, 4, 8);
+    }
+
+    @Override
+    public int getPriority() {
+        return 0x7;
     }
 
     @Override
@@ -43,10 +48,5 @@ public class MineTargetGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity> {
             }
         }
         return false;
-    }
-
-    @Override
-    public int getPriority() {
-        return 0x7;
     }
 }

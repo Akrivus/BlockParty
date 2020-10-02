@@ -7,6 +7,11 @@ import moe.blocks.mod.entity.MoeEntity;
 
 public class Wave extends ActionAnimation {
     @Override
+    public int getInterval() {
+        return 20;
+    }
+
+    @Override
     public void setMoeRotationAngles(MoeModel model, MoeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks) {
 
     }
@@ -14,10 +19,5 @@ public class Wave extends ActionAnimation {
     @Override
     public Animations getKey() {
         return Animations.WAVE;
-    }
-
-    @Override
-    public int getInterval() {
-        return 20;
     }
 }

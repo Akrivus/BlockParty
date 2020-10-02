@@ -26,6 +26,11 @@ public class TryEquipItemGoal<E extends AbstractNPCEntity> extends AbstractMoveT
     }
 
     @Override
+    public int getPriority() {
+        return 0x6;
+    }
+
+    @Override
     public void onArrival() {
         if (this.entity.tryEquipItem(this.target.getItem())) {
             this.entity.onItemPickup(this.target, this.target.getItem().getCount());
@@ -51,10 +56,5 @@ public class TryEquipItemGoal<E extends AbstractNPCEntity> extends AbstractMoveT
 
     public boolean canPickUp(ItemStack stack) {
         return this.check.test(stack) && this.entity.canPickUpItem(stack);
-    }
-
-    @Override
-    public int getPriority() {
-        return 0x6;
     }
 }
