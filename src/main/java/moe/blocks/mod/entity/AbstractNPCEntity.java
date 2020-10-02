@@ -221,7 +221,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         compound.putString("Emotion", this.getEmotion().name());
         compound.putFloat("Exhaustion", this.exhaustion);
         compound.putInt("EmotionTimer", this.timeUntilEmotionExpires);
-        compound.putUniqueId("FollowTarget", this.followTargetUUID == null ? Util.DUMMY_UUID : this.followTargetUUID);
+        if (followTargetUUID != null) { compound.putUniqueId("FollowTarget", this.followTargetUUID); }
         compound.putString("GivenName", this.getGivenName());
         compound.putFloat("Hunger", this.hunger);
         compound.putLong("HomePosition", this.getHomePosition().toLong());
@@ -243,7 +243,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.setDere(Deres.valueOf(compound.getString("Dere")));
         this.setEmotion(Emotions.valueOf(compound.getString("Emotion")), compound.getInt("EmotionTimer"));
         this.exhaustion = compound.getFloat("Exhaustion");
-        this.setFollowTarget(this.followTargetUUID);
+        if (compound.hasUniqueId("FollowTarget")) { this.setFollowTarget(compound.getUniqueId("FollowTarget")); }
         this.givenName = compound.getString("GivenName");
         this.hunger = compound.getFloat("Hunger");
         this.setHomePosition(BlockPos.fromLong(compound.getLong("HomePosition")));

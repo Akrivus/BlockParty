@@ -1,6 +1,7 @@
 package moe.blocks.mod.entity.ai.automata.state;
 
 import moe.blocks.mod.MoeMod;
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.AbstractDieEntity;
@@ -17,39 +18,39 @@ import java.util.HashMap;
 import java.util.List;
 
 public enum Deres {
-    HIMEDERE(new State<NPCEntity>() {
+    HIMEDERE(new State<AbstractNPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, NPCEntity entity) {
+        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
     }, AbstractDieEntity.Face.ONE, MoeTags.FARMER),
-    KUUDERE(new State<NPCEntity>() {
+    KUUDERE(new State<AbstractNPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, NPCEntity entity) {
+        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
     }, AbstractDieEntity.Face.TWO, MoeTags.ARCHER),
-    TSUNDERE(new State<NPCEntity>() {
+    TSUNDERE(new State<AbstractNPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, NPCEntity entity) {
+        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
     }, AbstractDieEntity.Face.THREE, MoeTags.FIGHTER),
-    YANDERE(new State<NPCEntity>() {
+    YANDERE(new State<AbstractNPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, NPCEntity entity) {
+        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
     }, AbstractDieEntity.Face.FOUR, MoeTags.FIGHTER),
-    DEREDERE(new State<NPCEntity>() {
+    DEREDERE(new State<AbstractNPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, NPCEntity entity) {
+        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
     }, AbstractDieEntity.Face.FIVE, MoeTags.BREEDER),
-    DANDERE(new State<NPCEntity>() {
+    DANDERE(new State<AbstractNPCEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, NPCEntity entity) {
+        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
     }, AbstractDieEntity.Face.SIX, MoeTags.MINER);

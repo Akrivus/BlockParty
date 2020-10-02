@@ -1,7 +1,7 @@
 package moe.blocks.mod.entity.ai.goal.items;
 
 import moe.blocks.mod.entity.ai.goal.AbstractMoveToBlockGoal;
-import moe.blocks.mod.entity.AbstractNPCEntity;
+import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.init.MoeTags;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiPredicate;
 
-public class ReplaceCropsGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity> {
+public class ReplaceCropsGoal extends AbstractMoveToBlockGoal<MoeEntity> {
     private static final Map<PlantType, BiPredicate<World, BlockPos>> blocksForPlant = new HashMap<>();
 
     static {
@@ -37,7 +37,7 @@ public class ReplaceCropsGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity>
     protected IPlantable plant;
     protected ItemStack stack;
 
-    public ReplaceCropsGoal(AbstractNPCEntity entity) {
+    public ReplaceCropsGoal(MoeEntity entity) {
         super(entity, 4, 8);
         this.timeUntilNextMove = 20;
     }

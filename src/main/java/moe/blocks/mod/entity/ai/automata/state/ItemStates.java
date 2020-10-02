@@ -1,5 +1,6 @@
 package moe.blocks.mod.entity.ai.automata.state;
 
+import moe.blocks.mod.entity.MoeEntity;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.ai.goal.TryStuffItemGoal;
@@ -24,31 +25,31 @@ public enum ItemStates {
 
         }
     }),
-    FARMER(new State<AbstractNPCEntity>() {
+    FARMER(new State<MoeEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
+        public void apply(List<IStateGoal> goals, MoeEntity entity) {
             goals.add(new TryStuffItemGoal(entity, MoeTags.CROPS));
             goals.add(new HarvestCropsGoal(entity));
             goals.add(new ReplaceCropsGoal(entity));
         }
     }, MoeTags.FARMER),
-    FIGHTER(new State<AbstractNPCEntity>() {
+    FIGHTER(new State<MoeEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
+        public void apply(List<IStateGoal> goals, MoeEntity entity) {
             goals.add(new TryStuffItemGoal(entity, MoeTags.LOOT));
             goals.add(new HostileMobsTarget(entity));
         }
     }, MoeTags.FIGHTER),
-    MINER(new State<AbstractNPCEntity>() {
+    MINER(new State<MoeEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
+        public void apply(List<IStateGoal> goals, MoeEntity entity) {
             goals.add(new TryStuffItemGoal(entity, MoeTags.ORES));
             goals.add(new MineOresGoal(entity));
         }
     }, MoeTags.MINER),
-    ARCHER(new State<AbstractNPCEntity>() {
+    ARCHER(new State<MoeEntity>() {
         @Override
-        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
+        public void apply(List<IStateGoal> goals, MoeEntity entity) {
             goals.add(new TryStuffItemGoal(entity, MoeTags.LOOT));
             goals.add(new BowAttackGoal(entity));
         }

@@ -1,8 +1,10 @@
 package moe.blocks.mod.entity.ai.automata;
 
+import moe.blocks.mod.entity.AbstractNPCEntity;
+
 import java.util.List;
 
-public class BlankState<E extends NPCEntity> extends State<E> {
+public class BlankState<E extends AbstractNPCEntity> extends State<E> {
     @Override
     public void apply(List<IStateGoal> goals, E entity) {
 
