@@ -6,6 +6,7 @@
     "#moeblocks:tools/farmer",
     "#moeblocks:tools/fighter",
     "#moeblocks:tools/miner",
-    "#moeblocks:tools/offhand"
+    "#moeblocks:tools/offhand",
+    "#minecraft:arrows"
   ]
 }
