@@ -74,11 +74,15 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public static final DataParameter<String> DERE = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public static final DataParameter<String> EMOTION = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public boolean isInYearbook = false;
-    protected final List<Relationship> relationships = new ArrayList<>();
-    protected final HashMap<States, State> states = new HashMap<>();
+    protected final Queue<Consumer<AbstractNPCEntity>> nextTickOps;
+    protected final List<Relationship> relationships;
+    protected final HashMap<States, State> states;
     protected ChunkPos lastRecordedPos;
     protected String givenName;
-    protected Queue<Consumer<AbstractNPCEntity>> nextTickOps = new LinkedList<>();
+    protected int timeOfAvoid;
+    protected int timeOfInteraction;
+    protected int timeOfStare;
+    protected int timeUntilEmotionExpires;
     protected int timeUntilTriggered;
     protected int timeSinceSleep;
     protected long age;
@@ -86,6 +90,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     protected PlayerEntity emotionTarget;
     protected PlayerEntity interactTarget;
     protected PlayerEntity stareTarget;
+    protected LivingEntity avoidTarget;
     protected LivingEntity followTarget;
     protected UUID followTargetUUID;
     protected BlockState blockTarget;
@@ -94,12 +99,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     private float exhaustion;
     private float stress;
     private float relaxation;
-    private LivingEntity avoidTarget;
-    private int avoidTimer;
     private boolean updateItemState = true;
-    private int timeUntilEmotionExpires;
-    private int timeOfInteraction;
-    private int timeOfStare;
 
     protected AbstractNPCEntity(EntityType<? extends AbstractNPCEntity> type, World world) {
         super(type, world);
@@ -107,6 +107,13 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.setPathPriority(PathNodeType.DOOR_WOOD_CLOSED, 0.0F);
         this.setPathPriority(PathNodeType.TRAPDOOR, 0.0F);
         this.setHomePosAndDistance(this.getPosition(), 16);
+        this.nextTickOps = new LinkedList<>();
+        this.relationships = new ArrayList<>();
+        this.states = new HashMap<>();
+        this.states.put(States.DERE, Deres.HIMEDERE.state.start(this));
+        this.states.put(States.EMOTION, Emotions.NORMAL.state.start(this));
+        this.states.put(States.HELD_ITEM, null);
+        this.states.put(States.REACTION, null);
         this.stepHeight = 1.0F;
     }
 
@@ -156,10 +163,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.goalSelector.addGoal(0x8, new FindBedGoal(this));
         this.goalSelector.addGoal(0xA, new StayHomeGoal(this));
         this.goalSelector.addGoal(0xB, new WanderGoal(this));
-        this.states.put(States.DERE, Deres.HIMEDERE.state.start(this));
-        this.states.put(States.EMOTION, Emotions.NORMAL.state.start(this));
-        this.states.put(States.HELD_ITEM, null);
-        this.states.put(States.REACTION, null);
         this.targetSelector.addGoal(0x1, new RevengeTarget(this));
     }
 
@@ -894,7 +897,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public void setAvoidTarget(LivingEntity target) {
         this.avoidTarget = target;
-        this.avoidTimer = this.ticksExisted;
+        this.timeOfAvoid = this.ticksExisted;
     }
 
     public boolean isAttacking() {
@@ -902,7 +905,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     }
 
     public boolean isAvoiding() {
-        return this.ticksExisted - this.avoidTimer < 500;
+        return this.ticksExisted - this.timeOfAvoid < 500;
     }
 
     public boolean isDead() {
