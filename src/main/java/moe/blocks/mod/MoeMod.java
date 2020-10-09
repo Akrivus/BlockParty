@@ -31,11 +31,14 @@ public class MoeMod {
 
     private void onClientSetup(final FMLClientSetupEvent e) {
         MoeEntities.registerEntityRenderingHandlers();
+        MoeItems.registerOverrides();
     }
 
     private void onCommonSetup(final FMLCommonSetupEvent e) {
-        DispenserBehaviors.register();
+        MoeBlocks.registerAliases();
+        MoeBlocks.registerPropertyOverrides();
+        MoeBlocks.registerStepSounds();
         MoeEntities.registerAttributes();
-        MoeBlocks.register();
+        MoeItems.registerDispenserBehaviors();
     }
 }

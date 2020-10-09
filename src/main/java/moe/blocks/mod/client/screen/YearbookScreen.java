@@ -58,12 +58,12 @@ public class YearbookScreen extends Screen {
         this.renderPortrait(stack);
         this.renderEntity(this.width / 2 + 3, 90, 40.0F, this.entity);
         this.renderBook(stack);
-        this.font.drawString(stack, this.name, (this.width - this.font.getStringWidth(this.name)) / 2 + 3, 92, 0);
+        this.font.drawString(stack, this.name, (this.width - this.font.getStringWidth(this.name)) / 2 + 3, 91, 0);
         for (int x = 0; x < this.stats.length; ++x) {
-            this.font.drawString(stack, this.stats[x], this.width / 2 - 38 + x * 25, 105, 0);
+            this.font.drawString(stack, this.stats[x], this.width / 2 - 38 + x * 25, 104, 0);
         }
         for (int y = 0; y < this.lines.length; ++y) {
-            this.font.drawString(stack, this.lines[y], this.width / 2 - 40 - (y > 0 ? 5 : y), 124 + 10 * y, 0);
+            this.font.drawString(stack, this.lines[y], this.width / 2 - 40 - (y > 0 ? 5 : y), 123 + 10 * y, 0);
         }
         super.render(stack, mouseX, mouseY, partialTicks);
         this.renderTooltips(stack, mouseX, mouseY);
@@ -80,14 +80,14 @@ public class YearbookScreen extends Screen {
         }
         if (text.size() > 0) { this.renderTooltip(stack, Lists.transform(text, ITextComponent::func_241878_f), mouseX, mouseY); }
         if (entity != null && entity.isDead()) {
-            this.blit(stack, (this.width - 60) / 2 + 2, 27, 182, 96, 60, 60);
+            this.blit(stack, (this.width - 60) / 2 + 2, 26, 160, 95, 60, 60);
         }
     }
 
     public void renderPortrait(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(YEARBOOK_TEXTURES);
-        this.blit(stack, (this.width - 60) / 2 + 3, 28, 183, 26, 58, 58);
+        this.blit(stack, (this.width - 60) / 2 + 3, 27, 161, 25, 58, 58);
     }
 
     public void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
@@ -111,7 +111,7 @@ public class YearbookScreen extends Screen {
     public void renderBook(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(YEARBOOK_TEXTURES);
-        this.blit(stack, (this.width - 146) / 2, 2, 20, 0, 146, 188);
+        this.blit(stack, (this.width - 146) / 2, 2, 0, 0, 146, 187);
     }
 
     @Override
@@ -137,15 +137,15 @@ public class YearbookScreen extends Screen {
     @Override
     protected void init() {
         this.addButton(new Button(this.width / 2 - 68, 196, 136, 20, DialogTexts.GUI_DONE, (button) -> this.minecraft.displayGuiScreen(null)));
-        this.buttonPreviousPage = this.addButton(new ChangePageButton((this.width - 146) / 2 + 21, 52, -1, (button) -> {
+        this.buttonPreviousPage = this.addButton(new ChangePageButton((this.width - 146) / 2 + 21, 51, -1, (button) -> {
             if (this.pageNumber > 0) { --this.pageNumber; }
             this.updateButtons();
         }));
-        this.buttonNextPage = this.addButton(new ChangePageButton((this.width - 146) / 2 + 122, 52, 1, (button) -> {
+        this.buttonNextPage = this.addButton(new ChangePageButton((this.width - 146) / 2 + 122, 51, 1, (button) -> {
             if (this.pageNumber < this.book.getPageCount() - 1) { ++this.pageNumber; }
             this.updateButtons();
         }));
-        this.buttonRemovePage = this.addButton(new RemovePageButton((this.width - 146) / 2 + 118, 13, (button) -> {
+        this.buttonRemovePage = this.addButton(new RemovePageButton((this.width - 146) / 2 + 118, 12, (button) -> {
             MoeMessages.send(new CRemovePageFromYearbook(this.page.getUUID()));
             this.closeScreen();
         }));
@@ -191,8 +191,8 @@ public class YearbookScreen extends Screen {
         public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             Minecraft.getInstance().getTextureManager().bindTexture(YearbookScreen.YEARBOOK_TEXTURES);
-            int x = this.delta > 0 ? 248 : 169;
-            int y = this.isHovered() ? 36 : 64;
+            int x = this.delta > 0 ? 226 : 147;
+            int y = this.isHovered() ? 35 : 63;
             this.blit(stack, this.x, this.y, x, y, 7, 10);
         }
     }
@@ -212,8 +212,8 @@ public class YearbookScreen extends Screen {
         public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             Minecraft.getInstance().getTextureManager().bindTexture(YearbookScreen.YEARBOOK_TEXTURES);
-            int x = this.isHovered() ? 169 : 138;
-            this.blit(stack, this.x, this.y, x, 11, 13, 13);
+            int x = this.isHovered() ? 147 : 118;
+            this.blit(stack, this.x, this.y, x, 10, 13, 13);
         }
     }
 }

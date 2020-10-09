@@ -29,10 +29,7 @@ public class MoeBlocks {
         return ALIASES.getOrDefault(block, block);
     }
 
-    public static void register() {
-        registerStepSound(Blocks.BELL, MoeSounds.MOE_BELL_STEP.get());
-        registerProperty(Blocks.CAKE, CakeBlock.BITES);
-        registerProperty(Blocks.NOTE_BLOCK, NoteBlock.NOTE);
+    public static void registerAliases() {
         rename(Blocks.ACACIA_LOG, Blocks.ACACIA_WOOD);
         rename(Blocks.ACACIA_PLANKS, Blocks.ACACIA_FENCE, Blocks.ACACIA_FENCE_GATE, Blocks.ACACIA_SLAB, Blocks.ACACIA_STAIRS);
         rename(Blocks.ANDESITE, Blocks.ANDESITE_SLAB, Blocks.ANDESITE_STAIRS, Blocks.ANDESITE_WALL, Blocks.POLISHED_ANDESITE, Blocks.POLISHED_ANDESITE_SLAB, Blocks.POLISHED_ANDESITE_STAIRS);
@@ -104,6 +101,15 @@ public class MoeBlocks {
         rename(Blocks.WARPED_STEM, Blocks.WARPED_HYPHAE);
         rename(Blocks.WHITE_STAINED_GLASS, Blocks.WHITE_STAINED_GLASS_PANE);
         rename(Blocks.YELLOW_STAINED_GLASS, Blocks.YELLOW_STAINED_GLASS_PANE);
+    }
+
+    public static void registerPropertyOverrides() {
+        registerProperty(Blocks.CAKE, CakeBlock.BITES);
+        registerProperty(Blocks.NOTE_BLOCK, NoteBlock.NOTE);
+    }
+
+    public static void registerStepSounds() {
+        registerStepSound(Blocks.BELL, MoeSounds.MOE_BELL_STEP.get());
     }
 
     private static void registerStepSound(Block block, SoundEvent sound) {

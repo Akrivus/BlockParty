@@ -1,0 +1,14 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "moeblocks:item/opened_invite"
+  },
+  "overrides": [
+    {
+      "model": "moeblocks:item/closed_invite",
+      "predicate": {
+        "closed": 1
+      }
+    }
+  ]
+}

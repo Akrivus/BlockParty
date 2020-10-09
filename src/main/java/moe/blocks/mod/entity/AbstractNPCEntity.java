@@ -17,6 +17,7 @@ import moe.blocks.mod.entity.ai.goal.*;
 import moe.blocks.mod.entity.ai.goal.attack.BasicAttackGoal;
 import moe.blocks.mod.entity.ai.goal.items.ConsumeGoal;
 import moe.blocks.mod.entity.ai.goal.target.RevengeTarget;
+import moe.blocks.mod.entity.ai.routines.Waypoint;
 import moe.blocks.mod.entity.ai.trigger.Trigger;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeTags;
@@ -76,6 +77,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public boolean isInYearbook = false;
     protected final Queue<Consumer<AbstractNPCEntity>> nextTickOps;
     protected final List<Relationship> relationships;
+    protected final List<Waypoint> waypoints;
     protected final HashMap<States, State> states;
     protected ChunkPos lastRecordedPos;
     protected String givenName;
@@ -109,6 +111,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.setHomePosAndDistance(this.getPosition(), 16);
         this.nextTickOps = new LinkedList<>();
         this.relationships = new ArrayList<>();
+        this.waypoints = new ArrayList<>();
         this.states = new HashMap<>();
         this.states.put(States.DERE, Deres.HIMEDERE.state.start(this));
         this.states.put(States.EMOTION, Emotions.NORMAL.state.start(this));
@@ -134,6 +137,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public boolean canFly() {
         return this.moveController instanceof FlyingMovementController;
+    }
+
+    public void setWaypoint(BlockPos pos, Waypoint.Origin origin) {
+        this.waypoints.add(new Waypoint(pos, origin));
     }
 
     public String getHonorific() {
@@ -230,16 +237,19 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         compound.putString("BloodType", this.getBloodType().name());
         compound.putString("Dere", this.getDere().name());
         compound.putString("Emotion", this.getEmotion().name());
-        compound.putFloat("Exhaustion", this.exhaustion);
         compound.putInt("EmotionTimer", this.timeUntilEmotionExpires);
+        compound.putFloat("Exhaustion", this.exhaustion);
         if (followTargetUUID != null) { compound.putUniqueId("FollowTarget", this.followTargetUUID); }
         compound.putString("GivenName", this.getGivenName());
         compound.putFloat("Hunger", this.hunger);
         compound.putLong("HomePosition", this.getHomePosition().toLong());
-        compound.putLong("LastRecordedPos", this.lastRecordedPos.asLong());
+        compound.putLong("LastRecordedPosition", this.lastRecordedPos.asLong());
         ListNBT relationships = new ListNBT();
         this.relationships.forEach(relationship -> relationships.add(relationship.write(new CompoundNBT())));
         compound.put("Relationships", relationships);
+        ListNBT waypoints = new ListNBT();
+        this.waypoints.forEach(waypoint -> waypoints.add(waypoint.write(new CompoundNBT())));
+        compound.put("Waypoints", waypoints);
         compound.putFloat("Relaxation", this.relaxation);
         compound.putFloat("Saturation", this.saturation);
         compound.putFloat("Stress", this.stress);
@@ -258,9 +268,11 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.givenName = compound.getString("GivenName");
         this.hunger = compound.getFloat("Hunger");
         this.setHomePosition(BlockPos.fromLong(compound.getLong("HomePosition")));
-        this.lastRecordedPos = new ChunkPos(compound.getLong("LastRecordedPos"));
+        this.lastRecordedPos = new ChunkPos(compound.getLong("LastRecordedPosition"));
         ListNBT relationships = compound.getList("Relationships", 10);
         relationships.forEach(relationship -> this.relationships.add(new Relationship(relationship)));
+        ListNBT waypoints = compound.getList("Waypoints", 10);
+        waypoints.forEach(waypoint -> this.waypoints.add(new Waypoint(waypoint)));
         this.relaxation = compound.getFloat("Relaxation");
         this.saturation = compound.getFloat("Saturation");
         this.stress = compound.getFloat("Stress");
