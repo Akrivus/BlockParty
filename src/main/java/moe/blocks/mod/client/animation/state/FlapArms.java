@@ -13,15 +13,15 @@ public class FlapArms extends ActionAnimation {
     }
 
     @Override
+    public Animations getKey() {
+        return Animations.FLAP_ARMS;
+    }
+
+    @Override
     public void setMoeRotationAngles(MoeModel model, MoeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks) {
         model.rightArm.rotateAngleZ -= 0.7853981633974483F * MathHelper.sin(ageInTicks);
         model.leftArm.rotateAngleZ -= -0.7853981633974483F * MathHelper.sin(ageInTicks);
         model.head.rotateAngleX = 0.2F;
         model.head.rotateAngleZ = 0.1F * MathHelper.sin(ageInTicks);
-    }
-
-    @Override
-    public Animations getKey() {
-        return Animations.FLAP_ARMS;
     }
 }

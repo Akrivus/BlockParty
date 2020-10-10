@@ -7,12 +7,12 @@ import moe.blocks.mod.entity.MoeEntity;
 
 public class Default extends Animation {
     @Override
-    public void setMoeRotationAngles(MoeModel model, MoeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks) {
-
+    public Animations getKey() {
+        return Animations.DEFAULT;
     }
 
     @Override
-    public Animations getKey() {
-        return Animations.DEFAULT;
+    public void setMoeRotationAngles(MoeModel model, MoeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks) {
+
     }
 }

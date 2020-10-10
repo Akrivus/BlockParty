@@ -12,12 +12,12 @@ public class Wave extends ActionAnimation {
     }
 
     @Override
-    public void setMoeRotationAngles(MoeModel model, MoeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks) {
-
+    public Animations getKey() {
+        return Animations.WAVE;
     }
 
     @Override
-    public Animations getKey() {
-        return Animations.WAVE;
+    public void setMoeRotationAngles(MoeModel model, MoeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks) {
+
     }
 }

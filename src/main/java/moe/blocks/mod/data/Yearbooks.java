@@ -189,6 +189,14 @@ public class Yearbooks extends WorldSavedData {
             return page;
         }
 
+        public Page getPage(UUID uuid) {
+            return this.pages.stream().filter(page -> page.getUUID().equals(uuid)).findFirst().orElse(null);
+        }
+
+        public void setDirty(UUID uuid) {
+            this.data.set(uuid, this);
+        }
+
         public int setPageIgnorantly(AbstractNPCEntity entity, UUID uuid) {
             if (!this.setPageCautiously(entity, uuid)) { this.pages.add(new Page(entity, uuid)); }
             this.setDirty(uuid);
@@ -201,14 +209,6 @@ public class Yearbooks extends WorldSavedData {
             this.pages.set(this.pages.indexOf(page), new Page(entity, uuid));
             this.setDirty(uuid);
             return true;
-        }
-
-        public Page getPage(UUID uuid) {
-            return this.pages.stream().filter(page -> page.getUUID().equals(uuid)).findFirst().orElse(null);
-        }
-
-        public void setDirty(UUID uuid) {
-            this.data.set(uuid, this);
         }
 
         public int getPageNumber(UUID uuid) {

@@ -15,13 +15,13 @@ public class LetterItem extends Item {
         super(new Properties().group(MoeItems.Group.INSTANCE));
     }
 
+    public static boolean isOpen(ItemStack stack) {
+        return LetterItem.isClosed(stack) < 1.0F;
+    }
+
     public static float isClosed(ItemStack stack) {
         CompoundNBT tag = stack.getShareTag();
         if (tag != null && tag.getBoolean("IsClosed")) { return 1.0F; }
         return 0.0F;
-    }
-
-    public static boolean isOpen(ItemStack stack) {
-        return LetterItem.isClosed(stack) < 1.0F;
     }
 }

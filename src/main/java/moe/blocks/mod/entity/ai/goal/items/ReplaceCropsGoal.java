@@ -43,13 +43,13 @@ public class ReplaceCropsGoal extends AbstractMoveToBlockGoal<MoeEntity> {
     }
 
     @Override
-    public boolean shouldContinueExecuting() {
-        return super.shouldContinueExecuting() && this.plant != null;
+    public int getPriority() {
+        return 0x7;
     }
 
     @Override
-    public int getPriority() {
-        return 0x7;
+    public boolean shouldContinueExecuting() {
+        return super.shouldContinueExecuting() && this.plant != null;
     }
 
     @Override

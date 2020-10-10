@@ -55,6 +55,26 @@ public class MoeEntity extends AbstractNPCEntity {
         return this.getCupSize().getContainer(id, inventory, this.getBrassiere());
     }
 
+    public Inventory getBrassiere() {
+        return this.brassiere;
+    }
+
+    protected void setBrassiere(CompoundNBT compound) {
+        MoeEntity.CupSizes cup = compound.contains("CupSizes") ? MoeEntity.CupSizes.valueOf(compound.getString("CupSizes")) : MoeEntity.CupSizes.B;
+        this.brassiere = new Inventory(cup.getSize());
+        this.brassiere.read(compound.getList("Brassiere", 10));
+    }
+
+    public MoeEntity.CupSizes getCupSize() {
+        return MoeEntity.CupSizes.get(this.brassiere.getSizeInventory());
+    }
+
+    public void setCupSize(MoeEntity.CupSizes cup) {
+        ListNBT items = this.brassiere.write();
+        this.brassiere = new Inventory(cup.getSize());
+        this.brassiere.read(items);
+    }
+
     @Override
     protected SoundEvent getAmbientSound() {
         return this.getEmotion().sound;
@@ -95,6 +115,14 @@ public class MoeEntity extends AbstractNPCEntity {
         return 0.908203125F * this.getScale();
     }
 
+    public float getScale() {
+        return this.dataManager.get(SCALE);
+    }
+
+    public void setScale(float scale) {
+        this.dataManager.set(SCALE, scale);
+    }
+
     @Override
     public boolean isInvulnerableTo(DamageSource source) {
         return super.isInvulnerableTo(source) || source == DamageSource.DROWN;
@@ -105,6 +133,24 @@ public class MoeEntity extends AbstractNPCEntity {
         if (this.getBlockData().isIn(MoeTags.FULLSIZED)) { return super.getHonorific(); }
         if (this.getBlockData().isIn(MoeTags.BABY)) { return "tan"; }
         return this.getScale() < 1.0F ? "tan" : super.getHonorific();
+    }
+
+    @Override
+    public BlockState getBlockData() {
+        return this.dataManager.get(BLOCK_STATE).orElseGet(() -> super.getBlockData());
+    }
+
+    public void setBlockData(BlockState state) {
+        this.dataManager.set(BLOCK_STATE, Optional.of(state));
+    }
+
+    public Genders getGender() {
+        return this.getBlockData().isIn(MoeTags.MALE) ? Genders.MASCULINE : Genders.FEMININE;
+    }
+
+    @Override
+    public String getFamilyName() {
+        return Trans.lator(String.format("entity.moeblocks.%s", this.getBlockName()), String.format("block.%s", this.getBlockName()));
     }
 
     @Override
@@ -143,6 +189,15 @@ public class MoeEntity extends AbstractNPCEntity {
         }
     }
 
+    public TileEntity getTileEntity() {
+        return this.getBlockData().hasTileEntity() ? TileEntity.readTileEntity(this.getBlockData(), this.getExtraBlockData()) : null;
+    }
+
+    @Override
+    public String getGivenName() {
+        return Trans.lator(String.format("entity.moeblocks.%s.name", this.getBlockName()), super.getGivenName());
+    }
+
     @Override
     public void notifyDataManagerChange(DataParameter<?> key) {
         if (BLOCK_STATE.equals(key)) { this.setNextState(States.BLOCK_STATE, BlockStates.get(this.getBlockData()).state); }
@@ -163,72 +218,17 @@ public class MoeEntity extends AbstractNPCEntity {
         return (int) (this.getScale() * 5) + 13;
     }
 
-    public TileEntity getTileEntity() {
-        return this.getBlockData().hasTileEntity() ? TileEntity.readTileEntity(this.getBlockData(), this.getExtraBlockData()) : null;
-    }
-
-    public Inventory getBrassiere() {
-        return this.brassiere;
-    }
-
-    protected void setBrassiere(CompoundNBT compound) {
-        MoeEntity.CupSizes cup = compound.contains("CupSizes") ? MoeEntity.CupSizes.valueOf(compound.getString("CupSizes")) : MoeEntity.CupSizes.B;
-        this.brassiere = new Inventory(cup.getSize());
-        this.brassiere.read(compound.getList("Brassiere", 10));
-    }
-
-    @Override
-    public BlockState getBlockData() {
-        return this.dataManager.get(BLOCK_STATE).orElseGet(() -> super.getBlockData());
-    }
-
-    public void setBlockData(BlockState state) {
-        this.dataManager.set(BLOCK_STATE, Optional.of(state));
-    }
-
-    @Override
-    public String getFamilyName() {
-        return Trans.lator(String.format("entity.moeblocks.%s", this.getBlockName()), String.format("block.%s", this.getBlockName()));
-    }
-
-    @Override
-    public String getGivenName() {
-        return Trans.lator(String.format("entity.moeblocks.%s.name", this.getBlockName()), super.getGivenName());
-    }
-
-    public Genders getGender() {
-        return this.getBlockData().isIn(MoeTags.MALE) ? Genders.MASCULINE : Genders.FEMININE;
-    }
-
-    public String getBlockName() {
-        ResourceLocation block = MoeBlocks.get(this.getBlockData().getBlock()).getRegistryName();
-        return String.format("%s.%s", block.getNamespace(), block.getPath());
-    }
-
-    public float getScale() {
-        return this.dataManager.get(SCALE);
-    }
-
-    public void setScale(float scale) {
-        this.dataManager.set(SCALE, scale);
-    }
-
-    public MoeEntity.CupSizes getCupSize() {
-        return MoeEntity.CupSizes.get(this.brassiere.getSizeInventory());
-    }
-
-    public void setCupSize(MoeEntity.CupSizes cup) {
-        ListNBT items = this.brassiere.write();
-        this.brassiere = new Inventory(cup.getSize());
-        this.brassiere.read(items);
-    }
-
     public CompoundNBT getExtraBlockData() {
         return this.extraBlockData;
     }
 
     public void setExtraBlockData(CompoundNBT compound) {
         this.extraBlockData = compound == null ? new CompoundNBT() : compound;
+    }
+
+    public String getBlockName() {
+        ResourceLocation block = MoeBlocks.get(this.getBlockData().getBlock()).getRegistryName();
+        return String.format("%s.%s", block.getNamespace(), block.getPath());
     }
 
     @Override

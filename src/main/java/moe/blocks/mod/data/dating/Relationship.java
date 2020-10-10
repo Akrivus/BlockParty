@@ -69,20 +69,20 @@ public class Relationship {
         }
     }
 
-    public CompoundNBT write(CompoundNBT compound) {
-        compound.putString("Phase", this.getPhase().name());
-        compound.putFloat("Love", this.getLove());
-        compound.putInt("TimeSinceInteraction", this.timeSinceInteraction);
-        this.interactions.forEach((interaction, timeout) -> compound.putInt(interaction.getKey(), timeout));
-        return compound;
-    }
-
     public Phases getPhase() {
         return this.phase;
     }
 
     public void setPhase(Phases phase) {
         this.phase = phase;
+    }
+
+    public CompoundNBT write(CompoundNBT compound) {
+        compound.putString("Phase", this.getPhase().name());
+        compound.putFloat("Love", this.getLove());
+        compound.putInt("TimeSinceInteraction", this.timeSinceInteraction);
+        this.interactions.forEach((interaction, timeout) -> compound.putInt(interaction.getKey(), timeout));
+        return compound;
     }
 
     public float getLove() {

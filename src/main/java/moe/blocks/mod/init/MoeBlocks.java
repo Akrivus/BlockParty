@@ -103,9 +103,19 @@ public class MoeBlocks {
         rename(Blocks.YELLOW_STAINED_GLASS, Blocks.YELLOW_STAINED_GLASS_PANE);
     }
 
+    public static void rename(Block main, Block... aliases) {
+        for (Block alias : aliases) {
+            ALIASES.put(alias, main);
+        }
+    }
+
     public static void registerPropertyOverrides() {
         registerProperty(Blocks.CAKE, CakeBlock.BITES);
         registerProperty(Blocks.NOTE_BLOCK, NoteBlock.NOTE);
+    }
+
+    public static void registerProperty(Block block, Property<?> property) {
+        PROPS.put(block, property);
     }
 
     public static void registerStepSounds() {
@@ -114,16 +124,6 @@ public class MoeBlocks {
 
     private static void registerStepSound(Block block, SoundEvent sound) {
         STEP_SOUNDS.put(block, sound);
-    }
-
-    public static void rename(Block main, Block... aliases) {
-        for (Block alias : aliases) {
-            ALIASES.put(alias, main);
-        }
-    }
-
-    public static void registerProperty(Block block, Property<?> property) {
-        PROPS.put(block, property);
     }
 
     public static SoundEvent getStepSound(BlockState block) {

@@ -139,10 +139,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return this.moveController instanceof FlyingMovementController;
     }
 
-    public void setWaypoint(BlockPos pos, Waypoint.Origin origin) {
-        this.waypoints.add(new Waypoint(pos, origin));
-    }
-
     public String getHonorific() {
         return this.getGender() == Genders.FEMININE ? "chan" : "kun";
     }
@@ -593,6 +589,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         compound.putString("Name", this.getGivenName());
         compound.putUniqueId("UUID", this.getUniqueID());
         return compound;
+    }
+
+    public void setWaypoint(BlockPos pos, Waypoint.Origin origin) {
+        this.waypoints.add(new Waypoint(pos, origin));
     }
 
     public void setYearbookPage(CompoundNBT compound, UUID uuid) {

@@ -8,6 +8,11 @@ import net.minecraft.util.math.MathHelper;
 
 public class Idle extends Animation {
     @Override
+    public Animations getKey() {
+        return Animations.IDLE;
+    }
+
+    @Override
     public void setMoeRotationAngles(MoeModel model, MoeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks) {
         if (!entity.isSwingInProgress && limbSwingAmount - entity.prevLimbSwingAmount == 0.0F) {
             switch (entity.getDere()) {
@@ -39,10 +44,5 @@ public class Idle extends Animation {
                 break;
             }
         }
-    }
-
-    @Override
-    public Animations getKey() {
-        return Animations.IDLE;
     }
 }

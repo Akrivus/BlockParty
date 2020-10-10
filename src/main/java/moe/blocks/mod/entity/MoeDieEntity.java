@@ -34,6 +34,18 @@ public class MoeDieEntity extends AbstractDieEntity {
     }
 
     @Override
+    public void writeAdditional(CompoundNBT compound) {
+        super.writeAdditional(compound);
+        compound.putInt("TimeUntilSpawned", this.timeUntilSpawned);
+    }
+
+    @Override
+    public void readAdditional(CompoundNBT compound) {
+        super.readAdditional(compound);
+        this.timeUntilSpawned = compound.getInt("TimeUntilSpawned");
+    }
+
+    @Override
     public boolean onActionTick() {
         if (--this.timeUntilSpawned < 0) {
             BlockState state = this.world.getBlockState(this.getPositionUnderneath());
@@ -71,17 +83,5 @@ public class MoeDieEntity extends AbstractDieEntity {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public void writeAdditional(CompoundNBT compound) {
-        super.writeAdditional(compound);
-        compound.putInt("TimeUntilSpawned", this.timeUntilSpawned);
-    }
-
-    @Override
-    public void readAdditional(CompoundNBT compound) {
-        super.readAdditional(compound);
-        this.timeUntilSpawned = compound.getInt("TimeUntilSpawned");
     }
 }
