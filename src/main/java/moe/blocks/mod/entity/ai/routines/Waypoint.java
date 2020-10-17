@@ -1,16 +1,15 @@
 package moe.blocks.mod.entity.ai.routines;
 
+import moe.blocks.mod.entity.AbstractNPCEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.math.BlockPos;
 
 public class Waypoint {
-    protected final Origin origin;
     protected final BlockPos pos;
 
-    public Waypoint(BlockPos pos, Origin origin) {
+    public Waypoint(BlockPos pos) {
         this.pos = pos;
-        this.origin = origin;
     }
 
     public Waypoint(INBT compound) {
@@ -19,16 +18,18 @@ public class Waypoint {
 
     public Waypoint(CompoundNBT compound) {
         this.pos = BlockPos.fromLong(compound.getLong("Position"));
-        this.origin = Origin.valueOf(compound.getString("Origin"));
+    }
+
+    public boolean matches(AbstractNPCEntity entity) {
+        return this.pos.withinDistance(entity.getPosition(), 256);
+    }
+
+    public BlockPos getPosition() {
+        return this.pos;
     }
 
     public CompoundNBT write(CompoundNBT compound) {
         compound.putLong("Position", this.pos.toLong());
-        compound.putString("Origin", this.origin.name());
         return compound;
-    }
-
-    public enum Origin {
-        PLAYER, ROUTINE, SOCIAL;
     }
 }

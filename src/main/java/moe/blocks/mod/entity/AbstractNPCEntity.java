@@ -21,6 +21,7 @@ import moe.blocks.mod.entity.ai.routines.Waypoint;
 import moe.blocks.mod.entity.ai.trigger.Trigger;
 import moe.blocks.mod.init.MoeItems;
 import moe.blocks.mod.init.MoeTags;
+import moe.blocks.mod.util.sort.BlockDistance;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -67,6 +68,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public abstract class AbstractNPCEntity extends CreatureEntity implements IInventoryChangedListener, INamedContainerProvider {
     public static final DataParameter<Boolean> SITTING = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.BOOLEAN);
@@ -78,6 +80,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     protected final Queue<Consumer<AbstractNPCEntity>> nextTickOps;
     protected final List<Relationship> relationships;
     protected final List<Waypoint> waypoints;
+    protected final Queue<Waypoint> routine;
     protected final HashMap<States, State> states;
     protected ChunkPos lastRecordedPos;
     protected String givenName;
@@ -102,6 +105,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     private float stress;
     private float relaxation;
     private boolean updateItemState = true;
+    private BlockPos returnPos;
 
     protected AbstractNPCEntity(EntityType<? extends AbstractNPCEntity> type, World world) {
         super(type, world);
@@ -109,9 +113,11 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.setPathPriority(PathNodeType.DOOR_WOOD_CLOSED, 0.0F);
         this.setPathPriority(PathNodeType.TRAPDOOR, 0.0F);
         this.setHomePosAndDistance(this.getPosition(), 16);
+        this.setReturnPosition(this.getPosition());
         this.nextTickOps = new LinkedList<>();
         this.relationships = new ArrayList<>();
         this.waypoints = new ArrayList<>();
+        this.routine = new LinkedList<>();
         this.states = new HashMap<>();
         this.states.put(States.DERE, Deres.HIMEDERE.state.start(this));
         this.states.put(States.EMOTION, Emotions.NORMAL.state.start(this));
@@ -139,6 +145,22 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return this.moveController instanceof FlyingMovementController;
     }
 
+    public void clearRoutine() {
+        this.routine.clear();
+    }
+
+    public Queue<Waypoint> getRoutine() {
+        return this.routine;
+    }
+
+    public Waypoint getNextWaypoint() {
+        return this.routine.poll();
+    }
+
+    public double getReturnDistance() {
+        return Math.sqrt(this.getDistanceSq(Vector3d.copyCentered(this.getReturnPosition())));
+    }
+
     public String getHonorific() {
         return this.getGender() == Genders.FEMININE ? "chan" : "kun";
     }
@@ -164,6 +186,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.goalSelector.addGoal(0x5, new TryEquipItemGoal<>(this, (stack) -> stack.isFood()));
         this.goalSelector.addGoal(0x6, new FollowTargetGoal(this));
         this.goalSelector.addGoal(0x8, new FindBedGoal(this));
+        this.goalSelector.addGoal(0x9, new FollowRoutineGoal(this));
         this.goalSelector.addGoal(0xA, new StayHomeGoal(this));
         this.goalSelector.addGoal(0xB, new WanderGoal(this));
         this.targetSelector.addGoal(0x1, new RevengeTarget(this));
@@ -239,6 +262,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         compound.putString("GivenName", this.getGivenName());
         compound.putFloat("Hunger", this.hunger);
         compound.putLong("HomePosition", this.getHomePosition().toLong());
+        compound.putLong("ReturnPosition", this.getReturnPosition().toLong());
         compound.putLong("LastRecordedPosition", this.lastRecordedPos.asLong());
         ListNBT relationships = new ListNBT();
         this.relationships.forEach(relationship -> relationships.add(relationship.write(new CompoundNBT())));
@@ -431,7 +455,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public void startSleeping(BlockPos pos) {
         this.timeUntilEmotionExpires = 0;
         this.timeSinceSleep = 0;
-        this.setHomePosition(pos);
+        this.setReturnPosition(pos);
         super.startSleeping(pos);
         this.addStress(-0.0001F);
     }
@@ -480,6 +504,20 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public void addNextTickOp(Consumer<AbstractNPCEntity> op) {
         this.nextTickOps.add(op);
+    }
+
+    public void setRoutine() {
+        List<Waypoint> waypoints = this.waypoints.stream().filter((waypoint) -> waypoint.matches(this)).collect(Collectors.toList());
+        waypoints.sort(new BlockDistance.Waypoints(this));
+        this.routine.addAll(waypoints);
+    }
+
+    public void setReturnPosition(BlockPos pos) {
+        this.returnPos = pos;
+    }
+
+    public BlockPos getReturnPosition() {
+        return this.returnPos;
     }
 
     public void addExhaustion(float exhaustion) {
@@ -591,8 +629,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return compound;
     }
 
-    public void setWaypoint(BlockPos pos, Waypoint.Origin origin) {
-        this.waypoints.add(new Waypoint(pos, origin));
+    public void setWaypoint(BlockPos pos) {
+        this.waypoints.add(new Waypoint(pos));
     }
 
     public void setYearbookPage(CompoundNBT compound, UUID uuid) {
