@@ -608,13 +608,11 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
         if (stack.getItem().isIn(MoeTags.ADMIN)) { return ActionResultType.FAIL; }
-        if (this.isRemote()) { return ActionResultType.PASS; }
-        if (player.isSneaking()) {
-            Relationship relationship = this.getRelationshipWith(player);
-            this.setNextState(States.REACTION, relationship.getReaction(Interactions.HEADPAT));
-            if (relationship.can(Relationship.Actions.FOLLOW)) {
-                this.setFollowTarget(player.equals(this.getFollowTarget()) ? null : player);
-            }
+        if (this.isRemote() || hand != Hand.MAIN_HAND) { return ActionResultType.PASS; }
+        Relationship relationship = this.getRelationshipWith(player);
+        this.setNextState(States.REACTION, relationship.getReaction(Interactions.HEADPAT));
+        if (relationship.can(Relationship.Actions.FOLLOW)) {
+            this.setFollowTarget(player.equals(this.getFollowTarget()) ? null : player);
         }
         return ActionResultType.SUCCESS;
     }
@@ -709,7 +707,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     @Override
     public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
-        ActionResultType result = super.func_230254_b_(player, hand);
+        ActionResultType result = this.onInteract(player, player.getHeldItem(hand), hand);
         if (result.isSuccessOrConsume()) {
             this.setInteractTarget(player);
             this.syncYearbooks();
