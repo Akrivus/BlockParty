@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[34,)"
+loaderVersion = "[35,)"
 license = "MIT"
 
 [[mods]]
@@ -9,8 +9,8 @@ displayName = "MoeBlocks"
 updateJSONURL = "https://blocks.moe/version"
 displayURL = "https://blocks.moe/"
 logoFile = "moeblocks.png"
-credits = "KAGIC for the idea, Akrivus for the code, Judacraz for textures, Azuraskys for voice lines."
-authors = "Akrivus"
+credits = "akrivus, Jüdacraz, dalfaria."
+authors = "akrivus"
 description = '''
 MoeBlocks adds moes, mobs that do chores and bring gifts in attempt to become your favorite,
 offering a fun and inuitive experience in Minecraft.
@@ -19,12 +19,12 @@ offering a fun and inuitive experience in Minecraft.
 [[dependencies.moeblocks]]
 modId = "forge"
 mandatory = true
-versionRange = "[34,)"
+versionRange = "[35,)"
 ordering = "NONE"
 side = "BOTH"
 [[dependencies.moeblocks]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.16.3]"
+versionRange = "[1.16.4]"
 ordering = "NONE"
 side = "BOTH"

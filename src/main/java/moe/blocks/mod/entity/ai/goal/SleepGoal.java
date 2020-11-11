@@ -20,11 +20,11 @@ public class SleepGoal extends Goal {
 
     @Override
     public void resetTask() {
-        this.entity.wakeUp();
+        this.entity.startSleeping(this.entity.getBedPosition().get());
     }
 
     @Override
     public void tick() {
-        this.entity.startSleeping(this.entity.getBedPosition().get());
+        this.entity.wakeUp();
     }
 }

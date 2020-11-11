@@ -55,8 +55,8 @@ public enum Deres {
         }
     }, AbstractDieEntity.Face.SIX, MoeTags.MINER);
 
-    public final State state;
     private final ITag.INamedTag<Item> tools;
+    public final State state;
 
     Deres(State state, AbstractDieEntity.Face face, ITag.INamedTag<Item> tools) {
         this.state = state;

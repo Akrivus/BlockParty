@@ -18,7 +18,7 @@ public class StayHomeGoal extends Goal {
 
     @Override
     public boolean shouldExecute() {
-        if (!this.entity.canWander()) { return false; }
+        if (this.entity.isWithinHomingDistance() || this.entity.isOccupied()) { return false; }
         this.pos = RandomPositionGenerator.findRandomTargetBlockTowards(this.entity, 16, 3, Vector3d.copyCentered(this.entity.getHomePosition()));
         return this.pos != null;
     }

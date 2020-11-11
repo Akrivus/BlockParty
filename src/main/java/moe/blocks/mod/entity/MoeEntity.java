@@ -76,30 +76,6 @@ public class MoeEntity extends AbstractNPCEntity {
     }
 
     @Override
-    protected SoundEvent getAmbientSound() {
-        return this.getEmotion().sound;
-    }
-
-    @Override
-    public boolean attackEntityAsMob(Entity entity) {
-        if (super.attackEntityAsMob(entity)) {
-            this.playSound(MoeSounds.MOE_YELL.get());
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    protected SoundEvent getHurtSound(DamageSource source) {
-        return MoeSounds.MOE_HURT.get();
-    }
-
-    @Override
-    protected SoundEvent getDeathSound() {
-        return MoeSounds.MOE_DEAD.get();
-    }
-
-    @Override
     public float getSoundPitch() {
         float hardness = (1.0F - (float) (this.getAttributeValue(Attributes.ARMOR) + 1.0F) / 31.0F) * 0.25F;
         return super.getSoundPitch() + hardness + (1.0F - this.getScale());

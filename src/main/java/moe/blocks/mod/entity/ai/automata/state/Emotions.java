@@ -1,6 +1,7 @@
 package moe.blocks.mod.entity.ai.automata.state;
 
 import moe.blocks.mod.entity.AbstractNPCEntity;
+import moe.blocks.mod.entity.ai.VoiceLines;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.init.MoeSounds;
@@ -14,87 +15,101 @@ public enum Emotions {
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, MoeSounds.MOE_YELL.get(), 100),
+    }, VoiceLines.ANGRY, 100),
     BEGGING(new State<AbstractNPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, MoeSounds.MOE_MOAN.get(), 101),
+    }, VoiceLines.SMITTEN, 101),
     CONFUSED(new State<AbstractNPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, MoeSounds.MOE_NO.get(), 102),
+    }, VoiceLines.CONFUSED, 102),
     CRYING(new State<AbstractNPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, MoeSounds.MOE_SOB.get(), 103),
+    }, VoiceLines.CRYING, 103),
     MISCHIEVOUS(new State<AbstractNPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, MoeSounds.MOE_LAUGH.get(), 104),
+    }, VoiceLines.GIGGLE, 104),
     EMBARRASSED(new State<AbstractNPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, MoeSounds.MOE_HURT.get(), 105),
+    }, VoiceLines.GRIEF, 105),
     HAPPY(new State<AbstractNPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, MoeSounds.MOE_LAUGH.get(), 106),
+    }, VoiceLines.HAPPY, 106),
     NORMAL(new State<AbstractNPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, MoeSounds.MOE_AMBIENT.get(), 107),
+    }, VoiceLines.NEUTRAL, 107),
     PAINED(new State<AbstractNPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, MoeSounds.MOE_HURT.get(), 108),
+    }, VoiceLines.CONFUSED, 108),
     PSYCHOTIC(new State<AbstractNPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, MoeSounds.MOE_SCREAM.get(), 109),
+    }, VoiceLines.PSYCHOTIC, 109),
     SCARED(new State<AbstractNPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, MoeSounds.MOE_SCREAM.get(), 110),
+    }, VoiceLines.GRIEF, 110),
+    SNOOTY(new State<AbstractNPCEntity>() {
+        @Override
+        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
+
+        }
+    }, VoiceLines.SNOOTY, 111),
     SMITTEN(new State<AbstractNPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, MoeSounds.MOE_MOAN.get(), 111),
+    }, VoiceLines.SMITTEN, 112),
     TIRED(new State<AbstractNPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, MoeSounds.MOE_YAWN.get(), 112);
+    }, VoiceLines.YAWN, 113);
 
+    private final VoiceLines line;
+    private final byte particle;
     public final State state;
-    public final SoundEvent sound;
-    public final int id;
 
-    Emotions(State state, SoundEvent sound, int id) {
+    Emotions(State state, VoiceLines line, int id) {
         this.state = state;
-        this.sound = sound;
-        this.id = id;
+        this.line = line;
+        this.particle = (byte) id;
+    }
+
+    public SoundEvent getSound(AbstractNPCEntity entity) {
+        return this.line.get(entity);
+    }
+
+    public byte getParticle() {
+        return this.particle;
     }
 }

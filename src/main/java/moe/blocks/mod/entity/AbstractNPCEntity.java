@@ -8,6 +8,7 @@ import moe.blocks.mod.data.dating.Interactions;
 import moe.blocks.mod.data.dating.Relationship;
 import moe.blocks.mod.data.dating.Tropes;
 import moe.blocks.mod.entity.ai.BloodTypes;
+import moe.blocks.mod.entity.ai.VoiceLines;
 import moe.blocks.mod.entity.ai.automata.State;
 import moe.blocks.mod.entity.ai.automata.States;
 import moe.blocks.mod.entity.ai.automata.state.Deres;
@@ -20,6 +21,7 @@ import moe.blocks.mod.entity.ai.goal.target.RevengeTarget;
 import moe.blocks.mod.entity.ai.routines.Waypoint;
 import moe.blocks.mod.entity.ai.trigger.Trigger;
 import moe.blocks.mod.init.MoeItems;
+import moe.blocks.mod.init.MoeSounds;
 import moe.blocks.mod.init.MoeTags;
 import moe.blocks.mod.util.sort.BlockDistance;
 import net.minecraft.block.BlockState;
@@ -76,6 +78,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public static final DataParameter<String> BLOOD_TYPE = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public static final DataParameter<String> DERE = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public static final DataParameter<String> EMOTION = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
+    public static final DataParameter<String> FAMILY_NAME = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
+    public static final DataParameter<String> GIVEN_NAME = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public boolean isInYearbook = false;
     protected final Queue<Consumer<AbstractNPCEntity>> nextTickOps;
     protected final List<Relationship> relationships;
@@ -83,7 +87,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     protected final Queue<Waypoint> routine;
     protected final HashMap<States, State> states;
     protected ChunkPos lastRecordedPos;
-    protected String givenName;
     protected int timeOfAvoid;
     protected int timeOfInteraction;
     protected int timeOfStare;
@@ -128,7 +131,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     @Override
     public ITextComponent getName() {
-        return new TranslationTextComponent("entity.moeblocks.generic", this.getFamilyName(), this.getHonorific());
+        return new TranslationTextComponent("entity.moeblocks.generic", this.getGivenName(), this.getHonorific());
     }
 
     @Override
@@ -170,7 +173,11 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     }
 
     public String getFamilyName() {
-        return "Chara";
+        return this.dataManager.get(FAMILY_NAME);
+    }
+
+    public void setFamilyName(String name) {
+        this.dataManager.set(FAMILY_NAME, name);
     }
 
     @Override
@@ -198,18 +205,15 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.dataManager.register(BLOOD_TYPE, BloodTypes.O.name());
         this.dataManager.register(DERE, Deres.HIMEDERE.name());
         this.dataManager.register(EMOTION, Emotions.NORMAL.name());
+        this.dataManager.register(FAMILY_NAME, "Moe");
+        this.dataManager.register(GIVEN_NAME, "Kawaii");
         this.dataManager.register(SITTING, false);
         super.registerData();
     }
 
     @Override
     public int getTalkInterval() {
-        return 200 + this.rand.nextInt(400);
-    }
-
-    @Override
-    public void playAmbientSound() {
-        if (!this.isSleeping()) { super.playAmbientSound(); }
+        return 150 + this.rand.nextInt(150);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -230,17 +234,18 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
             return;
         case 104:
         case 105:
-        case 112:
+        case 113:
             this.setParticles(ParticleTypes.SMOKE);
             return;
         case 106:
-        case 111:
+        case 112:
             this.setParticles(ParticleTypes.HEART);
             return;
         case 107:
             return;
         case 108:
         case 110:
+        case 111:
             this.setParticles(ParticleTypes.CRIT);
             return;
         default:
@@ -259,6 +264,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         compound.putInt("EmotionTimer", this.timeUntilEmotionExpires);
         compound.putFloat("Exhaustion", this.exhaustion);
         if (followTargetUUID != null) { compound.putUniqueId("FollowTarget", this.followTargetUUID); }
+        compound.putString("FamilyName", this.getFamilyName());
         compound.putString("GivenName", this.getGivenName());
         compound.putFloat("Hunger", this.hunger);
         compound.putLong("HomePosition", this.getHomePosition().toLong());
@@ -285,7 +291,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.setEmotion(Emotions.valueOf(compound.getString("Emotion")), compound.getInt("EmotionTimer"));
         this.exhaustion = compound.getFloat("Exhaustion");
         if (compound.hasUniqueId("FollowTarget")) { this.setFollowTarget(compound.getUniqueId("FollowTarget")); }
-        this.givenName = compound.getString("GivenName");
+        this.setFamilyName(compound.getString("FamilyName"));
+        this.setGivenName(compound.getString("GivenName"));
         this.hunger = compound.getFloat("Hunger");
         this.setHomePosition(BlockPos.fromLong(compound.getLong("HomePosition")));
         this.lastRecordedPos = new ChunkPos(compound.getLong("LastRecordedPosition"));
@@ -338,8 +345,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.timeUntilEmotionExpires = timeout;
         this.emotionTarget = entity;
         if (entity != null) {
-            this.world.setEntityState(this, (byte) emotion.id);
-            this.playSound(emotion.sound);
+            this.world.setEntityState(this, emotion.getParticle());
+            this.playSound(emotion.getSound(this));
         }
     }
 
@@ -360,8 +367,16 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     }
 
     public String getGivenName() {
-        if (this.givenName != null) { return this.givenName; }
-        return this.givenName = this.getGender().getName();
+        String name = this.dataManager.get(GIVEN_NAME);
+        if (name == null) {
+            name = this.getGender().getName();
+            this.setGivenName(name);
+        }
+        return name;
+    }
+
+    public void setGivenName(String name) {
+        this.dataManager.set(GIVEN_NAME, name);
     }
 
     public Deres getDere() {
@@ -424,6 +439,31 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public void swingArm(Hand hand) {
         this.addExhaustion(0.1F);
         super.swingArm(hand);
+    }
+
+    @Override
+    public boolean attackEntityAsMob(Entity entity) {
+        if (super.attackEntityAsMob(entity)) {
+            this.playSound(VoiceLines.ATTACK.get(this));
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    protected SoundEvent getAmbientSound() {
+        if (this.isSleeping()) { return VoiceLines.SLEEPING.get(this); }
+        return this.getEmotion().getSound(this);
+    }
+
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return VoiceLines.HURT.get(this);
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return VoiceLines.DEAD.get(this);
     }
 
     @Override
@@ -990,7 +1030,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public boolean isTimeToSleep() {
         if (this.canFight() && this.isNightWatch()) { return false; }
-        return this.canWander() && !this.world.isDaytime();
+        return this.isOccupied() && !this.world.isDaytime();
     }
 
     public boolean canFight() {
@@ -998,9 +1038,16 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return item.isIn(MoeTags.WEAPONS);
     }
 
-    public boolean canWander() {
-        if (this.isFighting() || this.isVengeful() || this.isSleeping() || this.isFollowing() || this.isInteracted() || this.hasPath()) { return false; }
+    public boolean isOccupied() {
+        return this.isFighting() || this.isVengeful() || this.isSleeping() || this.isFollowing() || this.isInteracted() || this.hasPath();
+    }
+
+    public boolean isWithinHomingDistance() {
         return 16 > this.getHomeDistance() || this.getHomeDistance() > 256;
+    }
+
+    public boolean canWander() {
+        return this.isWithinHomingDistance() && !this.isOccupied();
     }
 
     public boolean isVengeful() {

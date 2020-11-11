@@ -7,6 +7,8 @@ import net.minecraft.state.properties.BedPart;
 import net.minecraft.util.math.BlockPos;
 
 public class FindBedGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity> {
+    protected int tolerableRange = 0;
+
     public FindBedGoal(AbstractNPCEntity entity) {
         super(entity, 7, 16);
     }
@@ -19,7 +21,7 @@ public class FindBedGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity> {
     @Override
     public boolean shouldExecute() {
         if (!this.entity.isTimeToSleep()) { return false; }
-        if (this.entity.getReturnDistance() < 256) {
+        if (this.entity.getReturnDistance() < 16 + this.tolerableRange++) {
             this.pos = this.entity.getReturnPosition();
             if (this.canMoveTo(this.pos, this.entity.getBlockState(this.pos))) {
                 this.path = this.entity.getNavigator().getPathToPos(this.pos, 0);
@@ -38,6 +40,7 @@ public class FindBedGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity> {
     @Override
     public void onArrival() {
         this.entity.startSleeping(this.pos);
+        this.tolerableRange = 0;
     }
 
     @Override
