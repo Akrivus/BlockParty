@@ -1,17 +1,5 @@
 {
-  "entity.moe.ambient": {
-    "category": "player",
-    "subtitle": "subtitle.moe.ambient",
-    "sounds": [
-      "moeblocks:entity/moe1",
-      "moeblocks:entity/moe7",
-      "moeblocks:entity/moe11",
-      "moeblocks:entity/moe66",
-      "moeblocks:entity/moe69"
-    ]
-  },
   "entity.moe.bell.step": {
-    "category": "player",
     "subtitle": "subtitle.moe.bell.step",
     "sounds": [
       "moeblocks:entity/moe/bell/step1",
@@ -19,146 +7,723 @@
       "moeblocks:entity/moe/bell/step3"
     ]
   },
-  "entity.moe.dead": {
-    "category": "player",
+  "entity.moe.boy.angry": {
+    "subtitle": "subtitle.moe.angry",
+    "sounds": [
+      "moeblocks:entity/moe/boy/angry1"
+    ]
+  },
+  "entity.moe.boy.attack": {
+    "subtitle": "subtitle.moe.attack",
+    "sounds": [
+      "moeblocks:entity/moe/boy/attack1"
+    ]
+  },
+  "entity.moe.boy.confused": {
+    "subtitle": "subtitle.moe.confused",
+    "sounds": [
+      "moeblocks:entity/moe/boy/confused1"
+    ]
+  },
+  "entity.moe.boy.crying": {
+    "subtitle": "subtitle.moe.crying",
+    "sounds": [
+      "moeblocks:entity/moe/boy/crying1"
+    ]
+  },
+  "entity.moe.boy.dead": {
     "subtitle": "subtitle.moe.dead",
     "sounds": [
-      "moeblocks:entity/moe33",
-      "moeblocks:entity/moe34",
-      "moeblocks:entity/moe35",
-      "moeblocks:entity/moe36",
-      "moeblocks:entity/moe51",
-      "moeblocks:entity/moe52"
+      "moeblocks:entity/moe/boy/dead1"
     ]
   },
-  "entity.moe.eat": {
-    "category": "player",
+  "entity.moe.boy.eat": {
     "subtitle": "subtitle.moe.eat",
     "sounds": [
-      "moeblocks:entity/moe12",
-      "moeblocks:entity/moe13",
-      "moeblocks:entity/moe15",
-      "moeblocks:entity/moe67"
+      "moeblocks:entity/moe/boy/eat1"
     ]
   },
-  "entity.moe.hurt": {
-    "category": "player",
+  "entity.moe.boy.equip": {
+    "subtitle": "subtitle.moe.equip",
+    "sounds": [
+      "moeblocks:entity/moe/boy/equip1"
+    ]
+  },
+  "entity.moe.boy.feed": {
+    "subtitle": "subtitle.moe.feed",
+    "sounds": [
+      "moeblocks:entity/moe/boy/feed1"
+    ]
+  },
+  "entity.moe.boy.follow": {
+    "subtitle": "subtitle.moe.follow",
+    "sounds": [
+      "moeblocks:entity/moe/boy/follow1"
+    ]
+  },
+  "entity.moe.boy.gift": {
+    "subtitle": "subtitle.moe.gift",
+    "sounds": [
+      "moeblocks:entity/moe/boy/gift1"
+    ]
+  },
+  "entity.moe.boy.giggle": {
+    "subtitle": "subtitle.moe.giggle",
+    "sounds": [
+      "moeblocks:entity/moe/boy/giggle1"
+    ]
+  },
+  "entity.moe.boy.grief": {
+    "subtitle": "subtitle.moe.grief",
+    "sounds": [
+      "moeblocks:entity/moe/boy/grief1"
+    ]
+  },
+  "entity.moe.boy.happy": {
+    "subtitle": "subtitle.moe.happy",
+    "sounds": [
+      "moeblocks:entity/moe/boy/happy1"
+    ]
+  },
+  "entity.moe.boy.hello": {
+    "subtitle": "subtitle.moe.hello",
+    "sounds": [
+      "moeblocks:entity/moe/boy/hello1"
+    ]
+  },
+  "entity.moe.boy.hurt": {
     "subtitle": "subtitle.moe.hurt",
     "sounds": [
-      "moeblocks:entity/moe3",
-      "moeblocks:entity/moe4",
-      "moeblocks:entity/moe5",
-      "moeblocks:entity/moe16",
-      "moeblocks:entity/moe38",
-      "moeblocks:entity/moe41",
-      "moeblocks:entity/moe42",
-      "moeblocks:entity/moe63"
+      "moeblocks:entity/moe/boy/hurt1"
     ]
   },
-  "entity.moe.laugh": {
-    "category": "player",
+  "entity.moe.boy.laugh": {
     "subtitle": "subtitle.moe.laugh",
     "sounds": [
-      "moeblocks:entity/moe2",
-      "moeblocks:entity/moe8",
-      "moeblocks:entity/moe10",
-      "moeblocks:entity/moe18",
-      "moeblocks:entity/moe37",
-      "moeblocks:entity/moe43"
+      "moeblocks:entity/moe/boy/laugh1"
     ]
   },
-  "entity.moe.moan": {
-    "category": "player",
-    "subtitle": "subtitle.moe.moan",
+  "entity.moe.boy.meow": {
+    "subtitle": "subtitle.moe.meow",
     "sounds": [
-      "moeblocks:entity/moe14",
-      "moeblocks:entity/moe26",
-      "moeblocks:entity/moe27",
-      "moeblocks:entity/moe29",
-      "moeblocks:entity/moe32",
-      "moeblocks:entity/moe39",
-      "moeblocks:entity/moe48"
+      "moeblocks:entity/moe/boy/meow1"
     ]
   },
-  "entity.moe.no": {
-    "category": "player",
+  "entity.moe.boy.neutral": {
+    "subtitle": "subtitle.moe.neutral",
+    "sounds": [
+      "moeblocks:entity/moe/boy/neutral1"
+    ]
+  },
+  "entity.moe.boy.no": {
     "subtitle": "subtitle.moe.no",
     "sounds": [
-      "moeblocks:entity/moe23",
-      "moeblocks:entity/moe24",
-      "moeblocks:entity/moe25",
-      "moeblocks:entity/moe30",
-      "moeblocks:entity/moe44",
-      "moeblocks:entity/moe61"
+      "moeblocks:entity/moe/boy/no1"
     ]
   },
-  "entity.moe.scream": {
-    "category": "player",
-    "subtitle": "subtitle.moe.scream",
+  "entity.moe.boy.psychotic": {
+    "subtitle": "subtitle.moe.psychotic",
     "sounds": [
-      "moeblocks:entity/moe20",
-      "moeblocks:entity/moe21",
-      "moeblocks:entity/moe22",
-      "moeblocks:entity/moe28",
-      "moeblocks:entity/moe40",
-      "moeblocks:entity/moe49"
+      "moeblocks:entity/moe/boy/psychotic1"
     ]
   },
-  "entity.moe.sing": {
-    "category": "player",
-    "subtitle": "subtitle.moe.sing",
+  "entity.moe.boy.senpai": {
+    "subtitle": "subtitle.moe.senpai",
     "sounds": [
-      "moeblocks:entity/moe50",
-      "moeblocks:entity/moe70"
+      "moeblocks:entity/moe/boy/senpai1"
     ]
   },
-  "entity.moe.sob": {
-    "category": "player",
-    "subtitle": "subtitle.moe.sob",
+  "entity.moe.boy.sleeping": {
+    "subtitle": "subtitle.moe.sleeping",
     "sounds": [
-      "moeblocks:entity/moe54",
-      "moeblocks:entity/moe55",
-      "moeblocks:entity/moe62"
+      "moeblocks:entity/moe/boy/sleeping1"
     ]
   },
-  "entity.moe.yawn": {
-    "category": "player",
+  "entity.moe.boy.smitten": {
+    "subtitle": "subtitle.moe.smitten",
+    "sounds": [
+      "moeblocks:entity/moe/boy/smitten1"
+    ]
+  },
+  "entity.moe.boy.sneeze": {
+    "subtitle": "subtitle.moe.sneeze",
+    "sounds": [
+      "moeblocks:entity/moe/boy/sneeze1"
+    ]
+  },
+  "entity.moe.boy.snicker": {
+    "subtitle": "subtitle.moe.snicker",
+    "sounds": [
+      "moeblocks:entity/moe/boy/snicker1"
+    ]
+  },
+  "entity.moe.boy.snooty": {
+    "subtitle": "subtitle.moe.snooty",
+    "sounds": [
+      "moeblocks:entity/moe/boy/snooty1"
+    ]
+  },
+  "entity.moe.boy.yawn": {
     "subtitle": "subtitle.moe.yawn",
     "sounds": [
-      "moeblocks:entity/moe6",
-      "moeblocks:entity/moe9",
-      "moeblocks:entity/moe19",
-      "moeblocks:entity/moe45",
-      "moeblocks:entity/moe46",
-      "moeblocks:entity/moe47"
+      "moeblocks:entity/moe/boy/yawn1"
     ]
   },
-  "entity.moe.yell": {
-    "category": "player",
-    "subtitle": "subtitle.moe.yell",
-    "sounds": [
-      "moeblocks:entity/moe31",
-      "moeblocks:entity/moe53",
-      "moeblocks:entity/moe56",
-      "moeblocks:entity/moe57",
-      "moeblocks:entity/moe58",
-      "moeblocks:entity/moe65",
-      "moeblocks:entity/moe71"
-    ]
-  },
-  "entity.moe.yes": {
-    "category": "player",
+  "entity.moe.boy.yes": {
     "subtitle": "subtitle.moe.yes",
     "sounds": [
-      "moeblocks:entity/moe17",
-      "moeblocks:entity/moe59",
-      "moeblocks:entity/moe60",
-      "moeblocks:entity/moe64",
-      "moeblocks:entity/moe68"
+      "moeblocks:entity/moe/boy/yes1"
+    ]
+  },
+  "entity.moe.girl.angry": {
+    "subtitle": "subtitle.moe.angry",
+    "sounds": [
+      "moeblocks:entity/moe/girl/angry1",
+      "moeblocks:entity/moe/girl/angry2",
+      "moeblocks:entity/moe/girl/angry3",
+      "moeblocks:entity/moe/girl/angry4",
+      "moeblocks:entity/moe/girl/angry5",
+      "moeblocks:entity/moe/girl/angry6",
+      "moeblocks:entity/moe/girl/angry7",
+      "moeblocks:entity/moe/girl/angry8",
+      "moeblocks:entity/moe/girl/angry9",
+      "moeblocks:entity/moe/girl/angry10",
+      "moeblocks:entity/moe/girl/angry11",
+      "moeblocks:entity/moe/girl/angry12",
+      "moeblocks:entity/moe/girl/angry13",
+      "moeblocks:entity/moe/girl/angry14",
+      "moeblocks:entity/moe/girl/angry15"
+    ]
+  },
+  "entity.moe.girl.attack": {
+    "subtitle": "subtitle.moe.attack",
+    "sounds": [
+      "moeblocks:entity/moe/girl/attack1",
+      "moeblocks:entity/moe/girl/attack2",
+      "moeblocks:entity/moe/girl/attack3",
+      "moeblocks:entity/moe/girl/attack4",
+      "moeblocks:entity/moe/girl/attack5",
+      "moeblocks:entity/moe/girl/attack6",
+      "moeblocks:entity/moe/girl/attack7",
+      "moeblocks:entity/moe/girl/attack8",
+      "moeblocks:entity/moe/girl/attack9",
+      "moeblocks:entity/moe/girl/attack10",
+      "moeblocks:entity/moe/girl/attack11",
+      "moeblocks:entity/moe/girl/attack12",
+      "moeblocks:entity/moe/girl/attack13",
+      "moeblocks:entity/moe/girl/attack14",
+      "moeblocks:entity/moe/girl/attack15",
+      "moeblocks:entity/moe/girl/attack16",
+      "moeblocks:entity/moe/girl/attack17",
+      "moeblocks:entity/moe/girl/attack18",
+      "moeblocks:entity/moe/girl/attack19",
+      "moeblocks:entity/moe/girl/attack20",
+      "moeblocks:entity/moe/girl/attack21",
+      "moeblocks:entity/moe/girl/attack22",
+      "moeblocks:entity/moe/girl/attack23",
+      "moeblocks:entity/moe/girl/attack24",
+      "moeblocks:entity/moe/girl/attack25",
+      "moeblocks:entity/moe/girl/attack26"
+    ]
+  },
+  "entity.moe.girl.confused": {
+    "subtitle": "subtitle.moe.confused",
+    "sounds": [
+      "moeblocks:entity/moe/girl/confused1",
+      "moeblocks:entity/moe/girl/confused2",
+      "moeblocks:entity/moe/girl/confused3",
+      "moeblocks:entity/moe/girl/confused4",
+      "moeblocks:entity/moe/girl/confused5",
+      "moeblocks:entity/moe/girl/confused6",
+      "moeblocks:entity/moe/girl/confused7",
+      "moeblocks:entity/moe/girl/confused8",
+      "moeblocks:entity/moe/girl/confused9",
+      "moeblocks:entity/moe/girl/confused10",
+      "moeblocks:entity/moe/girl/confused11",
+      "moeblocks:entity/moe/girl/confused12"
+    ]
+  },
+  "entity.moe.girl.crying": {
+    "subtitle": "subtitle.moe.crying",
+    "sounds": [
+      "moeblocks:entity/moe/girl/crying1",
+      "moeblocks:entity/moe/girl/crying2",
+      "moeblocks:entity/moe/girl/crying3",
+      "moeblocks:entity/moe/girl/crying4",
+      "moeblocks:entity/moe/girl/crying5",
+      "moeblocks:entity/moe/girl/crying6",
+      "moeblocks:entity/moe/girl/crying7",
+      "moeblocks:entity/moe/girl/crying8",
+      "moeblocks:entity/moe/girl/crying9"
+    ]
+  },
+  "entity.moe.girl.dead": {
+    "subtitle": "subtitle.moe.dead",
+    "sounds": [
+      "moeblocks:entity/moe/girl/dead1",
+      "moeblocks:entity/moe/girl/dead2",
+      "moeblocks:entity/moe/girl/dead3",
+      "moeblocks:entity/moe/girl/dead4",
+      "moeblocks:entity/moe/girl/dead5",
+      "moeblocks:entity/moe/girl/dead6",
+      "moeblocks:entity/moe/girl/dead7",
+      "moeblocks:entity/moe/girl/dead8",
+      "moeblocks:entity/moe/girl/dead9"
+    ]
+  },
+  "entity.moe.girl.eat": {
+    "subtitle": "subtitle.moe.eat",
+    "sounds": [
+      "moeblocks:entity/moe/girl/eat1",
+      "moeblocks:entity/moe/girl/eat2",
+      "moeblocks:entity/moe/girl/eat3",
+      "moeblocks:entity/moe/girl/eat4",
+      "moeblocks:entity/moe/girl/eat5",
+      "moeblocks:entity/moe/girl/eat6",
+      "moeblocks:entity/moe/girl/eat7",
+      "moeblocks:entity/moe/girl/eat8",
+      "moeblocks:entity/moe/girl/eat9",
+      "moeblocks:entity/moe/girl/eat10",
+      "moeblocks:entity/moe/girl/eat11"
+    ]
+  },
+  "entity.moe.girl.equip": {
+    "subtitle": "subtitle.moe.equip",
+    "sounds": [
+      "moeblocks:entity/moe/girl/equip1",
+      "moeblocks:entity/moe/girl/equip2",
+      "moeblocks:entity/moe/girl/equip3",
+      "moeblocks:entity/moe/girl/equip4",
+      "moeblocks:entity/moe/girl/equip5",
+      "moeblocks:entity/moe/girl/equip6",
+      "moeblocks:entity/moe/girl/equip7"
+    ]
+  },
+  "entity.moe.girl.feed": {
+    "subtitle": "subtitle.moe.feed",
+    "sounds": [
+      "moeblocks:entity/moe/girl/feed1",
+      "moeblocks:entity/moe/girl/feed2",
+      "moeblocks:entity/moe/girl/feed3",
+      "moeblocks:entity/moe/girl/feed4"
+    ]
+  },
+  "entity.moe.girl.follow": {
+    "subtitle": "subtitle.moe.follow",
+    "sounds": [
+      "moeblocks:entity/moe/girl/follow1",
+      "moeblocks:entity/moe/girl/follow2",
+      "moeblocks:entity/moe/girl/follow3",
+      "moeblocks:entity/moe/girl/follow4",
+      "moeblocks:entity/moe/girl/follow5",
+      "moeblocks:entity/moe/girl/follow6"
+    ]
+  },
+  "entity.moe.girl.gift": {
+    "subtitle": "subtitle.moe.gift",
+    "sounds": [
+      "moeblocks:entity/moe/girl/gift1",
+      "moeblocks:entity/moe/girl/gift2",
+      "moeblocks:entity/moe/girl/gift3",
+      "moeblocks:entity/moe/girl/gift4",
+      "moeblocks:entity/moe/girl/gift5"
+    ]
+  },
+  "entity.moe.girl.giggle": {
+    "subtitle": "subtitle.moe.giggle",
+    "sounds": [
+      "moeblocks:entity/moe/girl/giggle1",
+      "moeblocks:entity/moe/girl/giggle2",
+      "moeblocks:entity/moe/girl/giggle3",
+      "moeblocks:entity/moe/girl/giggle4"
+    ]
+  },
+  "entity.moe.girl.grief": {
+    "subtitle": "subtitle.moe.grief",
+    "sounds": [
+      "moeblocks:entity/moe/girl/grief1",
+      "moeblocks:entity/moe/girl/grief2",
+      "moeblocks:entity/moe/girl/grief3",
+      "moeblocks:entity/moe/girl/grief4",
+      "moeblocks:entity/moe/girl/grief5",
+      "moeblocks:entity/moe/girl/grief6",
+      "moeblocks:entity/moe/girl/grief7",
+      "moeblocks:entity/moe/girl/grief8"
+    ]
+  },
+  "entity.moe.girl.happy": {
+    "subtitle": "subtitle.moe.happy",
+    "sounds": [
+      "moeblocks:entity/moe/girl/happy1",
+      "moeblocks:entity/moe/girl/happy2",
+      "moeblocks:entity/moe/girl/happy3",
+      "moeblocks:entity/moe/girl/happy4",
+      "moeblocks:entity/moe/girl/happy5",
+      "moeblocks:entity/moe/girl/happy6",
+      "moeblocks:entity/moe/girl/happy7",
+      "moeblocks:entity/moe/girl/happy8"
+    ]
+  },
+  "entity.moe.girl.hello": {
+    "subtitle": "subtitle.moe.hello",
+    "sounds": [
+      "moeblocks:entity/moe/girl/hello1",
+      "moeblocks:entity/moe/girl/hello2",
+      "moeblocks:entity/moe/girl/hello3",
+      "moeblocks:entity/moe/girl/hello4",
+      "moeblocks:entity/moe/girl/hello5",
+      "moeblocks:entity/moe/girl/hello6",
+      "moeblocks:entity/moe/girl/hello7",
+      "moeblocks:entity/moe/girl/hello8",
+      "moeblocks:entity/moe/girl/hello9",
+      "moeblocks:entity/moe/girl/hello10"
+    ]
+  },
+  "entity.moe.girl.hurt": {
+    "subtitle": "subtitle.moe.hurt",
+    "sounds": [
+      "moeblocks:entity/moe/girl/hurt1",
+      "moeblocks:entity/moe/girl/hurt2",
+      "moeblocks:entity/moe/girl/hurt3",
+      "moeblocks:entity/moe/girl/hurt4",
+      "moeblocks:entity/moe/girl/hurt5",
+      "moeblocks:entity/moe/girl/hurt6",
+      "moeblocks:entity/moe/girl/hurt7",
+      "moeblocks:entity/moe/girl/hurt8",
+      "moeblocks:entity/moe/girl/hurt9",
+      "moeblocks:entity/moe/girl/hurt10",
+      "moeblocks:entity/moe/girl/hurt11",
+      "moeblocks:entity/moe/girl/hurt12",
+      "moeblocks:entity/moe/girl/hurt13"
+    ]
+  },
+  "entity.moe.girl.laugh": {
+    "subtitle": "subtitle.moe.laugh",
+    "sounds": [
+      "moeblocks:entity/moe/girl/laugh1",
+      "moeblocks:entity/moe/girl/laugh2",
+      "moeblocks:entity/moe/girl/laugh3",
+      "moeblocks:entity/moe/girl/laugh4",
+      "moeblocks:entity/moe/girl/laugh5",
+      "moeblocks:entity/moe/girl/laugh6",
+      "moeblocks:entity/moe/girl/laugh7",
+      "moeblocks:entity/moe/girl/laugh8",
+      "moeblocks:entity/moe/girl/laugh9"
+    ]
+  },
+  "entity.moe.girl.meow": {
+    "subtitle": "subtitle.moe.meow",
+    "sounds": [
+      "moeblocks:entity/moe/girl/meow1",
+      "moeblocks:entity/moe/girl/meow2",
+      "moeblocks:entity/moe/girl/meow3",
+      "moeblocks:entity/moe/girl/meow4",
+      "moeblocks:entity/moe/girl/meow5",
+      "moeblocks:entity/moe/girl/meow6",
+      "moeblocks:entity/moe/girl/meow7",
+      "moeblocks:entity/moe/girl/meow8"
+    ]
+  },
+  "entity.moe.girl.neutral": {
+    "subtitle": "subtitle.moe.neutral",
+    "sounds": [
+      "moeblocks:entity/moe/girl/neutral1",
+      "moeblocks:entity/moe/girl/neutral2",
+      "moeblocks:entity/moe/girl/neutral3",
+      "moeblocks:entity/moe/girl/neutral4",
+      "moeblocks:entity/moe/girl/neutral5",
+      "moeblocks:entity/moe/girl/neutral6",
+      "moeblocks:entity/moe/girl/neutral7",
+      "moeblocks:entity/moe/girl/neutral8",
+      "moeblocks:entity/moe/girl/neutral9"
+    ]
+  },
+  "entity.moe.girl.no": {
+    "subtitle": "subtitle.moe.no",
+    "sounds": [
+      "moeblocks:entity/moe/girl/no1",
+      "moeblocks:entity/moe/girl/no2",
+      "moeblocks:entity/moe/girl/no3",
+      "moeblocks:entity/moe/girl/no4",
+      "moeblocks:entity/moe/girl/no5",
+      "moeblocks:entity/moe/girl/no6",
+      "moeblocks:entity/moe/girl/no7",
+      "moeblocks:entity/moe/girl/no8"
+    ]
+  },
+  "entity.moe.girl.psychotic": {
+    "subtitle": "subtitle.moe.psychotic",
+    "sounds": [
+      "moeblocks:entity/moe/girl/psychotic1",
+      "moeblocks:entity/moe/girl/psychotic2"
+    ]
+  },
+  "entity.moe.girl.senpai": {
+    "subtitle": "subtitle.moe.senpai",
+    "sounds": [
+      "moeblocks:entity/moe/girl/senpai1",
+      "moeblocks:entity/moe/girl/senpai2",
+      "moeblocks:entity/moe/girl/senpai3",
+      "moeblocks:entity/moe/girl/senpai4",
+      "moeblocks:entity/moe/girl/senpai5",
+      "moeblocks:entity/moe/girl/senpai6",
+      "moeblocks:entity/moe/girl/senpai7",
+      "moeblocks:entity/moe/girl/senpai8"
+    ]
+  },
+  "entity.moe.girl.sleeping": {
+    "subtitle": "subtitle.moe.sleeping",
+    "sounds": [
+      "moeblocks:entity/moe/girl/sleeping1",
+      "moeblocks:entity/moe/girl/sleeping2",
+      "moeblocks:entity/moe/girl/sleeping3",
+      "moeblocks:entity/moe/girl/sleeping4",
+      "moeblocks:entity/moe/girl/sleeping5",
+      "moeblocks:entity/moe/girl/sleeping6"
+    ]
+  },
+  "entity.moe.girl.smitten": {
+    "subtitle": "subtitle.moe.smitten",
+    "sounds": [
+      "moeblocks:entity/moe/girl/smitten1",
+      "moeblocks:entity/moe/girl/smitten2",
+      "moeblocks:entity/moe/girl/smitten3",
+      "moeblocks:entity/moe/girl/smitten4",
+      "moeblocks:entity/moe/girl/smitten5"
+    ]
+  },
+  "entity.moe.girl.sneeze": {
+    "subtitle": "subtitle.moe.sneeze",
+    "sounds": [
+      "moeblocks:entity/moe/girl/sneeze1",
+      "moeblocks:entity/moe/girl/sneeze2",
+      "moeblocks:entity/moe/girl/sneeze3",
+      "moeblocks:entity/moe/girl/sneeze4",
+      "moeblocks:entity/moe/girl/sneeze5",
+      "moeblocks:entity/moe/girl/sneeze6",
+      "moeblocks:entity/moe/girl/sneeze7",
+      "moeblocks:entity/moe/girl/sneeze8"
+    ]
+  },
+  "entity.moe.girl.snicker": {
+    "subtitle": "subtitle.moe.snicker",
+    "sounds": [
+      "moeblocks:entity/moe/girl/snicker1",
+      "moeblocks:entity/moe/girl/snicker2",
+      "moeblocks:entity/moe/girl/snicker3",
+      "moeblocks:entity/moe/girl/snicker4",
+      "moeblocks:entity/moe/girl/snicker5",
+      "moeblocks:entity/moe/girl/snicker6",
+      "moeblocks:entity/moe/girl/snicker7"
+    ]
+  },
+  "entity.moe.girl.snooty": {
+    "subtitle": "subtitle.moe.snooty",
+    "sounds": [
+      "moeblocks:entity/moe/girl/snooty1",
+      "moeblocks:entity/moe/girl/snooty2",
+      "moeblocks:entity/moe/girl/snooty3",
+      "moeblocks:entity/moe/girl/snooty4",
+      "moeblocks:entity/moe/girl/snooty5",
+      "moeblocks:entity/moe/girl/snooty6",
+      "moeblocks:entity/moe/girl/snooty7"
+    ]
+  },
+  "entity.moe.girl.yawn": {
+    "subtitle": "subtitle.moe.yawn",
+    "sounds": [
+      "moeblocks:entity/moe/girl/yawn1",
+      "moeblocks:entity/moe/girl/yawn2",
+      "moeblocks:entity/moe/girl/yawn3",
+      "moeblocks:entity/moe/girl/yawn4",
+      "moeblocks:entity/moe/girl/yawn5"
+    ]
+  },
+  "entity.moe.girl.yes": {
+    "subtitle": "subtitle.moe.yes",
+    "sounds": [
+      "moeblocks:entity/moe/girl/yes1",
+      "moeblocks:entity/moe/girl/yes2",
+      "moeblocks:entity/moe/girl/yes3",
+      "moeblocks:entity/moe/girl/yes4",
+      "moeblocks:entity/moe/girl/yes5",
+      "moeblocks:entity/moe/girl/yes6",
+      "moeblocks:entity/moe/girl/yes7",
+      "moeblocks:entity/moe/girl/yes8",
+      "moeblocks:entity/moe/girl/yes9",
+      "moeblocks:entity/moe/girl/yes10",
+      "moeblocks:entity/moe/girl/yes11"
+    ]
+  },
+  "entity.senpai.angry": {
+    "subtitle": "subtitle.moe.angry",
+    "sounds": [
+      "moeblocks:entity/senpai/angry1"
+    ]
+  },
+  "entity.senpai.attack": {
+    "subtitle": "subtitle.moe.attack",
+    "sounds": [
+      "moeblocks:entity/senpai/attack1"
+    ]
+  },
+  "entity.senpai.confused": {
+    "subtitle": "subtitle.moe.confused",
+    "sounds": [
+      "moeblocks:entity/senpai/confused1"
+    ]
+  },
+  "entity.senpai.crying": {
+    "subtitle": "subtitle.moe.crying",
+    "sounds": [
+      "moeblocks:entity/senpai/crying1"
+    ]
+  },
+  "entity.senpai.dead": {
+    "subtitle": "subtitle.moe.dead",
+    "sounds": [
+      "moeblocks:entity/senpai/dead1"
+    ]
+  },
+  "entity.senpai.eat": {
+    "subtitle": "subtitle.moe.eat",
+    "sounds": [
+      "moeblocks:entity/senpai/eat1"
+    ]
+  },
+  "entity.senpai.equip": {
+    "subtitle": "subtitle.moe.equip",
+    "sounds": [
+      "moeblocks:entity/senpai/equip1"
+    ]
+  },
+  "entity.senpai.feed": {
+    "subtitle": "subtitle.moe.feed",
+    "sounds": [
+      "moeblocks:entity/senpai/feed1"
+    ]
+  },
+  "entity.senpai.follow": {
+    "subtitle": "subtitle.moe.follow",
+    "sounds": [
+      "moeblocks:entity/senpai/follow1"
+    ]
+  },
+  "entity.senpai.gift": {
+    "subtitle": "subtitle.moe.gift",
+    "sounds": [
+      "moeblocks:entity/senpai/gift1"
+    ]
+  },
+  "entity.senpai.giggle": {
+    "subtitle": "subtitle.moe.giggle",
+    "sounds": [
+      "moeblocks:entity/senpai/giggle1"
+    ]
+  },
+  "entity.senpai.grief": {
+    "subtitle": "subtitle.moe.grief",
+    "sounds": [
+      "moeblocks:entity/senpai/grief1"
+    ]
+  },
+  "entity.senpai.happy": {
+    "subtitle": "subtitle.moe.happy",
+    "sounds": [
+      "moeblocks:entity/senpai/happy1"
+    ]
+  },
+  "entity.senpai.hello": {
+    "subtitle": "subtitle.moe.hello",
+    "sounds": [
+      "moeblocks:entity/senpai/hello1"
+    ]
+  },
+  "entity.senpai.hurt": {
+    "subtitle": "subtitle.moe.hurt",
+    "sounds": [
+      "moeblocks:entity/senpai/hurt1"
+    ]
+  },
+  "entity.senpai.laugh": {
+    "subtitle": "subtitle.moe.laugh",
+    "sounds": [
+      "moeblocks:entity/senpai/laugh1"
+    ]
+  },
+  "entity.senpai.meow": {
+    "subtitle": "subtitle.moe.meow",
+    "sounds": [
+      "moeblocks:entity/senpai/meow1"
+    ]
+  },
+  "entity.senpai.neutral": {
+    "subtitle": "subtitle.moe.neutral",
+    "sounds": [
+      "moeblocks:entity/senpai/neutral1"
+    ]
+  },
+  "entity.senpai.no": {
+    "subtitle": "subtitle.moe.no",
+    "sounds": [
+      "moeblocks:entity/senpai/no1"
+    ]
+  },
+  "entity.senpai.psychotic": {
+    "subtitle": "subtitle.moe.psychotic",
+    "sounds": [
+      "moeblocks:entity/senpai/psychotic1"
+    ]
+  },
+  "entity.senpai.senpai": {
+    "subtitle": "subtitle.moe.senpai",
+    "sounds": [
+      "moeblocks:entity/senpai/senpai1"
+    ]
+  },
+  "entity.senpai.sleeping": {
+    "subtitle": "subtitle.moe.sleeping",
+    "sounds": [
+      "moeblocks:entity/senpai/sleeping1"
+    ]
+  },
+  "entity.senpai.smitten": {
+    "subtitle": "subtitle.moe.smitten",
+    "sounds": [
+      "moeblocks:entity/senpai/smitten1"
+    ]
+  },
+  "entity.senpai.sneeze": {
+    "subtitle": "subtitle.moe.sneeze",
+    "sounds": [
+      "moeblocks:entity/senpai/sneeze1"
+    ]
+  },
+  "entity.senpai.snicker": {
+    "subtitle": "subtitle.moe.snicker",
+    "sounds": [
+      "moeblocks:entity/senpai/snicker1"
+    ]
+  },
+  "entity.senpai.snooty": {
+    "subtitle": "subtitle.moe.snooty",
+    "sounds": [
+      "moeblocks:entity/senpai/snooty1"
+    ]
+  },
+  "entity.senpai.yawn": {
+    "subtitle": "subtitle.moe.yawn",
+    "sounds": [
+      "moeblocks:entity/senpai/yawn1"
+    ]
+  },
+  "entity.senpai.yes": {
+    "subtitle": "subtitle.moe.yes",
+    "sounds": [
+      "moeblocks:entity/senpai/yes1"
     ]
   },
   "item.cell_phone.button": {
-    "category": "player",
     "subtitle": "subtitle.cell_phone.button",
     "sounds": [
       "moeblocks:item/cell_phone/button1",
@@ -167,21 +732,18 @@
     ]
   },
   "item.cell_phone.dial": {
-    "category": "player",
     "subtitle": "subtitle.cell_phone.dial",
     "sounds": [
       "moeblocks:item/cell_phone/dial"
     ]
   },
   "item.cell_phone.ring": {
-    "category": "player",
     "subtitle": "subtitle.cell_phone.ring",
     "sounds": [
       "moeblocks:item/cell_phone/ring"
     ]
   },
   "item.yearbook.remove_page": {
-    "category": "player",
     "subtitle": "subtitle.yearbook.remove_page",
     "sounds": [
       "moeblocks:item/yearbook/remove_page"
