@@ -76,24 +76,30 @@ public enum Emotions {
 
         }
     }, VoiceLines.GRIEF, 110),
+    SICK(new State<AbstractNPCEntity>() {
+        @Override
+        public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
+
+        }
+    }, VoiceLines.SNEEZE, 111),
     SNOOTY(new State<AbstractNPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, VoiceLines.SNOOTY, 111),
+    }, VoiceLines.SNOOTY, 112),
     SMITTEN(new State<AbstractNPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, VoiceLines.SMITTEN, 112),
+    }, VoiceLines.SMITTEN, 113),
     TIRED(new State<AbstractNPCEntity>() {
         @Override
         public void apply(List<IStateGoal> goals, AbstractNPCEntity entity) {
 
         }
-    }, VoiceLines.YAWN, 113);
+    }, VoiceLines.YAWN, 114);
 
     private final VoiceLines line;
     private final byte particle;
