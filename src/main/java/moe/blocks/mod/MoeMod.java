@@ -1,16 +1,20 @@
 package moe.blocks.mod;
 
 import moe.blocks.mod.init.*;
+import net.minecraft.command.Commands;
+import net.minecraft.resources.DataPackRegistries;
+import net.minecraft.util.Util;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 
 @Mod(MoeMod.ID)
 public class MoeMod {
-    public static final String VERSION = "20.21.08";
+    public static final String VERSION = "20.29.11";
     public static final String ID = "moeblocks";
     public static final SimpleChannel CHANNEL = MoeMessages.register();
 

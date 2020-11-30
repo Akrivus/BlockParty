@@ -1,0 +1,26 @@
+[
+  {
+    "tag": "23699354-1ab3-451b-adce-005943d9cde8",
+    "conditions": [
+      "always"
+    ],
+    "message": "Fuck you. I hate you.",
+    "emotion": "normal",
+    "reaction": "nothing",
+    "trigger": "interaction",
+    "responses": [
+      "80b449c5-28f5-47ad-8ab4-fb6973cbdfb1"
+    ]
+  },
+  {
+    "tag": "80b449c5-28f5-47ad-8ab4-fb6973cbdfb1",
+    "conditions": [
+      "always"
+    ],
+    "message": "No... I love you. I'm sorry.",
+    "emotion": "crying",
+    "reaction": "set_love_to_20",
+    "trigger": "response_continue",
+    "responses": []
+  }
+]

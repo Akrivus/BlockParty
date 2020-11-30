@@ -227,6 +227,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
             return;
         case 102:
         case 109:
+        case 111:
             this.setParticles(ParticleTypes.EFFECT);
             return;
         case 103:
@@ -234,18 +235,18 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
             return;
         case 104:
         case 105:
-        case 113:
+        case 114:
             this.setParticles(ParticleTypes.SMOKE);
             return;
         case 106:
-        case 112:
+        case 113:
             this.setParticles(ParticleTypes.HEART);
             return;
         case 107:
             return;
         case 108:
         case 110:
-        case 111:
+        case 112:
             this.setParticles(ParticleTypes.CRIT);
             return;
         default:
@@ -650,7 +651,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         if (stack.getItem().isIn(MoeTags.ADMIN)) { return ActionResultType.FAIL; }
         if (this.isRemote() || hand != Hand.MAIN_HAND) { return ActionResultType.PASS; }
         Relationship relationship = this.getRelationshipWith(player);
-        this.setNextState(States.REACTION, relationship.getReaction(Interactions.HEADPAT));
         if (relationship.can(Relationship.Actions.FOLLOW)) {
             this.setFollowTarget(player.equals(this.getFollowTarget()) ? null : player);
         }

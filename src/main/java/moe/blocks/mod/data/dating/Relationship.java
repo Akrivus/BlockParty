@@ -1,6 +1,5 @@
 package moe.blocks.mod.data.dating;
 
-import moe.blocks.mod.entity.ai.automata.ReactiveState;
 import moe.blocks.mod.util.Trans;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -41,12 +40,6 @@ public class Relationship {
 
     public PlayerEntity getPlayer(World world) {
         return world.getPlayerByUuid(this.playerUUID);
-    }
-
-    public ReactiveState getReaction(Interactions interaction) {
-        if (this.interactions.getOrDefault(interaction, -1) < 0) { this.addLove(interaction.getLove()); }
-        this.interactions.put(interaction, interaction.getCooldown());
-        return interaction.reaction.state;
     }
 
     public void addLove(float love) {
