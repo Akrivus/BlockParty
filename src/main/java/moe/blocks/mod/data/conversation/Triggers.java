@@ -32,5 +32,5 @@ public enum Triggers {
     FLOWER_LILAC,
     FLOWER_ROSE,
     FLOWER_PEONY,
-    EQUIP;
+    EQUIP
 }

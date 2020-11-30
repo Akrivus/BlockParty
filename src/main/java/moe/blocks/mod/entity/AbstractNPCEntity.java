@@ -4,7 +4,6 @@ import moe.blocks.mod.client.Animations;
 import moe.blocks.mod.client.animation.Animation;
 import moe.blocks.mod.client.animation.state.Default;
 import moe.blocks.mod.data.Yearbooks;
-import moe.blocks.mod.data.dating.Interactions;
 import moe.blocks.mod.data.dating.Relationship;
 import moe.blocks.mod.data.dating.Tropes;
 import moe.blocks.mod.entity.ai.BloodTypes;
@@ -21,7 +20,6 @@ import moe.blocks.mod.entity.ai.goal.target.RevengeTarget;
 import moe.blocks.mod.entity.ai.routines.Waypoint;
 import moe.blocks.mod.entity.ai.trigger.Trigger;
 import moe.blocks.mod.init.MoeItems;
-import moe.blocks.mod.init.MoeSounds;
 import moe.blocks.mod.init.MoeTags;
 import moe.blocks.mod.util.sort.BlockDistance;
 import net.minecraft.block.BlockState;
@@ -148,36 +146,25 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return this.moveController instanceof FlyingMovementController;
     }
 
-    public void clearRoutine() {
-        this.routine.clear();
-    }
-
-    public Queue<Waypoint> getRoutine() {
-        return this.routine;
-    }
-
-    public Waypoint getNextWaypoint() {
-        return this.routine.poll();
-    }
-
-    public double getReturnDistance() {
-        return Math.sqrt(this.getDistanceSq(Vector3d.copyCentered(this.getReturnPosition())));
-    }
-
     public String getHonorific() {
         return this.getGender() == Genders.FEMININE ? "chan" : "kun";
+    }
+
+    public String getGivenName() {
+        String name = this.dataManager.get(GIVEN_NAME);
+        if (name == null) {
+            name = this.getGender().getName();
+            this.setGivenName(name);
+        }
+        return name;
     }
 
     public Genders getGender() {
         return Genders.FEMININE;
     }
 
-    public String getFamilyName() {
-        return this.dataManager.get(FAMILY_NAME);
-    }
-
-    public void setFamilyName(String name) {
-        this.dataManager.set(FAMILY_NAME, name);
+    public void setGivenName(String name) {
+        this.dataManager.set(GIVEN_NAME, name);
     }
 
     @Override
@@ -254,6 +241,22 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
+    protected void setParticles(IParticleData particle) {
+        for (int i = 0; i < 5; ++i) {
+            double d0 = this.rand.nextGaussian() * 0.02D;
+            double d1 = this.rand.nextGaussian() * 0.02D;
+            double d2 = this.rand.nextGaussian() * 0.02D;
+            this.world.addParticle(particle, this.getPosXRandom(1.0D), this.getPosYRandom() + 1.0D, this.getPosZRandom(1.0D), d0, d1, d2);
+        }
+    }
+
+    @Override
+    protected SoundEvent getAmbientSound() {
+        if (this.isSleeping()) { return VoiceLines.SLEEPING.get(this); }
+        return this.getEmotion().getSound(this);
+    }
+
     @Override
     public void writeAdditional(CompoundNBT compound) {
         super.writeAdditional(compound);
@@ -280,6 +283,14 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         compound.putFloat("Relaxation", this.relaxation);
         compound.putFloat("Saturation", this.saturation);
         compound.putFloat("Stress", this.stress);
+    }
+
+    public String getFamilyName() {
+        return this.dataManager.get(FAMILY_NAME);
+    }
+
+    public void setFamilyName(String name) {
+        this.dataManager.set(FAMILY_NAME, name);
     }
 
     @Override
@@ -367,19 +378,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.dataManager.set(ANIMATION, animation.name());
     }
 
-    public String getGivenName() {
-        String name = this.dataManager.get(GIVEN_NAME);
-        if (name == null) {
-            name = this.getGender().getName();
-            this.setGivenName(name);
-        }
-        return name;
-    }
-
-    public void setGivenName(String name) {
-        this.dataManager.set(GIVEN_NAME, name);
-    }
-
     public Deres getDere() {
         return Deres.valueOf(this.dataManager.get(DERE));
     }
@@ -394,16 +392,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public void setBloodType(BloodTypes bloodType) {
         this.dataManager.set(BLOOD_TYPE, bloodType.name());
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    protected void setParticles(IParticleData particle) {
-        for (int i = 0; i < 5; ++i) {
-            double d0 = this.rand.nextGaussian() * 0.02D;
-            double d1 = this.rand.nextGaussian() * 0.02D;
-            double d2 = this.rand.nextGaussian() * 0.02D;
-            this.world.addParticle(particle, this.getPosXRandom(1.0D), this.getPosYRandom() + 1.0D, this.getPosZRandom(1.0D), d0, d1, d2);
-        }
     }
 
     @Override
@@ -432,6 +420,16 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     }
 
     @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return VoiceLines.HURT.get(this);
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return VoiceLines.DEAD.get(this);
+    }
+
+    @Override
     public boolean onLivingFall(float distance, float damageMultiplier) {
         return !this.canFly() || super.onLivingFall(distance, damageMultiplier);
     }
@@ -440,31 +438,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public void swingArm(Hand hand) {
         this.addExhaustion(0.1F);
         super.swingArm(hand);
-    }
-
-    @Override
-    public boolean attackEntityAsMob(Entity entity) {
-        if (super.attackEntityAsMob(entity)) {
-            this.playSound(VoiceLines.ATTACK.get(this));
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    protected SoundEvent getAmbientSound() {
-        if (this.isSleeping()) { return VoiceLines.SLEEPING.get(this); }
-        return this.getEmotion().getSound(this);
-    }
-
-    @Override
-    protected SoundEvent getHurtSound(DamageSource source) {
-        return VoiceLines.HURT.get(this);
-    }
-
-    @Override
-    protected SoundEvent getDeathSound() {
-        return VoiceLines.DEAD.get(this);
     }
 
     @Override
@@ -547,20 +520,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.nextTickOps.add(op);
     }
 
-    public void setRoutine() {
-        List<Waypoint> waypoints = this.waypoints.stream().filter((waypoint) -> waypoint.matches(this)).collect(Collectors.toList());
-        waypoints.sort(new BlockDistance.Waypoints(this));
-        this.routine.addAll(waypoints);
-    }
-
-    public void setReturnPosition(BlockPos pos) {
-        this.returnPos = pos;
-    }
-
-    public BlockPos getReturnPosition() {
-        return this.returnPos;
-    }
-
     public void addExhaustion(float exhaustion) {
         this.exhaustion += exhaustion;
     }
@@ -588,6 +547,22 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public boolean canBeTarget(Entity target) {
         return target != null && target.isAlive() && !target.equals(this);
+    }
+
+    public boolean canWander() {
+        return this.isWithinHomingDistance() && !this.isOccupied();
+    }
+
+    public boolean isWithinHomingDistance() {
+        return 16 > this.getHomeDistance() || this.getHomeDistance() > 256;
+    }
+
+    public double getHomeDistance() {
+        return Math.sqrt(this.getDistanceSq(Vector3d.copyCentered(this.getHomePosition())));
+    }
+
+    public void clearRoutine() {
+        this.routine.clear();
     }
 
     public BlockState getBlockState(BlockPos pos) {
@@ -667,8 +642,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return compound;
     }
 
-    public void setWaypoint(BlockPos pos) {
-        this.waypoints.add(new Waypoint(pos));
+    public void setRoutine() {
+        List<Waypoint> waypoints = this.waypoints.stream().filter((waypoint) -> waypoint.matches(this)).collect(Collectors.toList());
+        waypoints.sort(new BlockDistance.Waypoints(this));
+        this.routine.addAll(waypoints);
     }
 
     public void setYearbookPage(CompoundNBT compound, UUID uuid) {
@@ -758,6 +735,15 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     @Override
     public boolean canAttack(LivingEntity target) {
         return this.canBeTarget(target);
+    }
+
+    @Override
+    public boolean attackEntityAsMob(Entity entity) {
+        if (super.attackEntityAsMob(entity)) {
+            this.playSound(VoiceLines.ATTACK.get(this));
+            return true;
+        }
+        return false;
     }
 
     public void resetAnimationState() {
@@ -890,6 +876,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         }
     }
 
+    public void setWaypoint(BlockPos pos) {
+        this.waypoints.add(new Waypoint(pos));
+    }
+
     public int getAgeInYears() {
         return this.getBaseAge() + (int) (this.world.getGameTime() - this.age) / 24000 / 366;
     }
@@ -947,6 +937,26 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public void setInteractTarget(PlayerEntity player) {
         this.interactTarget = player;
         this.timeOfInteraction = this.ticksExisted;
+    }
+
+    public Waypoint getNextWaypoint() {
+        return this.routine.poll();
+    }
+
+    public double getReturnDistance() {
+        return Math.sqrt(this.getDistanceSq(Vector3d.copyCentered(this.getReturnPosition())));
+    }
+
+    public BlockPos getReturnPosition() {
+        return this.returnPos;
+    }
+
+    public void setReturnPosition(BlockPos pos) {
+        this.returnPos = pos;
+    }
+
+    public Queue<Waypoint> getRoutine() {
+        return this.routine;
     }
 
     public LivingEntity getStareTarget() {
@@ -1042,20 +1052,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return this.isFighting() || this.isVengeful() || this.isSleeping() || this.isFollowing() || this.isInteracted() || this.hasPath();
     }
 
-    public boolean isWithinHomingDistance() {
-        return 16 > this.getHomeDistance() || this.getHomeDistance() > 256;
-    }
-
-    public boolean canWander() {
-        return this.isWithinHomingDistance() && !this.isOccupied();
-    }
-
     public boolean isVengeful() {
         return this.ticksExisted - this.getRevengeTimer() < 500;
-    }
-
-    public double getHomeDistance() {
-        return Math.sqrt(this.getDistanceSq(Vector3d.copyCentered(this.getHomePosition())));
     }
 
     public boolean isInteracted() {

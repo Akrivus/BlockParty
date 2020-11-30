@@ -1,7 +1,5 @@
 package moe.blocks.mod.data.dating;
 
-import moe.blocks.mod.data.conversation.Reactions;
-
 public enum Interactions {
     HEADPAT(2.0F, 1000);
 

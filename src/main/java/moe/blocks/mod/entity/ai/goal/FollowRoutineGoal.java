@@ -2,11 +2,7 @@ package moe.blocks.mod.entity.ai.goal;
 
 import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.entity.ai.routines.Waypoint;
-import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.util.math.vector.Vector3d;
-
-import java.util.EnumSet;
 
 public class FollowRoutineGoal extends Goal {
     private final AbstractNPCEntity entity;
@@ -38,6 +34,6 @@ public class FollowRoutineGoal extends Goal {
 
     @Override
     public void startExecuting() {
-        this.timeUntilTravel = (int)(12000 - this.entity.world.getDayTime() % 12000) / (this.entity.getRoutine().size() + 1);
+        this.timeUntilTravel = (int) (12000 - this.entity.world.getDayTime() % 12000) / (this.entity.getRoutine().size() + 1);
     }
 }

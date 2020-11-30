@@ -1,7 +1,5 @@
 package moe.blocks.mod.data.conversation;
 
-import moe.blocks.mod.data.conversation.Conditions;
-import moe.blocks.mod.data.conversation.Reactions;
 import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.entity.ai.automata.state.Emotions;
 import moe.blocks.mod.init.MoeDialogues;
@@ -20,40 +18,9 @@ public class Dialogue extends ForgeRegistryEntry<Dialogue> {
     private String trigger;
     private String[] responses;
 
-    public String getKey() {
-        return this.tag;
-    }
-
-    public Conditions[] getConditions() {
-        Conditions[] temp = new Conditions[this.conditions.length];
-        for (int i = 0; i < temp.length; ++i) {
-            temp[i] = Conditions.valueOf(this.conditions[i].toUpperCase());
-        }
-        return temp;
-    }
-
-    public String getMessage() {
-        return this.message;
-    }
-
-    public Emotions getEmotion() {
-        return Emotions.valueOf(this.emotion.toUpperCase());
-    }
-
-    public Reactions getReactions() {
-        return Reactions.valueOf(this.reaction.toUpperCase());
-    }
-
-    public Triggers getTriggers() {
-        return Triggers.valueOf(this.trigger.toUpperCase());
-    }
-
-    public List<Dialogue> getResponses() {
-        List<Dialogue> temp = new ArrayList<>();
-        for (int i = 0; i < this.responses.length; ++i) {
-            temp.add(MoeDialogues.REGISTRY.get(this.responses[i]));
-        }
-        return temp;
+    public boolean matches(Triggers trigger, AbstractNPCEntity character, PlayerEntity player) {
+        if (!trigger.equals(this.trigger)) { return false; }
+        return this.matches(character, player);
     }
 
     public boolean matches(AbstractNPCEntity character, PlayerEntity player) {
@@ -64,8 +31,39 @@ public class Dialogue extends ForgeRegistryEntry<Dialogue> {
         return true;
     }
 
-    public boolean matches(Triggers trigger, AbstractNPCEntity character, PlayerEntity player) {
-        if (!trigger.equals(this.trigger)) { return false; }
-        return this.matches(character, player);
+    public Conditions[] getConditions() {
+        Conditions[] temp = new Conditions[this.conditions.length];
+        for (int i = 0; i < temp.length; ++i) {
+            temp[i] = Conditions.valueOf(this.conditions[i].toUpperCase());
+        }
+        return temp;
+    }
+
+    public Emotions getEmotion() {
+        return Emotions.valueOf(this.emotion.toUpperCase());
+    }
+
+    public String getKey() {
+        return this.tag;
+    }
+
+    public String getMessage() {
+        return this.message;
+    }
+
+    public Reactions getReactions() {
+        return Reactions.valueOf(this.reaction.toUpperCase());
+    }
+
+    public List<Dialogue> getResponses() {
+        List<Dialogue> temp = new ArrayList<>();
+        for (int i = 0; i < this.responses.length; ++i) {
+            temp.add(MoeDialogues.REGISTRY.get(this.responses[i]));
+        }
+        return temp;
+    }
+
+    public Triggers getTriggers() {
+        return Triggers.valueOf(this.trigger.toUpperCase());
     }
 }

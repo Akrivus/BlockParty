@@ -24,12 +24,12 @@ public class Waypoint {
         return this.pos.withinDistance(entity.getPosition(), 256);
     }
 
-    public BlockPos getPosition() {
-        return this.pos;
-    }
-
     public CompoundNBT write(CompoundNBT compound) {
         compound.putLong("Position", this.pos.toLong());
         return compound;
+    }
+
+    public BlockPos getPosition() {
+        return this.pos;
     }
 }

@@ -1,7 +1,6 @@
 package moe.blocks.mod.item;
 
 import moe.blocks.mod.entity.AbstractNPCEntity;
-import moe.blocks.mod.entity.ai.routines.Waypoint;
 import moe.blocks.mod.init.MoeItems;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;

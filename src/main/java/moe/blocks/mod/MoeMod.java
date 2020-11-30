@@ -1,14 +1,10 @@
 package moe.blocks.mod;
 
 import moe.blocks.mod.init.*;
-import net.minecraft.command.Commands;
-import net.minecraft.resources.DataPackRegistries;
-import net.minecraft.util.Util;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 

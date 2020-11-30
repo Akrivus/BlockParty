@@ -4,7 +4,6 @@ import moe.blocks.mod.entity.AbstractNPCEntity;
 import moe.blocks.mod.entity.ai.VoiceLines;
 import moe.blocks.mod.entity.ai.automata.IStateGoal;
 import moe.blocks.mod.entity.ai.automata.State;
-import moe.blocks.mod.init.MoeSounds;
 import net.minecraft.util.SoundEvent;
 
 import java.util.List;
@@ -101,9 +100,9 @@ public enum Emotions {
         }
     }, VoiceLines.YAWN, 114);
 
+    public final State state;
     private final VoiceLines line;
     private final byte particle;
-    public final State state;
 
     Emotions(State state, VoiceLines line, int id) {
         this.state = state;

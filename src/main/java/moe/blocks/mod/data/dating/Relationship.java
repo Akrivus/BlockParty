@@ -34,16 +34,16 @@ public class Relationship {
         }
     }
 
+    public void addLove(float love) {
+        this.setLove(this.love + love);
+    }
+
     public boolean can(Actions action) {
         return action.inRange(this.love);
     }
 
     public PlayerEntity getPlayer(World world) {
         return world.getPlayerByUuid(this.playerUUID);
-    }
-
-    public void addLove(float love) {
-        this.setLove(this.love + love);
     }
 
     public boolean isUUID(UUID uuid) {
