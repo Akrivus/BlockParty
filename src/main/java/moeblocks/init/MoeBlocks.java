@@ -119,7 +119,7 @@ public class MoeBlocks {
     }
 
     public static void registerStepSounds() {
-        registerStepSound(Blocks.BELL, MoeSounds.MOE_BELL_STEP.get());
+        registerStepSound(Blocks.BELL, MoeSounds.MOE_ENTITY_BELL_STEP.get());
     }
 
     private static void registerStepSound(Block block, SoundEvent sound) {
