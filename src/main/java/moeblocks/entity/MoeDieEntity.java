@@ -1,6 +1,6 @@
 package moeblocks.entity;
 
-import moeblocks.entity.ai.automata.state.Deres;
+import moeblocks.automata.state.Deres;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeItems;
 import moeblocks.init.MoeTags;
@@ -53,6 +53,7 @@ public class MoeDieEntity extends AbstractDieEntity {
             if (state.equals(this.blockStateForSpawn)) {
                 MoeEntity moe = MoeEntities.MOE.get().create(this.world);
                 moe.setPositionAndRotation(this.getPosX(), this.getPosY(), this.getPosZ(), this.rotationYaw, this.rotationPitch);
+                moe.setProtagonist(this.getPlayer());
                 moe.setBlockData(state);
                 moe.setExtraBlockData(extra != null ? extra.getTileData() : new CompoundNBT());
                 moe.setDere(this.dere);

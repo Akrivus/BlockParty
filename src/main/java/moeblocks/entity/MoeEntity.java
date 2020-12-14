@@ -1,8 +1,8 @@
 package moeblocks.entity;
 
-import moeblocks.entity.ai.automata.States;
-import moeblocks.entity.ai.automata.state.BlockStates;
-import moeblocks.entity.ai.automata.state.Deres;
+import moeblocks.automata.Automaton;
+import moeblocks.automata.state.BlockStates;
+import moeblocks.automata.state.Genders;
 import moeblocks.init.MoeBlocks;
 import moeblocks.init.MoeTags;
 import moeblocks.util.Trans;
@@ -18,9 +18,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -57,16 +55,16 @@ public class MoeEntity extends AbstractNPCEntity {
     }
 
     protected void setBrassiere(CompoundNBT compound) {
-        MoeEntity.CupSizes cup = compound.contains("CupSizes") ? MoeEntity.CupSizes.valueOf(compound.getString("CupSizes")) : MoeEntity.CupSizes.B;
+        CupSizes cup = compound.contains("CupSizes") ? CupSizes.valueOf(compound.getString("CupSizes")) : CupSizes.B;
         this.brassiere = new Inventory(cup.getSize());
         this.brassiere.read(compound.getList("Brassiere", 10));
     }
 
-    public MoeEntity.CupSizes getCupSize() {
-        return MoeEntity.CupSizes.get(this.brassiere.getSizeInventory());
+    public CupSizes getCupSize() {
+        return CupSizes.get(this.brassiere.getSizeInventory());
     }
 
-    public void setCupSize(MoeEntity.CupSizes cup) {
+    public void setCupSize(CupSizes cup) {
         ListNBT items = this.brassiere.write();
         this.brassiere = new Inventory(cup.getSize());
         this.brassiere.read(items);
@@ -127,15 +125,20 @@ public class MoeEntity extends AbstractNPCEntity {
     }
 
     @Override
+    public void registerStates() {
+        this.states.put(BlockStates.class, new Automaton(this, BlockStates.DEFAULT));
+        super.registerStates();
+    }
+
+    @Override
     public void registerData() {
-        super.registerData();
         this.dataManager.register(BLOCK_STATE, Optional.of(Blocks.AIR.getDefaultState()));
         this.dataManager.register(SCALE, 1.0F);
+        super.registerData();
     }
 
     @Override
     public void writeAdditional(CompoundNBT compound) {
-        compound.putInt("BlockData", Block.getStateId(this.getBlockData()));
         compound.put("ExtraBlockData", this.getExtraBlockData());
         compound.putFloat("Scale", this.getScale());
         compound.putString("CupSizes", this.getCupSize().name());
@@ -143,13 +146,22 @@ public class MoeEntity extends AbstractNPCEntity {
         super.writeAdditional(compound);
     }
 
+    public void writeCharacter(CompoundNBT compound) {
+        compound.putInt("BlockData", Block.getStateId(this.getBlockData()));
+        super.writeCharacter(compound);
+    }
+
     @Override
     public void readAdditional(CompoundNBT compound) {
-        this.setBlockData(Block.getStateById(compound.getInt("BlockData")));
         this.setExtraBlockData((CompoundNBT) compound.get("ExtraBlockData"));
         this.setScale(compound.getFloat("Scale"));
         this.setBrassiere(compound);
         super.readAdditional(compound);
+    }
+
+    public void readCharacter(CompoundNBT compound) {
+        this.setBlockData(Block.getStateById(compound.getInt("BlockData")));
+        super.readCharacter(compound);
     }
 
     @Override
@@ -173,17 +185,9 @@ public class MoeEntity extends AbstractNPCEntity {
 
     @Override
     public void notifyDataManagerChange(DataParameter<?> key) {
-        if (BLOCK_STATE.equals(key)) { this.setNextState(States.BLOCK_STATE, BlockStates.get(this.getBlockData()).state); }
+        if (BLOCK_STATE.equals(key)) { this.setNextState(BlockStates.class, BlockStates.get(this.getBlockData())); }
         if (SCALE.equals(key)) { this.recalculateSize(); }
         super.notifyDataManagerChange(key);
-    }
-
-    @Override
-    public void setYearbookPage(CompoundNBT compound, UUID uuid) {
-        super.setYearbookPage(compound, uuid);
-        compound.putInt("BlockData", Block.getStateId(this.getBlockData()));
-        compound.put("ExtraBlockData", this.getExtraBlockData());
-        compound.putFloat("Scale", 1.0F);
     }
 
     @Override
@@ -240,50 +244,10 @@ public class MoeEntity extends AbstractNPCEntity {
 
     private int[] getAuraColor() {
         MaterialColor block = this.getBlockData().getMaterial().getColor();
-        MaterialColor aura = Deres.getAura(this.getDere());
-        return new int[]{block.colorValue, aura.colorValue};
+        return new int[]{block.colorValue, this.getDere().getColor()};
     }
 
     public boolean isBlockGlowing() {
         return this.getBlockData().isIn(MoeTags.GLOWING);
     }
-
-    public enum CupSizes {
-        B(1), C(2), D(3), DD(6);
-
-        private final int size;
-        private final int rows;
-
-        CupSizes(int rows) {
-            this.size = (this.rows = rows) * 9;
-        }
-
-        public Container getContainer(int id, PlayerInventory inventory, Inventory brassiere) {
-            switch (this.rows) {
-            default:
-                return new ChestContainer(ContainerType.GENERIC_9X1, id, inventory, brassiere, this.rows);
-            case 2:
-                return new ChestContainer(ContainerType.GENERIC_9X2, id, inventory, brassiere, this.rows);
-            case 3:
-                return new ChestContainer(ContainerType.GENERIC_9X3, id, inventory, brassiere, this.rows);
-            case 4:
-                return new ChestContainer(ContainerType.GENERIC_9X4, id, inventory, brassiere, this.rows);
-            case 5:
-                return new ChestContainer(ContainerType.GENERIC_9X5, id, inventory, brassiere, this.rows);
-            case 6:
-                return new ChestContainer(ContainerType.GENERIC_9X6, id, inventory, brassiere, this.rows);
-            }
-        }
-
-        public static CupSizes get(int size) {
-            for (CupSizes cup : CupSizes.values()) { if (cup.getSize() == size) { return cup; } }
-            return CupSizes.B;
-        }
-
-        public int getSize() {
-            return this.size;
-        }
-    }
-
-
 }

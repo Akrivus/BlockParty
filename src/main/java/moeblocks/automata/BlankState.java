@@ -1,4 +1,4 @@
-package moeblocks.entity.ai.automata;
+package moeblocks.automata;
 
 import moeblocks.entity.AbstractNPCEntity;
 

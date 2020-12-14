@@ -1,6 +1,5 @@
 package moeblocks.item;
 
-import moeblocks.data.Yearbooks;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -24,9 +23,5 @@ public class YearbookPageItem extends Item {
             String name = String.format("%s %s", tag.getString("FamilyName"), tag.getString("GivenName"));
             list.add(new StringTextComponent(name).mergeStyle(TextFormatting.GRAY));
         }
-    }
-
-    public static void setPage(ItemStack stack, Yearbooks.Page page) {
-        stack.setTag(page.write());
     }
 }

@@ -1,4 +1,4 @@
-package moeblocks.entity.ai.automata;
+package moeblocks.automata;
 
 public interface IStateGoal {
     int getPriority();

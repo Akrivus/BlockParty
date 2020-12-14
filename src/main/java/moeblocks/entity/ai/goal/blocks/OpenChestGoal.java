@@ -1,9 +1,8 @@
 package moeblocks.entity.ai.goal.blocks;
 
-import moeblocks.data.dating.Relationship;
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.entity.ai.automata.IStateGoal;
-import moeblocks.entity.ai.automata.state.Emotions;
+import moeblocks.automata.IStateGoal;
+import moeblocks.automata.state.Emotions;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.player.PlayerEntity;
 
@@ -22,12 +21,12 @@ public class OpenChestGoal extends Goal implements IStateGoal {
 
     @Override
     public boolean shouldExecute() {
-        return this.entity.canBeTarget(this.entity.getInteractTarget()) && this.entity.isInteracted() && this.entity.getRelationshipWith(player).can(Relationship.Actions.LOOK_IN_BRA);
+        return this.entity.canBeTarget(this.entity.getInteractTarget()) && this.entity.isInteracted();
     }
 
     @Override
     public void startExecuting() {
-        this.entity.setEmotion(Emotions.EMBARRASSED, 600);
+        this.entity.setEmotion(Emotions.EMBARRASSED);
         this.player = this.entity.getInteractTarget();
         this.player.openContainer(this.entity);
     }

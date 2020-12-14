@@ -1,6 +1,7 @@
 package moeblocks.item;
 
-import moeblocks.data.Yearbooks;
+import moeblocks.datingsim.DatingData;
+import moeblocks.datingsim.DatingSim;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeItems;
 import moeblocks.init.MoeMessages;
@@ -22,7 +23,7 @@ public class YearbookItem extends Item {
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
-        if (!world.isRemote()) { MoeMessages.send(player, new SOpenYearbook(hand, Yearbooks.getBook(player), 0)); }
+        if (!world.isRemote()) { MoeMessages.send(player, new SOpenYearbook(hand, DatingData.get(world, player.getUniqueID()), 0)); }
         return ActionResult.resultSuccess(player.getHeldItem(hand));
     }
 
@@ -30,9 +31,10 @@ public class YearbookItem extends Item {
     public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
         if (!(entity instanceof AbstractNPCEntity)) { return ActionResultType.PASS; }
         AbstractNPCEntity character = (AbstractNPCEntity) entity;
-        if (character.isLocal()) {
-            Yearbooks.Book book = Yearbooks.getBook(player);
-            MoeMessages.send(player, new SOpenYearbook(hand, book, book.setPageIgnorantly(character, player.getUniqueID())));
+        if (character.isLocal() && character.getProtagonist().equals(player)) {
+            DatingSim sim = DatingData.get(player.world, player.getUniqueID());
+            int index = sim.getI(entity.getUniqueID());
+            MoeMessages.send(player, new SOpenYearbook(hand, sim, index));
         }
         return ActionResultType.SUCCESS;
     }

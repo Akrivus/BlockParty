@@ -21,8 +21,8 @@ public class FindBedGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity> {
     @Override
     public boolean shouldExecute() {
         if (!this.entity.isTimeToSleep()) { return false; }
-        if (this.entity.getReturnDistance() < 16 + this.tolerableRange++) {
-            this.pos = this.entity.getReturnPosition();
+        if (this.entity.getHomeDistance() < 16 + this.tolerableRange++) {
+            this.pos = this.entity.getHomePosition();
             if (this.canMoveTo(this.pos, this.entity.getBlockState(this.pos))) {
                 this.path = this.entity.getNavigator().getPathToPos(this.pos, 0);
                 if (this.path != null) { return true; }

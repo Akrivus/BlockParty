@@ -1,7 +1,7 @@
 package moeblocks.init;
 
 import moeblocks.MoeMod;
-import moeblocks.entity.ai.automata.state.Deres;
+import moeblocks.automata.state.Deres;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.tags.BlockTags;

@@ -41,7 +41,7 @@ public class InviteItem extends Item {
     public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
         if (!LetterItem.isOpen(stack) && entity instanceof AbstractNPCEntity) {
             AbstractNPCEntity npc = (AbstractNPCEntity) entity;
-            npc.setWaypoint(BlockPos.fromLong(stack.getTag().getLong("Position")));
+            //npc.setWaypoint(BlockPos.fromLong(stack.getTag().getLong("Position")));
             if (!player.isSneaking()) { stack.shrink(1); }
             return ActionResultType.SUCCESS;
         }

@@ -1,7 +1,7 @@
 package moeblocks.item;
 
 import moeblocks.entity.MoeEntity;
-import moeblocks.entity.ai.automata.state.Deres;
+import moeblocks.automata.state.Deres;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeItems;
 import moeblocks.init.MoeTags;
@@ -39,6 +39,7 @@ public class MoeSpawnItem extends Item {
             moe.setBlockData(state);
             pos = context.getPos().offset(context.getFace());
             moe.setPositionAndRotation(pos.getX() + 0.5F, pos.getY(), pos.getZ() + 0.5F, player.rotationYaw, -player.rotationPitch);
+            moe.setProtagonist(player);
             if (world.addEntity(moe)) {
                 moe.onInitialSpawn((ServerWorld) world, world.getDifficultyForLocation(pos), SpawnReason.SPAWN_EGG, null, null);
                 moe.setDere(Deres.values()[world.rand.nextInt(Deres.values().length)]);

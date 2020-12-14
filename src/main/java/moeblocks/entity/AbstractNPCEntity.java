@@ -1,28 +1,21 @@
 package moeblocks.entity;
 
+import moeblocks.automata.Automaton;
+import moeblocks.automata.IStateEnum;
+import moeblocks.automata.state.*;
 import moeblocks.client.Animations;
 import moeblocks.client.animation.Animation;
 import moeblocks.client.animation.state.Default;
-import moeblocks.data.Yearbooks;
-import moeblocks.data.dating.Relationship;
-import moeblocks.data.dating.Tropes;
-import moeblocks.entity.ai.BloodTypes;
+import moeblocks.datingsim.CacheNPC;
+import moeblocks.datingsim.DatingData;
+import moeblocks.datingsim.DatingSim;
 import moeblocks.entity.ai.VoiceLines;
-import moeblocks.entity.ai.automata.State;
-import moeblocks.entity.ai.automata.States;
-import moeblocks.entity.ai.automata.state.Deres;
-import moeblocks.entity.ai.automata.state.Emotions;
-import moeblocks.entity.ai.automata.state.ItemStates;
 import moeblocks.entity.ai.goal.*;
 import moeblocks.entity.ai.goal.attack.BasicAttackGoal;
 import moeblocks.entity.ai.goal.items.ConsumeGoal;
 import moeblocks.entity.ai.goal.target.RevengeTarget;
-import moeblocks.entity.ai.routines.Waypoint;
-import moeblocks.entity.ai.trigger.Trigger;
 import moeblocks.init.MoeItems;
 import moeblocks.init.MoeTags;
-import moeblocks.util.sort.BlockDistance;
-import moeblocks.entity.ai.goal.*;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -39,7 +32,6 @@ import net.minecraft.inventory.IInventoryChangedListener;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -58,9 +50,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.IServerWorld;
-import net.minecraft.world.World;
+import net.minecraft.world.*;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.server.ServerWorld;
@@ -69,7 +59,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public abstract class AbstractNPCEntity extends CreatureEntity implements IInventoryChangedListener, INamedContainerProvider {
     public static final DataParameter<Boolean> SITTING = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.BOOLEAN);
@@ -79,20 +68,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public static final DataParameter<String> EMOTION = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public static final DataParameter<String> FAMILY_NAME = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public static final DataParameter<String> GIVEN_NAME = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
-    public boolean isInYearbook = false;
-    protected final Queue<Consumer<AbstractNPCEntity>> nextTickOps;
-    protected final List<Relationship> relationships;
-    protected final List<Waypoint> waypoints;
-    protected final Queue<Waypoint> routine;
-    protected final HashMap<States, State> states;
-    protected ChunkPos lastRecordedPos;
-    protected int timeOfAvoid;
-    protected int timeOfInteraction;
-    protected int timeOfStare;
-    protected int timeUntilEmotionExpires;
-    protected int timeUntilTriggered;
-    protected int timeSinceSleep;
-    protected long age;
+    protected Queue<Consumer<AbstractNPCEntity>> nextTickOps;
+    protected HashMap<Class<? extends IStateEnum>, Automaton> states;
     protected Animation animation = new Default();
     protected PlayerEntity emotionTarget;
     protected PlayerEntity interactTarget;
@@ -100,14 +77,26 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     protected LivingEntity avoidTarget;
     protected LivingEntity followTarget;
     protected UUID followTargetUUID;
+    protected PlayerEntity protagonist;
+    protected UUID protagonistUUID;
     protected BlockState blockTarget;
+    protected ChunkPos lastRecordedPos;
+    protected int timeOfAvoid;
+    protected int timeOfInteraction;
+    protected int timeOfStare;
+    protected int timeSinceLastInteraction;
+    protected int timeSinceSleep;
+    protected int timeUntilHungry;
+    protected int timeUntilLove;
+    protected long age;
     private float hunger = 20.0F;
     private float saturation = 5.0F;
     private float exhaustion;
+    private float love;
+    private float infatuation;
     private float stress;
     private float relaxation;
-    private boolean updateItemState = true;
-    private BlockPos returnPos;
+    private float progress;
 
     protected AbstractNPCEntity(EntityType<? extends AbstractNPCEntity> type, World world) {
         super(type, world);
@@ -115,16 +104,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.setPathPriority(PathNodeType.DOOR_WOOD_CLOSED, 0.0F);
         this.setPathPriority(PathNodeType.TRAPDOOR, 0.0F);
         this.setHomePosAndDistance(this.getPosition(), 16);
-        this.setReturnPosition(this.getPosition());
+        this.lastRecordedPos = new ChunkPos(0, 0);
         this.nextTickOps = new LinkedList<>();
-        this.relationships = new ArrayList<>();
-        this.waypoints = new ArrayList<>();
-        this.routine = new LinkedList<>();
-        this.states = new HashMap<>();
-        this.states.put(States.DERE, Deres.HIMEDERE.state.start(this));
-        this.states.put(States.EMOTION, Emotions.NORMAL.state.start(this));
-        this.states.put(States.HELD_ITEM, null);
-        this.states.put(States.REACTION, null);
         this.stepHeight = 1.0F;
     }
 
@@ -154,7 +135,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public String getGivenName() {
         String name = this.dataManager.get(GIVEN_NAME);
         if (name == null) {
-            name = this.getGender().getName();
+            name = this.getGender().toString();
             this.setGivenName(name);
         }
         return name;
@@ -166,6 +147,21 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public void setGivenName(String name) {
         this.dataManager.set(GIVEN_NAME, name);
+    }
+
+    public void registerStates() {
+        this.states.put(BloodTypes.class, new Automaton(this, BloodTypes.O));
+        this.states.put(Deres.class, new Automaton(this, Deres.KUUDERE));
+        this.states.put(Emotions.class, new Automaton(this, Emotions.NORMAL));
+        this.states.put(Genders.class, new Automaton(this, Genders.FEMININE));
+        this.states.put(HealthStates.class, new Automaton(this, HealthStates.PERFECT));
+        this.states.put(HungerStates.class, new Automaton(this, HungerStates.SATISFIED));
+        this.states.put(ItemStates.class, new Automaton(this, ItemStates.DEFAULT));
+        this.states.put(LoveStates.class, new Automaton(this, LoveStates.FRIENDLY));
+        this.states.put(MoonPhases.class, new Automaton(this, MoonPhases.FULL));
+        this.states.put(PeriodsOfTime.class, new Automaton(this, PeriodsOfTime.ATTACHED));
+        this.states.put(StressStates.class, new Automaton(this, StressStates.RELAXED));
+        this.states.put(TimesOfDay.class, new Automaton(this, TimesOfDay.MORNING));
     }
 
     @Override
@@ -181,10 +177,11 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.goalSelector.addGoal(0x5, new TryEquipItemGoal<>(this, (stack) -> stack.isFood()));
         this.goalSelector.addGoal(0x6, new FollowTargetGoal(this));
         this.goalSelector.addGoal(0x8, new FindBedGoal(this));
-        this.goalSelector.addGoal(0x9, new FollowRoutineGoal(this));
         this.goalSelector.addGoal(0xA, new StayHomeGoal(this));
         this.goalSelector.addGoal(0xB, new WanderGoal(this));
         this.targetSelector.addGoal(0x1, new RevengeTarget(this));
+        this.states = new HashMap<>();
+        this.registerStates();
     }
 
     @Override
@@ -255,35 +252,40 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     @Override
     protected SoundEvent getAmbientSound() {
         if (this.isSleeping()) { return VoiceLines.SLEEPING.get(this); }
-        return this.getEmotion().getSound(this);
+        return VoiceLines.NEUTRAL.get(this);
     }
 
     @Override
     public void writeAdditional(CompoundNBT compound) {
+        if (this.followTargetUUID != null) { compound.putUniqueId("FollowTarget", this.followTargetUUID); }
+        if (this.protagonistUUID != null) { compound.putUniqueId("Protagonist", this.protagonistUUID); }
         super.writeAdditional(compound);
-        compound.putLong("Age", this.age);
         compound.putString("Animation", this.getAnimation().name());
+        compound.putLong("HomePosition", this.getHomePosition().toLong());
+        compound.putLong("LastRecordedPosition", this.lastRecordedPos.asLong());
+        compound.putInt("TimeSinceLastInteraction", this.timeSinceLastInteraction);
+        compound.putInt("TimeSinceSleep", this.timeSinceSleep);
+        compound.putInt("TimeUntilHungry", this.timeUntilHungry);
+        compound.putInt("TimeUntilLove", this.timeUntilLove);
+        this.writeCharacter(compound);
+    }
+
+    public void writeCharacter(CompoundNBT compound) {
+        compound.putLong("Age", this.age);
         compound.putString("BloodType", this.getBloodType().name());
         compound.putString("Dere", this.getDere().name());
         compound.putString("Emotion", this.getEmotion().name());
-        compound.putInt("EmotionTimer", this.timeUntilEmotionExpires);
         compound.putFloat("Exhaustion", this.exhaustion);
-        if (followTargetUUID != null) { compound.putUniqueId("FollowTarget", this.followTargetUUID); }
+        compound.putFloat("Love", this.love);
+        compound.putFloat("Infatuation", this.infatuation);
         compound.putString("FamilyName", this.getFamilyName());
         compound.putString("GivenName", this.getGivenName());
+        compound.putFloat("Health", this.getHealth());
         compound.putFloat("Hunger", this.hunger);
-        compound.putLong("HomePosition", this.getHomePosition().toLong());
-        compound.putLong("ReturnPosition", this.getReturnPosition().toLong());
-        compound.putLong("LastRecordedPosition", this.lastRecordedPos.asLong());
-        ListNBT relationships = new ListNBT();
-        this.relationships.forEach(relationship -> relationships.add(relationship.write(new CompoundNBT())));
-        compound.put("Relationships", relationships);
-        ListNBT waypoints = new ListNBT();
-        this.waypoints.forEach(waypoint -> waypoints.add(waypoint.write(new CompoundNBT())));
-        compound.put("Waypoints", waypoints);
         compound.putFloat("Relaxation", this.relaxation);
         compound.putFloat("Saturation", this.saturation);
         compound.putFloat("Stress", this.stress);
+        compound.putFloat("Progress", this.progress);
     }
 
     public String getFamilyName() {
@@ -296,26 +298,35 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     @Override
     public void readAdditional(CompoundNBT compound) {
+        if (compound.hasUniqueId("FollowTarget")) { this.setFollowTarget(compound.getUniqueId("FollowTarget")); }
+        if (compound.hasUniqueId("Protagonist")) { this.setProtagonist(compound.getUniqueId("Protagonist")); }
         super.readAdditional(compound);
-        this.age = compound.getInt("Age");
         this.setAnimation(Animations.valueOf(compound.getString("Animation")));
+        this.setHomePosition(BlockPos.fromLong(compound.getLong("HomePosition")));
+        this.lastRecordedPos = new ChunkPos(compound.getLong("LastRecordedPosition"));
+        this.timeSinceLastInteraction = compound.getInt("TimeSinceLastInteraction");
+        this.timeSinceSleep = compound.getInt("TimeSinceSleep");
+        this.timeUntilHungry = compound.getInt("TimeUntilHungry");
+        this.timeUntilLove = compound.getInt("TimeUntilLove");
+        this.readCharacter(compound);
+    }
+
+    public void readCharacter(CompoundNBT compound) {
+        this.age = compound.getInt("Age");
         this.setBloodType(BloodTypes.valueOf(compound.getString("BloodType")));
         this.setDere(Deres.valueOf(compound.getString("Dere")));
-        this.setEmotion(Emotions.valueOf(compound.getString("Emotion")), compound.getInt("EmotionTimer"));
+        this.setEmotion(Emotions.valueOf(compound.getString("Emotion")));
         this.exhaustion = compound.getFloat("Exhaustion");
-        if (compound.hasUniqueId("FollowTarget")) { this.setFollowTarget(compound.getUniqueId("FollowTarget")); }
+        this.love = compound.getFloat("Love");
+        this.infatuation = compound.getFloat("Infatuation");
         this.setFamilyName(compound.getString("FamilyName"));
         this.setGivenName(compound.getString("GivenName"));
         this.hunger = compound.getFloat("Hunger");
-        this.setHomePosition(BlockPos.fromLong(compound.getLong("HomePosition")));
-        this.lastRecordedPos = new ChunkPos(compound.getLong("LastRecordedPosition"));
-        ListNBT relationships = compound.getList("Relationships", 10);
-        relationships.forEach(relationship -> this.relationships.add(new Relationship(relationship)));
-        ListNBT waypoints = compound.getList("Waypoints", 10);
-        waypoints.forEach(waypoint -> this.waypoints.add(new Waypoint(waypoint)));
+        this.setHealth(compound.getFloat("Health"));
         this.relaxation = compound.getFloat("Relaxation");
         this.saturation = compound.getFloat("Saturation");
         this.stress = compound.getFloat("Stress");
+        this.progress = compound.getFloat("Progress");
     }
 
     @Override
@@ -333,14 +344,15 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         super.livingTick();
         if (this.isLocal()) {
             if (++this.timeSinceSleep > 24000) { this.addStress(0.0005F); }
-            this.relationships.forEach(relationship -> relationship.tick());
-            this.updateEmotionalState();
+            this.states.forEach((state, machine) -> machine.update());
             this.updateStareState();
+            this.updateHungerState();
+            this.updateLoveState();
             ++this.age;
             ChunkPos pos = this.getChunkPosition();
             if (!pos.equals(this.lastRecordedPos)) {
+                this.setCharacter((npc) -> npc.sync(this));
                 this.lastRecordedPos = pos;
-                this.syncYearbooks();
             }
         }
     }
@@ -349,18 +361,13 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.setHomePosAndDistance(pos, (int) this.getMaximumHomeDistance());
     }
 
-    public void setEmotion(Emotions emotion, int timeout) {
-        this.setEmotion(emotion, timeout, null);
+    public void setEmotion(Emotions emotion) {
+        this.setEmotion(emotion, null);
     }
 
-    public void setEmotion(Emotions emotion, int timeout, PlayerEntity entity) {
+    public void setEmotion(Emotions emotion, PlayerEntity entity) {
         this.dataManager.set(EMOTION, emotion.name());
-        this.timeUntilEmotionExpires = timeout;
         this.emotionTarget = entity;
-        if (entity != null) {
-            this.world.setEntityState(this, emotion.getParticle());
-            this.playSound(emotion.getSound(this));
-        }
     }
 
     public void playSound(SoundEvent sound) {
@@ -400,23 +407,13 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         if (!this.canFly()) { super.updateFallState(y, onGround, state, pos); }
     }
 
-    @Override
-    public void setHealth(float health) {
-        this.syncYearbooks();
-        super.setHealth(health);
-    }
-
-    public void syncYearbooks() {
-        if (this.isLocal() && !this.isInYearbook) { Yearbooks.sync(this); }
-    }
-
     public boolean isLocal() {
         return this.world instanceof ServerWorld;
     }
 
     @Override
     public void onDeath(DamageSource cause) {
-        this.syncYearbooks();
+        this.setCharacter((npc) -> npc.setDead(true));
         super.onDeath(cause);
     }
 
@@ -455,8 +452,9 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     @Override
     public void notifyDataManagerChange(DataParameter<?> key) {
         if (ANIMATION.equals(key)) { this.animation = Animations.valueOf(this.dataManager.get(ANIMATION)).get(); }
-        if (DERE.equals(key) && this.isLocal()) { this.setNextState(States.DERE, this.getDere().state); }
-        if (EMOTION.equals(key) && this.isLocal()) { this.setNextState(States.EMOTION, this.getEmotion().state); }
+        if (BLOOD_TYPE.equals(key)) { this.setNextState(BloodTypes.class, this.getBloodType()); }
+        if (DERE.equals(key)) { this.setNextState(Deres.class, this.getDere()); }
+        if (EMOTION.equals(key)) { this.setNextState(Emotions.class, this.getEmotion()); }
         super.notifyDataManagerChange(key);
     }
 
@@ -468,11 +466,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     @Override
     public void startSleeping(BlockPos pos) {
-        this.timeUntilEmotionExpires = 0;
-        this.timeSinceSleep = 0;
-        this.setReturnPosition(pos);
-        super.startSleeping(pos);
+        this.setHomePosition(pos);
         this.addStress(-0.0001F);
+        this.timeSinceSleep = 0;
+        super.startSleeping(pos);
     }
 
     public void addStress(float stress) {
@@ -508,13 +505,12 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return this.hunger < 19.0F;
     }
 
-    public void setNextState(States key, State state) {
-        this.addNextTickOp((entity) -> {
-            if (this.states != null) {
-                if (this.states.get(key) != null) { this.states.get(key).clean(this); }
-                this.states.put(key, state.start(this));
-            }
-        });
+    public void setNextState(Class<? extends IStateEnum> key, IStateEnum state, int timeout) {
+        this.addNextTickOp((entity) -> this.states.get(key).setNextState(state, timeout));
+    }
+
+    public void setNextState(Class<? extends IStateEnum> key, IStateEnum state) {
+        this.addNextTickOp((entity) -> this.states.get(key).setNextState(state));
     }
 
     public void addNextTickOp(Consumer<AbstractNPCEntity> op) {
@@ -562,10 +558,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return Math.sqrt(this.getDistanceSq(Vector3d.copyCentered(this.getHomePosition())));
     }
 
-    public void clearRoutine() {
-        this.routine.clear();
-    }
-
     public BlockState getBlockState(BlockPos pos) {
         IChunk chunk = this.getChunk(new ChunkPos(pos));
         return chunk == null ? Blocks.AIR.getDefaultState() : chunk.getBlockState(pos);
@@ -581,17 +573,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public double getGaussian(double factor) {
         return this.rand.nextGaussian() * factor;
-    }
-
-    public Relationship getRelationshipWith(UUID uuid) {
-        Optional<Relationship> optional = this.relationships.stream().filter(index -> index.isUUID(uuid)).findFirst();
-        if (optional.isPresent()) { return optional.get(); }
-        this.relationships.add(new Relationship(uuid));
-        return this.getRelationshipWith(uuid);
-    }
-
-    public Relationship getRelationshipWith(PlayerEntity player) {
-        return this.getRelationshipWith(player.getUniqueID());
     }
 
     public float getStrikingDistance(Entity target) {
@@ -623,45 +604,23 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return BloodTypes.isCompatible(this.getBloodType(), entity.getBloodType());
     }
 
+    public int getTimeSinceLastInteraction() {
+        return this.timeSinceLastInteraction;
+    }
+    
+    public int getTimeSinceSleep() {
+        return this.timeSinceSleep;
+    }
+
     public ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
         if (stack.getItem().isIn(MoeTags.ADMIN)) { return ActionResultType.FAIL; }
         if (this.isRemote() || hand != Hand.MAIN_HAND) { return ActionResultType.PASS; }
-        Relationship relationship = this.getRelationshipWith(player);
-        if (relationship.can(Relationship.Actions.FOLLOW)) {
-            this.setFollowTarget(player.equals(this.getFollowTarget()) ? null : player);
-        }
+        this.setFollowTarget(player.equals(this.getFollowTarget()) ? null : player);
         return ActionResultType.SUCCESS;
     }
 
     public void say(PlayerEntity player, String key, Object... params) {
         player.sendMessage(new TranslationTextComponent(key, params), this.getUniqueID());
-    }
-
-    public CompoundNBT setPhoneContact(CompoundNBT compound) {
-        compound.putString("Name", this.getGivenName());
-        compound.putUniqueId("UUID", this.getUniqueID());
-        return compound;
-    }
-
-    public void setRoutine() {
-        List<Waypoint> waypoints = this.waypoints.stream().filter((waypoint) -> waypoint.matches(this)).collect(Collectors.toList());
-        waypoints.sort(new BlockDistance.Waypoints(this));
-        this.routine.addAll(waypoints);
-    }
-
-    public void setYearbookPage(CompoundNBT compound, UUID uuid) {
-        compound.putString("GivenName", this.getGivenName());
-        compound.putString("FamilyName", this.getFamilyName());
-        compound.putString("Animation", Animations.IDLE.name());
-        compound.putString("Emotion", Emotions.NORMAL.name());
-        compound.putFloat("Health", this.getHealth());
-        compound.putFloat("Hunger", this.getHunger());
-        compound.putFloat("Stress", this.getStress());
-        compound.putFloat("Love", this.getRelationshipWith(uuid).getLove());
-        compound.putString("Dere", this.getDere().name());
-        compound.putString("Status", this.getRelationshipStatus().name());
-        compound.putString("BloodType", this.getBloodType().name());
-        compound.putInt("AgeInYears", this.getAgeInYears());
     }
 
     public boolean tryEquipItem(ItemStack stack) {
@@ -688,12 +647,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     }
 
     @Override
-    public void setItemStackToSlot(EquipmentSlotType slot, ItemStack stack) {
-        this.updateItemState |= (slot == EquipmentSlotType.MAINHAND);
-        super.setItemStackToSlot(slot, stack);
-    }
-
-    @Override
     protected float getDropChance(EquipmentSlotType slot) {
         return 0.0F;
     }
@@ -708,7 +661,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.setHomePosAndDistance(this.getPosition(), 16);
         this.setBloodType(BloodTypes.weigh(this.rand));
         this.resetAnimationState();
-        Yearbooks.sync(this);
+        this.setCharacter((npc) -> npc.sync(this));
         return data;
     }
 
@@ -726,10 +679,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     @Override
     public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
         ActionResultType result = this.onInteract(player, player.getHeldItem(hand), hand);
-        if (result.isSuccessOrConsume()) {
-            this.setInteractTarget(player);
-            this.syncYearbooks();
-        }
+        if (result.isSuccessOrConsume()) { this.setInteractTarget(player); }
+        this.setCharacter((npc) -> npc.sync(this));
         return result;
     }
 
@@ -763,13 +714,46 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return this.followTarget;
     }
 
+    public PlayerEntity getProtagonist() {
+        if (this.protagonistUUID == null) { return null; }
+        if (this.protagonist == null) {
+            this.protagonist = this.world.getPlayerByUuid(this.protagonistUUID);
+        }
+        return this.protagonist;
+    }
+
+    public void setProtagonist(PlayerEntity player) {
+        this.setCharacter((npc) -> npc.setDead(true));
+        this.setProtagonist(player != null ? player.getUniqueID() : null);
+        this.setCharacter((npc) -> npc.sync(this));
+        this.protagonist = player;
+    }
+
+    public void setProtagonist(UUID uuid) {
+        this.protagonistUUID = uuid;
+    }
+
+    public DatingSim getDatingSim() {
+        return DatingData.get(this.world, this.protagonistUUID);
+    }
+
+    public CacheNPC getCharacter() {
+        return this.getDatingSim().getNPC(this.getUniqueID());
+    }
+
+    public void setCharacter(Consumer<CacheNPC> transaction) {
+        CacheNPC character = this.getCharacter();
+        if (character == null) { return; }
+        character.set(DatingData.get(this.world), transaction);
+    }
+
     public LivingEntity getEntityFromUUID(UUID uuid) {
         return getEntityFromUUID(LivingEntity.class, this.world, uuid);
     }
 
     public static <T extends LivingEntity> T getEntityFromUUID(Class<T> type, World world, UUID uuid) {
         if (uuid != null && world instanceof ServerWorld) {
-            BlockPos moe = Yearbooks.getInstance(world).get(uuid);
+            BlockPos moe = CacheNPC.positions.get(uuid);
             int eX, bX, x, eZ, bZ, z;
             eX = 16 + (bX = 16 * (x = moe.getX() << 4));
             eZ = 16 + (bZ = 16 * (z = moe.getZ() << 4));
@@ -798,7 +782,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         if (slot == EquipmentSlotType.OFFHAND) {
             if (this.canConsume(candidate)) { return true; }
             if (this.isWieldingBow()) { return candidate.getItem().isIn(ItemTags.ARROWS); }
-            return this.isFavoriteItem(candidate);
+            return false;
         }
         if (existing.getItem().getClass() == candidate.getItem().getClass()) {
             if (existing.getItem() instanceof TieredItem) {
@@ -812,7 +796,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
                 return a.getDamageReduceAmount() > b.getDamageReduceAmount();
             }
         }
-        return this.isFavoriteItem(candidate) || existing.isEmpty();
+        return existing.isEmpty();
     }
 
     @Override
@@ -822,18 +806,12 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     @Override
     public void updateAITasks() {
-        if (this.updateItemState) { this.updateItemState(); }
         Consumer<AbstractNPCEntity> op = this.nextTickOps.poll();
         if (op != null) { op.accept(this); }
     }
 
-    public void updateItemState() {
-        this.setNextState(States.HELD_ITEM, ItemStates.get(this.getHeldItem(Hand.MAIN_HAND)).state);
-        this.updateItemState = false;
-    }
-
-    public boolean isFavoriteItem(ItemStack stack) {
-        return this.getDere().isFavorite(stack);
+    public Automaton getState(Class<? extends IStateEnum> state) {
+        return this.states.get(state);
     }
 
     public boolean isWieldingBow() {
@@ -849,16 +827,38 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return slot;
     }
 
-    public void updateEmotionalState() {
-        if (--this.timeUntilEmotionExpires < 0) { this.setEmotion(Emotions.NORMAL, this.getTalkInterval()); }
-        for (int i = 0; --this.timeUntilTriggered < 0 && i < Trigger.REGISTRY.size(); ++i) {
-            this.timeUntilTriggered = Trigger.REGISTRY.get(i).fire(this);
-        }
-    }
-
     public void updateStareState() {
         PlayerEntity player = this.world.getClosestPlayer(this, 8.0D);
         if (this.isBeingWatchedBy(player)) { this.setStareTarget(player); }
+    }
+
+    public void updateHungerState() {
+        if (--this.timeUntilHungry < 0) {
+            if (this.exhaustion > 4.0F) {
+                this.exhaustion -= 4.0F;
+                this.saturation -= 1.0F;
+                if (this.saturation < 0) {
+                    this.saturation = 0.0F;
+                    this.hunger -= 1.0F;
+                }
+            }
+            if (this.saturation > 0.0F) {
+                this.timeUntilHungry = 80;
+                this.addExhaustion(6.0F);
+                this.heal(1.0F);
+            }
+        }
+    }
+
+    public void updateLoveState() {
+        if (--this.timeUntilLove < 0) {
+            this.infatuation -= this.stress;
+            this.love += this.infatuation;
+            this.timeUntilLove = 1000;
+            if (this.infatuation < 0) {
+                this.infatuation = 0;
+            }
+        }
     }
 
     public void setCanFly(boolean fly) {
@@ -877,10 +877,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         }
     }
 
-    public void setWaypoint(BlockPos pos) {
-        this.waypoints.add(new Waypoint(pos));
-    }
-
     public int getAgeInYears() {
         return this.getBaseAge() + (int) (this.world.getGameTime() - this.age) / 24000 / 366;
     }
@@ -893,6 +889,14 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public BlockState getBlockData() {
         return Blocks.AIR.getDefaultState();
+    }
+
+    public CompoundNBT getExtraBlockData() {
+        return new CompoundNBT();
+    }
+
+    public float getScale() {
+        return 1.0F;
     }
 
     public float getBlockStrikingDistance() {
@@ -931,6 +935,14 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return this.hunger;
     }
 
+    public float getLove() {
+        return this.love;
+    }
+
+    public void setLoveBoost(float love) {
+        this.infatuation += love;
+    }
+
     public PlayerEntity getInteractTarget() {
         return this.interactTarget;
     }
@@ -938,26 +950,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public void setInteractTarget(PlayerEntity player) {
         this.interactTarget = player;
         this.timeOfInteraction = this.ticksExisted;
-    }
-
-    public Waypoint getNextWaypoint() {
-        return this.routine.poll();
-    }
-
-    public double getReturnDistance() {
-        return Math.sqrt(this.getDistanceSq(Vector3d.copyCentered(this.getReturnPosition())));
-    }
-
-    public BlockPos getReturnPosition() {
-        return this.returnPos;
-    }
-
-    public void setReturnPosition(BlockPos pos) {
-        this.returnPos = pos;
-    }
-
-    public Queue<Waypoint> getRoutine() {
-        return this.routine;
     }
 
     public LivingEntity getStareTarget() {
@@ -975,11 +967,18 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public void setStress(float stress) {
         this.stress = Math.max(Math.min(stress, 20.0F), 0.0F);
-        this.syncYearbooks();
     }
 
-    public Tropes getTrope() {
-        return Tropes.get(this.getDere(), this.getBloodType());
+    public float getProgress() {
+        return this.progress;
+    }
+
+    public void setProgress(float progress) {
+        this.progress = progress;
+    }
+
+    public StoryStates getStory() {
+        return (StoryStates) this.getState(StoryStates.class).getToken();
     }
 
     public boolean isAtEase() {
@@ -1005,18 +1004,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public boolean isAvoiding() {
         return this.ticksExisted - this.timeOfAvoid < 500;
-    }
-
-    public boolean isDead() {
-        return this.getRelationshipStatus() == Relationship.Status.DEAD;
-    }
-
-    public Relationship.Status getRelationshipStatus() {
-        if (this.getHealth() <= 0.0F) { return Relationship.Status.DEAD; }
-        for (Relationship r : this.relationships) {
-            if (r.getPhase() == Relationship.Phases.CONFESSION) { return Relationship.Status.TAKEN; }
-        }
-        return Relationship.Status.SINGLE;
     }
 
     public boolean isFull() {
@@ -1065,18 +1052,4 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return this.world.getGameTime() / 24000 % 4 == this.getBloodType().ordinal();
     }
 
-    public enum Genders {
-        MASCULINE("Akemi", "Aki", "Akifumi", "Akihisa", "Akihito", "Akinari", "Akitoshi", "Akiya", "Akiyoshi", "Akiyuki", "Arashi", "Arihiro", "Arinaga", "Asahiko", "Asao", "Asayama", "Atomu", "Atsuji", "Azuma", "Banri", "Bunji", "Chikao", "Chikara", "Choei", "Choki", "Daichi", "Daihachi", "Daijiro", "Daikichi", "Daisaku", "Daishin", "Daisuke", "Daizo", "Eiichi", "Eiji", "Eiken", "Eikichi", "Einosuke", "Eishun", "Eita", "Eizo", "Etsuji", "Fumio", "Fusao", "Gakuto", "Genjiro", "Genta", "Gentaro", "Gin", "Go", "Goichi", "Hakaru", "Haruaki", "Haruhisa", "Harunobu", "Harunori", "Haruto", "Hayanari", "Hayao", "Heizo", "Hideharu", "Hidehiko", "Hidehisa", "Hidemaro", "Hidemasa", "Hideo", "Hideomi", "Hideto", "Hideya", "Hideyo", "Hiro", "Hiroaki", "Hirokazu", "Hirokuni", "Hiromori", "Hironari", "Hirooki", "Hirotaka", "Hirotami", "Hirotoki", "Hiroya", "Hiroyasu", "Hisahito", "Hisaichi", "Hisaki", "Hisanobu", "Hisao", "Hisato", "Hisayasu", "Hisayuki", "Hokuto", "Hozumi", "Iehira", "Iemasa", "Iemon", "Iesada", "Ikki", "Inasa", "Isami", "Isao", "Issei", "Itsuo", "Itsuro", "Jiichiro", "Jinpachi", "Jo", "Joji", "Jokichi", "Junpei", "Kagenori", "Kaichi", "Kaisei", "Kamon", "Kanehiro", "Kanesuke", "Kanji", "Katsuki", "Katsuo", "Kazuharu", "Kazuhito", "Kazuki", "Kazuma", "Kazuo", "Kazutoki", "Kazuya", "Keiichi", "Keijiro", "Keiju", "Keisuke", "Keizo", "Ken", "Kenro", "Kenta", "Kentaro", "Kihachi", "Kiichiro", "Kimio", "Kinjiro", "Kinsuke", "Kisaburo", "Kisaku", "Kiyofumi", "Kiyokazu", "Kiyoshi", "Kiyoto", "Konosuke", "Koshiro", "Kozaburo", "Kumataro", "Kunihiko", "Kunitake", "Kyogo", "Kyoji", "Kyosuke", "Mahiro", "Makio", "Mamoru", "Manabu", "Mareo", "Masabumi", "Masahiro", "Masaji", "Masakata", "Masakazu", "Masakuni", "Masanaga", "Masanari", "Masanobu", "Masao", "Masatake", "Masatane", "Masatomi", "Masatomo", "Masayuki", "Masazumi", "Masujiro", "Matsuki", "Matsuo", "Michio", "Mikito", "Mineichi", "Mitsuaki", "Mitsugi", "Mitsugu", "Mitsuo", "Mochiaki", "Morihiko", "Morio", "Moritaka", "Motojiro", "Motokazu", "Motoki", "Motomu", "Motonobu", "Mototada", "Motoyasu", "Motoyuki", "Motozane", "Mukuro", "Munehiro", "Munehisa", "Munetaka", "Musashi", "Nagaharu", "Naganori", "Nagatoki", "Nagayasu", "Namio", "Nankichi", "Naohiko", "Naohiro", "Naohito", "Naotake", "Naoto", "Naoya", "Naritaka", "Nariyasu", "Nobumasa", "Nobunari", "Nobuo", "Nobusada", "Nobusuke", "Nobutada", "Nobuyasu", "Noriaki", "Norifumi", "Norihide", "Norihiko", "Norihiro", "Norihito", "Norimoto", "Norio", "Noriyasu", "Nozomu", "Reizo", "Rentaro", "Rikichi", "Rikio", "Rikiya", "Rinsho", "Risaburo", "Rokuro", "Ryohei", "Ryoichi", "Ryoji", "Ryoki", "Ryota", "Ryotaro", "Ryozo", "Ryu", "Ryuma", "Ryusaku", "Ryusei", "Ryushi", "Ryusuke", "Ryuta", "Ryutaro", "Ryuya", "Sachio", "Sadaharu", "Sadahiro", "Saiichi", "Sanji", "Sanshiro", "Satoshi", "Seigo", "Seiho", "Seijiro", "Seiki", "Seimei", "Seiya", "Sendai", "Setsuji", "Shigemi", "Shigeo", "Shigeto", "Shin", "Shingo", "Shinjo", "Shinta", "Shintaro", "Shoma", "Shota", "Shu", "Shuko", "Shungo", "Shunki", "Shunpei", "Shunsui", "Shunsuke", "Shunta", "Sogen", "Soichiro", "Sosuke", "Sota", "Suenaga", "Suguru", "Sukenobu", "Sukeyuki", "Sumihiro", "Sunao", "Susumu", "Tadaaki", "Tadahiko", "Tadahiro", "Tadamasa", "Tadami", "Tadamori", "Tadanobu", "Tadaoki", "Tadataka", "Tadateru", "Tadayo", "Taichi", "Taichiro", "Taiga", "Taiichi", "Taiji", "Taisei", "Taishin", "Taiyo", "Taizo", "Takaaki", "Takafumi", "Takahide", "Takahira", "Takahiro", "Takaji", "Takaki", "Takamasa", "Takanobu", "Takao", "Takato", "Takatomi", "Takeharu", "Takehisa", "Takehito", "Takeichi", "Takenori", "Takero", "Takeru", "Taketo", "Takuma", "Takumi", "Takumu", "Takuro", "Takuzo", "Tamotsu", "Tasuku", "Tateo", "Tatsuaki", "Tatsuji", "Tatsuma", "Tatsumi", "Tatsuya", "Tatsuzo", "Teizo", "Teruaki", "Teruhiko", "Teruki", "Terumasa", "Tetsu", "Tetsuji", "Tokuji", "Tokuo", "Tomio", "Tomoaki", "Tomoharu", "Tomohisa", "Tomohito", "Tomokazu", "Tomoki", "Tomonori", "Tomoya", "Tomoyasu", "Torahiko", "Toru", "Toshi", "Toshiaki", "Toshio", "Toya", "Toyotaro", "Toyozo", "Tsunemi", "Tsutomu", "Tsutsumi", "Tsuyoshi", "Yahiko", "Yasuharu", "Yasuhide", "Yasuhiro", "Yasuji", "Yasuki", "Yasunari", "Yasunobu", "Yasushi", "Yasutaka", "Yasutaro", "Yasutomo", "Yawara", "Yohei", "Yoichi", "Yoji", "Yoshi", "Yoshinao", "Yoshito", "Yoshiya", "Yozo", "Yugi", "Yuichi", "Yuji", "Yukichi", "Yukihiko", "Yukihiro", "Yukimura", "Yukito", "Yuma", "Yusaku", "Yushi", "Yusuke", "Yutaka", "Yuzo", "Yuzuru", "Zenji", "Zentaro", "Akiho", "Akimi", "Akira", "Anri", "Asuka", "Ayumu", "Chiaki", "Chihiro", "Hajime", "Haru", "Haruka", "Harumi", "Hatsu", "Hayate", "Hazuki", "Hibiki", "Hifumi", "Hikari", "Hikaru", "Hinata", "Hiromi", "Hiromu", "Hisaya", "Hiyori", "Hotaru", "Ibuki", "Iori", "Itsuki", "Izumi", "Jun", "Kagami", "Kaname", "Kaoru", "Katsumi", "Kayo", "Kazu", "Kazumi", "Kei", "Kou", "Kunie", "Kurumi", "Kyo", "Maiko", "Maki", "Mako", "Makoto", "Masaki", "Masami", "Masumi", "Matoi", "Mayumi", "Michi", "Michiru", "Michiyo", "Midori", "Mikoto", "Minori", "Mirai", "Misao", "Mitsue", "Mitsuki", "Mitsuru", "Mitsuyo", "Mizuho", "Mizuki", "Nagisa", "Nao", "Naomi", "Natsu", "Natsuki", "Natsuo", "Nozomi", "Rei", "Ren", "Riku", "Rin", "Rui", "Ryo", "Ryuko", "Sakae", "Satsuki", "Setsuna", "Shigeri", "Shinobu", "Shion", "Shizuka", "Sora", "Subaru", "Takemi", "Tala", "Tamaki", "Tatsuki", "Teru", "Tomo", "Tomoe", "Tomomi", "Toshimi", "Tsubasa", "Tsukasa", "Yoshika", "Yoshimi", "Yosuke", "Yu", "Yuki", "Yuri"),
-        FEMININE("Ai", "Aika", "Aiko", "Aimi", "Aina", "Airi", "Akane", "Akari", "Akemi", "Akeno", "Aki", "Akie", "Akiho", "Akiko", "Akimi", "Akina", "Akira", "Akiyo", "Amane", "Ami", "Anri", "Anzu", "Aoi", "Ariko", "Arisa", "Asako", "Asami", "Asuka", "Asumi", "Asuna", "Atsuko", "Atsumi", "Aya", "Ayaka", "Ayako", "Ayame", "Ayami", "Ayana", "Ayane", "Ayano", "Ayu", "Ayuka", "Ayuko", "Ayumi", "Ayumu", "Azumi", "Azura", "Azusa", "Chiaki", "Chidori", "Chie", "Chieko", "Chiemi", "Chigusa", "Chiharu", "Chihiro", "Chiho", "Chika", "Chikage", "Chikako", "Chinami", "Chinatsu", "Chisato", "Chitose", "Chiya", "Chiyako", "Chiyo", "Chiyoko", "Chizuko", "Chizuru", "Eiko", "Eimi", "Emi", "Emika", "Emiko", "Emiri", "Eri", "Erika", "Eriko", "Erina", "Etsuko", "Fujie", "Fujiko", "Fukumi", "Fumi", "Fumie", "Fumika", "Fumiko", "Fumino", "Fumiyo", "Fusako", "Futaba", "Fuyuko", "Fuyumi", "Fuka", "Hajime", "Hana", "Hanae", "Hanako", "Haru", "Harue", "Haruhi", "Haruka", "Haruko", "Harumi", "Haruna", "Haruno", "Haruyo", "Hasumi", "Hatsu", "Hatsue", "Hatsumi", "Hayate", "Hazuki", "Hibiki", "Hideko", "Hidemi", "Hifumi", "Hikari", "Hikaru", "Himawari", "Himeko", "Hina", "Hinako", "Hinata", "Hiroe", "Hiroka", "Hiroko", "Hiromi", "Hiromu", "Hiroyo", "Hisa", "Hisae", "Hisako", "Hisaya", "Hisayo", "Hitomi", "Hiyori", "Honami", "Honoka", "Hotaru", "Ibuki", "Ichiko", "Ikue", "Ikuko", "Ikumi", "Ikuyo", "Io", "Iori", "Itsuki", "Itsuko", "Itsumi", "Izumi", "Jitsuko", "Jun", "Junko", "Juri", "Kagami", "Kaguya", "Kaho", "Kahori", "Kahoru", "Kana", "Kanae", "Kanako", "Kaname", "Kanami", "Kanna", "Kanoko", "Kaori", "Kaoru", "Kaoruko", "Karen", "Karin", "Kasumi", "Katsuko", "Katsumi", "Kawai", "Kaya", "Kayo", "Kayoko", "Kazu", "Kazue", "Kazuha", "Kazuko", "Kazumi", "Kazusa", "Kazuyo", "Kei", "Keiki", "Keiko", "Kiho", "Kiko", "Kikue", "Kikuko", "Kimi", "Kimiko", "Kinuko", "Kira", "Kiyoko", "Koharu", "Komako", "Konomi", "Kotoe", "Kotomi", "Kotono", "Kotori", "Kou", "Kozue", "Kumi", "Kumiko", "Kunie", "Kuniko", "Kurenai", "Kuriko", "Kurumi", "Kyo", "Kyoko", "Maaya", "Machi", "Machiko", "Madoka", "Maho", "Mai", "Maiko", "Maki", "Makiko", "Mako", "Makoto", "Mami", "Mamiko", "Mana", "Manaka", "Manami", "Mao", "Mari", "Marie", "Marika", "Mariko", "Marina", "Masae", "Masaki", "Masako", "Masami", "Masayo", "Masumi", "Matoi", "Matsuko", "Mayako", "Mayo", "Mayu", "Mayuka", "Mayuko", "Mayumi", "Megu", "Megumi", "Mei", "Meiko", "Meisa", "Michi", "Michiko", "Michiru", "Michiyo", "Midori", "Mie", "Mieko", "Miharu", "Miho", "Mihoko", "Miiko", "Mika", "Mikako", "Miki", "Mikiko", "Mikoto", "Miku", "Mikuru", "Mimori", "Mina", "Minae", "Minako", "Minami", "Mineko", "Minori", "Mio", "Miori", "Mira", "Mirai", "Misaki", "Misako", "Misao", "Misato", "Misumi", "Misuzu", "Mitsue", "Mitsuki", "Mitsuko", "Mitsuru", "Mitsuyo", "Miu", "Miwa", "Miwako", "Miya", "Miyabi", "Miyako", "Miyo", "Miyoko", "Miyoshi", "Miyu", "Miyuki", "Miyumi", "Miyu", "Mizue", "Mizuho", "Mizuki", "Mizuko", "Moe", "Moeka", "Moeko", "Momo", "Momoe", "Momoka", "Momoko", "Motoko", "Mutsuko", "Mutsumi", "Nagako", "Nagisa", "Naho", "Nako", "Nami", "Nana", "Nanae", "Nanako", "Nanami", "Nanase", "Nao", "Naoko", "Naomi", "Narumi", "Natsue", "Natsuki", "Natsuko", "Natsume", "Natsumi", "Natsuo", "Noa", "Nobue", "Nobuko", "Nodoka", "Nonoka", "Noriko", "Noriyo", "Nozomi", "Omi", "Otoha", "Otome", "Ran", "Ranko", "Rei", "Reika", "Reiko", "Reina", "Ren", "Rena", "Reona", "Rie", "Rieko", "Riho", "Rika", "Rikako", "Riko", "Riku", "Rin", "Rina", "Rino", "Rio", "Risa", "Risako", "Ritsuko", "Rui", "Rumi", "Rumiko", "Runa", "Ruri", "Ruriko", "Ryo", "Ryoko", "Ryuko", "Ryoka", "Sachi", "Sachie", "Sachiko", "Sadako", "Sae", "Saeko", "Saiko", "Sakae", "Saki", "Sakie", "Sakiko", "Saku", "Sakura", "Sakurako", "Sanae", "Saori", "Sari", "Satoko", "Satomi", "Satsuki", "Sawa", "Sawako", "Saya", "Sayaka", "Sayako", "Sayo", "Sayoko", "Sayumi", "Sayuri", "Seiko", "Setsuko", "Setsuna", "Shigeko", "Shigeri", "Shiho", "Shihori", "Shiina", "Shimako", "Shinako", "Shino", "Shinobu", "Shion", "Shiori", "Shizue", "Shizuka", "Shizuko", "Shizuru", "Shuko", "Shoko", "Sonoko", "Sora", "Subaru", "Sugako", "Sumie", "Sumika", "Sumiko", "Sumire", "Suzue", "Suzuka", "Suzuko", "Taeko", "Takako", "Takayo", "Takeko", "Takemi", "Tala", "Tamaki", "Tamako", "Tamami", "Tamao", "Tamayo", "Tamiko", "Tatsuki", "Tatsuko", "Tazuko", "Teiko", "Teru", "Teruko", "Terumi", "Tokiko", "Tokuko", "Tomie", "Tomiko", "Tomo", "Tomoe", "Tomoka", "Tomoko", "Tomomi", "Tomoyo", "Toshiko", "Toshimi", "Toyoko", "Tsubasa", "Tsukasa", "Tsukiko", "Tsuneko", "Tsuru", "Umeko", "Uta", "Waka", "Wakako", "Wakana", "Yae", "Yaeko", "Yasue", "Yasuko", "Yayoi", "Yoko", "Yoriko", "Yoshika", "Yoshiko", "Yoshimi", "Yoshino", "Yu", "Yui", "Yuika", "Yuiko", "Yuka", "Yukako", "Yukari", "Yuki", "Yukie", "Yukika", "Yukiko", "Yukina", "Yukino", "Yumeko", "Yumi", "Yumie", "Yumika", "Yumiko", "Yuri", "Yuria", "Yurie", "Yurika", "Yuriko", "Yurina", "Yuumi", "Yuuna", "Yuko");
-
-        private final String[] names;
-
-        Genders(String... names) {
-            this.names = names;
-        }
-
-        public String getName() {
-            return this.names[(int) (Math.random() * this.names.length)];
-        }
-    }
 }

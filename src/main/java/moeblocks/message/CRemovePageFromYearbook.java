@@ -1,10 +1,11 @@
 package moeblocks.message;
 
-import moeblocks.data.Yearbooks;
+import moeblocks.datingsim.DatingData;
 import moeblocks.init.MoeItems;
 import moeblocks.item.YearbookPageItem;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -12,22 +13,22 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 public class CRemovePageFromYearbook {
-    protected final UUID pageUUID;
+    protected final UUID uuid;
 
     public CRemovePageFromYearbook(PacketBuffer buffer) {
         this(buffer.readUniqueId());
     }
 
-    public CRemovePageFromYearbook(UUID pageUUID) {
-        this.pageUUID = pageUUID;
+    public CRemovePageFromYearbook(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public static void encode(CRemovePageFromYearbook message, PacketBuffer buffer) {
-        buffer.writeUniqueId(message.getPageUUID());
+        buffer.writeUniqueId(message.getUUID());
     }
 
-    public UUID getPageUUID() {
-        return this.pageUUID;
+    public UUID getUUID() {
+        return this.uuid;
     }
 
     public static void handleContext(CRemovePageFromYearbook message, Supplier<NetworkEvent.Context> context) {
@@ -37,7 +38,7 @@ public class CRemovePageFromYearbook {
 
     public static void handle(CRemovePageFromYearbook message, NetworkEvent.Context context, ServerPlayerEntity player) {
         ItemStack stack = new ItemStack(MoeItems.YEARBOOK_PAGE.get());
-        YearbookPageItem.setPage(stack, Yearbooks.getBook(player).removePage(message.getPageUUID(), player));
+        stack.setTag(DatingData.get(player.world, player.getUniqueID()).write(new CompoundNBT()));
         if (!player.addItemStackToInventory(stack)) { player.entityDropItem(stack); }
     }
 }

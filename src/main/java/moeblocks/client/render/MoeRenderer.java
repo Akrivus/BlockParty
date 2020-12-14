@@ -40,7 +40,7 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
 
     @Override
     protected void renderName(MoeEntity entity, ITextComponent name, MatrixStack stack, IRenderTypeBuffer buffer, int packedLight) {
-        if (Minecraft.getInstance().player.getDistance(entity) > 8.0F || entity.isInYearbook) { return; }
+        if (Minecraft.getInstance().player.getDistance(entity) > 8.0F) { return; }
         String[] lines = new String[]{this.getHealth(entity), name.getString()};
         stack.push();
         stack.translate(0.0D, entity.getHeight() + 0.5F, 0.0D);

@@ -38,8 +38,5 @@ public class CPhoneRemoveMoe {
     public static void handle(CPhoneRemoveMoe message, NetworkEvent.Context context, ServerPlayerEntity player) {
         Hand hand = player.getHeldItem(Hand.MAIN_HAND).getItem() == MoeItems.CELL_PHONE.get() ? Hand.MAIN_HAND : Hand.OFF_HAND;
         ItemStack stack = player.getHeldItem(hand);
-        if (stack.getItem() == MoeItems.CELL_PHONE.get()) {
-            CellPhoneItem.removeContact(message.getMoeUUID(), stack);
-        }
     }
 }

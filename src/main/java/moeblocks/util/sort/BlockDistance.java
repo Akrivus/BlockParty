@@ -1,6 +1,5 @@
 package moeblocks.util.sort;
 
-import moeblocks.entity.ai.routines.Waypoint;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 
@@ -24,24 +23,5 @@ public class BlockDistance implements Comparator<BlockPos> {
     @Override
     public boolean equals(Object obj) {
         return false;
-    }
-
-    public static class Waypoints implements Comparator<Waypoint> {
-        private final Entity entity;
-
-        public Waypoints(Entity entity) {
-            super();
-            this.entity = entity;
-        }
-
-        @Override
-        public int compare(Waypoint one, Waypoint two) {
-            return new BlockDistance(this.entity).compare(one.getPosition(), two.getPosition());
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return false;
-        }
     }
 }
