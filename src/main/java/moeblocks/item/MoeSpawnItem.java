@@ -19,7 +19,7 @@ import net.minecraft.world.server.ServerWorld;
 public class MoeSpawnItem extends Item {
 
     public MoeSpawnItem() {
-        super(new Properties().group(MoeItems.Group.INSTANCE));
+        super(new Properties().group(MoeItems.CreativeTab.INSTANCE));
     }
 
     @Override

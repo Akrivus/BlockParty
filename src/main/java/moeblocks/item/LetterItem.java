@@ -12,7 +12,7 @@ public class LetterItem extends Item {
     public static final ResourceLocation CLOSED_PROPERTY = new ResourceLocation("closed");
 
     public LetterItem() {
-        super(new Properties().group(MoeItems.Group.INSTANCE));
+        super(new Properties().group(MoeItems.CreativeTab.INSTANCE));
     }
 
     public static boolean isOpen(ItemStack stack) {

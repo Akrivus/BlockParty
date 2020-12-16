@@ -22,7 +22,7 @@ import java.util.List;
 public class InviteItem extends Item {
 
     public InviteItem() {
-        super(new Properties().group(MoeItems.Group.INSTANCE));
+        super(new Properties().group(MoeItems.CreativeTab.INSTANCE));
     }
 
     @Override

@@ -22,7 +22,7 @@ public class MoeDieItem extends Item {
     };
 
     public MoeDieItem() {
-        super(new Item.Properties().group(MoeItems.Group.INSTANCE));
+        super(new Item.Properties().group(MoeItems.CreativeTab.INSTANCE));
     }
 
     @Override

@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 public class YearbookItem extends Item {
 
     public YearbookItem() {
-        super(new Properties().group(MoeItems.Group.INSTANCE));
+        super(new Properties().group(MoeItems.CreativeTab.INSTANCE));
     }
 
     @Override

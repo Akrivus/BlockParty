@@ -2,7 +2,6 @@ package moeblocks.init;
 
 import moeblocks.MoeMod;
 import moeblocks.item.*;
-import moeblocks.item.*;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -36,10 +35,10 @@ public class MoeItems {
         ItemModelsProperties.registerProperty(MoeItems.LETTER.get(), LetterItem.CLOSED_PROPERTY, LetterItem.CLOSED_PROPERTY_GETTER);
     }
 
-    public static class Group extends ItemGroup {
-        public static final Group INSTANCE = new Group();
+    public static class CreativeTab extends ItemGroup {
+        public static final CreativeTab INSTANCE = new CreativeTab();
 
-        public Group() {
+        public CreativeTab() {
             super(MoeMod.ID);
         }
 
