@@ -4,18 +4,15 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moeblocks.MoeMod;
-import moeblocks.automata.state.LoveStates;
+import moeblocks.client.screen.widget.ChangePageButton;
+import moeblocks.client.screen.widget.DeletePageButton;
 import moeblocks.datingsim.CacheNPC;
 import moeblocks.datingsim.DatingSim;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeMessages;
-import moeblocks.init.MoeSounds;
 import moeblocks.message.CRemovePageFromYearbook;
 import moeblocks.util.Trans;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screen.Screen;
@@ -24,13 +21,9 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -148,7 +141,7 @@ public class YearbookScreen extends Screen {
             if (this.index < this.sim.size() - 1) { ++this.index; }
             this.updateButtons();
         }));
-        this.buttonRemovePage = this.addButton(new RemovePageButton((this.width - 146) / 2 + 118, 12, (button) -> {
+        this.buttonRemovePage = this.addButton(new DeletePageButton((this.width - 146) / 2 + 118, 12, (button) -> {
             MoeMessages.send(new CRemovePageFromYearbook(this.npc.getUUID()));
             this.closeScreen();
         }));
@@ -177,47 +170,4 @@ public class YearbookScreen extends Screen {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public class ChangePageButton extends Button {
-        private final int delta;
-
-        public ChangePageButton(int x, int y, int delta, Button.IPressable button) {
-            super(x, y, 7, 10, StringTextComponent.EMPTY, button);
-            this.delta = delta;
-        }
-
-        @Override
-        public void playDownSound(SoundHandler sound) {
-            sound.play(SimpleSound.master(SoundEvents.ITEM_BOOK_PAGE_TURN, 1.0F));
-        }
-
-        @Override
-        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            Minecraft.getInstance().getTextureManager().bindTexture(YearbookScreen.YEARBOOK_TEXTURES);
-            int x = this.delta > 0 ? 226 : 147;
-            int y = this.isHovered() ? 35 : 63;
-            this.blit(stack, this.x, this.y, x, y, 7, 10);
-        }
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public class RemovePageButton extends Button {
-        public RemovePageButton(int x, int y, Button.IPressable button) {
-            super(x, y, 13, 13, StringTextComponent.EMPTY, button);
-        }
-
-        @Override
-        public void playDownSound(SoundHandler sound) {
-            sound.play(SimpleSound.master(MoeSounds.YEARBOOK_REMOVE_PAGE.get(), 1.0F));
-        }
-
-        @Override
-        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            Minecraft.getInstance().getTextureManager().bindTexture(YearbookScreen.YEARBOOK_TEXTURES);
-            int x = this.isHovered() ? 147 : 118;
-            this.blit(stack, this.x, this.y, x, 10, 13, 13);
-        }
-    }
 }

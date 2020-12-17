@@ -351,8 +351,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
             ++this.age;
             ChunkPos pos = this.getChunkPosition();
             if (!pos.equals(this.lastRecordedPos)) {
-                this.setCharacter((npc) -> npc.sync(this));
                 this.lastRecordedPos = pos;
+                this.setCharacterData();
             }
         }
     }
@@ -623,6 +623,12 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         player.sendMessage(new TranslationTextComponent(key, params), this.getUniqueID());
     }
 
+    public void say(String key, Object... params) {
+        this.world.getPlayers().forEach((player) -> {
+            if (player.getDistance(this) < 8.0D) { this.say(player, key, params); }
+        });
+    }
+
     public boolean tryEquipItem(ItemStack stack) {
         EquipmentSlotType slot = this.getSlotForStack(stack);
         ItemStack shift = this.getItemStackFromSlot(slot);
@@ -661,7 +667,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.setHomePosAndDistance(this.getPosition(), 16);
         this.setBloodType(BloodTypes.weigh(this.rand));
         this.resetAnimationState();
-        this.setCharacter((npc) -> npc.sync(this));
+        this.setCharacterData();
         return data;
     }
 
@@ -680,7 +686,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
         ActionResultType result = this.onInteract(player, player.getHeldItem(hand), hand);
         if (result.isSuccessOrConsume()) { this.setInteractTarget(player); }
-        this.setCharacter((npc) -> npc.sync(this));
+        this.setCharacterData();
         return result;
     }
 
@@ -725,7 +731,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public void setProtagonist(PlayerEntity player) {
         this.setCharacter((npc) -> npc.setDead(true));
         this.setProtagonist(player != null ? player.getUniqueID() : null);
-        this.setCharacter((npc) -> npc.sync(this));
+        this.setCharacterData();
         this.protagonist = player;
     }
 
@@ -738,13 +744,17 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     }
 
     public CacheNPC getCharacter() {
-        return this.getDatingSim().getNPC(this.getUniqueID());
+        return this.getDatingSim().getNPC(this.getUniqueID(), this);
     }
 
     public void setCharacter(Consumer<CacheNPC> transaction) {
         CacheNPC character = this.getCharacter();
         if (character == null) { return; }
         character.set(DatingData.get(this.world), transaction);
+    }
+
+    public void setCharacterData() {
+        this.setCharacter((npc) -> npc.sync(this));
     }
 
     public LivingEntity getEntityFromUUID(UUID uuid) {

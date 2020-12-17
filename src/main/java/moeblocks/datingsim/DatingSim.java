@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class DatingSim {
-    protected final List<CacheNPC> characters = new ArrayList<>();
+    public final List<CacheNPC> characters = new ArrayList<>();
 
     public DatingSim(CompoundNBT compound) {
         ListNBT npcs = compound.getList("NPCs", Constants.NBT.TAG_COMPOUND);
@@ -29,16 +29,22 @@ public class DatingSim {
         return compound;
     }
 
-    public CacheNPC getNPC(UUID uuid) {
-        Optional<CacheNPC> npcs = this.characters.stream().filter(npc -> npc.getUUID().equals(uuid)).findFirst();
-        if (npcs.isPresent()) { return npcs.get(); }
-        CacheNPC npc = new CacheNPC(uuid);
+    public Optional<CacheNPC> getNPC(UUID uuid) {
+        return this.characters.stream().filter(npc -> npc.getUUID().equals(uuid)).findFirst();
+    }
+
+    public CacheNPC getNPC(UUID uuid, AbstractNPCEntity entity) {
+        Optional<CacheNPC> _npc = this.getNPC(uuid);
+        if (_npc.isPresent()) { return _npc.get(); }
+        CacheNPC npc = new CacheNPC(entity);
         this.characters.add(npc);
         return npc;
     }
 
     public int getI(UUID uuid) {
-        return this.characters.indexOf(this.getNPC(uuid));
+        Optional<CacheNPC> _npc = this.getNPC(uuid);
+        if (_npc.isPresent()) { return this.characters.indexOf(_npc.get()); }
+        return -1;
     }
 
     public CacheNPC get(int index) {

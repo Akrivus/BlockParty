@@ -19,21 +19,19 @@ public class CacheNPC {
     public static final Map<UUID, BlockPos> positions = new HashMap<>();
     protected final UUID uuid;
     protected BlockPos pos;
+    protected String name;
     protected CompoundNBT tag;
     protected boolean dead;
 
-    public CacheNPC(UUID uuid) {
-        this.uuid = uuid;
-    }
-
     public CacheNPC(AbstractNPCEntity npc) {
-        this(npc.getUniqueID());
+        this.uuid = npc.getUniqueID();
         this.sync(npc);
     }
 
     public CacheNPC(CompoundNBT compound) {
         this.uuid = compound.getUniqueId("UUID");
         this.setPosition(BlockPos.fromLong(compound.getLong("Position")));
+        this.setName(compound.getString("Name"));
         this.setTag(compound.getCompound("NPC"));
         this.setDead(compound.getBoolean("Dead"));
     }
@@ -41,6 +39,7 @@ public class CacheNPC {
     public CompoundNBT write(CompoundNBT compound) {
         compound.putUniqueId("UUID", this.uuid);
         compound.putLong("Position", this.pos.toLong());
+        compound.putString("Name", this.name);
         compound.put("NPC", this.tag);
         compound.putBoolean("Dead", this.dead);
         return compound;
@@ -71,6 +70,14 @@ public class CacheNPC {
         npc.writeUnlessPassenger(this.getTag());
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
     public boolean isDead() {
         return this.dead;
     }
@@ -81,6 +88,7 @@ public class CacheNPC {
 
     public void sync(AbstractNPCEntity npc) {
         this.setPosition(npc.getPosition());
+        this.setName(npc.getFullName());
         this.setTag(npc);
         this.setDead(false);
     }
