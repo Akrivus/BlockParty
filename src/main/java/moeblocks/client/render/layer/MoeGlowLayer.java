@@ -23,7 +23,7 @@ public class MoeGlowLayer extends LayerRenderer<MoeEntity, MoeModel<MoeEntity>> 
 
     @Override
     public void render(MatrixStack stack, IRenderTypeBuffer buffer, int packedLight, MoeEntity entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (entity.isBlockGlowing() && this.isWithinDistance(entity.getPositionVec()) && !entity.isInvisible()) {
+        if (this.isWithinDistance(entity.getPositionVec()) && !entity.isInvisible() && entity.isBlockGlowing()) {
             this.getEntityModel().render(stack, buffer.getBuffer(RenderType.getEyes(this.getTexture(entity))), 15728640, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
