@@ -15,6 +15,9 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
+import java.util.Iterator;
+import java.util.UUID;
+
 public class YearbookItem extends Item {
 
     public YearbookItem() {
@@ -23,19 +26,23 @@ public class YearbookItem extends Item {
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
-        if (!world.isRemote()) { MoeMessages.send(player, new SOpenYearbook(hand, DatingData.get(world, player.getUniqueID()), 0)); }
-        return ActionResult.resultSuccess(player.getHeldItem(hand));
+        ItemStack stack = player.getHeldItem(hand);
+        if (world.isRemote()) { return ActionResult.resultPass(stack); }
+        DatingSim sim = DatingData.get(world, player.getUniqueID());
+        Iterator<UUID> it = sim.characters.keySet().iterator();
+        if (it.hasNext()) { MoeMessages.send(player, new SOpenYearbook(hand, sim, it.next())); }
+        return ActionResult.resultSuccess(stack);
     }
 
     @Override
     public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
-        if (!(entity instanceof AbstractNPCEntity)) { return ActionResultType.PASS; }
+        if (!(entity instanceof AbstractNPCEntity) || entity.world.isRemote()) { return ActionResultType.PASS; }
         AbstractNPCEntity character = (AbstractNPCEntity) entity;
-        if (character.isLocal() && character.getProtagonist().equals(player)) {
+        if (character.getProtagonist().equals(player)) {
             DatingSim sim = DatingData.get(player.world, player.getUniqueID());
-            int index = sim.getI(entity.getUniqueID());
-            MoeMessages.send(player, new SOpenYearbook(hand, sim, index));
+            MoeMessages.send(player, new SOpenYearbook(hand, sim, entity.getUniqueID()));
+            return ActionResultType.SUCCESS;
         }
-        return ActionResultType.SUCCESS;
+        return ActionResultType.FAIL;
     }
 }

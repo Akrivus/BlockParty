@@ -9,27 +9,28 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
 import net.minecraftforge.fml.network.NetworkEvent;
 
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public class SOpenYearbook {
     protected final Hand hand;
     protected final DatingSim sim;
-    protected final int index;
+    protected final UUID uuid;
 
     public SOpenYearbook(PacketBuffer buffer) {
-        this(buffer.readEnumValue(Hand.class), new DatingSim(buffer.readCompoundTag()), buffer.readInt());
+        this(buffer.readEnumValue(Hand.class), new DatingSim(buffer.readCompoundTag()), buffer.readUniqueId());
     }
 
-    public SOpenYearbook(Hand hand, DatingSim sim, int index) {
+    public SOpenYearbook(Hand hand, DatingSim sim, UUID uuid) {
         this.hand = hand;
         this.sim = sim;
-        this.index = index;
+        this.uuid = uuid;
     }
 
     public static void encode(SOpenYearbook message, PacketBuffer buffer) {
         buffer.writeEnumValue(message.getHand());
         buffer.writeCompoundTag(message.getSim().write(new CompoundNBT()));
-        buffer.writeInt(message.getIndex());
+        buffer.writeUniqueId(message.getUUID());
     }
 
     public Hand getHand() {
@@ -40,8 +41,8 @@ public class SOpenYearbook {
         return this.sim;
     }
 
-    public int getIndex() {
-        return this.index;
+    public UUID getUUID() {
+        return this.uuid;
     }
 
     public static void handleContext(SOpenYearbook message, Supplier<NetworkEvent.Context> context) {
@@ -52,6 +53,6 @@ public class SOpenYearbook {
     public static void handle(SOpenYearbook message, NetworkEvent.Context context, Minecraft mc) {
         if (mc.player.getHeldItem(message.getHand()).getItem() != MoeItems.YEARBOOK.get()) { return; }
         if (mc.currentScreen instanceof YearbookScreen) { return; } // Fixes indexes not persisting
-        mc.displayGuiScreen(new YearbookScreen(message.getSim(), message.getIndex()));
+        mc.displayGuiScreen(new YearbookScreen(message.getSim(), message.getUUID()));
     }
 }

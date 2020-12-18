@@ -10,11 +10,12 @@ import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class DatingData extends WorldSavedData {
     private static final String KEY = "datingsim";
-    private HashMap<UUID, DatingSim> sims = new HashMap<>();
+    private Map<UUID, DatingSim> sims = new HashMap<>();
 
     public DatingData(String name) {
         super(name);
@@ -29,8 +30,7 @@ public class DatingData extends WorldSavedData {
         ListNBT games = compound.getList("DatingSims", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < games.size(); ++i) {
             CompoundNBT nbt = games.getCompound(i);
-            UUID uuid = nbt.getUniqueId("UUID");
-            this.sims.put(uuid, new DatingSim(nbt));
+            this.sims.put(nbt.getUniqueId("UUID"), new DatingSim(nbt));
         }
     }
 
@@ -43,7 +43,7 @@ public class DatingData extends WorldSavedData {
     }
 
     public DatingSim getSim(UUID uuid) {
-        if (!this.sims.containsKey(uuid)) { this.sims.put(uuid, new DatingSim(new CompoundNBT())); }
+        if (!this.sims.containsKey(uuid)) { this.sims.put(uuid, new DatingSim(uuid)); }
         return this.sims.get(uuid);
     }
 

@@ -25,6 +25,7 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.tags.ITag;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
@@ -101,8 +102,8 @@ public class MoeEntity extends AbstractNPCEntity {
 
     @Override
     public String getHonorific() {
-        if (this.getBlockData().isIn(MoeTags.FULLSIZED)) { return super.getHonorific(); }
-        if (this.getBlockData().isIn(MoeTags.BABY)) { return "tan"; }
+        if (this.isTagSafe(MoeTags.FULLSIZED)) { return super.getHonorific(); }
+        if (this.isTagSafe(MoeTags.BABY)) { return "tan"; }
         return this.getScale() < 1.0F ? "tan" : super.getHonorific();
     }
 
@@ -116,7 +117,7 @@ public class MoeEntity extends AbstractNPCEntity {
     }
 
     public Genders getGender() {
-        return this.getBlockData().isIn(MoeTags.MALE) ? Genders.MASCULINE : Genders.FEMININE;
+        return this.isTagSafe(MoeTags.MALE) ? Genders.MASCULINE : Genders.FEMININE;
     }
 
     @Override
@@ -248,6 +249,14 @@ public class MoeEntity extends AbstractNPCEntity {
     }
 
     public boolean isBlockGlowing() {
-        return this.getBlockData().isIn(MoeTags.GLOWING);
+        return this.isTagSafe(MoeTags.GLOWING);
+    }
+
+    public boolean isTagSafe(ITag<Block> tag) {
+        try {
+            return this.getBlockData().isIn(tag);
+        } catch (IllegalStateException e) {
+            return false;
+        }
     }
 }

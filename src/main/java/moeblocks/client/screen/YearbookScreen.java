@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moeblocks.MoeMod;
-import moeblocks.client.screen.widget.ChangePageButton;
-import moeblocks.client.screen.widget.DeletePageButton;
+import moeblocks.client.screen.widget.TurnPageButton;
+import moeblocks.client.screen.widget.RemovePageButton;
 import moeblocks.datingsim.CacheNPC;
 import moeblocks.datingsim.DatingSim;
 import moeblocks.entity.AbstractNPCEntity;
@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -28,9 +29,11 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class YearbookScreen extends Screen {
     public static final ResourceLocation YEARBOOK_TEXTURES = new ResourceLocation(MoeMod.ID, "textures/gui/yearbook.png");
+    private final List<UUID> pages = new ArrayList<>();
     private final String[] stats = new String[4];
     private final String[] lines = new String[4];
     private final DatingSim sim;
@@ -42,10 +45,12 @@ public class YearbookScreen extends Screen {
     private String name;
     private AbstractNPCEntity entity;
 
-    public YearbookScreen(DatingSim sim, int index) {
+    public YearbookScreen(DatingSim sim, UUID uuid) {
         super(NarratorChatListener.EMPTY);
         this.sim = sim;
-        this.index = index;
+        this.sim.characters.forEach((key, value) -> this.pages.add(key));
+        this.index = this.pages.indexOf(uuid);
+        if (this.index < 0) { this.index = 0; }
     }
 
     @Override
@@ -53,6 +58,7 @@ public class YearbookScreen extends Screen {
         this.renderBackground(stack);
         this.renderPortrait(stack);
         this.renderEntity(this.width / 2 + 3, 90, 40.0F, this.entity);
+        if (this.npc.isDead() || this.npc.isEstranged()) { this.renderOverlay(stack); }
         this.renderBook(stack);
         this.font.drawString(stack, this.name, (this.width - this.font.getStringWidth(this.name)) / 2 + 3, 91, 0);
         for (int x = 0; x < this.stats.length; ++x) {
@@ -75,15 +81,19 @@ public class YearbookScreen extends Screen {
             if (this.width / 2 + 24 < mouseX && mouseX < this.width / 2 + 50) { text.add(new TranslationTextComponent("gui.moeblocks.label.stress")); }
         }
         if (text.size() > 0) { this.renderTooltip(stack, Lists.transform(text, ITextComponent::func_241878_f), mouseX, mouseY); }
-        if (this.entity != null) {
-            this.blit(stack, (this.width - 60) / 2 + 2, 26, 160, 95, 60, 60);
-        }
     }
 
     public void renderPortrait(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(YEARBOOK_TEXTURES);
         this.blit(stack, (this.width - 60) / 2 + 3, 27, 161, 25, 58, 58);
+    }
+
+    public void renderOverlay(MatrixStack stack) {
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        this.minecraft.getTextureManager().bindTexture(YEARBOOK_TEXTURES);
+        if (this.npc.isDead()) { this.blit(stack, (this.width - 60) / 2 + 2, 26, 160, 155, 60, 60); }
+        if (this.npc.isEstranged()) { this.blit(stack, (this.width - 60) / 2 + 2, 26, 160, 95, 60, 60); }
     }
 
     public void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
@@ -133,15 +143,15 @@ public class YearbookScreen extends Screen {
     @Override
     protected void init() {
         this.addButton(new Button(this.width / 2 - 68, 196, 136, 20, DialogTexts.GUI_DONE, (button) -> this.minecraft.displayGuiScreen(null)));
-        this.buttonPreviousPage = this.addButton(new ChangePageButton((this.width - 146) / 2 + 21, 51, -1, (button) -> {
+        this.buttonPreviousPage = this.addButton(new TurnPageButton((this.width - 146) / 2 + 21, 51, -1, (button) -> {
             if (this.index > 0) { --this.index; }
             this.updateButtons();
         }));
-        this.buttonNextPage = this.addButton(new ChangePageButton((this.width - 146) / 2 + 122, 51, 1, (button) -> {
-            if (this.index < this.sim.size() - 1) { ++this.index; }
+        this.buttonNextPage = this.addButton(new TurnPageButton((this.width - 146) / 2 + 122, 51, 1, (button) -> {
+            if (this.index < this.sim.totalNPCs() - 1) { ++this.index; }
             this.updateButtons();
         }));
-        this.buttonRemovePage = this.addButton(new DeletePageButton((this.width - 146) / 2 + 118, 12, (button) -> {
+        this.buttonRemovePage = this.addButton(new RemovePageButton((this.width - 146) / 2 + 115, 9, (button) -> {
             MoeMessages.send(new CRemovePageFromYearbook(this.npc.getUUID()));
             this.closeScreen();
         }));
@@ -149,12 +159,12 @@ public class YearbookScreen extends Screen {
     }
 
     private void updateButtons() {
-        if (this.sim.isEmpty()) {
+        if (this.sim.isNPCsEmpty()) {
             this.minecraft.player.sendStatusMessage(new TranslationTextComponent("gui.moeblocks.error.yearbook"), true);
             this.minecraft.displayGuiScreen(null);
         } else {
-            this.npc = this.sim.get(this.index);
-            this.entity = this.npc.get(this.minecraft.world, MoeEntities.MOE.get());
+            this.npc = this.sim.getNPC(this.pages.get(this.index));
+            this.entity = this.npc.get(this.minecraft, MoeEntities.MOE.get());
             this.name = this.entity.getFullName();
             this.stats[0] = String.format("%.0f", this.entity.getHealth());
             this.stats[1] = String.format("%.0f", this.entity.getHunger());
@@ -163,9 +173,11 @@ public class YearbookScreen extends Screen {
             this.lines[0] = String.format(Trans.late("gui.moeblocks.label.dere"), this.entity.getDere().toString());
             this.lines[1] = String.format(Trans.late("gui.moeblocks.label.blood"), this.entity.getBloodType().toString());
             this.lines[2] = String.format(Trans.late("gui.moeblocks.label.age"), this.entity.getAgeInYears());
-            this.lines[3] = this.npc.isDead() ? Trans.late("debug.moeblocks.story.dead") : this.entity.getStory().toString();
+            this.lines[3] = this.entity.getStory().toString();
+            if (this.npc.isDead()) { this.lines[3] = Trans.late("debug.moeblocks.story.dead"); }
+            if (this.npc.isEstranged()) { this.lines[3] = Trans.late("debug.moeblocks.story.estranged"); }
             this.buttonPreviousPage.visible = this.index > 0;
-            this.buttonNextPage.visible = this.index < this.sim.size() - 1;
+            this.buttonNextPage.visible = this.index < this.sim.totalNPCs() - 1;
             this.buttonRemovePage.visible = this.npc.isDead();
         }
     }

@@ -33,7 +33,7 @@ public class CellPhoneScreen extends Screen {
 
     public CellPhoneScreen(DatingSim sim) {
         super(NarratorChatListener.EMPTY);
-        sim.characters.forEach((npc) -> this.contacts.add(new PhoneContactButton(this, npc, this.contacts.size())));
+        sim.characters.forEach((uuid, npc) -> this.contacts.add(new PhoneContactButton(this, npc, this.contacts.size())));
     }
 
     @Override

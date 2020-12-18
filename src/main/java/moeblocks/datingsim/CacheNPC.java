@@ -1,6 +1,7 @@
 package moeblocks.datingsim;
 
 import moeblocks.entity.AbstractNPCEntity;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundNBT;
@@ -22,6 +23,7 @@ public class CacheNPC {
     protected String name;
     protected CompoundNBT tag;
     protected boolean dead;
+    protected boolean estranged;
 
     public CacheNPC(AbstractNPCEntity npc) {
         this.uuid = npc.getUniqueID();
@@ -34,6 +36,7 @@ public class CacheNPC {
         this.setName(compound.getString("Name"));
         this.setTag(compound.getCompound("NPC"));
         this.setDead(compound.getBoolean("Dead"));
+        this.setEstranged(compound.getBoolean("Estranged"));
     }
 
     public CompoundNBT write(CompoundNBT compound) {
@@ -42,6 +45,7 @@ public class CacheNPC {
         compound.putString("Name", this.name);
         compound.put("NPC", this.tag);
         compound.putBoolean("Dead", this.dead);
+        compound.putBoolean("Estranged", this.estranged);
         return compound;
     }
 
@@ -86,16 +90,25 @@ public class CacheNPC {
         this.dead = dead;
     }
 
+    public boolean isEstranged() {
+        return this.estranged;
+    }
+
+    public void setEstranged(boolean estranged) {
+        this.estranged = estranged;
+    }
+
     public void sync(AbstractNPCEntity npc) {
         this.setPosition(npc.getPosition());
         this.setName(npc.getFullName());
         this.setTag(npc);
         this.setDead(false);
+        this.setEstranged(false);
     }
 
-    public AbstractNPCEntity get(World world, EntityType<? extends AbstractNPCEntity> type) {
-        AbstractNPCEntity entity = type.create(world);
-        entity.setPosition(this.pos.getX(), this.pos.getY(), this.pos.getZ());
+    public AbstractNPCEntity get(Minecraft minecraft, EntityType<? extends AbstractNPCEntity> type) {
+        AbstractNPCEntity entity = type.create(minecraft.world);
+        entity.setPosition(minecraft.player.getPosX(), minecraft.player.getPosY(), minecraft.player.getPosZ());
         entity.readCharacter(this.getTag());
         return entity;
     }

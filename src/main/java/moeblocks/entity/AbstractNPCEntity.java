@@ -160,6 +160,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.states.put(LoveStates.class, new Automaton(this, LoveStates.FRIENDLY));
         this.states.put(MoonPhases.class, new Automaton(this, MoonPhases.FULL));
         this.states.put(PeriodsOfTime.class, new Automaton(this, PeriodsOfTime.ATTACHED));
+        this.states.put(StoryStates.class, new Automaton(this, StoryStates.INTRODUCTION));
         this.states.put(StressStates.class, new Automaton(this, StressStates.RELAXED));
         this.states.put(TimesOfDay.class, new Automaton(this, TimesOfDay.MORNING));
     }
@@ -729,7 +730,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     }
 
     public void setProtagonist(PlayerEntity player) {
-        this.setCharacter((npc) -> npc.setDead(true));
+        this.setCharacter((npc) -> npc.setEstranged(true));
         this.setProtagonist(player != null ? player.getUniqueID() : null);
         this.setCharacterData();
         this.protagonist = player;
@@ -739,18 +740,19 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.protagonistUUID = uuid;
     }
 
+    public boolean hasProtagonist() {
+        return this.protagonistUUID != null;
+    }
+
     public DatingSim getDatingSim() {
         return DatingData.get(this.world, this.protagonistUUID);
     }
 
-    public CacheNPC getCharacter() {
-        return this.getDatingSim().getNPC(this.getUniqueID(), this);
-    }
-
     public void setCharacter(Consumer<CacheNPC> transaction) {
-        CacheNPC character = this.getCharacter();
-        if (character == null) { return; }
-        character.set(DatingData.get(this.world), transaction);
+        if (this.isLocal() && this.hasProtagonist()) {
+            CacheNPC character = this.getDatingSim().getNPC(this.getUniqueID(), this);
+            character.set(DatingData.get(this.world), transaction);
+        }
     }
 
     public void setCharacterData() {
@@ -764,6 +766,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public static <T extends LivingEntity> T getEntityFromUUID(Class<T> type, World world, UUID uuid) {
         if (uuid != null && world instanceof ServerWorld) {
             BlockPos moe = CacheNPC.positions.get(uuid);
+            if (moe == null) { return null; }
             int eX, bX, x, eZ, bZ, z;
             eX = 16 + (bX = 16 * (x = moe.getX() << 4));
             eZ = 16 + (bZ = 16 * (z = moe.getZ() << 4));
@@ -988,7 +991,11 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     }
 
     public StoryStates getStory() {
-        return (StoryStates) this.getState(StoryStates.class).getToken();
+        for (int i = 0; i < StoryStates.values().length; ++i) {
+            StoryStates story = StoryStates.values()[i];
+            if (story.getState(this).canApply(this)) { return story; }
+        }
+        return StoryStates.INTRODUCTION;
     }
 
     public boolean isAtEase() {

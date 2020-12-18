@@ -1,6 +1,7 @@
 package moeblocks.message;
 
 import moeblocks.datingsim.DatingData;
+import moeblocks.datingsim.DatingSim;
 import moeblocks.init.MoeItems;
 import moeblocks.item.YearbookPageItem;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -37,8 +38,9 @@ public class CRemovePageFromYearbook {
     }
 
     public static void handle(CRemovePageFromYearbook message, NetworkEvent.Context context, ServerPlayerEntity player) {
+        DatingSim sim = DatingData.get(player.world, player.getUniqueID());
         ItemStack stack = new ItemStack(MoeItems.YEARBOOK_PAGE.get());
-        stack.setTag(DatingData.get(player.world, player.getUniqueID()).write(new CompoundNBT()));
+        stack.setTag(sim.removeNPC(message.getUUID()).write(new CompoundNBT()));
         if (!player.addItemStackToInventory(stack)) { player.entityDropItem(stack); }
     }
 }

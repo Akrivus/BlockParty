@@ -19,7 +19,7 @@ public class YearbookPageItem extends Item {
     @Override
     public void addInformation(ItemStack stack, World world, List<ITextComponent> list, ITooltipFlag flag) {
         if (stack.hasTag()) {
-            CompoundNBT tag = stack.getShareTag();
+            CompoundNBT tag = stack.getShareTag().getCompound("NPC");
             String name = String.format("%s %s", tag.getString("FamilyName"), tag.getString("GivenName"));
             list.add(new StringTextComponent(name).mergeStyle(TextFormatting.GRAY));
         }
