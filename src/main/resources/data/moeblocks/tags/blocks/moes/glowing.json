@@ -2,20 +2,25 @@
   "replace": false,
   "values": [
     "minecraft:beacon",
+    "minecraft:blue_concrete_powder",
+    "miencraft:blue_ice",
     "minecraft:brewing_stand",
     "minecraft:bricks",
     "minecraft:conduit",
+    "minecraft:crimson_nylium",
     "minecraft:dragon_egg",
     "minecraft:furnace",
+    "minecraft:glowstone",
+    "minecraft:light_gray_concrete_powder",
     "minecraft:magma_block",
     "minecraft:netherite_block",
-    "minecraft:crimson_nylium",
-    "minecraft:warped_nylium",
     "minecraft:observer",
     "minecraft:redstone_block",
     "minecraft:redstone_lamp",
     "minecraft:respawn_anchor",
     "minecraft:sea_lantern",
-    "minecraft:shroomlight"
+    "minecraft:shroomlight",
+    "minecraft:soul_campfire",
+    "minecraft:warped_nylium"
   ]
 }
