@@ -14,6 +14,7 @@ import moeblocks.entity.ai.goal.*;
 import moeblocks.entity.ai.goal.attack.BasicAttackGoal;
 import moeblocks.entity.ai.goal.items.ConsumeGoal;
 import moeblocks.entity.ai.goal.target.RevengeTarget;
+import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeItems;
 import moeblocks.init.MoeTags;
 import net.minecraft.block.BlockState;
@@ -89,11 +90,11 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     protected int timeUntilHungry;
     protected int timeUntilLove;
     protected long age;
-    private float hunger = 20.0F;
+    private float foodLevel = 20.0F;
     private float saturation = 5.0F;
     private float exhaustion;
     private float love;
-    private float infatuation;
+    private float affection;
     private float stress;
     private float relaxation;
     private float progress;
@@ -133,12 +134,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     }
 
     public String getGivenName() {
-        String name = this.dataManager.get(GIVEN_NAME);
-        if (name == null) {
-            name = this.getGender().toString();
-            this.setGivenName(name);
-        }
-        return name;
+        return  this.dataManager.get(GIVEN_NAME);
     }
 
     public Genders getGender() {
@@ -278,11 +274,11 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         compound.putString("Emotion", this.getEmotion().name());
         compound.putFloat("Exhaustion", this.exhaustion);
         compound.putFloat("Love", this.love);
-        compound.putFloat("Infatuation", this.infatuation);
+        compound.putFloat("Affection", this.affection);
         compound.putString("FamilyName", this.getFamilyName());
         compound.putString("GivenName", this.getGivenName());
         compound.putFloat("Health", this.getHealth());
-        compound.putFloat("Hunger", this.hunger);
+        compound.putFloat("FoodLevel", this.foodLevel);
         compound.putFloat("Relaxation", this.relaxation);
         compound.putFloat("Saturation", this.saturation);
         compound.putFloat("Stress", this.stress);
@@ -319,10 +315,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.setEmotion(Emotions.valueOf(compound.getString("Emotion")));
         this.exhaustion = compound.getFloat("Exhaustion");
         this.love = compound.getFloat("Love");
-        this.infatuation = compound.getFloat("Infatuation");
+        this.affection = compound.getFloat("Affection");
         this.setFamilyName(compound.getString("FamilyName"));
         this.setGivenName(compound.getString("GivenName"));
-        this.hunger = compound.getFloat("Hunger");
+        this.foodLevel = compound.getFloat("FoodLevel");
         this.setHealth(compound.getFloat("Health"));
         this.relaxation = compound.getFloat("Relaxation");
         this.saturation = compound.getFloat("Saturation");
@@ -353,7 +349,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
             ChunkPos pos = this.getChunkPosition();
             if (!pos.equals(this.lastRecordedPos)) {
                 this.lastRecordedPos = pos;
-                this.setCharacterData();
+                this.sync();
             }
         }
     }
@@ -473,6 +469,11 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         super.startSleeping(pos);
     }
 
+    public void setHealth(float health) {
+        super.setHealth(health);
+        this.sync();
+    }
+
     public void addStress(float stress) {
         this.setStress(this.stress + stress);
     }
@@ -481,7 +482,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         if (this.canConsume(stack)) {
             Food food = stack.getItem().getFood();
             this.addSaturation(food.getSaturation());
-            this.addHungerLevel(food.getHealing());
+            this.addFoodLevel(food.getHealing());
             food.getEffects().forEach(pair -> {
                 if (pair.getFirst() != null && this.world.rand.nextFloat() < pair.getSecond()) {
                     this.addPotionEffect(pair.getFirst());
@@ -490,8 +491,13 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         }
     }
 
-    public void addHungerLevel(float hungerLevel) {
-        this.hunger = Math.min(this.hunger + hungerLevel, 20.0F);
+    public void setFoodLevel(float foodLevel) {
+        this.foodLevel = Math.max(0.0F, Math.min(this.foodLevel, 20.0F));
+        this.sync();
+    }
+
+    public void addFoodLevel(float foodLevel) {
+        this.setFoodLevel(this.foodLevel + foodLevel);
     }
 
     public void addSaturation(float saturation) {
@@ -503,7 +509,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     }
 
     public boolean isHungry() {
-        return this.hunger < 19.0F;
+        return this.foodLevel < 19.0F;
     }
 
     public void setNextState(Class<? extends IStateEnum> key, IStateEnum state, int timeout) {
@@ -667,8 +673,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         ILivingEntityData data = super.onInitialSpawn(world, difficulty, reason, spawnData, compound);
         this.setHomePosAndDistance(this.getPosition(), 16);
         this.setBloodType(BloodTypes.weigh(this.rand));
+        this.setGivenName(this.getGender().toString());
         this.resetAnimationState();
-        this.setCharacterData();
         return data;
     }
 
@@ -687,7 +693,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
         ActionResultType result = this.onInteract(player, player.getHeldItem(hand), hand);
         if (result.isSuccessOrConsume()) { this.setInteractTarget(player); }
-        this.setCharacterData();
+        this.sync();
         return result;
     }
 
@@ -732,7 +738,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public void setProtagonist(PlayerEntity player) {
         this.setCharacter((npc) -> npc.setEstranged(true));
         this.setProtagonist(player != null ? player.getUniqueID() : null);
-        this.setCharacterData();
+        this.sync();
         this.protagonist = player;
     }
 
@@ -755,7 +761,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         }
     }
 
-    public void setCharacterData() {
+    public void sync() {
         this.setCharacter((npc) -> npc.sync(this));
     }
 
@@ -851,8 +857,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
                 this.exhaustion -= 4.0F;
                 this.saturation -= 1.0F;
                 if (this.saturation < 0) {
+                    this.addFoodLevel(-1.0F);
                     this.saturation = 0.0F;
-                    this.hunger -= 1.0F;
                 }
             }
             if (this.saturation > 0.0F) {
@@ -865,11 +871,11 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public void updateLoveState() {
         if (--this.timeUntilLove < 0) {
-            this.infatuation -= this.stress;
-            this.love += this.infatuation;
+            this.affection -= this.stress;
+            this.addLove(this.affection);
             this.timeUntilLove = 1000;
-            if (this.infatuation < 0) {
-                this.infatuation = 0;
+            if (this.affection < 0) {
+                this.affection = 0;
             }
         }
     }
@@ -886,7 +892,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public void setNavigator(PathNavigator navigator) {
         this.navigator = navigator;
         if (this.navigator instanceof GroundPathNavigator) {
-            ((GroundPathNavigator) this.navigator).setBreakDoors(true);
+            GroundPathNavigator ground = (GroundPathNavigator) this.navigator;
+            ground.setBreakDoors(true);
         }
     }
 
@@ -944,16 +951,25 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return String.format("%s %s", this.getFamilyName(), this.getGivenName());
     }
 
-    public float getHunger() {
-        return this.hunger;
+    public float getFoodLevel() {
+        return this.foodLevel;
     }
 
     public float getLove() {
         return this.love;
     }
 
-    public void setLoveBoost(float love) {
-        this.infatuation += love;
+    public void setLove(float love) {
+        this.love = Math.max(0.0F, Math.min(love, 20.0F));
+        this.sync();
+    }
+
+    public void addLove(float love) {
+        this.setLove(this.love + love);
+    }
+
+    public void addAffection(float love) {
+        this.affection += love;
     }
 
     public PlayerEntity getInteractTarget() {
@@ -980,6 +996,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public void setStress(float stress) {
         this.stress = Math.max(Math.min(stress, 20.0F), 0.0F);
+        this.sync();
     }
 
     public float getProgress() {
@@ -988,14 +1005,23 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public void setProgress(float progress) {
         this.progress = progress;
+        this.sync();
     }
 
     public StoryStates getStory() {
-        for (int i = 0; i < StoryStates.values().length; ++i) {
-            StoryStates story = StoryStates.values()[i];
-            if (story.getState(this).canApply(this)) { return story; }
+        int step = (int) this.getProgress();
+        switch (step) {
+        case 1:
+            return StoryStates.INFATUATION;
+        case 2:
+            return StoryStates.CONFUSION;
+        case 3:
+            return StoryStates.RESOLUTION;
+        case 4:
+            return StoryStates.TRAGEDY;
+        default:
+            return StoryStates.INTRODUCTION;
         }
-        return StoryStates.INTRODUCTION;
     }
 
     public boolean isAtEase() {
@@ -1024,7 +1050,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     }
 
     public boolean isFull() {
-        return this.hunger > 19.0F;
+        return this.foodLevel > 19.0F;
     }
 
     public boolean isRemote() {
@@ -1068,5 +1094,4 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public boolean isNightWatch() {
         return this.world.getGameTime() / 24000 % 4 == this.getBloodType().ordinal();
     }
-
 }

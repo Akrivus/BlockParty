@@ -45,6 +45,9 @@ public enum ItemStates implements IStateEnum<AbstractNPCEntity> {
     }
 
     public static ItemStates get(Item item) {
-        return Arrays.stream(ItemStates.values()).filter((state) -> state.items.contains(item)).findFirst().orElse(ItemStates.DEFAULT);
+        for (ItemStates state : ItemStates.values()) {
+            if (state.items.contains(item)) { return state; }
+        }
+        return ItemStates.DEFAULT;
     }
 }

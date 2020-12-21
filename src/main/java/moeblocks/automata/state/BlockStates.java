@@ -32,6 +32,9 @@ public enum BlockStates implements IStateEnum<MoeEntity> {
     }
 
     public static BlockStates get(BlockState block) {
-        return Arrays.stream(BlockStates.values()).filter((state) -> state.blocks.contains(block.getBlock())).findFirst().orElse(BlockStates.DEFAULT);
+        for (BlockStates state : BlockStates.values()) {
+            if (state.blocks.contains(block.getBlock())) { return state; }
+        }
+        return BlockStates.DEFAULT;
     }
 }

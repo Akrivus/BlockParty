@@ -76,7 +76,7 @@ public class YearbookScreen extends Screen {
         if (this.buttonRemovePage.isHovered()) { text.add(new TranslationTextComponent("gui.moeblocks.button.remove")); }
         if (102 < mouseY && mouseY < 112) {
             if (this.width / 2 - 50 < mouseX && mouseX < this.width / 2 - 24) { text.add(new TranslationTextComponent("gui.moeblocks.label.health")); }
-            if (this.width / 2 - 24 < mouseX && mouseX < this.width / 2 + -2) { text.add(new TranslationTextComponent("gui.moeblocks.label.hunger")); }
+            if (this.width / 2 - 24 < mouseX && mouseX < this.width / 2 + -2) { text.add(new TranslationTextComponent("gui.moeblocks.label.foodLevel")); }
             if (this.width / 2 + -2 < mouseX && mouseX < this.width / 2 + 24) { text.add(new TranslationTextComponent("gui.moeblocks.label.love")); }
             if (this.width / 2 + 24 < mouseX && mouseX < this.width / 2 + 50) { text.add(new TranslationTextComponent("gui.moeblocks.label.stress")); }
         }
@@ -167,7 +167,7 @@ public class YearbookScreen extends Screen {
             this.entity = this.npc.get(this.minecraft, MoeEntities.MOE.get());
             this.name = this.entity.getFullName();
             this.stats[0] = String.format("%.0f", this.entity.getHealth());
-            this.stats[1] = String.format("%.0f", this.entity.getHunger());
+            this.stats[1] = String.format("%.0f", this.entity.getFoodLevel());
             this.stats[2] = String.format("%.0f", this.entity.getLove());
             this.stats[3] = String.format("%.0f", this.entity.getStress());
             this.lines[0] = String.format(Trans.late("gui.moeblocks.label.dere"), this.entity.getDere().toString());

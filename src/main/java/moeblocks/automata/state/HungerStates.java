@@ -13,13 +13,13 @@ import java.util.function.Function;
 public enum HungerStates implements IStateEnum<AbstractNPCEntity> {
     SATISFIED((npc, list) -> {
 
-    }, (npc) -> npc.getHunger(), 16, 20),
+    }, (npc) -> npc.getFoodLevel(), 16, 20),
     HUNGRY((npc, list) -> {
 
-    }, (npc) -> npc.getHunger(), 4, 16),
+    }, (npc) -> npc.getFoodLevel(), 4, 16),
     STARVING((npc, list) -> {
 
-    }, (npc) -> npc.getHunger(), 0, 4);
+    }, (npc) -> npc.getFoodLevel(), 0, 4);
 
     private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
     private final Function<AbstractNPCEntity, Float> valuator;

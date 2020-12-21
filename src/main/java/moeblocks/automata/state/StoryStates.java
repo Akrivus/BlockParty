@@ -23,7 +23,10 @@ public enum StoryStates implements IStateEnum<AbstractNPCEntity> {
     }, (npc) -> npc.getProgress(), 2, 3),
     RESOLUTION((npc, list) -> {
 
-    }, (npc) -> npc.getProgress(), 3, 4);
+    }, (npc) -> npc.getProgress(), 3, 4),
+    TRAGEDY((npc, list) -> {
+
+    }, (npc) -> npc.getProgress(), 4, 5);
 
     private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
     private final Function<AbstractNPCEntity, Float> valuator;

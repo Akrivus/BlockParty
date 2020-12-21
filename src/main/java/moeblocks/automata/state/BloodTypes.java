@@ -49,9 +49,7 @@ public enum BloodTypes implements IStateEnum<AbstractNPCEntity> {
 
     public static BloodTypes weigh(Random rand) {
         List<BloodTypes> weights = new ArrayList<>();
-        for (BloodTypes bloodType : BloodTypes.values()) {
-            weights.addAll(bloodType.weights);
-        }
+        for (BloodTypes bloodType : BloodTypes.values()) { weights.addAll(bloodType.weights); }
         return weights.get(rand.nextInt(weights.size()));
     }
 }
