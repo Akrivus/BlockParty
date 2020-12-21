@@ -27,27 +27,15 @@ public class MoeSpawnItem extends Item {
         World world = context.getWorld();
         if (world.isRemote()) { return ActionResultType.PASS; }
         PlayerEntity player = context.getPlayer();
-        MoeEntity moe = MoeEntities.MOE.get().create(world);
-        BlockPos pos = context.getPos();
-        BlockState state = world.getBlockState(pos);
-        int attempts = 0;
-        while (attempts < 3 && !state.getBlock().isIn(MoeTags.MOEABLES)) {
-            state = world.getBlockState(pos = pos.down(++attempts));
+        BlockPos block = context.getPos();
+        BlockPos spawn = block.offset(context.getFace());
+        Deres dere = Deres.values()[world.rand.nextInt(Deres.values().length)];
+        if (MoeEntity.spawn(world, block, spawn, player.rotationYaw, player.rotationPitch, dere, player)) {
+            context.getItem().shrink(1);
+            return ActionResultType.CONSUME;
+        } else {
+            player.sendStatusMessage(new TranslationTextComponent("command.moeblocks.spawn.error"), true);
+            return ActionResultType.FAIL;
         }
-        if (state.getBlock().isIn(MoeTags.MOEABLES)) {
-            if (state.hasTileEntity()) { moe.setExtraBlockData(world.getTileEntity(pos).getTileData()); }
-            moe.setBlockData(state);
-            pos = context.getPos().offset(context.getFace());
-            moe.setPositionAndRotation(pos.getX() + 0.5F, pos.getY(), pos.getZ() + 0.5F, player.rotationYaw, -player.rotationPitch);
-            moe.setProtagonist(player);
-            if (world.addEntity(moe)) {
-                moe.onInitialSpawn((ServerWorld) world, world.getDifficultyForLocation(pos), SpawnReason.SPAWN_EGG, null, null);
-                moe.setDere(Deres.values()[world.rand.nextInt(Deres.values().length)]);
-                context.getItem().shrink(1);
-                return ActionResultType.CONSUME;
-            }
-        }
-        player.sendStatusMessage(new TranslationTextComponent("command.moeblocks.spawn.error"), true);
-        return ActionResultType.FAIL;
     }
 }

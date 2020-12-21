@@ -1,5 +1,6 @@
 package moeblocks.item;
 
+import moeblocks.entity.AbstractDieEntity;
 import moeblocks.entity.MoeDieEntity;
 import moeblocks.init.MoeItems;
 import net.minecraft.dispenser.IPosition;
@@ -11,7 +12,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.world.World;
+
+import java.util.Iterator;
 
 public class MoeDieItem extends Item {
     public static final ProjectileDispenseBehavior DISPENSER_BEHAVIOR = new ProjectileDispenseBehavior() {
@@ -27,17 +31,17 @@ public class MoeDieItem extends Item {
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
+        if (world.isRemote) { return ActionResult.resultPass(player.getHeldItem(hand)); }
         ItemStack stack = player.getHeldItem(hand);
-        if (!world.isRemote) {
-            MoeDieEntity die = new MoeDieEntity(world, player);
-            die.func_234612_a_(player, player.rotationPitch, player.rotationYaw, 0.0F, 0.8F, 1.0F);
-            die.setItem(stack);
-            world.addEntity(die);
+        MoeDieEntity die = new MoeDieEntity(world, player);
+        die.func_234612_a_(player, player.rotationPitch, player.rotationYaw, 0.0F, 0.8F, 1.0F);
+        die.setItem(stack);
+        if (world.addEntity(die)) {
+            player.addStat(Stats.ITEM_USED.get(this));
+            if (!player.abilities.isCreativeMode) { stack.shrink(1); }
+            return ActionResult.resultSuccess(stack);
+        } else {
+            return ActionResult.resultFail(stack);
         }
-        player.addStat(Stats.ITEM_USED.get(this));
-        if (!player.abilities.isCreativeMode) {
-            stack.shrink(1);
-        }
-        return ActionResult.resultSuccess(stack);
     }
 }

@@ -2,8 +2,10 @@ package moeblocks.entity;
 
 import moeblocks.automata.Automaton;
 import moeblocks.automata.state.BlockStates;
+import moeblocks.automata.state.Deres;
 import moeblocks.automata.state.Genders;
 import moeblocks.init.MoeBlocks;
+import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeTags;
 import moeblocks.util.Trans;
 import net.minecraft.block.Block;
@@ -13,6 +15,7 @@ import net.minecraft.block.material.MaterialColor;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.Pose;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -31,6 +34,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -258,5 +262,22 @@ public class MoeEntity extends AbstractNPCEntity {
         } catch (IllegalStateException e) {
             return false;
         }
+    }
+
+    public static boolean spawn(World world, BlockPos block, BlockPos spawn, float yaw, float pitch, Deres dere, PlayerEntity player) {
+        BlockState state = world.getBlockState(block);
+        if (!state.getBlock().isIn(MoeTags.MOEABLES)) { return false; }
+        TileEntity extra = world.getTileEntity(block);
+        MoeEntity moe = MoeEntities.MOE.get().create(world);
+        moe.setPositionAndRotation(spawn.getX() + 0.5D, spawn.getY(), spawn.getZ() + 0.5D, yaw, pitch);
+        moe.setBlockData(state);
+        moe.setExtraBlockData(extra != null ? extra.getTileData() : new CompoundNBT());
+        moe.setDere(dere);
+        if (world.addEntity(moe)) {
+            moe.onInitialSpawn((ServerWorld) world, world.getDifficultyForLocation(spawn), SpawnReason.TRIGGERED, null, null);
+            if (player != null) { moe.setProtagonist(player); }
+            return world.destroyBlock(block, false);
+        }
+        return false;
     }
 }

@@ -23,8 +23,8 @@ public class DieCubeModel<T extends AbstractDieEntity> extends EntityModel<T> {
 
     @Override
     public void setRotationAngles(AbstractDieEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float yaw, float pitch) {
-        this.die.rotateAngleX = entity.getRotations().getX() * 0.0174533F;
-        this.die.rotateAngleY = entity.getRotations().getY() * 0.0174533F;
-        this.die.rotateAngleZ = entity.getRotations().getZ() * 0.0174533F;
+        this.die.rotateAngleX = entity.getRotations().getX() * 0.0174532925F;
+        this.die.rotateAngleY = entity.getRotations().getY() * 0.0174532925F;
+        this.die.rotateAngleZ = entity.getRotations().getZ() * 0.0174532925F;
     }
 }

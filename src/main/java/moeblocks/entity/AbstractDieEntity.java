@@ -12,87 +12,93 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.*;
+import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public abstract class AbstractDieEntity extends ProjectileItemEntity {
     private static final DataParameter<Rotations> ROTATIONS = EntityDataManager.createKey(AbstractDieEntity.class, DataSerializers.ROTATIONS);
-    private static final HashMap<Vector3i, Face> DIE_FACE = new HashMap<>();
+    private static final Map<Vector3f, Integer> MAP = new LinkedHashMap<>(64);
 
     static {
-        DIE_FACE.put(new Vector3i(0, 0, 0), Face.FIVE);
-        DIE_FACE.put(new Vector3i(0, 90, 0), Face.FIVE);
-        DIE_FACE.put(new Vector3i(0, 180, 0), Face.FIVE);
-        DIE_FACE.put(new Vector3i(0, 270, 0), Face.FIVE);
-        DIE_FACE.put(new Vector3i(90, 0, 0), Face.ONE);
-        DIE_FACE.put(new Vector3i(90, 90, 0), Face.ONE);
-        DIE_FACE.put(new Vector3i(90, 180, 0), Face.ONE);
-        DIE_FACE.put(new Vector3i(90, 270, 0), Face.ONE);
-        DIE_FACE.put(new Vector3i(180, 0, 0), Face.TWO);
-        DIE_FACE.put(new Vector3i(180, 90, 0), Face.TWO);
-        DIE_FACE.put(new Vector3i(180, 180, 0), Face.TWO);
-        DIE_FACE.put(new Vector3i(180, 270, 0), Face.TWO);
-        DIE_FACE.put(new Vector3i(270, 0, 0), Face.SIX);
-        DIE_FACE.put(new Vector3i(270, 90, 0), Face.SIX);
-        DIE_FACE.put(new Vector3i(270, 180, 0), Face.SIX);
-        DIE_FACE.put(new Vector3i(270, 270, 0), Face.SIX);
-        DIE_FACE.put(new Vector3i(0, 0, 90), Face.FOUR);
-        DIE_FACE.put(new Vector3i(0, 90, 90), Face.SIX);
-        DIE_FACE.put(new Vector3i(0, 180, 90), Face.THREE);
-        DIE_FACE.put(new Vector3i(0, 270, 90), Face.ONE);
-        DIE_FACE.put(new Vector3i(90, 0, 90), Face.FOUR);
-        DIE_FACE.put(new Vector3i(90, 90, 90), Face.FIVE);
-        DIE_FACE.put(new Vector3i(90, 180, 90), Face.THREE);
-        DIE_FACE.put(new Vector3i(90, 270, 90), Face.TWO);
-        DIE_FACE.put(new Vector3i(180, 0, 90), Face.FOUR);
-        DIE_FACE.put(new Vector3i(180, 90, 90), Face.ONE);
-        DIE_FACE.put(new Vector3i(180, 180, 90), Face.THREE);
-        DIE_FACE.put(new Vector3i(180, 270, 90), Face.SIX);
-        DIE_FACE.put(new Vector3i(270, 0, 90), Face.FOUR);
-        DIE_FACE.put(new Vector3i(270, 90, 90), Face.TWO);
-        DIE_FACE.put(new Vector3i(270, 180, 90), Face.THREE);
-        DIE_FACE.put(new Vector3i(270, 270, 90), Face.FIVE);
-        DIE_FACE.put(new Vector3i(0, 0, 180), Face.TWO);
-        DIE_FACE.put(new Vector3i(0, 90, 180), Face.TWO);
-        DIE_FACE.put(new Vector3i(0, 180, 180), Face.TWO);
-        DIE_FACE.put(new Vector3i(0, 270, 180), Face.TWO);
-        DIE_FACE.put(new Vector3i(90, 0, 180), Face.SIX);
-        DIE_FACE.put(new Vector3i(90, 90, 180), Face.SIX);
-        DIE_FACE.put(new Vector3i(90, 180, 180), Face.SIX);
-        DIE_FACE.put(new Vector3i(90, 270, 180), Face.SIX);
-        DIE_FACE.put(new Vector3i(180, 0, 180), Face.FIVE);
-        DIE_FACE.put(new Vector3i(180, 90, 180), Face.FIVE);
-        DIE_FACE.put(new Vector3i(180, 180, 180), Face.FIVE);
-        DIE_FACE.put(new Vector3i(180, 270, 180), Face.FIVE);
-        DIE_FACE.put(new Vector3i(270, 0, 180), Face.ONE);
-        DIE_FACE.put(new Vector3i(270, 90, 180), Face.ONE);
-        DIE_FACE.put(new Vector3i(270, 180, 180), Face.ONE);
-        DIE_FACE.put(new Vector3i(270, 270, 180), Face.ONE);
-        DIE_FACE.put(new Vector3i(0, 0, 270), Face.THREE);
-        DIE_FACE.put(new Vector3i(0, 90, 270), Face.ONE);
-        DIE_FACE.put(new Vector3i(0, 180, 270), Face.FOUR);
-        DIE_FACE.put(new Vector3i(0, 270, 270), Face.SIX);
-        DIE_FACE.put(new Vector3i(90, 0, 270), Face.THREE);
-        DIE_FACE.put(new Vector3i(90, 90, 270), Face.TWO);
-        DIE_FACE.put(new Vector3i(90, 180, 270), Face.FOUR);
-        DIE_FACE.put(new Vector3i(90, 270, 270), Face.FIVE);
-        DIE_FACE.put(new Vector3i(180, 0, 270), Face.THREE);
-        DIE_FACE.put(new Vector3i(180, 90, 270), Face.SIX);
-        DIE_FACE.put(new Vector3i(180, 180, 270), Face.FOUR);
-        DIE_FACE.put(new Vector3i(180, 270, 270), Face.ONE);
-        DIE_FACE.put(new Vector3i(270, 0, 270), Face.THREE);
-        DIE_FACE.put(new Vector3i(270, 90, 270), Face.FIVE);
-        DIE_FACE.put(new Vector3i(270, 180, 270), Face.FOUR);
-        DIE_FACE.put(new Vector3i(270, 270, 270), Face.TWO);
+        MAP.put(new Vector3f(  0,   0,   0), 2);
+        MAP.put(new Vector3f(  0,   0,  90), 3);
+        MAP.put(new Vector3f(  0,   0, 180), 5);
+        MAP.put(new Vector3f(  0,   0, 270), 4);
+        MAP.put(new Vector3f(  0,  90,   0), 2);
+        MAP.put(new Vector3f(  0,  90,  90), 6);
+        MAP.put(new Vector3f(  0,  90, 180), 5);
+        MAP.put(new Vector3f(  0,  90, 270), 1);
+        MAP.put(new Vector3f(  0, 180,   0), 2);
+        MAP.put(new Vector3f(  0, 180,  90), 4);
+        MAP.put(new Vector3f(  0, 180, 180), 5);
+        MAP.put(new Vector3f(  0, 180, 270), 3);
+        MAP.put(new Vector3f(  0, 270,   0), 2);
+        MAP.put(new Vector3f(  0, 270,  90), 1);
+        MAP.put(new Vector3f(  0, 270, 180), 5);
+        MAP.put(new Vector3f(  0, 270, 270), 6);
+        MAP.put(new Vector3f( 90,   0,   0), 1);
+        MAP.put(new Vector3f( 90,   0,  90), 3);
+        MAP.put(new Vector3f( 90,   0, 180), 6);
+        MAP.put(new Vector3f( 90,   0, 270), 4);
+        MAP.put(new Vector3f( 90,  90,   0), 1);
+        MAP.put(new Vector3f( 90,  90,  90), 2);
+        MAP.put(new Vector3f( 90,  90, 180), 6);
+        MAP.put(new Vector3f( 90,  90, 270), 5);
+        MAP.put(new Vector3f( 90, 180,   0), 1);
+        MAP.put(new Vector3f( 90, 180,  90), 4);
+        MAP.put(new Vector3f( 90, 180, 180), 6);
+        MAP.put(new Vector3f( 90, 180, 270), 3);
+        MAP.put(new Vector3f( 90, 270,   0), 1);
+        MAP.put(new Vector3f( 90, 270,  90), 5);
+        MAP.put(new Vector3f( 90, 270, 180), 6);
+        MAP.put(new Vector3f( 90, 270, 270), 2);
+        MAP.put(new Vector3f(180,   0,   0), 5);
+        MAP.put(new Vector3f(180,   0,  90), 3);
+        MAP.put(new Vector3f(180,   0, 180), 2);
+        MAP.put(new Vector3f(180,   0, 270), 4);
+        MAP.put(new Vector3f(180,  90,   0), 5);
+        MAP.put(new Vector3f(180,  90,  90), 1);
+        MAP.put(new Vector3f(180,  90, 180), 2);
+        MAP.put(new Vector3f(180,  90, 270), 6);
+        MAP.put(new Vector3f(180, 180,   0), 5);
+        MAP.put(new Vector3f(180, 180,  90), 4);
+        MAP.put(new Vector3f(180, 180, 180), 2);
+        MAP.put(new Vector3f(180, 180, 270), 3);
+        MAP.put(new Vector3f(180, 270,   0), 5);
+        MAP.put(new Vector3f(180, 270,  90), 6);
+        MAP.put(new Vector3f(180, 270, 180), 2);
+        MAP.put(new Vector3f(180, 270, 270), 1);
+        MAP.put(new Vector3f(270,   0,   0), 6);
+        MAP.put(new Vector3f(270,   0,  90), 3);
+        MAP.put(new Vector3f(270,   0, 180), 1);
+        MAP.put(new Vector3f(270,   0, 270), 4);
+        MAP.put(new Vector3f(270,  90,   0), 6);
+        MAP.put(new Vector3f(270,  90,  90), 5);
+        MAP.put(new Vector3f(270,  90, 180), 1);
+        MAP.put(new Vector3f(270,  90, 270), 2);
+        MAP.put(new Vector3f(270, 180,   0), 6);
+        MAP.put(new Vector3f(270, 180,  90), 4);
+        MAP.put(new Vector3f(270, 180, 180), 1);
+        MAP.put(new Vector3f(270, 180, 270), 3);
+        MAP.put(new Vector3f(270, 270,   0), 6);
+        MAP.put(new Vector3f(270, 270,  90), 2);
+        MAP.put(new Vector3f(270, 270, 180), 1);
+        MAP.put(new Vector3f(270, 270, 270), 5);
     }
 
-    protected int totalHops;
+    private final int spin = 30;
     private boolean landed;
-    private Vector3i rotation;
+    private int totalHops;
+    private int face = -1;
 
     public AbstractDieEntity(EntityType<? extends AbstractDieEntity> type, World world) {
         super(type, world);
@@ -108,38 +114,39 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
 
     @Override
     protected void onImpact(RayTraceResult result) {
-        if (!this.world.isRemote()) {
-            if (--this.totalHops < 0 && result.getType() == RayTraceResult.Type.BLOCK) {
-                if (this.world.isAirBlock(this.getPositionUnderneath())) {
-                    this.bounce();
-                } else {
-                    BlockRayTraceResult block = (BlockRayTraceResult) result;
-                    BlockPos pos = block.getPos();
-                    BlockState state = this.world.getBlockState(pos);
-                    if (this.isLanded() && this.onActionStart(state, pos, this.getFaceFromAngle())) {
-                        this.setRotations(this.rotation.getX(), this.rotation.getY(), this.rotation.getZ());
-                        this.setVelocity(0, 0, 0);
-                        this.setMotion(Vector3d.ZERO);
-                        this.setNoGravity(true);
-                    } else {
-                        this.landed = false;
-                        this.bounce();
-                    }
-                }
-            } else if (result.getType() == RayTraceResult.Type.ENTITY) {
-                EntityRayTraceResult trace = (EntityRayTraceResult) result;
-                Entity entity = trace.getEntity();
-                this.setMotion(this.bounce().mul(entity.getMotion()));
-            } else {
+        if (this.world.isRemote()) { return; }
+        if (--this.totalHops < 0 && result.getType() == RayTraceResult.Type.BLOCK) {
+            if (this.world.isAirBlock(this.getPositionUnderneath())) {
                 this.bounce();
+            } else {
+                BlockRayTraceResult block = (BlockRayTraceResult) result;
+                BlockPos pos = block.getPos();
+                BlockState state = this.world.getBlockState(pos);
+                this.landed = true;
+                if (this.isLanded() && this.onActionStart(state, pos, this.getFaceFromAngle())) {
+                    this.setPositionAndUpdate(this.getPosX(), Math.round(this.getPosY()) - 0.15F, this.getPosZ());
+                    this.setRotations(this.getRandomFaceRotations());
+                    this.setNoGravity(true);
+                    this.setVelocity(0, 0, 0);
+                    this.setMotion(Vector3d.ZERO);
+                } else {
+                    this.landed = false;
+                    this.bounce();
+                }
             }
+        } else if (result.getType() == RayTraceResult.Type.ENTITY) {
+            EntityRayTraceResult trace = (EntityRayTraceResult) result;
+            Entity entity = trace.getEntity();
+            this.setMotion(this.bounce().mul(entity.getMotion()));
+        } else {
+            this.bounce();
         }
     }
 
     @Override
     protected void registerData() {
+        this.dataManager.register(ROTATIONS, this.getRandomSpinRotations());
         super.registerData();
-        this.dataManager.register(ROTATIONS, new Rotations(this.rand.nextFloat() * 360.0F, this.rand.nextFloat() * 360.0F, this.rand.nextFloat() * 360.0F));
     }
 
     @Override
@@ -158,6 +165,18 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
         return this.dataManager.get(ROTATIONS);
     }
 
+    public float getYaw() {
+        return this.getRotations().getY() % 360;
+    }
+
+    public float getPitch() {
+        return this.getRotations().getX() % 360;
+    }
+
+    public float getRoll() {
+        return this.getRotations().getZ() % 360;
+    }
+
     public void setRotations(Rotations rotations) {
         this.dataManager.set(ROTATIONS, rotations);
     }
@@ -165,21 +184,16 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
     @Override
     public void tick() {
         super.tick();
-        if (!this.world.isRemote()) {
-            if (this.landed) {
-                if (this.onActionTick()) {
-                    this.setVelocity(0, 0, 0);
-                    this.setMotion(Vector3d.ZERO);
-                    this.setNoGravity(true);
-                } else {
-                    this.remove();
-                }
-            } else {
-                double x = Math.abs(this.getMotion().x) * (this.rand.nextFloat() * 90.0 + 90.0) + this.rand.nextFloat();
-                double y = Math.abs(this.getMotion().y) * (this.rand.nextFloat() * 90.0 + 90.0) + this.rand.nextFloat();
-                double z = Math.abs(this.getMotion().z) * (this.rand.nextFloat() * 90.0 + 90.0) + this.rand.nextFloat();
-                this.addRotations(new Vector3d(x, y, z));
-            }
+        if (this.world.isRemote()) { return; }
+        double x = this.getMotion().x * this.spin;
+        double y = this.getMotion().y * this.spin;
+        double z = this.getMotion().z * this.spin;
+        this.addRotations(new Vector3d(x, y, z));
+        if (this.isLanded()) {
+            if (this.onActionTick()) { this.remove(); }
+            this.setVelocity(0, 0, 0);
+            this.setMotion(Vector3d.ZERO);
+            this.setNoGravity(true);
         }
     }
 
@@ -204,37 +218,59 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
     }
 
     public Vector3d bounce() {
-        Vector3d motion = this.getMotion().inverse().scale(0.8F);
-        this.setMotion(motion);
-        return motion;
+        this.setMotion(this.getMotion().inverse().scale(0.8F));
+        return this.getMotion();
     }
 
-    public abstract boolean onActionStart(BlockState state, BlockPos pos, Face face);
-
-    public Face getFaceFromAngle() {
-        int x = 90 * (Math.round(this.getRotations().getX() / 90));
-        int y = 90 * (Math.round(this.getRotations().getY() / 90));
-        int z = 90 * (Math.round(this.getRotations().getZ() / 90));
-        this.rotation = new Vector3i(x, y, z);
-        return DIE_FACE.get(this.rotation);
-    }
+    public abstract boolean onActionStart(BlockState state, BlockPos pos, int face);
 
     public PlayerEntity getPlayer() {
-        if (this.func_234616_v_() instanceof PlayerEntity) {
-            return (PlayerEntity) this.func_234616_v_();
-        }
-        return null;
+        if (!(this.func_234616_v_() instanceof PlayerEntity)) { return null; }
+        return (PlayerEntity) this.func_234616_v_();
+    }
+
+    public int getFaceFromAngle() {
+        return this.face = AbstractDieEntity.match(this.getPitch(), this.getYaw(), this.getRoll());
     }
 
     public boolean isLanded() {
-        return this.landed || (this.landed = this.getFaceFromAngle() != null);
+        if (this.face < 0) { this.getFaceFromAngle(); }
+        return this.face > 0 && this.landed;
     }
 
-    public enum Face {
-        ONE, TWO, THREE, FOUR, FIVE, SIX;
+    private int getSpin() {
+        return this.rand.nextInt(this.spin) * (this.rand.nextInt(3) - 1);
+    }
 
-        public int getNumber() {
-            return this.ordinal() + 1;
+    private Rotations getRandomFaceRotations() {
+        int target = this.rand.nextInt(6) + 1;
+        Vector3f face = new Vector3f(0, 0, 0);
+        Iterator<Map.Entry<Vector3f, Integer>> it = MAP.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Vector3f, Integer> entry = it.next();
+            if (target != entry.getValue()) { continue; }
+            face = entry.getKey();
         }
+        return new Rotations(face.getX(), face.getY(), face.getZ());
+    }
+
+    private Rotations getRandomSpinRotations() {
+        Rotations rotation = this.getRandomFaceRotations();
+        float x = rotation.getX() + this.getSpin();
+        float y = rotation.getY() + this.getSpin();
+        float z = rotation.getZ() + this.getSpin();
+        return new Rotations(x, y, z);
+    }
+
+    protected static int match(float x, float y, float z) {
+        return MAP.getOrDefault(new Vector3f(round(x), round(y), round(z)), -1);
+    }
+
+    private static float round(float angle) {
+        if (345 < angle || angle <  15) { return   0; }
+        if ( 75 < angle || angle < 105) { return  90; }
+        if (165 < angle || angle < 195) { return 180; }
+        if (255 < angle || angle < 285) { return 270; }
+        return angle;
     }
 }
