@@ -134,32 +134,16 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return this.getGender() == Genders.FEMININE ? "chan" : "kun";
     }
 
-    public String getGivenName() {
-        return  this.dataManager.get(GIVEN_NAME);
-    }
-
     public Genders getGender() {
         return Genders.FEMININE;
     }
 
-    public void setGivenName(String name) {
-        this.dataManager.set(GIVEN_NAME, name);
+    public String getGivenName() {
+        return this.dataManager.get(GIVEN_NAME);
     }
 
-    public void registerStates() {
-        this.states.put(BloodTypes.class, new Automaton(this, BloodTypes.O));
-        this.states.put(Deres.class, new Automaton(this, Deres.KUUDERE));
-        this.states.put(Emotions.class, new Automaton(this, Emotions.NORMAL));
-        this.states.put(Genders.class, new Automaton(this, Genders.FEMININE));
-        this.states.put(HealthStates.class, new Automaton(this, HealthStates.PERFECT));
-        this.states.put(HungerStates.class, new Automaton(this, HungerStates.SATISFIED));
-        this.states.put(ItemStates.class, new Automaton(this, ItemStates.DEFAULT));
-        this.states.put(LoveStates.class, new Automaton(this, LoveStates.FRIENDLY));
-        this.states.put(MoonPhases.class, new Automaton(this, MoonPhases.FULL));
-        this.states.put(PeriodsOfTime.class, new Automaton(this, PeriodsOfTime.ATTACHED));
-        this.states.put(StoryStates.class, new Automaton(this, StoryStates.INTRODUCTION));
-        this.states.put(StressStates.class, new Automaton(this, StressStates.RELAXED));
-        this.states.put(TimesOfDay.class, new Automaton(this, TimesOfDay.MORNING));
+    public void setGivenName(String name) {
+        this.dataManager.set(GIVEN_NAME, name);
     }
 
     @Override
@@ -180,6 +164,22 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.targetSelector.addGoal(0x1, new RevengeTarget(this));
         this.states = new HashMap<>();
         this.registerStates();
+    }
+
+    public void registerStates() {
+        this.states.put(BloodTypes.class, new Automaton(this, BloodTypes.O));
+        this.states.put(Deres.class, new Automaton(this, Deres.KUUDERE));
+        this.states.put(Emotions.class, new Automaton(this, Emotions.NORMAL));
+        this.states.put(Genders.class, new Automaton(this, Genders.FEMININE));
+        this.states.put(HealthStates.class, new Automaton(this, HealthStates.PERFECT));
+        this.states.put(HungerStates.class, new Automaton(this, HungerStates.SATISFIED));
+        this.states.put(ItemStates.class, new Automaton(this, ItemStates.DEFAULT));
+        this.states.put(LoveStates.class, new Automaton(this, LoveStates.FRIENDLY));
+        this.states.put(MoonPhases.class, new Automaton(this, MoonPhases.FULL));
+        this.states.put(PeriodsOfTime.class, new Automaton(this, PeriodsOfTime.ATTACHED));
+        this.states.put(StoryStates.class, new Automaton(this, StoryStates.INTRODUCTION));
+        this.states.put(StressStates.class, new Automaton(this, StressStates.RELAXED));
+        this.states.put(TimesOfDay.class, new Automaton(this, TimesOfDay.MORNING));
     }
 
     @Override
@@ -294,6 +294,35 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.dataManager.set(FAMILY_NAME, name);
     }
 
+    public Emotions getEmotion() {
+        return Emotions.valueOf(this.dataManager.get(EMOTION));
+    }
+
+    public void setEmotion(Emotions emotion) {
+        this.setEmotion(emotion, null);
+    }
+
+    public void setEmotion(Emotions emotion, PlayerEntity entity) {
+        this.dataManager.set(EMOTION, emotion.name());
+        this.emotionTarget = entity;
+    }
+
+    public Deres getDere() {
+        return Deres.valueOf(this.dataManager.get(DERE));
+    }
+
+    public void setDere(Deres dere) {
+        this.dataManager.set(DERE, dere.name());
+    }
+
+    public BloodTypes getBloodType() {
+        return BloodTypes.valueOf(this.dataManager.get(BLOOD_TYPE));
+    }
+
+    public void setBloodType(BloodTypes bloodType) {
+        this.dataManager.set(BLOOD_TYPE, bloodType.name());
+    }
+
     @Override
     public void readAdditional(CompoundNBT compound) {
         if (compound.hasUniqueId("FollowTarget")) { this.setFollowTarget(compound.getUniqueId("FollowTarget")); }
@@ -327,86 +356,9 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.progress = compound.getFloat("Progress");
     }
 
-    @Override
-    protected void dropLoot(DamageSource cause, boolean player) {
-        this.entityDropItem(MoeItems.MOE_DIE.get());
-        for (EquipmentSlotType slot : EquipmentSlotType.values()) {
-            this.entityDropItem(this.getItemStackFromSlot(slot));
-        }
-    }
-
-    @Override
-    public void livingTick() {
-        this.updateArmSwingProgress();
-        this.getAnimation().tick(this);
-        super.livingTick();
-        if (this.isLocal()) {
-            if (++this.timeSinceSleep > 24000) { this.addStress(0.0005F); }
-            this.states.forEach((state, machine) -> machine.update());
-            this.updateStareState();
-            this.updateHungerState();
-            this.updateLoveState();
-            ++this.age;
-            ChunkPos pos = this.getChunkPosition();
-            if (!pos.equals(this.lastRecordedPos)) {
-                this.lastRecordedPos = pos;
-                this.sync();
-            }
-        }
-    }
-
-    public void setHomePosition(BlockPos pos) {
-        this.setHomePosAndDistance(pos, (int) this.getMaximumHomeDistance());
-    }
-
-    public void setEmotion(Emotions emotion) {
-        this.setEmotion(emotion, null);
-    }
-
-    public void setEmotion(Emotions emotion, PlayerEntity entity) {
-        this.dataManager.set(EMOTION, emotion.name());
-        this.emotionTarget = entity;
-    }
-
-    public void playSound(SoundEvent sound) {
-        this.playSound(sound, this.getSoundVolume(), this.getSoundPitch());
-    }
-
-    public Emotions getEmotion() {
-        return Emotions.valueOf(this.dataManager.get(EMOTION));
-    }
-
-    public Animation getAnimation() {
-        return this.animation;
-    }
-
-    public void setAnimation(Animations animation) {
-        this.dataManager.set(ANIMATION, animation.name());
-    }
-
-    public Deres getDere() {
-        return Deres.valueOf(this.dataManager.get(DERE));
-    }
-
-    public void setDere(Deres dere) {
-        this.dataManager.set(DERE, dere.name());
-    }
-
-    public BloodTypes getBloodType() {
-        return BloodTypes.valueOf(this.dataManager.get(BLOOD_TYPE));
-    }
-
-    public void setBloodType(BloodTypes bloodType) {
-        this.dataManager.set(BLOOD_TYPE, bloodType.name());
-    }
-
-    @Override
-    protected void updateFallState(double y, boolean onGround, BlockState state, BlockPos pos) {
-        if (!this.canFly()) { super.updateFallState(y, onGround, state, pos); }
-    }
-
-    public boolean isLocal() {
-        return this.world instanceof ServerWorld;
+    public void setHealth(float health) {
+        super.setHealth(health);
+        this.sync();
     }
 
     @Override
@@ -470,11 +422,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         super.startSleeping(pos);
     }
 
-    public void setHealth(float health) {
-        super.setHealth(health);
-        this.sync();
-    }
-
     public void addStress(float stress) {
         this.setStress(this.stress + stress);
     }
@@ -490,11 +437,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
                 }
             });
         }
-    }
-
-    public void setFoodLevel(float foodLevel) {
-        this.foodLevel = Math.max(0.0F, Math.min(this.foodLevel, 20.0F));
-        this.sync();
     }
 
     public void addFoodLevel(float foodLevel) {
@@ -513,10 +455,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return this.foodLevel < 19.0F;
     }
 
-    public void setNextState(Class<? extends IStateEnum> key, IStateEnum state, int timeout) {
-        this.addNextTickOp((entity) -> this.states.get(key).setNextState(state, timeout));
-    }
-
     public void setNextState(Class<? extends IStateEnum> key, IStateEnum state) {
         this.addNextTickOp((entity) -> this.states.get(key).setNextState(state));
     }
@@ -527,6 +465,82 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public void addExhaustion(float exhaustion) {
         this.exhaustion += exhaustion;
+    }
+
+    public void sync() {
+        this.setCharacter((npc) -> npc.sync(this));
+    }
+
+    public void setCharacter(Consumer<CacheNPC> transaction) {
+        if (this.isLocal() && this.hasProtagonist()) {
+            CacheNPC character = this.getDatingSim().getNPC(this.getUniqueID(), this);
+            character.set(DatingData.get(this.world), transaction);
+        }
+    }
+
+    public boolean isLocal() {
+        return this.world instanceof ServerWorld;
+    }
+
+    public boolean hasProtagonist() {
+        return this.protagonistUUID != null;
+    }
+
+    public DatingSim getDatingSim() {
+        return DatingData.get(this.world, this.protagonistUUID);
+    }
+
+    @Override
+    protected void dropLoot(DamageSource cause, boolean player) {
+        this.entityDropItem(MoeItems.MOE_DIE.get());
+        for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+            this.entityDropItem(this.getItemStackFromSlot(slot));
+        }
+    }
+
+    @Override
+    public void livingTick() {
+        this.updateArmSwingProgress();
+        this.getAnimation().tick(this);
+        super.livingTick();
+        if (this.isLocal()) {
+            if (++this.timeSinceSleep > 24000) { this.addStress(0.0005F); }
+            this.states.forEach((state, machine) -> machine.update());
+            this.updateStareState();
+            this.updateHungerState();
+            this.updateLoveState();
+            ++this.age;
+            ChunkPos pos = this.getChunkPosition();
+            if (!pos.equals(this.lastRecordedPos)) {
+                this.lastRecordedPos = pos;
+                this.sync();
+            }
+        }
+    }
+
+    public void setHomePosition(BlockPos pos) {
+        this.setHomePosAndDistance(pos, (int) this.getMaximumHomeDistance());
+    }
+
+    public Animation getAnimation() {
+        return this.animation;
+    }
+
+    public void setAnimation(Animations animation) {
+        this.dataManager.set(ANIMATION, animation.name());
+    }
+
+    @Override
+    protected void updateFallState(double y, boolean onGround, BlockState state, BlockPos pos) {
+        if (!this.canFly()) { super.updateFallState(y, onGround, state, pos); }
+    }
+
+    public void addAffection(float love) {
+        this.affection += love;
+    }
+
+    public void addLove(float love) {
+        this.setLove(this.love + love);
     }
 
     public void attackEntityFromRange(LivingEntity victim, double factor) {
@@ -566,6 +580,72 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return Math.sqrt(this.getDistanceSq(Vector3d.copyCentered(this.getHomePosition())));
     }
 
+    public boolean isOccupied() {
+        return this.isFighting() || this.isVengeful() || this.isSleeping() || this.isFollowing() || this.isInteracted() || this.hasPath();
+    }
+
+    public boolean isFollowing() {
+        return this.canBeTarget(this.getFollowTarget());
+    }
+
+    public LivingEntity getFollowTarget() {
+        if (this.followTargetUUID == null) { return null; }
+        if (this.followTarget == null) {
+            this.followTarget = this.getEntityFromUUID(this.followTargetUUID);
+        }
+        return this.followTarget;
+    }
+
+    public LivingEntity getEntityFromUUID(UUID uuid) {
+        return getEntityFromUUID(LivingEntity.class, this.world, uuid);
+    }
+
+    public static <T extends LivingEntity> T getEntityFromUUID(Class<T> type, World world, UUID uuid) {
+        if (uuid != null && world instanceof ServerWorld) {
+            BlockPos moe = CacheNPC.positions.get(uuid);
+            if (moe == null) { return null; }
+            int eX, bX, x, eZ, bZ, z;
+            eX = 16 + (bX = 16 * (x = moe.getX() << 4));
+            eZ = 16 + (bZ = 16 * (z = moe.getZ() << 4));
+            IChunk chunk = world.getChunk(x, z, ChunkStatus.FULL, false);
+            if (chunk == null) { return null; }
+            List<T> entities = world.getLoadedEntitiesWithinAABB(type, new AxisAlignedBB(bX, 0, bZ, eX, 255, eZ), (entity) -> entity.getUniqueID().equals(uuid));
+            if (entities.size() > 0) { return entities.get(0); }
+        }
+        return null;
+    }
+
+    public void setFollowTarget(LivingEntity target) {
+        this.setFollowTarget(target != null ? target.getUniqueID() : null);
+        this.followTarget = target;
+        this.resetAnimationState();
+    }
+
+    public void setFollowTarget(UUID target) {
+        this.followTargetUUID = target;
+    }
+
+    public boolean isFighting() {
+        return this.canBeTarget(this.getAttackTarget()) || this.canBeTarget(this.getRevengeTarget()) || this.canBeTarget(this.getAvoidTarget());
+    }
+
+    public LivingEntity getAvoidTarget() {
+        return this.avoidTarget;
+    }
+
+    public void setAvoidTarget(LivingEntity target) {
+        this.avoidTarget = target;
+        this.timeOfAvoid = this.ticksExisted;
+    }
+
+    public boolean isVengeful() {
+        return this.ticksExisted - this.getRevengeTimer() < 500;
+    }
+
+    public boolean isInteracted() {
+        return this.ticksExisted - this.timeOfInteraction < 20;
+    }
+
     public BlockState getBlockState(BlockPos pos) {
         IChunk chunk = this.getChunk(new ChunkPos(pos));
         return chunk == null ? Blocks.AIR.getDefaultState() : chunk.getBlockState(pos);
@@ -581,6 +661,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
 
     public double getGaussian(double factor) {
         return this.rand.nextGaussian() * factor;
+    }
+
+    public Automaton getState(Class<? extends IStateEnum> state) {
+        return this.states.get(state);
     }
 
     public float getStrikingDistance(Entity target) {
@@ -612,14 +696,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return BloodTypes.isCompatible(this.getBloodType(), entity.getBloodType());
     }
 
-    public int getTimeSinceLastInteraction() {
-        return this.timeSinceLastInteraction;
-    }
-    
-    public int getTimeSinceSleep() {
-        return this.timeSinceSleep;
-    }
-
     public ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
         if (stack.getItem().isIn(MoeTags.ADMIN)) { return ActionResultType.FAIL; }
         if (this.isRemote() || hand != Hand.MAIN_HAND) { return ActionResultType.PASS; }
@@ -627,14 +703,18 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return ActionResultType.SUCCESS;
     }
 
-    public void say(PlayerEntity player, String key, Object... params) {
-        player.sendMessage(new TranslationTextComponent(key, params), this.getUniqueID());
-    }
-
     public void say(String key, Object... params) {
         this.world.getPlayers().forEach((player) -> {
             if (player.getDistance(this) < 8.0D) { this.say(player, key, params); }
         });
+    }
+
+    public void say(PlayerEntity player, String key, Object... params) {
+        player.sendMessage(new TranslationTextComponent(key, params), this.getUniqueID());
+    }
+
+    public void setNextState(Class<? extends IStateEnum> key, IStateEnum state, int timeout) {
+        this.addNextTickOp((entity) -> this.states.get(key).setNextState(state, timeout));
     }
 
     public boolean tryEquipItem(ItemStack stack) {
@@ -658,6 +738,41 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
             return true;
         }
         return false;
+    }
+
+    @Override
+    protected boolean shouldExchangeEquipment(ItemStack candidate, ItemStack existing) {
+        if (EnchantmentHelper.hasBindingCurse(existing)) { return false; }
+        EquipmentSlotType slot = this.getSlotForStack(candidate);
+        if (slot == EquipmentSlotType.OFFHAND) {
+            if (this.canConsume(candidate)) { return true; }
+            if (this.isWieldingBow()) { return candidate.getItem().isIn(ItemTags.ARROWS); }
+            return false;
+        }
+        if (existing.getItem().getClass() == candidate.getItem().getClass()) {
+            if (existing.getItem() instanceof TieredItem) {
+                IItemTier a = ((TieredItem) candidate.getItem()).getTier();
+                IItemTier b = ((TieredItem) existing.getItem()).getTier();
+                return a.getAttackDamage() > b.getAttackDamage();
+            }
+            if (existing.getItem() instanceof ArmorItem) {
+                ArmorItem a = (ArmorItem) candidate.getItem();
+                ArmorItem b = (ArmorItem) existing.getItem();
+                return a.getDamageReduceAmount() > b.getDamageReduceAmount();
+            }
+        }
+        return existing.isEmpty();
+    }
+
+    @Override
+    public boolean canDespawn(double distanceToClosestPlayer) {
+        return false;
+    }
+
+    @Override
+    public void updateAITasks() {
+        Consumer<AbstractNPCEntity> op = this.nextTickOps.poll();
+        if (op != null) { op.accept(this); }
     }
 
     @Override
@@ -712,126 +827,12 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return false;
     }
 
+    public void playSound(SoundEvent sound) {
+        this.playSound(sound, this.getSoundVolume(), this.getSoundPitch());
+    }
+
     public void resetAnimationState() {
         this.setAnimation(this.isFollowing() ? Animations.DEFAULT : Animations.IDLE);
-    }
-
-    public boolean isFollowing() {
-        return this.canBeTarget(this.getFollowTarget());
-    }
-
-    public LivingEntity getFollowTarget() {
-        if (this.followTargetUUID == null) { return null; }
-        if (this.followTarget == null) {
-            this.followTarget = this.getEntityFromUUID(this.followTargetUUID);
-        }
-        return this.followTarget;
-    }
-
-    public PlayerEntity getProtagonist() {
-        if (this.protagonistUUID == null) { return null; }
-        if (this.protagonist == null) {
-            this.protagonist = this.world.getPlayerByUuid(this.protagonistUUID);
-        }
-        return this.protagonist;
-    }
-
-    public void setProtagonist(PlayerEntity player) {
-        this.setCharacter((npc) -> npc.setEstranged(true));
-        this.setProtagonist(player != null ? player.getUniqueID() : null);
-        this.sync();
-        this.protagonist = player;
-    }
-
-    public void setProtagonist(UUID uuid) {
-        this.protagonistUUID = uuid;
-    }
-
-    public boolean hasProtagonist() {
-        return this.protagonistUUID != null;
-    }
-
-    public DatingSim getDatingSim() {
-        return DatingData.get(this.world, this.protagonistUUID);
-    }
-
-    public void setCharacter(Consumer<CacheNPC> transaction) {
-        if (this.isLocal() && this.hasProtagonist()) {
-            CacheNPC character = this.getDatingSim().getNPC(this.getUniqueID(), this);
-            character.set(DatingData.get(this.world), transaction);
-        }
-    }
-
-    public void sync() {
-        this.setCharacter((npc) -> npc.sync(this));
-    }
-
-    public LivingEntity getEntityFromUUID(UUID uuid) {
-        return getEntityFromUUID(LivingEntity.class, this.world, uuid);
-    }
-
-    public static <T extends LivingEntity> T getEntityFromUUID(Class<T> type, World world, UUID uuid) {
-        if (uuid != null && world instanceof ServerWorld) {
-            BlockPos moe = CacheNPC.positions.get(uuid);
-            if (moe == null) { return null; }
-            int eX, bX, x, eZ, bZ, z;
-            eX = 16 + (bX = 16 * (x = moe.getX() << 4));
-            eZ = 16 + (bZ = 16 * (z = moe.getZ() << 4));
-            IChunk chunk = world.getChunk(x, z, ChunkStatus.FULL, false);
-            if (chunk == null) { return null; }
-            List<T> entities = world.getLoadedEntitiesWithinAABB(type, new AxisAlignedBB(bX, 0, bZ, eX, 255, eZ), (entity) -> entity.getUniqueID().equals(uuid));
-            if (entities.size() > 0) { return entities.get(0); }
-        }
-        return null;
-    }
-
-    public void setFollowTarget(LivingEntity target) {
-        this.setFollowTarget(target != null ? target.getUniqueID() : null);
-        this.followTarget = target;
-        this.resetAnimationState();
-    }
-
-    public void setFollowTarget(UUID target) {
-        this.followTargetUUID = target;
-    }
-
-    @Override
-    protected boolean shouldExchangeEquipment(ItemStack candidate, ItemStack existing) {
-        if (EnchantmentHelper.hasBindingCurse(existing)) { return false; }
-        EquipmentSlotType slot = this.getSlotForStack(candidate);
-        if (slot == EquipmentSlotType.OFFHAND) {
-            if (this.canConsume(candidate)) { return true; }
-            if (this.isWieldingBow()) { return candidate.getItem().isIn(ItemTags.ARROWS); }
-            return false;
-        }
-        if (existing.getItem().getClass() == candidate.getItem().getClass()) {
-            if (existing.getItem() instanceof TieredItem) {
-                IItemTier a = ((TieredItem) candidate.getItem()).getTier();
-                IItemTier b = ((TieredItem) existing.getItem()).getTier();
-                return a.getAttackDamage() > b.getAttackDamage();
-            }
-            if (existing.getItem() instanceof ArmorItem) {
-                ArmorItem a = (ArmorItem) candidate.getItem();
-                ArmorItem b = (ArmorItem) existing.getItem();
-                return a.getDamageReduceAmount() > b.getDamageReduceAmount();
-            }
-        }
-        return existing.isEmpty();
-    }
-
-    @Override
-    public boolean canDespawn(double distanceToClosestPlayer) {
-        return false;
-    }
-
-    @Override
-    public void updateAITasks() {
-        Consumer<AbstractNPCEntity> op = this.nextTickOps.poll();
-        if (op != null) { op.accept(this); }
-    }
-
-    public Automaton getState(Class<? extends IStateEnum> state) {
-        return this.states.get(state);
     }
 
     public boolean isWieldingBow() {
@@ -845,11 +846,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
             slot = EquipmentSlotType.OFFHAND;
         }
         return slot;
-    }
-
-    public void updateStareState() {
-        PlayerEntity player = this.world.getClosestPlayer(this, 8.0D);
-        if (this.isBeingWatchedBy(player)) { this.setStareTarget(player); }
     }
 
     public void updateHungerState() {
@@ -881,6 +877,11 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         }
     }
 
+    public void updateStareState() {
+        PlayerEntity player = this.world.getClosestPlayer(this, 8.0D);
+        if (this.isBeingWatchedBy(player)) { this.setStareTarget(player); }
+    }
+
     public void setCanFly(boolean fly) {
         this.setMoveController(fly ? new FlyingMovementController(this, 10, false) : new MovementController(this));
         this.setNavigator(fly ? new FlyingPathNavigator(this, this.world) : new GroundPathNavigator(this, this.world));
@@ -902,22 +903,14 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return this.getBaseAge() + (int) (this.world.getGameTime() - this.age) / 24000 / 366;
     }
 
+    public abstract int getBaseAge();
+
     public int getAttackCooldown() {
         return (int) (this.getAttribute(Attributes.ATTACK_SPEED).getValue() * 4.0F);
     }
 
-    public abstract int getBaseAge();
-
     public BlockState getBlockData() {
         return Blocks.AIR.getDefaultState();
-    }
-
-    public CompoundNBT getExtraBlockData() {
-        return new CompoundNBT();
-    }
-
-    public float getScale() {
-        return 1.0F;
     }
 
     public float getBlockStrikingDistance() {
@@ -948,29 +941,21 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return new ChunkPos(this.getPosition());
     }
 
-    public String getFullName() {
-        return String.format("%s %s", this.getFamilyName(), this.getGivenName());
+    public CompoundNBT getExtraBlockData() {
+        return new CompoundNBT();
     }
 
     public float getFoodLevel() {
         return this.foodLevel;
     }
 
-    public float getLove() {
-        return this.love;
-    }
-
-    public void setLove(float love) {
-        this.love = Math.max(0.0F, Math.min(love, 20.0F));
+    public void setFoodLevel(float foodLevel) {
+        this.foodLevel = Math.max(0.0F, Math.min(this.foodLevel, 20.0F));
         this.sync();
     }
 
-    public void addLove(float love) {
-        this.setLove(this.love + love);
-    }
-
-    public void addAffection(float love) {
-        this.affection += love;
+    public String getFullName() {
+        return String.format("%s %s", this.getFamilyName(), this.getGivenName());
     }
 
     public PlayerEntity getInteractTarget() {
@@ -982,6 +967,38 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.timeOfInteraction = this.ticksExisted;
     }
 
+    public float getLove() {
+        return this.love;
+    }
+
+    public void setLove(float love) {
+        this.love = Math.max(0.0F, Math.min(love, 20.0F));
+        this.sync();
+    }
+
+    public PlayerEntity getProtagonist() {
+        if (this.protagonistUUID == null) { return null; }
+        if (this.protagonist == null) {
+            this.protagonist = this.world.getPlayerByUuid(this.protagonistUUID);
+        }
+        return this.protagonist;
+    }
+
+    public void setProtagonist(PlayerEntity player) {
+        this.setCharacter((npc) -> npc.setEstranged(true));
+        this.setProtagonist(player != null ? player.getUniqueID() : null);
+        this.sync();
+        this.protagonist = player;
+    }
+
+    public void setProtagonist(UUID uuid) {
+        this.protagonistUUID = uuid;
+    }
+
+    public float getScale() {
+        return 1.0F;
+    }
+
     public LivingEntity getStareTarget() {
         return this.stareTarget;
     }
@@ -989,24 +1006,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public void setStareTarget(PlayerEntity player) {
         this.stareTarget = player;
         this.timeOfStare = this.ticksExisted;
-    }
-
-    public float getStress() {
-        return this.stress;
-    }
-
-    public void setStress(float stress) {
-        this.stress = Math.max(Math.min(stress, 20.0F), 0.0F);
-        this.sync();
-    }
-
-    public float getProgress() {
-        return this.progress;
-    }
-
-    public void setProgress(float progress) {
-        this.progress = progress;
-        this.sync();
     }
 
     public StoryStates getStory() {
@@ -1025,21 +1024,34 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         }
     }
 
+    public float getProgress() {
+        return this.progress;
+    }
+
+    public void setProgress(float progress) {
+        this.progress = progress;
+        this.sync();
+    }
+
+    public float getStress() {
+        return this.stress;
+    }
+
+    public void setStress(float stress) {
+        this.stress = Math.max(Math.min(stress, 20.0F), 0.0F);
+        this.sync();
+    }
+
+    public int getTimeSinceLastInteraction() {
+        return this.timeSinceLastInteraction;
+    }
+
+    public int getTimeSinceSleep() {
+        return this.timeSinceSleep;
+    }
+
     public boolean isAtEase() {
         return !this.isFighting();
-    }
-
-    public boolean isFighting() {
-        return this.canBeTarget(this.getAttackTarget()) || this.canBeTarget(this.getRevengeTarget()) || this.canBeTarget(this.getAvoidTarget());
-    }
-
-    public LivingEntity getAvoidTarget() {
-        return this.avoidTarget;
-    }
-
-    public void setAvoidTarget(LivingEntity target) {
-        this.avoidTarget = target;
-        this.timeOfAvoid = this.ticksExisted;
     }
 
     public boolean isAttacking() {
@@ -1078,18 +1090,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public boolean canFight() {
         Item item = this.getHeldItem(Hand.MAIN_HAND).getItem();
         return item.isIn(MoeTags.WEAPONS);
-    }
-
-    public boolean isOccupied() {
-        return this.isFighting() || this.isVengeful() || this.isSleeping() || this.isFollowing() || this.isInteracted() || this.hasPath();
-    }
-
-    public boolean isVengeful() {
-        return this.ticksExisted - this.getRevengeTimer() < 500;
-    }
-
-    public boolean isInteracted() {
-        return this.ticksExisted - this.timeOfInteraction < 20;
     }
 
     public boolean isNightWatch() {

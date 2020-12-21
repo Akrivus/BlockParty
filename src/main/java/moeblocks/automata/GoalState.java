@@ -19,10 +19,10 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public class GoalState<O extends IStateEnum<E>,  E extends AbstractNPCEntity> implements IState<E> {
+public class GoalState<O extends IStateEnum<E>, E extends AbstractNPCEntity> implements IState<E> {
     public final O filter;
     public final BiConsumer<E, List<IStateGoal>> generator;
-    private List<IStateGoal> goals = new ArrayList<>();
+    private final List<IStateGoal> goals = new ArrayList<>();
 
     public GoalState(O filter, BiConsumer<E, List<IStateGoal>> generator) {
         this.filter = filter;
@@ -30,29 +30,20 @@ public class GoalState<O extends IStateEnum<E>,  E extends AbstractNPCEntity> im
     }
 
     @Override
-    public boolean canApply(E applicant) {
-        return !applicant.getState(this.filter.getClass()).equals(this.filter);
-    }
-
-    @Override
-    public boolean canClear(E applicant) {
-        return !this.canApply(applicant);
-    }
-
-    @Override
     public void apply(E applicant) {
         this.generator.accept(applicant, this.goals);
         this.goals.forEach(goal -> this.getSelector(applicant, goal).addGoal(goal.getPriority(), (Goal) goal));
-    }
-
-    @Override
-    public void clear(E applicant) {
-        this.goals.forEach(goal -> this.getSelector(applicant, goal).removeGoal((Goal) goal));
+    }    @Override
+    public boolean canApply(E applicant) {
+        return !applicant.getState(this.filter.getClass()).equals(this.filter);
     }
 
     private GoalSelector getSelector(E applicant, IStateGoal goal) {
         if (goal instanceof AbstractStateTarget) { return applicant.targetSelector; }
         return applicant.goalSelector;
+    }    @Override
+    public boolean canClear(E applicant) {
+        return !this.canApply(applicant);
     }
 
     public static class BlockBased<O extends BlockStates> extends GoalState<O, MoeEntity> {
@@ -91,7 +82,7 @@ public class GoalState<O extends IStateEnum<E>,  E extends AbstractNPCEntity> im
         }
     }
 
-    public static class ValueBased<O extends IStateEnum<E>,  E extends AbstractNPCEntity> extends GoalState<O, E> {
+    public static class ValueBased<O extends IStateEnum<E>, E extends AbstractNPCEntity> extends GoalState<O, E> {
         public final Function<E, Number> valuator;
         public final float start;
         public final float end;
@@ -99,7 +90,8 @@ public class GoalState<O extends IStateEnum<E>,  E extends AbstractNPCEntity> im
         public ValueBased(O filter, BiConsumer<E, List<IStateGoal>> generator, Function<E, Number> valuator, float start, float end) {
             super(filter, generator);
             this.valuator = valuator;
-            this.start = start; this.end = end;
+            this.start = start;
+            this.end = end;
         }
 
         @Override
@@ -107,5 +99,14 @@ public class GoalState<O extends IStateEnum<E>,  E extends AbstractNPCEntity> im
             float value = (float) this.valuator.apply(applicant);
             return this.start <= value && value <= this.end;
         }
+    }    @Override
+    public void clear(E applicant) {
+        this.goals.forEach(goal -> this.getSelector(applicant, goal).removeGoal((Goal) goal));
     }
+
+
+
+
+
+
 }

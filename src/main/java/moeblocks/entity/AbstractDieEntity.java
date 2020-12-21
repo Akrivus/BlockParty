@@ -26,68 +26,68 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
     private static final Map<Vector3f, Integer> MAP = new LinkedHashMap<>(64);
 
     static {
-        MAP.put(new Vector3f(  0,   0,   0), 2);
-        MAP.put(new Vector3f(  0,   0,  90), 3);
-        MAP.put(new Vector3f(  0,   0, 180), 5);
-        MAP.put(new Vector3f(  0,   0, 270), 4);
-        MAP.put(new Vector3f(  0,  90,   0), 2);
-        MAP.put(new Vector3f(  0,  90,  90), 6);
-        MAP.put(new Vector3f(  0,  90, 180), 5);
-        MAP.put(new Vector3f(  0,  90, 270), 1);
-        MAP.put(new Vector3f(  0, 180,   0), 2);
-        MAP.put(new Vector3f(  0, 180,  90), 4);
-        MAP.put(new Vector3f(  0, 180, 180), 5);
-        MAP.put(new Vector3f(  0, 180, 270), 3);
-        MAP.put(new Vector3f(  0, 270,   0), 2);
-        MAP.put(new Vector3f(  0, 270,  90), 1);
-        MAP.put(new Vector3f(  0, 270, 180), 5);
-        MAP.put(new Vector3f(  0, 270, 270), 6);
-        MAP.put(new Vector3f( 90,   0,   0), 1);
-        MAP.put(new Vector3f( 90,   0,  90), 3);
-        MAP.put(new Vector3f( 90,   0, 180), 6);
-        MAP.put(new Vector3f( 90,   0, 270), 4);
-        MAP.put(new Vector3f( 90,  90,   0), 1);
-        MAP.put(new Vector3f( 90,  90,  90), 2);
-        MAP.put(new Vector3f( 90,  90, 180), 6);
-        MAP.put(new Vector3f( 90,  90, 270), 5);
-        MAP.put(new Vector3f( 90, 180,   0), 1);
-        MAP.put(new Vector3f( 90, 180,  90), 4);
-        MAP.put(new Vector3f( 90, 180, 180), 6);
-        MAP.put(new Vector3f( 90, 180, 270), 3);
-        MAP.put(new Vector3f( 90, 270,   0), 1);
-        MAP.put(new Vector3f( 90, 270,  90), 5);
-        MAP.put(new Vector3f( 90, 270, 180), 6);
-        MAP.put(new Vector3f( 90, 270, 270), 2);
-        MAP.put(new Vector3f(180,   0,   0), 5);
-        MAP.put(new Vector3f(180,   0,  90), 3);
-        MAP.put(new Vector3f(180,   0, 180), 2);
-        MAP.put(new Vector3f(180,   0, 270), 4);
-        MAP.put(new Vector3f(180,  90,   0), 5);
-        MAP.put(new Vector3f(180,  90,  90), 1);
-        MAP.put(new Vector3f(180,  90, 180), 2);
-        MAP.put(new Vector3f(180,  90, 270), 6);
-        MAP.put(new Vector3f(180, 180,   0), 5);
-        MAP.put(new Vector3f(180, 180,  90), 4);
+        MAP.put(new Vector3f(0, 0, 0), 2);
+        MAP.put(new Vector3f(0, 0, 90), 3);
+        MAP.put(new Vector3f(0, 0, 180), 5);
+        MAP.put(new Vector3f(0, 0, 270), 4);
+        MAP.put(new Vector3f(0, 90, 0), 2);
+        MAP.put(new Vector3f(0, 90, 90), 6);
+        MAP.put(new Vector3f(0, 90, 180), 5);
+        MAP.put(new Vector3f(0, 90, 270), 1);
+        MAP.put(new Vector3f(0, 180, 0), 2);
+        MAP.put(new Vector3f(0, 180, 90), 4);
+        MAP.put(new Vector3f(0, 180, 180), 5);
+        MAP.put(new Vector3f(0, 180, 270), 3);
+        MAP.put(new Vector3f(0, 270, 0), 2);
+        MAP.put(new Vector3f(0, 270, 90), 1);
+        MAP.put(new Vector3f(0, 270, 180), 5);
+        MAP.put(new Vector3f(0, 270, 270), 6);
+        MAP.put(new Vector3f(90, 0, 0), 1);
+        MAP.put(new Vector3f(90, 0, 90), 3);
+        MAP.put(new Vector3f(90, 0, 180), 6);
+        MAP.put(new Vector3f(90, 0, 270), 4);
+        MAP.put(new Vector3f(90, 90, 0), 1);
+        MAP.put(new Vector3f(90, 90, 90), 2);
+        MAP.put(new Vector3f(90, 90, 180), 6);
+        MAP.put(new Vector3f(90, 90, 270), 5);
+        MAP.put(new Vector3f(90, 180, 0), 1);
+        MAP.put(new Vector3f(90, 180, 90), 4);
+        MAP.put(new Vector3f(90, 180, 180), 6);
+        MAP.put(new Vector3f(90, 180, 270), 3);
+        MAP.put(new Vector3f(90, 270, 0), 1);
+        MAP.put(new Vector3f(90, 270, 90), 5);
+        MAP.put(new Vector3f(90, 270, 180), 6);
+        MAP.put(new Vector3f(90, 270, 270), 2);
+        MAP.put(new Vector3f(180, 0, 0), 5);
+        MAP.put(new Vector3f(180, 0, 90), 3);
+        MAP.put(new Vector3f(180, 0, 180), 2);
+        MAP.put(new Vector3f(180, 0, 270), 4);
+        MAP.put(new Vector3f(180, 90, 0), 5);
+        MAP.put(new Vector3f(180, 90, 90), 1);
+        MAP.put(new Vector3f(180, 90, 180), 2);
+        MAP.put(new Vector3f(180, 90, 270), 6);
+        MAP.put(new Vector3f(180, 180, 0), 5);
+        MAP.put(new Vector3f(180, 180, 90), 4);
         MAP.put(new Vector3f(180, 180, 180), 2);
         MAP.put(new Vector3f(180, 180, 270), 3);
-        MAP.put(new Vector3f(180, 270,   0), 5);
-        MAP.put(new Vector3f(180, 270,  90), 6);
+        MAP.put(new Vector3f(180, 270, 0), 5);
+        MAP.put(new Vector3f(180, 270, 90), 6);
         MAP.put(new Vector3f(180, 270, 180), 2);
         MAP.put(new Vector3f(180, 270, 270), 1);
-        MAP.put(new Vector3f(270,   0,   0), 6);
-        MAP.put(new Vector3f(270,   0,  90), 3);
-        MAP.put(new Vector3f(270,   0, 180), 1);
-        MAP.put(new Vector3f(270,   0, 270), 4);
-        MAP.put(new Vector3f(270,  90,   0), 6);
-        MAP.put(new Vector3f(270,  90,  90), 5);
-        MAP.put(new Vector3f(270,  90, 180), 1);
-        MAP.put(new Vector3f(270,  90, 270), 2);
-        MAP.put(new Vector3f(270, 180,   0), 6);
-        MAP.put(new Vector3f(270, 180,  90), 4);
+        MAP.put(new Vector3f(270, 0, 0), 6);
+        MAP.put(new Vector3f(270, 0, 90), 3);
+        MAP.put(new Vector3f(270, 0, 180), 1);
+        MAP.put(new Vector3f(270, 0, 270), 4);
+        MAP.put(new Vector3f(270, 90, 0), 6);
+        MAP.put(new Vector3f(270, 90, 90), 5);
+        MAP.put(new Vector3f(270, 90, 180), 1);
+        MAP.put(new Vector3f(270, 90, 270), 2);
+        MAP.put(new Vector3f(270, 180, 0), 6);
+        MAP.put(new Vector3f(270, 180, 90), 4);
         MAP.put(new Vector3f(270, 180, 180), 1);
         MAP.put(new Vector3f(270, 180, 270), 3);
-        MAP.put(new Vector3f(270, 270,   0), 6);
-        MAP.put(new Vector3f(270, 270,  90), 2);
+        MAP.put(new Vector3f(270, 270, 0), 6);
+        MAP.put(new Vector3f(270, 270, 90), 2);
         MAP.put(new Vector3f(270, 270, 180), 1);
         MAP.put(new Vector3f(270, 270, 270), 5);
     }
@@ -162,20 +162,32 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
         return this.dataManager.get(ROTATIONS);
     }
 
-    public float getYaw() {
-        return this.getRotations().getY() % 360;
-    }
-
-    public float getPitch() {
-        return this.getRotations().getX() % 360;
-    }
-
-    public float getRoll() {
-        return this.getRotations().getZ() % 360;
-    }
-
     public void setRotations(Rotations rotations) {
         this.dataManager.set(ROTATIONS, rotations);
+    }
+
+    private Rotations getRandomSpinRotations() {
+        Rotations rotation = this.getRandomFaceRotations();
+        float x = rotation.getX() + this.getSpin();
+        float y = rotation.getY() + this.getSpin();
+        float z = rotation.getZ() + this.getSpin();
+        return new Rotations(x, y, z);
+    }
+
+    private int getSpin() {
+        return this.rand.nextInt(this.spin) * (this.rand.nextInt(3) - 1);
+    }
+
+    private Rotations getRandomFaceRotations() {
+        int target = this.rand.nextInt(6) + 1;
+        Vector3f face = new Vector3f(0, 0, 0);
+        Iterator<Map.Entry<Vector3f, Integer>> it = MAP.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Vector3f, Integer> entry = it.next();
+            if (target != entry.getValue()) { continue; }
+            face = entry.getKey();
+        }
+        return new Rotations(face.getX(), face.getY(), face.getZ());
     }
 
     @Override
@@ -214,6 +226,39 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
         this.setRotations(new Rotations(x, y, z));
     }
 
+    public boolean isLanded() {
+        if (this.face < 0) { this.getFaceFromAngle(); }
+        return this.face > 0 && this.landed;
+    }
+
+    public int getFaceFromAngle() {
+        return this.face = AbstractDieEntity.match(this.getPitch(), this.getYaw(), this.getRoll());
+    }
+
+    public float getYaw() {
+        return this.getRotations().getY() % 360;
+    }
+
+    public float getPitch() {
+        return this.getRotations().getX() % 360;
+    }
+
+    public float getRoll() {
+        return this.getRotations().getZ() % 360;
+    }
+
+    protected static int match(float x, float y, float z) {
+        return MAP.getOrDefault(new Vector3f(round(x), round(y), round(z)), -1);
+    }
+
+    private static float round(float angle) {
+        if (255 < angle || angle < 285) { return 270; }
+        if (165 < angle || angle < 195) { return 180; }
+        if (75 < angle || angle < 105) { return 90; }
+        if (345 < angle || angle < 15) { return 0; }
+        return angle;
+    }
+
     public Vector3d bounce() {
         this.setMotion(this.getMotion().inverse().scale(0.8F));
         return this.getMotion();
@@ -224,50 +269,5 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
     public PlayerEntity getPlayer() {
         if (!(this.func_234616_v_() instanceof PlayerEntity)) { return null; }
         return (PlayerEntity) this.func_234616_v_();
-    }
-
-    public int getFaceFromAngle() {
-        return this.face = AbstractDieEntity.match(this.getPitch(), this.getYaw(), this.getRoll());
-    }
-
-    public boolean isLanded() {
-        if (this.face < 0) { this.getFaceFromAngle(); }
-        return this.face > 0 && this.landed;
-    }
-
-    private int getSpin() {
-        return this.rand.nextInt(this.spin) * (this.rand.nextInt(3) - 1);
-    }
-
-    private Rotations getRandomFaceRotations() {
-        int target = this.rand.nextInt(6) + 1;
-        Vector3f face = new Vector3f(0, 0, 0);
-        Iterator<Map.Entry<Vector3f, Integer>> it = MAP.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<Vector3f, Integer> entry = it.next();
-            if (target != entry.getValue()) { continue; }
-            face = entry.getKey();
-        }
-        return new Rotations(face.getX(), face.getY(), face.getZ());
-    }
-
-    private Rotations getRandomSpinRotations() {
-        Rotations rotation = this.getRandomFaceRotations();
-        float x = rotation.getX() + this.getSpin();
-        float y = rotation.getY() + this.getSpin();
-        float z = rotation.getZ() + this.getSpin();
-        return new Rotations(x, y, z);
-    }
-
-    protected static int match(float x, float y, float z) {
-        return MAP.getOrDefault(new Vector3f(round(x), round(y), round(z)), -1);
-    }
-
-    private static float round(float angle) {
-        if (345 < angle || angle <  15) { return   0; }
-        if ( 75 < angle || angle < 105) { return  90; }
-        if (165 < angle || angle < 195) { return 180; }
-        if (255 < angle || angle < 285) { return 270; }
-        return angle;
     }
 }

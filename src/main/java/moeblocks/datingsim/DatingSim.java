@@ -14,10 +14,6 @@ public class DatingSim {
     public final Map<UUID, CacheNPC> characters = new LinkedHashMap<>();
     private final UUID uuid;
 
-    public DatingSim(UUID uuid) {
-        this.uuid = uuid;
-    }
-
     public DatingSim(CompoundNBT compound) {
         this(compound.getUniqueId("UUID"));
         ListNBT npcs = compound.getList("NPCs", Constants.NBT.TAG_COMPOUND);
@@ -27,12 +23,15 @@ public class DatingSim {
         }
     }
 
-    public CompoundNBT write(CompoundNBT compound) {
-        ListNBT npcs = new ListNBT();
-        this.characters.forEach((uuid, npc) -> npcs.add(npc.write(new CompoundNBT())));
-        compound.put("NPCs", npcs);
-        compound.putUniqueId("UUID", this.uuid);
-        return compound;
+    public DatingSim(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    public CacheNPC getNPC(UUID uuid, AbstractNPCEntity entity) {
+        CacheNPC npc = getNPC(uuid);
+        if (npc == null) { npc = new CacheNPC(entity); }
+        this.characters.put(uuid, npc);
+        return npc;
     }
 
     public CacheNPC getNPC(UUID uuid) {
@@ -43,20 +42,20 @@ public class DatingSim {
         return npc.get();
     }
 
-    public CacheNPC getNPC(UUID uuid, AbstractNPCEntity entity) {
-        CacheNPC npc = getNPC(uuid);
-        if (npc == null) { npc = new CacheNPC(entity); }
-        this.characters.put(uuid, npc);
-        return npc;
-    }
-
-
     public CacheNPC removeNPC(UUID uuid) {
         return this.characters.remove(uuid);
     }
 
     public int totalNPCs() {
         return this.characters.size();
+    }
+
+    public CompoundNBT write(CompoundNBT compound) {
+        ListNBT npcs = new ListNBT();
+        this.characters.forEach((uuid, npc) -> npcs.add(npc.write(new CompoundNBT())));
+        compound.put("NPCs", npcs);
+        compound.putUniqueId("UUID", this.uuid);
+        return compound;
     }
 
     public boolean isNPCsEmpty() {

@@ -28,6 +28,15 @@ public class PhoneContactButton extends Button {
         this.index = index;
     }
 
+    private static void act(CellPhoneScreen parent, CacheNPC npc, int index) {
+        if (parent.isSelected(index)) {
+            MoeMessages.send(new CPhoneTeleportMoe(npc.getUUID()));
+            parent.closeScreen();
+        } else {
+            parent.setSelected(index);
+        }
+    }
+
     @Override
     public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -45,14 +54,5 @@ public class PhoneContactButton extends Button {
     @Override
     public void playDownSound(SoundHandler sound) {
         sound.play(SimpleSound.master(MoeSounds.CELL_PHONE_BUTTON.get(), 1.0F));
-    }
-
-    private static void act(CellPhoneScreen parent, CacheNPC npc, int index) {
-        if (parent.isSelected(index)) {
-            MoeMessages.send(new CPhoneTeleportMoe(npc.getUUID()));
-            parent.closeScreen();
-        } else {
-            parent.setSelected(index);
-        }
     }
 }

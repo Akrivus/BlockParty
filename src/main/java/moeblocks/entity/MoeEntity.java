@@ -111,21 +111,12 @@ public class MoeEntity extends AbstractNPCEntity {
     }
 
     @Override
-    public BlockState getBlockData() {
-        return this.dataManager.get(BLOCK_STATE).orElseGet(() -> super.getBlockData());
-    }
-
-    public void setBlockData(BlockState state) {
-        this.dataManager.set(BLOCK_STATE, Optional.of(state));
+    public String getGivenName() {
+        return Trans.lator(String.format("entity.moeblocks.%s.name", this.getBlockName()), super.getGivenName());
     }
 
     public Genders getGender() {
         return this.isTagSafe(MoeTags.MALE) ? Genders.MASCULINE : Genders.FEMININE;
-    }
-
-    @Override
-    public String getFamilyName() {
-        return Trans.lator(String.format("entity.moeblocks.%s", this.getBlockName()), String.format("block.%s", this.getBlockName()));
     }
 
     @Override
@@ -156,6 +147,11 @@ public class MoeEntity extends AbstractNPCEntity {
     }
 
     @Override
+    public String getFamilyName() {
+        return Trans.lator(String.format("entity.moeblocks.%s", this.getBlockName()), String.format("block.%s", this.getBlockName()));
+    }
+
+    @Override
     public void readAdditional(CompoundNBT compound) {
         this.setExtraBlockData((CompoundNBT) compound.get("ExtraBlockData"));
         this.setScale(compound.getFloat("Scale"));
@@ -183,11 +179,6 @@ public class MoeEntity extends AbstractNPCEntity {
     }
 
     @Override
-    public String getGivenName() {
-        return Trans.lator(String.format("entity.moeblocks.%s.name", this.getBlockName()), super.getGivenName());
-    }
-
-    @Override
     public void notifyDataManagerChange(DataParameter<?> key) {
         if (BLOCK_STATE.equals(key)) { this.setNextState(BlockStates.class, BlockStates.get(this.getBlockData())); }
         if (SCALE.equals(key)) { this.recalculateSize(); }
@@ -199,6 +190,11 @@ public class MoeEntity extends AbstractNPCEntity {
         return (int) (this.getScale() * 5) + 13;
     }
 
+    public String getBlockName() {
+        ResourceLocation block = MoeBlocks.get(this.getBlockData().getBlock()).getRegistryName();
+        return String.format("%s.%s", block.getNamespace(), block.getPath());
+    }
+
     public CompoundNBT getExtraBlockData() {
         return this.extraBlockData;
     }
@@ -207,9 +203,21 @@ public class MoeEntity extends AbstractNPCEntity {
         this.extraBlockData = compound == null ? new CompoundNBT() : compound;
     }
 
-    public String getBlockName() {
-        ResourceLocation block = MoeBlocks.get(this.getBlockData().getBlock()).getRegistryName();
-        return String.format("%s.%s", block.getNamespace(), block.getPath());
+    public boolean isTagSafe(ITag<Block> tag) {
+        try {
+            return this.getBlockData().isIn(tag);
+        } catch (IllegalStateException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public BlockState getBlockData() {
+        return this.dataManager.get(BLOCK_STATE).orElseGet(() -> super.getBlockData());
+    }
+
+    public void setBlockData(BlockState state) {
+        this.dataManager.set(BLOCK_STATE, Optional.of(state));
     }
 
     @Override
@@ -253,14 +261,6 @@ public class MoeEntity extends AbstractNPCEntity {
 
     public boolean isBlockGlowing() {
         return this.isTagSafe(MoeTags.GLOWING);
-    }
-
-    public boolean isTagSafe(ITag<Block> tag) {
-        try {
-            return this.getBlockData().isIn(tag);
-        } catch (IllegalStateException e) {
-            return false;
-        }
     }
 
     public static boolean spawn(World world, BlockPos block, BlockPos spawn, float yaw, float pitch, Deres dere, PlayerEntity player) {

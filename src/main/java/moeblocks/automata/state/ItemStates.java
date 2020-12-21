@@ -33,13 +33,13 @@ public enum ItemStates implements IStateEnum<AbstractNPCEntity> {
     private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
     private final List<Item> items;
 
+    ItemStates(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, ITag.INamedTag<Item> tag) {
+        this(generator, tag.getAllElements().toArray(new Item[0]));
+    }
+
     ItemStates(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Item... items) {
         this.generator = generator;
         this.items = Arrays.asList(items);
-    }
-
-    ItemStates(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, ITag.INamedTag<Item> tag) {
-        this(generator, tag.getAllElements().toArray(new Item[0]));
     }
 
     @Override

@@ -21,13 +21,13 @@ public enum BlockStates implements IStateEnum<MoeEntity> {
     private final BiConsumer<MoeEntity, List<IStateGoal>> generator;
     private final List<Block> blocks;
 
+    BlockStates(BiConsumer<MoeEntity, List<IStateGoal>> generator, ITag.INamedTag<Block> tag) {
+        this(generator, tag.getAllElements().toArray(new Block[0]));
+    }
+
     BlockStates(BiConsumer<MoeEntity, List<IStateGoal>> generator, Block... blocks) {
         this.generator = generator;
         this.blocks = Arrays.asList(blocks);
-    }
-
-    BlockStates(BiConsumer<MoeEntity, List<IStateGoal>> generator, ITag.INamedTag<Block> tag) {
-        this(generator, tag.getAllElements().toArray(new Block[0]));
     }
 
     @Override

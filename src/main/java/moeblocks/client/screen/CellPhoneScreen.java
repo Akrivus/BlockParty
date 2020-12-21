@@ -70,27 +70,6 @@ public class CellPhoneScreen extends Screen {
         this.updateButtons();
     }
 
-    public void setSelected(int index) {
-        if (index < 0) { index = this.contacts.size() + index; }
-        this.selectedIndex = this.contacts.isEmpty() ? 0 : index % this.contacts.size();
-        int shift = this.selectedIndex - this.selectedStart;
-        if (shift < 0 || shift > 3) { this.setScroll(1, false); }
-        this.updateButtons();
-    }
-
-    public boolean isSelected(int index) {
-        return this.selectedIndex == index;
-    }
-
-    public void setScroll(int delta, boolean select) {
-        this.selectedStart += 4 * delta;
-        int range = this.contacts.size() - 1;
-        if (this.selectedStart < 0) { this.selectedStart = range - range % 4; }
-        if (this.selectedStart > range) { this.selectedStart = 0; }
-        if (select) { this.setSelected(this.selectedStart); }
-        this.updateButtons();
-    }
-
     private void updateButtons() {
         if (this.contacts.isEmpty()) {
             this.minecraft.player.sendStatusMessage(new TranslationTextComponent("gui.moeblocks.error.cell_phone"), true);
@@ -117,5 +96,26 @@ public class CellPhoneScreen extends Screen {
         this.minecraft.getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
         int y = (int) (Math.min((double) this.selectedStart / (this.contacts.size() - this.contacts.size() % 4), 1.0) * 35);
         this.blit(stack, this.width / 2 + 37, 40 + y, 108, 82, 7, 15);
+    }
+
+    public boolean isSelected(int index) {
+        return this.selectedIndex == index;
+    }
+
+    public void setScroll(int delta, boolean select) {
+        this.selectedStart += 4 * delta;
+        int range = this.contacts.size() - 1;
+        if (this.selectedStart < 0) { this.selectedStart = range - range % 4; }
+        if (this.selectedStart > range) { this.selectedStart = 0; }
+        if (select) { this.setSelected(this.selectedStart); }
+        this.updateButtons();
+    }
+
+    public void setSelected(int index) {
+        if (index < 0) { index = this.contacts.size() + index; }
+        this.selectedIndex = this.contacts.isEmpty() ? 0 : index % this.contacts.size();
+        int shift = this.selectedIndex - this.selectedStart;
+        if (shift < 0 || shift > 3) { this.setScroll(1, false); }
+        this.updateButtons();
     }
 }

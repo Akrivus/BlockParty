@@ -36,7 +36,8 @@ public enum StoryStates implements IStateEnum<AbstractNPCEntity> {
     StoryStates(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> valuator, float start, float end) {
         this.generator = generator;
         this.valuator = valuator;
-        this.start = start; this.end = end;
+        this.start = start;
+        this.end = end;
     }
 
     @Override

@@ -44,8 +44,7 @@ public class MoeDieEntity extends AbstractDieEntity {
     @Override
     public boolean onActionTick() {
         if (--this.timeUntilSpawned > 0) { return false; }
-        if (this.world.getBlockState(this.getPositionUnderneath()).equals(this.blockStateForSpawn))
-            return MoeEntity.spawn(this.world, this.getPositionUnderneath(), this.getPosition(), this.rotationYaw, this.rotationPitch, this.dere, this.getPlayer());
+        if (this.world.getBlockState(this.getPositionUnderneath()).equals(this.blockStateForSpawn)) { return MoeEntity.spawn(this.world, this.getPositionUnderneath(), this.getPosition(), this.rotationYaw, this.rotationPitch, this.dere, this.getPlayer()); }
         this.entityDropItem(this.getDefaultItem());
         return true;
     }

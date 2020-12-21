@@ -43,12 +43,12 @@ public enum Deres implements IStateEnum<AbstractNPCEntity> {
         return new GoalState(this, this.generator);
     }
 
-    public int getColor() {
-        return this.color;
-    }
-
     @Override
     public String toString() {
         return Trans.late(String.format("debug.moeblocks.deres.%s", this.name().toLowerCase()));
+    }
+
+    public int getColor() {
+        return this.color;
     }
 }

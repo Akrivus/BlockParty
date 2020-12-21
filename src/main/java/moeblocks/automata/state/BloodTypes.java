@@ -18,7 +18,7 @@ public enum BloodTypes implements IStateEnum<AbstractNPCEntity> {
     }, 1),
     B((moe, list) -> {
 
-    },3, AB),
+    }, 3, AB),
     A((moe, list) -> {
 
     }, 5, AB),

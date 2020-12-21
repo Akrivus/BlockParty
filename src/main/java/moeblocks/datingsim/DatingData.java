@@ -14,15 +14,7 @@ import java.util.UUID;
 
 public class DatingData extends WorldSavedData {
     private static final String KEY = "datingsim";
-    private Map<UUID, DatingSim> sims = new HashMap<>();
-
-    public DatingData(String name) {
-        super(name);
-    }
-
-    public DatingData() {
-        this(KEY);
-    }
+    private final Map<UUID, DatingSim> sims = new HashMap<>();
 
     @Override
     public void read(CompoundNBT compound) {
@@ -41,6 +33,10 @@ public class DatingData extends WorldSavedData {
         return compound;
     }
 
+    public static DatingSim get(World world, UUID uuid) {
+        return DatingData.get(world).getSim(uuid);
+    }
+
     public DatingSim getSim(UUID uuid) {
         if (!this.sims.containsKey(uuid)) { this.sims.put(uuid, new DatingSim(uuid)); }
         return this.sims.get(uuid);
@@ -53,7 +49,11 @@ public class DatingData extends WorldSavedData {
         return storage.getOrCreate(DatingData::new, KEY);
     }
 
-    public static DatingSim get(World world, UUID uuid) {
-        return DatingData.get(world).getSim(uuid);
+    public DatingData() {
+        this(KEY);
+    }
+
+    public DatingData(String name) {
+        super(name);
     }
 }
