@@ -1,6 +1,5 @@
 package moeblocks.item;
 
-import moeblocks.entity.AbstractDieEntity;
 import moeblocks.entity.MoeDieEntity;
 import moeblocks.init.MoeItems;
 import net.minecraft.dispenser.IPosition;
@@ -12,10 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.world.World;
-
-import java.util.Iterator;
 
 public class MoeDieItem extends Item {
     public static final ProjectileDispenseBehavior DISPENSER_BEHAVIOR = new ProjectileDispenseBehavior() {

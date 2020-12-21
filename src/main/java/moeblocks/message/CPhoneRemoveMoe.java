@@ -1,7 +1,6 @@
 package moeblocks.message;
 
 import moeblocks.init.MoeItems;
-import moeblocks.item.CellPhoneItem;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;

@@ -1,12 +1,16 @@
 package moeblocks.automata.state;
 
-import moeblocks.automata.*;
+import moeblocks.automata.GoalState;
+import moeblocks.automata.IState;
+import moeblocks.automata.IStateEnum;
+import moeblocks.automata.IStateGoal;
 import moeblocks.entity.MoeEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.tags.ITag;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 public enum BlockStates implements IStateEnum<MoeEntity> {

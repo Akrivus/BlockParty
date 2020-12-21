@@ -2,7 +2,6 @@ package moeblocks.client;
 
 import moeblocks.client.animation.Animation;
 import moeblocks.client.animation.state.*;
-import moeblocks.client.animation.state.*;
 
 import java.util.function.Supplier;
 

@@ -37,7 +37,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class MoeEntity extends AbstractNPCEntity {
     public static final DataParameter<Optional<BlockState>> BLOCK_STATE = EntityDataManager.createKey(MoeEntity.class, DataSerializers.OPTIONAL_BLOCK_STATE);

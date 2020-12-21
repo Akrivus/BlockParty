@@ -1,7 +1,6 @@
 package moeblocks.entity.ai;
 
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.entity.SenpaiEntity;
 import moeblocks.init.MoeSounds;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.RegistryObject;

@@ -1,22 +1,16 @@
 package moeblocks.client.screen;
 
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moeblocks.MoeMod;
 import moeblocks.client.screen.widget.PhoneContactButton;
 import moeblocks.client.screen.widget.PhoneScrollButton;
 import moeblocks.datingsim.DatingSim;
-import moeblocks.init.MoeMessages;
-import moeblocks.message.CPhoneRemoveMoe;
-import moeblocks.message.CPhoneTeleportMoe;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.lwjgl.glfw.GLFW;
 

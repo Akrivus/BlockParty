@@ -3,7 +3,6 @@ package moeblocks.message;
 import moeblocks.datingsim.DatingData;
 import moeblocks.datingsim.DatingSim;
 import moeblocks.init.MoeItems;
-import moeblocks.item.YearbookPageItem;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;

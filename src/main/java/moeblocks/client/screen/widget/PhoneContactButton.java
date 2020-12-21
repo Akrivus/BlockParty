@@ -4,7 +4,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moeblocks.client.screen.CellPhoneScreen;
 import moeblocks.datingsim.CacheNPC;
-import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeMessages;
 import moeblocks.init.MoeSounds;
 import moeblocks.message.CPhoneTeleportMoe;

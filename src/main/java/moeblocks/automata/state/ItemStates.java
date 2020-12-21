@@ -1,6 +1,9 @@
 package moeblocks.automata.state;
 
-import moeblocks.automata.*;
+import moeblocks.automata.GoalState;
+import moeblocks.automata.IState;
+import moeblocks.automata.IStateEnum;
+import moeblocks.automata.IStateGoal;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeTags;
 import net.minecraft.item.Item;

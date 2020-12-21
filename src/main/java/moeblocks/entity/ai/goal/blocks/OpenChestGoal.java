@@ -1,8 +1,8 @@
 package moeblocks.entity.ai.goal.blocks;
 
-import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.automata.IStateGoal;
 import moeblocks.automata.state.Emotions;
+import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.player.PlayerEntity;
 

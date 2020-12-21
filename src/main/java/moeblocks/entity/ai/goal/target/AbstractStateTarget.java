@@ -1,7 +1,7 @@
 package moeblocks.entity.ai.goal.target;
 
-import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.automata.IStateGoal;
+import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 
