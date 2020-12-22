@@ -6,12 +6,10 @@ buildscript {
   }
   dependencies {
     classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
-    classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow', version: '4.0.4'
   }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'maven-publish'
 
 version = new Date().format('yy.MM.dd')
@@ -20,7 +18,6 @@ group = 'moeblocks'
 
 minecraft {
   mappings channel: 'snapshot', version: '20201028-1.16.3'
-
 
   runs {
     client {
@@ -39,28 +36,13 @@ minecraft {
   }
 }
 
-sourceSets {
-  main {
-    resources { srcDir 'src/main/ruby' }
-  }
-}
+sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
   minecraft 'net.minecraftforge:forge:1.16.4-35.0.7'
-  shadow 'org.jruby:jruby-core:9.2.13.0'
 }
 
-shadowJar {
-  configurations = [project.configurations.shadow]
-  classifier = '1.16.4'
-}
-
-reobf {
-  shadowJar { }
-}
-
-tasks.build.dependsOn reobfShadowJar
-jar.finalizedBy('reobfShadowJar')
+jar.finalizedBy('reobfJar')
 
 jar {
   manifest {
