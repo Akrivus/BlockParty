@@ -10,7 +10,10 @@ import moeblocks.util.Trans;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-public enum Deres implements IStateEnum<AbstractNPCEntity> {
+public enum Dere implements IStateEnum<AbstractNPCEntity> {
+    NONDERE((moe, list) -> {
+
+    }, 0xffffff),
     HIMEDERE((moe, list) -> {
 
     }, 0xcc00ff),
@@ -33,7 +36,7 @@ public enum Deres implements IStateEnum<AbstractNPCEntity> {
     private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
     private final int color;
 
-    Deres(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, int color) {
+    Dere(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, int color) {
         this.generator = generator;
         this.color = color;
     }
@@ -41,6 +44,17 @@ public enum Deres implements IStateEnum<AbstractNPCEntity> {
     @Override
     public IState getState(AbstractNPCEntity applicant) {
         return new GoalState(this, this.generator);
+    }
+
+    @Override
+    public String toToken() {
+        return this.name();
+    }
+
+    @Override
+    public IStateEnum<AbstractNPCEntity> fromToken(String token) {
+        if (token.isEmpty()) { return Dere.NONDERE; }
+        return Dere.valueOf(token);
     }
 
     @Override

@@ -1,9 +1,6 @@
 package moeblocks.automata.state;
 
-import moeblocks.automata.GoalState;
-import moeblocks.automata.IState;
-import moeblocks.automata.IStateEnum;
-import moeblocks.automata.IStateGoal;
+import moeblocks.automata.*;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.util.Trans;
 
@@ -11,7 +8,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public enum StoryStates implements IStateEnum<AbstractNPCEntity> {
+public enum StoryPhase implements IStateEnum<AbstractNPCEntity> {
     INTRODUCTION((npc, list) -> {
 
     }, (npc) -> npc.getProgress(), 0, 1),
@@ -33,7 +30,7 @@ public enum StoryStates implements IStateEnum<AbstractNPCEntity> {
     private final float start;
     private final float end;
 
-    StoryStates(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> valuator, float start, float end) {
+    StoryPhase(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> valuator, float start, float end) {
         this.generator = generator;
         this.valuator = valuator;
         this.start = start;
@@ -42,7 +39,18 @@ public enum StoryStates implements IStateEnum<AbstractNPCEntity> {
 
     @Override
     public IState getState(AbstractNPCEntity applicant) {
-        return new GoalState.ValueBased(this, this.generator, this.valuator, this.start, this.end);
+        return new ConditionalGoalState(this, this.generator, this.valuator, this.start, this.end);
+    }
+
+    @Override
+    public String toToken() {
+        return this.name();
+    }
+
+    @Override
+    public IStateEnum<AbstractNPCEntity> fromToken(String token) {
+        if (token.isEmpty()) { return StoryPhase.INTRODUCTION; }
+        return StoryPhase.valueOf(token);
     }
 
     @Override

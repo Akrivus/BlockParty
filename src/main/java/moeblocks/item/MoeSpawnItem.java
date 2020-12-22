@@ -1,6 +1,6 @@
 package moeblocks.item;
 
-import moeblocks.automata.state.Deres;
+import moeblocks.automata.state.Dere;
 import moeblocks.entity.MoeEntity;
 import moeblocks.init.MoeItems;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,7 +24,7 @@ public class MoeSpawnItem extends Item {
         PlayerEntity player = context.getPlayer();
         BlockPos block = context.getPos();
         BlockPos spawn = block.offset(context.getFace());
-        Deres dere = Deres.values()[world.rand.nextInt(Deres.values().length)];
+        Dere dere = Dere.values()[world.rand.nextInt(Dere.values().length)];
         if (MoeEntity.spawn(world, block, spawn, player.rotationYaw, player.rotationPitch, dere, player)) {
             context.getItem().shrink(1);
             return ActionResultType.CONSUME;

@@ -1,6 +1,7 @@
 package moeblocks.client.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import moeblocks.automata.state.Animation;
 import moeblocks.client.model.MoeModel;
 import moeblocks.client.render.layer.MoeEmotionLayer;
 import moeblocks.client.render.layer.MoeGlowLayer;
@@ -12,6 +13,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.layers.HeadLayer;
 import net.minecraft.client.renderer.entity.layers.HeldItemLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
@@ -26,6 +28,7 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
         this.addLayer(new MoeEmotionLayer(this));
         this.addLayer(new MoeSleepingLayer(this));
         this.addLayer(new MoeGlowLayer(this));
+        this.addLayer(new HeadLayer<>(this));
     }
 
     @Override
@@ -64,6 +67,7 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
     @Override
     public void preRenderCallback(MoeEntity entity, MatrixStack stack, float partialTickTime) {
         super.preRenderCallback(entity, stack, partialTickTime);
+        entity.getState(Animation.class).render(stack, partialTickTime);
         stack.scale(entity.getScale(), entity.getScale(), entity.getScale());
         stack.scale(0.9375F, 0.9375F, 0.9375F);
         this.shadowSize = entity.getScale() * 0.25F;

@@ -27,25 +27,19 @@ public class MineTargetGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity> {
     @Override
     public boolean canMoveTo(BlockPos pos, BlockState state) {
         if (this.isHoldingCorrectItem(this.entity.getHeldItem(Hand.MAIN_HAND))) { return false; }
-        return state.getBlock().equals(this.entity.getBlockTarget());
+        return state.getBlock().equals(this.entity.getBlockToMine());
     }
 
     protected boolean isHoldingCorrectItem(ItemStack stack) {
-        BlockState state = this.entity.getBlockTarget();
-        if (state != null) {
-            Item item = this.entity.getHeldItem(Hand.MAIN_HAND).getItem();
-            if (item.canHarvestBlock(state)) {
-                ToolType tool = state.getHarvestTool();
-                if (tool == ToolType.PICKAXE) {
-                    return item instanceof PickaxeItem;
-                } else if (tool == ToolType.SHOVEL) {
-                    return item instanceof ShovelItem;
-                } else if (tool == ToolType.HOE) {
-                    return item instanceof HoeItem;
-                } else if (tool == ToolType.AXE) {
-                    return item instanceof AxeItem;
-                }
-            }
+        BlockState state = this.entity.getBlockToMine();
+        if (state == null) { return false; }
+        ToolType tool = state.getHarvestTool();
+        Item item = stack.getItem();
+        if (!item.canHarvestBlock(state)) {
+            if (tool == ToolType.AXE) { return item instanceof AxeItem; }
+            if (tool == ToolType.PICKAXE) { return item instanceof PickaxeItem; }
+            if (tool == ToolType.SHOVEL) { return item instanceof ShovelItem; }
+            if (tool == ToolType.HOE) { return item instanceof HoeItem; }
         }
         return false;
     }

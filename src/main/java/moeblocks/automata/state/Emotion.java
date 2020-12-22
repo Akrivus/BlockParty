@@ -9,7 +9,7 @@ import moeblocks.entity.AbstractNPCEntity;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-public enum Emotions implements IStateEnum<AbstractNPCEntity> {
+public enum Emotion implements IStateEnum<AbstractNPCEntity> {
     ANGRY((npc, list) -> {
 
     }),
@@ -58,12 +58,23 @@ public enum Emotions implements IStateEnum<AbstractNPCEntity> {
 
     private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
 
-    Emotions(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator) {
+    Emotion(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator) {
         this.generator = generator;
     }
 
     @Override
     public IState getState(AbstractNPCEntity applicant) {
         return new GoalState(this, this.generator);
+    }
+
+    @Override
+    public String toToken() {
+        return this.name();
+    }
+
+    @Override
+    public IStateEnum<AbstractNPCEntity> fromToken(String token) {
+        if (token.isEmpty()) { return Emotion.NORMAL; }
+        return Emotion.valueOf(token);
     }
 }

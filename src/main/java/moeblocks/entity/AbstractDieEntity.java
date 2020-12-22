@@ -120,9 +120,8 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
                 BlockPos pos = block.getPos();
                 BlockState state = this.world.getBlockState(pos);
                 this.landed = true;
-                if (this.isLanded() && this.onActionStart(state, pos, this.getFaceFromAngle())) {
+                if (this.isLanded() && this.onActionStart(state, pos, this.getRandomFace())) {
                     this.setPositionAndUpdate(this.getPosX(), Math.round(this.getPosY()) - 0.15F, this.getPosZ());
-                    this.setRotations(this.getRandomFaceRotations());
                     this.setNoGravity(true);
                     this.setVelocity(0, 0, 0);
                     this.setMotion(Vector3d.ZERO);
@@ -179,15 +178,20 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
     }
 
     private Rotations getRandomFaceRotations() {
-        int target = this.rand.nextInt(6) + 1;
+        this.face = this.rand.nextInt(6) + 1;
         Vector3f face = new Vector3f(0, 0, 0);
         Iterator<Map.Entry<Vector3f, Integer>> it = MAP.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<Vector3f, Integer> entry = it.next();
-            if (target != entry.getValue()) { continue; }
+            if (this.face != entry.getValue()) { continue; }
             face = entry.getKey();
         }
         return new Rotations(face.getX(), face.getY(), face.getZ());
+    }
+
+    private int getRandomFace() {
+        this.setRotations(this.getRandomFaceRotations());
+        return this.face;
     }
 
     @Override

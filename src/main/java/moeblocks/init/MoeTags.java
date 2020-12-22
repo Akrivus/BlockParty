@@ -1,7 +1,7 @@
 package moeblocks.init;
 
 import moeblocks.MoeMod;
-import moeblocks.automata.state.Deres;
+import moeblocks.automata.state.Dere;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.tags.BlockTags;
@@ -36,7 +36,7 @@ public class MoeTags {
     public static final ITag.INamedTag<Item> SEEDS = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "drops/seeds"));
     public static final ITag.INamedTag<Item> WEAPONS = ItemTags.createOptional(new ResourceLocation(MoeMod.ID, "tools/weapons"));
 
-    public static final Map<Deres, ITag.INamedTag<Item>> LOVED_GIFTS = new HashMap<>();
-    public static final Map<Deres, ITag.INamedTag<Item>> LIKED_GIFTS = new HashMap<>();
-    public static final Map<Deres, ITag.INamedTag<Item>> HATED_GIFTS = new HashMap<>();
+    public static final Map<Dere, ITag.INamedTag<Item>> LOVED_GIFTS = new HashMap<>();
+    public static final Map<Dere, ITag.INamedTag<Item>> LIKED_GIFTS = new HashMap<>();
+    public static final Map<Dere, ITag.INamedTag<Item>> HATED_GIFTS = new HashMap<>();
 }

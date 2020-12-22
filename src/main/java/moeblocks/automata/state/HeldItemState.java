@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-public enum ItemStates implements IStateEnum<AbstractNPCEntity> {
+public enum HeldItemState implements IStateEnum<AbstractNPCEntity> {
     DEFAULT((moe, list) -> {
 
     }),
@@ -33,11 +33,11 @@ public enum ItemStates implements IStateEnum<AbstractNPCEntity> {
     private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
     private final List<Item> items;
 
-    ItemStates(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, ITag.INamedTag<Item> tag) {
+    HeldItemState(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, ITag.INamedTag<Item> tag) {
         this(generator, tag.getAllElements().toArray(new Item[0]));
     }
 
-    ItemStates(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Item... items) {
+    HeldItemState(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Item... items) {
         this.generator = generator;
         this.items = Arrays.asList(items);
     }
@@ -47,10 +47,21 @@ public enum ItemStates implements IStateEnum<AbstractNPCEntity> {
         return new GoalState(this, this.generator);
     }
 
-    public static ItemStates get(Item item) {
-        for (ItemStates state : ItemStates.values()) {
+    @Override
+    public String toToken() {
+        return this.name();
+    }
+
+    @Override
+    public IStateEnum<AbstractNPCEntity> fromToken(String token) {
+        if (token.isEmpty()) { return HeldItemState.DEFAULT; }
+        return HeldItemState.valueOf(token);
+    }
+
+    public static HeldItemState get(Item item) {
+        for (HeldItemState state : HeldItemState.values()) {
             if (state.items.contains(item)) { return state; }
         }
-        return ItemStates.DEFAULT;
+        return HeldItemState.DEFAULT;
     }
 }

@@ -1,9 +1,9 @@
 package moeblocks.entity;
 
 import moeblocks.automata.Automaton;
-import moeblocks.automata.state.BlockStates;
-import moeblocks.automata.state.Deres;
-import moeblocks.automata.state.Genders;
+import moeblocks.automata.state.BlockDataState;
+import moeblocks.automata.state.Dere;
+import moeblocks.automata.state.Gender;
 import moeblocks.init.MoeBlocks;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeTags;
@@ -115,13 +115,13 @@ public class MoeEntity extends AbstractNPCEntity {
         return Trans.lator(String.format("entity.moeblocks.%s.name", this.getBlockName()), super.getGivenName());
     }
 
-    public Genders getGender() {
-        return this.isTagSafe(MoeTags.MALE) ? Genders.MASCULINE : Genders.FEMININE;
+    public Gender getGender() {
+        return this.isTagSafe(MoeTags.MALE) ? Gender.MASCULINE : Gender.FEMININE;
     }
 
     @Override
     public void registerStates() {
-        this.states.put(BlockStates.class, new Automaton(this, BlockStates.DEFAULT));
+        this.states.put(BlockDataState.class, new Automaton(this, BlockDataState.DEFAULT));
         super.registerStates();
     }
 
@@ -180,7 +180,7 @@ public class MoeEntity extends AbstractNPCEntity {
 
     @Override
     public void notifyDataManagerChange(DataParameter<?> key) {
-        if (BLOCK_STATE.equals(key)) { this.setNextState(BlockStates.class, BlockStates.get(this.getBlockData())); }
+        if (BLOCK_STATE.equals(key)) { this.setNextState(BlockDataState.class, BlockDataState.get(this.getBlockData())); }
         if (SCALE.equals(key)) { this.recalculateSize(); }
         super.notifyDataManagerChange(key);
     }
@@ -222,7 +222,7 @@ public class MoeEntity extends AbstractNPCEntity {
 
     @Override
     public void onInventoryChanged(IInventory inventory) {
-
+        return;
     }
 
     @Override
@@ -263,7 +263,7 @@ public class MoeEntity extends AbstractNPCEntity {
         return this.isTagSafe(MoeTags.GLOWING);
     }
 
-    public static boolean spawn(World world, BlockPos block, BlockPos spawn, float yaw, float pitch, Deres dere, PlayerEntity player) {
+    public static boolean spawn(World world, BlockPos block, BlockPos spawn, float yaw, float pitch, Dere dere, PlayerEntity player) {
         BlockState state = world.getBlockState(block);
         if (!state.getBlock().isIn(MoeTags.MOEABLES)) { return false; }
         TileEntity extra = world.getTileEntity(block);

@@ -1,6 +1,6 @@
 package moeblocks.entity;
 
-import moeblocks.automata.state.Deres;
+import moeblocks.automata.state.Dere;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeItems;
 import moeblocks.init.MoeTags;
@@ -14,7 +14,7 @@ import net.minecraft.world.World;
 
 public class MoeDieEntity extends AbstractDieEntity {
     protected BlockState blockStateForSpawn;
-    protected Deres dere;
+    protected Dere dere;
     protected int timeUntilSpawned;
 
     public MoeDieEntity(EntityType<MoeDieEntity> type, World world) {
@@ -58,7 +58,7 @@ public class MoeDieEntity extends AbstractDieEntity {
     public boolean onActionStart(BlockState state, BlockPos pos, int face) {
         if (!state.getBlock().isIn(MoeTags.MOEABLES)) { return false; }
         this.blockStateForSpawn = state;
-        this.dere = Deres.values()[face - 1];
+        this.dere = Dere.values()[face - 1];
         this.timeUntilSpawned = 30;
         return true;
     }

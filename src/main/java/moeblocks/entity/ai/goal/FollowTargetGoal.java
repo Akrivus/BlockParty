@@ -40,7 +40,7 @@ public class FollowTargetGoal extends AbstractFollowEntityGoal<AbstractNPCEntity
 
     @Override
     public LivingEntity getTarget() {
-        return this.entity.getFollowTarget();
+        return this.entity.getProtagonist();
     }
 
     @Override

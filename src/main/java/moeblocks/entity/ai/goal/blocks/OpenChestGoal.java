@@ -1,7 +1,7 @@
 package moeblocks.entity.ai.goal.blocks;
 
 import moeblocks.automata.IStateGoal;
-import moeblocks.automata.state.Emotions;
+import moeblocks.automata.state.Emotion;
 import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.player.PlayerEntity;
@@ -26,7 +26,7 @@ public class OpenChestGoal extends Goal implements IStateGoal {
 
     @Override
     public void startExecuting() {
-        this.entity.setEmotion(Emotions.EMBARRASSED);
+        this.entity.setEmotion(Emotion.EMBARRASSED);
         this.player = this.entity.getInteractTarget();
         this.player.openContainer(this.entity);
     }
