@@ -1,5 +1,6 @@
 package moeblocks.entity;
 
+import moeblocks.automata.state.Dere;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -178,15 +179,20 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
     }
 
     private Rotations getRandomFaceRotations() {
-        this.face = this.rand.nextInt(6) + 1;
-        Vector3f face = new Vector3f(0, 0, 0);
-        Iterator<Map.Entry<Vector3f, Integer>> it = MAP.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<Vector3f, Integer> entry = it.next();
-            if (this.face != entry.getValue()) { continue; }
-            face = entry.getKey();
+        this.face = this.rand.nextInt(Dere.values().length);
+        if (this.face > 0) {
+            Vector3f face = new Vector3f(0, 0, 0);
+            Iterator<Map.Entry<Vector3f, Integer>> it = MAP.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Vector3f, Integer> entry = it.next();
+                if (this.face != entry.getValue()) {
+                    continue;
+                }
+                face = entry.getKey();
+            }
+            return new Rotations(face.getX(), face.getY(), face.getZ());
         }
-        return new Rotations(face.getX(), face.getY(), face.getZ());
+        return this.getRandomFaceRotations();
     }
 
     private int getRandomFace() {
@@ -231,12 +237,11 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
     }
 
     public boolean isLanded() {
-        if (this.face < 0) { this.getFaceFromAngle(); }
-        return this.face > 0 && this.landed;
+        return this.getFaceFromAngle() > 0 && this.landed;
     }
 
     public int getFaceFromAngle() {
-        return this.face = AbstractDieEntity.match(this.getPitch(), this.getYaw(), this.getRoll());
+        return AbstractDieEntity.match(this.getPitch(), this.getYaw(), this.getRoll());
     }
 
     public float getYaw() {

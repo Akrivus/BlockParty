@@ -163,7 +163,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public void registerStates() {
         this.states.put(Animation.class, new Automaton(this, Animation.DEFAULT).setCanRunOnClient());
         this.states.put(BloodType.class, new Automaton(this, BloodType.O).setCanUpdate(false));
-        this.states.put(Dere.class, new Automaton(this, Dere.NONDERE).setCanUpdate(false));
+        this.states.put(Dere.class, new Automaton(this, Dere.NYANDERE).setCanUpdate(false));
         this.states.put(Emotion.class, new Automaton(this, Emotion.NORMAL));
         this.states.put(Gender.class, new Automaton(this, Gender.FEMININE).setCanUpdate(false));
         this.states.put(HealthState.class, new Automaton(this, HealthState.PERFECT));
@@ -181,7 +181,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public void registerData() {
         this.dataManager.register(ANIMATION, Animation.DEFAULT.name());
         this.dataManager.register(BLOOD_TYPE, BloodType.O.name());
-        this.dataManager.register(DERE, Dere.NONDERE.name());
+        this.dataManager.register(DERE, Dere.NYANDERE.name());
         this.dataManager.register(EMOTION, Emotion.NORMAL.name());
         this.dataManager.register(FAMILY_NAME, "Missing");
         this.dataManager.register(GIVEN_NAME, "Name");

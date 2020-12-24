@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 public enum Dere implements IStateEnum<AbstractNPCEntity> {
-    NONDERE((moe, list) -> {
+    NYANDERE((moe, list) -> {
 
     }, 0xffffff),
     HIMEDERE((moe, list) -> {
@@ -53,7 +53,7 @@ public enum Dere implements IStateEnum<AbstractNPCEntity> {
 
     @Override
     public IStateEnum<AbstractNPCEntity> fromToken(String token) {
-        if (token.isEmpty()) { return Dere.NONDERE; }
+        if (token.isEmpty()) { return Dere.NYANDERE; }
         return Dere.valueOf(token);
     }
 
