@@ -70,28 +70,28 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     public static final DataParameter<String> EMOTION = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public static final DataParameter<String> FAMILY_NAME = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public static final DataParameter<String> GIVEN_NAME = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
-    protected Queue<Consumer<AbstractNPCEntity>> nextTickOps;
     protected HashMap<Class<? extends IStateEnum>, Automaton> states;
-    protected ChunkPos lastRecordedPos;
-    protected PlayerEntity playerInteracted;
-    protected LivingEntity entityStaring;
-    protected LivingEntity entityToAvoid;
-    protected BlockState blockToMine;
-    protected int timeSinceAvoid;
-    protected int timeSinceInteraction;
-    protected int timeSinceStare;
-    protected int timeSinceSleep;
-    protected int timeUntilHungry;
-    protected int timeUntilLove;
-    protected long age;
-    private float foodLevel = 20.0F;
-    private float saturation = 5.0F;
-    private float exhaustion;
-    private float love;
-    private float affection;
-    private float stress;
-    private float relaxation;
-    private float progress;
+    private Queue<Consumer<AbstractNPCEntity>> nextTickOps;
+    private ChunkPos lastRecordedPos;
+    private PlayerEntity playerInteracted;
+    private LivingEntity entityStaring;
+    private LivingEntity entityToAvoid;
+    private BlockState blockToMine;
+    private int timeSinceAvoid;
+    private int timeSinceInteraction;
+    private int timeSinceStare;
+    private int timeSinceSleep;
+    private int timeUntilHungry;
+    private int timeUntilLove;
+    private long age;                // todo: move to data
+    private float foodLevel = 20.0F; // todo: move to data
+    private float saturation = 5.0F; // todo: move to data
+    private float exhaustion;        // todo: move to data
+    private float love;              // todo: move to data
+    private float affection;         // todo: move to data
+    private float stress;            // todo: move to data
+    private float relaxation;        // todo: move to data
+    private float progress;          // todo: move to data
 
     protected AbstractNPCEntity(EntityType<? extends AbstractNPCEntity> type, World world) {
         super(type, world);

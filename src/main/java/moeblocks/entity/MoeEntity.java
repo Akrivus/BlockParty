@@ -41,8 +41,8 @@ import java.util.Optional;
 public class MoeEntity extends AbstractNPCEntity {
     public static final DataParameter<Optional<BlockState>> BLOCK_STATE = EntityDataManager.createKey(MoeEntity.class, DataSerializers.OPTIONAL_BLOCK_STATE);
     public static final DataParameter<Float> SCALE = EntityDataManager.createKey(MoeEntity.class, DataSerializers.FLOAT);
-    protected CompoundNBT extraBlockData = new CompoundNBT();
-    protected Inventory brassiere;
+    private CompoundNBT extraBlockData = new CompoundNBT();
+    private Inventory brassiere;
 
     public MoeEntity(EntityType<? extends MoeEntity> type, World world) {
         super(type, world);
@@ -112,7 +112,7 @@ public class MoeEntity extends AbstractNPCEntity {
 
     @Override
     public String getGivenName() {
-        return Trans.lator(String.format("entity.moeblocks.%s.name", this.getBlockName()), super.getGivenName());
+        return Trans.late(String.format("entity.moeblocks.%s.name", this.getBlockName()), super.getGivenName());
     }
 
     public Gender getGender() {
@@ -148,7 +148,7 @@ public class MoeEntity extends AbstractNPCEntity {
 
     @Override
     public String getFamilyName() {
-        return Trans.lator(String.format("entity.moeblocks.%s", this.getBlockName()), String.format("block.%s", this.getBlockName()));
+        return Trans.late(String.format("entity.moeblocks.%s", this.getBlockName()), String.format("block.%s", this.getBlockName()));
     }
 
     @Override
@@ -174,7 +174,7 @@ public class MoeEntity extends AbstractNPCEntity {
         }
     }
 
-    public TileEntity getTileEntity() {
+    private TileEntity getTileEntity() {
         return this.getBlockData().hasTileEntity() ? TileEntity.readTileEntity(this.getBlockData(), this.getExtraBlockData()) : null;
     }
 
@@ -202,7 +202,7 @@ public class MoeEntity extends AbstractNPCEntity {
         this.extraBlockData = compound == null ? new CompoundNBT() : compound;
     }
 
-    public boolean isTagSafe(ITag<Block> tag) {
+    private boolean isTagSafe(ITag<Block> tag) {
         try {
             return this.getBlockData().isIn(tag);
         } catch (IllegalStateException e) {

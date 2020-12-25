@@ -13,12 +13,12 @@ import java.util.function.Consumer;
 
 public class CacheNPC {
     public static final Map<UUID, BlockPos> positions = new HashMap<>();
-    protected final UUID uuid;
-    protected BlockPos pos;
-    protected String name;
-    protected CompoundNBT tag;
-    protected boolean dead;
-    protected boolean estranged;
+    private final UUID uuid;
+    private BlockPos pos;
+    private String name;
+    private CompoundNBT tag;
+    private boolean dead;
+    private boolean estranged;
 
     public CacheNPC(AbstractNPCEntity npc) {
         this.uuid = npc.getUniqueID();

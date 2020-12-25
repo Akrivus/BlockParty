@@ -22,10 +22,8 @@ public class MoeMod {
     }
 
     private void registerRegisters(IEventBus bus) {
-        MoeActivities.REGISTRY.register(bus);
         MoeEntities.REGISTRY.register(bus);
         MoeItems.REGISTRY.register(bus);
-        MoeSchedules.REGISTRY.register(bus);
         MoeSounds.REGISTRY.register(bus);
     }
 

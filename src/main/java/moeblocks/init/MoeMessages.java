@@ -1,7 +1,6 @@
 package moeblocks.init;
 
 import moeblocks.MoeMod;
-import moeblocks.message.CPhoneRemoveMoe;
 import moeblocks.message.CPhoneTeleportMoe;
 import moeblocks.message.CRemovePageFromYearbook;
 import moeblocks.message.SOpenYearbook;
@@ -28,7 +27,6 @@ public class MoeMessages {
     static {
         MESSAGES.add(new MessageContainer<>(CRemovePageFromYearbook.class, CRemovePageFromYearbook::new, CRemovePageFromYearbook::encode, CRemovePageFromYearbook::handleContext));
         MESSAGES.add(new MessageContainer<>(SOpenYearbook.class, SOpenYearbook::new, SOpenYearbook::encode, SOpenYearbook::handleContext));
-        MESSAGES.add(new MessageContainer<>(CPhoneRemoveMoe.class, CPhoneRemoveMoe::new, CPhoneRemoveMoe::encode, CPhoneRemoveMoe::handleContext));
         MESSAGES.add(new MessageContainer<>(CPhoneTeleportMoe.class, CPhoneTeleportMoe::new, CPhoneTeleportMoe::encode, CPhoneTeleportMoe::handleContext));
     }
 

@@ -19,10 +19,6 @@ public enum Animation implements IStateEnum<AbstractNPCEntity> {
         this.animation = animation;
     }
 
-    public AnimationState get() {
-        return this.animation.get();
-    }
-
     @Override
     public IState getState(AbstractNPCEntity applicant) {
         return this.animation.get();

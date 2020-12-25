@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 public class GoalState<O extends IStateEnum<E>, E extends AbstractNPCEntity> implements IState<E> {
-    public final O filter;
-    public final BiConsumer<E, List<IStateGoal>> generator;
+    protected final O filter;
+    protected final BiConsumer<E, List<IStateGoal>> generator;
     private final List<IStateGoal> goals = new ArrayList<>();
 
     public GoalState(O filter, BiConsumer<E, List<IStateGoal>> generator) {

@@ -13,9 +13,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class MoeDieEntity extends AbstractDieEntity {
-    protected BlockState blockStateForSpawn;
-    protected Dere dere;
-    protected int timeUntilSpawned;
+    private BlockState blockStateForSpawn;
+    private Dere dere;
+    private int timeUntilSpawned;
 
     public MoeDieEntity(EntityType<MoeDieEntity> type, World world) {
         super(type, world);

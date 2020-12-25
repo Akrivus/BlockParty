@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 
 public class DieCubeModel<T extends AbstractDieEntity> extends EntityModel<T> {
-    public ModelRenderer die;
+    private ModelRenderer die;
 
     public DieCubeModel() {
         this.textureHeight = this.textureWidth = 64;

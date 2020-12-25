@@ -61,11 +61,4 @@ public enum HeldItemState implements IStateEnum<AbstractNPCEntity> {
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
         return HeldItemState.values();
     }
-
-    public static HeldItemState get(Item item) {
-        for (HeldItemState state : HeldItemState.values()) {
-            if (state.items.contains(item)) { return state; }
-        }
-        return HeldItemState.DEFAULT;
-    }
 }

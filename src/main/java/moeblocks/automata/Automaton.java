@@ -9,12 +9,12 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
     protected final E applicant;
     protected final O natural;
     protected final int timeout;
-    protected int timeUntilCheck;
     protected IState state;
     protected O key;
     private boolean canUpdate = true;
     private boolean hasNoDefault = true;
     private boolean isServerOnly = true;
+    private int timeUntilCheck;
 
     public Automaton(E applicant, O natural) {
         this(applicant, natural, 1000);

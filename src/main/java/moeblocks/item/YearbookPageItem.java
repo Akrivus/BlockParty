@@ -12,6 +12,7 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class YearbookPageItem extends Item {
+
     public YearbookPageItem() {
         super(new Properties().maxStackSize(1));
     }

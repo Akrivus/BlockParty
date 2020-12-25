@@ -7,7 +7,7 @@ import net.minecraft.state.properties.BedPart;
 import net.minecraft.util.math.BlockPos;
 
 public class FindBedGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity> {
-    protected int tolerableRange = 0;
+    private int tolerableRange = 0;
 
     public FindBedGoal(AbstractNPCEntity entity) {
         super(entity, 7, 16);

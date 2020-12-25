@@ -13,8 +13,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 
 public class MoeDieRenderer extends EntityRenderer<MoeDieEntity> implements IRenderFactory<MoeDieEntity> {
-    public static ResourceLocation DIE_TEXTURE = new ResourceLocation(MoeMod.ID, "textures/entity/moe_die.png");
-    protected final DieCubeModel<MoeDieEntity> model = new DieCubeModel<>();
+    private static ResourceLocation DIE_TEXTURE = new ResourceLocation(MoeMod.ID, "textures/entity/moe_die.png");
+    private final DieCubeModel<MoeDieEntity> model = new DieCubeModel<>();
 
     public MoeDieRenderer(EntityRendererManager manager) {
         super(manager);
