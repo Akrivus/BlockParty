@@ -25,7 +25,7 @@ import java.util.Map;
 public abstract class AbstractDieEntity extends ProjectileItemEntity {
     private static final DataParameter<Rotations> ROTATIONS = EntityDataManager.createKey(AbstractDieEntity.class, DataSerializers.ROTATIONS);
     private static final Map<Vector3f, Integer> MAP = new LinkedHashMap<>(64);
-
+    
     static {
         MAP.put(new Vector3f(0, 0, 0), 2);
         MAP.put(new Vector3f(0, 0, 90), 3);
@@ -92,24 +92,104 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
         MAP.put(new Vector3f(270, 270, 180), 1);
         MAP.put(new Vector3f(270, 270, 270), 5);
     }
-
+    
     private final int spin = 30;
     private boolean landed;
     private int totalHops;
     private int face = -1;
-
+    
     public AbstractDieEntity(EntityType<? extends AbstractDieEntity> type, World world) {
         super(type, world);
     }
-
+    
     public AbstractDieEntity(EntityType<? extends AbstractDieEntity> type, World world, double x, double y, double z) {
         super(type, x, y, z, world);
     }
-
+    
     public AbstractDieEntity(EntityType<? extends AbstractDieEntity> type, World world, LivingEntity thrower) {
         super(type, thrower, world);
     }
-
+    
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.world.isRemote()) { return; }
+        double x = this.getMotion().x * this.spin;
+        double y = this.getMotion().y * this.spin;
+        double z = this.getMotion().z * this.spin;
+        this.addRotations(new Vector3d(x, y, z));
+        if (this.isLanded()) {
+            if (this.onActionTick()) { this.remove(); }
+            this.setVelocity(0, 0, 0);
+            this.setMotion(Vector3d.ZERO);
+            this.setNoGravity(true);
+        }
+    }
+    
+    @Override
+    public IPacket<?> createSpawnPacket() {
+        return NetworkHooks.getEntitySpawningPacket(this);
+    }
+    
+    public boolean onActionTick() {
+        return false;
+    }
+    
+    public void addRotations(Vector3d rotation) {
+        float x = this.getRotations().getX() + (float) rotation.x;
+        float y = this.getRotations().getY() + (float) rotation.y;
+        float z = this.getRotations().getZ() + (float) rotation.z;
+        this.setRotations(x, y, z);
+    }
+    
+    public void setRotations(float x, float y, float z) {
+        this.setRotations(new Rotations(x, y, z));
+    }
+    
+    public boolean isLanded() {
+        return this.getFaceFromAngle() > 0 && this.landed;
+    }
+    
+    public int getFaceFromAngle() {
+        return AbstractDieEntity.match(this.getPitch(), this.getYaw(), this.getRoll());
+    }
+    
+    public float getYaw() {
+        return this.getRotations().getY() % 360;
+    }
+    
+    public float getPitch() {
+        return this.getRotations().getX() % 360;
+    }
+    
+    public float getRoll() {
+        return this.getRotations().getZ() % 360;
+    }
+    
+    protected static int match(float x, float y, float z) {
+        return MAP.getOrDefault(new Vector3f(round(x), round(y), round(z)), -1);
+    }
+    
+    private static float round(float angle) {
+        if (255 < angle || angle < 285) { return 270; }
+        if (165 < angle || angle < 195) { return 180; }
+        if (75 < angle || angle < 105) { return 90; }
+        if (345 < angle || angle < 15) { return 0; }
+        return angle;
+    }
+    
+    public Vector3d bounce() {
+        this.setMotion(this.getMotion().inverse().scale(0.8F));
+        return this.getMotion();
+    }
+    
+    public abstract boolean onActionStart(BlockState state, BlockPos pos, int face);
+    
+    public PlayerEntity getPlayer() {
+        if (!(this.func_234616_v_() instanceof PlayerEntity)) { return null; }
+        return (PlayerEntity) this.func_234616_v_();
+    }
+    
     @Override
     protected void onImpact(RayTraceResult result) {
         if (this.world.isRemote()) { return; }
@@ -139,33 +219,33 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
             this.bounce();
         }
     }
-
+    
     @Override
     protected void registerData() {
         this.dataManager.register(ROTATIONS, this.getRandomSpinRotations());
         super.registerData();
     }
-
+    
     @Override
     public void writeAdditional(CompoundNBT compound) {
         super.writeAdditional(compound);
         compound.put("Rotations", this.getRotations().writeToNBT());
     }
-
+    
     @Override
     public void readAdditional(CompoundNBT compound) {
         super.readAdditional(compound);
         this.setRotations(new Rotations(compound.getList("Rotations", 5)));
     }
-
+    
     public Rotations getRotations() {
         return this.dataManager.get(ROTATIONS);
     }
-
+    
     public void setRotations(Rotations rotations) {
         this.dataManager.set(ROTATIONS, rotations);
     }
-
+    
     private Rotations getRandomSpinRotations() {
         Rotations rotation = this.getRandomFaceRotations();
         float x = rotation.getX() + this.getSpin();
@@ -173,11 +253,11 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
         float z = rotation.getZ() + this.getSpin();
         return new Rotations(x, y, z);
     }
-
+    
     private int getSpin() {
         return this.rand.nextInt(this.spin) * (this.rand.nextInt(3) - 1);
     }
-
+    
     private Rotations getRandomFaceRotations() {
         this.face = this.rand.nextInt(Dere.values().length);
         if (this.face > 0) {
@@ -194,89 +274,9 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
         }
         return this.getRandomFaceRotations();
     }
-
+    
     private int getRandomFace() {
         this.setRotations(this.getRandomFaceRotations());
         return this.face;
-    }
-
-    @Override
-    public void tick() {
-        super.tick();
-        if (this.world.isRemote()) { return; }
-        double x = this.getMotion().x * this.spin;
-        double y = this.getMotion().y * this.spin;
-        double z = this.getMotion().z * this.spin;
-        this.addRotations(new Vector3d(x, y, z));
-        if (this.isLanded()) {
-            if (this.onActionTick()) { this.remove(); }
-            this.setVelocity(0, 0, 0);
-            this.setMotion(Vector3d.ZERO);
-            this.setNoGravity(true);
-        }
-    }
-
-    @Override
-    public IPacket<?> createSpawnPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
-
-    public boolean onActionTick() {
-        return false;
-    }
-
-    public void addRotations(Vector3d rotation) {
-        float x = this.getRotations().getX() + (float) rotation.x;
-        float y = this.getRotations().getY() + (float) rotation.y;
-        float z = this.getRotations().getZ() + (float) rotation.z;
-        this.setRotations(x, y, z);
-    }
-
-    public void setRotations(float x, float y, float z) {
-        this.setRotations(new Rotations(x, y, z));
-    }
-
-    public boolean isLanded() {
-        return this.getFaceFromAngle() > 0 && this.landed;
-    }
-
-    public int getFaceFromAngle() {
-        return AbstractDieEntity.match(this.getPitch(), this.getYaw(), this.getRoll());
-    }
-
-    public float getYaw() {
-        return this.getRotations().getY() % 360;
-    }
-
-    public float getPitch() {
-        return this.getRotations().getX() % 360;
-    }
-
-    public float getRoll() {
-        return this.getRotations().getZ() % 360;
-    }
-
-    protected static int match(float x, float y, float z) {
-        return MAP.getOrDefault(new Vector3f(round(x), round(y), round(z)), -1);
-    }
-
-    private static float round(float angle) {
-        if (255 < angle || angle < 285) { return 270; }
-        if (165 < angle || angle < 195) { return 180; }
-        if (75 < angle || angle < 105) { return 90; }
-        if (345 < angle || angle < 15) { return 0; }
-        return angle;
-    }
-
-    public Vector3d bounce() {
-        this.setMotion(this.getMotion().inverse().scale(0.8F));
-        return this.getMotion();
-    }
-
-    public abstract boolean onActionStart(BlockState state, BlockPos pos, int face);
-
-    public PlayerEntity getPlayer() {
-        if (!(this.func_234616_v_() instanceof PlayerEntity)) { return null; }
-        return (PlayerEntity) this.func_234616_v_();
     }
 }

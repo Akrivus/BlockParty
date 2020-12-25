@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class DatingSim {
     public final Map<UUID, CacheNPC> characters = new LinkedHashMap<>();
     private final UUID uuid;
-
+    
     public DatingSim(CompoundNBT compound) {
         this(compound.getUniqueId("UUID"));
         ListNBT npcs = compound.getList("NPCs", Constants.NBT.TAG_COMPOUND);
@@ -22,18 +22,18 @@ public class DatingSim {
             this.characters.put(nbt.getUniqueId("UUID"), new CacheNPC(nbt));
         }
     }
-
+    
     public DatingSim(UUID uuid) {
         this.uuid = uuid;
     }
-
+    
     public CacheNPC getNPC(UUID uuid, AbstractNPCEntity entity) {
         CacheNPC npc = getNPC(uuid);
         if (npc == null) { npc = new CacheNPC(entity); }
         this.characters.put(uuid, npc);
         return npc;
     }
-
+    
     public CacheNPC getNPC(UUID uuid) {
         AtomicReference<CacheNPC> npc = new AtomicReference<>();
         this.characters.forEach((key, value) -> {
@@ -41,15 +41,15 @@ public class DatingSim {
         });
         return npc.get();
     }
-
+    
     public CacheNPC removeNPC(UUID uuid) {
         return this.characters.remove(uuid);
     }
-
+    
     public int totalNPCs() {
         return this.characters.size();
     }
-
+    
     public CompoundNBT write(CompoundNBT compound) {
         ListNBT npcs = new ListNBT();
         this.characters.forEach((uuid, npc) -> npcs.add(npc.write(new CompoundNBT())));
@@ -57,7 +57,7 @@ public class DatingSim {
         compound.putUniqueId("UUID", this.uuid);
         return compound;
     }
-
+    
     public boolean isNPCsEmpty() {
         return this.characters.isEmpty();
     }

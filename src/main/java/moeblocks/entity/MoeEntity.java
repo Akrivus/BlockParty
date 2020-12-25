@@ -43,95 +43,87 @@ public class MoeEntity extends AbstractNPCEntity {
     public static final DataParameter<Float> SCALE = EntityDataManager.createKey(MoeEntity.class, DataSerializers.FLOAT);
     private CompoundNBT extraBlockData = new CompoundNBT();
     private Inventory brassiere;
-
+    
     public MoeEntity(EntityType<? extends MoeEntity> type, World world) {
         super(type, world);
         this.setBrassiere(new CompoundNBT());
     }
-
+    
     @Override
     public Container createMenu(int id, PlayerInventory inventory, PlayerEntity player) {
         return this.getCupSize().getContainer(id, inventory, this.getBrassiere());
     }
-
+    
     public Inventory getBrassiere() {
         return this.brassiere;
     }
-
+    
     protected void setBrassiere(CompoundNBT compound) {
         CupSizes cup = compound.contains("CupSizes") ? CupSizes.valueOf(compound.getString("CupSizes")) : CupSizes.B;
         this.brassiere = new Inventory(cup.getSize());
         this.brassiere.read(compound.getList("Brassiere", 10));
     }
-
+    
     public CupSizes getCupSize() {
         return CupSizes.get(this.brassiere.getSizeInventory());
     }
-
+    
     public void setCupSize(CupSizes cup) {
         ListNBT items = this.brassiere.write();
         this.brassiere = new Inventory(cup.getSize());
         this.brassiere.read(items);
     }
-
+    
     @Override
     public float getSoundPitch() {
         float hardness = (1.0F - (float) (this.getAttributeValue(Attributes.ARMOR) + 1.0F) / 31.0F) * 0.25F;
         return super.getSoundPitch() + hardness + (1.0F - this.getScale());
     }
-
+    
     @Override
     public EntitySize getSize(Pose pose) {
         return super.getSize(pose).scale(this.getScale());
     }
-
+    
     @Override
     protected float getStandingEyeHeight(Pose pose, EntitySize size) {
         return 0.908203125F * this.getScale();
     }
-
-    public float getScale() {
-        return this.dataManager.get(SCALE);
-    }
-
-    public void setScale(float scale) {
-        this.dataManager.set(SCALE, scale);
-    }
-
+    
     @Override
     public boolean isInvulnerableTo(DamageSource source) {
         return super.isInvulnerableTo(source) || source == DamageSource.DROWN;
     }
-
+    
     @Override
     public String getHonorific() {
         if (this.isTagSafe(MoeTags.FULLSIZED)) { return super.getHonorific(); }
         if (this.isTagSafe(MoeTags.BABY)) { return "tan"; }
         return this.getScale() < 1.0F ? "tan" : super.getHonorific();
     }
-
+    
+    public Gender getGender() {
+        return this.isTagSafe(MoeTags.MALE) ? Gender.MASCULINE : Gender.FEMININE;
+    }
+    
     @Override
     public String getGivenName() {
         return Trans.late(String.format("entity.moeblocks.%s.name", this.getBlockName()), super.getGivenName());
     }
-
-    public Gender getGender() {
-        return this.isTagSafe(MoeTags.MALE) ? Gender.MASCULINE : Gender.FEMININE;
-    }
-
+    
     @Override
     public void registerStates() {
         this.states.put(BlockDataState.class, new Automaton(this, BlockDataState.DEFAULT).start());
         super.registerStates();
     }
-
+    
     @Override
     public void registerData() {
         this.dataManager.register(BLOCK_STATE, Optional.of(Blocks.AIR.getDefaultState()));
         this.dataManager.register(SCALE, 1.0F);
         super.registerData();
     }
-
+    
     @Override
     public void writeAdditional(CompoundNBT compound) {
         compound.put("ExtraBlockData", this.getExtraBlockData());
@@ -140,17 +132,17 @@ public class MoeEntity extends AbstractNPCEntity {
         compound.put("Brassiere", this.brassiere.write());
         super.writeAdditional(compound);
     }
-
+    
     public void writeCharacter(CompoundNBT compound) {
         compound.putInt("BlockData", Block.getStateId(this.getBlockData()));
         super.writeCharacter(compound);
     }
-
+    
     @Override
     public String getFamilyName() {
         return Trans.late(String.format("entity.moeblocks.%s", this.getBlockName()), String.format("block.%s", this.getBlockName()));
     }
-
+    
     @Override
     public void readAdditional(CompoundNBT compound) {
         this.setExtraBlockData((CompoundNBT) compound.get("ExtraBlockData"));
@@ -158,12 +150,18 @@ public class MoeEntity extends AbstractNPCEntity {
         this.setBrassiere(compound);
         super.readAdditional(compound);
     }
-
+    
     public void readCharacter(CompoundNBT compound) {
         this.setBlockData(Block.getStateById(compound.getInt("BlockData")));
         super.readCharacter(compound);
     }
-
+    
+    @Override
+    public void notifyDataManagerChange(DataParameter<?> key) {
+        if (SCALE.equals(key)) { this.recalculateSize(); }
+        super.notifyDataManagerChange(key);
+    }
+    
     @Override
     protected void dropLoot(DamageSource cause, boolean player) {
         super.dropLoot(cause, player);
@@ -173,35 +171,46 @@ public class MoeEntity extends AbstractNPCEntity {
             if (!stack.isEmpty()) { this.entityDropItem(stack); }
         }
     }
-
+    
     private TileEntity getTileEntity() {
         return this.getBlockData().hasTileEntity() ? TileEntity.readTileEntity(this.getBlockData(), this.getExtraBlockData()) : null;
     }
-
-    @Override
-    public void notifyDataManagerChange(DataParameter<?> key) {
-        if (SCALE.equals(key)) { this.recalculateSize(); }
-        super.notifyDataManagerChange(key);
-    }
-
+    
     @Override
     public int getBaseAge() {
         return (int) (this.getScale() * 5) + 13;
     }
-
+    
+    @Override
+    public BlockState getBlockData() {
+        return this.dataManager.get(BLOCK_STATE).orElseGet(() -> super.getBlockData());
+    }
+    
+    public CompoundNBT getExtraBlockData() {
+        return this.extraBlockData;
+    }
+    
+    public float getScale() {
+        return this.dataManager.get(SCALE);
+    }
+    
+    public void setScale(float scale) {
+        this.dataManager.set(SCALE, scale);
+    }
+    
+    public void setExtraBlockData(CompoundNBT compound) {
+        this.extraBlockData = compound == null ? new CompoundNBT() : compound;
+    }
+    
+    public void setBlockData(BlockState state) {
+        this.dataManager.set(BLOCK_STATE, Optional.of(state));
+    }
+    
     public String getBlockName() {
         ResourceLocation block = MoeBlocks.get(this.getBlockData().getBlock()).getRegistryName();
         return String.format("%s.%s", block.getNamespace(), block.getPath());
     }
-
-    public CompoundNBT getExtraBlockData() {
-        return this.extraBlockData;
-    }
-
-    public void setExtraBlockData(CompoundNBT compound) {
-        this.extraBlockData = compound == null ? new CompoundNBT() : compound;
-    }
-
+    
     private boolean isTagSafe(ITag<Block> tag) {
         try {
             return this.getBlockData().isIn(tag);
@@ -209,32 +218,12 @@ public class MoeEntity extends AbstractNPCEntity {
             return false;
         }
     }
-
-    @Override
-    public BlockState getBlockData() {
-        return this.dataManager.get(BLOCK_STATE).orElseGet(() -> super.getBlockData());
-    }
-
-    public void setBlockData(BlockState state) {
-        this.dataManager.set(BLOCK_STATE, Optional.of(state));
-    }
-
+    
     @Override
     public void onInventoryChanged(IInventory inventory) {
         return;
     }
-
-    @Override
-    protected void playStepSound(BlockPos pos, BlockState block) {
-        this.playSound(MoeBlocks.getStepSound(this.getBlockData()), 0.15F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
-        super.playStepSound(pos, block);
-    }
-
-    @Override
-    public boolean isImmuneToFire() {
-        return this.getBlockData().isFlammable(this.world, this.getPosition(), this.getHorizontalFacing());
-    }
-
+    
     public float[] getEyeColor() {
         int[] colors = this.getAuraColor();
         float[] b = this.getRGB(colors[0]);
@@ -245,23 +234,23 @@ public class MoeEntity extends AbstractNPCEntity {
         }
         return rgb;
     }
-
+    
     private float[] getRGB(int hex) {
         float r = ((hex & 0xff0000) >> 16) / 255.0F;
         float g = ((hex & 0xff00) >> 8) / 255.0F;
         float b = ((hex & 0xff) >> 1) / 255.0F;
-        return new float[]{r, g, b};
+        return new float[] { r, g, b };
     }
-
+    
     private int[] getAuraColor() {
         MaterialColor block = this.getBlockData().getMaterial().getColor();
-        return new int[]{block.colorValue, this.getDere().getColor()};
+        return new int[] { block.colorValue, this.getDere().getColor() };
     }
-
+    
     public boolean isBlockGlowing() {
         return this.isTagSafe(MoeTags.GLOWING);
     }
-
+    
     public static boolean spawn(World world, BlockPos block, BlockPos spawn, float yaw, float pitch, Dere dere, PlayerEntity player) {
         BlockState state = world.getBlockState(block);
         if (!state.getBlock().isIn(MoeTags.MOEABLES)) { return false; }
@@ -277,5 +266,16 @@ public class MoeEntity extends AbstractNPCEntity {
             return world.destroyBlock(block, false);
         }
         return false;
+    }
+    
+    @Override
+    protected void playStepSound(BlockPos pos, BlockState block) {
+        this.playSound(MoeBlocks.getStepSound(this.getBlockData()), 0.15F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
+        super.playStepSound(pos, block);
+    }
+    
+    @Override
+    public boolean isImmuneToFire() {
+        return this.getBlockData().isFlammable(this.world, this.getPosition(), this.getHorizontalFacing());
     }
 }

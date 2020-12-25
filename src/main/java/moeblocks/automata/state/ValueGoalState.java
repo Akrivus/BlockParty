@@ -12,7 +12,7 @@ public class ValueGoalState<O extends IStateEnum<E>, E extends AbstractNPCEntity
     public ValueGoalState(O filter, BiConsumer<E, List<IStateGoal>> generator, Function<E, Float> function, float start, float end) {
         super(filter, generator, (npc) -> isBetween(function.apply(npc), start, end));
     }
-
+    
     private static boolean isBetween(float value, float start, float end) {
         return start <= value && value <= end;
     }

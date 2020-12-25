@@ -15,10 +15,10 @@ public class PhoneScrollButton extends Button {
     public PhoneScrollButton(CellPhoneScreen parent, int x, int y, int delta) {
         super(x, y, 7, 7, StringTextComponent.EMPTY, (button) -> parent.setScroll(delta, true));
     }
-
+    
     @Override
     public void playDownSound(SoundHandler sound) { }
-
+    
     @Override
     public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);

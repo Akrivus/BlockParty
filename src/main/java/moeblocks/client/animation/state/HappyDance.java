@@ -10,7 +10,7 @@ public class HappyDance extends ActionAnimationState {
     public int getInterval() {
         return 20;
     }
-
+    
     @Override
     public void setRotationAngles(IRiggableModel model, AbstractNPCEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks) {
         model.getRightArm().rotateAngleZ -= 0.7853981633974483F * MathHelper.sin(ageInTicks);

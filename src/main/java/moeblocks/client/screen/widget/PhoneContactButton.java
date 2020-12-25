@@ -20,14 +20,14 @@ public class PhoneContactButton extends Button {
     private final CellPhoneScreen parent;
     private final CacheNPC npc;
     private final int index;
-
+    
     public PhoneContactButton(CellPhoneScreen parent, CacheNPC npc, int index) {
         super(0, 0, 81, 15, StringTextComponent.EMPTY, (button) -> PhoneContactButton.act(parent, npc, index));
         this.parent = parent;
         this.npc = npc;
         this.index = index;
     }
-
+    
     private static void act(CellPhoneScreen parent, CacheNPC npc, int index) {
         if (parent.isSelected(index)) {
             MoeMessages.send(new CPhoneTeleportMoe(npc.getUUID()));
@@ -36,7 +36,7 @@ public class PhoneContactButton extends Button {
             parent.setSelected(index);
         }
     }
-
+    
     @Override
     public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -45,12 +45,12 @@ public class PhoneContactButton extends Button {
         this.blit(stack, this.x, this.y, 108, y, 81, 15);
         Minecraft.getInstance().fontRenderer.drawString(stack, this.npc.getName(), this.x + 10, this.y + 4, this.isHovered() ? 0xffffff : 0);
     }
-
+    
     @Override
     public boolean isHovered() {
         return super.isHovered() || this.parent.isSelected(this.index);
     }
-
+    
     @Override
     public void playDownSound(SoundHandler sound) {
         sound.play(SimpleSound.master(MoeSounds.CELL_PHONE_BUTTON.get(), 1.0F));

@@ -18,19 +18,19 @@ public class MoeSleepingLayer extends LayerRenderer<MoeEntity, MoeModel<MoeEntit
     public MoeSleepingLayer(IEntityRenderer<MoeEntity, MoeModel<MoeEntity>> renderer) {
         super(renderer);
     }
-
+    
     @Override
     public void render(MatrixStack stack, IRenderTypeBuffer buffer, int packedLight, MoeEntity entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
         if (this.isWithinDistance(entity.getPositionVec()) && !entity.isInvisible() && entity.isSleeping()) {
             this.getEntityModel().render(stack, buffer.getBuffer(RenderType.getEntityTranslucent(this.getSleepingTexture())), packedLight, LivingRenderer.getPackedOverlay(entity, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
-
+    
     public boolean isWithinDistance(Vector3d pos) {
         ActiveRenderInfo renderInfo = Minecraft.getInstance().gameRenderer.getActiveRenderInfo();
         return renderInfo.getProjectedView().distanceTo(pos) < 16;
     }
-
+    
     public ResourceLocation getSleepingTexture() {
         return new ResourceLocation(MoeMod.ID, String.format("textures/entity/moe/sleeping.png"));
     }

@@ -11,19 +11,19 @@ public class SenpaiEntity extends AbstractNPCEntity {
     public SenpaiEntity(EntityType<? extends SenpaiEntity> type, World world) {
         super(type, world);
     }
-
+    
     @Override
     public Container createMenu(int id, PlayerInventory inventory, PlayerEntity player) {
         return null;
     }
-
+    
     @Override
     public int getBaseAge() {
         return 18;
     }
-
+    
     @Override
     public void onInventoryChanged(IInventory inventory) {
-
+    
     }
 }

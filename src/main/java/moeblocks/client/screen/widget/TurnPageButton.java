@@ -15,17 +15,17 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class TurnPageButton extends Button {
     private final int delta;
-
+    
     public TurnPageButton(int x, int y, int delta, IPressable button) {
         super(x, y, 7, 10, StringTextComponent.EMPTY, button);
         this.delta = delta;
     }
-
+    
     @Override
     public void playDownSound(SoundHandler sound) {
         sound.play(SimpleSound.master(SoundEvents.ITEM_BOOK_PAGE_TURN, 1.0F));
     }
-
+    
     @Override
     public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);

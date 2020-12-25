@@ -12,11 +12,11 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class YearbookPageItem extends Item {
-
+    
     public YearbookPageItem() {
         super(new Properties().maxStackSize(1));
     }
-
+    
     @Override
     public void addInformation(ItemStack stack, World world, List<ITextComponent> list, ITooltipFlag flag) {
         if (stack.hasTag()) {

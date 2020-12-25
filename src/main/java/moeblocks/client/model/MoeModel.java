@@ -13,47 +13,47 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
 
 public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHasArm, IHasHead, IRiggableModel {
-    private ModelRenderer head;
-    private ModelRenderer hair;
-    private ModelRenderer rightBun;
-    private ModelRenderer leftBun;
-    private ModelRenderer backBun;
-    private ModelRenderer rightTail;
-    private ModelRenderer leftTail;
-    private ModelRenderer backTail;
-    private ModelRenderer rightEar;
-    private ModelRenderer leftEar;
-    private ModelRenderer hatTop;
-    private ModelRenderer hatBrim;
-    private ModelRenderer body;
-    private ModelRenderer skirt;
-    private ModelRenderer rightWing;
-    private ModelRenderer leftWing;
-    private ModelRenderer tailBase;
-    private ModelRenderer tailTip;
-    private ModelRenderer rightArm;
-    private ModelRenderer leftArm;
-    private ModelRenderer rightLeg;
-    private ModelRenderer leftLeg;
-    private ModelRenderer headWear;
-    private ModelRenderer hairWear;
-    private ModelRenderer rightBunWear;
-    private ModelRenderer leftBunWear;
-    private ModelRenderer backBunWear;
-    private ModelRenderer rightTailWear;
-    private ModelRenderer leftTailWear;
-    private ModelRenderer backTailWear;
-    private ModelRenderer rightEarWear;
-    private ModelRenderer leftEarWear;
-    private ModelRenderer bodyWear;
-    private ModelRenderer skirtWear;
-    private ModelRenderer tailBaseWear;
-    private ModelRenderer tailTipWear;
-    private ModelRenderer rightArmWear;
-    private ModelRenderer leftArmWear;
-    private ModelRenderer rightLegWear;
-    private ModelRenderer leftLegWear;
-
+    private final ModelRenderer head;
+    private final ModelRenderer hair;
+    private final ModelRenderer rightBun;
+    private final ModelRenderer leftBun;
+    private final ModelRenderer backBun;
+    private final ModelRenderer rightTail;
+    private final ModelRenderer leftTail;
+    private final ModelRenderer backTail;
+    private final ModelRenderer rightEar;
+    private final ModelRenderer leftEar;
+    private final ModelRenderer hatTop;
+    private final ModelRenderer hatBrim;
+    private final ModelRenderer body;
+    private final ModelRenderer skirt;
+    private final ModelRenderer rightWing;
+    private final ModelRenderer leftWing;
+    private final ModelRenderer tailBase;
+    private final ModelRenderer tailTip;
+    private final ModelRenderer rightArm;
+    private final ModelRenderer leftArm;
+    private final ModelRenderer rightLeg;
+    private final ModelRenderer leftLeg;
+    private final ModelRenderer headWear;
+    private final ModelRenderer hairWear;
+    private final ModelRenderer rightBunWear;
+    private final ModelRenderer leftBunWear;
+    private final ModelRenderer backBunWear;
+    private final ModelRenderer rightTailWear;
+    private final ModelRenderer leftTailWear;
+    private final ModelRenderer backTailWear;
+    private final ModelRenderer rightEarWear;
+    private final ModelRenderer leftEarWear;
+    private final ModelRenderer bodyWear;
+    private final ModelRenderer skirtWear;
+    private final ModelRenderer tailBaseWear;
+    private final ModelRenderer tailTipWear;
+    private final ModelRenderer rightArmWear;
+    private final ModelRenderer leftArmWear;
+    private final ModelRenderer rightLegWear;
+    private final ModelRenderer leftLegWear;
+    
     public MoeModel() {
         this.textureHeight = this.textureWidth = 128;
         this.head = new ModelRenderer(this, 0, 0);
@@ -208,12 +208,12 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
         this.leftLegWear.setRotationPoint(2.0F, 18.0F, 0.0F);
         this.leftLegWear.addBox(-1.0F, 0.0F, -1.0F, 2.0F, 6.0F, 2.0F, 0.5F);
     }
-
+    
     @Override
     public ModelRenderer getModelHead() {
         return this.head;
     }
-
+    
     @Override
     public void render(MatrixStack stack, IVertexBuilder buffer, int light, int overlay, float red, float green, float blue, float alpha) {
         this.body.render(stack, buffer, light, overlay, red, green, blue, alpha);
@@ -229,7 +229,7 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
         this.head.render(stack, buffer, light, overlay, red, green, blue, alpha);
         this.headWear.render(stack, buffer, light, overlay, red, green, blue, alpha);
     }
-
+    
     @Override
     public void setRotationAngles(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float yaw, float pitch) {
         entity.getState(Animation.class).setRotationAngles(this, limbSwing, limbSwingAmount, ageInTicks);
@@ -258,7 +258,7 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
         this.rightLegWear.copyModelAngles(this.rightLeg);
         this.leftLegWear.copyModelAngles(this.leftLeg);
     }
-
+    
     @Override
     public void setLivingAnimations(T entity, float limbSwing, float limbSwingAmount, float partialTicks) {
         super.setLivingAnimations(entity, limbSwing, limbSwingAmount, partialTicks);
@@ -279,7 +279,7 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
         this.skirt.rotateAngleY = -this.leftLeg.rotateAngleX * 0.25F;
         this.tailBase.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F) * 2.0F * limbSwingAmount * 0.5F;
         this.tailBase.rotateAngleZ = -this.tailBase.rotateAngleX * 0.5F - MathHelper.cos(entity.ticksExisted * 0.09F) * 0.05F + 0.05F;
-
+        
         if (entity.isSwingInProgress) { this.setSwingingArmRotations(entity, partialTicks); }
         if (entity.isSneaking()) {
             this.head.rotationPointY = 14.2F;
@@ -315,7 +315,7 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
             this.leftLeg.rotateAngleZ = -0.0785398F;
         }
     }
-
+    
     protected void setSwingingArmRotations(T entity, float partialTicks) {
         float swingProgress = entity.getSwingProgress(partialTicks) * 3.14F;
         HandSide hand = this.getSwingingHand(entity);
@@ -334,12 +334,12 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
         arm.rotateAngleY += this.body.rotateAngleY * 2.0F;
         arm.rotateAngleZ += swingRotation * -0.4F;
     }
-
+    
     protected HandSide getSwingingHand(T entity) {
         HandSide hand = entity.getPrimaryHand();
         return entity.swingingHand == Hand.MAIN_HAND ? hand : hand.opposite();
     }
-
+    
     @Override
     public void translateHand(HandSide side, MatrixStack stack) {
         float x = side == HandSide.RIGHT ? 1.0F : -1.0F;
@@ -351,57 +351,57 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
         stack.translate(z, y, z);
         arm.rotationPointX -= x;
     }
-
+    
     @Override
     public ModelRenderer getRightArm() {
         return this.rightArm;
     }
-
+    
     @Override
     public ModelRenderer getLeftArm() {
         return this.leftArm;
     }
-
+    
     @Override
     public ModelRenderer getRightWing() {
         return this.rightWing;
     }
-
+    
     @Override
     public ModelRenderer getLeftWing() {
         return this.leftWing;
     }
-
+    
     @Override
     public ModelRenderer getRightLeg() {
         return this.rightLeg;
     }
-
+    
     @Override
     public ModelRenderer getLeftLeg() {
         return this.leftLeg;
     }
-
+    
     @Override
     public ModelRenderer getHead() {
         return this.head;
     }
-
+    
     @Override
     public ModelRenderer getHair() {
         return this.headWear;
     }
-
+    
     @Override
     public ModelRenderer getBody() {
         return this.body;
     }
-
+    
     @Override
     public ModelRenderer getTail() {
         return this.tailBase;
     }
-
+    
     @Override
     public ModelRenderer getTailTip() {
         return this.tailTip;

@@ -8,16 +8,16 @@ import net.minecraft.entity.monster.IMob;
 import java.util.List;
 
 public class HostileMobsTarget extends AbstractStateTarget {
-
+    
     public HostileMobsTarget(AbstractNPCEntity entity) {
         super(entity);
     }
-
+    
     @Override
     public int getPriority() {
         return 0x3;
     }
-
+    
     @Override
     public boolean setTarget() {
         if (this.entity.ticksExisted % 20 != 0) { return false; }

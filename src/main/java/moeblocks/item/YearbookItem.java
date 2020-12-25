@@ -19,11 +19,11 @@ import java.util.Iterator;
 import java.util.UUID;
 
 public class YearbookItem extends Item {
-
+    
     public YearbookItem() {
         super(new Properties().group(MoeItems.CreativeTab.INSTANCE));
     }
-
+    
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getHeldItem(hand);
@@ -33,7 +33,7 @@ public class YearbookItem extends Item {
         if (it.hasNext()) { MoeMessages.send(player, new SOpenYearbook(hand, sim, it.next())); }
         return ActionResult.resultSuccess(stack);
     }
-
+    
     @Override
     public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
         if (!(entity instanceof AbstractNPCEntity) || entity.world.isRemote()) { return ActionResultType.PASS; }

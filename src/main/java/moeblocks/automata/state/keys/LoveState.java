@@ -12,49 +12,49 @@ import java.util.function.Function;
 
 public enum LoveState implements IStateEnum<AbstractNPCEntity> {
     INTIMATE((npc, list) -> {
-
+    
     }, (npc) -> npc.getLove(), 16, 20),
     CLOSE((npc, list) -> {
-
+    
     }, (npc) -> npc.getLove(), 12, 16),
     FRIENDLY((npc, list) -> {
-
+    
     }, (npc) -> npc.getLove(), 8, 12),
     ACQUAINTED((npc, list) -> {
-
+    
     }, (npc) -> npc.getLove(), 4, 8),
     ESTRANGED((npc, list) -> {
-
+    
     }, (npc) -> npc.getLove(), 0, 4);
-
+    
     private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
     private final Function<AbstractNPCEntity, Float> function;
     private final float start;
     private final float end;
-
+    
     LoveState(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
         this.generator = generator;
         this.function = function;
         this.start = start;
         this.end = end;
     }
-
+    
     @Override
     public IState getState(AbstractNPCEntity applicant) {
         return new ValueGoalState(this, this.generator, this.function, this.start, this.end);
     }
-
+    
     @Override
     public String toKey() {
         return this.name();
     }
-
+    
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
         if (key.isEmpty()) { return LoveState.ACQUAINTED; }
         return LoveState.valueOf(key);
     }
-
+    
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
         return LoveState.values();

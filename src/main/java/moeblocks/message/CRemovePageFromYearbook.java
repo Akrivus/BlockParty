@@ -14,28 +14,28 @@ import java.util.function.Supplier;
 
 public class CRemovePageFromYearbook {
     protected final UUID uuid;
-
+    
     public CRemovePageFromYearbook(PacketBuffer buffer) {
         this(buffer.readUniqueId());
     }
-
+    
     public CRemovePageFromYearbook(UUID uuid) {
         this.uuid = uuid;
     }
-
+    
     public static void encode(CRemovePageFromYearbook message, PacketBuffer buffer) {
         buffer.writeUniqueId(message.getUUID());
     }
-
+    
     public UUID getUUID() {
         return this.uuid;
     }
-
+    
     public static void handleContext(CRemovePageFromYearbook message, Supplier<NetworkEvent.Context> context) {
         context.get().enqueueWork(() -> handle(message, context.get(), context.get().getSender()));
         context.get().setPacketHandled(true);
     }
-
+    
     public static void handle(CRemovePageFromYearbook message, NetworkEvent.Context context, ServerPlayerEntity player) {
         DatingSim sim = DatingData.get(player.world, player.getUniqueID());
         ItemStack stack = new ItemStack(MoeItems.YEARBOOK_PAGE.get());

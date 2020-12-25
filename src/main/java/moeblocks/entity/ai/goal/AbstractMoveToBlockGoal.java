@@ -26,7 +26,7 @@ public abstract class AbstractMoveToBlockGoal<T extends AbstractNPCEntity> exten
     protected Path path;
     protected BlockPos pos;
     protected BlockState state;
-
+    
     public AbstractMoveToBlockGoal(T entity, int height, int radius) {
         this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE, Flag.JUMP));
         this.entity = entity;
@@ -34,7 +34,7 @@ public abstract class AbstractMoveToBlockGoal<T extends AbstractNPCEntity> exten
         this.height = height;
         this.width = radius;
     }
-
+    
     @Override
     public boolean shouldExecute() {
         if (!this.entity.isThreadSafe()) { return false; }
@@ -62,7 +62,7 @@ public abstract class AbstractMoveToBlockGoal<T extends AbstractNPCEntity> exten
         this.edges.clear();
         return this.path != null;
     }
-
+    
     private boolean setEdgePos(int x, int y, int z) {
         BlockPos pos = this.entity.getPosition().add(x, y, z);
         IChunk chunk = this.entity.getChunk(new ChunkPos(pos));
@@ -72,31 +72,33 @@ public abstract class AbstractMoveToBlockGoal<T extends AbstractNPCEntity> exten
         this.edges.add(pos);
         return state.isOpaqueCube(chunk, pos);
     }
-
+    
     @Override
     public boolean shouldContinueExecuting() {
         return this.entity.isThreadSafe() && --this.timeUntilReset > 0 && this.entity.hasPath();
     }
-
+    
     @Override
     public void startExecuting() {
         if (!this.entity.isThreadSafe()) { return; }
         this.entity.getLookController().setLookPosition(this.pos.getX(), this.pos.getY(), this.pos.getZ());
         this.entity.getNavigator().setPath(this.path, 1.0F);
     }
-
+    
     @Override
     public void resetTask() {
         this.entity.getNavigator().clearPath();
         this.path = null;
     }
-
+    
     @Override
     public void tick() {
-        if (this.entity.isThreadSafe() && this.entity.getPosition().withinDistance(this.pos, this.entity.getBlockStrikingDistance())) { this.onArrival(); }
+        if (this.entity.isThreadSafe() && this.entity.getPosition().withinDistance(this.pos, this.entity.getBlockStrikingDistance())) {
+            this.onArrival();
+        }
     }
-
+    
     public abstract void onArrival();
-
+    
     public abstract boolean canMoveTo(BlockPos pos, BlockState state);
 }

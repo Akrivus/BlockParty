@@ -12,11 +12,11 @@ public class MoeBlocks {
     protected static HashMap<Block, SoundEvent> STEP_SOUNDS = new HashMap<>();
     protected static HashMap<Block, Property<?>> PROPS = new HashMap<>();
     protected static HashMap<Block, Block> ALIASES = new HashMap<>();
-
+    
     public static ResourceLocation getNameOf(BlockState state) {
         return MoeBlocks.getNameOf(state, null);
     }
-
+    
     public static ResourceLocation getNameOf(BlockState state, String suffix) {
         Block block = state.getBlock();
         String key = MoeBlocks.get(block).getRegistryName().toString().replace(':', '/');
@@ -24,11 +24,11 @@ public class MoeBlocks {
         if (suffix != null) { key += String.format(".%s", suffix); }
         return new ResourceLocation(MoeMod.ID, String.format("textures/entity/moe/%s.png", key));
     }
-
+    
     public static Block get(Block block) {
         return ALIASES.getOrDefault(block, block);
     }
-
+    
     public static void registerAliases() {
         rename(Blocks.ACACIA_LOG, Blocks.ACACIA_WOOD);
         rename(Blocks.ACACIA_PLANKS, Blocks.ACACIA_FENCE, Blocks.ACACIA_FENCE_GATE, Blocks.ACACIA_SLAB, Blocks.ACACIA_STAIRS);
@@ -102,30 +102,30 @@ public class MoeBlocks {
         rename(Blocks.WHITE_STAINED_GLASS, Blocks.WHITE_STAINED_GLASS_PANE);
         rename(Blocks.YELLOW_STAINED_GLASS, Blocks.YELLOW_STAINED_GLASS_PANE);
     }
-
+    
     public static void rename(Block main, Block... aliases) {
         for (Block alias : aliases) {
             ALIASES.put(alias, main);
         }
     }
-
+    
     public static void registerPropertyOverrides() {
         registerProperty(Blocks.CAKE, CakeBlock.BITES);
         registerProperty(Blocks.NOTE_BLOCK, NoteBlock.NOTE);
     }
-
+    
     public static void registerProperty(Block block, Property<?> property) {
         PROPS.put(block, property);
     }
-
+    
     public static void registerStepSounds() {
         registerStepSound(Blocks.BELL, MoeSounds.MOE_ENTITY_BELL_STEP.get());
     }
-
+    
     private static void registerStepSound(Block block, SoundEvent sound) {
         STEP_SOUNDS.put(block, sound);
     }
-
+    
     public static SoundEvent getStepSound(BlockState block) {
         return STEP_SOUNDS.getOrDefault(block.getBlock(), block.getSoundType().getStepSound());
     }

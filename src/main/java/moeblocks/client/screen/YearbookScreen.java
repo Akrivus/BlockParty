@@ -43,7 +43,7 @@ public class YearbookScreen extends Screen {
     private Button buttonRemovePage;
     private String name;
     private AbstractNPCEntity entity;
-
+    
     public YearbookScreen(DatingSim sim, UUID uuid) {
         super(NarratorChatListener.EMPTY);
         this.sim = sim;
@@ -51,7 +51,7 @@ public class YearbookScreen extends Screen {
         this.index = this.pages.indexOf(uuid);
         if (this.index < 0) { this.index = 0; }
     }
-
+    
     @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(stack);
@@ -69,32 +69,44 @@ public class YearbookScreen extends Screen {
         super.render(stack, mouseX, mouseY, partialTicks);
         this.renderTooltips(stack, mouseX, mouseY);
     }
-
+    
     public void renderTooltips(MatrixStack stack, int mouseX, int mouseY) {
         List<ITextComponent> text = new ArrayList<>();
-        if (this.buttonRemovePage.isHovered()) { text.add(new TranslationTextComponent("gui.moeblocks.button.remove")); }
-        if (102 < mouseY && mouseY < 112) {
-            if (this.width / 2 - 50 < mouseX && mouseX < this.width / 2 - 24) { text.add(new TranslationTextComponent("gui.moeblocks.label.health")); }
-            if (this.width / 2 - 24 < mouseX && mouseX < this.width / 2 + -2) { text.add(new TranslationTextComponent("gui.moeblocks.label.foodLevel")); }
-            if (this.width / 2 + -2 < mouseX && mouseX < this.width / 2 + 24) { text.add(new TranslationTextComponent("gui.moeblocks.label.love")); }
-            if (this.width / 2 + 24 < mouseX && mouseX < this.width / 2 + 50) { text.add(new TranslationTextComponent("gui.moeblocks.label.stress")); }
+        if (this.buttonRemovePage.isHovered()) {
+            text.add(new TranslationTextComponent("gui.moeblocks.button.remove"));
         }
-        if (text.size() > 0) { this.renderTooltip(stack, Lists.transform(text, ITextComponent::func_241878_f), mouseX, mouseY); }
+        if (102 < mouseY && mouseY < 112) {
+            if (this.width / 2 - 50 < mouseX && mouseX < this.width / 2 - 24) {
+                text.add(new TranslationTextComponent("gui.moeblocks.label.health"));
+            }
+            if (this.width / 2 - 24 < mouseX && mouseX < this.width / 2 + -2) {
+                text.add(new TranslationTextComponent("gui.moeblocks.label.foodLevel"));
+            }
+            if (this.width / 2 + -2 < mouseX && mouseX < this.width / 2 + 24) {
+                text.add(new TranslationTextComponent("gui.moeblocks.label.love"));
+            }
+            if (this.width / 2 + 24 < mouseX && mouseX < this.width / 2 + 50) {
+                text.add(new TranslationTextComponent("gui.moeblocks.label.stress"));
+            }
+        }
+        if (text.size() > 0) {
+            this.renderTooltip(stack, Lists.transform(text, ITextComponent::func_241878_f), mouseX, mouseY);
+        }
     }
-
+    
     public void renderPortrait(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(YEARBOOK_TEXTURES);
         this.blit(stack, (this.width - 60) / 2 + 3, 27, 161, 25, 58, 58);
     }
-
+    
     public void renderOverlay(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(YEARBOOK_TEXTURES);
         if (this.npc.isDead()) { this.blit(stack, (this.width - 60) / 2 + 2, 26, 160, 155, 60, 60); }
         if (this.npc.isEstranged()) { this.blit(stack, (this.width - 60) / 2 + 2, 26, 160, 95, 60, 60); }
     }
-
+    
     public void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
         if (entity == null) { return; }
         RenderSystem.pushMatrix();
@@ -112,33 +124,33 @@ public class YearbookScreen extends Screen {
         renderer.setRenderShadow(true);
         RenderSystem.popMatrix();
     }
-
+    
     public void renderBook(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(YEARBOOK_TEXTURES);
         this.blit(stack, (this.width - 146) / 2, 2, 0, 0, 146, 187);
     }
-
+    
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (super.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
         } else {
             switch (keyCode) {
-            case GLFW.GLFW_KEY_LEFT:
-            case GLFW.GLFW_KEY_A:
-                this.buttonPreviousPage.onPress();
-                return true;
-            case GLFW.GLFW_KEY_RIGHT:
-            case GLFW.GLFW_KEY_D:
-                this.buttonNextPage.onPress();
-                return true;
-            default:
-                return false;
+                case GLFW.GLFW_KEY_LEFT:
+                case GLFW.GLFW_KEY_A:
+                    this.buttonPreviousPage.onPress();
+                    return true;
+                case GLFW.GLFW_KEY_RIGHT:
+                case GLFW.GLFW_KEY_D:
+                    this.buttonNextPage.onPress();
+                    return true;
+                default:
+                    return false;
             }
         }
     }
-
+    
     @Override
     protected void init() {
         this.addButton(new Button(this.width / 2 - 68, 196, 136, 20, DialogTexts.GUI_DONE, (button) -> this.minecraft.displayGuiScreen(null)));
@@ -156,7 +168,7 @@ public class YearbookScreen extends Screen {
         }));
         this.updateButtons();
     }
-
+    
     private void updateButtons() {
         if (this.sim.isNPCsEmpty()) {
             this.minecraft.player.sendStatusMessage(new TranslationTextComponent("gui.moeblocks.error.yearbook"), true);
@@ -180,5 +192,4 @@ public class YearbookScreen extends Screen {
             this.buttonRemovePage.visible = this.npc.isDead();
         }
     }
-
 }

@@ -6,7 +6,7 @@ import net.minecraft.item.Item;
 
 public class BentoBoxItem extends Item {
     private static final Food FOOD = new Food.Builder().hunger(11).saturation(1.9F).build();
-
+    
     public BentoBoxItem() {
         super(new Properties().group(MoeItems.CreativeTab.INSTANCE).food(FOOD));
     }

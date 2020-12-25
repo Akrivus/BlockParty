@@ -33,13 +33,13 @@ public enum VoiceLines {
     SNOOTY(MoeSounds.MOE_ENTITY_SNOOTY),
     YAWN(MoeSounds.MOE_ENTITY_YAWN),
     YES(MoeSounds.MOE_ENTITY_YES);
-
+    
     private final RegistryObject<SoundEvent> girl;
-
+    
     VoiceLines(RegistryObject<SoundEvent> girl) {
         this.girl = girl;
     }
-
+    
     public SoundEvent get(AbstractNPCEntity entity) {
         return this.girl.get();
     }

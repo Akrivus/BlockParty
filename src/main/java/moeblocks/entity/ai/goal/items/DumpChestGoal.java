@@ -10,17 +10,17 @@ import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.util.math.BlockPos;
 
 public class DumpChestGoal extends AbstractMoveToBlockGoal<MoeEntity> {
-
+    
     public DumpChestGoal(MoeEntity entity) {
         super(entity, 3, 8);
         this.timeUntilNextMove = 12000;
     }
-
+    
     @Override
     public int getPriority() {
         return 0x8;
     }
-
+    
     @Override
     public void onArrival() {
         if (!this.canMoveTo(this.pos, this.state)) { return; }
@@ -41,7 +41,7 @@ public class DumpChestGoal extends AbstractMoveToBlockGoal<MoeEntity> {
             }
         }
     }
-
+    
     @Override
     public boolean canMoveTo(BlockPos pos, BlockState state) {
         IInventory inv = HopperTileEntity.getInventoryAtPosition(this.world, pos);

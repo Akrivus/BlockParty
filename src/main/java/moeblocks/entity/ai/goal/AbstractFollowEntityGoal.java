@@ -13,14 +13,14 @@ public abstract class AbstractFollowEntityGoal<E extends AbstractNPCEntity, T ex
     protected final double speed;
     protected T target;
     protected int timeUntilReset;
-
+    
     public AbstractFollowEntityGoal(E entity, Class<T> type, double speed) {
         this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE, Flag.JUMP));
         this.entity = entity;
         this.type = type;
         this.speed = speed;
     }
-
+    
     @Override
     public boolean shouldExecute() {
         T target = this.getTarget();
@@ -30,12 +30,12 @@ public abstract class AbstractFollowEntityGoal<E extends AbstractNPCEntity, T ex
         }
         return false;
     }
-
+    
     @Override
     public boolean shouldContinueExecuting() {
         return this.entity.hasPath() && this.entity.canBeTarget(this.target) && this.entity.getDistance(this.target) > this.getStrikeZone(this.target);
     }
-
+    
     @Override
     public void startExecuting() {
         if (this.entity.getNavigator().tryMoveToEntityLiving(this.target, this.speed)) {
@@ -43,13 +43,13 @@ public abstract class AbstractFollowEntityGoal<E extends AbstractNPCEntity, T ex
             this.onFollow();
         }
     }
-
+    
     @Override
     public void resetTask() {
         this.entity.getNavigator().clearPath();
         this.target = null;
     }
-
+    
     @Override
     public void tick() {
         this.entity.canSee(this.target);
@@ -58,16 +58,16 @@ public abstract class AbstractFollowEntityGoal<E extends AbstractNPCEntity, T ex
             this.onArrival();
         }
     }
-
+    
     public abstract void onArrival();
-
+    
     public abstract void onFollow();
-
+    
     public abstract float getStrikeZone(T target);
-
+    
     public abstract T getTarget();
-
+    
     public abstract boolean canFollow(T target);
-
+    
     public abstract float getSafeZone(T target);
 }

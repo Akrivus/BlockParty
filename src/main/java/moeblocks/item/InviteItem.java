@@ -20,11 +20,11 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class InviteItem extends Item {
-
+    
     public InviteItem() {
         super(new Properties().group(MoeItems.CreativeTab.INSTANCE));
     }
-
+    
     @Override
     public ActionResultType onItemUse(ItemUseContext context) {
         ItemStack stack = context.getItem();
@@ -36,7 +36,7 @@ public class InviteItem extends Item {
         stack.setTag(tag);
         return ActionResultType.SUCCESS;
     }
-
+    
     @Override
     public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
         if (!LetterItem.isOpen(stack) && entity instanceof AbstractNPCEntity) {
@@ -47,7 +47,7 @@ public class InviteItem extends Item {
         }
         return ActionResultType.PASS;
     }
-
+    
     @Override
     public void addInformation(ItemStack stack, World world, List<ITextComponent> list, ITooltipFlag flag) {
         TranslationTextComponent component;

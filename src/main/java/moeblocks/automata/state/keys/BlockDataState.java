@@ -14,37 +14,37 @@ import java.util.function.BiConsumer;
 
 public enum BlockDataState implements IStateEnum<MoeEntity> {
     DEFAULT((moe, list) -> {
-
+    
     });
-
+    
     private final BiConsumer<MoeEntity, List<IStateGoal>> generator;
     private final List<Block> blocks;
-
+    
     BlockDataState(BiConsumer<MoeEntity, List<IStateGoal>> generator, ITag.INamedTag<Block> tag) {
         this(generator, tag.getAllElements().toArray(new Block[0]));
     }
-
+    
     BlockDataState(BiConsumer<MoeEntity, List<IStateGoal>> generator, Block... blocks) {
         this.generator = generator;
         this.blocks = Arrays.asList(blocks);
     }
-
+    
     @Override
     public IState getState(MoeEntity applicant) {
         return new BlockGoalState(this, this.generator, this.blocks);
     }
-
+    
     @Override
     public String toKey() {
         return this.name();
     }
-
+    
     @Override
     public IStateEnum<MoeEntity> fromKey(String key) {
         if (key.isEmpty()) { return BlockDataState.DEFAULT; }
         return BlockDataState.valueOf(key);
     }
-
+    
     @Override
     public IStateEnum<MoeEntity>[] getKeys() {
         return BlockDataState.values();

@@ -15,14 +15,14 @@ public abstract class AbstractMoveToEntityGoal<E extends AbstractNPCEntity, T ex
     protected final double speed;
     protected T target;
     protected int timeUntilReset;
-
+    
     public AbstractMoveToEntityGoal(E entity, Class<T> type, double speed) {
         this.setMutexFlags(EnumSet.of(Flag.LOOK, Flag.MOVE, Flag.JUMP));
         this.entity = entity;
         this.type = type;
         this.speed = speed;
     }
-
+    
     @Override
     public boolean shouldExecute() {
         List<T> targets = this.entity.world.getLoadedEntitiesWithinAABB(this.type, this.entity.getBoundingBox().grow(8.0D, 2.0D, 8.0D));
@@ -35,22 +35,22 @@ public abstract class AbstractMoveToEntityGoal<E extends AbstractNPCEntity, T ex
         }
         return false;
     }
-
+    
     @Override
     public boolean shouldContinueExecuting() {
         return --this.timeUntilReset > 0 && this.entity.canBeTarget(this.target);
     }
-
+    
     @Override
     public void startExecuting() {
         if (this.entity.getNavigator().tryMoveToEntityLiving(this.target, this.speed)) { this.timeUntilReset = 200; }
     }
-
+    
     @Override
     public void resetTask() {
         this.entity.getNavigator().clearPath();
     }
-
+    
     @Override
     public void tick() {
         if (this.entity.canSee(this.target) && this.entity.getDistance(this.target) < this.getStrikeZone(this.target)) {
@@ -58,12 +58,12 @@ public abstract class AbstractMoveToEntityGoal<E extends AbstractNPCEntity, T ex
             this.onArrival();
         }
     }
-
+    
     public abstract void onArrival();
-
+    
     public abstract float getStrikeZone(T target);
-
+    
     public abstract float getSafeZone(T target);
-
+    
     public abstract boolean canMoveTo(T target);
 }

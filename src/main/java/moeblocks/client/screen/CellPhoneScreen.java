@@ -24,19 +24,19 @@ public class CellPhoneScreen extends Screen {
     protected int selectedStart;
     protected Button scrollUp;
     protected Button scrollDown;
-
+    
     public CellPhoneScreen(DatingSim sim) {
         super(NarratorChatListener.EMPTY);
         sim.characters.forEach((uuid, npc) -> this.contacts.add(new PhoneContactButton(this, npc, this.contacts.size())));
     }
-
+    
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         if (delta > 0) { this.scrollUp.onPress(); }
         if (delta < 0) { this.scrollDown.onPress(); }
         return delta != 0;
     }
-
+    
     @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(stack);
@@ -44,24 +44,24 @@ public class CellPhoneScreen extends Screen {
         this.renderScrollBar(stack);
         super.render(stack, mouseX, mouseY, partialTicks);
     }
-
+    
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (super.keyPressed(keyCode, scanCode, modifiers)) { return true; }
         switch (keyCode) {
-        case GLFW.GLFW_KEY_UP:
-        case GLFW.GLFW_KEY_W:
-            this.scrollUp.onPress();
-            return true;
-        case GLFW.GLFW_KEY_DOWN:
-        case GLFW.GLFW_KEY_S:
-            this.scrollDown.onPress();
-            return true;
-        default:
-            return false;
+            case GLFW.GLFW_KEY_UP:
+            case GLFW.GLFW_KEY_W:
+                this.scrollUp.onPress();
+                return true;
+            case GLFW.GLFW_KEY_DOWN:
+            case GLFW.GLFW_KEY_S:
+                this.scrollDown.onPress();
+                return true;
+            default:
+                return false;
         }
     }
-
+    
     @Override
     protected void init() {
         this.addButton(new Button(this.width / 2 - 54, 190, 108, 20, DialogTexts.GUI_DONE, (button) -> this.closeScreen()));
@@ -69,7 +69,7 @@ public class CellPhoneScreen extends Screen {
         this.scrollDown = this.addButton(new PhoneScrollButton(this, this.width / 2 + 37, 91, 1));
         this.updateButtons();
     }
-
+    
     private void updateButtons() {
         if (this.contacts.isEmpty()) {
             this.minecraft.player.sendStatusMessage(new TranslationTextComponent("gui.moeblocks.error.cell_phone"), true);
@@ -84,24 +84,24 @@ public class CellPhoneScreen extends Screen {
             }
         }
     }
-
+    
     public void renderPhone(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
         this.blit(stack, (this.width - 108) / 2, 2, 0, 0, 108, 182);
     }
-
+    
     public void renderScrollBar(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
         int y = (int) (Math.min((double) this.selectedStart / (this.contacts.size() - this.contacts.size() % 4), 1.0) * 35);
         this.blit(stack, this.width / 2 + 37, 40 + y, 108, 82, 7, 15);
     }
-
+    
     public boolean isSelected(int index) {
         return this.selectedIndex == index;
     }
-
+    
     public void setScroll(int delta, boolean select) {
         this.selectedStart += 4 * delta;
         int range = this.contacts.size() - 1;
@@ -110,7 +110,7 @@ public class CellPhoneScreen extends Screen {
         if (select) { this.setSelected(this.selectedStart); }
         this.updateButtons();
     }
-
+    
     public void setSelected(int index) {
         if (index < 0) { index = this.contacts.size() + index; }
         this.selectedIndex = this.contacts.isEmpty() ? 0 : index % this.contacts.size();

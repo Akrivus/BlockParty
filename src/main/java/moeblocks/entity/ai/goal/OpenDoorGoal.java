@@ -16,11 +16,11 @@ public class OpenDoorGoal extends Goal {
     private float x;
     private float z;
     private int timeUntilClosed;
-
+    
     public OpenDoorGoal(AbstractNPCEntity entity) {
         this.entity = entity;
     }
-
+    
     @Override
     public boolean shouldExecute() {
         Path path = this.entity.getNavigator().getPath();
@@ -31,12 +31,12 @@ public class OpenDoorGoal extends Goal {
         }
         return false;
     }
-
+    
     @Override
     public boolean shouldContinueExecuting() {
         return !this.hasStoppedDoorInteraction && --this.timeUntilClosed > 0;
     }
-
+    
     @Override
     public void startExecuting() {
         this.hasStoppedDoorInteraction = false;
@@ -45,7 +45,7 @@ public class OpenDoorGoal extends Goal {
         this.timeUntilClosed = 20;
         this.setDoorState(true);
     }
-
+    
     protected void setDoorState(boolean open) {
         BlockState state = this.entity.world.getBlockState(this.pos);
         Block block = state.getBlock();
@@ -62,12 +62,12 @@ public class OpenDoorGoal extends Goal {
             this.entity.world.playEvent(null, open ? 1007 : 1013, this.pos, 0);
         }
     }
-
+    
     @Override
     public void resetTask() {
         this.setDoorState(false);
     }
-
+    
     @Override
     public void tick() {
         float dX = (float) ((this.pos.getX() + 0.5F) - this.entity.getPosX());
@@ -75,7 +75,7 @@ public class OpenDoorGoal extends Goal {
         float dD = this.x * dX + this.z * dZ;
         this.hasStoppedDoorInteraction |= dD < 0.0F;
     }
-
+    
     public static boolean canOpenDoor(World world, BlockPos pos) {
         return world.getBlockState(pos).isIn(MoeTags.DOORS);
     }

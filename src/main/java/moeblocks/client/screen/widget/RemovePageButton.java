@@ -17,12 +17,12 @@ public class RemovePageButton extends Button {
     public RemovePageButton(int x, int y, IPressable button) {
         super(x, y, 18, 18, StringTextComponent.EMPTY, button);
     }
-
+    
     @Override
     public void playDownSound(SoundHandler sound) {
         sound.play(SimpleSound.master(MoeSounds.YEARBOOK_REMOVE_PAGE.get(), 1.0F));
     }
-
+    
     @Override
     public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);

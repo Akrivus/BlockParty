@@ -6,10 +6,9 @@ import moeblocks.entity.AbstractNPCEntity;
 
 public abstract class AnimationState implements IState<AbstractNPCEntity> {
     public abstract void setRotationAngles(IRiggableModel model, AbstractNPCEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks);
-
+    
     @Override
     public boolean canClear(AbstractNPCEntity applicant) {
-        if (this.canApply(applicant)) { return false; }
-        return true;
+        return !this.canApply(applicant);
     }
 }

@@ -15,45 +15,49 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
     private boolean hasNoDefault = true;
     private boolean isServerOnly = true;
     private int timeUntilCheck;
-
+    
     public Automaton(E applicant, O natural) {
         this(applicant, natural, 1000);
     }
-
+    
     public Automaton(E applicant, O natural, int timeout) {
         this.applicant = applicant;
         this.natural = natural;
         this.timeout = timeout;
     }
-
+    
     public Automaton setCanUpdate(boolean updatable) {
         this.canUpdate = updatable;
         return this;
     }
-
+    
     public Automaton setCanRunOnClient() {
         this.isServerOnly = false;
         return this;
     }
-
+    
     public Automaton setHasDefault() {
         this.hasNoDefault = false;
         return this;
     }
-
+    
     public Automaton start() {
         this.state = this.natural.getState(this.applicant);
         this.key = this.natural;
         return this;
     }
-
+    
     public boolean update() {
         if (this.isBlocked() && --this.timeUntilCheck > 0) { return false; }
         if (this.state.canClear(this.applicant)) { return this.setNextState(); }
         if (this.canUpdate) { this.state.tick(this.applicant); }
         return this.canUpdate;
     }
-
+    
+    public boolean setNextState() {
+        return this.setNextState(this.getNatural(), this.timeout);
+    }
+    
     public boolean setNextState(O key, int timeUntilCheck) {
         IState state = key.getState(this.applicant);
         if (state.canApply(this.applicant)) {
@@ -66,19 +70,7 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
         }
         return false;
     }
-
-    public boolean setNextState(O key) {
-        return this.setNextState(key, this.timeout);
-    }
-
-    public boolean setNextState() {
-        return this.setNextState(this.getNatural(), this.timeout);
-    }
-
-    public boolean isNatural() {
-        return this.key.equals(this.natural);
-    }
-
+    
     public O getNatural() {
         if (!this.hasNoDefault) { return this.natural; }
         for (IStateEnum key : this.natural.getKeys()) {
@@ -86,26 +78,36 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
         }
         return this.natural;
     }
-
+    
+    private boolean isBlocked() {
+        return this.applicant.isRemote() && this.isServerOnly;
+    }
+    
+    public boolean setNextState(O key) {
+        return this.setNextState(key, this.timeout);
+    }
+    
+    public boolean isNatural() {
+        return this.key.equals(this.natural);
+    }
+    
     public O getKey() {
         return this.key;
     }
-
+    
     public void fromKey(String key) {
         this.key = (O) this.key.fromKey(key);
         this.state = this.key.getState(this.applicant);
         this.state.apply(this.applicant);
     }
-
+    
     public void render(MatrixStack stack, float partialTickTime) {
         this.state.render(this.applicant, stack, partialTickTime);
     }
-
+    
     public void setRotationAngles(IRiggableModel model, float limbSwing, float limbSwingAmount, float ageInTicks) {
-        if (this.state instanceof AnimationState) { ((AnimationState)(this.state)).setRotationAngles(model, this.applicant, limbSwing, limbSwingAmount, ageInTicks); }
-    }
-
-    private boolean isBlocked() {
-        return this.applicant.isRemote() && this.isServerOnly;
+        if (this.state instanceof AnimationState) {
+            ((AnimationState) (this.state)).setRotationAngles(model, this.applicant, limbSwing, limbSwingAmount, ageInTicks);
+        }
     }
 }

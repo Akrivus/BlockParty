@@ -12,29 +12,29 @@ import java.util.function.Supplier;
 
 public class CPhoneTeleportMoe {
     protected final UUID uuid;
-
+    
     public CPhoneTeleportMoe(PacketBuffer buffer) {
         this(buffer.readUniqueId());
     }
-
+    
     public CPhoneTeleportMoe(UUID uuid) {
         this.uuid = uuid;
         Minecraft.getInstance().player.playSound(MoeSounds.CELL_PHONE_RING.get(), 1.0F, 1.0F);
     }
-
+    
     public static void encode(CPhoneTeleportMoe message, PacketBuffer buffer) {
         buffer.writeUniqueId(message.getUUID());
     }
-
+    
     public UUID getUUID() {
         return this.uuid;
     }
-
+    
     public static void handleContext(CPhoneTeleportMoe message, Supplier<NetworkEvent.Context> context) {
         context.get().enqueueWork(() -> handle(message, context.get(), context.get().getSender()));
         context.get().setPacketHandled(true);
     }
-
+    
     public static void handle(CPhoneTeleportMoe message, NetworkEvent.Context context, ServerPlayerEntity player) {
         AbstractNPCEntity character = AbstractNPCEntity.getEntityFromUUID(AbstractNPCEntity.class, player.getServerWorld(), message.getUUID());
         if (character != null) {

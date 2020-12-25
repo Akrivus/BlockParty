@@ -12,11 +12,11 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public class MoeSpawnItem extends Item {
-
+    
     public MoeSpawnItem() {
         super(new Properties().group(MoeItems.CreativeTab.INSTANCE));
     }
-
+    
     @Override
     public ActionResultType onItemUse(ItemUseContext context) {
         World world = context.getWorld();

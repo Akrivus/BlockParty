@@ -25,23 +25,23 @@ public class MoeItems {
     public static final RegistryObject<Item> PINK_BOW = REGISTRY.register("pink_bow", PinkBowItem::new);
     public static final RegistryObject<Item> YEARBOOK_PAGE = REGISTRY.register("yearbook_page", YearbookPageItem::new);
     public static final RegistryObject<Item> YEARBOOK = REGISTRY.register("yearbook", YearbookItem::new);
-
+    
     public static void registerDispenserBehaviors() {
         DispenserBlock.registerDispenseBehavior(MoeItems.MOE_DIE.get(), MoeDieItem.DISPENSER_BEHAVIOR);
     }
-
+    
     public static void registerOverrides() {
         ItemModelsProperties.registerProperty(MoeItems.INVITE.get(), LetterItem.CLOSED_PROPERTY, LetterItem.CLOSED_PROPERTY_GETTER);
         ItemModelsProperties.registerProperty(MoeItems.LETTER.get(), LetterItem.CLOSED_PROPERTY, LetterItem.CLOSED_PROPERTY_GETTER);
     }
-
+    
     public static class CreativeTab extends ItemGroup {
         public static final CreativeTab INSTANCE = new CreativeTab();
-
+        
         public CreativeTab() {
             super(MoeMod.ID);
         }
-
+        
         @Override
         public ItemStack createIcon() {
             return new ItemStack(MoeItems.MOE_DIE.get());

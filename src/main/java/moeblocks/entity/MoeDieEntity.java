@@ -16,44 +16,46 @@ public class MoeDieEntity extends AbstractDieEntity {
     private BlockState blockStateForSpawn;
     private Dere dere;
     private int timeUntilSpawned;
-
+    
     public MoeDieEntity(EntityType<MoeDieEntity> type, World world) {
         super(type, world);
     }
-
+    
     public MoeDieEntity(World world, double x, double y, double z) {
         super(MoeEntities.MOE_DIE.get(), world, x, y, z);
     }
-
+    
     public MoeDieEntity(World world, LivingEntity thrower) {
         super(MoeEntities.MOE_DIE.get(), world, thrower);
     }
-
+    
     @Override
     public void writeAdditional(CompoundNBT compound) {
         super.writeAdditional(compound);
         compound.putInt("TimeUntilSpawned", this.timeUntilSpawned);
     }
-
+    
     @Override
     public void readAdditional(CompoundNBT compound) {
         super.readAdditional(compound);
         this.timeUntilSpawned = compound.getInt("TimeUntilSpawned");
     }
-
+    
     @Override
     public boolean onActionTick() {
         if (--this.timeUntilSpawned > 0) { return false; }
-        if (this.world.getBlockState(this.getPositionUnderneath()).equals(this.blockStateForSpawn)) { return MoeEntity.spawn(this.world, this.getPositionUnderneath(), this.getPosition(), this.rotationYaw, this.rotationPitch, this.dere, this.getPlayer()); }
+        if (this.world.getBlockState(this.getPositionUnderneath()).equals(this.blockStateForSpawn)) {
+            return MoeEntity.spawn(this.world, this.getPositionUnderneath(), this.getPosition(), this.rotationYaw, this.rotationPitch, this.dere, this.getPlayer());
+        }
         this.entityDropItem(this.getDefaultItem());
         return true;
     }
-
+    
     @Override
     protected Item getDefaultItem() {
         return MoeItems.MOE_DIE.get();
     }
-
+    
     @Override
     public boolean onActionStart(BlockState state, BlockPos pos, int face) {
         if (!state.getBlock().isIn(MoeTags.MOEABLES)) { return false; }

@@ -11,12 +11,12 @@ import java.util.EnumSet;
 public class WanderGoal extends Goal {
     private final AbstractNPCEntity entity;
     private Vector3d pos;
-
+    
     public WanderGoal(AbstractNPCEntity entity) {
         this.setMutexFlags(EnumSet.of(Flag.MOVE));
         this.entity = entity;
     }
-
+    
     @Override
     public boolean shouldExecute() {
         if (this.entity.ticksExisted % (this.entity.world.rand.nextInt(9) * 20 + 20) != 0) { return false; }
@@ -24,12 +24,12 @@ public class WanderGoal extends Goal {
         this.pos = RandomPositionGenerator.findRandomTarget(this.entity, (int) this.entity.getHomeDistance(), 7);
         return this.pos != null && this.entity.isWithinHomeDistanceFromPosition(new BlockPos(this.pos));
     }
-
+    
     @Override
     public boolean shouldContinueExecuting() {
         return this.entity.hasPath();
     }
-
+    
     @Override
     public void startExecuting() {
         this.entity.getNavigator().tryMoveToXYZ(this.pos.getX(), this.pos.getY(), this.pos.getZ(), 0.6F);
