@@ -296,6 +296,78 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.dataManager.set(FAMILY_NAME, name);
     }
     
+    public float getFoodLevel() {
+        return this.dataManager.get(FOOD_LEVEL);
+    }
+    
+    public void setFoodLevel(float foodLevel) {
+        this.dataManager.set(FOOD_LEVEL, Math.max(0.0F, Math.min(foodLevel, 20.0F)));
+        this.sync();
+    }
+    
+    public float getLove() {
+        return this.dataManager.get(LOVE);
+    }
+    
+    public void setLove(float love) {
+        this.dataManager.set(LOVE, Math.max(0.0F, Math.min(love, 20.0F)));
+        this.sync();
+    }
+    
+    public float getExhaustion() {
+        return this.dataManager.get(EXHAUSTION);
+    }
+    
+    public void setExhaustion(float exhaustion) {
+        this.dataManager.set(EXHAUSTION, Math.max(0.0F, Math.min(exhaustion, 20.0F)));
+        this.sync();
+    }
+    
+    public float getSaturation() {
+        return this.dataManager.get(SATURATION);
+    }
+    
+    public void setSaturation(float saturation) {
+        this.dataManager.set(SATURATION, Math.max(0.0F, Math.min(saturation, 20.0F)));
+        this.sync();
+    }
+    
+    public float getAffection() {
+        return this.dataManager.get(AFFECTION);
+    }
+    
+    public void setAffection(float affection) {
+        this.dataManager.set(AFFECTION, Math.max(0.0F, Math.min(affection, 20.0F)));
+        this.sync();
+    }
+    
+    public float getRelaxation() {
+        return this.dataManager.get(RELAXATION);
+    }
+    
+    public void setRelaxation(float relaxation) {
+        this.dataManager.set(RELAXATION, Math.max(0.0F, Math.min(relaxation, 20.0F)));
+        this.sync();
+    }
+    
+    public float getProgress() {
+        return this.dataManager.get(PROGRESS);
+    }
+    
+    public void setProgress(float progress) {
+        this.dataManager.set(PROGRESS, progress);
+        this.sync();
+    }
+    
+    public float getStress() {
+        return this.dataManager.get(STRESS);
+    }
+    
+    public void setStress(float stress) {
+        this.dataManager.set(STRESS, Math.max(Math.min(stress, 20.0F), 0.0F));
+        this.sync();
+    }
+    
     @Override
     public void readAdditional(CompoundNBT compound) {
         if (compound.hasUniqueId("Protagonist")) { this.setProtagonist(compound.getUniqueId("Protagonist")); }
@@ -309,25 +381,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.timeUntilHungry = compound.getInt("TimeUntilHungry");
         this.timeUntilLove = compound.getInt("TimeUntilLove");
         this.readCharacter(compound);
-    }
-    
-    public void readCharacter(CompoundNBT compound) {
-        this.states.forEach((state, automaton) -> automaton.fromKey(compound.getString(state.getSimpleName())));
-        this.setBloodType(BloodType.valueOf(compound.getString("BloodType")));
-        this.setDere(Dere.valueOf(compound.getString("Dere")));
-        this.setEmotion(Emotion.valueOf(compound.getString("Emotion")));
-        this.setFamilyName(compound.getString("FamilyName"));
-        this.setGivenName(compound.getString("GivenName"));
-        this.setHealth(compound.getFloat("Health"));
-        this.setFoodLevel(compound.getFloat("FoodLevel"));
-        this.setSaturation(compound.getFloat("Saturation"));
-        this.setExhaustion(compound.getFloat("Exhaustion"));
-        this.setLove(compound.getFloat("Love"));
-        this.setAffection(compound.getFloat("Affection"));
-        this.setProgress(compound.getFloat("Progress"));
-        this.setStress(compound.getFloat("Stress"));
-        this.setRelaxation(compound.getFloat("Relaxation"));
-        this.age = compound.getInt("Age");
     }
     
     @Override
@@ -469,6 +522,37 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.playSound(sound, this.getSoundVolume(), this.getSoundPitch());
     }
     
+    public boolean canBeTarget(Entity target) {
+        return target != null && target.isAlive() && !target.equals(this);
+    }
+    
+    public void sync() {
+        this.setCharacter((npc) -> npc.sync(this));
+    }
+    
+    public void setCharacter(Consumer<CacheNPC> transaction) {
+        if (this.isLocal() && this.hasProtagonist()) {
+            CacheNPC character = this.getDatingSim().getNPC(this.getUniqueID(), this);
+            character.set(DatingData.get(this.world), transaction);
+        }
+    }
+    
+    public boolean isLocal() {
+        return this.world instanceof ServerWorld;
+    }
+    
+    public DatingSim getDatingSim() {
+        return DatingData.get(this.world, this.getProtagonistUUID());
+    }
+    
+    public EquipmentSlotType getSlotForStack(ItemStack stack) {
+        EquipmentSlotType slot = MobEntity.getSlotForItemStack(stack);
+        if (stack.getItem().isIn(MoeTags.OFFHAND) || stack.isFood()) {
+            slot = EquipmentSlotType.OFFHAND;
+        }
+        return slot;
+    }
+    
     public void resetAnimationState() {
         this.setAnimation(Animation.DEFAULT);
     }
@@ -478,8 +562,12 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return item == Items.BOW || item == Items.CROSSBOW;
     }
     
-    public void setHomePosition(BlockPos pos) {
-        this.setHomePosAndDistance(pos, (int) this.getMaximumHomeDistance());
+    public boolean canConsume(ItemStack stack) {
+        return stack.isFood() && (this.isHungry() || stack.getItem().getFood().canEatWhenFull());
+    }
+    
+    public boolean isHungry() {
+        return this.getFoodLevel() < 19.0F;
     }
     
     public boolean hasProtagonist() {
@@ -488,6 +576,25 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     
     public UUID getProtagonistUUID() {
         return this.dataManager.get(PROTAGONIST).orElse(null);
+    }
+    
+    public void readCharacter(CompoundNBT compound) {
+        this.states.forEach((state, automaton) -> automaton.fromKey(compound.getString(state.getSimpleName())));
+        this.setBloodType(BloodType.valueOf(compound.getString("BloodType")));
+        this.setDere(Dere.valueOf(compound.getString("Dere")));
+        this.setEmotion(Emotion.valueOf(compound.getString("Emotion")));
+        this.setFamilyName(compound.getString("FamilyName"));
+        this.setGivenName(compound.getString("GivenName"));
+        this.setHealth(compound.getFloat("Health"));
+        this.setFoodLevel(compound.getFloat("FoodLevel"));
+        this.setSaturation(compound.getFloat("Saturation"));
+        this.setExhaustion(compound.getFloat("Exhaustion"));
+        this.setLove(compound.getFloat("Love"));
+        this.setAffection(compound.getFloat("Affection"));
+        this.setProgress(compound.getFloat("Progress"));
+        this.setStress(compound.getFloat("Stress"));
+        this.setRelaxation(compound.getFloat("Relaxation"));
+        this.age = compound.getInt("Age");
     }
     
     public BlockState getBlockToMine() {
@@ -525,10 +632,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
             return true;
         }
         return false;
-    }
-    
-    public boolean canBeTarget(Entity target) {
-        return target != null && target.isAlive() && !target.equals(this);
     }
     
     public boolean canWander() {
@@ -661,6 +764,14 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return BloodType.isCompatible(this.getBloodType(), entity.getBloodType());
     }
     
+    public BloodType getBloodType() {
+        return BloodType.valueOf(this.dataManager.get(BLOOD_TYPE));
+    }
+    
+    public void setBloodType(BloodType bloodType) {
+        this.dataManager.set(BLOOD_TYPE, bloodType.name());
+    }
+    
     public void say(String key, Object... params) {
         this.world.getPlayers().forEach((player) -> {
             if (player.getDistance(this) < 8.0D) { this.say(player, key, params); }
@@ -673,6 +784,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     
     public void setNextState(Class<? extends IStateEnum> key, IStateEnum state, int timeout) {
         this.addNextTickOp((entity) -> this.states.get(key).setNextState(state, timeout));
+    }
+    
+    public void addNextTickOp(Consumer<AbstractNPCEntity> op) {
+        this.nextTickOps.add(op);
     }
     
     public boolean tryEquipItem(ItemStack stack) {
@@ -696,14 +811,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
             return true;
         }
         return false;
-    }
-    
-    public EquipmentSlotType getSlotForStack(ItemStack stack) {
-        EquipmentSlotType slot = MobEntity.getSlotForItemStack(stack);
-        if (stack.getItem().isIn(MoeTags.OFFHAND) || stack.isFood()) {
-            slot = EquipmentSlotType.OFFHAND;
-        }
-        return slot;
     }
     
     public void updateHungerState() {
@@ -821,62 +928,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         return new CompoundNBT();
     }
     
-    public float getFoodLevel() {
-        return this.dataManager.get(FOOD_LEVEL);
-    }
-    
-    public void setFoodLevel(float foodLevel) {
-        this.dataManager.set(FOOD_LEVEL, Math.max(0.0F, Math.min(foodLevel, 20.0F)));
-        this.sync();
-    }
-    
     public String getFullName() {
         return String.format("%s %s", this.getFamilyName(), this.getGivenName());
-    }
-    
-    public float getLove() {
-        return this.dataManager.get(LOVE);
-    }
-    
-    public void setLove(float love) {
-        this.dataManager.set(LOVE, Math.max(0.0F, Math.min(love, 20.0F)));
-        this.sync();
-    }
-    
-    public float getExhaustion() {
-        return this.dataManager.get(EXHAUSTION);
-    }
-    
-    public void setExhaustion(float exhaustion) {
-        this.dataManager.set(EXHAUSTION, Math.max(0.0F, Math.min(exhaustion, 20.0F)));
-        this.sync();
-    }
-    
-    public float getSaturation() {
-        return this.dataManager.get(SATURATION);
-    }
-    
-    public void setSaturation(float saturation) {
-        this.dataManager.set(SATURATION, Math.max(0.0F, Math.min(saturation, 20.0F)));
-        this.sync();
-    }
-    
-    public float getAffection() {
-        return this.dataManager.get(AFFECTION);
-    }
-    
-    public void setAffection(float affection) {
-        this.dataManager.set(AFFECTION, Math.max(0.0F, Math.min(affection, 20.0F)));
-        this.sync();
-    }
-    
-    public float getRelaxation() {
-        return this.dataManager.get(RELAXATION);
-    }
-    
-    public void setRelaxation(float relaxation) {
-        this.dataManager.set(RELAXATION, Math.max(0.0F, Math.min(relaxation, 20.0F)));
-        this.sync();
     }
     
     public float getScale() {
@@ -897,24 +950,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
             default:
                 return StoryPhase.INTRODUCTION;
         }
-    }
-    
-    public float getProgress() {
-        return this.dataManager.get(PROGRESS);
-    }
-    
-    public void setProgress(float progress) {
-        this.dataManager.set(PROGRESS, progress);
-        this.sync();
-    }
-    
-    public float getStress() {
-        return this.dataManager.get(STRESS);
-    }
-    
-    public void setStress(float stress) {
-        this.dataManager.set(STRESS, Math.max(Math.min(stress, 20.0F), 0.0F));
-        this.sync();
     }
     
     public int getTimeSinceInteraction() {
@@ -961,6 +996,27 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     
     public boolean isNightWatch() {
         return this.world.getGameTime() / 24000 % 4 == this.getBloodType().ordinal();
+    }
+    
+    public void consume(ItemStack stack) {
+        if (this.canConsume(stack)) {
+            Food food = stack.getItem().getFood();
+            this.addSaturation(food.getSaturation());
+            this.addFoodLevel(food.getHealing());
+            food.getEffects().forEach(pair -> {
+                if (pair.getFirst() != null && this.world.rand.nextFloat() < pair.getSecond()) {
+                    this.addPotionEffect(pair.getFirst());
+                }
+            });
+        }
+    }
+    
+    public void addFoodLevel(float foodLevel) {
+        this.setFoodLevel(this.getFoodLevel() + foodLevel);
+    }
+    
+    public void addSaturation(float saturation) {
+        this.setSaturation(this.getSaturation() + saturation);
     }
     
     @Override
@@ -1036,14 +1092,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.dataManager.set(DERE, dere.name());
     }
     
-    public BloodType getBloodType() {
-        return BloodType.valueOf(this.dataManager.get(BLOOD_TYPE));
-    }
-    
-    public void setBloodType(BloodType bloodType) {
-        this.dataManager.set(BLOOD_TYPE, bloodType.name());
-    }
-    
     @Override
     public void onItemUseFinish() {
         this.consume(this.activeItemStack);
@@ -1058,45 +1106,16 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         super.startSleeping(pos);
     }
     
+    public void setHomePosition(BlockPos pos) {
+        this.setHomePosAndDistance(pos, (int) this.getMaximumHomeDistance());
+    }
+    
     public void addStress(float stress) {
         this.setStress(this.getStress() + stress);
     }
     
-    public void consume(ItemStack stack) {
-        if (this.canConsume(stack)) {
-            Food food = stack.getItem().getFood();
-            this.addSaturation(food.getSaturation());
-            this.addFoodLevel(food.getHealing());
-            food.getEffects().forEach(pair -> {
-                if (pair.getFirst() != null && this.world.rand.nextFloat() < pair.getSecond()) {
-                    this.addPotionEffect(pair.getFirst());
-                }
-            });
-        }
-    }
-    
-    public void addFoodLevel(float foodLevel) {
-        this.setFoodLevel(this.getFoodLevel() + foodLevel);
-    }
-    
-    public void addSaturation(float saturation) {
-        this.setSaturation(this.getSaturation() + saturation);
-    }
-    
-    public boolean canConsume(ItemStack stack) {
-        return stack.isFood() && (this.isHungry() || stack.getItem().getFood().canEatWhenFull());
-    }
-    
-    public boolean isHungry() {
-        return this.getFoodLevel() < 19.0F;
-    }
-    
     public void setNextState(Class<? extends IStateEnum> key, IStateEnum state) {
         this.addNextTickOp((entity) -> this.states.get(key).setNextState(state));
-    }
-    
-    public void addNextTickOp(Consumer<AbstractNPCEntity> op) {
-        this.nextTickOps.add(op);
     }
     
     public Animation getAnimation() {
@@ -1109,24 +1128,5 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     
     public void addExhaustion(float exhaustion) {
         this.setExhaustion(this.getExhaustion() + exhaustion);
-    }
-    
-    public void sync() {
-        this.setCharacter((npc) -> npc.sync(this));
-    }
-    
-    public void setCharacter(Consumer<CacheNPC> transaction) {
-        if (this.isLocal() && this.hasProtagonist()) {
-            CacheNPC character = this.getDatingSim().getNPC(this.getUniqueID(), this);
-            character.set(DatingData.get(this.world), transaction);
-        }
-    }
-    
-    public boolean isLocal() {
-        return this.world instanceof ServerWorld;
-    }
-    
-    public DatingSim getDatingSim() {
-        return DatingData.get(this.world, this.getProtagonistUUID());
     }
 }
