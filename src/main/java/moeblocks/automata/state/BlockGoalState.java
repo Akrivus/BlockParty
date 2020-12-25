@@ -1,7 +1,6 @@
 package moeblocks.automata.state;
 
 import moeblocks.automata.IStateGoal;
-import moeblocks.automata.state.PredicateGoalState;
 import moeblocks.automata.state.keys.BlockDataState;
 import moeblocks.entity.MoeEntity;
 import moeblocks.init.MoeTags;

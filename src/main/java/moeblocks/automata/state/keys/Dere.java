@@ -1,6 +1,5 @@
 package moeblocks.automata.state.keys;
 
-import moeblocks.automata.GoalState;
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
 import moeblocks.automata.IStateGoal;

@@ -2,7 +2,6 @@ package moeblocks.automata;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.entity.MoeEntity;
 
 public interface IState<E extends AbstractNPCEntity> {
     void apply(E applicant);

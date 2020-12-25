@@ -3,7 +3,9 @@ package moeblocks.automata.state.keys;
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
 import moeblocks.client.animation.AnimationState;
-import moeblocks.client.animation.state.*;
+import moeblocks.client.animation.state.AimBow;
+import moeblocks.client.animation.state.Default;
+import moeblocks.client.animation.state.HappyDance;
 import moeblocks.entity.AbstractNPCEntity;
 
 import java.util.function.Supplier;

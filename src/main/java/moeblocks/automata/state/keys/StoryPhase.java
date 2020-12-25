@@ -1,6 +1,8 @@
 package moeblocks.automata.state.keys;
 
-import moeblocks.automata.*;
+import moeblocks.automata.IState;
+import moeblocks.automata.IStateEnum;
+import moeblocks.automata.IStateGoal;
 import moeblocks.automata.state.ValueGoalState;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.util.Trans;

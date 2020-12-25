@@ -1,6 +1,5 @@
 package moeblocks.automata.state;
 
-import moeblocks.automata.GoalState;
 import moeblocks.automata.IStateEnum;
 import moeblocks.automata.IStateGoal;
 import moeblocks.entity.AbstractNPCEntity;

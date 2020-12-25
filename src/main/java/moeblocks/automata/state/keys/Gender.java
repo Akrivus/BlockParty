@@ -1,6 +1,5 @@
 package moeblocks.automata.state.keys;
 
-import moeblocks.automata.GoalState;
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
 import moeblocks.automata.IStateGoal;
@@ -9,7 +8,6 @@ import moeblocks.entity.AbstractNPCEntity;
 
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 
 public enum Gender implements IStateEnum<AbstractNPCEntity> {
     MASCULINE((npc, list) -> {

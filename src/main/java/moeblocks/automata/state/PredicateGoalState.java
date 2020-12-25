@@ -7,7 +7,6 @@ import moeblocks.entity.AbstractNPCEntity;
 
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class PredicateGoalState<O extends IStateEnum<E>, E extends AbstractNPCEntity> extends GoalState<O, E> {
