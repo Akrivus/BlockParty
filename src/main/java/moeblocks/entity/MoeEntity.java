@@ -1,9 +1,9 @@
 package moeblocks.entity;
 
 import moeblocks.automata.Automaton;
-import moeblocks.automata.state.BlockDataState;
-import moeblocks.automata.state.Dere;
-import moeblocks.automata.state.Gender;
+import moeblocks.automata.state.keys.BlockDataState;
+import moeblocks.automata.state.keys.Dere;
+import moeblocks.automata.state.keys.Gender;
 import moeblocks.init.MoeBlocks;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeTags;
@@ -121,7 +121,7 @@ public class MoeEntity extends AbstractNPCEntity {
 
     @Override
     public void registerStates() {
-        this.states.put(BlockDataState.class, new Automaton(this, BlockDataState.DEFAULT));
+        this.states.put(BlockDataState.class, new Automaton(this, BlockDataState.DEFAULT).start());
         super.registerStates();
     }
 
@@ -180,7 +180,6 @@ public class MoeEntity extends AbstractNPCEntity {
 
     @Override
     public void notifyDataManagerChange(DataParameter<?> key) {
-        if (BLOCK_STATE.equals(key)) { this.setNextState(BlockDataState.class, BlockDataState.get(this.getBlockData())); }
         if (SCALE.equals(key)) { this.recalculateSize(); }
         super.notifyDataManagerChange(key);
     }

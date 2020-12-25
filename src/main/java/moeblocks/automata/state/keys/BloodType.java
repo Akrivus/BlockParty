@@ -1,9 +1,10 @@
-package moeblocks.automata.state;
+package moeblocks.automata.state.keys;
 
 import moeblocks.automata.GoalState;
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
 import moeblocks.automata.IStateGoal;
+import moeblocks.automata.state.WatchedGoalState;
 import moeblocks.entity.AbstractNPCEntity;
 
 import java.util.ArrayList;
@@ -40,18 +41,23 @@ public enum BloodType implements IStateEnum<AbstractNPCEntity> {
 
     @Override
     public IState getState(AbstractNPCEntity applicant) {
-        return new GoalState(this, this.generator);
+        return new WatchedGoalState(this, this.generator, AbstractNPCEntity.BLOOD_TYPE);
     }
 
     @Override
-    public String toToken() {
+    public String toKey() {
         return this.name();
     }
 
     @Override
-    public IStateEnum<AbstractNPCEntity> fromToken(String token) {
-        if (token.isEmpty()) { return BloodType.O; }
-        return BloodType.valueOf(token);
+    public IStateEnum<AbstractNPCEntity> fromKey(String key) {
+        if (key.isEmpty()) { return BloodType.O; }
+        return BloodType.valueOf(key);
+    }
+
+    @Override
+    public IStateEnum<AbstractNPCEntity>[] getKeys() {
+        return BloodType.values();
     }
 
     public static boolean isCompatible(BloodType one, BloodType two) {

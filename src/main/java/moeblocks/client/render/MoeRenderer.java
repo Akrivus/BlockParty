@@ -1,7 +1,7 @@
 package moeblocks.client.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import moeblocks.automata.state.Animation;
+import moeblocks.automata.state.keys.Animation;
 import moeblocks.client.model.MoeModel;
 import moeblocks.client.render.layer.MoeEmotionLayer;
 import moeblocks.client.render.layer.MoeGlowLayer;

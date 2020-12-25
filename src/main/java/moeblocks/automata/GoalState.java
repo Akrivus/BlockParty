@@ -27,7 +27,7 @@ public class GoalState<O extends IStateEnum<E>, E extends AbstractNPCEntity> imp
 
     @Override
     public boolean canApply(E applicant) {
-        return !applicant.getState(this.filter.getClass()).equals(this.filter);
+        return applicant.getState(this.filter.getClass()) != this.filter;
     }
 
     private GoalSelector getSelector(E applicant, IStateGoal goal) {
@@ -44,5 +44,4 @@ public class GoalState<O extends IStateEnum<E>, E extends AbstractNPCEntity> imp
     public void clear(E applicant) {
         this.goals.forEach(goal -> this.getSelector(applicant, goal).removeGoal((Goal) goal));
     }
-
 }

@@ -1,13 +1,12 @@
-package moeblocks.automata.state;
+package moeblocks.automata.state.keys;
 
-import moeblocks.automata.GoalState;
-import moeblocks.automata.IState;
-import moeblocks.automata.IStateEnum;
-import moeblocks.automata.IStateGoal;
+import moeblocks.automata.*;
+import moeblocks.automata.state.PredicateGoalState;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeTags;
 import net.minecraft.item.Item;
 import net.minecraft.tags.ITag;
+import net.minecraft.util.Hand;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,18 +43,23 @@ public enum HeldItemState implements IStateEnum<AbstractNPCEntity> {
 
     @Override
     public IState getState(AbstractNPCEntity applicant) {
-        return new GoalState(this, this.generator);
+        return new PredicateGoalState<>(this, this.generator, (npc) -> this.items.contains(npc.getHeldItem(Hand.MAIN_HAND).getItem()));
     }
 
     @Override
-    public String toToken() {
+    public String toKey() {
         return this.name();
     }
 
     @Override
-    public IStateEnum<AbstractNPCEntity> fromToken(String token) {
-        if (token.isEmpty()) { return HeldItemState.DEFAULT; }
-        return HeldItemState.valueOf(token);
+    public IStateEnum<AbstractNPCEntity> fromKey(String key) {
+        if (key.isEmpty()) { return HeldItemState.DEFAULT; }
+        return HeldItemState.valueOf(key);
+    }
+
+    @Override
+    public IStateEnum<AbstractNPCEntity>[] getKeys() {
+        return HeldItemState.values();
     }
 
     public static HeldItemState get(Item item) {

@@ -1,9 +1,10 @@
-package moeblocks.automata.state;
+package moeblocks.automata.state.keys;
 
 import moeblocks.automata.GoalState;
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
 import moeblocks.automata.IStateGoal;
+import moeblocks.automata.state.WatchedGoalState;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.util.Trans;
 
@@ -43,18 +44,23 @@ public enum Dere implements IStateEnum<AbstractNPCEntity> {
 
     @Override
     public IState getState(AbstractNPCEntity applicant) {
-        return new GoalState(this, this.generator);
+        return new WatchedGoalState(this, this.generator, AbstractNPCEntity.DERE);
     }
 
     @Override
-    public String toToken() {
+    public String toKey() {
         return this.name();
     }
 
     @Override
-    public IStateEnum<AbstractNPCEntity> fromToken(String token) {
-        if (token.isEmpty()) { return Dere.NYANDERE; }
-        return Dere.valueOf(token);
+    public IStateEnum<AbstractNPCEntity> fromKey(String key) {
+        if (key.isEmpty()) { return Dere.NYANDERE; }
+        return Dere.valueOf(key);
+    }
+
+    @Override
+    public IStateEnum<AbstractNPCEntity>[] getKeys() {
+        return Dere.values();
     }
 
     @Override

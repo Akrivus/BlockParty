@@ -5,7 +5,9 @@ import moeblocks.entity.AbstractNPCEntity;
 public interface IStateEnum<E extends AbstractNPCEntity> {
     IState getState(E applicant);
 
-    String toToken();
+    String toKey();
 
-    IStateEnum<E> fromToken(String token);
+    IStateEnum<E> fromKey(String key);
+
+    IStateEnum<E>[] getKeys();
 }

@@ -1,9 +1,10 @@
-package moeblocks.automata.state;
+package moeblocks.automata.state.keys;
 
 import moeblocks.automata.GoalState;
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
 import moeblocks.automata.IStateGoal;
+import moeblocks.automata.state.WatchedGoalState;
 import moeblocks.entity.AbstractNPCEntity;
 
 import java.util.List;
@@ -64,17 +65,22 @@ public enum Emotion implements IStateEnum<AbstractNPCEntity> {
 
     @Override
     public IState getState(AbstractNPCEntity applicant) {
-        return new GoalState(this, this.generator);
+        return new WatchedGoalState(this, this.generator, AbstractNPCEntity.EMOTION);
     }
 
     @Override
-    public String toToken() {
+    public String toKey() {
         return this.name();
     }
 
     @Override
-    public IStateEnum<AbstractNPCEntity> fromToken(String token) {
-        if (token.isEmpty()) { return Emotion.NORMAL; }
-        return Emotion.valueOf(token);
+    public IStateEnum<AbstractNPCEntity> fromKey(String key) {
+        if (key.isEmpty()) { return Emotion.NORMAL; }
+        return Emotion.valueOf(key);
+    }
+
+    @Override
+    public IStateEnum<AbstractNPCEntity>[] getKeys() {
+        return Emotion.values();
     }
 }

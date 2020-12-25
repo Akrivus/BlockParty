@@ -1,6 +1,6 @@
 package moeblocks.entity;
 
-import moeblocks.automata.state.Dere;
+import moeblocks.automata.state.keys.Dere;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;

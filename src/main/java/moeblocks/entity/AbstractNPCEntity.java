@@ -2,8 +2,7 @@ package moeblocks.entity;
 
 import moeblocks.automata.Automaton;
 import moeblocks.automata.IStateEnum;
-import moeblocks.automata.state.*;
-import moeblocks.automata.state.Animation;
+import moeblocks.automata.state.keys.*;
 import moeblocks.datingsim.CacheNPC;
 import moeblocks.datingsim.DatingData;
 import moeblocks.datingsim.DatingSim;
@@ -161,20 +160,20 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     }
 
     public void registerStates() {
-        this.states.put(Animation.class, new Automaton(this, Animation.DEFAULT).setCanRunOnClient());
-        this.states.put(BloodType.class, new Automaton(this, BloodType.O).setCanUpdate(false));
-        this.states.put(Dere.class, new Automaton(this, Dere.NYANDERE).setCanUpdate(false));
-        this.states.put(Emotion.class, new Automaton(this, Emotion.NORMAL));
-        this.states.put(Gender.class, new Automaton(this, Gender.FEMININE).setCanUpdate(false));
-        this.states.put(HealthState.class, new Automaton(this, HealthState.PERFECT));
-        this.states.put(HungerState.class, new Automaton(this, HungerState.SATISFIED));
-        this.states.put(HeldItemState.class, new Automaton(this, HeldItemState.DEFAULT));
-        this.states.put(LoveState.class, new Automaton(this, LoveState.FRIENDLY));
-        this.states.put(MoonPhase.class, new Automaton(this, MoonPhase.FULL));
-        this.states.put(PeriodOfTime.class, new Automaton(this, PeriodOfTime.ATTACHED));
-        this.states.put(StoryPhase.class, new Automaton(this, StoryPhase.INTRODUCTION));
-        this.states.put(StressState.class, new Automaton(this, StressState.RELAXED));
-        this.states.put(TimeOfDay.class, new Automaton(this, TimeOfDay.MORNING));
+        this.states.put(Animation.class, new Automaton(this, Animation.DEFAULT).setCanRunOnClient().setHasDefault().start());
+        this.states.put(BloodType.class, new Automaton(this, BloodType.O).setCanUpdate(false).setHasDefault().start());
+        this.states.put(Dere.class, new Automaton(this, Dere.NYANDERE).setCanUpdate(false).setHasDefault().start());
+        this.states.put(Emotion.class, new Automaton(this, Emotion.NORMAL).start());
+        this.states.put(Gender.class, new Automaton(this, Gender.FEMININE).start());
+        this.states.put(HealthState.class, new Automaton(this, HealthState.PERFECT).start());
+        this.states.put(HungerState.class, new Automaton(this, HungerState.SATISFIED).start());
+        this.states.put(HeldItemState.class, new Automaton(this, HeldItemState.DEFAULT).start());
+        this.states.put(LoveState.class, new Automaton(this, LoveState.FRIENDLY).start());
+        this.states.put(MoonPhase.class, new Automaton(this, MoonPhase.FULL).start());
+        this.states.put(PeriodOfTime.class, new Automaton(this, PeriodOfTime.ATTACHED).start());
+        this.states.put(StoryPhase.class, new Automaton(this, StoryPhase.INTRODUCTION).start());
+        this.states.put(StressState.class, new Automaton(this, StressState.RELAXED).start());
+        this.states.put(TimeOfDay.class, new Automaton(this, TimeOfDay.MORNING).start());
     }
 
     @Override
@@ -266,7 +265,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     }
 
     public void writeCharacter(CompoundNBT compound) {
-        this.states.forEach((state, automaton) -> compound.putString(state.getSimpleName(), automaton.getToken().toToken()));
+        this.states.forEach((state, automaton) -> compound.putString(state.getSimpleName(), automaton.getKey().toKey()));
         compound.putString("FamilyName", this.getFamilyName());
         compound.putString("GivenName", this.getGivenName());
         compound.putFloat("Health", this.getHealth());
@@ -329,8 +328,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     }
 
     public void readCharacter(CompoundNBT compound) {
-        System.out.println(compound.toString());
-        this.states.forEach((state, automaton) -> automaton.fromToken(compound.getString(state.getSimpleName())));
+        this.states.forEach((state, automaton) -> automaton.fromKey(compound.getString(state.getSimpleName())));
         this.setBloodType(BloodType.valueOf(compound.getString("BloodType")));
         this.setDere(Dere.valueOf(compound.getString("Dere")));
         this.setEmotion(Emotion.valueOf(compound.getString("Emotion")));

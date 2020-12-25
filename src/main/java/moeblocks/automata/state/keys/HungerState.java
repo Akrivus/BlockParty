@@ -1,6 +1,7 @@
-package moeblocks.automata.state;
+package moeblocks.automata.state.keys;
 
 import moeblocks.automata.*;
+import moeblocks.automata.state.ValueGoalState;
 import moeblocks.entity.AbstractNPCEntity;
 
 import java.util.List;
@@ -19,30 +20,35 @@ public enum HungerState implements IStateEnum<AbstractNPCEntity> {
     }, (npc) -> npc.getFoodLevel(), 0, 4);
 
     private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
-    private final Function<AbstractNPCEntity, Float> valuator;
+    private final Function<AbstractNPCEntity, Float> function;
     private final float start;
     private final float end;
 
-    HungerState(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> valuator, float start, float end) {
+    HungerState(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
         this.generator = generator;
-        this.valuator = valuator;
+        this.function = function;
         this.start = start;
         this.end = end;
     }
 
     @Override
     public IState getState(AbstractNPCEntity applicant) {
-        return new ConditionalGoalState(this, this.generator, this.valuator, this.start, this.end);
+        return new ValueGoalState(this, this.generator, this.function, this.start, this.end);
     }
 
     @Override
-    public String toToken() {
+    public String toKey() {
         return this.name();
     }
 
     @Override
-    public IStateEnum<AbstractNPCEntity> fromToken(String token) {
-        if (token.isEmpty()) { return HungerState.SATISFIED; }
-        return HungerState.valueOf(token);
+    public IStateEnum<AbstractNPCEntity> fromKey(String key) {
+        if (key.isEmpty()) { return HungerState.SATISFIED; }
+        return HungerState.valueOf(key);
+    }
+
+    @Override
+    public IStateEnum<AbstractNPCEntity>[] getKeys() {
+        return HungerState.values();
     }
 }

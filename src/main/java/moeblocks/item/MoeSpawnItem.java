@@ -1,6 +1,6 @@
 package moeblocks.item;
 
-import moeblocks.automata.state.Dere;
+import moeblocks.automata.state.keys.Dere;
 import moeblocks.entity.MoeEntity;
 import moeblocks.init.MoeItems;
 import net.minecraft.entity.player.PlayerEntity;

@@ -11,9 +11,10 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
     protected final int timeout;
     protected int timeUntilCheck;
     protected IState state;
-    protected O token;
-    private boolean isServerOnly = true;
+    protected O key;
     private boolean canUpdate = true;
+    private boolean hasNoDefault = true;
+    private boolean isServerOnly = true;
 
     public Automaton(E applicant, O natural) {
         this(applicant, natural, 1000);
@@ -23,12 +24,6 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
         this.applicant = applicant;
         this.natural = natural;
         this.timeout = timeout;
-        this.setFirstState(natural);
-    }
-
-    public Automaton setCanRunOnClient() {
-        this.isServerOnly = false;
-        return this;
     }
 
     public Automaton setCanUpdate(boolean updatable) {
@@ -36,58 +31,70 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
         return this;
     }
 
-    public Automaton start() {
-        this.setFirstState(this.natural);
+    public Automaton setCanRunOnClient() {
+        this.isServerOnly = false;
         return this;
     }
 
-    private void setFirstState(O token) {
-        this.state = token.getState(this.applicant);
-        this.token = token;
-        if (this.isBlocked()) { return; }
-        this.state.apply(this.applicant);
+    public Automaton setHasDefault() {
+        this.hasNoDefault = false;
+        return this;
     }
 
-    public void update() {
-        if (this.isBlocked()) { return; }
-        if (--this.timeUntilCheck > 0) { return; }
-        if (this.state.canClear(this.applicant)) {
-            this.state.clear(this.applicant);
-            this.setNextState(this.natural, this.timeout);
-        } else if (this.canUpdate) {
-            this.state.tick(this.applicant);
-        }
+    public Automaton start() {
+        this.state = this.natural.getState(this.applicant);
+        this.key = this.natural;
+        return this;
     }
 
-    public void setNextState(O token) {
-        this.setNextState(token, this.timeout);
+    public boolean update() {
+        if (this.isBlocked() && --this.timeUntilCheck > 0) { return false; }
+        if (this.state.canClear(this.applicant)) { return this.setNextState(); }
+        if (this.canUpdate) { this.state.tick(this.applicant); }
+        return this.canUpdate;
     }
 
-    public boolean setNextState(O token, int timeUntilCheck) {
-        if (this.isBlocked()) { return false; }
-        IState state = token.getState(this.applicant);
+    public boolean setNextState(O key, int timeUntilCheck) {
+        IState state = key.getState(this.applicant);
         if (state.canApply(this.applicant)) {
             this.state.clear(this.applicant);
             this.state = state;
             this.timeUntilCheck = timeUntilCheck;
             this.state.apply(this.applicant);
-            this.token = token;
+            this.key = key;
             return true;
-        } else {
-            return false;
         }
+        return false;
+    }
+
+    public boolean setNextState(O key) {
+        return this.setNextState(key, this.timeout);
+    }
+
+    public boolean setNextState() {
+        return this.setNextState(this.getNatural(), this.timeout);
     }
 
     public boolean isNatural() {
-        return this.token.equals(this.natural);
+        return this.key.equals(this.natural);
     }
 
-    public O getToken() {
-        return this.token;
+    public O getNatural() {
+        if (!this.hasNoDefault) { return this.natural; }
+        for (IStateEnum key : this.natural.getKeys()) {
+            if (key.getState(this.applicant).canApply(this.applicant)) { return (O) key; }
+        }
+        return this.natural;
     }
 
-    public void fromToken(String token) {
-        this.setFirstState((O)(this.token.fromToken(token)));
+    public O getKey() {
+        return this.key;
+    }
+
+    public void fromKey(String key) {
+        this.key = (O) this.key.fromKey(key);
+        this.state = this.key.getState(this.applicant);
+        this.state.apply(this.applicant);
     }
 
     public void render(MatrixStack stack, float partialTickTime) {

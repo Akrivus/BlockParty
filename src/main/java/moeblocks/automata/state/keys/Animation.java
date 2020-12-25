@@ -1,4 +1,4 @@
-package moeblocks.automata.state;
+package moeblocks.automata.state.keys;
 
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
@@ -29,13 +29,18 @@ public enum Animation implements IStateEnum<AbstractNPCEntity> {
     }
 
     @Override
-    public String toToken() {
+    public String toKey() {
         return this.name();
     }
 
     @Override
-    public IStateEnum<AbstractNPCEntity> fromToken(String token) {
-        if (token.isEmpty()) { return Animation.DEFAULT; }
-        return Animation.valueOf(token);
+    public IStateEnum<AbstractNPCEntity> fromKey(String key) {
+        if (key.isEmpty()) { return Animation.DEFAULT; }
+        return Animation.valueOf(key);
+    }
+
+    @Override
+    public IStateEnum<AbstractNPCEntity>[] getKeys() {
+        return Animation.values();
     }
 }
