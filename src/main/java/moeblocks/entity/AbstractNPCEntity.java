@@ -262,8 +262,9 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     
     @Override
     public void writeAdditional(CompoundNBT compound) {
-        if (this.hasProtagonist()) { compound.putUniqueId("Protagonist", this.getProtagonistUUID()); }
         super.writeAdditional(compound);
+        if (this.hasProtagonist()) { compound.putUniqueId("Protagonist", this.getProtagonistUUID()); }
+        compound.putUniqueId("GlobalUUID", this.getUUID());
         compound.putLong("HomePosition", this.getHomePosition().toLong());
         compound.putInt("TimeSinceAvoid", this.timeSinceAvoid);
         compound.putInt("TimeSinceInteraction", this.timeSinceInteraction);
@@ -287,7 +288,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         compound.putFloat("Progress", this.getProgress());
         compound.putFloat("Stress", this.getStress());
         compound.putFloat("Relaxation", this.getRelaxation());
-        compound.putUniqueId("GlobalUUID", this.getUUID());
         compound.putLong("Age", this.age);
     }
     
@@ -381,8 +381,9 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
     
     @Override
     public void readAdditional(CompoundNBT compound) {
-        if (compound.hasUniqueId("Protagonist")) { this.setProtagonist(compound.getUniqueId("Protagonist")); }
         super.readAdditional(compound);
+        if (compound.hasUniqueId("Protagonist")) { this.setProtagonist(compound.getUniqueId("Protagonist")); }
+        if (compound.hasUniqueId("GlobalUUID")) { this.setUUID(compound.getUniqueId("GlobalUUID")); }
         this.setHomePosition(BlockPos.fromLong(compound.getLong("HomePosition")));
         this.timeSinceAvoid = compound.getInt("TimeSinceAvoid");
         this.timeSinceInteraction = compound.getInt("TimeSinceInteraction");
@@ -622,7 +623,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.setProgress(compound.getFloat("Progress"));
         this.setStress(compound.getFloat("Stress"));
         this.setRelaxation(compound.getFloat("Relaxation"));
-        this.setUUID(compound.getUniqueId("GlobalUUID"));
         this.age = compound.getInt("Age");
     }
     
