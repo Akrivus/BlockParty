@@ -19,6 +19,7 @@ public class CellPhoneScreen extends ControllerScreen {
     public static final ResourceLocation CELL_PHONE_TEXTURES = new ResourceLocation(MoeMod.ID, "textures/gui/cell_phone.png");
     private final List<PhoneContactButton> contacts = new ArrayList<>();
     private int start;
+    private int total;
     private Button buttonScrollUp;
     private Button buttonScrollDown;
     
@@ -34,7 +35,12 @@ public class CellPhoneScreen extends ControllerScreen {
     
     @Override
     public void setNPC() {
-        this.contacts.add(new PhoneContactButton(this, this.npc));
+        if (this.npc.isRemovable()) {
+            this.npcs.remove(this.npc);
+        } else {
+            this.contacts.add(new PhoneContactButton(this, this.npc));
+        }
+        ++this.total;
         this.updateButtons();
     }
     
@@ -55,7 +61,7 @@ public class CellPhoneScreen extends ControllerScreen {
     public void renderScrollBar(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
-        int y = (int) (Math.min((double) this.start / (this.npcs.size() - this.npcs.size() % 4), 1.0) * 35);
+        int y = (int) (Math.min((double) this.start / (this.contacts.size() - this.contacts.size() % 4), 1.0) * 35);
         this.blit(stack, this.width / 2 + 37, 40 + y, 108, 82, 7, 15);
     }
     
@@ -104,7 +110,7 @@ public class CellPhoneScreen extends ControllerScreen {
     }
     
     private void updateButtons() {
-        if (this.npcs.isEmpty()) {
+        if (this.npcs.size() == this.total && this.contacts.isEmpty()) {
             this.minecraft.player.sendStatusMessage(new TranslationTextComponent("gui.moeblocks.error.empty"), true);
             this.closeScreen();
         } else {
