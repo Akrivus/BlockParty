@@ -8,6 +8,7 @@ import moeblocks.datingsim.DatingData;
 import moeblocks.datingsim.DatingSim;
 import moeblocks.entity.ai.*;
 import moeblocks.init.MoeSounds;
+import moeblocks.util.CellPhoneTeleporter;
 import moeblocks.util.ChunkScheduler;
 import moeblocks.util.DimBlockPos;
 import moeblocks.util.VoiceLines;
@@ -52,6 +53,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
+import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
@@ -84,6 +86,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     public static final DataParameter<Float> PROGRESS = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
     protected HashMap<Class<? extends IStateEnum>, Automaton> states;
     private final Queue<Consumer<AbstractNPCEntity>> nextTickOps;
+    private boolean isAutomatonReady;
     private PlayerEntity playerInteracted;
     private LivingEntity entityStaring;
     private LivingEntity entityToAvoid;
@@ -106,6 +109,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         this.stepHeight = 1.0F;
         this.states = new HashMap<>();
         this.registerStates();
+        this.isAutomatonReady = true;
     }
     
     public void registerStates() {
@@ -165,13 +169,12 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         this.goalSelector.addGoal(0x0, new OpenDoorGoal(this));
         this.goalSelector.addGoal(0x0, new SleepGoal(this));
         this.goalSelector.addGoal(0x0, new SwimGoal(this));
-        this.goalSelector.addGoal(0x1, new LookAtInteractiveGoal(this));
-        this.goalSelector.addGoal(0x2, new BasicAttackGoal(this));
-        this.goalSelector.addGoal(0x3, new ConsumeGoal(this));
-        this.goalSelector.addGoal(0x4, new AvoidTargetGoal(this));
-        this.goalSelector.addGoal(0x5, new TryEquipItemGoal<>(this));
-        this.goalSelector.addGoal(0x5, new TryEquipItemGoal<>(this, (stack) -> stack.isFood()));
-        this.goalSelector.addGoal(0x6, new FollowTargetGoal(this));
+        this.goalSelector.addGoal(0x1, new BasicAttackGoal(this));
+        this.goalSelector.addGoal(0x2, new ConsumeGoal(this));
+        this.goalSelector.addGoal(0x3, new AvoidTargetGoal(this));
+        this.goalSelector.addGoal(0x4, new TryEquipItemGoal<>(this));
+        this.goalSelector.addGoal(0x4, new TryEquipItemGoal<>(this, (stack) -> stack.isFood()));
+        this.goalSelector.addGoal(0x5, new FollowTargetGoal(this));
         this.goalSelector.addGoal(0x8, new FindBedGoal(this));
         this.goalSelector.addGoal(0xA, new StayHomeGoal(this));
         this.goalSelector.addGoal(0xB, new WanderGoal(this));
@@ -265,6 +268,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         super.writeAdditional(compound);
         if (this.hasProtagonist()) { compound.putUniqueId("Protagonist", this.getProtagonistUUID()); }
         compound.putUniqueId("GlobalUUID", this.getUUID());
+        compound.putBoolean("IsFollowing", this.isFollowing());
+        compound.putBoolean("IsSitting", this.isSitting());
         compound.putLong("HomePosition", this.getHomePosition().toLong());
         compound.putInt("TimeSinceAvoid", this.timeSinceAvoid);
         compound.putInt("TimeSinceInteraction", this.timeSinceInteraction);
@@ -292,7 +297,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public UUID getUUID() {
-        return this.dataManager.get(GLOBAL_UUID).get();
+        return this.dataManager.get(GLOBAL_UUID).orElse(null);
     }
     
     public void setUUID(UUID uuid) {
@@ -331,7 +336,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     public void setExhaustion(float exhaustion) {
         this.dataManager.set(EXHAUSTION, Math.max(0.0F, Math.min(exhaustion, 20.0F)));
-        this.sync();
     }
     
     public float getSaturation() {
@@ -340,7 +344,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     public void setSaturation(float saturation) {
         this.dataManager.set(SATURATION, Math.max(0.0F, Math.min(saturation, 20.0F)));
-        this.sync();
     }
     
     public float getAffection() {
@@ -349,7 +352,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     public void setAffection(float affection) {
         this.dataManager.set(AFFECTION, Math.max(0.0F, Math.min(affection, 20.0F)));
-        this.sync();
     }
     
     public float getRelaxation() {
@@ -358,7 +360,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     public void setRelaxation(float relaxation) {
         this.dataManager.set(RELAXATION, Math.max(0.0F, Math.min(relaxation, 20.0F)));
-        this.sync();
     }
     
     public float getProgress() {
@@ -384,6 +385,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         super.readAdditional(compound);
         if (compound.hasUniqueId("Protagonist")) { this.setProtagonist(compound.getUniqueId("Protagonist")); }
         if (compound.hasUniqueId("GlobalUUID")) { this.setUUID(compound.getUniqueId("GlobalUUID")); }
+        this.setFollowing(compound.getBoolean("IsFollowing"));
+        this.setSitting(compound.getBoolean("IsSitting"));
         this.setHomePosition(BlockPos.fromLong(compound.getLong("HomePosition")));
         this.timeSinceAvoid = compound.getInt("TimeSinceAvoid");
         this.timeSinceInteraction = compound.getInt("TimeSinceInteraction");
@@ -412,8 +415,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     public void livingTick() {
         this.updateArmSwingProgress();
         super.livingTick();
-        this.setCharacter((npc) -> npc.setPosition(this.getDimBlockPos()));
         this.states.forEach((state, machine) -> machine.update());
+        if (this.isFollowing() && this.isPassenger() && !this.getProtagonist().isPassenger()) { this.dismount(); }
         if (this.isLocal()) {
             if (++this.timeSinceSleep > 24000) { this.addStress(0.0005F); }
             this.updateStareState();
@@ -450,6 +453,16 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     @Override
     public boolean canDespawn(double distanceToClosestPlayer) {
         return false;
+    }
+    
+    public void setPositionAndUpdate(BlockPos pos) {
+        this.setPositionAndUpdate(pos.getX(), pos.getY(), pos.getZ());
+    }
+    
+    @Override
+    public void dismount() {
+        super.dismount();
+        if (this.isFollowing()) { this.setPositionAndUpdate(this.getProtagonist().getPosition()); }
     }
     
     @Override
@@ -560,7 +573,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public void setCharacter(Consumer<CacheNPC> transaction) {
-        if (this.isLocal() && this.hasProtagonist()) {
+        if (this.isAutomatonReady() && this.isLocal() && this.hasProtagonist()) {
             CacheNPC character = this.getDatingSim().getNPC(this.getUUID(), this);
             character.set(DatingData.get(this.world), transaction);
         }
@@ -568,6 +581,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     public boolean isLocal() {
         return this.world instanceof ServerWorld;
+    }
+    
+    public boolean isAutomatonReady() {
+        return this.isAutomatonReady;
     }
     
     public DatingSim getDatingSim() {
@@ -600,7 +617,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public boolean hasProtagonist() {
-        return this.dataManager.get(GLOBAL_UUID).isPresent() && this.dataManager.get(PROTAGONIST).isPresent();
+        if (this.getUUID() == null) { return false; }
+        return this.getProtagonist() != null;
     }
     
     public UUID getProtagonistUUID() {
@@ -680,8 +698,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public boolean isFollowing() {
-        if (this.canBeTarget(this.getProtagonist())) { return this.dataManager.get(FOLLOWING); }
-        return false;
+        if (!this.hasProtagonist()) { return false; }
+        return this.dataManager.get(FOLLOWING);
     }
     
     public void setFollowing(boolean following) {
@@ -689,8 +707,9 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public PlayerEntity getProtagonist() {
-        if (this.hasProtagonist()) { return this.world.getPlayerByUuid(this.getProtagonistUUID()); }
-        return null;
+        if (this.getProtagonistUUID() == null) { return null; }
+        if (this.isLocal()) { return this.world.getServer().getPlayerList().getPlayerByUUID(this.getProtagonistUUID()); }
+        return this.world.getPlayerByUuid(this.getProtagonistUUID());
     }
     
     public void setProtagonist(PlayerEntity player) {
@@ -1038,6 +1057,12 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     public void setHealth(float health) {
         super.setHealth(health);
         this.sync();
+    }
+    
+    @Override
+    public void setRawPosition(double x, double y, double z) {
+        super.setRawPosition(x, y, z);
+        this.setCharacter((npc) -> npc.setPosition(this.getDimBlockPos()));
     }
     
     @Override

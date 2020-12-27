@@ -24,7 +24,8 @@ public abstract class AbstractFollowEntityGoal<E extends AbstractNPCEntity, T ex
     @Override
     public boolean shouldExecute() {
         T target = this.getTarget();
-        if (this.entity.canBeTarget(target) && this.entity.getDistance(target) > this.getSafeZone(target) && this.canFollow(target)) {
+        if (this.entity.canBeTarget(target) && this.canFollow(target)) {
+            if (this.entity.getDistance(target) < this.getSafeZone(target)) { return false; }
             this.target = target;
             return true;
         }
@@ -33,15 +34,18 @@ public abstract class AbstractFollowEntityGoal<E extends AbstractNPCEntity, T ex
     
     @Override
     public boolean shouldContinueExecuting() {
-        return this.entity.hasPath() && this.entity.canBeTarget(this.target) && this.entity.getDistance(this.target) > this.getStrikeZone(this.target);
+        if (this.entity.canBeTarget(this.target) && this.canFollow(this.target)) {
+            if (this.entity.getDistance(this.target) < this.getStrikeZone(this.target)) { return false; }
+            return this.entity.hasPath() && --this.timeUntilReset > 0;
+        }
+        return false;
     }
     
     @Override
     public void startExecuting() {
-        if (this.entity.getNavigator().tryMoveToEntityLiving(this.target, this.speed)) {
-            this.timeUntilReset = 200;
-            this.onFollow();
-        }
+        this.entity.getNavigator().tryMoveToEntityLiving(this.target, this.speed);
+        this.timeUntilReset = 200;
+        this.onFollow();
     }
     
     @Override
@@ -59,9 +63,9 @@ public abstract class AbstractFollowEntityGoal<E extends AbstractNPCEntity, T ex
         }
     }
     
-    public abstract void onArrival();
-    
     public abstract void onFollow();
+    
+    public abstract void onArrival();
     
     public abstract float getStrikeZone(T target);
     
