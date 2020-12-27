@@ -3,10 +3,7 @@ package moeblocks.automata.state.keys;
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
 import moeblocks.client.animation.AnimationState;
-import moeblocks.client.animation.state.AimBow;
-import moeblocks.client.animation.state.Default;
-import moeblocks.client.animation.state.HappyDance;
-import moeblocks.client.animation.state.Summoned;
+import moeblocks.client.animation.state.*;
 import moeblocks.entity.AbstractNPCEntity;
 
 import java.util.function.Supplier;
@@ -15,7 +12,8 @@ public enum Animation implements IStateEnum<AbstractNPCEntity> {
     AIM(AimBow::new),
     DEFAULT(Default::new),
     HAPPY_DANCE(HappyDance::new),
-    SUMMONED(Summoned::new);
+    SUMMONED(Summoned::new),
+    YEARBOOK(Yearbook::new);
     
     private final Supplier<? extends AnimationState> animation;
     

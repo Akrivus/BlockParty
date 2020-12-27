@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moeblocks.MoeMod;
+import moeblocks.automata.state.keys.Animation;
 import moeblocks.client.screen.widget.RemovePageButton;
 import moeblocks.client.screen.widget.TurnPageButton;
 import moeblocks.entity.AbstractNPCEntity;
@@ -60,6 +61,7 @@ public class YearbookScreen extends ControllerScreen {
         if (this.npc.isDead()) { this.lines[3] = Trans.late("debug.moeblocks.story.dead"); }
         if (this.npc.isEstranged()) { this.lines[3] = Trans.late("debug.moeblocks.story.estranged"); }
         this.name = this.entity.getFullName();
+        this.entity.setAnimation(Animation.YEARBOOK);
         this.updateButtons();
     }
     
