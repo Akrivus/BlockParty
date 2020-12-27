@@ -25,7 +25,7 @@ public class DumpChestGoal extends AbstractMoveToBlockGoal<MoeEntity> {
     public void onArrival() {
         if (!this.canMoveTo(this.pos, this.state)) { return; }
         IInventory chest = HopperTileEntity.getInventoryAtPosition(this.world, this.pos);
-        Inventory inventory = this.entity.getBrassiere();
+        Inventory inventory = this.entity.getInventory();
         for (int x = 0; x < inventory.getSizeInventory(); ++x) {
             ItemStack bra = inventory.getStackInSlot(x);
             if (bra.isEmpty()) { continue; }
@@ -46,8 +46,8 @@ public class DumpChestGoal extends AbstractMoveToBlockGoal<MoeEntity> {
     public boolean canMoveTo(BlockPos pos, BlockState state) {
         IInventory inv = HopperTileEntity.getInventoryAtPosition(this.world, pos);
         if (inv == null) { return false; }
-        for (int x = 0; x < this.entity.getBrassiere().getSizeInventory(); ++x) {
-            ItemStack bra = this.entity.getBrassiere().getStackInSlot(x);
+        for (int x = 0; x < this.entity.getInventory().getSizeInventory(); ++x) {
+            ItemStack bra = this.entity.getInventory().getStackInSlot(x);
             if (bra.isEmpty()) { continue; }
             boolean flag = false;
             for (int y = 0; y < inv.getSizeInventory(); ++y) {

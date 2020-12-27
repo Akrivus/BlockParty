@@ -19,7 +19,7 @@ public class TryStuffItemGoal<E extends MoeEntity> extends TryEquipItemGoal<E> {
     @Override
     public void onArrival() {
         this.entity.onItemPickup(this.target, this.target.getItem().getCount());
-        ItemStack loot = this.entity.getBrassiere().addItem(this.target.getItem());
+        ItemStack loot = this.entity.getInventory().addItem(this.target.getItem());
         if (loot.isEmpty()) {
             this.target.remove();
         } else {
@@ -29,6 +29,6 @@ public class TryStuffItemGoal<E extends MoeEntity> extends TryEquipItemGoal<E> {
     
     @Override
     public boolean canPickUp(ItemStack stack) {
-        return this.check.test(stack) && this.entity.getBrassiere().func_233541_b_(stack);
+        return this.check.test(stack) && this.entity.getInventory().func_233541_b_(stack);
     }
 }

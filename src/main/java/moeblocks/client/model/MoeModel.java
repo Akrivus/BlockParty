@@ -26,6 +26,7 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
     private final ModelRenderer hatTop;
     private final ModelRenderer hatBrim;
     private final ModelRenderer body;
+    private final ModelRenderer tiddies;
     private final ModelRenderer skirt;
     private final ModelRenderer rightWing;
     private final ModelRenderer leftWing;
@@ -46,6 +47,7 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
     private final ModelRenderer rightEarWear;
     private final ModelRenderer leftEarWear;
     private final ModelRenderer bodyWear;
+    private final ModelRenderer tiddiesWear;
     private final ModelRenderer skirtWear;
     private final ModelRenderer tailBaseWear;
     private final ModelRenderer tailTipWear;
@@ -106,6 +108,10 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
         this.body = new ModelRenderer(this, 6, 28);
         this.body.setRotationPoint(0.0F, 15.0F, 0.0F);
         this.body.addBox(-3.0F, -3.0F, -2.0F, 6.0F, 6.0F, 4.0F);
+        this.tiddies = new ModelRenderer(this, 6, 28);
+        this.tiddies.setRotationPoint(0.0F, -2.9F, -2.0F);
+        this.tiddies.addBox(-3.0F, 0.0F, 0.0F, 6.0F, 3.0F, 4.0F, -0.01F);
+        this.body.addChild(this.tiddies);
         this.skirt = new ModelRenderer(this, 24, 28);
         this.skirt.setRotationPoint(0.0F, 1.0F, 0.0F);
         this.skirt.addBox(-6.0F, 0.0F, -6.0F, 12.0F, 8.0F, 12.0F);
@@ -182,6 +188,10 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
         this.bodyWear = new ModelRenderer(this, 6, 28 + 68);
         this.bodyWear.setRotationPoint(0.0F, 15.0F, 0.0F);
         this.bodyWear.addBox(-3.0F, -3.0F, -2.0F, 6.0F, 6.0F, 4.0F, 0.5F);
+        this.tiddiesWear = new ModelRenderer(this, 6, 28 + 68);
+        this.tiddiesWear.setRotationPoint(0.0F, -2.9F, -2.0F);
+        this.tiddiesWear.addBox(-3.0F, 0.0F, 0.0F, 6.0F, 3.0F, 4.0F, 0.49F);
+        this.bodyWear.addChild(this.tiddiesWear);
         this.skirtWear = new ModelRenderer(this, 24, 28 + 68);
         this.skirtWear.setRotationPoint(0.0F, 1.0F, 0.0F);
         this.skirtWear.addBox(-6.0F, 0.0F, -6.0F, 12.0F, 8.0F, 12.0F, 0.5F);
@@ -250,6 +260,7 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
         this.rightEarWear.copyModelAngles(this.rightEar);
         this.leftEarWear.copyModelAngles(this.leftEar);
         this.bodyWear.copyModelAngles(this.body);
+        this.tiddiesWear.copyModelAngles(this.tiddies);
         this.skirtWear.copyModelAngles(this.skirt);
         this.tailBaseWear.copyModelAngles(this.tailBase);
         this.tailTipWear.copyModelAngles(this.tailTip);
@@ -276,6 +287,7 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
         this.rightLeg.rotateAngleY = this.rightLeg.rotateAngleZ = 0.0F;
         this.leftLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + 3.14F) * 1.4F * limbSwingAmount;
         this.leftLeg.rotateAngleY = this.leftLeg.rotateAngleZ = 0.0F;
+        this.tiddies.rotateAngleX = entity.getTiddyAngle() * 0.01745329251F;
         this.skirt.rotateAngleY = -this.leftLeg.rotateAngleX * 0.25F;
         this.tailBase.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F) * 2.0F * limbSwingAmount * 0.5F;
         this.tailBase.rotateAngleZ = -this.tailBase.rotateAngleX * 0.5F - MathHelper.cos(entity.ticksExisted * 0.09F) * 0.05F + 0.05F;

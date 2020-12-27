@@ -70,7 +70,7 @@ public class ReplaceCropsGoal extends AbstractMoveToBlockGoal<MoeEntity> {
     @Override
     public boolean canMoveTo(BlockPos pos, BlockState state) {
         if (!this.world.isAirBlock(pos.up())) { return false; }
-        Inventory inventory = this.entity.getBrassiere();
+        Inventory inventory = this.entity.getInventory();
         for (int i = 0; i < inventory.getSizeInventory(); ++i) {
             ItemStack stack = inventory.getStackInSlot(i);
             Item item = stack.getItem();

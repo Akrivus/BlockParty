@@ -13,11 +13,6 @@ public class SenpaiEntity extends AbstractNPCEntity {
     }
     
     @Override
-    public Container createMenu(int id, PlayerInventory inventory, PlayerEntity player) {
-        return null;
-    }
-    
-    @Override
     protected void onTeleport() {
     
     }
@@ -25,10 +20,5 @@ public class SenpaiEntity extends AbstractNPCEntity {
     @Override
     public int getBaseAge() {
         return 18;
-    }
-    
-    @Override
-    public void onInventoryChanged(IInventory inventory) {
-    
     }
 }

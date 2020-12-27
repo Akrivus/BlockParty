@@ -28,6 +28,6 @@ public class OpenChestGoal extends Goal implements IStateGoal {
     public void startExecuting() {
         this.entity.setEmotion(Emotion.EMBARRASSED);
         this.player = this.entity.getInteractTarget();
-        this.player.openContainer(this.entity);
+        //this.player.openContainer(this.entity);
     }
 }

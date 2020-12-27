@@ -63,7 +63,7 @@ import net.minecraftforge.common.util.ITeleporter;
 import java.util.*;
 import java.util.function.Consumer;
 
-public abstract class AbstractNPCEntity extends CreatureEntity implements IInventoryChangedListener, INamedContainerProvider {
+public abstract class AbstractNPCEntity extends CreatureEntity {
     public static final DataParameter<Optional<UUID>> GLOBAL_UUID = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.OPTIONAL_UNIQUE_ID);
     public static final DataParameter<Optional<UUID>> PROTAGONIST = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.OPTIONAL_UNIQUE_ID);
     public static final DataParameter<Boolean> FOLLOWING = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.BOOLEAN);
@@ -184,10 +184,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity implements IInven
         this.dataManager.register(PROTAGONIST, Optional.empty());
         this.dataManager.register(FOLLOWING, false);
         this.dataManager.register(SITTING, false);
-        this.dataManager.register(ANIMATION, Animation.DEFAULT.name());
-        this.dataManager.register(BLOOD_TYPE, BloodType.O.name());
-        this.dataManager.register(DERE, Dere.NYANDERE.name());
-        this.dataManager.register(EMOTION, Emotion.NORMAL.name());
+        this.dataManager.register(ANIMATION, Animation.DEFAULT.toKey());
+        this.dataManager.register(BLOOD_TYPE, BloodType.O.toKey());
+        this.dataManager.register(DERE, Dere.NYANDERE.toKey());
+        this.dataManager.register(EMOTION, Emotion.NORMAL.toKey());
         this.dataManager.register(FAMILY_NAME, "Missing");
         this.dataManager.register(GIVEN_NAME, "Name");
         this.dataManager.register(FOOD_LEVEL, 20.0F);
