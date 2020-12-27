@@ -23,7 +23,7 @@ public class MoeBlocks {
         if (PROPS.containsKey(block)) { key += String.format(".%s", state.get(PROPS.get(block)).toString()); }
         if (block.isIn(MoeTags.CHESTS) && MoeMod.isChristmas()) { suffix = "christmas"; }
         if (suffix != null) { key += String.format(".%s", suffix); }
-        return new ResourceLocation(MoeMod.ID, String.format("textures/entity/moe/%s.png", key));
+        return new ResourceLocation(MoeMod.ID, String.format("textures/entity/moe/skins/%s.png", key));
     }
     
     public static Block get(Block block) {
