@@ -1,10 +1,7 @@
 package moeblocks.entity;
 
 import moeblocks.automata.Automaton;
-import moeblocks.automata.state.keys.BlockDataState;
-import moeblocks.automata.state.keys.CupSize;
-import moeblocks.automata.state.keys.Dere;
-import moeblocks.automata.state.keys.Gender;
+import moeblocks.automata.state.keys.*;
 import moeblocks.init.MoeBlocks;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeSounds;
@@ -156,6 +153,7 @@ public class MoeEntity extends AbstractNPCEntity {
     
     @Override
     public void notifyDataManagerChange(DataParameter<?> key) {
+        if (CUP_SIZE.equals(key)) { this.setNextState(CupSize.class, this.getCupSize()); }
         if (SCALE.equals(key)) { this.recalculateSize(); }
         super.notifyDataManagerChange(key);
     }
