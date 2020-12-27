@@ -1,7 +1,6 @@
 package moeblocks.item;
 
 import moeblocks.datingsim.DatingData;
-import moeblocks.datingsim.DatingSim;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeItems;
 import moeblocks.init.MoeMessages;
@@ -15,7 +14,6 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 

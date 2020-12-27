@@ -4,7 +4,9 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class ChunkScheduler {
     private static final Map<UUID, ChunkScheduler> chunks = new LinkedHashMap<>();

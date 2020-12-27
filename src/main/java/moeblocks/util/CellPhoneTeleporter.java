@@ -3,7 +3,6 @@ package moeblocks.util;
 import net.minecraft.block.PortalInfo;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.Teleporter;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.ITeleporter;
 

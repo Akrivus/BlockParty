@@ -1,7 +1,10 @@
 package moeblocks.entity;
 
 import moeblocks.automata.Automaton;
-import moeblocks.automata.state.keys.*;
+import moeblocks.automata.state.keys.BlockDataState;
+import moeblocks.automata.state.keys.CupSize;
+import moeblocks.automata.state.keys.Dere;
+import moeblocks.automata.state.keys.Gender;
 import moeblocks.init.MoeBlocks;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeSounds;
@@ -17,13 +20,9 @@ import net.minecraft.entity.Pose;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;

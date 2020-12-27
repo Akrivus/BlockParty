@@ -1,18 +1,13 @@
 package moeblocks.message;
 
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.init.MoeSounds;
 import moeblocks.util.CellPhoneTeleporter;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.UUID;
-import java.util.function.Supplier;
 
 public class CNPCTeleport extends CNPCQuery {
     public CNPCTeleport(UUID uuid) {

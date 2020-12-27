@@ -1,7 +1,7 @@
 package moeblocks.message;
 
-import moeblocks.client.screen.ControllerScreen;
 import moeblocks.client.screen.CellPhoneScreen;
+import moeblocks.client.screen.ControllerScreen;
 import moeblocks.init.MoeItems;
 import net.minecraft.item.Item;
 import net.minecraft.network.PacketBuffer;

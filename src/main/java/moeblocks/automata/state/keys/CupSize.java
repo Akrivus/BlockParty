@@ -7,11 +7,6 @@ import moeblocks.automata.IStateGoal;
 import moeblocks.automata.state.WatchedGoalState;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.entity.MoeEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.container.ChestContainer;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
 
 import java.util.List;
 import java.util.function.BiConsumer;

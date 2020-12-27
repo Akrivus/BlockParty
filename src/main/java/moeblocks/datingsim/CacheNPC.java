@@ -1,13 +1,11 @@
 package moeblocks.datingsim;
 
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.util.ChunkScheduler;
 import moeblocks.util.DimBlockPos;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;

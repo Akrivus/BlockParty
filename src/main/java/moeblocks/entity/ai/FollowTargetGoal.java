@@ -3,7 +3,6 @@ package moeblocks.entity.ai;
 import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.pathfinding.PathNodeType;
-import net.minecraft.world.Teleporter;
 
 public class FollowTargetGoal extends AbstractFollowEntityGoal<AbstractNPCEntity, LivingEntity> {
     

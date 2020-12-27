@@ -6,7 +6,6 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class DatingSim {
     public final Map<UUID, CacheNPC> characters = new LinkedHashMap<>();
