@@ -11,6 +11,7 @@ import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeMessages;
 import moeblocks.message.CNPCRemove;
+import moeblocks.message.CRemovePage;
 import moeblocks.util.Trans;
 import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.widget.button.Button;
@@ -172,7 +173,7 @@ public class YearbookScreen extends ControllerScreen {
             if (this.index - 1 >= 0) { this.getNPC(this.npcs.get(this.index - 1)); }
         }));
         this.buttonRemovePage = this.addButton(new RemovePageButton((this.width - 146) / 2 + 115, 9, (button) -> {
-            MoeMessages.send(new CNPCRemove(this.npc.getUUID()));
+            MoeMessages.send(new CRemovePage(this.npc.getUUID()));
             this.npcs.remove(this.npc.getUUID());
             if (++this.index >= this.npcs.size()) { --this.index; }
             if (this.index < 0) { this.index = 0; }

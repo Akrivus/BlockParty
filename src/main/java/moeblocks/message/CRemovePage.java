@@ -7,7 +7,13 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
+import java.util.UUID;
+
 public class CRemovePage extends CNPCRemove {
+    public CRemovePage(UUID uuid) {
+        super(uuid);
+    }
+    
     public CRemovePage(PacketBuffer buffer) {
         super(buffer);
     }
