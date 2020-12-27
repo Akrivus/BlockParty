@@ -1,11 +1,16 @@
 package moeblocks.client.animation.state;
 
+import moeblocks.automata.state.keys.Animation;
 import moeblocks.client.animation.AnimationState;
 import moeblocks.client.model.IRiggableModel;
 import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.util.math.MathHelper;
 
 public class Default extends AnimationState {
+    public Default() {
+        super(Animation.DEFAULT);
+    }
+    
     @Override
     public void apply(AbstractNPCEntity applicant) {
     

@@ -1,10 +1,15 @@
 package moeblocks.client.animation.state;
 
+import moeblocks.automata.state.keys.Animation;
 import moeblocks.client.animation.AnimationState;
 import moeblocks.client.model.IRiggableModel;
 import moeblocks.entity.AbstractNPCEntity;
 
 public class AimBow extends AnimationState {
+    public AimBow() {
+        super(Animation.AIM);
+    }
+    
     @Override
     public void apply(AbstractNPCEntity applicant) {
     

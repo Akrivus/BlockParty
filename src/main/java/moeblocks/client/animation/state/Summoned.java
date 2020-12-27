@@ -1,11 +1,16 @@
 package moeblocks.client.animation.state;
 
+import moeblocks.automata.state.keys.Animation;
 import moeblocks.client.animation.ActionAnimationState;
 import moeblocks.client.model.IRiggableModel;
 import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.util.math.MathHelper;
 
 public class Summoned extends ActionAnimationState {
+    public Summoned() {
+        super(Animation.SUMMONED);
+    }
+    
     @Override
     public int getInterval() {
         return 20;

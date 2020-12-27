@@ -1,11 +1,16 @@
 package moeblocks.client.animation.state;
 
+import moeblocks.automata.state.keys.Animation;
 import moeblocks.client.animation.ActionAnimationState;
 import moeblocks.client.model.IRiggableModel;
 import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.util.math.MathHelper;
 
 public class HappyDance extends ActionAnimationState {
+    public HappyDance() {
+        super(Animation.HAPPY_DANCE);
+    }
+    
     @Override
     public int getInterval() {
         return 20;
