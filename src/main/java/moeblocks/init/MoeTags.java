@@ -14,6 +14,7 @@ import java.util.Map;
 
 public class MoeTags {
     public static final ITag.INamedTag<Block> BABY = BlockTags.createOptional(new ResourceLocation(MoeMod.ID, "moes/baby"));
+    public static final ITag.INamedTag<Block> CHESTS = BlockTags.createOptional(new ResourceLocation(MoeMod.ID, "chests"));
     public static final ITag.INamedTag<Block> DOORS = BlockTags.createOptional(new ResourceLocation(MoeMod.ID, "doors"));
     public static final ITag.INamedTag<Block> FULLSIZED = BlockTags.createOptional(new ResourceLocation(MoeMod.ID, "moes/fullsized"));
     public static final ITag.INamedTag<Block> GLOWING = BlockTags.createOptional(new ResourceLocation(MoeMod.ID, "moes/glowing"));

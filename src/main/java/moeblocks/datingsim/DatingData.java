@@ -18,18 +18,18 @@ public class DatingData extends WorldSavedData {
 
     @Override
     public void read(CompoundNBT compound) {
-        ListNBT games = compound.getList("DatingSims", Constants.NBT.TAG_COMPOUND);
-        for (int i = 0; i < games.size(); ++i) {
-            CompoundNBT nbt = games.getCompound(i);
+        ListNBT sims = compound.getList("DatingSims", Constants.NBT.TAG_COMPOUND);
+        for (int i = 0; i < sims.size(); ++i) {
+            CompoundNBT nbt = sims.getCompound(i);
             this.sims.put(nbt.getUniqueId("UUID"), new DatingSim(nbt));
         }
     }
 
     @Override
     public CompoundNBT write(CompoundNBT compound) {
-        ListNBT games = new ListNBT();
-        this.sims.forEach((uuid, game) -> games.add(game.write(new CompoundNBT())));
-        compound.put("DatingSims", games);
+        ListNBT sims = new ListNBT();
+        this.sims.forEach((uuid, sim) -> sims.add(sim.write(new CompoundNBT())));
+        compound.put("DatingSims", sims);
         return compound;
     }
 

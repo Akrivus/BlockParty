@@ -1,7 +1,7 @@
 package moeblocks.automata;
 
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.entity.ai.goal.target.AbstractStateTarget;
+import moeblocks.entity.ai.target.AbstractStateTarget;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.GoalSelector;
 

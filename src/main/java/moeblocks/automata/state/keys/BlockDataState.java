@@ -41,12 +41,19 @@ public enum BlockDataState implements IStateEnum<MoeEntity> {
     
     @Override
     public IStateEnum<MoeEntity> fromKey(String key) {
-        if (key.isEmpty()) { return BlockDataState.DEFAULT; }
-        return BlockDataState.valueOf(key);
+        return BlockDataState.get(key);
     }
     
     @Override
     public IStateEnum<MoeEntity>[] getKeys() {
         return BlockDataState.values();
+    }
+    
+    public static BlockDataState get(String key) {
+        try {
+            return BlockDataState.valueOf(key);
+        } catch (IllegalArgumentException e) {
+            return BlockDataState.DEFAULT;
+        }
     }
 }

@@ -6,16 +6,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import moeblocks.MoeMod;
 import moeblocks.client.screen.widget.RemovePageButton;
 import moeblocks.client.screen.widget.TurnPageButton;
-import moeblocks.datingsim.CacheNPC;
-import moeblocks.datingsim.DatingSim;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeMessages;
-import moeblocks.message.CRemovePageFromYearbook;
+import moeblocks.message.CNPCRemove;
 import moeblocks.util.Trans;
 import net.minecraft.client.gui.DialogTexts;
-import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -30,34 +26,50 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class YearbookScreen extends Screen {
+public class YearbookScreen extends ControllerScreen {
     public static final ResourceLocation YEARBOOK_TEXTURES = new ResourceLocation(MoeMod.ID, "textures/gui/yearbook.png");
-    private final List<UUID> pages = new ArrayList<>();
     private final String[] stats = new String[4];
     private final String[] lines = new String[4];
-    private final DatingSim sim;
-    private int index;
-    private CacheNPC npc;
+    private String name;
+    private AbstractNPCEntity entity;
     private Button buttonPreviousPage;
     private Button buttonNextPage;
     private Button buttonRemovePage;
-    private String name;
-    private AbstractNPCEntity entity;
     
-    public YearbookScreen(DatingSim sim, UUID uuid) {
-        super(NarratorChatListener.EMPTY);
-        this.sim = sim;
-        this.sim.characters.forEach((key, value) -> this.pages.add(key));
-        this.index = this.pages.indexOf(uuid);
-        if (this.index < 0) { this.index = 0; }
+    public YearbookScreen(List<UUID> npcs, UUID uuid) {
+        super(npcs, uuid);
+        this.getNPC(uuid);
+    }
+    
+    @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
+    
+    @Override
+    public void setNPC() {
+        this.entity = this.npc.clone(this.minecraft, MoeEntities.MOE.get());
+        this.stats[0] = String.format("%.0f", this.entity.getHealth());
+        this.stats[1] = String.format("%.0f", this.entity.getFoodLevel());
+        this.stats[2] = String.format("%.0f", this.entity.getLove());
+        this.stats[3] = String.format("%.0f", this.entity.getStress());
+        this.lines[0] = String.format(Trans.late("gui.moeblocks.label.dere"), this.entity.getDere().toString());
+        this.lines[1] = String.format(Trans.late("gui.moeblocks.label.blood"), this.entity.getBloodType().toString());
+        this.lines[2] = String.format(Trans.late("gui.moeblocks.label.age"), this.entity.getAgeInYears());
+        this.lines[3] = this.entity.getStory().toString();
+        if (this.npc.isDead()) { this.lines[3] = Trans.late("debug.moeblocks.story.dead"); }
+        if (this.npc.isEstranged()) { this.lines[3] = Trans.late("debug.moeblocks.story.estranged"); }
+        this.name = this.entity.getFullName();
+        this.updateButtons();
     }
     
     @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        if (this.npc == null) { return; }
         this.renderBackground(stack);
         this.renderPortrait(stack);
         this.renderEntity(this.width / 2 + 3, 90, 40.0F, this.entity);
-        if (this.npc.isDead() || this.npc.isEstranged()) { this.renderOverlay(stack); }
+        if (this.npc.isRemovable()) { this.renderOverlay(stack); }
         this.renderBook(stack);
         this.font.drawString(stack, this.name, (this.width - this.font.getStringWidth(this.name)) / 2 + 3, 91, 0);
         for (int x = 0; x < this.stats.length; ++x) {
@@ -133,63 +145,51 @@ public class YearbookScreen extends Screen {
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers)) {
-            return true;
-        } else {
-            switch (keyCode) {
-                case GLFW.GLFW_KEY_LEFT:
-                case GLFW.GLFW_KEY_A:
-                    this.buttonPreviousPage.onPress();
-                    return true;
-                case GLFW.GLFW_KEY_RIGHT:
-                case GLFW.GLFW_KEY_D:
-                    this.buttonNextPage.onPress();
-                    return true;
-                default:
-                    return false;
-            }
+        if (super.keyPressed(keyCode, scanCode, modifiers)) { return true; }
+        switch (keyCode) {
+            case GLFW.GLFW_KEY_RIGHT:
+            case GLFW.GLFW_KEY_D:
+                this.buttonNextPage.onPress();
+                return true;
+            case GLFW.GLFW_KEY_LEFT:
+            case GLFW.GLFW_KEY_A:
+                this.buttonPreviousPage.onPress();
+                return true;
+            default:
+                return false;
         }
     }
     
     @Override
     protected void init() {
         this.addButton(new Button(this.width / 2 - 68, 196, 136, 20, DialogTexts.GUI_DONE, (button) -> this.minecraft.displayGuiScreen(null)));
-        this.buttonPreviousPage = this.addButton(new TurnPageButton((this.width - 146) / 2 + 21, 51, -1, (button) -> {
-            if (this.index > 0) { --this.index; }
-            this.updateButtons();
-        }));
         this.buttonNextPage = this.addButton(new TurnPageButton((this.width - 146) / 2 + 122, 51, 1, (button) -> {
-            if (this.index < this.sim.totalNPCs() - 1) { ++this.index; }
-            this.updateButtons();
+            if (this.index + 1 < this.npcs.size()) { this.getNPC(this.npcs.get(this.index + 1)); }
+        }));
+        this.buttonPreviousPage = this.addButton(new TurnPageButton((this.width - 146) / 2 + 21, 51, -1, (button) -> {
+            if (this.index - 1 >= 0) { this.getNPC(this.npcs.get(this.index - 1)); }
         }));
         this.buttonRemovePage = this.addButton(new RemovePageButton((this.width - 146) / 2 + 115, 9, (button) -> {
-            MoeMessages.send(new CRemovePageFromYearbook(this.npc.getUUID()));
-            this.closeScreen();
+            MoeMessages.send(new CNPCRemove(this.npc.getUUID()));
+            this.npcs.remove(this.npc.getUUID());
+            if (++this.index >= this.npcs.size()) { --this.index; }
+            if (this.index < 0) { this.index = 0; }
+            if (this.npcs.isEmpty()) {
+                this.closeScreen();
+            } else {
+                this.getNPC(this.npcs.get(this.index));
+            }
         }));
-        this.updateButtons();
     }
     
     private void updateButtons() {
-        if (this.sim.isNPCsEmpty()) {
-            this.minecraft.player.sendStatusMessage(new TranslationTextComponent("gui.moeblocks.error.yearbook"), true);
-            this.minecraft.displayGuiScreen(null);
+        if (this.npcs.isEmpty()) {
+            this.minecraft.player.sendStatusMessage(new TranslationTextComponent("gui.moeblocks.error.empty"), true);
+            this.closeScreen();
         } else {
-            this.npc = this.sim.getNPC(this.pages.get(this.index));
-            this.entity = this.npc.get(this.minecraft, MoeEntities.MOE.get());
-            this.name = this.entity.getFullName();
-            this.stats[0] = String.format("%.0f", this.entity.getHealth());
-            this.stats[1] = String.format("%.0f", this.entity.getFoodLevel());
-            this.stats[2] = String.format("%.0f", this.entity.getLove());
-            this.stats[3] = String.format("%.0f", this.entity.getStress());
-            this.lines[0] = String.format(Trans.late("gui.moeblocks.label.dere"), this.entity.getDere().toString());
-            this.lines[1] = String.format(Trans.late("gui.moeblocks.label.blood"), this.entity.getBloodType().toString());
-            this.lines[2] = String.format(Trans.late("gui.moeblocks.label.age"), this.entity.getAgeInYears());
-            this.lines[3] = this.entity.getStory().toString();
-            if (this.npc.isDead()) { this.lines[3] = Trans.late("debug.moeblocks.story.dead"); }
-            if (this.npc.isEstranged()) { this.lines[3] = Trans.late("debug.moeblocks.story.estranged"); }
-            this.buttonPreviousPage.visible = this.index > 0;
-            this.buttonNextPage.visible = this.index < this.sim.totalNPCs() - 1;
-            this.buttonRemovePage.visible = this.npc.isDead();
+            this.buttonNextPage.visible = this.index + 1 < this.npcs.size();
+            this.buttonPreviousPage.visible = this.index - 1 >= 0;
+            this.buttonRemovePage.visible = this.npc.isRemovable();
         }
     }
 }

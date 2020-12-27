@@ -13,7 +13,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class PhoneScrollButton extends Button {
     public PhoneScrollButton(CellPhoneScreen parent, int x, int y, int delta) {
-        super(x, y, 7, 7, StringTextComponent.EMPTY, (button) -> parent.setScroll(delta, true));
+        super(x, y, 7, 7, StringTextComponent.EMPTY, (button) -> parent.setScroll(delta));
     }
     
     @Override

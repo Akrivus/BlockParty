@@ -37,8 +37,7 @@ public enum Gender implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        if (key.isEmpty()) { return Gender.FEMININE; }
-        return Gender.valueOf(key);
+        return Gender.get(key);
     }
     
     @Override
@@ -49,5 +48,13 @@ public enum Gender implements IStateEnum<AbstractNPCEntity> {
     @Override
     public String toString() {
         return this.names[(int) (Math.random() * this.names.length)];
+    }
+    
+    public static Gender get(String key) {
+        try {
+            return Gender.valueOf(key);
+        } catch (IllegalArgumentException e) {
+            return Gender.FEMININE;
+        }
     }
 }

@@ -21,6 +21,7 @@ public class MoeBlocks {
         Block block = state.getBlock();
         String key = MoeBlocks.get(block).getRegistryName().toString().replace(':', '/');
         if (PROPS.containsKey(block)) { key += String.format(".%s", state.get(PROPS.get(block)).toString()); }
+        if (block.isIn(MoeTags.CHESTS) && MoeMod.isChristmas()) { suffix = "christmas"; }
         if (suffix != null) { key += String.format(".%s", suffix); }
         return new ResourceLocation(MoeMod.ID, String.format("textures/entity/moe/%s.png", key));
     }
@@ -54,7 +55,7 @@ public class MoeBlocks {
         rename(Blocks.DIRT, Blocks.COARSE_DIRT);
         rename(Blocks.END_STONE_BRICKS, Blocks.END_STONE_BRICK_SLAB, Blocks.END_STONE_BRICK_STAIRS, Blocks.END_STONE_BRICK_WALL);
         rename(Blocks.GLASS, Blocks.GLASS_PANE);
-        rename(Blocks.GRANITE, Blocks.GRANITE_SLAB, Blocks.DIORITE_STAIRS, Blocks.DIORITE_WALL);
+        rename(Blocks.GRANITE, Blocks.GRANITE_SLAB, Blocks.GRANITE_STAIRS, Blocks.GRANITE_WALL);
         rename(Blocks.GRAY_STAINED_GLASS, Blocks.GRAY_STAINED_GLASS_PANE);
         rename(Blocks.GREEN_STAINED_GLASS, Blocks.GREEN_STAINED_GLASS_PANE);
         rename(Blocks.IRON_BLOCK, Blocks.IRON_BARS);

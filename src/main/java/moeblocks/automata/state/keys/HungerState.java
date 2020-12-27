@@ -45,12 +45,19 @@ public enum HungerState implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        if (key.isEmpty()) { return HungerState.SATISFIED; }
-        return HungerState.valueOf(key);
+        return HungerState.get(key);
     }
     
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
         return HungerState.values();
+    }
+    
+    public static HungerState get(String key) {
+        try {
+            return HungerState.valueOf(key);
+        } catch (IllegalArgumentException e) {
+            return HungerState.SATISFIED;
+        }
     }
 }

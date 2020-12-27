@@ -51,12 +51,19 @@ public enum MoonPhase implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        if (key.isEmpty()) { return MoonPhase.FULL; }
-        return MoonPhase.valueOf(key);
+        return MoonPhase.get(key);
     }
     
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
         return MoonPhase.values();
+    }
+    
+    public static MoonPhase get(String key) {
+        try {
+            return MoonPhase.valueOf(key);
+        } catch (IllegalArgumentException e) {
+            return MoonPhase.FULL;
+        }
     }
 }

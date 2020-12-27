@@ -74,12 +74,19 @@ public enum Emotion implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        if (key.isEmpty()) { return Emotion.NORMAL; }
-        return Emotion.valueOf(key);
+        return Emotion.get(key);
     }
     
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
         return Emotion.values();
+    }
+    
+    public static Emotion get(String key) {
+        try {
+            return Emotion.valueOf(key);
+        } catch (IllegalArgumentException e) {
+            return Emotion.NORMAL;
+        }
     }
 }

@@ -53,8 +53,7 @@ public enum Dere implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        if (key.isEmpty()) { return Dere.NYANDERE; }
-        return Dere.valueOf(key);
+        return Dere.get(key);
     }
     
     @Override
@@ -69,5 +68,13 @@ public enum Dere implements IStateEnum<AbstractNPCEntity> {
     
     public int getColor() {
         return this.color;
+    }
+    
+    public static Dere get(String key) {
+        try {
+            return Dere.valueOf(key);
+        } catch (IllegalArgumentException e) {
+            return Dere.NYANDERE;
+        }
     }
 }

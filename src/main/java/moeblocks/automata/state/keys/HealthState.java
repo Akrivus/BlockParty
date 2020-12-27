@@ -51,12 +51,19 @@ public enum HealthState implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        if (key.isEmpty()) { return HealthState.PERFECT; }
-        return HealthState.valueOf(key);
+        return HealthState.get(key);
     }
     
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
         return HealthState.values();
+    }
+    
+    public static HealthState get(String key) {
+        try {
+            return HealthState.valueOf(key);
+        } catch (IllegalArgumentException e) {
+            return HealthState.PERFECT;
+        }
     }
 }

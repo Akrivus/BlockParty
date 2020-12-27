@@ -52,8 +52,7 @@ public enum StoryPhase implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        if (key.isEmpty()) { return StoryPhase.INTRODUCTION; }
-        return StoryPhase.valueOf(key);
+        return StoryPhase.get(key);
     }
     
     @Override
@@ -64,5 +63,13 @@ public enum StoryPhase implements IStateEnum<AbstractNPCEntity> {
     @Override
     public String toString() {
         return Trans.late(String.format("debug.moeblocks.story.%s", this.name().toLowerCase()));
+    }
+    
+    public static StoryPhase get(String key) {
+        try {
+            return StoryPhase.valueOf(key);
+        } catch (IllegalArgumentException e) {
+            return StoryPhase.INTRODUCTION;
+        }
     }
 }

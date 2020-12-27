@@ -6,10 +6,11 @@ import moeblocks.client.screen.CellPhoneScreen;
 import moeblocks.datingsim.CacheNPC;
 import moeblocks.init.MoeMessages;
 import moeblocks.init.MoeSounds;
-import moeblocks.message.CPhoneTeleportMoe;
+import moeblocks.message.CNPCTeleport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.audio.SoundHandler;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -17,38 +18,22 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class PhoneContactButton extends Button {
-    private final CellPhoneScreen parent;
-    private final CacheNPC npc;
-    private final int index;
-    
-    public PhoneContactButton(CellPhoneScreen parent, CacheNPC npc, int index) {
-        super(0, 0, 81, 15, StringTextComponent.EMPTY, (button) -> PhoneContactButton.act(parent, npc, index));
-        this.parent = parent;
-        this.npc = npc;
-        this.index = index;
-    }
-    
-    private static void act(CellPhoneScreen parent, CacheNPC npc, int index) {
-        if (parent.isSelected(index)) {
-            MoeMessages.send(new CPhoneTeleportMoe(npc.getUUID()));
+    public PhoneContactButton(CellPhoneScreen parent, CacheNPC npc) {
+        super(0, 0, 81, 15, new StringTextComponent(npc.getName()), (button) -> {
+            MoeMessages.send(new CNPCTeleport(npc.getUUID()));
             parent.closeScreen();
-        } else {
-            parent.setSelected(index);
-        }
+        });
     }
     
     @Override
     public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        Minecraft.getInstance().getTextureManager().bindTexture(CellPhoneScreen.CELL_PHONE_TEXTURES);
-        int y = this.isHovered() ? 98 : 115;
-        this.blit(stack, this.x, this.y, 108, y, 81, 15);
-        Minecraft.getInstance().fontRenderer.drawString(stack, this.npc.getName(), this.x + 10, this.y + 4, this.isHovered() ? 0xffffff : 0);
-    }
-    
-    @Override
-    public boolean isHovered() {
-        return super.isHovered() || this.parent.isSelected(this.index);
+        int color = this.isHovered() ? 0xffffff : 0xff7fb6;
+        Minecraft minecraft = Minecraft.getInstance();
+        FontRenderer font = minecraft.fontRenderer;
+        minecraft.getTextureManager().bindTexture(CellPhoneScreen.CELL_PHONE_TEXTURES);
+        this.blit(stack, this.x, this.y, 108, this.isHovered() ? 98 : 115, 81, 15);
+        font.drawString(stack, this.getMessage().getString(), this.x + 10, this.y + 4, color);
     }
     
     @Override

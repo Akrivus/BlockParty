@@ -5,9 +5,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraftforge.common.util.Constants;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DatingSim {
@@ -35,19 +33,11 @@ public class DatingSim {
     }
     
     public CacheNPC getNPC(UUID uuid) {
-        AtomicReference<CacheNPC> npc = new AtomicReference<>();
-        this.characters.forEach((key, value) -> {
-            if (key.equals(uuid)) { npc.set(value); }
-        });
-        return npc.get();
+        return this.characters.get(uuid);
     }
     
     public CacheNPC removeNPC(UUID uuid) {
         return this.characters.remove(uuid);
-    }
-    
-    public int totalNPCs() {
-        return this.characters.size();
     }
     
     public CompoundNBT write(CompoundNBT compound) {
@@ -58,7 +48,9 @@ public class DatingSim {
         return compound;
     }
     
-    public boolean isNPCsEmpty() {
-        return this.characters.isEmpty();
+    public List<UUID> getNPCs() {
+        List<UUID> npcs = new ArrayList<>();
+        this.characters.forEach((npc, data) -> npcs.add(npc));
+        return npcs;
     }
 }

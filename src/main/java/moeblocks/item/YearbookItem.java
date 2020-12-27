@@ -16,33 +16,34 @@ import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 public class YearbookItem extends Item {
-    
     public YearbookItem() {
         super(new Properties().group(MoeItems.CreativeTab.INSTANCE));
     }
     
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
-        ItemStack stack = player.getHeldItem(hand);
-        if (world.isRemote()) { return ActionResult.resultPass(stack); }
-        DatingSim sim = DatingData.get(world, player.getUniqueID());
-        Iterator<UUID> it = sim.characters.keySet().iterator();
-        if (it.hasNext()) { MoeMessages.send(player, new SOpenYearbook(hand, sim, it.next())); }
-        return ActionResult.resultSuccess(stack);
+        if (world.isRemote()) { return ActionResult.resultPass(player.getHeldItem(hand)); }
+        return new ActionResult(this.openGui(player, hand, null), player.getHeldItem(hand));
     }
     
     @Override
     public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
-        if (!(entity instanceof AbstractNPCEntity) || entity.world.isRemote()) { return ActionResultType.PASS; }
-        AbstractNPCEntity character = (AbstractNPCEntity) entity;
-        if (character.getProtagonist().equals(player)) {
-            DatingSim sim = DatingData.get(player.world, player.getUniqueID());
-            MoeMessages.send(player, new SOpenYearbook(hand, sim, entity.getUniqueID()));
+        if (player.world.isRemote()) { return ActionResultType.PASS; }
+        if (entity instanceof AbstractNPCEntity) {
+            AbstractNPCEntity npc = (AbstractNPCEntity) entity;
+            if (npc.getProtagonist().equals(player)) { return this.openGui(player, hand, npc.getUUID()); }
             return ActionResultType.SUCCESS;
         }
         return ActionResultType.FAIL;
+    }
+    
+    private ActionResultType openGui(PlayerEntity player, Hand hand, UUID uuid) {
+        List<UUID> npcs = DatingData.get(player.world, player.getUniqueID()).getNPCs();
+        MoeMessages.send(player, new SOpenYearbook(npcs, uuid == null ? npcs.get(0) : uuid, hand));
+        return ActionResultType.SUCCESS;
     }
 }

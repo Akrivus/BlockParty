@@ -55,12 +55,19 @@ public enum HeldItemState implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        if (key.isEmpty()) { return HeldItemState.DEFAULT; }
-        return HeldItemState.valueOf(key);
+        return HeldItemState.get(key);
     }
     
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
         return HeldItemState.values();
+    }
+    
+    public static HeldItemState get(String key) {
+        try {
+            return HeldItemState.valueOf(key);
+        } catch (IllegalArgumentException e) {
+            return HeldItemState.DEFAULT;
+        }
     }
 }

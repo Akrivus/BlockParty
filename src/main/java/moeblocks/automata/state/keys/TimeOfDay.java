@@ -60,12 +60,19 @@ public enum TimeOfDay implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        if (key.isEmpty()) { return TimeOfDay.MORNING; }
-        return TimeOfDay.valueOf(key);
+        return TimeOfDay.get(key);
     }
     
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
         return TimeOfDay.values();
+    }
+    
+    public static TimeOfDay get(String key) {
+        try {
+            return TimeOfDay.valueOf(key);
+        } catch (IllegalArgumentException e) {
+            return TimeOfDay.MORNING;
+        }
     }
 }

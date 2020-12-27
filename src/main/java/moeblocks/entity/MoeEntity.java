@@ -6,6 +6,7 @@ import moeblocks.automata.state.keys.Dere;
 import moeblocks.automata.state.keys.Gender;
 import moeblocks.init.MoeBlocks;
 import moeblocks.init.MoeEntities;
+import moeblocks.init.MoeSounds;
 import moeblocks.init.MoeTags;
 import moeblocks.util.Trans;
 import net.minecraft.block.Block;
@@ -172,6 +173,12 @@ public class MoeEntity extends AbstractNPCEntity {
         }
     }
     
+    @Override
+    protected void onTeleport() {
+        this.playSound(MoeSounds.MOE_ENTITY_FOLLOW.get());
+        this.setFollowing(true);
+    }
+    
     private TileEntity getTileEntity() {
         return this.getBlockData().hasTileEntity() ? TileEntity.readTileEntity(this.getBlockData(), this.getExtraBlockData()) : null;
     }
@@ -251,6 +258,17 @@ public class MoeEntity extends AbstractNPCEntity {
         return this.isTagSafe(MoeTags.GLOWING);
     }
     
+    @Override
+    protected void playStepSound(BlockPos pos, BlockState block) {
+        this.playSound(MoeBlocks.getStepSound(this.getBlockData()), 0.15F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
+        super.playStepSound(pos, block);
+    }
+    
+    @Override
+    public boolean isImmuneToFire() {
+        return this.getBlockData().isFlammable(this.world, this.getPosition(), this.getHorizontalFacing());
+    }
+    
     public static boolean spawn(World world, BlockPos block, BlockPos spawn, float yaw, float pitch, Dere dere, PlayerEntity player) {
         BlockState state = world.getBlockState(block);
         if (!state.getBlock().isIn(MoeTags.MOEABLES)) { return false; }
@@ -266,16 +284,5 @@ public class MoeEntity extends AbstractNPCEntity {
             return world.destroyBlock(block, false);
         }
         return false;
-    }
-    
-    @Override
-    protected void playStepSound(BlockPos pos, BlockState block) {
-        this.playSound(MoeBlocks.getStepSound(this.getBlockData()), 0.15F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
-        super.playStepSound(pos, block);
-    }
-    
-    @Override
-    public boolean isImmuneToFire() {
-        return this.getBlockData().isFlammable(this.world, this.getPosition(), this.getHorizontalFacing());
     }
 }

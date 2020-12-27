@@ -50,8 +50,7 @@ public enum BloodType implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        if (key.isEmpty()) { return BloodType.O; }
-        return BloodType.valueOf(key);
+        return BloodType.get(key);
     }
     
     @Override
@@ -67,5 +66,13 @@ public enum BloodType implements IStateEnum<AbstractNPCEntity> {
         List<BloodType> weights = new ArrayList<>();
         for (BloodType bloodType : BloodType.values()) { weights.addAll(bloodType.weights); }
         return weights.get(rand.nextInt(weights.size()));
+    }
+    
+    public static BloodType get(String key) {
+        try {
+            return BloodType.valueOf(key);
+        } catch (IllegalArgumentException e) {
+            return BloodType.O;
+        }
     }
 }

@@ -1,32 +1,39 @@
 package moeblocks.datingsim;
 
 import moeblocks.entity.AbstractNPCEntity;
+import moeblocks.util.ChunkScheduler;
+import moeblocks.util.DimBlockPos;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 public class CacheNPC {
-    public static final Map<UUID, BlockPos> positions = new HashMap<>();
+    public static final Map<UUID, DimBlockPos> positions = new HashMap<>();
     private final UUID uuid;
-    private BlockPos pos;
+    private DimBlockPos pos;
     private String name;
     private CompoundNBT tag;
     private boolean dead;
     private boolean estranged;
     
     public CacheNPC(AbstractNPCEntity npc) {
-        this.uuid = npc.getUniqueID();
+        this.uuid = npc.getUUID();
         this.sync(npc);
     }
     
     public void sync(AbstractNPCEntity npc) {
-        this.setPosition(npc.getPosition());
+        this.setPosition(new DimBlockPos(npc));
         this.setName(npc.getFullName());
         this.setTag(npc);
         this.setDead(false);
@@ -35,18 +42,34 @@ public class CacheNPC {
     
     public CacheNPC(CompoundNBT compound) {
         this.uuid = compound.getUniqueId("UUID");
-        this.setPosition(BlockPos.fromLong(compound.getLong("Position")));
+        this.setPosition(new DimBlockPos(compound.getCompound("Position")));
         this.setName(compound.getString("Name"));
         this.setTag(compound.getCompound("NPC"));
         this.setDead(compound.getBoolean("Dead"));
         this.setEstranged(compound.getBoolean("Estranged"));
     }
     
-    public AbstractNPCEntity get(Minecraft minecraft, EntityType<? extends AbstractNPCEntity> type) {
-        AbstractNPCEntity entity = type.create(minecraft.world);
-        entity.setPosition(minecraft.player.getPosX(), minecraft.player.getPosY(), minecraft.player.getPosZ());
+    public AbstractNPCEntity clone(World world, BlockPos pos, EntityType<? extends AbstractNPCEntity> type) {
+        AbstractNPCEntity entity = type.create(world);
+        entity.setPosition(pos.getX(), pos.getY(), pos.getZ());
         entity.readCharacter(this.getTag());
         return entity;
+    }
+    
+    public AbstractNPCEntity clone(Minecraft minecraft, EntityType<? extends AbstractNPCEntity> type) {
+        return this.clone(minecraft.world, minecraft.player.getPosition(), type);
+    }
+    
+    public AbstractNPCEntity get(MinecraftServer server) {
+        DimBlockPos coord = CacheNPC.positions.get(this.getUUID());
+        if (coord == null) { return null; }
+        ServerWorld world = server.getWorld(coord.getDim());
+        if (world == null) { return null; }
+        List<AbstractNPCEntity> npcs = world.getEntitiesWithinAABB(AbstractNPCEntity.class, coord.getAABB());
+        for (AbstractNPCEntity npc : npcs) {
+            if (this.getUUID().equals(npc.getUUID())) { return npc; }
+        }
+        return null;
     }
     
     public void set(DatingData data, Consumer<CacheNPC> transaction) {
@@ -56,7 +79,7 @@ public class CacheNPC {
     
     public CompoundNBT write(CompoundNBT compound) {
         compound.putUniqueId("UUID", this.uuid);
-        compound.putLong("Position", this.pos.toLong());
+        compound.put("Position", this.pos.write());
         compound.putString("Name", this.name);
         compound.put("NPC", this.tag);
         compound.putBoolean("Dead", this.dead);
@@ -76,11 +99,11 @@ public class CacheNPC {
         return this.tag;
     }
     
-    public BlockPos getPosition() {
+    public DimBlockPos getPosition() {
         return this.pos;
     }
     
-    public void setPosition(BlockPos pos) {
+    public void setPosition(DimBlockPos pos) {
         CacheNPC.positions.put(this.uuid, this.pos = pos);
     }
     
@@ -111,5 +134,9 @@ public class CacheNPC {
     
     public void setEstranged(boolean estranged) {
         this.estranged = estranged;
+    }
+    
+    public boolean isRemovable() {
+        return this.isDead() || this.isEstranged();
     }
 }

@@ -18,6 +18,11 @@ public class SenpaiEntity extends AbstractNPCEntity {
     }
     
     @Override
+    protected void onTeleport() {
+    
+    }
+    
+    @Override
     public int getBaseAge() {
         return 18;
     }

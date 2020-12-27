@@ -51,12 +51,19 @@ public enum StressState implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        if (key.isEmpty()) { return StressState.RELAXED; }
-        return StressState.valueOf(key);
+        return StressState.get(key);
     }
     
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
         return StressState.values();
+    }
+    
+    public static StressState get(String key) {
+        try {
+            return StressState.valueOf(key);
+        } catch (IllegalArgumentException e) {
+            return StressState.RELAXED;
+        }
     }
 }

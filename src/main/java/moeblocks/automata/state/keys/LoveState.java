@@ -51,12 +51,19 @@ public enum LoveState implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        if (key.isEmpty()) { return LoveState.ACQUAINTED; }
-        return LoveState.valueOf(key);
+        return LoveState.get(key);
     }
     
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
         return LoveState.values();
+    }
+    
+    public static LoveState get(String key) {
+        try {
+            return LoveState.valueOf(key);
+        } catch (IllegalArgumentException e) {
+            return LoveState.ACQUAINTED;
+        }
     }
 }

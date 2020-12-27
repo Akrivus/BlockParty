@@ -48,12 +48,19 @@ public enum PeriodOfTime implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        if (key.isEmpty()) { return PeriodOfTime.ATTACHED; }
-        return PeriodOfTime.valueOf(key);
+        return PeriodOfTime.get(key);
     }
     
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
         return PeriodOfTime.values();
+    }
+    
+    public static PeriodOfTime get(String key) {
+        try {
+            return PeriodOfTime.valueOf(key);
+        } catch (IllegalArgumentException e) {
+            return PeriodOfTime.ATTACHED;
+        }
     }
 }
