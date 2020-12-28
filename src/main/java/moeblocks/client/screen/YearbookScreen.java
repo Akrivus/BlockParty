@@ -4,24 +4,29 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moeblocks.MoeMod;
-import moeblocks.automata.state.keys.Animation;
-import moeblocks.client.screen.widget.RemovePageButton;
-import moeblocks.client.screen.widget.TurnPageButton;
+import moeblocks.automata.state.enums.Animation;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeMessages;
-import moeblocks.message.CNPCRemove;
+import moeblocks.init.MoeSounds;
 import moeblocks.message.CRemovePage;
 import moeblocks.util.Trans;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -32,8 +37,8 @@ public class YearbookScreen extends ControllerScreen {
     public static final ResourceLocation YEARBOOK_TEXTURES = new ResourceLocation(MoeMod.ID, "textures/gui/yearbook.png");
     private final String[] stats = new String[4];
     private final String[] lines = new String[4];
-    private String name;
     private AbstractNPCEntity entity;
+    private String name;
     private Button buttonPreviousPage;
     private Button buttonNextPage;
     private Button buttonRemovePage;
@@ -193,6 +198,50 @@ public class YearbookScreen extends ControllerScreen {
             this.buttonNextPage.visible = this.index + 1 < this.npcs.size();
             this.buttonPreviousPage.visible = this.index - 1 >= 0;
             this.buttonRemovePage.visible = this.npc.isRemovable();
+        }
+    }
+    
+    @OnlyIn(Dist.CLIENT)
+    public static class TurnPageButton extends Button {
+        private final int delta;
+        
+        public TurnPageButton(int x, int y, int delta, IPressable button) {
+            super(x, y, 7, 10, StringTextComponent.EMPTY, button);
+            this.delta = delta;
+        }
+        
+        @Override
+        public void playDownSound(SoundHandler sound) {
+            sound.play(SimpleSound.master(SoundEvents.ITEM_BOOK_PAGE_TURN, 1.0F));
+        }
+        
+        @Override
+        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            Minecraft.getInstance().getTextureManager().bindTexture(YEARBOOK_TEXTURES);
+            int x = this.delta > 0 ? 226 : 147;
+            int y = this.isHovered() ? 35 : 63;
+            this.blit(stack, this.x, this.y, x, y, 7, 10);
+        }
+    }
+    
+    @OnlyIn(Dist.CLIENT)
+    public static class RemovePageButton extends Button {
+        public RemovePageButton(int x, int y, IPressable button) {
+            super(x, y, 18, 18, StringTextComponent.EMPTY, button);
+        }
+        
+        @Override
+        public void playDownSound(SoundHandler sound) {
+            sound.play(SimpleSound.master(MoeSounds.YEARBOOK_REMOVE_PAGE.get(), 1.0F));
+        }
+        
+        @Override
+        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            Minecraft.getInstance().getTextureManager().bindTexture(YEARBOOK_TEXTURES);
+            int x = this.isHovered() ? 164 : 146;
+            this.blit(stack, this.x, this.y, x, 7, 18, 18);
         }
     }
 }

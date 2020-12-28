@@ -1,6 +1,7 @@
 package moeblocks.item;
 
-import moeblocks.automata.state.keys.Dere;
+import moeblocks.MoeMod;
+import moeblocks.automata.state.enums.Dere;
 import moeblocks.entity.MoeEntity;
 import moeblocks.init.MoeItems;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,7 +15,7 @@ import net.minecraft.world.World;
 public class MoeSpawnItem extends Item {
     
     public MoeSpawnItem() {
-        super(new Properties().group(MoeItems.CreativeTab.INSTANCE));
+        super(new Properties().group(MoeMod.ITEMS));
     }
     
     @Override

@@ -1,39 +1,38 @@
-package moeblocks.automata.state.keys;
+package moeblocks.automata.state.enums;
 
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
 import moeblocks.automata.IStateGoal;
 import moeblocks.automata.state.ValueGoalState;
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.util.Trans;
 
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public enum StoryPhase implements IStateEnum<AbstractNPCEntity> {
-    INTRODUCTION((npc, list) -> {
+public enum MoonPhase implements IStateEnum<AbstractNPCEntity> {
+    NEW((npc, list) -> {
     
-    }, (npc) -> npc.getProgress(), 0, 1),
-    INFATUATION((npc, list) -> {
+    }, (npc) -> npc.world.getMoonFactor(), 0.00F, 0.25F),
+    CRESCENT((npc, list) -> {
     
-    }, (npc) -> npc.getProgress(), 1, 2),
-    CONFUSION((npc, list) -> {
+    }, (npc) -> npc.world.getMoonFactor(), 0.25F, 0.50F),
+    QUARTER((npc, list) -> {
     
-    }, (npc) -> npc.getProgress(), 2, 3),
-    RESOLUTION((npc, list) -> {
+    }, (npc) -> npc.world.getMoonFactor(), 0.50F, 0.75F),
+    GIBBOUS((npc, list) -> {
     
-    }, (npc) -> npc.getProgress(), 3, 4),
-    TRAGEDY((npc, list) -> {
+    }, (npc) -> npc.world.getMoonFactor(), 0.75F, 1.00F),
+    FULL((npc, list) -> {
     
-    }, (npc) -> npc.getProgress(), 4, 5);
+    }, (npc) -> npc.world.getMoonFactor(), 1.00F, 1.00F);
     
     private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
     private final Function<AbstractNPCEntity, Float> function;
     private final float start;
     private final float end;
     
-    StoryPhase(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
+    MoonPhase(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
         this.generator = generator;
         this.function = function;
         this.start = start;
@@ -52,24 +51,19 @@ public enum StoryPhase implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        return StoryPhase.get(key);
+        return MoonPhase.get(key);
     }
     
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
-        return StoryPhase.values();
+        return MoonPhase.values();
     }
     
-    @Override
-    public String toString() {
-        return Trans.late(String.format("debug.moeblocks.story.%s", this.name().toLowerCase()));
-    }
-    
-    public static StoryPhase get(String key) {
+    public static MoonPhase get(String key) {
         try {
-            return StoryPhase.valueOf(key);
+            return MoonPhase.valueOf(key);
         } catch (IllegalArgumentException e) {
-            return StoryPhase.INTRODUCTION;
+            return MoonPhase.FULL;
         }
     }
 }

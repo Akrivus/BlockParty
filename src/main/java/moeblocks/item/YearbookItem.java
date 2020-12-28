@@ -1,5 +1,6 @@
 package moeblocks.item;
 
+import moeblocks.MoeMod;
 import moeblocks.datingsim.DatingData;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeItems;
@@ -19,7 +20,7 @@ import java.util.UUID;
 
 public class YearbookItem extends Item {
     public YearbookItem() {
-        super(new Properties().group(MoeItems.CreativeTab.INSTANCE));
+        super(new Properties().group(MoeMod.ITEMS));
     }
     
     @Override

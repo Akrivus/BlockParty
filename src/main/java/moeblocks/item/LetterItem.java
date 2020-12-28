@@ -1,5 +1,6 @@
 package moeblocks.item;
 
+import moeblocks.MoeMod;
 import moeblocks.init.MoeItems;
 import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.Item;
@@ -12,7 +13,7 @@ public class LetterItem extends Item {
     public static final ResourceLocation CLOSED_PROPERTY = new ResourceLocation("closed");
     
     public LetterItem() {
-        super(new Properties().group(MoeItems.CreativeTab.INSTANCE));
+        super(new Properties().group(MoeMod.ITEMS));
     }
     
     public static boolean isOpen(ItemStack stack) {

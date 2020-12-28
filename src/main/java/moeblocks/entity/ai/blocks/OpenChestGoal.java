@@ -1,7 +1,7 @@
 package moeblocks.entity.ai.blocks;
 
 import moeblocks.automata.IStateGoal;
-import moeblocks.automata.state.keys.Emotion;
+import moeblocks.automata.state.enums.Emotion;
 import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.player.PlayerEntity;

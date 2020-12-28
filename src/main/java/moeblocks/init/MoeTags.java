@@ -1,7 +1,7 @@
 package moeblocks.init;
 
 import moeblocks.MoeMod;
-import moeblocks.automata.state.keys.Dere;
+import moeblocks.automata.state.enums.Dere;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.tags.BlockTags;

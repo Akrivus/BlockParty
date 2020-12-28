@@ -24,6 +24,7 @@ public class MoeMessages {
     }
     
     public static void register() {
+        register(CNPCInteract.class, CNPCInteract::new);
         register(CNPCQuery.class, CNPCQuery::new);
         register(CNPCRemove.class, CNPCRemove::new);
         register(CNPCRequest.class, CNPCRequest::new);
@@ -32,6 +33,7 @@ public class MoeMessages {
         register(SNPCList.class, SNPCList::new);
         register(SNPCResponse.class, SNPCResponse::new);
         register(SOpenCellPhone.class, SOpenCellPhone::new);
+        register(SOpenDialogue.class, SOpenDialogue::new);
         register(SOpenYearbook.class, SOpenYearbook::new);
     }
     

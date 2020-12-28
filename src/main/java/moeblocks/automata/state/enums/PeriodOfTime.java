@@ -1,4 +1,4 @@
-package moeblocks.automata.state.keys;
+package moeblocks.automata.state.enums;
 
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
@@ -10,29 +10,26 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public enum StressState implements IStateEnum<AbstractNPCEntity> {
-    BROKEN((npc, list) -> {
+public enum PeriodOfTime implements IStateEnum<AbstractNPCEntity> {
+    ATTACHED((npc, list) -> {
     
-    }, (npc) -> npc.getStress(), 16, 20),
-    PANICKED((npc, list) -> {
+    }, (npc) -> (float) npc.getTimeSinceInteraction(), 0, 24000),
+    PROTESTING((npc, list) -> {
     
-    }, (npc) -> npc.getStress(), 12, 16),
-    STRESSED((npc, list) -> {
+    }, (npc) -> (float) npc.getTimeSinceInteraction(), 24000, 72000),
+    DESPAIRED((npc, list) -> {
     
-    }, (npc) -> npc.getStress(), 8, 12),
-    ALERT((npc, list) -> {
+    }, (npc) -> (float) npc.getTimeSinceInteraction(), 72000, 240000),
+    DETACHED((npc, list) -> {
     
-    }, (npc) -> npc.getStress(), 4, 8),
-    RELAXED((npc, list) -> {
-    
-    }, (npc) -> npc.getStress(), 0, 4);
+    }, (npc) -> (float) npc.getTimeSinceInteraction(), 240000, Float.MAX_VALUE);
     
     private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
     private final Function<AbstractNPCEntity, Float> function;
     private final float start;
     private final float end;
     
-    StressState(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
+    PeriodOfTime(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
         this.generator = generator;
         this.function = function;
         this.start = start;
@@ -51,19 +48,19 @@ public enum StressState implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        return StressState.get(key);
+        return PeriodOfTime.get(key);
     }
     
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
-        return StressState.values();
+        return PeriodOfTime.values();
     }
     
-    public static StressState get(String key) {
+    public static PeriodOfTime get(String key) {
         try {
-            return StressState.valueOf(key);
+            return PeriodOfTime.valueOf(key);
         } catch (IllegalArgumentException e) {
-            return StressState.RELAXED;
+            return PeriodOfTime.ATTACHED;
         }
     }
 }

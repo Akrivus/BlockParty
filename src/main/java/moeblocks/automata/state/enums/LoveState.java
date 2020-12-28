@@ -1,4 +1,4 @@
-package moeblocks.automata.state.keys;
+package moeblocks.automata.state.enums;
 
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
@@ -10,26 +10,29 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public enum PeriodOfTime implements IStateEnum<AbstractNPCEntity> {
-    ATTACHED((npc, list) -> {
+public enum LoveState implements IStateEnum<AbstractNPCEntity> {
+    INTIMATE((npc, list) -> {
     
-    }, (npc) -> (float) npc.getTimeSinceInteraction(), 0, 24000),
-    PROTESTING((npc, list) -> {
+    }, (npc) -> npc.getLove(), 16, 20),
+    CLOSE((npc, list) -> {
     
-    }, (npc) -> (float) npc.getTimeSinceInteraction(), 24000, 72000),
-    DESPAIRED((npc, list) -> {
+    }, (npc) -> npc.getLove(), 12, 16),
+    FRIENDLY((npc, list) -> {
     
-    }, (npc) -> (float) npc.getTimeSinceInteraction(), 72000, 240000),
-    DETACHED((npc, list) -> {
+    }, (npc) -> npc.getLove(), 8, 12),
+    ACQUAINTED((npc, list) -> {
     
-    }, (npc) -> (float) npc.getTimeSinceInteraction(), 240000, Float.MAX_VALUE);
+    }, (npc) -> npc.getLove(), 4, 8),
+    ESTRANGED((npc, list) -> {
+    
+    }, (npc) -> npc.getLove(), 0, 4);
     
     private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
     private final Function<AbstractNPCEntity, Float> function;
     private final float start;
     private final float end;
     
-    PeriodOfTime(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
+    LoveState(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
         this.generator = generator;
         this.function = function;
         this.start = start;
@@ -48,19 +51,19 @@ public enum PeriodOfTime implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        return PeriodOfTime.get(key);
+        return LoveState.get(key);
     }
     
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
-        return PeriodOfTime.values();
+        return LoveState.values();
     }
     
-    public static PeriodOfTime get(String key) {
+    public static LoveState get(String key) {
         try {
-            return PeriodOfTime.valueOf(key);
+            return LoveState.valueOf(key);
         } catch (IllegalArgumentException e) {
-            return PeriodOfTime.ATTACHED;
+            return LoveState.ACQUAINTED;
         }
     }
 }

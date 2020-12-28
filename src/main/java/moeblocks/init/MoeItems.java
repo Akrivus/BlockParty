@@ -34,17 +34,4 @@ public class MoeItems {
         ItemModelsProperties.registerProperty(MoeItems.INVITE.get(), LetterItem.CLOSED_PROPERTY, LetterItem.CLOSED_PROPERTY_GETTER);
         ItemModelsProperties.registerProperty(MoeItems.LETTER.get(), LetterItem.CLOSED_PROPERTY, LetterItem.CLOSED_PROPERTY_GETTER);
     }
-    
-    public static class CreativeTab extends ItemGroup {
-        public static final CreativeTab INSTANCE = new CreativeTab();
-        
-        public CreativeTab() {
-            super(MoeMod.ID);
-        }
-        
-        @Override
-        public ItemStack createIcon() {
-            return new ItemStack(MoeItems.MOE_DIE.get());
-        }
-    }
 }

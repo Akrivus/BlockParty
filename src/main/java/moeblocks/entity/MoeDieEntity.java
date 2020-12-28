@@ -1,6 +1,6 @@
 package moeblocks.entity;
 
-import moeblocks.automata.state.keys.Dere;
+import moeblocks.automata.state.enums.Dere;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeItems;
 import moeblocks.init.MoeTags;

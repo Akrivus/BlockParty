@@ -3,12 +3,21 @@ package moeblocks.client.screen;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moeblocks.MoeMod;
-import moeblocks.client.screen.widget.PhoneContactButton;
-import moeblocks.client.screen.widget.PhoneScrollButton;
+import moeblocks.datingsim.CacheNPC;
+import moeblocks.init.MoeMessages;
+import moeblocks.init.MoeSounds;
+import moeblocks.message.CNPCTeleport;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.DialogTexts;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -17,7 +26,7 @@ import java.util.UUID;
 
 public class CellPhoneScreen extends ControllerScreen {
     public static final ResourceLocation CELL_PHONE_TEXTURES = new ResourceLocation(MoeMod.ID, "textures/gui/cell_phone.png");
-    private final List<PhoneContactButton> contacts = new ArrayList<>();
+    private final List<ContactButton> contacts = new ArrayList<>();
     private int start;
     private int total;
     private Button buttonScrollUp;
@@ -38,7 +47,7 @@ public class CellPhoneScreen extends ControllerScreen {
         if (this.npc.isRemovable()) {
             this.npcs.remove(this.npc);
         } else {
-            this.contacts.add(new PhoneContactButton(this, this.npc));
+            this.contacts.add(new ContactButton(this, this.npc));
         }
         ++this.total;
         this.updateButtons();
@@ -92,8 +101,8 @@ public class CellPhoneScreen extends ControllerScreen {
     @Override
     protected void init() {
         this.addButton(new Button(this.width / 2 - 54, 190, 108, 20, DialogTexts.GUI_DONE, (button) -> this.closeScreen()));
-        this.buttonScrollUp = this.addButton(new PhoneScrollButton(this, this.width / 2 + 37, 32, -1));
-        this.buttonScrollDown = this.addButton(new PhoneScrollButton(this, this.width / 2 + 37, 91, 1));
+        this.buttonScrollUp = this.addButton(new ScrollButton(this, this.width / 2 + 37, 32, -1));
+        this.buttonScrollDown = this.addButton(new ScrollButton(this, this.width / 2 + 37, 91, 1));
         this.updateButtons();
     }
     
@@ -121,6 +130,50 @@ public class CellPhoneScreen extends ControllerScreen {
                 button.y = 32 + (y % 4) * 17;
                 this.addButton(button);
             }
+        }
+    }
+    
+    @OnlyIn(Dist.CLIENT)
+    public static class ScrollButton extends Button {
+        public ScrollButton(CellPhoneScreen parent, int x, int y, int delta) {
+            super(x, y, 7, 7, StringTextComponent.EMPTY, (button) -> parent.setScroll(delta));
+        }
+        
+        @Override
+        public void playDownSound(SoundHandler sound) { }
+        
+        @Override
+        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            Minecraft.getInstance().getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
+            int x = this.isHovered() ? 116 : 108;
+            this.blit(stack, this.x, this.y, x, 73, 7, 7);
+        }
+    }
+    
+    @OnlyIn(Dist.CLIENT)
+    public static class ContactButton extends Button {
+        public ContactButton(CellPhoneScreen parent, CacheNPC npc) {
+            super(0, 0, 81, 15, new StringTextComponent(npc.getName()), (button) -> {
+                MoeMessages.send(new CNPCTeleport(npc.getUUID()));
+                parent.closeScreen();
+            });
+        }
+        
+        @Override
+        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            int color = this.isHovered() ? 0xffffff : 0xff7fb6;
+            Minecraft minecraft = Minecraft.getInstance();
+            FontRenderer font = minecraft.fontRenderer;
+            minecraft.getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
+            this.blit(stack, this.x, this.y, 108, this.isHovered() ? 98 : 115, 81, 15);
+            font.drawString(stack, this.getMessage().getString(), this.x + 10, this.y + 4, color);
+        }
+        
+        @Override
+        public void playDownSound(SoundHandler sound) {
+            sound.play(SimpleSound.master(MoeSounds.CELL_PHONE_BUTTON.get(), 1.0F));
         }
     }
 }

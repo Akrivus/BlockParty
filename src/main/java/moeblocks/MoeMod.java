@@ -1,6 +1,8 @@
 package moeblocks;
 
 import moeblocks.init.*;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -16,6 +18,12 @@ public class MoeMod {
     public static final String VERSION = "20.29.11";
     public static final String ID = "moeblocks";
     public static final SimpleChannel CHANNEL = MoeMessages.init(new ResourceLocation(MoeMod.ID));
+    public static final ItemGroup ITEMS = new ItemGroup(MoeMod.ID) {
+        @Override
+        public ItemStack createIcon() {
+            return new ItemStack(MoeItems.MOE_DIE.get());
+        }
+    };
 
     public MoeMod() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();

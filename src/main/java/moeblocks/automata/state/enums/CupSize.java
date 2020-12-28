@@ -1,4 +1,4 @@
-package moeblocks.automata.state.keys;
+package moeblocks.automata.state.enums;
 
 
 import moeblocks.automata.IState;

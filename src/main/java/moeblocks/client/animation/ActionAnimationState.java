@@ -1,6 +1,6 @@
 package moeblocks.client.animation;
 
-import moeblocks.automata.state.keys.Animation;
+import moeblocks.automata.state.enums.Animation;
 import moeblocks.entity.AbstractNPCEntity;
 
 public abstract class ActionAnimationState extends AnimationState {

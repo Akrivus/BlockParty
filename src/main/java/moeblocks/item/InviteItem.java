@@ -1,5 +1,6 @@
 package moeblocks.item;
 
+import moeblocks.MoeMod;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeItems;
 import net.minecraft.client.util.ITooltipFlag;
@@ -22,7 +23,7 @@ import java.util.List;
 public class InviteItem extends Item {
     
     public InviteItem() {
-        super(new Properties().group(MoeItems.CreativeTab.INSTANCE));
+        super(new Properties().group(MoeMod.ITEMS));
     }
     
     @Override

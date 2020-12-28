@@ -1,4 +1,4 @@
-package moeblocks.automata.state.keys;
+package moeblocks.automata.state.enums;
 
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
@@ -10,29 +10,29 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public enum LoveState implements IStateEnum<AbstractNPCEntity> {
-    INTIMATE((npc, list) -> {
+public enum HealthState implements IStateEnum<AbstractNPCEntity> {
+    PERFECT((npc, list) -> {
     
-    }, (npc) -> npc.getLove(), 16, 20),
-    CLOSE((npc, list) -> {
+    }, (npc) -> npc.getHealth(), 16, 20),
+    GOOD((npc, list) -> {
     
-    }, (npc) -> npc.getLove(), 12, 16),
-    FRIENDLY((npc, list) -> {
+    }, (npc) -> npc.getHealth(), 12, 16),
+    FAIR((npc, list) -> {
     
-    }, (npc) -> npc.getLove(), 8, 12),
-    ACQUAINTED((npc, list) -> {
+    }, (npc) -> npc.getHealth(), 8, 12),
+    SERIOUS((npc, list) -> {
     
-    }, (npc) -> npc.getLove(), 4, 8),
-    ESTRANGED((npc, list) -> {
+    }, (npc) -> npc.getHealth(), 4, 8),
+    CRITICAL((npc, list) -> {
     
-    }, (npc) -> npc.getLove(), 0, 4);
+    }, (npc) -> npc.getHealth(), 0, 4);
     
     private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
     private final Function<AbstractNPCEntity, Float> function;
     private final float start;
     private final float end;
     
-    LoveState(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
+    HealthState(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
         this.generator = generator;
         this.function = function;
         this.start = start;
@@ -51,19 +51,19 @@ public enum LoveState implements IStateEnum<AbstractNPCEntity> {
     
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
-        return LoveState.get(key);
+        return HealthState.get(key);
     }
     
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
-        return LoveState.values();
+        return HealthState.values();
     }
     
-    public static LoveState get(String key) {
+    public static HealthState get(String key) {
         try {
-            return LoveState.valueOf(key);
+            return HealthState.valueOf(key);
         } catch (IllegalArgumentException e) {
-            return LoveState.ACQUAINTED;
+            return HealthState.PERFECT;
         }
     }
 }

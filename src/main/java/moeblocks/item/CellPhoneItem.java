@@ -1,5 +1,6 @@
 package moeblocks.item;
 
+import moeblocks.MoeMod;
 import moeblocks.datingsim.DatingData;
 import moeblocks.init.MoeItems;
 import moeblocks.init.MoeMessages;
@@ -13,7 +14,7 @@ import net.minecraft.world.World;
 
 public class CellPhoneItem extends Item {
     public CellPhoneItem() {
-        super(new Properties().group(MoeItems.CreativeTab.INSTANCE));
+        super(new Properties().group(MoeMod.ITEMS));
     }
     
     @Override

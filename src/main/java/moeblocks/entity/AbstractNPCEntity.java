@@ -2,16 +2,24 @@ package moeblocks.entity;
 
 import moeblocks.automata.Automaton;
 import moeblocks.automata.IStateEnum;
-import moeblocks.automata.state.keys.*;
+import moeblocks.automata.state.enums.*;
 import moeblocks.datingsim.CacheNPC;
 import moeblocks.datingsim.DatingData;
 import moeblocks.datingsim.DatingSim;
+import moeblocks.datingsim.convo.Conversation;
+import moeblocks.datingsim.convo.Dialogue;
+import moeblocks.datingsim.convo.Scene;
+import moeblocks.datingsim.convo.enums.Interaction;
+import moeblocks.datingsim.convo.enums.Response;
 import moeblocks.entity.ai.*;
 import moeblocks.entity.ai.attack.BasicAttackGoal;
 import moeblocks.entity.ai.items.ConsumeGoal;
 import moeblocks.entity.ai.target.RevengeTarget;
+import moeblocks.init.MoeConvos;
 import moeblocks.init.MoeItems;
+import moeblocks.init.MoeMessages;
 import moeblocks.init.MoeTags;
+import moeblocks.message.SOpenDialogue;
 import moeblocks.util.ChunkScheduler;
 import moeblocks.util.DimBlockPos;
 import moeblocks.util.VoiceLines;
@@ -86,6 +94,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     private LivingEntity entityStaring;
     private LivingEntity entityToAvoid;
     private BlockState blockToMine;
+    private Conversation conversation;
+    private Scene scene;
     private int timeSinceAvoid;
     private int timeSinceInteraction;
     private int timeSinceStare;
@@ -132,6 +142,15 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     @Override
     public boolean isInvulnerableTo(DamageSource source) {
         return this.canFly() && source == DamageSource.FALL;
+    }
+    
+    @Override
+    public boolean attackEntityFrom(DamageSource source, float amount) {
+        if (this.canConverseWith(source.getTrueSource())) {
+            this.setConversation(MoeConvos.find(Interaction.LEFT_CLICK, this));
+            if (this.isInConversation()) { return false; }
+        }
+        return super.attackEntityFrom(source, amount);
     }
     
     @Override
@@ -375,6 +394,33 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         this.sync();
     }
     
+    public Conversation getConversation() {
+        return this.conversation;
+    }
+    
+    public void setConversation(Conversation conversation) {
+        this.conversation = conversation;
+        if (this.conversation != null) {
+            this.setScene(this.conversation.getFirstScene());
+        }
+    }
+    
+    public boolean isInConversation() {
+        return this.getConversation() != null;
+    }
+    
+    public Scene getScene() {
+        return this.scene;
+    }
+    
+    public void setScene(Scene scene) {
+        this.scene = scene;
+    }
+    
+    public void setScene(Response response) {
+        if (this.scene != null) { this.setScene(this.scene.next(this, response)); }
+    }
+    
     @Override
     public void readAdditional(CompoundNBT compound) {
         super.readAdditional(compound);
@@ -509,12 +555,11 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     public ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
         if (stack.getItem().isIn(MoeTags.ADMIN)) { return ActionResultType.FAIL; }
         if (this.isRemote() || hand != Hand.MAIN_HAND) { return ActionResultType.PASS; }
-        if (this.isProtagonist(player)) {
-            this.setFollowing(!this.isFollowing());
-            return ActionResultType.SUCCESS;
-        } else {
-            return ActionResultType.FAIL;
+        if (this.canConverseWith(player)) {
+            this.setConversation(MoeConvos.find(Interaction.RIGHT_CLICK, this));
+            if (this.isInConversation()) { return ActionResultType.SUCCESS; }
         }
+        return ActionResultType.FAIL;
     }
     
     public AbstractNPCEntity teleport(ServerWorld world, ITeleporter teleporter) {
@@ -531,9 +576,16 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     protected abstract void onTeleport();
     
-    public boolean isProtagonist(PlayerEntity player) {
-        if (this.hasProtagonist()) { return this.getProtagonistUUID().equals(player.getUniqueID()); }
+    public boolean isProtagonist(Entity entity) {
+        if (entity instanceof PlayerEntity) {
+            if (this.hasProtagonist()) { return this.getProtagonistUUID().equals(entity.getUniqueID()); }
+        }
         return false;
+    }
+    
+    public boolean canConverseWith(Entity entity) {
+        if (this.isRemote() || this.isInConversation()) { return false; }
+        return this.isProtagonist(entity);
     }
     
     public boolean isRemote() {
@@ -567,9 +619,16 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         return this;
     }
     
-    public void setCharacter(Consumer<CacheNPC> transaction) {
+    public CacheNPC getCharacter() {
         if (this.isAutomatonReady() && this.isLocal() && this.hasProtagonist()) {
-            CacheNPC character = this.getDatingSim().getNPC(this.getUUID(), this);
+            return this.getDatingSim().getNPC(this.getUUID(), this);
+        }
+        return null;
+    }
+    
+    public void setCharacter(Consumer<CacheNPC> transaction) {
+        CacheNPC character = this.getCharacter();
+        if (character != null) {
             character.set(DatingData.get(this.world), transaction);
         }
     }
@@ -796,6 +855,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         this.dataManager.set(BLOOD_TYPE, bloodType.name());
     }
     
+    public void say(PlayerEntity player, String line, Response... responses) {
+        MoeMessages.send(player, new SOpenDialogue(new Dialogue(this.getCharacter(), line, responses)));
+    }
+    
     public void say(String key, Object... params) {
         this.world.getPlayers().forEach((player) -> {
             if (player.getDistance(this) < 8.0D) { this.say(player, key, params); }
@@ -881,6 +944,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         list.sort(new EntityDistance(this));
         for (LivingEntity entity : list) {
             if (this.isBeingWatchedBy(entity)) {
+                if (this.canConverseWith(entity)) { this.setConversation(MoeConvos.find(Interaction.STARE, this)); }
                 this.entityStaring = entity;
                 this.timeSinceStare = 0;
                 return;
@@ -1041,6 +1105,12 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     public void addSaturation(float saturation) {
         this.setSaturation(this.getSaturation() + saturation);
+    }
+    
+    @Override
+    public void applyEntityCollision(Entity entity) {
+        super.applyEntityCollision(entity);
+        if (this.canConverseWith(entity)) { this.setConversation(MoeConvos.find(Interaction.COLLISION, this)); }
     }
     
     @Override
