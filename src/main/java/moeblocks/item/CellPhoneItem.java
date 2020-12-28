@@ -2,7 +2,6 @@ package moeblocks.item;
 
 import moeblocks.MoeMod;
 import moeblocks.datingsim.DatingData;
-import moeblocks.init.MoeItems;
 import moeblocks.init.MoeMessages;
 import moeblocks.message.SOpenCellPhone;
 import net.minecraft.entity.player.PlayerEntity;

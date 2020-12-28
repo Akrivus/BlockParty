@@ -1,7 +1,6 @@
 package moeblocks.item;
 
 import moeblocks.MoeMod;
-import moeblocks.init.MoeItems;
 import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

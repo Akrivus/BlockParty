@@ -2,7 +2,6 @@ package moeblocks.item;
 
 import moeblocks.MoeMod;
 import moeblocks.entity.MoeDieEntity;
-import moeblocks.init.MoeItems;
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.dispenser.ProjectileDispenseBehavior;
 import net.minecraft.entity.player.PlayerEntity;

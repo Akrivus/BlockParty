@@ -2,7 +2,6 @@ package moeblocks.item;
 
 import moeblocks.MoeMod;
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.init.MoeItems;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;

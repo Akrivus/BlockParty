@@ -4,7 +4,6 @@ import moeblocks.datingsim.CacheNPC;
 import moeblocks.datingsim.convo.enums.Response;
 import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;

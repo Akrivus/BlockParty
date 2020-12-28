@@ -3,7 +3,6 @@ package moeblocks.item;
 import moeblocks.MoeMod;
 import moeblocks.datingsim.DatingData;
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.init.MoeItems;
 import moeblocks.init.MoeMessages;
 import moeblocks.message.SOpenYearbook;
 import net.minecraft.entity.LivingEntity;

@@ -5,7 +5,6 @@ import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 public class Scene {
     private final BiConsumer<PlayerEntity, AbstractNPCEntity> action;

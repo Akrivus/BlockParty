@@ -3,7 +3,6 @@ package moeblocks.item;
 import moeblocks.MoeMod;
 import moeblocks.automata.state.enums.Dere;
 import moeblocks.entity.MoeEntity;
-import moeblocks.init.MoeItems;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemUseContext;
