@@ -44,7 +44,7 @@ public class YearbookScreen extends ControllerScreen {
     private Button buttonRemovePage;
     
     public YearbookScreen(List<UUID> npcs, UUID uuid) {
-        super(npcs, uuid);
+        super(npcs, uuid, 146, 187);
         this.getNPC(uuid);
     }
     
@@ -202,7 +202,7 @@ public class YearbookScreen extends ControllerScreen {
     }
     
     @OnlyIn(Dist.CLIENT)
-    public static class TurnPageButton extends Button {
+    public class TurnPageButton extends Button {
         private final int delta;
         
         public TurnPageButton(int x, int y, int delta, IPressable button) {
@@ -226,7 +226,7 @@ public class YearbookScreen extends ControllerScreen {
     }
     
     @OnlyIn(Dist.CLIENT)
-    public static class RemovePageButton extends Button {
+    public class RemovePageButton extends Button {
         public RemovePageButton(int x, int y, IPressable button) {
             super(x, y, 18, 18, StringTextComponent.EMPTY, button);
         }

@@ -9,13 +9,13 @@ import net.minecraft.client.gui.screen.Screen;
 import java.util.List;
 import java.util.UUID;
 
-public abstract class ControllerScreen extends Screen {
+public abstract class ControllerScreen extends AbstractScreen {
     protected List<UUID> npcs;
     protected CacheNPC npc;
     protected int index;
     
-    protected ControllerScreen(List<UUID> npcs, UUID uuid) {
-        super(NarratorChatListener.EMPTY);
+    protected ControllerScreen(List<UUID> npcs, UUID uuid, int x, int y) {
+        super(x, y);
         this.npcs = npcs;
         this.index = this.npcs.indexOf(uuid);
         if (this.index < 0) {

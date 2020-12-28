@@ -24,12 +24,14 @@ public class MoeMessages {
     }
     
     public static void register() {
-        register(CNPCInteract.class, CNPCInteract::new);
+        register(CDialogueClose.class, CDialogueClose::new);
+        register(CDialogueRespond.class, CDialogueRespond::new);
         register(CNPCQuery.class, CNPCQuery::new);
         register(CNPCRemove.class, CNPCRemove::new);
         register(CNPCRequest.class, CNPCRequest::new);
         register(CNPCTeleport.class, CNPCTeleport::new);
         register(CRemovePage.class, CRemovePage::new);
+        register(SCloseDialogue.class, SCloseDialogue::new);
         register(SNPCList.class, SNPCList::new);
         register(SNPCResponse.class, SNPCResponse::new);
         register(SOpenCellPhone.class, SOpenCellPhone::new);
@@ -38,7 +40,7 @@ public class MoeMessages {
     }
     
     public static <T extends AbstractMessage> void register(Class<T> packet, Function<PacketBuffer, T> con) {
-        MoeMod.CHANNEL.messageBuilder(packet, ++messageID).decoder(con).encoder(AbstractMessage::prepare).consumer(AbstractMessage::consume).add();
+        MoeMod.CHANNEL.messageBuilder(packet, ++MoeMessages.messageID).decoder(con).encoder(AbstractMessage::prepare).consumer(AbstractMessage::consume).add();
     }
     
     public static void send(PlayerEntity player, AbstractMessage message) {

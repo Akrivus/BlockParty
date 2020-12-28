@@ -7,7 +7,8 @@ public enum Response {
     HEART,
     ARMOR,
     SKULL,
-    NEXT;
+    NEXT,
+    CLOSE;
     
     public String getKey() {
         return String.format("gui.moeblocks.button.%s", this.name().toLowerCase());

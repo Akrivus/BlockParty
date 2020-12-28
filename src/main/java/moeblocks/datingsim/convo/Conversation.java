@@ -2,6 +2,7 @@ package moeblocks.datingsim.convo;
 
 import moeblocks.datingsim.convo.enums.Interaction;
 import moeblocks.entity.AbstractNPCEntity;
+import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.function.Predicate;
 
@@ -16,7 +17,7 @@ public class Conversation {
         this.firstScene = firstScene;
     }
     
-    public Scene getFirstScene() {
+    public Scene start() {
         return this.firstScene;
     }
     

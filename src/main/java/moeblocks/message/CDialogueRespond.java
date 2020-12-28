@@ -8,17 +8,23 @@ import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.UUID;
 
-public class CNPCInteract extends CNPCQuery {
+public class CDialogueRespond extends CNPCQuery {
     private final Response response;
     
-    public CNPCInteract(UUID uuid, Response response) {
+    public CDialogueRespond(UUID uuid, Response response) {
         super(uuid);
         this.response = response;
     }
     
-    public CNPCInteract(PacketBuffer buffer) {
+    public CDialogueRespond(PacketBuffer buffer) {
         super(buffer);
         this.response = buffer.readEnumValue(Response.class);
+    }
+    
+    @Override
+    public void encode(PacketBuffer buffer) {
+        super.encode(buffer);
+        buffer.writeEnumValue(this.response);
     }
     
     @Override

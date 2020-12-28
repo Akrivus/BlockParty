@@ -19,6 +19,7 @@ import moeblocks.init.MoeConvos;
 import moeblocks.init.MoeItems;
 import moeblocks.init.MoeMessages;
 import moeblocks.init.MoeTags;
+import moeblocks.message.SCloseDialogue;
 import moeblocks.message.SOpenDialogue;
 import moeblocks.util.ChunkScheduler;
 import moeblocks.util.DimBlockPos;
@@ -94,8 +95,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     private LivingEntity entityStaring;
     private LivingEntity entityToAvoid;
     private BlockState blockToMine;
-    private Conversation conversation;
     private Scene scene;
+    private int sceneID;
     private int timeSinceAvoid;
     private int timeSinceInteraction;
     private int timeSinceStare;
@@ -146,10 +147,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     @Override
     public boolean attackEntityFrom(DamageSource source, float amount) {
-        if (this.canConverseWith(source.getTrueSource())) {
-            this.setConversation(MoeConvos.find(Interaction.LEFT_CLICK, this));
-            if (this.isInConversation()) { return false; }
-        }
+        if (this.setConvo(Interaction.LEFT_CLICK, source.getTrueSource())) { return false; }
         return super.attackEntityFrom(source, amount);
     }
     
@@ -180,15 +178,16 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     @Override
     public void registerGoals() {
-        this.goalSelector.addGoal(0x0, new OpenDoorGoal(this));
-        this.goalSelector.addGoal(0x0, new SleepGoal(this));
-        this.goalSelector.addGoal(0x0, new SwimGoal(this));
-        this.goalSelector.addGoal(0x1, new BasicAttackGoal(this));
-        this.goalSelector.addGoal(0x2, new ConsumeGoal(this));
-        this.goalSelector.addGoal(0x3, new AvoidTargetGoal(this));
-        this.goalSelector.addGoal(0x4, new TryEquipItemGoal<>(this));
-        this.goalSelector.addGoal(0x4, new TryEquipItemGoal<>(this, (stack) -> stack.isFood()));
-        this.goalSelector.addGoal(0x5, new FollowTargetGoal(this));
+        this.goalSelector.addGoal(0x0, new KeepEyeContactGoal(this));
+        this.goalSelector.addGoal(0x1, new OpenDoorGoal(this));
+        this.goalSelector.addGoal(0x1, new SleepGoal(this));
+        this.goalSelector.addGoal(0x1, new SwimGoal(this));
+        this.goalSelector.addGoal(0x2, new BasicAttackGoal(this));
+        this.goalSelector.addGoal(0x3, new ConsumeGoal(this));
+        this.goalSelector.addGoal(0x4, new AvoidTargetGoal(this));
+        this.goalSelector.addGoal(0x5, new TryEquipItemGoal<>(this));
+        this.goalSelector.addGoal(0x5, new TryEquipItemGoal<>(this, (stack) -> stack.isFood()));
+        this.goalSelector.addGoal(0x6, new FollowTargetGoal(this));
         this.goalSelector.addGoal(0x8, new FindBedGoal(this));
         this.goalSelector.addGoal(0xA, new StayHomeGoal(this));
         this.goalSelector.addGoal(0xB, new WanderGoal(this));
@@ -394,19 +393,12 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         this.sync();
     }
     
-    public Conversation getConversation() {
-        return this.conversation;
-    }
-    
-    public void setConversation(Conversation conversation) {
-        this.conversation = conversation;
-        if (this.conversation != null) {
-            this.setScene(this.conversation.getFirstScene());
-        }
-    }
-    
     public boolean isInConversation() {
-        return this.getConversation() != null;
+        return this.scene != null;
+    }
+    
+    public boolean isReadyToAct() {
+        return this.scene.hashCode() != this.sceneID;
     }
     
     public Scene getScene() {
@@ -418,7 +410,22 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public void setScene(Response response) {
-        if (this.scene != null) { this.setScene(this.scene.next(this, response)); }
+        if (this.isInConversation()) {
+            this.setScene(this.scene.next(response));
+            if (response == Response.CLOSE) {
+                MoeMessages.send(this.getProtagonist(), new SCloseDialogue());
+            }
+        }
+    }
+    
+    public boolean setConvo(Interaction interaction, Entity entity) {
+        if (this.canConverseWith(entity)) {
+            Conversation convo = MoeConvos.find(interaction, this);
+            if (convo == null) { return false; }
+            this.setScene(convo.start());
+            return true;
+        }
+        return false;
     }
     
     @Override
@@ -460,6 +467,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         if (this.isFollowing() && this.isPassenger() && !this.getProtagonist().isPassenger()) { this.dismount(); }
         if (this.isLocal()) {
             if (++this.timeSinceSleep > 24000) { this.addStress(0.0005F); }
+            this.updateConvoState();
             this.updateStareState();
             this.updateHungerState();
             this.updateLoveState();
@@ -526,9 +534,9 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     public ILivingEntityData onInitialSpawn(IServerWorld world, DifficultyInstance difficulty, SpawnReason reason, ILivingEntityData spawnData, CompoundNBT compound) {
         ILivingEntityData data = super.onInitialSpawn(world, difficulty, reason, spawnData, compound);
         this.setHomePosAndDistance(this.getPosition(), 16);
-        this.setUUID(UUID.randomUUID());
         this.setBloodType(BloodType.weigh(this.rand));
         this.setGivenName(this.getGender().toString());
+        this.setUUID(UUID.randomUUID());
         this.resetAnimationState();
         return data;
     }
@@ -555,9 +563,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     public ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
         if (stack.getItem().isIn(MoeTags.ADMIN)) { return ActionResultType.FAIL; }
         if (this.isRemote() || hand != Hand.MAIN_HAND) { return ActionResultType.PASS; }
-        if (this.canConverseWith(player)) {
-            this.setConversation(MoeConvos.find(Interaction.RIGHT_CLICK, this));
-            if (this.isInConversation()) { return ActionResultType.SUCCESS; }
+        if (this.setConvo(player.isSneaking() ? Interaction.SHIFT_RIGHT_CLICK : Interaction.RIGHT_CLICK, player)) {
+            return ActionResultType.SUCCESS;
         }
         return ActionResultType.FAIL;
     }
@@ -577,10 +584,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     protected abstract void onTeleport();
     
     public boolean isProtagonist(Entity entity) {
-        if (entity instanceof PlayerEntity) {
-            if (this.hasProtagonist()) { return this.getProtagonistUUID().equals(entity.getUniqueID()); }
-        }
-        return false;
+        if (!this.hasProtagonist() || entity == null) { return false; }
+        return this.getProtagonistUUID().equals(entity.getUniqueID());
     }
     
     public boolean canConverseWith(Entity entity) {
@@ -672,7 +677,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     public boolean hasProtagonist() {
         if (this.getUUID() == null) { return false; }
-        return this.getProtagonist() != null;
+        return this.getProtagonistUUID() != null;
     }
     
     public UUID getProtagonistUUID() {
@@ -748,7 +753,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public boolean isOccupied() {
-        return this.isFighting() || this.isVengeful() || this.isSleeping() || this.isFollowing() || this.isInteracted() || this.hasPath();
+        return this.isFighting() || this.isVengeful() || this.isSleeping() || this.isFollowing() || this.isInConversation() || this.hasPath();
     }
     
     public boolean isFollowing() {
@@ -856,6 +861,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public void say(PlayerEntity player, String line, Response... responses) {
+        if (line.length() > 128) { throw new IllegalArgumentException("Lines can't be over 128 characters long."); }
         MoeMessages.send(player, new SOpenDialogue(new Dialogue(this.getCharacter(), line, responses)));
     }
     
@@ -944,11 +950,18 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         list.sort(new EntityDistance(this));
         for (LivingEntity entity : list) {
             if (this.isBeingWatchedBy(entity)) {
-                if (this.canConverseWith(entity)) { this.setConversation(MoeConvos.find(Interaction.STARE, this)); }
+                this.setConvo(Interaction.STARE, entity);
                 this.entityStaring = entity;
                 this.timeSinceStare = 0;
                 return;
             }
+        }
+    }
+    
+    public void updateConvoState() {
+        if (this.isInConversation() && this.isReadyToAct()) {
+            this.scene.act(this.getProtagonist(), this);
+            this.sceneID = this.scene.hashCode();
         }
     }
     
@@ -1110,7 +1123,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     @Override
     public void applyEntityCollision(Entity entity) {
         super.applyEntityCollision(entity);
-        if (this.canConverseWith(entity)) { this.setConversation(MoeConvos.find(Interaction.COLLISION, this)); }
+        this.setConvo(Interaction.COLLISION, entity);
     }
     
     @Override
@@ -1170,7 +1183,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     @Override
     public void notifyDataManagerChange(DataParameter<?> key) {
-        if (ANIMATION.equals(key)) { this.setNextState(BloodType.class, this.getAnimation()); }
+        if (ANIMATION.equals(key)) { this.setNextState(Animation.class, this.getAnimation()); }
         if (BLOOD_TYPE.equals(key)) { this.setNextState(BloodType.class, this.getBloodType()); }
         if (DERE.equals(key)) { this.setNextState(Dere.class, this.getDere()); }
         if (EMOTION.equals(key)) { this.setNextState(Emotion.class, this.getEmotion()); }

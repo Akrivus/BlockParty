@@ -33,7 +33,7 @@ public class CellPhoneScreen extends ControllerScreen {
     private Button buttonScrollDown;
     
     public CellPhoneScreen(List<UUID> npcs) {
-        super(npcs, UUID.randomUUID());
+        super(npcs, UUID.randomUUID(), 108, 182);
         this.npcs.forEach(this::getNPC);
     }
     
@@ -101,8 +101,8 @@ public class CellPhoneScreen extends ControllerScreen {
     @Override
     protected void init() {
         this.addButton(new Button(this.width / 2 - 54, 190, 108, 20, DialogTexts.GUI_DONE, (button) -> this.closeScreen()));
-        this.buttonScrollUp = this.addButton(new ScrollButton(this, this.width / 2 + 37, 32, -1));
-        this.buttonScrollDown = this.addButton(new ScrollButton(this, this.width / 2 + 37, 91, 1));
+        this.buttonScrollUp = this.addButton(new ScrollButton(this.width / 2 + 37, 32, -1));
+        this.buttonScrollDown = this.addButton(new ScrollButton(this.width / 2 + 37, 91, 1));
         this.updateButtons();
     }
     
@@ -134,9 +134,9 @@ public class CellPhoneScreen extends ControllerScreen {
     }
     
     @OnlyIn(Dist.CLIENT)
-    public static class ScrollButton extends Button {
-        public ScrollButton(CellPhoneScreen parent, int x, int y, int delta) {
-            super(x, y, 7, 7, StringTextComponent.EMPTY, (button) -> parent.setScroll(delta));
+    public class ScrollButton extends Button {
+        public ScrollButton(int x, int y, int delta) {
+            super(x, y, 7, 7, StringTextComponent.EMPTY, (button) -> CellPhoneScreen.this.setScroll(delta));
         }
         
         @Override

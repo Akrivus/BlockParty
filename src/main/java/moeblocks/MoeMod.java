@@ -24,7 +24,7 @@ public class MoeMod {
             return new ItemStack(MoeItems.MOE_DIE.get());
         }
     };
-
+    
     public MoeMod() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::onClientSetup);
