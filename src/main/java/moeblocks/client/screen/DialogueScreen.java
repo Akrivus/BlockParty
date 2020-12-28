@@ -11,12 +11,15 @@ import moeblocks.init.MoeMessages;
 import moeblocks.message.CDialogueClose;
 import moeblocks.message.CDialogueRespond;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.screen.inventory.BeaconScreen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,6 +53,11 @@ public class DialogueScreen extends AbstractScreen {
         if (this.cursor < this.line.length()) {
             this.cursor = this.minecraft.player.ticksExisted - this.start;
         }
+        this.renderTooltips(stack, mouseX, mouseY);
+    }
+    
+    public void renderTooltips(MatrixStack stack, int mouseX, int mouseY) {
+        this.buttons.forEach((button) -> { if (button.isHovered()) { button.renderToolTip(stack, mouseX, mouseY); } });
     }
     
     public void renderDialogue(MatrixStack stack) {
