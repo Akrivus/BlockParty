@@ -39,7 +39,7 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-  minecraft 'net.minecraftforge:forge:1.16.4-35.0.7'
+  minecraft 'net.minecraftforge:forge:1.16.4-35.1.15'
 }
 
 jar.finalizedBy('reobfJar')
