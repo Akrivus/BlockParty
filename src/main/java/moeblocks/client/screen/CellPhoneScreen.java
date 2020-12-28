@@ -101,8 +101,8 @@ public class CellPhoneScreen extends ControllerScreen {
     @Override
     protected void init() {
         this.addButton(new Button(this.width / 2 - 54, 190, 108, 20, DialogTexts.GUI_DONE, (button) -> this.closeScreen()));
-        this.buttonScrollUp = this.addButton(new ScrollButton(this.width / 2 + 37, 32, -1));
-        this.buttonScrollDown = this.addButton(new ScrollButton(this.width / 2 + 37, 91, 1));
+        this.buttonScrollUp = this.addButton(new ScrollButton(this, this.width / 2 + 37, 32, -1));
+        this.buttonScrollDown = this.addButton(new ScrollButton(this, this.width / 2 + 37, 91, 1));
         this.updateButtons();
     }
     
@@ -135,8 +135,8 @@ public class CellPhoneScreen extends ControllerScreen {
     
     @OnlyIn(Dist.CLIENT)
     public class ScrollButton extends Button {
-        public ScrollButton(int x, int y, int delta) {
-            super(x, y, 7, 7, StringTextComponent.EMPTY, (button) -> CellPhoneScreen.this.setScroll(delta));
+        public ScrollButton(CellPhoneScreen parent, int x, int y, int delta) {
+            super(x, y, 7, 7, StringTextComponent.EMPTY, (button) -> parent.setScroll(delta));
         }
         
         @Override

@@ -78,7 +78,7 @@ public class DialogueScreen extends AbstractScreen {
         this.line = this.dialogue.getLine();
         this.start = this.minecraft.player.ticksExisted;
         for (Response response : Response.values()) {
-            if (this.dialogue.has(response)) { this.addButton(new RespondButton(this.dialogue, response, this.role++)); }
+            if (this.dialogue.has(response)) { this.addButton(new RespondButton(this, this.dialogue, response, this.role++)); }
         }
     }
     
@@ -100,10 +100,10 @@ public class DialogueScreen extends AbstractScreen {
     public class RespondButton extends Button {
         private final Response response;
         
-        public RespondButton(Dialogue dialogue, Response response, int index) {
-            super(DialogueScreen.this.getLeft(index * 15 + 5), DialogueScreen.this.getBottom(14), 10, 10, NarratorChatListener.EMPTY,
+        public RespondButton(DialogueScreen parent, Dialogue dialogue, Response response, int index) {
+            super(parent.getLeft(index * 15 + 5), parent.getBottom(14), 10, 10, NarratorChatListener.EMPTY,
                   (button) -> MoeMessages.send(new CDialogueRespond(dialogue.getSpeaker().getUUID(), response)),
-                  (button, stack, x, y) -> DialogueScreen.this.renderTooltip(stack, new TranslationTextComponent(response.getKey()), x, y));
+                  (button, stack, x, y) -> parent.renderTooltip(stack, new TranslationTextComponent(response.getKey()), x, y));
             this.response = response;
         }
         
