@@ -106,10 +106,6 @@ public class CellPhoneScreen extends ControllerScreen {
         this.updateButtons();
     }
     
-    public boolean isSelected(int index) {
-        return this.index == index;
-    }
-    
     public void setScroll(int delta) {
         this.start += 4 * delta;
         int range = this.contacts.size() - 1;
@@ -154,7 +150,7 @@ public class CellPhoneScreen extends ControllerScreen {
     @OnlyIn(Dist.CLIENT)
     public static class ContactButton extends Button {
         public ContactButton(CellPhoneScreen parent, CacheNPC npc) {
-            super(0, 0, 81, 15, new StringTextComponent(npc.getName()), (button) -> {
+            super(0, 0, 81, 15, new StringTextComponent(npc.getContactName()), (button) -> {
                 MoeMessages.send(new CNPCTeleport(npc.getUUID()));
                 parent.closeScreen();
             });

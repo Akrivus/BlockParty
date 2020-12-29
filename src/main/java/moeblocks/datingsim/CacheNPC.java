@@ -85,6 +85,12 @@ public class CacheNPC {
         return compound;
     }
     
+    public String getContactName() {
+        String[] names = this.name.split(" ");
+        if (names.length == 0) { return "null"; }
+        return names[names.length - 1];
+    }
+    
     public String getName() {
         return this.name;
     }
