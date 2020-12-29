@@ -13,22 +13,13 @@ public abstract class ActionAnimationState extends AnimationState {
     @Override
     public void apply(AbstractNPCEntity applicant) {
         this.timeUntilComplete = this.getInterval();
+        super.apply(applicant);
     }
-    
-    @Override
-    public boolean canApply(AbstractNPCEntity applicant) {
-        return true;
-    }
-    
-    @Override
-    public void clear(AbstractNPCEntity applicant) {
-    
-    }
-    
-    public abstract int getInterval();
     
     @Override
     public boolean canClear(AbstractNPCEntity applicant) {
         return --this.timeUntilComplete < 0;
     }
+    
+    public abstract int getInterval();
 }

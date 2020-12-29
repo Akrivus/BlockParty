@@ -472,6 +472,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
             this.updateHungerState();
             this.updateLoveState();
             ++this.age;
+        } else {
+            this.updateAITasks();
         }
     }
     
@@ -857,7 +859,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public void setBloodType(BloodType bloodType) {
-        this.dataManager.set(BLOOD_TYPE, bloodType.name());
+        this.dataManager.set(BLOOD_TYPE, bloodType.toKey());
     }
     
     public void say(PlayerEntity player, String line, Response... responses) {
@@ -873,10 +875,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     public void say(PlayerEntity player, String key, Object... params) {
         player.sendMessage(new TranslationTextComponent(key, params), this.getUUID());
-    }
-    
-    public void setNextState(Class<? extends IStateEnum> key, IStateEnum state, int timeout) {
-        this.addNextTickOp((entity) -> this.states.get(key).setNextState(state, timeout));
     }
     
     public void addNextTickOp(Consumer<AbstractNPCEntity> op) {
@@ -1199,7 +1197,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public void setEmotion(Emotion emotion) {
-        this.dataManager.set(EMOTION, emotion.name());
+        this.dataManager.set(EMOTION, emotion.toKey());
     }
     
     public Dere getDere() {
@@ -1207,7 +1205,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public void setDere(Dere dere) {
-        this.dataManager.set(DERE, dere.name());
+        this.dataManager.set(DERE, dere.toKey());
     }
     
     @Override
@@ -1241,7 +1239,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public void setAnimation(Animation animation) {
-        this.dataManager.set(ANIMATION, animation.name());
+        this.dataManager.set(ANIMATION, animation.toKey());
     }
     
     public void addExhaustion(float exhaustion) {

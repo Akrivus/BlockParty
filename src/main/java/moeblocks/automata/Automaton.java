@@ -8,27 +8,15 @@ import moeblocks.entity.AbstractNPCEntity;
 public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
     protected final E applicant;
     protected final O natural;
-    protected final int timeout;
     protected IState state;
     protected O key;
-    private boolean canUpdate = true;
     private boolean hasNoDefault = true;
     private boolean isServerOnly = true;
-    private int timeUntilCheck;
+    private boolean canUpdate = true;
     
     public Automaton(E applicant, O natural) {
-        this(applicant, natural, 1000);
-    }
-    
-    public Automaton(E applicant, O natural, int timeout) {
         this.applicant = applicant;
         this.natural = natural;
-        this.timeout = timeout;
-    }
-    
-    public Automaton setCanUpdate(boolean updatable) {
-        this.canUpdate = updatable;
-        return this;
     }
     
     public Automaton setCanRunOnClient() {
@@ -41,6 +29,11 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
         return this;
     }
     
+    public Automaton setCanUpdate(boolean updatable) {
+        this.canUpdate = updatable;
+        return this;
+    }
+    
     public Automaton start() {
         this.state = this.natural.getState(this.applicant);
         this.key = this.natural;
@@ -48,22 +41,24 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
     }
     
     public boolean update() {
-        if (this.isBlocked() && --this.timeUntilCheck > 0) { return false; }
-        if (this.state.canClear(this.applicant)) { return this.setNextState(); }
-        if (this.canUpdate) { this.state.tick(this.applicant); }
+        if (this.isBlocked()) { return false; }
+        if (this.state.canClear(this.applicant)) {
+            return this.setNextState();
+        } else if (this.canUpdate) {
+            this.state.tick(this.applicant);
+        }
         return this.canUpdate;
     }
     
     public boolean setNextState() {
-        return this.setNextState(this.getNatural(), this.timeout);
+        return this.setNextState(this.getNatural());
     }
     
-    public boolean setNextState(O key, int timeUntilCheck) {
+    public boolean setNextState(O key) {
         IState state = key.getState(this.applicant);
         if (state.canApply(this.applicant)) {
             this.state.clear(this.applicant);
             this.state = state;
-            this.timeUntilCheck = timeUntilCheck;
             this.state.apply(this.applicant);
             this.key = key;
             return true;
@@ -81,10 +76,6 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
     
     private boolean isBlocked() {
         return this.applicant.isRemote() && this.isServerOnly;
-    }
-    
-    public boolean setNextState(O key) {
-        return this.setNextState(key, this.timeout);
     }
     
     public boolean isNatural() {

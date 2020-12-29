@@ -10,10 +10,10 @@ public abstract class AnimationState extends WatchedGoalState<Animation, Abstrac
         super(filter, (npc, list) -> { }, AbstractNPCEntity.ANIMATION);
     }
     
-    public abstract void setRotationAngles(IRiggableModel model, AbstractNPCEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks);
-    
     @Override
-    public boolean canClear(AbstractNPCEntity applicant) {
-        return !this.canApply(applicant);
+    public boolean canApply(AbstractNPCEntity applicant) {
+        return true;
     }
+    
+    public abstract void setRotationAngles(IRiggableModel model, AbstractNPCEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks);
 }

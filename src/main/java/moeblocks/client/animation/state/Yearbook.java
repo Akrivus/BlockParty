@@ -12,21 +12,6 @@ public class Yearbook extends AnimationState {
     }
     
     @Override
-    public void apply(AbstractNPCEntity applicant) {
-    
-    }
-    
-    @Override
-    public boolean canApply(AbstractNPCEntity applicant) {
-        return false;
-    }
-    
-    @Override
-    public void clear(AbstractNPCEntity applicant) {
-    
-    }
-    
-    @Override
     public void setRotationAngles(IRiggableModel model, AbstractNPCEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks) {
         switch (entity.getDere()) {
             case HIMEDERE:
