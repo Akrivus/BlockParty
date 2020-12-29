@@ -24,8 +24,7 @@ public class MoeSpawnItem extends Item {
         PlayerEntity player = context.getPlayer();
         BlockPos block = context.getPos();
         BlockPos spawn = block.offset(context.getFace());
-        Dere dere = Dere.values()[world.rand.nextInt(Dere.values().length)];
-        if (MoeEntity.spawn(world, block, spawn, player.rotationYaw, player.rotationPitch, dere, player)) {
+        if (MoeEntity.spawn(world, block, spawn, player.rotationYaw, player.rotationPitch, Dere.weigh(world.rand), player)) {
             context.getItem().shrink(1);
             return ActionResultType.CONSUME;
         } else {

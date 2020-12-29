@@ -8,6 +8,7 @@ import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.util.Trans;
 
 import java.util.List;
+import java.util.Random;
 import java.util.function.BiConsumer;
 
 public enum Dere implements IStateEnum<AbstractNPCEntity> {
@@ -76,5 +77,9 @@ public enum Dere implements IStateEnum<AbstractNPCEntity> {
         } catch (IllegalArgumentException e) {
             return Dere.NYANDERE;
         }
+    }
+    
+    public static Dere weigh(Random rand) {
+        return Dere.values()[rand.nextInt(Dere.values().length - 1) + 1];
     }
 }
