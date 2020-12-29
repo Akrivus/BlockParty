@@ -1,10 +1,8 @@
 package moeblocks.message;
 
 import moeblocks.client.screen.DialogueScreen;
-import moeblocks.datingsim.convo.Dialogue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 

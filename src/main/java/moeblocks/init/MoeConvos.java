@@ -9,7 +9,8 @@ import moeblocks.datingsim.convo.enums.Interaction;
 import moeblocks.datingsim.convo.enums.Response;
 import moeblocks.entity.AbstractNPCEntity;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MoeConvos {
     private static final List<Conversation> REGISTRY = new ArrayList<>();

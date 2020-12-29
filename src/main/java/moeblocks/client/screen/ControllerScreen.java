@@ -3,8 +3,6 @@ package moeblocks.client.screen;
 import moeblocks.datingsim.CacheNPC;
 import moeblocks.init.MoeMessages;
 import moeblocks.message.CNPCRequest;
-import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.screen.Screen;
 
 import java.util.List;
 import java.util.UUID;

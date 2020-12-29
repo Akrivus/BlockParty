@@ -1,9 +1,6 @@
 package moeblocks.datingsim.convo;
 
 import moeblocks.datingsim.convo.enums.Response;
-import moeblocks.entity.AbstractNPCEntity;
-
-import java.util.function.Function;
 
 public class Transition {
     private final Response response;

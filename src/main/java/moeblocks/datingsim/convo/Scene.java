@@ -4,7 +4,6 @@ import moeblocks.datingsim.convo.enums.Response;
 import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
-import java.util.UUID;
 import java.util.function.BiConsumer;
 
 public class Scene {

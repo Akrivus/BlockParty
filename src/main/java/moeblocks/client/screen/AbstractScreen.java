@@ -2,7 +2,6 @@ package moeblocks.client.screen;
 
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.text.ITextComponent;
 
 public class AbstractScreen extends Screen {
     protected final int white = 0xffffff;

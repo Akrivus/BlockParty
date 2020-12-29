@@ -11,18 +11,10 @@ import moeblocks.init.MoeMessages;
 import moeblocks.message.CDialogueClose;
 import moeblocks.message.CDialogueRespond;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.screen.inventory.BeaconScreen;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class DialogueScreen extends AbstractScreen {
     public static final ResourceLocation DIALOGUE_TEXTURES = new ResourceLocation(MoeMod.ID, "textures/gui/dialogue.png");
