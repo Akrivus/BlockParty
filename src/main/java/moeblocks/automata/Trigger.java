@@ -4,7 +4,7 @@ import moeblocks.entity.AbstractNPCEntity;
 
 import java.util.function.Predicate;
 
-public class Trigger<E extends AbstractNPCEntity, T extends IStateEnum<E>> {
+public class Trigger<E extends AbstractNPCEntity, T extends IStateEnum> {
     private final T state;
     private final Predicate<E> function;
     
