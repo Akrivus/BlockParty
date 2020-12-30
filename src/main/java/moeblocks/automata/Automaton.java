@@ -5,27 +5,27 @@ import moeblocks.client.animation.AnimationState;
 import moeblocks.client.model.IRiggableModel;
 import moeblocks.entity.AbstractNPCEntity;
 
+import java.util.function.Function;
+
 public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
     protected final E applicant;
-    protected final O natural;
+    protected final Function<E, O> generator;
     protected IState state;
     protected O key;
-    private boolean hasNoDefault = true;
     private boolean isServerOnly = true;
     private boolean canUpdate = true;
-    
-    public Automaton(E applicant, O natural) {
+
+    public Automaton(E applicant, Function<E, O> generator) {
         this.applicant = applicant;
-        this.natural = natural;
+        this.generator = generator;
+    }
+
+    public Automaton(E applicant, O initial) {
+        this(applicant, (npc) -> initial);
     }
     
     public Automaton setCanRunOnClient() {
         this.isServerOnly = false;
-        return this;
-    }
-    
-    public Automaton setHasDefault() {
-        this.hasNoDefault = false;
         return this;
     }
     
@@ -35,8 +35,8 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
     }
     
     public Automaton start() {
-        this.state = this.natural.getState(this.applicant);
-        this.key = this.natural;
+        this.key = this.generator.apply(this.applicant);
+        this.state = this.key.getState(this.applicant);
         return this;
     }
     
@@ -51,7 +51,7 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
     }
     
     public boolean setNextState() {
-        return this.setNextState(this.getNatural());
+        return this.setNextState(this.generator.apply(this.applicant));
     }
     
     public boolean setNextState(O key) {
@@ -66,20 +66,8 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
         return false;
     }
     
-    public O getNatural() {
-        if (!this.hasNoDefault) { return this.natural; }
-        for (IStateEnum key : this.natural.getKeys()) {
-            if (key.getState(this.applicant).canApply(this.applicant)) { return (O) key; }
-        }
-        return this.natural;
-    }
-    
     private boolean isBlocked() {
         return this.applicant.isRemote() && this.isServerOnly;
-    }
-    
-    public boolean isNatural() {
-        return this.key.equals(this.natural);
     }
     
     public O getKey() {
