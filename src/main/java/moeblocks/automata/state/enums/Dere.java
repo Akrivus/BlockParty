@@ -5,6 +5,7 @@ import moeblocks.automata.IStateEnum;
 import moeblocks.automata.IStateGoal;
 import moeblocks.automata.state.WatchedGoalState;
 import moeblocks.entity.AbstractNPCEntity;
+import moeblocks.init.MoeTriggers;
 import moeblocks.util.Trans;
 
 import java.util.List;

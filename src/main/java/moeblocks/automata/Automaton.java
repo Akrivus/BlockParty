@@ -7,20 +7,20 @@ import moeblocks.entity.AbstractNPCEntity;
 
 import java.util.function.Function;
 
-public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
+public class Automaton<E extends AbstractNPCEntity> {
     protected final E applicant;
-    protected final Function<E, O> generator;
+    protected final Function<E, IStateEnum<E>> generator;
     protected IState state;
-    protected O key;
+    protected IStateEnum<E> key;
     private boolean isServerOnly = true;
     private boolean canUpdate = true;
 
-    public Automaton(E applicant, Function<E, O> generator) {
+    public Automaton(E applicant, Function<E, IStateEnum<E>> generator) {
         this.applicant = applicant;
         this.generator = generator;
     }
 
-    public Automaton(E applicant, O initial) {
+    public Automaton(E applicant, IStateEnum<E> initial) {
         this(applicant, (npc) -> initial);
     }
     
@@ -54,7 +54,7 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
         return this.setNextState(this.generator.apply(this.applicant));
     }
     
-    public boolean setNextState(O key) {
+    public boolean setNextState(IStateEnum<E> key) {
         IState state = key.getState(this.applicant);
         if (state.canApply(this.applicant)) {
             this.state.clear(this.applicant);
@@ -70,12 +70,12 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
         return this.applicant.isRemote() && this.isServerOnly;
     }
     
-    public O getKey() {
+    public IStateEnum<E> getKey() {
         return this.key;
     }
     
     public void fromKey(String key) {
-        this.key = (O) this.key.fromKey(key);
+        this.key = this.key.fromKey(key);
         this.state = this.key.getState(this.applicant);
         this.state.apply(this.applicant);
     }
@@ -85,8 +85,6 @@ public class Automaton<E extends AbstractNPCEntity, O extends IStateEnum> {
     }
     
     public void setRotationAngles(IRiggableModel model, float limbSwing, float limbSwingAmount, float ageInTicks) {
-        if (this.state instanceof AnimationState) {
-            ((AnimationState) (this.state)).setRotationAngles(model, this.applicant, limbSwing, limbSwingAmount, ageInTicks);
-        }
+        this.state.setRotationAngles(model, this.applicant, limbSwing, limbSwingAmount, ageInTicks);
     }
 }

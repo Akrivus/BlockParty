@@ -1,6 +1,9 @@
 package moeblocks.automata;
 
 import moeblocks.entity.AbstractNPCEntity;
+import moeblocks.init.MoeTriggers;
+
+import java.util.function.Predicate;
 
 public interface IStateEnum<E extends AbstractNPCEntity> {
     IState getState(E applicant);
@@ -10,4 +13,12 @@ public interface IStateEnum<E extends AbstractNPCEntity> {
     IStateEnum<E> fromKey(String key);
     
     IStateEnum<E>[] getKeys();
+
+    default IStateEnum<E> trigger(E npc) {
+        return MoeTriggers.find(this, npc).getState();
+    }
+
+    default void when(Predicate<E> function) {
+        MoeTriggers.register(this, function);
+    }
 }

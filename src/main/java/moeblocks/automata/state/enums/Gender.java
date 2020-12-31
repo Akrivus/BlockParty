@@ -5,6 +5,7 @@ import moeblocks.automata.IStateEnum;
 import moeblocks.automata.IStateGoal;
 import moeblocks.automata.state.PredicateGoalState;
 import moeblocks.entity.AbstractNPCEntity;
+import moeblocks.init.MoeTriggers;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -49,7 +50,7 @@ public enum Gender implements IStateEnum<AbstractNPCEntity> {
     public String toString() {
         return this.names[(int) (Math.random() * this.names.length)];
     }
-    
+
     public static Gender get(String key) {
         try {
             return Gender.valueOf(key);

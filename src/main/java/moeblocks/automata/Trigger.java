@@ -12,4 +12,12 @@ public class Trigger<E extends AbstractNPCEntity, T extends IStateEnum> {
         this.state = state;
         this.function = function;
     }
+
+    public boolean fire(E npc) {
+        return this.function.test(npc);
+    }
+
+    public IStateEnum<E> getState() {
+        return this.state;
+    }
 }

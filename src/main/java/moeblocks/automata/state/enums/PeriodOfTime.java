@@ -5,6 +5,7 @@ import moeblocks.automata.IStateEnum;
 import moeblocks.automata.IStateGoal;
 import moeblocks.automata.state.ValueGoalState;
 import moeblocks.entity.AbstractNPCEntity;
+import moeblocks.init.MoeTriggers;
 
 import java.util.List;
 import java.util.function.BiConsumer;

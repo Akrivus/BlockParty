@@ -50,6 +50,7 @@ public class MoeMod {
         MoeBlocks.registerStepSounds();
         MoeEntities.registerAttributes();
         MoeItems.registerDispenserBehaviors();
+        MoeTriggers.registerTriggers();
     }
     
     public static String getVersion() {

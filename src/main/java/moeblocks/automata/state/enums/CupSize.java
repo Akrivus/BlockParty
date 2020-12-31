@@ -5,8 +5,8 @@ import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
 import moeblocks.automata.IStateGoal;
 import moeblocks.automata.state.WatchedGoalState;
-import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.entity.MoeEntity;
+import moeblocks.init.MoeTriggers;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -25,11 +25,11 @@ public enum CupSize implements IStateEnum<MoeEntity> {
     
     }, 36.0F, 36);
     
-    private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
+    private final BiConsumer<MoeEntity, List<IStateGoal>> generator;
     private final float angle;
     private final int size;
     
-    CupSize(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, float angle, int size) {
+    CupSize(BiConsumer<MoeEntity, List<IStateGoal>> generator, float angle, int size) {
         this.generator = generator;
         this.angle = angle;
         this.size = size;

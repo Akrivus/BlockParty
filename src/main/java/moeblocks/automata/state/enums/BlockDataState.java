@@ -4,7 +4,9 @@ import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
 import moeblocks.automata.IStateGoal;
 import moeblocks.automata.state.BlockGoalState;
+import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.entity.MoeEntity;
+import moeblocks.init.MoeTriggers;
 import net.minecraft.block.Block;
 import net.minecraft.tags.ITag;
 

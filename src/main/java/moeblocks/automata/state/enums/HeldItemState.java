@@ -6,6 +6,7 @@ import moeblocks.automata.IStateGoal;
 import moeblocks.automata.state.PredicateGoalState;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeTags;
+import moeblocks.init.MoeTriggers;
 import net.minecraft.item.Item;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.Hand;

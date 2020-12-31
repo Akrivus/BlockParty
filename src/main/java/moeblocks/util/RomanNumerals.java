@@ -22,7 +22,7 @@ public class RomanNumerals {
         MAP.put(0, "");
     }
     
-    public final static String convert(int n) {
+    public static final String convert(int n) {
         if (MAP.containsKey(n)) {
             return MAP.get(n);
         } else {

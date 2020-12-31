@@ -5,6 +5,7 @@ import moeblocks.automata.IStateEnum;
 import moeblocks.client.animation.AnimationState;
 import moeblocks.client.animation.state.*;
 import moeblocks.entity.AbstractNPCEntity;
+import moeblocks.init.MoeTriggers;
 
 import java.util.function.Supplier;
 
@@ -14,7 +15,7 @@ public enum Animation implements IStateEnum<AbstractNPCEntity> {
     HAPPY_DANCE(HappyDance::new),
     SUMMONED(Summoned::new),
     YEARBOOK(Yearbook::new);
-    
+
     private final Supplier<? extends AnimationState> animation;
     
     Animation(Supplier<? extends AnimationState> animation) {

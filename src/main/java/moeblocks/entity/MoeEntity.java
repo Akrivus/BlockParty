@@ -105,8 +105,8 @@ public class MoeEntity extends AbstractNPCEntity {
     
     @Override
     public void registerStates() {
-        this.states.put(BlockDataState.class, new Automaton(this, BlockDataState.DEFAULT).start());
-        this.states.put(CupSize.class, new Automaton(this, CupSize.A).start());
+        this.states.put(BlockDataState.class, new Automaton<>(this, BlockDataState.DEFAULT::trigger).start());
+        this.states.put(CupSize.class, new Automaton<>(this, CupSize.A::trigger).start());
         super.registerStates();
     }
     

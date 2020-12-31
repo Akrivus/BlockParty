@@ -119,20 +119,20 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public void registerStates() {
-        this.states.put(Animation.class, new Automaton(this, Animation.DEFAULT).setCanRunOnClient().setHasDefault().start());
-        this.states.put(BloodType.class, new Automaton(this, BloodType.O).setCanUpdate(false).setHasDefault().start());
-        this.states.put(Dere.class, new Automaton(this, Dere.NYANDERE).setCanUpdate(false).setHasDefault().start());
-        this.states.put(Emotion.class, new Automaton(this, Emotion.NORMAL).start());
-        this.states.put(Gender.class, new Automaton(this, Gender.FEMININE).start());
-        this.states.put(HealthState.class, new Automaton(this, HealthState.PERFECT).start());
-        this.states.put(HungerState.class, new Automaton(this, HungerState.SATISFIED).start());
-        this.states.put(HeldItemState.class, new Automaton(this, HeldItemState.DEFAULT).start());
-        this.states.put(LoveState.class, new Automaton(this, LoveState.FRIENDLY).start());
-        this.states.put(MoonPhase.class, new Automaton(this, MoonPhase.FULL).start());
-        this.states.put(PeriodOfTime.class, new Automaton(this, PeriodOfTime.ATTACHED).start());
-        this.states.put(StoryPhase.class, new Automaton(this, StoryPhase.INTRODUCTION).start());
-        this.states.put(StressState.class, new Automaton(this, StressState.RELAXED).start());
-        this.states.put(TimeOfDay.class, new Automaton(this, TimeOfDay.MORNING).start());
+        this.states.put(Animation.class, new Automaton<>(this, Animation.DEFAULT::trigger).setCanRunOnClient().start());
+        this.states.put(BloodType.class, new Automaton<>(this, BloodType.O::trigger).setCanUpdate(false).start());
+        this.states.put(Dere.class, new Automaton<>(this, Dere.NYANDERE::trigger).setCanUpdate(false).start());
+        this.states.put(Emotion.class, new Automaton<>(this, Emotion.NORMAL::trigger).start());
+        this.states.put(Gender.class, new Automaton<>(this, Gender.FEMININE::trigger).start());
+        this.states.put(HealthState.class, new Automaton<>(this, HealthState.PERFECT::trigger).start());
+        this.states.put(HungerState.class, new Automaton<>(this, HungerState.SATISFIED::trigger).start());
+        this.states.put(HeldItemState.class, new Automaton<>(this, HeldItemState.DEFAULT::trigger).start());
+        this.states.put(LoveState.class, new Automaton<>(this, LoveState.FRIENDLY::trigger).start());
+        this.states.put(MoonPhase.class, new Automaton<>(this, MoonPhase.FULL::trigger).start());
+        this.states.put(PeriodOfTime.class, new Automaton<>(this, PeriodOfTime.ATTACHED::trigger).start());
+        this.states.put(StoryPhase.class, new Automaton<>(this, StoryPhase.INTRODUCTION::trigger).start());
+        this.states.put(StressState.class, new Automaton<>(this, StressState.RELAXED::trigger).start());
+        this.states.put(TimeOfDay.class, new Automaton<>(this, TimeOfDay.MORNING::trigger).start());
     }
     
     @Override
@@ -182,7 +182,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         this.goalSelector.addGoal(0x1, new OpenDoorGoal(this));
         this.goalSelector.addGoal(0x1, new SleepGoal(this));
         this.goalSelector.addGoal(0x1, new SwimGoal(this));
-        this.goalSelector.addGoal(0x2, new BasicAttackGoal(this));
+        this.goalSelector.addGoal(0x2, new BasicAttackGoal<>(this));
         this.goalSelector.addGoal(0x3, new ConsumeGoal(this));
         this.goalSelector.addGoal(0x4, new AvoidTargetGoal(this));
         this.goalSelector.addGoal(0x5, new TryEquipItemGoal<>(this));
