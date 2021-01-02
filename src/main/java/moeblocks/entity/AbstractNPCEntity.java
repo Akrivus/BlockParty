@@ -866,15 +866,19 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         if (line.length() > 128) { throw new IllegalArgumentException("Lines can't be over 128 characters long."); }
         MoeMessages.send(player, new SOpenDialogue(new Dialogue(this.getCharacter(), line, responses)));
     }
+
+    public void say(PlayerEntity player, String key, Object... params) {
+        this.say(player, new TranslationTextComponent(key, params));
+    }
+
+    public void say(PlayerEntity player, ITextComponent component) {
+        player.sendMessage(component, this.getUUID());
+    }
     
     public void say(String key, Object... params) {
         this.world.getPlayers().forEach((player) -> {
             if (player.getDistance(this) < 8.0D) { this.say(player, key, params); }
         });
-    }
-    
-    public void say(PlayerEntity player, String key, Object... params) {
-        player.sendMessage(new TranslationTextComponent(key, params), this.getUUID());
     }
     
     public void addNextTickOp(Consumer<AbstractNPCEntity> op) {
@@ -1145,6 +1149,9 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     public void onDeath(DamageSource cause) {
         this.setCharacter((npc) -> npc.setDead(true));
         super.onDeath(cause);
+        if (this.hasProtagonist()) {
+            this.say(this.getProtagonist(), cause.getDeathMessage(this));
+        }
     }
     
     @Override
@@ -1231,7 +1238,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public void setNextState(Class<? extends IStateEnum> key, IStateEnum state) {
-        this.addNextTickOp((entity) -> this.states.get(key).setNextState(state));
+        this.addNextTickOp((entity) -> this.states.get(key).setNextState(state, true));
     }
     
     public Animation getAnimation() {

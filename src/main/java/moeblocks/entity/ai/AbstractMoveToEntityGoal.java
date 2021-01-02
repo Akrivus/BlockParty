@@ -1,15 +1,14 @@
 package moeblocks.entity.ai;
 
-import moeblocks.automata.IStateGoal;
+import moeblocks.automata.state.goal.AbstractStateGoal;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.util.sort.EntityDistance;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
 import java.util.List;
 
-public abstract class AbstractMoveToEntityGoal<E extends AbstractNPCEntity, T extends Entity> extends Goal implements IStateGoal {
+public abstract class AbstractMoveToEntityGoal<E extends AbstractNPCEntity, T extends Entity> extends AbstractStateGoal {
     protected final E entity;
     protected final Class<T> type;
     protected final double speed;

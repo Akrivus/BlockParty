@@ -7,12 +7,7 @@ import moeblocks.entity.AbstractNPCEntity;
 
 public abstract class AnimationState extends WatchedGoalState<Animation, AbstractNPCEntity> {
     public AnimationState(Animation filter) {
-        super(filter, (npc, list) -> { }, AbstractNPCEntity.ANIMATION);
-    }
-    
-    @Override
-    public boolean canApply(AbstractNPCEntity applicant) {
-        return true;
+        super(filter, (npc, goals) -> { }, AbstractNPCEntity.ANIMATION);
     }
     
     public abstract void setRotationAngles(IRiggableModel model, AbstractNPCEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks);

@@ -3,11 +3,10 @@ package moeblocks.automata;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import moeblocks.client.model.IRiggableModel;
 import moeblocks.entity.AbstractNPCEntity;
+import net.minecraft.nbt.CompoundNBT;
 
 public interface IState<E extends AbstractNPCEntity> {
     void apply(E applicant);
-    
-    boolean canApply(E applicant);
     
     boolean canClear(E applicant);
     
@@ -20,4 +19,10 @@ public interface IState<E extends AbstractNPCEntity> {
     }
 
     default void setRotationAngles(IRiggableModel model, E applicant, float limbSwing, float limbSwingAmount, float ageInTicks) { return; }
+
+    default void read(CompoundNBT compound) { return; }
+
+    default CompoundNBT write(CompoundNBT compound) {
+        return compound;
+    }
 }

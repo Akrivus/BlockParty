@@ -2,7 +2,7 @@ package moeblocks.automata.state;
 
 import moeblocks.automata.GoalState;
 import moeblocks.automata.IStateEnum;
-import moeblocks.automata.IStateGoal;
+import moeblocks.automata.state.goal.AbstractStateGoal;
 import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.network.datasync.DataParameter;
 
@@ -12,7 +12,7 @@ import java.util.function.BiConsumer;
 public class WatchedGoalState<O extends IStateEnum<E>, E extends AbstractNPCEntity> extends GoalState<O, E> {
     private final DataParameter<String> key;
     
-    public WatchedGoalState(O filter, BiConsumer<E, List<IStateGoal>> generator, DataParameter<String> key) {
+    public WatchedGoalState(O filter, BiConsumer<E, List<AbstractStateGoal>> generator, DataParameter<String> key) {
         super(filter, generator);
         this.key = key;
     }

@@ -1,5 +1,6 @@
 package moeblocks.entity.ai.target;
 
+import moeblocks.automata.state.goal.AbstractStateTarget;
 import moeblocks.entity.AbstractNPCEntity;
 
 public class RevengeTarget extends AbstractStateTarget {

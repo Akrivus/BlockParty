@@ -2,91 +2,88 @@ package moeblocks.automata.state.enums;
 
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
-import moeblocks.automata.IStateGoal;
 import moeblocks.automata.state.WatchedGoalState;
+import moeblocks.automata.state.goal.AbstractStateGoal;
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.init.MoeTriggers;
 
 import java.util.List;
 import java.util.function.BiConsumer;
 
 public enum Emotion implements IStateEnum<AbstractNPCEntity> {
-    ANGRY((npc, list) -> {
-    
+    ANGRY((npc, goals) -> {
+
     }),
-    BEGGING((npc, list) -> {
-    
+    BEGGING((npc, goals) -> {
+
     }),
-    CONFUSED((npc, list) -> {
-    
+    CONFUSED((npc, goals) -> {
+
     }),
-    CRYING((npc, list) -> {
-    
+    CRYING((npc, goals) -> {
+
     }),
-    MISCHIEVOUS((npc, list) -> {
-    
+    MISCHIEVOUS((npc, goals) -> {
+
     }),
-    EMBARRASSED((npc, list) -> {
-    
+    EMBARRASSED((npc, goals) -> {
+
     }),
-    HAPPY((npc, list) -> {
-    
+    HAPPY((npc, goals) -> {
+
     }),
-    NORMAL((npc, list) -> {
-    
+    NORMAL((npc, goals) -> {
+
     }),
-    PAINED((npc, list) -> {
-    
+    PAINED((npc, goals) -> {
+
     }),
-    PSYCHOTIC((npc, list) -> {
-    
+    PSYCHOTIC((npc, goals) -> {
+
     }),
-    SCARED((npc, list) -> {
-    
+    SCARED((npc, goals) -> {
+
     }),
-    SICK((npc, list) -> {
-    
+    SICK((npc, goals) -> {
+
     }),
-    SNOOTY((npc, list) -> {
-    
+    SNOOTY((npc, goals) -> {
+
     }),
-    SMITTEN((npc, list) -> {
-    
+    SMITTEN((npc, goals) -> {
+
     }),
-    TIRED((npc, list) -> {
-    
+    TIRED((npc, goals) -> {
+
     });
-    
-    private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
-    
-    Emotion(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator) {
+
+    private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
+
+    Emotion(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator) {
         this.generator = generator;
     }
-    
+
     @Override
     public IState getState(AbstractNPCEntity applicant) {
         return new WatchedGoalState(this, this.generator, AbstractNPCEntity.EMOTION);
     }
-    
+
     @Override
     public String toKey() {
         return this.name();
     }
-    
+
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
         return Emotion.get(key);
     }
-    
+
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
         return Emotion.values();
     }
-    
+
     public static Emotion get(String key) {
-        try {
-            return Emotion.valueOf(key);
-        } catch (IllegalArgumentException e) {
+        try { return Emotion.valueOf(key); } catch (IllegalArgumentException e) {
             return Emotion.NORMAL;
         }
     }

@@ -1,13 +1,11 @@
-package moeblocks.entity.ai.target;
+package moeblocks.automata.state.goal;
 
-import moeblocks.automata.IStateGoal;
 import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
 
-public abstract class AbstractStateTarget extends Goal implements IStateGoal {
+public abstract class AbstractStateTarget extends AbstractStateGoal {
     protected final AbstractNPCEntity entity;
     protected LivingEntity target;
     

@@ -1,74 +1,69 @@
 package moeblocks.automata.state.enums;
 
+import moeblocks.automata.GoalState;
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
-import moeblocks.automata.IStateGoal;
-import moeblocks.automata.state.ValueGoalState;
+import moeblocks.automata.Trigger;
+import moeblocks.automata.state.goal.AbstractStateGoal;
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.init.MoeTriggers;
 
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public enum TimeOfDay implements IStateEnum<AbstractNPCEntity> {
-    MORNING((npc, list) -> {
-    
+    MORNING((npc, goals) -> {
+
     }, (npc) -> (float) npc.world.getDayTime(), 0, 3000),
-    NOON((npc, list) -> {
-    
+    NOON((npc, goals) -> {
+
     }, (npc) -> (float) npc.world.getDayTime(), 3000, 6000),
-    EVENING((npc, list) -> {
-    
+    EVENING((npc, goals) -> {
+
     }, (npc) -> (float) npc.world.getDayTime(), 6000, 9000),
-    DUSK((npc, list) -> {
-    
+    DUSK((npc, goals) -> {
+
     }, (npc) -> (float) npc.world.getDayTime(), 9000, 12000),
-    NIGHT((npc, list) -> {
-    
+    NIGHT((npc, goals) -> {
+
     }, (npc) -> (float) npc.world.getDayTime(), 12000, 15000),
-    MIDNIGHT((npc, list) -> {
-    
+    MIDNIGHT((npc, goals) -> {
+
     }, (npc) -> (float) npc.world.getDayTime(), 15000, 18000),
-    MORROW((npc, list) -> {
-    
+    MORROW((npc, goals) -> {
+
     }, (npc) -> (float) npc.world.getDayTime(), 18000, 21000),
-    DAWN((npc, list) -> {
-    
+    DAWN((npc, goals) -> {
+
     }, (npc) -> (float) npc.world.getDayTime(), 21000, 24000);
-    
-    private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
-    private final Function<AbstractNPCEntity, Float> function;
-    private final float start;
-    private final float end;
-    
-    TimeOfDay(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
+
+    private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
+
+    TimeOfDay(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
         this.generator = generator;
-        this.function = function;
-        this.start = start;
-        this.end = end;
+        this.when(0, (npc) -> Trigger.isBetween(function.apply(npc), start, end));
     }
-    
+
     @Override
     public IState getState(AbstractNPCEntity applicant) {
-        return new ValueGoalState(this, this.generator, this.function, this.start, this.end);
+        return new GoalState(this, this.generator);
     }
-    
+
     @Override
     public String toKey() {
         return this.name();
     }
-    
+
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
         return TimeOfDay.get(key);
     }
-    
+
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
         return TimeOfDay.values();
     }
-    
+
     public static TimeOfDay get(String key) {
         try {
             return TimeOfDay.valueOf(key);

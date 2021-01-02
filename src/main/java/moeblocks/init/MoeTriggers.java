@@ -6,10 +6,7 @@ import moeblocks.automata.state.enums.*;
 import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.block.Blocks;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class MoeTriggers {
@@ -36,12 +33,14 @@ public class MoeTriggers {
     }
 
     public static List<Trigger> register(IStateEnum state) {
-        return REGISTRY.getOrDefault(state.getClass(), new ArrayList<>());
+        List<Trigger> triggers = REGISTRY.getOrDefault(state.getClass(), new ArrayList<>());
+        triggers.sort(Comparator.comparingInt(Trigger::getPriority));
+        return triggers;
     }
 
-    public static <E extends AbstractNPCEntity> void register(IStateEnum state, Predicate<E> function) {
+    public static <E extends AbstractNPCEntity> void register(int priority, IStateEnum state, Predicate<E> function) {
         List<Trigger> triggers = register(state);
-        triggers.add(new Trigger(state, function));
+        triggers.add(new Trigger(priority, state, function));
         REGISTRY.put(state.getClass(), triggers);
     }
 
@@ -49,10 +48,10 @@ public class MoeTriggers {
         for (Trigger trigger : register(state)) {
             if (trigger.fire(npc)) { return trigger; }
         }
-        return new Trigger(state, TRUE);
+        return new Trigger(0, state, TRUE);
     }
 
     static {
-        CupSize.D.when((moe) -> moe.getBlockData().isIn(Blocks.BARREL));
+        CupSize.D.when(0, (moe) -> moe.getBlockData().isIn(Blocks.BARREL));
     }
 }

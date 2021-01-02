@@ -1,10 +1,9 @@
 package moeblocks.entity.ai;
 
-import moeblocks.automata.IStateGoal;
+import moeblocks.automata.state.goal.AbstractStateGoal;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.util.sort.BlockDistance;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-public abstract class AbstractMoveToBlockGoal<T extends AbstractNPCEntity> extends Goal implements IStateGoal {
+public abstract class AbstractMoveToBlockGoal<T extends AbstractNPCEntity> extends AbstractStateGoal {
     protected final List<BlockPos> edges = new ArrayList<>();
     protected final T entity;
     protected final World world;

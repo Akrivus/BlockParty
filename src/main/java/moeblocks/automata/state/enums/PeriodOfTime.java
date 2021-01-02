@@ -1,62 +1,57 @@
 package moeblocks.automata.state.enums;
 
+import moeblocks.automata.GoalState;
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
-import moeblocks.automata.IStateGoal;
-import moeblocks.automata.state.ValueGoalState;
+import moeblocks.automata.Trigger;
+import moeblocks.automata.state.goal.AbstractStateGoal;
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.init.MoeTriggers;
 
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public enum PeriodOfTime implements IStateEnum<AbstractNPCEntity> {
-    ATTACHED((npc, list) -> {
-    
+    ATTACHED((npc, goals) -> {
+
     }, (npc) -> (float) npc.getTimeSinceInteraction(), 0, 24000),
-    PROTESTING((npc, list) -> {
-    
+    PROTESTING((npc, goals) -> {
+
     }, (npc) -> (float) npc.getTimeSinceInteraction(), 24000, 72000),
-    DESPAIRED((npc, list) -> {
-    
+    DESPAIRED((npc, goals) -> {
+
     }, (npc) -> (float) npc.getTimeSinceInteraction(), 72000, 240000),
-    DETACHED((npc, list) -> {
-    
+    DETACHED((npc, goals) -> {
+
     }, (npc) -> (float) npc.getTimeSinceInteraction(), 240000, Float.MAX_VALUE);
-    
-    private final BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator;
-    private final Function<AbstractNPCEntity, Float> function;
-    private final float start;
-    private final float end;
-    
-    PeriodOfTime(BiConsumer<AbstractNPCEntity, List<IStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
+
+    private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
+
+    PeriodOfTime(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
         this.generator = generator;
-        this.function = function;
-        this.start = start;
-        this.end = end;
+        this.when(0, (npc) -> Trigger.isBetween(function.apply(npc), start, end));
     }
-    
+
     @Override
     public IState getState(AbstractNPCEntity applicant) {
-        return new ValueGoalState(this, this.generator, this.function, this.start, this.end);
+        return new GoalState(this, this.generator);
     }
-    
+
     @Override
     public String toKey() {
         return this.name();
     }
-    
+
     @Override
     public IStateEnum<AbstractNPCEntity> fromKey(String key) {
         return PeriodOfTime.get(key);
     }
-    
+
     @Override
     public IStateEnum<AbstractNPCEntity>[] getKeys() {
         return PeriodOfTime.values();
     }
-    
+
     public static PeriodOfTime get(String key) {
         try {
             return PeriodOfTime.valueOf(key);

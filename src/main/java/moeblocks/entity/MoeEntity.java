@@ -5,7 +5,7 @@ import moeblocks.automata.state.enums.BlockDataState;
 import moeblocks.automata.state.enums.CupSize;
 import moeblocks.automata.state.enums.Dere;
 import moeblocks.automata.state.enums.Gender;
-import moeblocks.init.MoeBlocks;
+import moeblocks.init.MoeOverrides;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeSounds;
 import moeblocks.init.MoeTags;
@@ -53,8 +53,7 @@ public class MoeEntity extends AbstractNPCEntity {
     }
     
     protected void setInventory(CompoundNBT compound) {
-        CupSize cup = compound.contains("CupSizes") ? CupSize.valueOf(compound.getString("CupSizes")) : CupSize.B;
-        this.inventory = new Inventory(cup.getSize());
+        this.inventory = new Inventory(27);
         this.inventory.read(compound.getList("Inventory", 10));
     }
     
@@ -208,7 +207,7 @@ public class MoeEntity extends AbstractNPCEntity {
     }
     
     public String getBlockName() {
-        ResourceLocation block = MoeBlocks.get(this.getBlockData().getBlock()).getRegistryName();
+        ResourceLocation block = MoeOverrides.get(this.getBlockData().getBlock()).getRegistryName();
         return String.format("%s.%s", block.getNamespace(), block.getPath());
     }
     
@@ -249,17 +248,13 @@ public class MoeEntity extends AbstractNPCEntity {
     
     @Override
     protected void playStepSound(BlockPos pos, BlockState block) {
-        this.playSound(MoeBlocks.getStepSound(this.getBlockData()), 0.15F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
+        this.playSound(MoeOverrides.getStepSound(this.getBlockData()), 0.15F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
         super.playStepSound(pos, block);
     }
     
     @Override
     public boolean isImmuneToFire() {
         return this.getBlockData().isFlammable(this.world, this.getPosition(), this.getHorizontalFacing());
-    }
-    
-    public float getTiddyAngle() {
-        return this.getCupSize().getAngle();
     }
     
     public static boolean spawn(World world, BlockPos block, BlockPos spawn, float yaw, float pitch, Dere dere, PlayerEntity player) {

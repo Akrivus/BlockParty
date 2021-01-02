@@ -35,8 +35,7 @@ public class Automaton<E extends AbstractNPCEntity> {
     }
     
     public Automaton start() {
-        this.key = this.generator.apply(this.applicant);
-        this.state = this.key.getState(this.applicant);
+        this.fromKey(this.generator.apply(this.applicant));
         return this;
     }
     
@@ -53,14 +52,15 @@ public class Automaton<E extends AbstractNPCEntity> {
     public boolean setNextState() {
         return this.setNextState(this.generator.apply(this.applicant));
     }
-    
+
     public boolean setNextState(IStateEnum<E> key) {
-        IState state = key.getState(this.applicant);
-        if (state.canApply(this.applicant)) {
+        return this.setNextState(key, false);
+    }
+
+    public boolean setNextState(IStateEnum<E> key, boolean forced) {
+        if (this.state.canClear(this.applicant) || forced) {
             this.state.clear(this.applicant);
-            this.state = state;
-            this.state.apply(this.applicant);
-            this.key = key;
+            this.fromKey(key);
             return true;
         }
         return false;
@@ -74,10 +74,14 @@ public class Automaton<E extends AbstractNPCEntity> {
         return this.key;
     }
     
-    public void fromKey(String key) {
-        this.key = this.key.fromKey(key);
-        this.state = this.key.getState(this.applicant);
+    public void fromKey(IStateEnum<E> key) {
+        this.state = (this.key = key).getState(this.applicant);
+        if (this.isBlocked()) { return; }
         this.state.apply(this.applicant);
+    }
+
+    public void fromKey(String key) {
+        this.fromKey(this.key.fromKey(key));
     }
     
     public void render(MatrixStack stack, float partialTickTime) {

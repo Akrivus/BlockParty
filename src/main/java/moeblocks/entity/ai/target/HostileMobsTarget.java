@@ -1,5 +1,6 @@
 package moeblocks.entity.ai.target;
 
+import moeblocks.automata.state.goal.AbstractStateTarget;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.util.sort.EntityDistance;
 import net.minecraft.entity.MobEntity;

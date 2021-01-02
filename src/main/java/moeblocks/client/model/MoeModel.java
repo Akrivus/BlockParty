@@ -287,7 +287,7 @@ public class MoeModel<T extends MoeEntity> extends EntityModel<T> implements IHa
         this.rightLeg.rotateAngleY = this.rightLeg.rotateAngleZ = 0.0F;
         this.leftLeg.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F + 3.14F) * 1.4F * limbSwingAmount;
         this.leftLeg.rotateAngleY = this.leftLeg.rotateAngleZ = 0.0F;
-        this.tiddies.rotateAngleX = entity.getTiddyAngle() * 0.01745329251F;
+        this.tiddies.rotateAngleX = entity.getCupSize().ordinal() * 0.218166156F;
         this.skirt.rotateAngleY = -this.leftLeg.rotateAngleX * 0.25F;
         this.tailBase.rotateAngleX = MathHelper.cos(limbSwing * 0.6662F) * 2.0F * limbSwingAmount * 0.5F;
         this.tailBase.rotateAngleZ = -this.tailBase.rotateAngleX * 0.5F - MathHelper.cos(entity.ticksExisted * 0.09F) * 0.05F + 0.05F;

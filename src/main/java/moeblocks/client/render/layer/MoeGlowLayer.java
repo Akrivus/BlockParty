@@ -3,7 +3,7 @@ package moeblocks.client.render.layer;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import moeblocks.client.model.MoeModel;
 import moeblocks.entity.MoeEntity;
-import moeblocks.init.MoeBlocks;
+import moeblocks.init.MoeOverrides;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -34,6 +34,6 @@ public class MoeGlowLayer extends LayerRenderer<MoeEntity, MoeModel<MoeEntity>> 
     }
     
     public ResourceLocation getTexture(MoeEntity entity) {
-        return MoeBlocks.getNameOf(entity.getBlockData(), "glow");
+        return MoeOverrides.getNameOf(entity.getBlockData(), "glow");
     }
 }

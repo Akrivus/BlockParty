@@ -1,10 +1,10 @@
 package moeblocks.automata.state;
 
-import moeblocks.automata.IStateGoal;
+import moeblocks.automata.GoalState;
+import moeblocks.automata.state.goal.AbstractStateGoal;
 import moeblocks.automata.state.enums.BlockDataState;
 import moeblocks.entity.MoeEntity;
 import moeblocks.init.MoeTags;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -15,9 +15,9 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-public class BlockGoalState<O extends BlockDataState> extends PredicateGoalState<O, MoeEntity> {
-    public BlockGoalState(O filter, BiConsumer<MoeEntity, List<IStateGoal>> generator, List<Block> blocks) {
-        super(filter, generator, (moe) -> blocks.contains(moe.getBlockData().getBlock()));
+public class BlockGoalState<O extends BlockDataState> extends GoalState<O, MoeEntity> {
+    public BlockGoalState(O filter, BiConsumer<MoeEntity, List<AbstractStateGoal>> generator) {
+        super(filter, generator);
     }
     
     @Override
