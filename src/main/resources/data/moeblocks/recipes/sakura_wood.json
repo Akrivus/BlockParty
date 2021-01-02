@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "bark",
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": {
+      "item": "moeblocks:sakura_log"
+    }
+  },
+  "result": {
+    "item": "moeblocks:sakura_wood",
+    "count": 3
+  }
+}

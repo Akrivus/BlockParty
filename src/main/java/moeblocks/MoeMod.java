@@ -34,22 +34,25 @@ public class MoeMod {
     }
     
     private void registerRegisters(IEventBus bus) {
+        MoeBlocks.REGISTRY.register(bus);
         MoeEntities.REGISTRY.register(bus);
         MoeItems.REGISTRY.register(bus);
         MoeSounds.REGISTRY.register(bus);
     }
 
     private void onClientSetup(final FMLClientSetupEvent e) {
+        MoeBlocks.registerRenderTypes();
         MoeEntities.registerEntityRenderingHandlers();
-        MoeItems.registerOverrides();
+        MoeItems.registerModelProperties();
     }
 
     private void onCommonSetup(final FMLCommonSetupEvent e) {
-        MoeBlocks.registerAliases();
-        MoeBlocks.registerPropertyOverrides();
-        MoeBlocks.registerStepSounds();
+        MoeBlocks.registerPottedPlants();
         MoeEntities.registerAttributes();
         MoeItems.registerDispenserBehaviors();
+        MoeOverrides.registerAliases();
+        MoeOverrides.registerPropertyOverrides();
+        MoeOverrides.registerStepSounds();
         MoeTriggers.registerTriggers();
     }
     

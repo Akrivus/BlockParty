@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "moeblocks:sakura_log",
+    "moeblocks:sakura_wood",
+    "moeblocks:stripped_sakura_log",
+    "moeblocks:stripped_sakura_wood"
+  ]
+}

@@ -12,23 +12,40 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class MoeItems {
     public static final DeferredRegister<Item> REGISTRY = DeferredRegister.create(ForgeRegistries.ITEMS, MoeMod.ID);
     public static final RegistryObject<Item> BENTO_BOX = REGISTRY.register("bento_box", BentoBoxItem::new);
+    public static final RegistryObject<Item> BLUE_SPIDER_LILY = REGISTRY.register("blue_spider_lily", () -> new MoeBlockItem(MoeBlocks.BLUE_SPIDER_LILY));
     public static final RegistryObject<Item> CELL_PHONE = REGISTRY.register("cell_phone", CellPhoneItem::new);
     public static final RegistryObject<Item> CUPCAKE = REGISTRY.register("cupcake", CupcakeItem::new);
     public static final RegistryObject<Item> INVITE = REGISTRY.register("invite", InviteItem::new);
-    public static final RegistryObject<Item> KNAIFU = REGISTRY.register("knaifu", KnaifuItem::new);
     public static final RegistryObject<Item> LETTER = REGISTRY.register("letter", LetterItem::new);
     public static final RegistryObject<Item> MOE_DIE = REGISTRY.register("moe_die", MoeDieItem::new);
     public static final RegistryObject<Item> MOE_SPAWN_EGG = REGISTRY.register("moe_spawn_egg", MoeSpawnItem::new);
     public static final RegistryObject<Item> ONIGIRI = REGISTRY.register("onigiri", OnigiriItem::new);
     public static final RegistryObject<Item> PINK_BOW = REGISTRY.register("pink_bow", PinkBowItem::new);
+    public static final RegistryObject<Item> RED_SPIDER_LILY = REGISTRY.register("red_spider_lily", () -> new MoeBlockItem(MoeBlocks.RED_SPIDER_LILY));
     public static final RegistryObject<Item> YEARBOOK_PAGE = REGISTRY.register("yearbook_page", YearbookPageItem::new);
     public static final RegistryObject<Item> YEARBOOK = REGISTRY.register("yearbook", YearbookItem::new);
+    public static final RegistryObject<Item> SAKURA_BLOSSOMS = REGISTRY.register("sakura_blossoms", () -> new MoeBlockItem(MoeBlocks.SAKURA_BLOSSOMS));
+    public static final RegistryObject<Item> SAKURA_BUTTON = REGISTRY.register("sakura_button", () -> new MoeBlockItem(MoeBlocks.SAKURA_BUTTON));
+    public static final RegistryObject<Item> SAKURA_DOOR = REGISTRY.register("sakura_door", () -> new MoeBlockItem(MoeBlocks.SAKURA_DOOR));
+    public static final RegistryObject<Item> SAKURA_FENCE = REGISTRY.register("sakura_fence", () -> new MoeBlockItem(MoeBlocks.SAKURA_FENCE));
+    public static final RegistryObject<Item> SAKURA_FENCE_GATE = REGISTRY.register("sakura_fence_gate", () -> new MoeBlockItem(MoeBlocks.SAKURA_FENCE_GATE));
+    public static final RegistryObject<Item> SAKURA_LEAVES = REGISTRY.register("sakura_leaves", () -> new MoeBlockItem(MoeBlocks.SAKURA_LEAVES));
+    public static final RegistryObject<Item> SAKURA_LOG = REGISTRY.register("sakura_log", () -> new MoeBlockItem(MoeBlocks.SAKURA_LOG));
+    public static final RegistryObject<Item> SAKURA_PLANKS = REGISTRY.register("sakura_planks", () -> new MoeBlockItem(MoeBlocks.SAKURA_PLANKS));
+    public static final RegistryObject<Item> SAKURA_PRESSURE_PLATE = REGISTRY.register("sakura_pressure_plate", () -> new MoeBlockItem(MoeBlocks.SAKURA_PRESSURE_PLATE));
+    public static final RegistryObject<Item> SAKURA_SAPLING = REGISTRY.register("sakura_sapling", () -> new MoeBlockItem(MoeBlocks.SAKURA_SAPLING));
+    public static final RegistryObject<Item> SAKURA_SLAB = REGISTRY.register("sakura_slab", () -> new MoeBlockItem(MoeBlocks.SAKURA_SLAB));
+    public static final RegistryObject<Item> SAKURA_STAIRS = REGISTRY.register("sakura_stairs", () -> new MoeBlockItem(MoeBlocks.SAKURA_STAIRS));
+    public static final RegistryObject<Item> SAKURA_TRAPDOOR = REGISTRY.register("sakura_trapdoor", () -> new MoeBlockItem(MoeBlocks.SAKURA_TRAPDOOR));
+    public static final RegistryObject<Item> SAKURA_WOOD = REGISTRY.register("sakura_wood", () -> new MoeBlockItem(MoeBlocks.SAKURA_WOOD));
+    public static final RegistryObject<Item> STRIPPED_SAKURA_LOG = REGISTRY.register("stripped_sakura_log", () -> new MoeBlockItem(MoeBlocks.STRIPPED_SAKURA_LOG));
+    public static final RegistryObject<Item> STRIPPED_SAKURA_WOOD = REGISTRY.register("stripped_sakura_wood", () -> new MoeBlockItem(MoeBlocks.STRIPPED_SAKURA_WOOD));
     
     public static void registerDispenserBehaviors() {
         DispenserBlock.registerDispenseBehavior(MoeItems.MOE_DIE.get(), MoeDieItem.DISPENSER_BEHAVIOR);
     }
     
-    public static void registerOverrides() {
+    public static void registerModelProperties() {
         ItemModelsProperties.registerProperty(MoeItems.INVITE.get(), LetterItem.CLOSED_PROPERTY, LetterItem.CLOSED_PROPERTY_GETTER);
         ItemModelsProperties.registerProperty(MoeItems.LETTER.get(), LetterItem.CLOSED_PROPERTY, LetterItem.CLOSED_PROPERTY_GETTER);
     }

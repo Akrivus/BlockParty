@@ -7,7 +7,7 @@ import moeblocks.client.render.layer.MoeEmotionLayer;
 import moeblocks.client.render.layer.MoeGlowLayer;
 import moeblocks.client.render.layer.MoeSleepingLayer;
 import moeblocks.entity.MoeEntity;
-import moeblocks.init.MoeBlocks;
+import moeblocks.init.MoeOverrides;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -38,7 +38,7 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
     
     @Override
     public ResourceLocation getEntityTexture(MoeEntity entity) {
-        return MoeBlocks.getNameOf(entity.getBlockData());
+        return MoeOverrides.getNameOf(entity.getBlockData());
     }
     
     @Override
