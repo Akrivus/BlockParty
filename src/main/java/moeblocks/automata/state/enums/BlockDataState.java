@@ -18,10 +18,8 @@ public enum BlockDataState implements IStateEnum<MoeEntity> {
     private final BiConsumer<MoeEntity, List<AbstractStateGoal>> generator;
 
     BlockDataState(BiConsumer<MoeEntity, List<AbstractStateGoal>> generator, Predicate<MoeEntity>... triggers) {
+        for (Predicate<MoeEntity> trigger : triggers) { this.when(0, trigger); }
         this.generator = generator;
-        for (Predicate<MoeEntity> trigger : triggers) {
-            this.when(0, trigger);
-        }
     }
 
     @Override

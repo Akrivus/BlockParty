@@ -12,9 +12,13 @@ import java.util.function.BiConsumer;
 public class WatchedGoalState<O extends IStateEnum<E>, E extends AbstractNPCEntity> extends GoalState<O, E> {
     private final DataParameter<String> key;
     
-    public WatchedGoalState(O filter, BiConsumer<E, List<AbstractStateGoal>> generator, DataParameter<String> key) {
-        super(filter, generator);
+    public WatchedGoalState(O filter, BiConsumer<E, List<AbstractStateGoal>> generator, DataParameter<String> key, int lifespan) {
+        super(filter, generator, lifespan);
         this.key = key;
+    }
+
+    public WatchedGoalState(O filter, BiConsumer<E, List<AbstractStateGoal>> generator, DataParameter<String> key) {
+        this(filter, generator, key, 100);
     }
     
     @Override

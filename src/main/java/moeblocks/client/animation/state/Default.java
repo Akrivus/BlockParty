@@ -15,32 +15,32 @@ public class Default extends AnimationState {
     public void setRotationAngles(IRiggableModel model, AbstractNPCEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks) {
         if (!entity.isSwingInProgress && limbSwingAmount - entity.prevLimbSwingAmount == 0.0F) {
             switch (entity.getDere()) {
-                case HIMEDERE:
-                    model.getRightLeg().rotateAngleY = Math.abs(MathHelper.cos(ageInTicks * 0.125F)) * 0.5F;
-                    model.getLeftArm().rotateAngleZ = -(model.getRightArm().rotateAngleZ = 0.5F);
-                    break;
-                case KUUDERE:
-                    model.getRightArm().rotateAngleX = model.getLeftArm().rotateAngleX = -0.6F;
-                    model.getLeftArm().rotateAngleZ = -(model.getRightArm().rotateAngleZ = -0.8F);
-                    break;
-                case TSUNDERE:
-                    model.getLeftLeg().rotateAngleZ = -(model.getRightLeg().rotateAngleZ = 0.1F);
-                    model.getRightArm().rotateAngleX = model.getLeftArm().rotateAngleX = 0.0F;
-                    model.getLeftArm().rotateAngleZ = -(model.getRightArm().rotateAngleZ = 0.9F);
-                    break;
-                case YANDERE:
-                    break;
-                case DEREDERE:
-                    model.getBody().rotateAngleY = MathHelper.cos(ageInTicks * 0.125F) * 0.1F;
-                    model.getLeftLeg().rotateAngleZ = -(model.getRightLeg().rotateAngleZ = -0.1F);
-                    model.getRightArm().rotateAngleX = model.getLeftArm().rotateAngleX = 0.6F;
-                    model.getLeftArm().rotateAngleZ = -(model.getRightArm().rotateAngleZ = -0.8F);
-                    break;
-                case DANDERE:
-                    model.getLeftLeg().rotateAngleZ = -(model.getRightLeg().rotateAngleZ = -0.1F);
-                    model.getRightArm().rotateAngleX = model.getLeftArm().rotateAngleX = -0.6F;
-                    model.getLeftArm().rotateAngleZ = -(model.getRightArm().rotateAngleZ = -0.8F);
-                    break;
+            case HIMEDERE:
+                model.getRightLeg().rotateAngleY = Math.abs(MathHelper.cos(ageInTicks * 0.125F)) * 0.5F;
+                model.getLeftArm().rotateAngleZ = -(model.getRightArm().rotateAngleZ = 0.5F);
+                break;
+            case KUUDERE:
+                model.getRightArm().rotateAngleX = model.getLeftArm().rotateAngleX = -0.6F;
+                model.getLeftArm().rotateAngleZ = -(model.getRightArm().rotateAngleZ = -0.8F);
+                break;
+            case TSUNDERE:
+                model.getLeftLeg().rotateAngleZ = -(model.getRightLeg().rotateAngleZ = 0.1F);
+                model.getRightArm().rotateAngleX = model.getLeftArm().rotateAngleX = 0.0F;
+                model.getLeftArm().rotateAngleZ = -(model.getRightArm().rotateAngleZ = 0.9F);
+                break;
+            case YANDERE:
+                break;
+            case DEREDERE:
+                model.getBody().rotateAngleY = MathHelper.cos(ageInTicks * 0.125F) * 0.1F;
+                model.getLeftLeg().rotateAngleZ = -(model.getRightLeg().rotateAngleZ = -0.1F);
+                model.getRightArm().rotateAngleX = model.getLeftArm().rotateAngleX = 0.6F;
+                model.getLeftArm().rotateAngleZ = -(model.getRightArm().rotateAngleZ = -0.8F);
+                break;
+            case DANDERE:
+                model.getLeftLeg().rotateAngleZ = -(model.getRightLeg().rotateAngleZ = -0.1F);
+                model.getRightArm().rotateAngleX = model.getLeftArm().rotateAngleX = -0.6F;
+                model.getLeftArm().rotateAngleZ = -(model.getRightArm().rotateAngleZ = -0.8F);
+                break;
             }
         }
     }

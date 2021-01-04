@@ -25,8 +25,8 @@ public enum HungerState implements IStateEnum<AbstractNPCEntity> {
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
     HungerState(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
-        this.generator = generator;
         this.when(0, (npc) -> Trigger.isBetween(function.apply(npc), start, end));
+        this.generator = generator;
     }
 
     @Override
@@ -50,9 +50,7 @@ public enum HungerState implements IStateEnum<AbstractNPCEntity> {
     }
 
     public static HungerState get(String key) {
-        try {
-            return HungerState.valueOf(key);
-        } catch (IllegalArgumentException e) {
+        try { return HungerState.valueOf(key); } catch (IllegalArgumentException e) {
             return HungerState.SATISFIED;
         }
     }

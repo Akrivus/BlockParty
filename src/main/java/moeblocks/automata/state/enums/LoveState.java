@@ -31,8 +31,8 @@ public enum LoveState implements IStateEnum<AbstractNPCEntity> {
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
     LoveState(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
-        this.generator = generator;
         this.when(0, (npc) -> Trigger.isBetween(function.apply(npc), start, end));
+        this.generator = generator;
     }
 
     @Override
@@ -56,9 +56,7 @@ public enum LoveState implements IStateEnum<AbstractNPCEntity> {
     }
 
     public static LoveState get(String key) {
-        try {
-            return LoveState.valueOf(key);
-        } catch (IllegalArgumentException e) {
+        try { return LoveState.valueOf(key); } catch (IllegalArgumentException e) {
             return LoveState.ACQUAINTED;
         }
     }

@@ -25,6 +25,7 @@ import moeblocks.util.ChunkScheduler;
 import moeblocks.util.DimBlockPos;
 import moeblocks.util.VoiceLines;
 import moeblocks.util.sort.EntityDistance;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -48,6 +49,7 @@ import net.minecraft.pathfinding.FlyingPathNavigator;
 import net.minecraft.pathfinding.GroundPathNavigator;
 import net.minecraft.pathfinding.PathNavigator;
 import net.minecraft.pathfinding.PathNodeType;
+import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
@@ -68,6 +70,7 @@ import net.minecraftforge.common.util.ITeleporter;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public abstract class AbstractNPCEntity extends CreatureEntity {
     public static final DataParameter<Optional<UUID>> GLOBAL_UUID = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.OPTIONAL_UNIQUE_ID);
@@ -78,17 +81,18 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     public static final DataParameter<String> BLOOD_TYPE = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public static final DataParameter<String> DERE = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public static final DataParameter<String> EMOTION = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
+    public static final DataParameter<String> STORY_PHASE = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public static final DataParameter<String> FAMILY_NAME = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public static final DataParameter<String> GIVEN_NAME = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
-    public static final DataParameter<Float> FOOD_LEVEL = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
-    public static final DataParameter<Float> SATURATION = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
-    public static final DataParameter<Float> EXHAUSTION = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
-    public static final DataParameter<Float> LOVE = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
     public static final DataParameter<Float> AFFECTION = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
-    public static final DataParameter<Float> STRESS = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
-    public static final DataParameter<Float> RELAXATION = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
+    public static final DataParameter<Float> EXHAUSTION = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
+    public static final DataParameter<Float> FOOD_LEVEL = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
+    public static final DataParameter<Float> LOVE = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
     public static final DataParameter<Float> PROGRESS = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
-    protected HashMap<Class<? extends IStateEnum>, Automaton> states;
+    public static final DataParameter<Float> RELAXATION = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
+    public static final DataParameter<Float> SATURATION = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
+    public static final DataParameter<Float> STRESS = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
+    public HashMap<Class<? extends IStateEnum>, Automaton> states;
     private final Queue<Consumer<AbstractNPCEntity>> nextTickOps;
     private boolean isAutomatonReady;
     private PlayerEntity playerInteracted;
@@ -96,7 +100,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     private LivingEntity entityToAvoid;
     private BlockState blockToMine;
     private Scene scene;
-    private int sceneID;
+    private boolean acted;
     private int timeSinceAvoid;
     private int timeSinceInteraction;
     private int timeSinceStare;
@@ -204,16 +208,17 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         this.dataManager.register(BLOOD_TYPE, BloodType.O.toKey());
         this.dataManager.register(DERE, Dere.NYANDERE.toKey());
         this.dataManager.register(EMOTION, Emotion.NORMAL.toKey());
+        this.dataManager.register(STORY_PHASE, StoryPhase.INTRODUCTION.toKey());
         this.dataManager.register(FAMILY_NAME, "Missing");
         this.dataManager.register(GIVEN_NAME, "Name");
-        this.dataManager.register(FOOD_LEVEL, 20.0F);
-        this.dataManager.register(SATURATION, 6.0F);
-        this.dataManager.register(EXHAUSTION, 0.0F);
-        this.dataManager.register(LOVE, 4.0F);
         this.dataManager.register(AFFECTION, 0.0F);
-        this.dataManager.register(STRESS, 0.0F);
-        this.dataManager.register(RELAXATION, 0.0F);
+        this.dataManager.register(EXHAUSTION, 0.0F);
+        this.dataManager.register(FOOD_LEVEL, 20.0F);
+        this.dataManager.register(LOVE, 4.0F);
         this.dataManager.register(PROGRESS, 0.0F);
+        this.dataManager.register(RELAXATION, 0.0F);
+        this.dataManager.register(SATURATION, 6.0F);
+        this.dataManager.register(STRESS, 0.0F);
         super.registerData();
     }
     
@@ -225,38 +230,38 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     @OnlyIn(Dist.CLIENT)
     public void handleStatusUpdate(byte id) {
         switch (id) {
-            case 100:
-                this.setParticles(ParticleTypes.FLAME);
-                return;
-            case 101:
-                this.setParticles(ParticleTypes.BUBBLE);
-                return;
-            case 102:
-            case 109:
-            case 111:
-                this.setParticles(ParticleTypes.EFFECT);
-                return;
-            case 103:
-                this.setParticles(ParticleTypes.SPLASH);
-                return;
-            case 104:
-            case 105:
-            case 114:
-                this.setParticles(ParticleTypes.SMOKE);
-                return;
-            case 106:
-            case 113:
-                this.setParticles(ParticleTypes.HEART);
-                return;
-            case 107:
-                return;
-            case 108:
-            case 110:
-            case 112:
-                this.setParticles(ParticleTypes.CRIT);
-                return;
-            default:
-                super.handleStatusUpdate(id);
+        case 100:
+            this.setParticles(ParticleTypes.FLAME);
+            return;
+        case 101:
+            this.setParticles(ParticleTypes.BUBBLE);
+            return;
+        case 102:
+        case 109:
+        case 111:
+            this.setParticles(ParticleTypes.EFFECT);
+            return;
+        case 103:
+            this.setParticles(ParticleTypes.SPLASH);
+            return;
+        case 104:
+        case 105:
+        case 114:
+            this.setParticles(ParticleTypes.SMOKE);
+            return;
+        case 106:
+        case 113:
+            this.setParticles(ParticleTypes.HEART);
+            return;
+        case 107:
+            return;
+        case 108:
+        case 110:
+        case 112:
+            this.setParticles(ParticleTypes.CRIT);
+            return;
+        default:
+            super.handleStatusUpdate(id);
         }
     }
     
@@ -394,11 +399,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public boolean isInConversation() {
-        return this.scene != null;
-    }
-    
-    public boolean isReadyToAct() {
-        return this.scene.hashCode() != this.sceneID;
+        return this.scene != null && this.getDistance(this.getProtagonist()) < 5.0F;
     }
     
     public Scene getScene() {
@@ -406,26 +407,22 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public void setScene(Scene scene) {
+        if (scene == null) { MoeMessages.send(this.getProtagonist(), new SCloseDialogue()); }
         this.scene = scene;
+        this.acted = false;
     }
     
     public void setScene(Response response) {
-        if (this.isInConversation()) {
-            this.setScene(this.scene.next(response));
-            if (response == Response.CLOSE) {
-                MoeMessages.send(this.getProtagonist(), new SCloseDialogue());
-            }
-        }
+        if (this.isInConversation()) { this.setScene(this.scene.next(response)); }
     }
-    
+
+    public boolean setConvo(Interaction interaction) {
+        this.setScene(MoeConvos.find(interaction, this));
+        return this.isInConversation();
+    }
+
     public boolean setConvo(Interaction interaction, Entity entity) {
-        if (this.canConverseWith(entity)) {
-            Conversation convo = MoeConvos.find(interaction, this);
-            if (convo == null) { return false; }
-            this.setScene(convo.start());
-            return true;
-        }
-        return false;
+        return this.canConverseWith(entity) && this.setConvo(interaction);
     }
     
     @Override
@@ -466,11 +463,14 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         this.states.forEach((state, machine) -> machine.update());
         if (this.isFollowing() && this.isPassenger() && !this.getProtagonist().isPassenger()) { this.dismount(); }
         if (this.isLocal()) {
-            if (++this.timeSinceSleep > 24000) { this.addStress(0.0005F); }
+            if (this.timeSinceSleep > 24000) { this.addStress(0.0005F); }
             this.updateConvoState();
             this.updateStareState();
             this.updateHungerState();
             this.updateLoveState();
+            ++this.timeSinceSleep;
+            ++this.timeSinceInteraction;
+            ++this.timeSinceStare;
             ++this.age;
         } else {
             this.updateAITasks();
@@ -565,7 +565,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     public ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
         if (stack.getItem().isIn(MoeTags.ADMIN)) { return ActionResultType.FAIL; }
         if (this.isRemote() || hand != Hand.MAIN_HAND) { return ActionResultType.PASS; }
-        if (this.setConvo(player.isSneaking() ? Interaction.SHIFT_RIGHT_CLICK : Interaction.RIGHT_CLICK, player)) {
+        if (this.setConvo(Interaction.RIGHT_CLICK, player)) {
             return ActionResultType.SUCCESS;
         }
         return ActionResultType.FAIL;
@@ -691,17 +691,18 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         this.setBloodType(BloodType.get(compound.getString("BloodType")));
         this.setDere(Dere.get(compound.getString("Dere")));
         this.setEmotion(Emotion.get(compound.getString("Emotion")));
+        this.setStoryPhase(StoryPhase.get(compound.getString("StoryPhase")));
         this.setFamilyName(compound.getString("FamilyName"));
+        this.setAffection(compound.getFloat("Affection"));
+        this.setExhaustion(compound.getFloat("Exhaustion"));
+        this.setFoodLevel(compound.getFloat("FoodLevel"));
         this.setGivenName(compound.getString("GivenName"));
         this.setHealth(compound.getFloat("Health"));
-        this.setFoodLevel(compound.getFloat("FoodLevel"));
-        this.setSaturation(compound.getFloat("Saturation"));
-        this.setExhaustion(compound.getFloat("Exhaustion"));
         this.setLove(compound.getFloat("Love"));
-        this.setAffection(compound.getFloat("Affection"));
         this.setProgress(compound.getFloat("Progress"));
-        this.setStress(compound.getFloat("Stress"));
         this.setRelaxation(compound.getFloat("Relaxation"));
+        this.setSaturation(compound.getFloat("Saturation"));
+        this.setStress(compound.getFloat("Stress"));
         this.age = compound.getInt("Age");
     }
     
@@ -820,9 +821,25 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     public double getGaussian(double factor) {
         return this.rand.nextGaussian() * factor;
     }
-    
-    public Automaton getState(Class<? extends IStateEnum> state) {
+
+    public Automaton getAutomaton(Class<? extends IStateEnum> state) {
         return this.states.get(state);
+    }
+
+    public Automaton getAutomaton(IStateEnum state) {
+        return this.getAutomaton(state.getClass());
+    }
+
+    public IStateEnum getState(Class<? extends IStateEnum> state) {
+        return this.getAutomaton(state).getKey();
+    }
+
+    public IStateEnum getState(IStateEnum state) {
+        return this.getState(state.getClass());
+    }
+
+    public boolean hasState(IStateEnum state) {
+        return this.getState(state) == state;
     }
     
     public float getStrikingDistance(Entity target) {
@@ -848,6 +865,16 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         double distance = cast.length();
         double sum = look.dotProduct(cast.normalize());
         return sum > 1.0D - 0.025D / distance && entity.canEntityBeSeen(this);
+    }
+
+    public boolean hasItem(ITag<Item> tag) {
+        try { return this.getHeldItem(Hand.MAIN_HAND).getItem().isIn(tag); } catch (IllegalStateException e) {
+            return false;
+        }
+    }
+
+    public boolean hasItem(Item item) {
+        return this.getHeldItem(Hand.MAIN_HAND).getItem() == item;
     }
     
     public boolean isCompatible(AbstractNPCEntity entity) {
@@ -883,6 +910,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     public void addNextTickOp(Consumer<AbstractNPCEntity> op) {
         this.nextTickOps.add(op);
+    }
+
+    public boolean asMoe(Predicate<MoeEntity> function) {
+        return this instanceof MoeEntity && function.test((MoeEntity) this);
     }
     
     public boolean tryEquipItem(ItemStack stack) {
@@ -948,7 +979,8 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public void updateStareState() {
-        List<LivingEntity> list = this.world.getLoadedEntitiesWithinAABB(LivingEntity.class, this.getBoundingBox().grow(8.0));
+        if (this.isBeingStaredAt() || this.timeSinceStare % 200 != 0) { return; }
+        List<LivingEntity> list = this.world.getLoadedEntitiesWithinAABB(LivingEntity.class, this.getBoundingBox().grow(5.0));
         list.sort(new EntityDistance(this));
         for (LivingEntity entity : list) {
             if (this.isBeingWatchedBy(entity)) {
@@ -961,9 +993,9 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public void updateConvoState() {
-        if (this.isInConversation() && this.isReadyToAct()) {
+        if (this.isInConversation() && !this.acted) {
             this.scene.act(this.getProtagonist(), this);
-            this.sceneID = this.scene.hashCode();
+            this.acted = true;
         }
     }
     
@@ -1037,22 +1069,6 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     public float getScale() {
         return 1.0F;
-    }
-    
-    public StoryPhase getStory() {
-        int step = (int) this.getProgress();
-        switch (step) {
-            case 1:
-                return StoryPhase.INFATUATION;
-            case 2:
-                return StoryPhase.CONFUSION;
-            case 3:
-                return StoryPhase.RESOLUTION;
-            case 4:
-                return StoryPhase.TRAGEDY;
-            default:
-                return StoryPhase.INTRODUCTION;
-        }
     }
     
     public int getTimeSinceInteraction() {
@@ -1149,7 +1165,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     public void onDeath(DamageSource cause) {
         this.setCharacter((npc) -> npc.setDead(true));
         super.onDeath(cause);
-        if (this.hasProtagonist()) {
+        if (this.isLocal() && this.hasProtagonist()) {
             this.say(this.getProtagonist(), cause.getDeathMessage(this));
         }
     }
@@ -1192,6 +1208,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         if (BLOOD_TYPE.equals(key)) { this.setNextState(BloodType.class, this.getBloodType()); }
         if (DERE.equals(key)) { this.setNextState(Dere.class, this.getDere()); }
         if (EMOTION.equals(key)) { this.setNextState(Emotion.class, this.getEmotion()); }
+        if (STORY_PHASE.equals(key)) { this.setNextState(StoryPhase.class, this.getStoryPhase()); }
         super.notifyDataManagerChange(key);
     }
     
@@ -1213,6 +1230,15 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     public void setDere(Dere dere) {
         this.dataManager.set(DERE, dere.toKey());
+    }
+
+    public StoryPhase getStoryPhase() {
+        return StoryPhase.get(this.dataManager.get(STORY_PHASE));
+    }
+
+    public void setStoryPhase(StoryPhase phase) {
+        this.dataManager.set(STORY_PHASE, phase.toKey());
+        this.setProgress(0.0F);
     }
     
     @Override

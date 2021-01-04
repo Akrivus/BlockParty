@@ -27,6 +27,7 @@ public enum CupSize implements IStateEnum<MoeEntity> {
     private final BiConsumer<MoeEntity, List<AbstractStateGoal>> generator;
 
     CupSize(BiConsumer<MoeEntity, List<AbstractStateGoal>> generator) {
+        this.when(0, (npc) -> this.equals(npc.getCupSize()));
         this.generator = generator;
     }
 

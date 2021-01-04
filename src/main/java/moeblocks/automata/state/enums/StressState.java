@@ -12,13 +12,13 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public enum StressState implements IStateEnum<AbstractNPCEntity> {
-    BROKEN((npc, goals) -> {
+    BURNT_OUT((npc, goals) -> {
 
     }, (npc) -> npc.getStress(), 16, 20),
     PANICKED((npc, goals) -> {
 
     }, (npc) -> npc.getStress(), 12, 16),
-    STRESSED((npc, goals) -> {
+    ANXIOUS((npc, goals) -> {
 
     }, (npc) -> npc.getStress(), 8, 12),
     ALERT((npc, goals) -> {
@@ -31,8 +31,8 @@ public enum StressState implements IStateEnum<AbstractNPCEntity> {
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
     StressState(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
-        this.generator = generator;
         this.when(0, (npc) -> Trigger.isBetween(function.apply(npc), start, end));
+        this.generator = generator;
     }
 
     @Override
@@ -56,9 +56,7 @@ public enum StressState implements IStateEnum<AbstractNPCEntity> {
     }
 
     public static StressState get(String key) {
-        try {
-            return StressState.valueOf(key);
-        } catch (IllegalArgumentException e) {
+        try { return StressState.valueOf(key); } catch (IllegalArgumentException e) {
             return StressState.RELAXED;
         }
     }

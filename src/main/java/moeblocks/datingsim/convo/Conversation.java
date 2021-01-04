@@ -6,22 +6,21 @@ import moeblocks.entity.AbstractNPCEntity;
 import java.util.function.Predicate;
 
 public class Conversation {
-    private final Interaction interaction;
-    private final Predicate<AbstractNPCEntity> condition;
-    private final Scene firstScene;
+    private final Interaction trigger;
+    private final Predicate<AbstractNPCEntity> function;
+    private final Scene scene;
     
-    public Conversation(Interaction interaction, Predicate<AbstractNPCEntity> condition, Scene firstScene) {
-        this.interaction = interaction;
-        this.condition = condition;
-        this.firstScene = firstScene;
+    public Conversation(Interaction trigger, Predicate<AbstractNPCEntity> function, Scene scene) {
+        this.trigger = trigger;
+        this.function = function;
+        this.scene = scene;
     }
     
-    public Scene start() {
-        return this.firstScene;
+    public Scene getScene() {
+        return this.scene;
     }
     
-    public boolean matches(Interaction interaction, AbstractNPCEntity npc) {
-        if (this.interaction != interaction) { return false; }
-        return this.condition.test(npc);
+    public boolean matches(Interaction trigger, AbstractNPCEntity npc) {
+        return this.trigger == trigger && this.function.test(npc);
     }
 }

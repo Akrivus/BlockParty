@@ -4,6 +4,7 @@ import moeblocks.automata.GoalState;
 import moeblocks.automata.IState;
 import moeblocks.automata.IStateEnum;
 import moeblocks.automata.Trigger;
+import moeblocks.automata.state.WatchedGoalState;
 import moeblocks.automata.state.goal.AbstractStateGoal;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.util.Trans;
@@ -15,30 +16,38 @@ import java.util.function.Function;
 public enum StoryPhase implements IStateEnum<AbstractNPCEntity> {
     INTRODUCTION((npc, goals) -> {
 
-    }, (npc) -> npc.getProgress(), 0, 1),
+    }),
     INFATUATION((npc, goals) -> {
 
-    }, (npc) -> npc.getProgress(), 1, 2),
+    }),
     CONFUSION((npc, goals) -> {
 
-    }, (npc) -> npc.getProgress(), 2, 3),
-    RESOLUTION((npc, goals) -> {
+    }),
+    HAPPY_ENDING((npc, goals) -> {
 
-    }, (npc) -> npc.getProgress(), 3, 4),
-    TRAGEDY((npc, goals) -> {
+    }),
+    BITTERSWEET_ENDING((npc, goals) -> {
 
-    }, (npc) -> npc.getProgress(), 4, 5);
+    }),
+    TRAGIC_ENDING((npc, goals) -> {
+
+    }),
+    DEAD((npc, goals) -> {
+
+    }),
+    ESTRANGED((npc, goals) -> {
+
+    });
 
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
-    StoryPhase(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
+    StoryPhase(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator) {
         this.generator = generator;
-        this.when(0, (npc) -> Trigger.isBetween(function.apply(npc), start, end));
     }
 
     @Override
     public IState getState(AbstractNPCEntity applicant) {
-        return new GoalState(this, this.generator);
+        return new WatchedGoalState(this, this.generator, AbstractNPCEntity.STORY_PHASE);
     }
 
     @Override
@@ -57,15 +66,8 @@ public enum StoryPhase implements IStateEnum<AbstractNPCEntity> {
     }
 
     public static StoryPhase get(String key) {
-        try {
-            return StoryPhase.valueOf(key);
-        } catch (IllegalArgumentException e) {
+        try { return StoryPhase.valueOf(key); } catch (IllegalArgumentException e) {
             return StoryPhase.INTRODUCTION;
         }
-    }
-
-    @Override
-    public String toString() {
-        return Trans.late(String.format("debug.moeblocks.story.%s", this.name().toLowerCase()));
     }
 }

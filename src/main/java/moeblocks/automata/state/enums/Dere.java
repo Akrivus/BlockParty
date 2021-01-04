@@ -38,6 +38,7 @@ public enum Dere implements IStateEnum<AbstractNPCEntity> {
     private final int color;
 
     Dere(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, int color) {
+        this.when(0, (npc) -> this.equals(npc.getDere()));
         this.generator = generator;
         this.color = color;
     }
@@ -66,11 +67,6 @@ public enum Dere implements IStateEnum<AbstractNPCEntity> {
         try { return Dere.valueOf(key); } catch (IllegalArgumentException e) {
             return Dere.NYANDERE;
         }
-    }
-
-    @Override
-    public String toString() {
-        return Trans.late(String.format("debug.moeblocks.deres.%s", this.name().toLowerCase()));
     }
 
     public int getColor() {

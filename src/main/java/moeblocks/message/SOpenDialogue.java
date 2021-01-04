@@ -32,6 +32,7 @@ public class SOpenDialogue extends AbstractMessage {
     
     @Override
     public void handle(NetworkEvent.Context context, Minecraft minecraft) {
+        if (minecraft.currentScreen != null) { minecraft.currentScreen.closeScreen(); }
         minecraft.displayGuiScreen(new DialogueScreen(this.dialogue));
     }
 }

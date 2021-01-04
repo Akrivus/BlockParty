@@ -12,12 +12,19 @@ import moeblocks.message.CDialogueClose;
 import moeblocks.message.CDialogueRespond;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DialogueScreen extends AbstractScreen {
     public static final ResourceLocation DIALOGUE_TEXTURES = new ResourceLocation(MoeMod.ID, "textures/gui/dialogue.png");
+    private final List<RespondButton> responses = new ArrayList<>();
     private final String[] lines = new String[] { "", "", "" };
     private final Dialogue dialogue;
     private AbstractNPCEntity entity;
@@ -39,7 +46,7 @@ public class DialogueScreen extends AbstractScreen {
     
     @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-        this.setLines(this.line.substring(0, this.cursor), 0);
+        this.setLines(this.line.substring(0, Math.min(this.cursor, this.line.length())), 0);
         this.renderDialogue(stack);
         super.render(stack, mouseX, mouseY, partialTicks);
         if (this.cursor < this.line.length()) {
@@ -64,10 +71,34 @@ public class DialogueScreen extends AbstractScreen {
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers)) { return true; }
         switch (keyCode) {
-            default:
-                return false;
+        case GLFW.GLFW_KEY_1:
+        case GLFW.GLFW_KEY_2:
+        case GLFW.GLFW_KEY_3:
+        case GLFW.GLFW_KEY_4:
+        case GLFW.GLFW_KEY_5:
+        case GLFW.GLFW_KEY_6:
+        case GLFW.GLFW_KEY_7:
+        case GLFW.GLFW_KEY_8:
+        case GLFW.GLFW_KEY_9:
+            if (this.responses.size() >= keyCode - 48) {
+                this.responses.get(keyCode - 49).onPress();
+                return true;
+            }
+        case GLFW.GLFW_KEY_0:
+            if (this.responses.size() >= 10) {
+                this.responses.get(9).onPress();
+                return true;
+            }
+            return false;
+        case GLFW.GLFW_KEY_ENTER:
+        case GLFW.GLFW_KEY_SPACE:
+            this.cursor = this.line.length();
+            return true;
+        case GLFW.GLFW_KEY_ESCAPE:
+            MoeMessages.send(new CDialogueClose(this.dialogue.getSpeaker().getUUID()));
+        default:
+            return super.keyPressed(keyCode, scanCode, modifiers);
         }
     }
     
@@ -78,14 +109,8 @@ public class DialogueScreen extends AbstractScreen {
         this.line = this.dialogue.getLine();
         this.start = this.minecraft.player.ticksExisted;
         for (Response response : Response.values()) {
-            if (this.dialogue.has(response)) { this.addButton(new RespondButton(this, this.dialogue, response, this.role++)); }
+            if (this.dialogue.has(response)) { this.responses.add(this.addButton(new RespondButton(this, this.dialogue, response, this.role++))); }
         }
-    }
-    
-    @Override
-    public void closeScreen() {
-        MoeMessages.send(new CDialogueClose(this.dialogue.getSpeaker().getUUID()));
-        super.closeScreen();
     }
     
     private void setLines(String words, int i) {

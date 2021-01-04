@@ -30,10 +30,8 @@ public enum HeldItemState implements IStateEnum<AbstractNPCEntity> {
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
     HeldItemState(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, Predicate<AbstractNPCEntity>... triggers) {
+        for (Predicate<AbstractNPCEntity> trigger : triggers) { this.when(0, trigger); }
         this.generator = generator;
-        for (Predicate<AbstractNPCEntity> trigger : triggers) {
-            this.when(0, trigger);
-        }
     }
 
     @Override

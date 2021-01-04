@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moeblocks.MoeMod;
-import moeblocks.automata.state.enums.Animation;
+import moeblocks.automata.state.enums.*;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeMessages;
@@ -56,19 +56,23 @@ public class YearbookScreen extends ControllerScreen {
     @Override
     public void setNPC() {
         this.entity = this.npc.clone(this.minecraft, MoeEntities.MOE.get());
+        this.entity.setAnimation(Animation.YEARBOOK);
+        this.name = this.entity.getFullName();
+        this.updateButtons();
         this.stats[0] = String.format("%.0f", this.entity.getHealth());
         this.stats[1] = String.format("%.0f", this.entity.getFoodLevel());
         this.stats[2] = String.format("%.0f", this.entity.getLove());
         this.stats[3] = String.format("%.0f", this.entity.getStress());
-        this.lines[0] = String.format(Trans.late("gui.moeblocks.label.dere"), this.entity.getDere().toString());
-        this.lines[1] = String.format(Trans.late("gui.moeblocks.label.blood"), this.entity.getBloodType().toString());
-        this.lines[2] = String.format(Trans.late("gui.moeblocks.label.age"), this.entity.getAgeInYears());
-        this.lines[3] = this.entity.getStory().toString();
-        if (this.npc.isDead()) { this.lines[3] = Trans.late("debug.moeblocks.story.dead"); }
-        if (this.npc.isEstranged()) { this.lines[3] = Trans.late("debug.moeblocks.story.estranged"); }
-        this.name = this.entity.getFullName();
-        this.entity.setAnimation(Animation.YEARBOOK);
-        this.updateButtons();
+        this.lines[0] = Trans.late(this.entity.getDere().getTranslationKey());
+        this.lines[1] = Trans.late(this.entity.getBloodType().getTranslationKey());
+        this.lines[2] = String.format(Trans.late("debug.moeblocks.age"), this.entity.getAgeInYears());
+        if (this.npc.isEstranged()) {
+            this.lines[3] = Trans.late(StoryPhase.ESTRANGED.getTranslationKey());
+        } else if (this.npc.isDead()) {
+            this.lines[3] = Trans.late(StoryPhase.DEAD.getTranslationKey());
+        } else {
+            this.lines[3] = Trans.late(this.entity.getStoryPhase().getTranslationKey());
+        }
     }
     
     @Override
@@ -97,16 +101,16 @@ public class YearbookScreen extends ControllerScreen {
         }
         if (102 < mouseY && mouseY < 112) {
             if (this.width / 2 - 50 < mouseX && mouseX < this.width / 2 - 24) {
-                text.add(new TranslationTextComponent("gui.moeblocks.label.health"));
+                text.add(new StringTextComponent(Trans.late(this.entity.getState(HealthState.class).getTranslationKey())));
             }
             if (this.width / 2 - 24 < mouseX && mouseX < this.width / 2 + -2) {
-                text.add(new TranslationTextComponent("gui.moeblocks.label.foodLevel"));
+                text.add(new StringTextComponent(Trans.late(this.entity.getState(HungerState.class).getTranslationKey())));
             }
             if (this.width / 2 + -2 < mouseX && mouseX < this.width / 2 + 24) {
-                text.add(new TranslationTextComponent("gui.moeblocks.label.love"));
+                text.add(new StringTextComponent(Trans.late(this.entity.getState(LoveState.class).getTranslationKey())));
             }
             if (this.width / 2 + 24 < mouseX && mouseX < this.width / 2 + 50) {
-                text.add(new TranslationTextComponent("gui.moeblocks.label.stress"));
+                text.add(new StringTextComponent(Trans.late(this.entity.getState(StressState.class).getTranslationKey())));
             }
         }
         if (text.size() > 0) {
@@ -155,16 +159,16 @@ public class YearbookScreen extends ControllerScreen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (super.keyPressed(keyCode, scanCode, modifiers)) { return true; }
         switch (keyCode) {
-            case GLFW.GLFW_KEY_RIGHT:
-            case GLFW.GLFW_KEY_D:
-                this.buttonNextPage.onPress();
-                return true;
-            case GLFW.GLFW_KEY_LEFT:
-            case GLFW.GLFW_KEY_A:
-                this.buttonPreviousPage.onPress();
-                return true;
-            default:
-                return false;
+        case GLFW.GLFW_KEY_RIGHT:
+        case GLFW.GLFW_KEY_D:
+            this.buttonNextPage.onPress();
+            return true;
+        case GLFW.GLFW_KEY_LEFT:
+        case GLFW.GLFW_KEY_A:
+            this.buttonPreviousPage.onPress();
+            return true;
+        default:
+            return false;
         }
     }
     

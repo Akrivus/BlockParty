@@ -37,6 +37,7 @@ public class MoeMod {
         MoeBlocks.REGISTRY.register(bus);
         MoeEntities.REGISTRY.register(bus);
         MoeItems.REGISTRY.register(bus);
+        MoeParticles.REGISTRY.register(bus);
         MoeSounds.REGISTRY.register(bus);
     }
 
@@ -48,6 +49,7 @@ public class MoeMod {
 
     private void onCommonSetup(final FMLCommonSetupEvent e) {
         MoeBlocks.registerPottedPlants();
+        MoeConvos.registerConvos();
         MoeEntities.registerAttributes();
         MoeItems.registerDispenserBehaviors();
         MoeOverrides.registerAliases();

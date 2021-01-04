@@ -6,6 +6,7 @@ import moeblocks.client.model.MoeModel;
 import moeblocks.client.render.layer.MoeEmotionLayer;
 import moeblocks.client.render.layer.MoeGlowLayer;
 import moeblocks.client.render.layer.MoeSleepingLayer;
+import moeblocks.client.render.layer.special.SpecialBarrelLayer;
 import moeblocks.entity.MoeEntity;
 import moeblocks.init.MoeOverrides;
 import net.minecraft.client.Minecraft;
@@ -29,6 +30,7 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
         this.addLayer(new MoeSleepingLayer(this));
         this.addLayer(new MoeGlowLayer(this));
         this.addLayer(new HeadLayer<>(this));
+        this.addLayer(new SpecialBarrelLayer(this));
     }
     
     @Override
@@ -69,7 +71,7 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
     @Override
     public void preRenderCallback(MoeEntity entity, MatrixStack stack, float partialTickTime) {
         super.preRenderCallback(entity, stack, partialTickTime);
-        entity.getState(Animation.class).render(stack, partialTickTime);
+        entity.states.forEach((state, machine) -> machine.render(stack, partialTickTime));
         stack.scale(0.9375F, 0.9375F, 0.9375F);
         if (entity.getAnimation() != Animation.YEARBOOK) {
             stack.scale(entity.getScale(), entity.getScale(), entity.getScale());

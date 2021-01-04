@@ -85,16 +85,16 @@ public class CellPhoneScreen extends ControllerScreen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (super.keyPressed(keyCode, scanCode, modifiers)) { return true; }
         switch (keyCode) {
-            case GLFW.GLFW_KEY_UP:
-            case GLFW.GLFW_KEY_W:
-                this.buttonScrollUp.onPress();
-                return true;
-            case GLFW.GLFW_KEY_DOWN:
-            case GLFW.GLFW_KEY_S:
-                this.buttonScrollDown.onPress();
-                return true;
-            default:
-                return false;
+        case GLFW.GLFW_KEY_UP:
+        case GLFW.GLFW_KEY_W:
+            this.buttonScrollUp.onPress();
+            return true;
+        case GLFW.GLFW_KEY_DOWN:
+        case GLFW.GLFW_KEY_S:
+            this.buttonScrollDown.onPress();
+            return true;
+        default:
+            return false;
         }
     }
     

@@ -7,6 +7,8 @@ public enum Response {
     HEART,
     ARMOR,
     SKULL,
+    CHEST,
+    BLOCK,
     NEXT,
     CLOSE;
     

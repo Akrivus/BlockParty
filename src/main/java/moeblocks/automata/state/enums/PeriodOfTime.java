@@ -28,8 +28,8 @@ public enum PeriodOfTime implements IStateEnum<AbstractNPCEntity> {
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
     PeriodOfTime(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
-        this.generator = generator;
         this.when(0, (npc) -> Trigger.isBetween(function.apply(npc), start, end));
+        this.generator = generator;
     }
 
     @Override
@@ -53,9 +53,7 @@ public enum PeriodOfTime implements IStateEnum<AbstractNPCEntity> {
     }
 
     public static PeriodOfTime get(String key) {
-        try {
-            return PeriodOfTime.valueOf(key);
-        } catch (IllegalArgumentException e) {
+        try { return PeriodOfTime.valueOf(key); } catch (IllegalArgumentException e) {
             return PeriodOfTime.ATTACHED;
         }
     }

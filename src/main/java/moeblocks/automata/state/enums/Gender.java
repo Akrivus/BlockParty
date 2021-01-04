@@ -21,9 +21,9 @@ public enum Gender implements IStateEnum<AbstractNPCEntity> {
     private final String[] names;
 
     Gender(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, String... names) {
+        this.when(0, (npc) -> this.equals(npc.getGender()));
         this.generator = generator;
         this.names = names;
-        this.when(0, (npc) -> this.equals(npc.getGender()));
     }
 
     @Override

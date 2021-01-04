@@ -10,6 +10,8 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraftforge.common.util.Constants;
 
+import java.util.function.Predicate;
+
 public class Dialogue {
     private final CacheNPC speaker;
     private final String line;

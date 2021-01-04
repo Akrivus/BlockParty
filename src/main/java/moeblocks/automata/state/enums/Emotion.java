@@ -59,6 +59,7 @@ public enum Emotion implements IStateEnum<AbstractNPCEntity> {
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
     Emotion(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator) {
+        this.when(0, (npc) -> this.equals(npc.getEmotion()));
         this.generator = generator;
     }
 

@@ -88,13 +88,13 @@ public class MoeEntity extends AbstractNPCEntity {
     
     @Override
     public String getHonorific() {
-        if (this.isTagSafe(MoeTags.FULLSIZED)) { return super.getHonorific(); }
-        if (this.isTagSafe(MoeTags.BABY)) { return "tan"; }
+        if (this.isBlock(MoeTags.FULLSIZED)) { return super.getHonorific(); }
+        if (this.isBlock(MoeTags.BABY)) { return "tan"; }
         return this.getScale() < 1.0F ? "tan" : super.getHonorific();
     }
     
     public Gender getGender() {
-        return this.isTagSafe(MoeTags.MALE) ? Gender.MASCULINE : Gender.FEMININE;
+        return this.isBlock(MoeTags.MALE) ? Gender.MASCULINE : Gender.FEMININE;
     }
     
     @Override
@@ -210,13 +210,15 @@ public class MoeEntity extends AbstractNPCEntity {
         ResourceLocation block = MoeOverrides.get(this.getBlockData().getBlock()).getRegistryName();
         return String.format("%s.%s", block.getNamespace(), block.getPath());
     }
-    
-    private boolean isTagSafe(ITag<Block> tag) {
-        try {
-            return this.getBlockData().isIn(tag);
-        } catch (IllegalStateException e) {
+
+    public boolean isBlock(ITag<Block> tag) {
+        try { return this.getBlockData().isIn(tag); } catch (IllegalStateException e) {
             return false;
         }
+    }
+
+    public boolean isBlock(Block block) {
+        return this.getBlockData().isIn(block);
     }
     
     public float[] getEyeColor() {
@@ -243,7 +245,7 @@ public class MoeEntity extends AbstractNPCEntity {
     }
     
     public boolean isBlockGlowing() {
-        return this.isTagSafe(MoeTags.GLOWING);
+        return this.isBlock(MoeTags.GLOWING);
     }
     
     @Override

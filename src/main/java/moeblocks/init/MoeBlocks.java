@@ -2,7 +2,7 @@ package moeblocks.init;
 
 import moeblocks.MoeMod;
 import moeblocks.block.MoeFlowerBlock;
-import moeblocks.block.MoeLeavesBlock;
+import moeblocks.block.SakuraLeavesBlock;
 import moeblocks.block.tree.SakuraTree;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
@@ -18,12 +18,12 @@ public class MoeBlocks {
     public static final DeferredRegister<Block> REGISTRY = DeferredRegister.create(ForgeRegistries.BLOCKS, MoeMod.ID);
     public static final RegistryObject<Block> BLUE_SPIDER_LILY = REGISTRY.register("blue_spider_lily", () -> new MoeFlowerBlock(Effects.BAD_OMEN));
     public static final RegistryObject<Block> RED_SPIDER_LILY = REGISTRY.register("red_spider_lily", () -> new MoeFlowerBlock(Effects.HERO_OF_THE_VILLAGE));
-    public static final RegistryObject<Block> SAKURA_BLOSSOMS = REGISTRY.register("sakura_blossoms", () -> new MoeLeavesBlock(MaterialColor.PINK));
+    public static final RegistryObject<Block> SAKURA_BLOSSOMS = REGISTRY.register("sakura_blossoms", () -> new SakuraLeavesBlock(MaterialColor.PINK));
     public static final RegistryObject<Block> SAKURA_BUTTON = REGISTRY.register("sakura_button", () -> new WoodButtonBlock(AbstractBlock.Properties.create(Material.WOOD, MaterialColor.WOOD).sound(SoundType.WOOD).hardnessAndResistance(3.0F).notSolid()));
     public static final RegistryObject<Block> SAKURA_DOOR = REGISTRY.register("sakura_door", () -> new DoorBlock(AbstractBlock.Properties.from(SAKURA_BUTTON.get())));
     public static final RegistryObject<Block> SAKURA_FENCE = REGISTRY.register("sakura_fence", () -> new FenceBlock(AbstractBlock.Properties.from(SAKURA_BUTTON.get())));
     public static final RegistryObject<Block> SAKURA_FENCE_GATE = REGISTRY.register("sakura_fence_gate", () -> new FenceGateBlock(AbstractBlock.Properties.from(SAKURA_BUTTON.get())));
-    public static final RegistryObject<Block> SAKURA_LEAVES = REGISTRY.register("sakura_leaves", () -> new MoeLeavesBlock(MaterialColor.PINK));
+    public static final RegistryObject<Block> SAKURA_LEAVES = REGISTRY.register("sakura_leaves", () -> new SakuraLeavesBlock(MaterialColor.PINK));
     public static final RegistryObject<Block> SAKURA_LOG = REGISTRY.register("sakura_log", () -> new RotatedPillarBlock(AbstractBlock.Properties.from(SAKURA_BUTTON.get())));
     public static final RegistryObject<Block> SAKURA_PLANKS = REGISTRY.register("sakura_planks", () -> new Block(AbstractBlock.Properties.from(SAKURA_BUTTON.get())));
     public static final RegistryObject<Block> SAKURA_PRESSURE_PLATE = REGISTRY.register("sakura_pressure_plate", () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.EVERYTHING, AbstractBlock.Properties.from(SAKURA_BUTTON.get())));
@@ -53,7 +53,7 @@ public class MoeBlocks {
         RenderTypeLookup.setRenderLayer(POTTED_SAKURA_SAPLING.get(), RenderType.getCutout());
     }
 
-    public static FlowerPotBlock getFlowerPot() {
+    private static FlowerPotBlock getFlowerPot() {
         return (FlowerPotBlock) Blocks.FLOWER_POT;
     }
 }
