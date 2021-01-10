@@ -2,7 +2,6 @@
   "parent": "minecraft:block/cube_column_horizontal",
   "textures": {
     "end": "moeblocks:block/wisteria_bine_top",
-    "side": "moeblocks:block/wisteria_bine",
-
+    "side": "moeblocks:block/wisteria_bine"
   }
 }

@@ -27,7 +27,7 @@ public class SakuraBlossomsBlock extends LeavesBlock {
     public static final BooleanProperty BLOOMING = BooleanProperty.create("blooming");
 
     public SakuraBlossomsBlock(Properties properties) {
-        super(properties);
+        super(properties.setAllowsSpawn((state, reader, pos, entity) -> false).setSuffocates((state, reader, pos) -> false).setBlocksVision((state, reader, pos) -> false));
         this.setDefaultState(this.stateContainer.getBaseState().with(DISTANCE, 7).with(PERSISTENT, false).with(BLOOMING, true));
     }
 
