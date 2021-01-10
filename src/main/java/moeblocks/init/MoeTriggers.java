@@ -3,11 +3,13 @@ package moeblocks.init;
 import moeblocks.automata.IStateEnum;
 import moeblocks.automata.Trigger;
 import moeblocks.automata.state.enums.*;
-import moeblocks.datingsim.convo.Conversation;
 import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.block.Blocks;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 

@@ -5,9 +5,7 @@ import moeblocks.automata.IStateEnum;
 import moeblocks.client.animation.AnimationState;
 import moeblocks.client.animation.state.*;
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.entity.MoeEntity;
 
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public enum Animation implements IStateEnum<AbstractNPCEntity> {

@@ -5,7 +5,6 @@ import moeblocks.automata.IStateEnum;
 import moeblocks.automata.state.WatchedGoalState;
 import moeblocks.automata.state.goal.AbstractStateGoal;
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.util.Trans;
 
 import java.util.List;
 import java.util.Random;

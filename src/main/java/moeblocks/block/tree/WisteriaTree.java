@@ -1,17 +1,13 @@
 package moeblocks.block.tree;
 
 import moeblocks.init.MoeBlocks;
-import net.minecraft.block.Block;
 import net.minecraft.block.trees.Tree;
 import net.minecraft.world.gen.blockstateprovider.SimpleBlockStateProvider;
 import net.minecraft.world.gen.feature.*;
 import net.minecraft.world.gen.foliageplacer.AcaciaFoliagePlacer;
-import net.minecraft.world.gen.foliageplacer.BlobFoliagePlacer;
-import net.minecraft.world.gen.treedecorator.LeaveVineTreeDecorator;
 import net.minecraft.world.gen.trunkplacer.ForkyTrunkPlacer;
 
 import java.util.Random;
-import java.util.function.Supplier;
 
 public class WisteriaTree extends Tree {
     @Override

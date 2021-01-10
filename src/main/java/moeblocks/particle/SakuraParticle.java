@@ -11,8 +11,6 @@ import net.minecraft.particles.BasicParticleType;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleType;
 
-import javax.annotation.Nullable;
-
 public class SakuraParticle extends Particle implements IParticleData {
 
     public SakuraParticle(ClientWorld world, double x, double y, double z, double mX, double mY, double mZ) {

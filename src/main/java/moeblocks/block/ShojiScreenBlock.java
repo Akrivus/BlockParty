@@ -1,25 +1,19 @@
 package moeblocks.block;
 
 import moeblocks.init.MoeSounds;
-import net.minecraft.block.*;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.DoorBlock;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.DoorHingeSide;
-import net.minecraft.util.*;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.FakePlayerFactory;
 
 public class ShojiScreenBlock extends DoorBlock {
     public ShojiScreenBlock(Properties properties) {

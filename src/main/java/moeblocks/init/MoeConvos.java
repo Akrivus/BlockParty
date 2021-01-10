@@ -1,9 +1,6 @@
 package moeblocks.init;
 
-import moeblocks.automata.state.enums.Animation;
 import moeblocks.automata.state.enums.BlockDataState;
-import moeblocks.automata.state.enums.CupSize;
-import moeblocks.automata.state.enums.Emotion;
 import moeblocks.datingsim.convo.Conversation;
 import moeblocks.datingsim.convo.Scene;
 import moeblocks.datingsim.convo.Transition;
@@ -13,7 +10,6 @@ import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.block.Blocks;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 

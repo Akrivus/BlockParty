@@ -1,7 +1,6 @@
 package moeblocks.automata;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import moeblocks.client.animation.AnimationState;
 import moeblocks.client.model.IRiggableModel;
 import moeblocks.entity.AbstractNPCEntity;
 

@@ -2,7 +2,10 @@ package moeblocks.block;
 
 import moeblocks.init.MoeBlocks;
 import moeblocks.init.MoeTags;
-import net.minecraft.block.*;
+import net.minecraft.block.AbstractTopPlantBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.PlantBlockHelper;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;

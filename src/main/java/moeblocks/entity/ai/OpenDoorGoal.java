@@ -3,7 +3,10 @@ package moeblocks.entity.ai;
 
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeTags;
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.DoorBlock;
+import net.minecraft.block.TrapDoorBlock;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.util.math.BlockPos;

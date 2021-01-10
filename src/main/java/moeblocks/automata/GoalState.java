@@ -1,9 +1,8 @@
 package moeblocks.automata;
 
-import moeblocks.automata.state.enums.CupSize;
 import moeblocks.automata.state.goal.AbstractStateGoal;
-import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.automata.state.goal.AbstractStateTarget;
+import moeblocks.entity.AbstractNPCEntity;
 import net.minecraft.entity.ai.goal.GoalSelector;
 
 import java.util.ArrayList;

@@ -6,7 +6,6 @@ import net.minecraft.block.AbstractBodyPlantBlock;
 import net.minecraft.block.AbstractTopPlantBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.util.BlockVoxelShape;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;

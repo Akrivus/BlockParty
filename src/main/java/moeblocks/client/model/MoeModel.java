@@ -2,7 +2,6 @@ package moeblocks.client.model;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import moeblocks.automata.state.enums.Animation;
 import moeblocks.entity.MoeEntity;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.IHasArm;

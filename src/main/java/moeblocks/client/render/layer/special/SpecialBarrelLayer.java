@@ -12,9 +12,7 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
-import net.minecraft.client.renderer.entity.model.CowModel;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Vector3f;
 
 public class SpecialBarrelLayer extends LayerRenderer<MoeEntity, MoeModel<MoeEntity>> {
     public SpecialBarrelLayer(IEntityRenderer<MoeEntity, MoeModel<MoeEntity>> renderer) {

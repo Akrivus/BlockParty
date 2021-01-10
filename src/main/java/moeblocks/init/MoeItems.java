@@ -1,7 +1,6 @@
 package moeblocks.init;
 
 import moeblocks.MoeMod;
-import moeblocks.block.WisteriaVineBodyBlock;
 import moeblocks.item.*;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.item.Item;

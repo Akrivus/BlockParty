@@ -1,8 +1,5 @@
 package moeblocks.block;
 
-import moeblocks.init.MoeBlocks;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.FlowerBlock;
 import net.minecraft.potion.Effect;
 
