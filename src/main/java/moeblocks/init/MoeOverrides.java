@@ -21,7 +21,7 @@ public class MoeOverrides {
         Block block = state.getBlock();
         String key = MoeOverrides.get(block).getRegistryName().toString().replace(':', '/');
         if (PROPS.containsKey(block)) { key += String.format(".%s", state.get(PROPS.get(block)).toString()); }
-        if (block.isIn(MoeTags.CHESTS) && MoeMod.isChristmas()) { suffix = "christmas"; }
+        if (block.isIn(MoeTags.Blocks.CHESTS) && MoeMod.isChristmas()) { suffix = "christmas"; }
         if (suffix != null) { key += String.format(".%s", suffix); }
         return new ResourceLocation(MoeMod.ID, String.format("textures/entity/moe/skins/%s.png", key));
     }

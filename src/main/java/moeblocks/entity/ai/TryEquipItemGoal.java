@@ -13,7 +13,7 @@ public class TryEquipItemGoal<E extends AbstractNPCEntity> extends AbstractMoveT
     protected final Predicate<ItemStack> check;
     
     public TryEquipItemGoal(E entity) {
-        this(entity, MoeTags.EQUIPPABLES);
+        this(entity, MoeTags.Items.EQUIPPABLES);
     }
     
     public TryEquipItemGoal(E entity, ITag.INamedTag<Item> tag) {

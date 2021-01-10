@@ -72,6 +72,6 @@ public class OpenDoorGoal extends Goal {
     }
     
     public static boolean canOpenDoor(World world, BlockPos pos) {
-        return world.getBlockState(pos).isIn(MoeTags.DOORS);
+        return world.getBlockState(pos).isIn(MoeTags.Blocks.DOORS);
     }
 }

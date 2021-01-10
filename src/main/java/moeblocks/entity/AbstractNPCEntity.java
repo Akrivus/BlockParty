@@ -563,7 +563,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
     
     public ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
-        if (stack.getItem().isIn(MoeTags.ADMIN)) { return ActionResultType.FAIL; }
+        if (stack.getItem().isIn(MoeTags.Items.ADMIN)) { return ActionResultType.FAIL; }
         if (this.isRemote() || hand != Hand.MAIN_HAND) { return ActionResultType.PASS; }
         if (this.setConvo(Interaction.RIGHT_CLICK, player)) {
             return ActionResultType.SUCCESS;
@@ -654,7 +654,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     public EquipmentSlotType getSlotForStack(ItemStack stack) {
         EquipmentSlotType slot = MobEntity.getSlotForItemStack(stack);
-        if (stack.getItem().isIn(MoeTags.OFFHAND) || stack.isFood()) {
+        if (stack.getItem().isIn(MoeTags.Items.OFFHAND) || stack.isFood()) {
             slot = EquipmentSlotType.OFFHAND;
         }
         return slot;
@@ -1110,7 +1110,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     
     public boolean canFight() {
         Item item = this.getHeldItem(Hand.MAIN_HAND).getItem();
-        return item.isIn(MoeTags.WEAPONS);
+        return item.isIn(MoeTags.Items.WEAPONS);
     }
     
     public boolean isNightWatch() {

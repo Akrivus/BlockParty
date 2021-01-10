@@ -27,6 +27,6 @@ public class MineOresGoal extends AbstractMoveToBlockGoal<AbstractNPCEntity> {
     @Override
     public boolean canMoveTo(BlockPos pos, BlockState state) {
         if (!this.entity.getHeldItem(Hand.MAIN_HAND).getItem().canHarvestBlock(state)) { return false; }
-        return state.getBlock().isIn(MoeTags.MINEABLES);
+        return state.getBlock().isIn(MoeTags.Blocks.MINEABLES);
     }
 }

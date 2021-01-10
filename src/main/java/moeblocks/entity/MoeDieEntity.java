@@ -58,7 +58,7 @@ public class MoeDieEntity extends AbstractDieEntity {
     
     @Override
     public boolean onActionStart(BlockState state, BlockPos pos, int face) {
-        if (!state.getBlock().isIn(MoeTags.MOEABLES)) { return false; }
+        if (!state.getBlock().isIn(MoeTags.Blocks.MOEABLES)) { return false; }
         this.blockStateForSpawn = state;
         this.dere = Dere.values()[face];
         this.timeUntilSpawned = 30;

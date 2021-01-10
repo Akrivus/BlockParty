@@ -261,7 +261,7 @@ public class MoeEntity extends AbstractNPCEntity {
     
     public static boolean spawn(World world, BlockPos block, BlockPos spawn, float yaw, float pitch, Dere dere, PlayerEntity player) {
         BlockState state = world.getBlockState(block);
-        if (!state.getBlock().isIn(MoeTags.MOEABLES)) { return false; }
+        if (!state.getBlock().isIn(MoeTags.Blocks.MOEABLES)) { return false; }
         TileEntity extra = world.getTileEntity(block);
         MoeEntity moe = MoeEntities.MOE.get().create(world);
         moe.setPositionAndRotation(spawn.getX() + 0.5D, spawn.getY(), spawn.getZ() + 0.5D, yaw, pitch);

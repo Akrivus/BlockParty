@@ -74,7 +74,7 @@ public class ReplaceCropsGoal extends AbstractMoveToBlockGoal<MoeEntity> {
         for (int i = 0; i < inventory.getSizeInventory(); ++i) {
             ItemStack stack = inventory.getStackInSlot(i);
             Item item = stack.getItem();
-            if (item.isIn(MoeTags.SEEDS)) {
+            if (item.isIn(MoeTags.Items.DROPS_SEEDS)) {
                 this.plant = this.getPlant(item);
                 this.stack = stack;
                 BiPredicate<World, BlockPos> function = blocksForPlant.get(this.plant.getPlantType(this.world, pos));
