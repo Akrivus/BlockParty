@@ -1,4 +1,20 @@
 {
+  "block.shoji_screen.close": {
+    "subtitle": "subtitle.shoji_screen",
+    "sounds": [
+      "moeblocks:block/shoji_screen/close1",
+      "moeblocks:block/shoji_screen/close2",
+      "moeblocks:block/shoji_screen/close3"
+    ]
+  },
+  "block.shoji_screen.open": {
+    "subtitle": "subtitle.shoji_screen",
+    "sounds": [
+      "moeblocks:block/shoji_screen/open1",
+      "moeblocks:block/shoji_screen/open2",
+      "moeblocks:block/shoji_screen/open3"
+    ]
+  },
   "entity.moe.bell.step": {
     "subtitle": "subtitle.moe.bell.step",
     "sounds": [

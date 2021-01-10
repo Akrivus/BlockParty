@@ -1,7 +1,8 @@
 {
   "replace": false,
   "values": [
-    "moeblocks:sakura_blossoms",
-    "moeblocks:sakura_leaves"
+    "moeblocks:pink_sakura_blossoms",
+    "moeblocks:white_sakura_blossoms",
+    "moeblocks:wisteria_leaves"
   ]
 }

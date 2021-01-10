@@ -1,0 +1,21 @@
+{
+	"textures": {
+		"door": "moeblocks:block/shoji_screen_bottom",
+		"side": "moeblocks:block/shoji_screen_side",
+		"particle": "#door"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 16, 3],
+			"faces": {
+				"down": { "uv": [13, 0, 16, 16], "rotation": 270, "texture": "#side" },
+				"up": { "uv": [13, 0, 16, 16], "rotation": 90, "texture": "#side" },
+				"north": { "uv": [0, 0, 16, 16], "texture": "#door" },
+				"east": { "uv": [16, 0, 13, 16], "texture": "#side" },
+				"south": { "uv": [16, 0, 0, 16], "texture": "#door" },
+				"west": { "uv": [13, 0, 16, 16], "texture": "#side" }
+			}
+		}
+	]
+}

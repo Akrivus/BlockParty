@@ -1,0 +1,124 @@
+{
+  "variants": {
+    "facing=east,half=lower,hinge=left,open=false": {
+      "model": "moeblocks:block/shoji_screen_bottom",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=left,open=false": {
+      "model": "moeblocks:block/shoji_screen_bottom"
+    },
+    "facing=west,half=lower,hinge=left,open=false": {
+      "model": "moeblocks:block/shoji_screen_bottom",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=left,open=false": {
+      "model": "moeblocks:block/shoji_screen_bottom",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false": {
+      "model": "moeblocks:block/shoji_screen_bottom",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false": {
+      "model": "moeblocks:block/shoji_screen_bottom"
+    },
+    "facing=west,half=lower,hinge=right,open=false": {
+      "model": "moeblocks:block/shoji_screen_bottom",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false": {
+      "model": "moeblocks:block/shoji_screen_bottom",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=left,open=true": {
+      "model": "moeblocks:block/shoji_screen_bottom_open",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=left,open=true": {
+      "model": "moeblocks:block/shoji_screen_bottom_open"
+    },
+    "facing=west,half=lower,hinge=left,open=true": {
+      "model": "moeblocks:block/shoji_screen_bottom_open",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=left,open=true": {
+      "model": "moeblocks:block/shoji_screen_bottom_open",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=true": {
+      "model": "moeblocks:block/shoji_screen_bottom_open",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=true": {
+      "model": "moeblocks:block/shoji_screen_bottom_open"
+    },
+    "facing=west,half=lower,hinge=right,open=true": {
+      "model": "moeblocks:block/shoji_screen_bottom_open",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=true": {
+      "model": "moeblocks:block/shoji_screen_bottom_open",
+      "y": 180
+    },
+    "facing=east,half=upper,hinge=left,open=false": {
+      "model": "moeblocks:block/shoji_screen_top",
+      "y": 270
+    },
+    "facing=south,half=upper,hinge=left,open=false": {
+      "model": "moeblocks:block/shoji_screen_top"
+    },
+    "facing=west,half=upper,hinge=left,open=false": {
+      "model": "moeblocks:block/shoji_screen_top",
+      "y": 90
+    },
+    "facing=north,half=upper,hinge=left,open=false": {
+      "model": "moeblocks:block/shoji_screen_top",
+      "y": 180
+    },
+    "facing=east,half=upper,hinge=right,open=false": {
+      "model": "moeblocks:block/shoji_screen_top",
+      "y": 270
+    },
+    "facing=south,half=upper,hinge=right,open=false": {
+      "model": "moeblocks:block/shoji_screen_top"
+    },
+    "facing=west,half=upper,hinge=right,open=false": {
+      "model": "moeblocks:block/shoji_screen_top",
+      "y": 90
+    },
+    "facing=north,half=upper,hinge=right,open=false": {
+      "model": "moeblocks:block/shoji_screen_top",
+      "y": 180
+    },
+    "facing=east,half=upper,hinge=left,open=true": {
+      "model": "moeblocks:block/shoji_screen_top_open",
+      "y": 270
+    },
+    "facing=south,half=upper,hinge=left,open=true": {
+      "model": "moeblocks:block/shoji_screen_top_open"
+    },
+    "facing=west,half=upper,hinge=left,open=true": {
+      "model": "moeblocks:block/shoji_screen_top_open",
+      "y": 90
+    },
+    "facing=north,half=upper,hinge=left,open=true": {
+      "model": "moeblocks:block/shoji_screen_top_open",
+      "y": 180
+    },
+    "facing=east,half=upper,hinge=right,open=true": {
+      "model": "moeblocks:block/shoji_screen_top_open",
+      "y": 270
+    },
+    "facing=south,half=upper,hinge=right,open=true": {
+      "model": "moeblocks:block/shoji_screen_top_open"
+    },
+    "facing=west,half=upper,hinge=right,open=true": {
+      "model": "moeblocks:block/shoji_screen_top_open",
+      "y": 90
+    },
+    "facing=north,half=upper,hinge=right,open=true": {
+      "model": "moeblocks:block/shoji_screen_top_open",
+      "y": 180
+    }
+  }
+}

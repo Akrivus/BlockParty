@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " W",
+    "I "
+  ],
+  "key": {
+    "W": {
+      "item": "minecraft:wheat"
+    },
+    "I": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "item": "moeblocks:brush",
+    "count": 1
+  }
+}

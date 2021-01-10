@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/door_top",
-  "textures": {
-    "top": "moeblocks:block/sakura_door_top",
-    "bottom": "moeblocks:block/sakura_door_bottom"
-  }
-}

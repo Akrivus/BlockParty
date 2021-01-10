@@ -168,7 +168,7 @@ public class MoeEntity extends AbstractNPCEntity {
     
     @Override
     protected void onTeleport() {
-        this.playSound(MoeSounds.MOE_ENTITY_FOLLOW.get());
+        this.playSound(MoeSounds.ENTITY_MOE_FOLLOW.get());
         this.setFollowing(true);
     }
     

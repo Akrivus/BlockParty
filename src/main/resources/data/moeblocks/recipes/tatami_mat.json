@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "##",
+    "XX"
+  ],
+  "key": {
+    "#": {
+      "item": "moeblocks:sakura_planks"
+    },
+    "X": {
+      "item": "minecraft:hay_block"
+    }
+  },
+  "result": {
+    "item": "moeblocks:tatami_mat",
+    "count": 4
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " # ",
+    "# #",
+    " # "
+  ],
+  "key": {
+    "#": {
+      "item": "moeblocks:shoji_panel"
+    }
+  },
+  "result": {
+    "item": "moeblocks:shoji_block",
+    "count": 24
+  }
+}

@@ -169,7 +169,7 @@ public class CellPhoneScreen extends ControllerScreen {
         
         @Override
         public void playDownSound(SoundHandler sound) {
-            sound.play(SimpleSound.master(MoeSounds.CELL_PHONE_BUTTON.get(), 1.0F));
+            sound.play(SimpleSound.master(MoeSounds.ITEM_CELL_PHONE_BUTTON.get(), 1.0F));
         }
     }
 }

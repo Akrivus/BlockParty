@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "moeblocks:block/tatami_mat",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "moeblocks:block/tatami_mat"
+    },
+    "axis=z": {
+      "model": "moeblocks:block/tatami_mat",
+      "x": 90
+    }
+  }
+}

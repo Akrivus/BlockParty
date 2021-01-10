@@ -49,17 +49,12 @@ public class OpenDoorGoal extends Goal {
     protected void setDoorState(boolean open) {
         BlockState state = this.entity.world.getBlockState(this.pos);
         Block block = state.getBlock();
-        if (block instanceof FenceGateBlock) {
-            this.entity.world.setBlockState(this.pos, state.with(FenceGateBlock.OPEN, open));
-            this.entity.world.playEvent(null, open ? 1008 : 1014, this.pos, 0);
-        }
-        if (block instanceof DoorBlock) {
-            this.entity.world.setBlockState(this.pos, state.with(DoorBlock.OPEN, open));
-            this.entity.world.playEvent(null, open ? 1006 : 1012, this.pos, 0);
-        }
         if (block instanceof TrapDoorBlock) {
             this.entity.world.setBlockState(this.pos, state.with(TrapDoorBlock.OPEN, open));
             this.entity.world.playEvent(null, open ? 1007 : 1013, this.pos, 0);
+        } else if (block instanceof DoorBlock) {
+            this.entity.world.setBlockState(this.pos, state.with(DoorBlock.OPEN, open));
+            this.entity.world.playEvent(null, open ? 1006 : 1012, this.pos, 0);
         }
     }
     

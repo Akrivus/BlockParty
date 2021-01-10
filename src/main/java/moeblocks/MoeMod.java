@@ -15,7 +15,7 @@ import java.util.Calendar;
 
 @Mod(MoeMod.ID)
 public class MoeMod {
-    public static final String VERSION = "20.29.11";
+    public static final String VERSION = "21.1.10";
     public static final String ID = "moeblocks";
     public static final SimpleChannel CHANNEL = MoeMessages.init(new ResourceLocation(MoeMod.ID));
     public static final ItemGroup ITEMS = new ItemGroup(MoeMod.ID) {

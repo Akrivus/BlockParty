@@ -237,7 +237,7 @@ public class YearbookScreen extends ControllerScreen {
         
         @Override
         public void playDownSound(SoundHandler sound) {
-            sound.play(SimpleSound.master(MoeSounds.YEARBOOK_REMOVE_PAGE.get(), 1.0F));
+            sound.play(SimpleSound.master(MoeSounds.ITEM_YEARBOOK_REMOVE_PAGE.get(), 1.0F));
         }
         
         @Override

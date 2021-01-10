@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#",
+    "I"
+  ],
+  "key": {
+    "#": {
+      "item": "moeblocks:shoji_panel"
+    },
+    "I": {
+      "item": "minecraft:torch"
+    }
+  },
+  "result": {
+    "item": "moeblocks:shoji_lamp",
+    "count": 1
+  }
+}
