@@ -782,6 +782,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         return this.isProtagonistOnline() && this.getProtagonist().openContainer != this.getProtagonist().container;
     }
 
+    public boolean isProtagonistBeingPerverted() {
+        return false;
+    }
+
     public boolean isProtagonistOnline() {
         return this.hasProtagonist() && this.getProtagonist() != null;
     }
