@@ -21,7 +21,6 @@ import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.container.*;
 import net.minecraft.item.ItemStack;
@@ -46,11 +45,11 @@ import net.minecraftforge.items.wrapper.InvWrapper;
 
 import java.util.Optional;
 
-public class MoeEntity extends AbstractNPCEntity implements IInventory, INamedContainerProvider {
+public class MoeEntity extends AbstractNPCEntity implements INamedContainerProvider {
     public static final DataParameter<Optional<BlockState>> BLOCK_STATE = EntityDataManager.createKey(MoeEntity.class, DataSerializers.OPTIONAL_BLOCK_STATE);
     public static final DataParameter<String> CUP_SIZE = EntityDataManager.createKey(MoeEntity.class, DataSerializers.STRING);
     public static final DataParameter<Float> SCALE = EntityDataManager.createKey(MoeEntity.class, DataSerializers.FLOAT);
-    private LazyOptional<?> itemHandler = LazyOptional.of(() -> new InvWrapper(this));
+    private LazyOptional<?> itemHandler = LazyOptional.of(() -> new InvWrapper(this.inventory));
     private CompoundNBT extraBlockData = new CompoundNBT();
     private Inventory inventory;
 
@@ -187,15 +186,7 @@ public class MoeEntity extends AbstractNPCEntity implements IInventory, INamedCo
 
     @Override
     public Container createMenu(int id, PlayerInventory inventory, PlayerEntity player) {
-        if (this.is(CupSize.B)) { return this.openChest(id, inventory, 1); }
-        if (this.is(CupSize.C)) { return this.openChest(id, inventory, 2); }
-        if (this.is(CupSize.D)) { return this.openChest(id, inventory, 3); }
-        return null;
-    }
-
-    public Container openChest(int id, PlayerInventory inventory, int rows) {
-        ContainerType type = rows == 1 ? ContainerType.GENERIC_9X1 : (rows == 2 ? ContainerType.GENERIC_9X2 : ContainerType.GENERIC_9X3);
-        return new ChestContainer(type, id, inventory, this, rows);
+        return new ChestContainer(ContainerType.GENERIC_9X3, id, inventory, this.inventory, 3);
     }
 
     public void setInventory(ListNBT list) {
@@ -208,50 +199,6 @@ public class MoeEntity extends AbstractNPCEntity implements IInventory, INamedCo
     }
 
     @Override
-    public void setInventorySlotContents(int index, ItemStack stack) {
-        if (this.getSizeInventory() < index) { return; }
-        this.inventory.setInventorySlotContents(index, stack);
-    }
-
-    @Override
-    public ItemStack getStackInSlot(int index) {
-        if (this.getSizeInventory() < index) { return ItemStack.EMPTY; }
-        return this.inventory.getStackInSlot(index);
-    }
-
-    @Override
-    public ItemStack decrStackSize(int index, int count) {
-        if (this.getSizeInventory() < index) { return ItemStack.EMPTY; }
-        return this.inventory.decrStackSize(index, count);
-    }
-
-    @Override
-    public ItemStack removeStackFromSlot(int index) {
-        if (this.getSizeInventory() < index) { return ItemStack.EMPTY; }
-        return this.inventory.removeStackFromSlot(index);
-    }
-
-    @Override
-    public int getSizeInventory() {
-        return Math.max(2, this.getCupSize().ordinal() * 9);
-    }
-
-    @Override
-    public void clear() {
-        this.inventory.clear();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return this.inventory.isEmpty();
-    }
-
-    @Override
-    public void markDirty() {
-        this.inventory.markDirty();
-    }
-
-    @Override
     protected void dropLoot(DamageSource cause, boolean player) {
         super.dropLoot(cause, player);
         Block.spawnDrops(this.getBlockData(), this.world, this.getPosition(), this.getTileEntity(), cause.getTrueSource(), ItemStack.EMPTY);
@@ -259,11 +206,6 @@ public class MoeEntity extends AbstractNPCEntity implements IInventory, INamedCo
             ItemStack stack = this.getInventory().getStackInSlot(i);
             if (!stack.isEmpty()) { this.entityDropItem(stack); }
         }
-    }
-
-    @Override
-    public boolean isUsableByPlayer(PlayerEntity player) {
-        return this.isProtagonist(player);
     }
 
     @Override
