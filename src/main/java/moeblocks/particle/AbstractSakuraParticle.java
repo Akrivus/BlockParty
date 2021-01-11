@@ -22,6 +22,7 @@ public class AbstractSakuraParticle extends SpriteTexturedParticle {
         super(world, x, y, z, mX, mY, mZ);
         this.setSize(0.25F, 0.25F);
         this.selectSpriteRandomly(sprite);
+        this.multiplyParticleScaleBy(0.5F);
         this.particle = particle;
         this.particleAngle = world.rand.nextFloat() * 360.0F;
         this.particleGravity = 0.01F;
