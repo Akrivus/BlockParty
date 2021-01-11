@@ -6,7 +6,7 @@ import moeblocks.client.model.MoeModel;
 import moeblocks.client.render.layer.MoeEmotionLayer;
 import moeblocks.client.render.layer.MoeGlowLayer;
 import moeblocks.client.render.layer.MoeSleepingLayer;
-import moeblocks.client.render.layer.special.SpecialBarrelLayer;
+import moeblocks.client.render.layer.MoeSpecialRenderer;
 import moeblocks.entity.MoeEntity;
 import moeblocks.init.MoeOverrides;
 import net.minecraft.client.Minecraft;
@@ -30,7 +30,7 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
         this.addLayer(new MoeSleepingLayer(this));
         this.addLayer(new MoeGlowLayer(this));
         this.addLayer(new HeadLayer<>(this));
-        this.addLayer(new SpecialBarrelLayer(this));
+        this.addLayer(new MoeSpecialRenderer(this));
     }
     
     @Override

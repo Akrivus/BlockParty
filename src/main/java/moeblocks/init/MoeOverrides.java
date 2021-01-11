@@ -1,6 +1,8 @@
 package moeblocks.init;
 
 import moeblocks.MoeMod;
+import moeblocks.client.render.layer.MoeSpecialRenderer;
+import moeblocks.client.render.layer.special.BarrelOverlay;
 import net.minecraft.block.*;
 import net.minecraft.state.Property;
 import net.minecraft.util.ResourceLocation;
@@ -115,7 +117,7 @@ public class MoeOverrides {
         registerProperty(Blocks.NOTE_BLOCK, NoteBlock.NOTE);
     }
     
-    public static void registerProperty(Block block, Property<?> property) {
+    private static void registerProperty(Block block, Property<?> property) {
         PROPS.put(block, property);
     }
     
@@ -129,5 +131,9 @@ public class MoeOverrides {
     
     public static SoundEvent getStepSound(BlockState block) {
         return STEP_SOUNDS.getOrDefault(block.getBlock(), block.getSoundType().getStepSound());
+    }
+
+    public static void registerSpecialRenderers() {
+        MoeSpecialRenderer.registerOverlay(Blocks.BARREL, BarrelOverlay::new);
     }
 }
