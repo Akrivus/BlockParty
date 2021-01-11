@@ -28,7 +28,7 @@ public class MoeSpawnItem extends Item {
             context.getItem().shrink(1);
             return ActionResultType.CONSUME;
         } else {
-            player.sendStatusMessage(new TranslationTextComponent("item.moe_spawn_egg.error"), true);
+            player.sendStatusMessage(new TranslationTextComponent("item.moeblocks.moe_spawn_egg.error"), true);
             return ActionResultType.FAIL;
         }
     }
