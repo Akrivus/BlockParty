@@ -90,6 +90,6 @@ public enum Emotion implements IStateEnum<AbstractNPCEntity> {
     }
 
     public static void registerTriggers() {
-
+        Emotion.EMBARRASSED.when(1, (npc) -> npc.isProtagonistBusy());
     }
 }
