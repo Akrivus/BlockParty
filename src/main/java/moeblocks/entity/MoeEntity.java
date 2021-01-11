@@ -18,6 +18,7 @@ import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.container.*;
 import net.minecraft.item.ItemStack;
@@ -223,6 +224,17 @@ public class MoeEntity extends AbstractNPCEntity implements INamedContainerProvi
     }
 
     public boolean openSpecialMenuFor(PlayerEntity player) {
+        return false;
+    }
+
+    @Override
+    public boolean isProtagonistBeingPerverted() {
+        if (!this.isProtagonistBusy()) { return false; }
+        Container container = this.getProtagonist().openContainer;
+        if (container instanceof ChestContainer) {
+            IInventory inventory = ((ChestContainer) container).getLowerChestInventory();
+            return inventory.equals(this.inventory);
+        }
         return false;
     }
 
