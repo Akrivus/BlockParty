@@ -1,9 +1,14 @@
 package moeblocks;
 
 import moeblocks.init.*;
+import moeblocks.particle.PinkSakuraParticle;
+import moeblocks.particle.WhiteSakuraParticle;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -27,18 +32,15 @@ public class MoeMod {
     
     public MoeMod() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        bus.addListener(MoeParticles::registerParticleFactories);
         bus.addListener(this::onClientSetup);
         bus.addListener(this::onCommonSetup);
-        this.registerRegisters(bus);
-        MoeMessages.register();
-    }
-    
-    private void registerRegisters(IEventBus bus) {
         MoeBlocks.REGISTRY.register(bus);
         MoeEntities.REGISTRY.register(bus);
         MoeItems.REGISTRY.register(bus);
         MoeParticles.REGISTRY.register(bus);
         MoeSounds.REGISTRY.register(bus);
+        MoeMessages.register();
     }
 
     private void onClientSetup(final FMLClientSetupEvent e) {
@@ -61,9 +63,16 @@ public class MoeMod {
     public static String getVersion() {
         return VERSION;
     }
+
+    public static Calendar getCalendar() {
+        return Calendar.getInstance();
+    }
     
     public static boolean isChristmas() {
-        Calendar calendar = Calendar.getInstance();
-        return calendar.get(2) + 1 == 12 && calendar.get(5) >= 24 && calendar.get(5) <= 26;
+        return getCalendar().get(2) + 1 == 12 && getCalendar().get(5) >= 24 && getCalendar().get(5) <= 26;
+    }
+
+    public static boolean isHalloween() {
+        return getCalendar().get(2) + 1 == 10 && getCalendar().get(5) == 31;
     }
 }

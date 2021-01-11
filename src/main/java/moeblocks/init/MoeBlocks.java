@@ -24,9 +24,9 @@ public class MoeBlocks {
     public static final Supplier<AbstractBlock.Properties> NONSOLID_PROPERTY = () -> SOLID_PROPERTY.get().notSolid();
     public static final DeferredRegister<Block> REGISTRY = DeferredRegister.create(ForgeRegistries.BLOCKS, MoeMod.ID);
     public static final RegistryObject<Block> CALLIGRAPHY_TABLE = REGISTRY.register("calligraphy_table", () -> new CalligraphyTableBlock(SOLID_PROPERTY.get()));
-    public static final RegistryObject<Block> PINK_SAKURA_BLOSSOMS = REGISTRY.register("pink_sakura_blossoms", () -> new SakuraBlossomsBlock(PLANT_PROPERTY.get()));
+    public static final RegistryObject<Block> PINK_SAKURA_BLOSSOMS = REGISTRY.register("pink_sakura_blossoms", () -> new SakuraBlossomsBlock(MoeParticles.PINK_SAKURA_PETAL, PLANT_PROPERTY.get()));
     public static final RegistryObject<Block> PINK_SAKURA_SAPLING = REGISTRY.register("pink_sakura_sapling", () -> new SaplingBlock(new PinkSakuraTree(), PLANT_PROPERTY.get()));
-    public static final RegistryObject<Block> WHITE_SAKURA_BLOSSOMS = REGISTRY.register("white_sakura_blossoms", () -> new SakuraBlossomsBlock(PLANT_PROPERTY.get()));
+    public static final RegistryObject<Block> WHITE_SAKURA_BLOSSOMS = REGISTRY.register("white_sakura_blossoms", () -> new SakuraBlossomsBlock(MoeParticles.WHITE_SAKURA_PETAL, PLANT_PROPERTY.get()));
     public static final RegistryObject<Block> WHITE_SAKURA_SAPLING = REGISTRY.register("white_sakura_sapling", () -> new SaplingBlock(new WhiteSakuraTree(), PLANT_PROPERTY.get()));
     public static final RegistryObject<Block> WISTERIA_SAPLING = REGISTRY.register("wisteria_sapling", () -> new SaplingBlock(new WisteriaTree(), PLANT_PROPERTY.get()));
     public static final RegistryObject<Block> BLUE_SPIDER_LILY = REGISTRY.register("blue_spider_lily", () -> new MoeFlowerBlock(PLANT_PROPERTY.get(), Effects.BAD_OMEN));

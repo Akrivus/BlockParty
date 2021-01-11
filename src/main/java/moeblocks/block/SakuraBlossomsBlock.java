@@ -4,21 +4,27 @@ import moeblocks.init.MoeParticles;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.LeavesBlock;
+import net.minecraft.block.material.MaterialColor;
+import net.minecraft.particles.BasicParticleType;
+import net.minecraft.particles.ParticleType;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.fml.RegistryObject;
 
 import java.util.Random;
 
 public class SakuraBlossomsBlock extends LeavesBlock {
     public static final BooleanProperty BLOOMING = BooleanProperty.create("blooming");
+    private final RegistryObject<BasicParticleType> particle;
 
-    public SakuraBlossomsBlock(Properties properties) {
+    public SakuraBlossomsBlock(RegistryObject<BasicParticleType> particle, Properties properties) {
         super(properties.setAllowsSpawn((state, reader, pos, entity) -> false).setSuffocates((state, reader, pos) -> false).setBlocksVision((state, reader, pos) -> false));
         this.setDefaultState(this.stateContainer.getBaseState().with(DISTANCE, 7).with(PERSISTENT, false).with(BLOOMING, true));
+        this.particle = particle;
     }
 
     @Override
@@ -44,15 +50,14 @@ public class SakuraBlossomsBlock extends LeavesBlock {
     @Override
     public void animateTick(BlockState state, World world, BlockPos pos, Random random) {
         super.animateTick(state, world, pos, random);
-        if (random.nextInt(15) != 0) { return; }
-        if (state.get(BLOOMING)) {
-            BlockPos loc = pos.down();
-            BlockState check = world.getBlockState(loc);
-            if (check.isSolidSide(world, loc, Direction.UP)) { return; }
-            double x = pos.getX() + random.nextDouble();
-            double y = pos.getY() + 0.05D;
-            double z = pos.getZ() + random.nextDouble();
-            world.addParticle(MoeParticles.SAKURA.get(), x, y, z, 0.0D, 0.0D, 0.0D);
+        BlockPos spawn = pos.add(random.nextDouble(), -1.0D, random.nextDouble());
+        if (random.nextInt(10) == 0 && state.get(BLOOMING) && world.isAirBlock(spawn)) {
+            double direction = world.getDayTime() / 1000 * 15.0D;
+            double x = Math.sin(0.0174444444D * direction) * (random.nextDouble() + random.nextInt(6));
+            double z = Math.cos(0.0174444444D * direction) * (random.nextDouble() + random.nextInt(6));
+            double y = Math.abs(random.nextGaussian()) * -1.0D;
+            double start = spawn.getY() + 0.75F;
+            world.addParticle(this.particle.get(), spawn.getX(), start, spawn.getZ(), x, y, z);
         }
     }
 
