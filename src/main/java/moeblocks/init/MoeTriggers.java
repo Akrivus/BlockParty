@@ -4,7 +4,6 @@ import moeblocks.automata.IStateEnum;
 import moeblocks.automata.Trigger;
 import moeblocks.automata.state.enums.*;
 import moeblocks.entity.AbstractNPCEntity;
-import net.minecraft.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +32,9 @@ public class MoeTriggers {
         register(0, StoryPhase.INTRODUCTION, (npc) -> true);
         register(0, StressState.RELAXED, (npc) -> true);
         register(0, TimeOfDay.MORNING, (npc) -> true);
-        CupSize.D.when(1, (moe) -> moe.isBlock(Blocks.BARREL));
+        Animation.registerTriggers();
+        CupSize.registerTriggers();
+        Emotion.registerTriggers();
     }
 
     public static List<Trigger> registry(IStateEnum state) {

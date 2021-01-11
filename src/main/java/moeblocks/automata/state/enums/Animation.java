@@ -47,4 +47,8 @@ public enum Animation implements IStateEnum<AbstractNPCEntity> {
             return Animation.DEFAULT;
         }
     }
+
+    public static void registerTriggers() {
+
+    }
 }

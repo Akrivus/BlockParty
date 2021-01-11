@@ -88,4 +88,8 @@ public enum Emotion implements IStateEnum<AbstractNPCEntity> {
             return Emotion.NORMAL;
         }
     }
+
+    public static void registerTriggers() {
+
+    }
 }
