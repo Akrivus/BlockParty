@@ -91,7 +91,6 @@ public class MoeEntity extends AbstractNPCEntity implements INamedContainerProvi
     @Override
     public void writeAdditional(CompoundNBT compound) {
         compound.put("ExtraBlockData", this.getExtraBlockData());
-        compound.putFloat("Scale", this.getScale());
         compound.put("Inventory", this.inventory.write());
         super.writeAdditional(compound);
     }
@@ -99,6 +98,7 @@ public class MoeEntity extends AbstractNPCEntity implements INamedContainerProvi
     @Override
     public void writeCharacter(CompoundNBT compound) {
         compound.putInt("BlockData", Block.getStateId(this.getBlockData()));
+        compound.putFloat("Scale", this.getScale());
         super.writeCharacter(compound);
     }
 
