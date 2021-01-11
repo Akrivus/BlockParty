@@ -35,7 +35,11 @@ public class Scene {
         case CONVO:
             return MoeConvos.find(Interaction.CONVO, this.npc);
         case BLOCK:
+            this.npc.asMoe((moe) -> moe.openSpecialMenuFor(player));
+            return this.next(Response.CLOSE);
         case CHEST:
+            this.npc.asMoe((moe) -> moe.openChestFor(player));
+            return this.next(Response.CLOSE);
         case CLOSE:
             MoeMessages.send(this.player, new SCloseDialogue());
         default:

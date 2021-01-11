@@ -18,12 +18,12 @@ public class MoeConvos {
 
     public static void registerConvos() {
         register(new Conversation(Interaction.RIGHT_CLICK, (npc) -> npc.hasState(BlockDataState.DEFAULT), new Scene((player, npc) -> {
-            npc.say(player, String.format("Oh, hi %s, would you like me to follow you?", player.getScoreboardName()), Response.YES, Response.NO, Response.CONVO);
+            npc.say(player, String.format("Oh, hi %s, would you like me to follow you?", player.getScoreboardName()), Response.YES, Response.NO, Response.CHEST, Response.CONVO);
         }, new Transition(Response.YES, new Scene((player, npc) -> {
-            npc.say(player, "Okay, I'll be right behind you.", Response.CLOSE);
+            npc.say(player, "Okay, I'll be right behind you.");
             npc.setFollowing(true);
         })), new Transition(Response.NO, new Scene((player, npc) -> {
-            npc.say(player, "Okay, I'll be right here for you.", Response.CLOSE);
+            npc.say(player, "Okay, I'll be right here for you.");
             npc.setFollowing(false);
         })))));
         register(new Conversation(Interaction.STARE, (npc) -> npc.asMoe((moe) -> moe.isBlock(Blocks.BARREL)), new Scene((player, npc) -> {
