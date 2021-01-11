@@ -1,10 +1,7 @@
 package moeblocks.entity;
 
 import moeblocks.automata.Automaton;
-import moeblocks.automata.state.enums.BlockDataState;
-import moeblocks.automata.state.enums.CupSize;
-import moeblocks.automata.state.enums.Dere;
-import moeblocks.automata.state.enums.Gender;
+import moeblocks.automata.state.enums.*;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeOverrides;
 import moeblocks.init.MoeSounds;
@@ -84,6 +81,7 @@ public class MoeEntity extends AbstractNPCEntity implements INamedContainerProvi
     public void readCharacter(CompoundNBT compound) {
         this.setBlockData(Block.getStateById(compound.getInt("BlockData")));
         this.setScale(compound.getFloat("Scale"));
+        this.setCupSize(CupSize.get(compound.getString("CupSize")));
         super.readCharacter(compound);
     }
 
