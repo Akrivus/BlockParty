@@ -76,7 +76,6 @@ public class MoeEntity extends AbstractNPCEntity implements INamedContainerProvi
     @Override
     public void readAdditional(CompoundNBT compound) {
         this.setExtraBlockData((CompoundNBT) compound.get("ExtraBlockData"));
-        this.setScale(compound.getFloat("Scale"));
         this.setInventory(compound.getList("Inventory", Constants.NBT.TAG_COMPOUND));
         super.readAdditional(compound);
     }
@@ -84,7 +83,7 @@ public class MoeEntity extends AbstractNPCEntity implements INamedContainerProvi
     @Override
     public void readCharacter(CompoundNBT compound) {
         this.setBlockData(Block.getStateById(compound.getInt("BlockData")));
-        this.setCupSize(CupSize.get(compound.getString("CupSize")));
+        this.setScale(compound.getFloat("Scale"));
         super.readCharacter(compound);
     }
 
