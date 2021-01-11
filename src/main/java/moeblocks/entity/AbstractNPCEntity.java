@@ -746,7 +746,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
 
     public boolean is(IStateEnum state) {
-        return this.getAutomaton(state.getClass()).getKey() == state;
+        return this.isAutomatonReady() && this.getState(state) == state;
     }
 
     public boolean isBeingWatchedBy(LivingEntity entity) {
