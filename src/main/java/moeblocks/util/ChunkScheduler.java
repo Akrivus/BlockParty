@@ -27,9 +27,14 @@ public class ChunkScheduler {
         return ChunkScheduler.chunks.get(uuid);
     }
     
-    public static void queue(UUID uuid, ServerWorld world, ChunkPos pos) {
-        ChunkScheduler.chunks.put(uuid, new ChunkScheduler(world, pos));
-        world.tickEnvironment(world.getChunk(pos.x, pos.z), 20);
-        world.getChunkProvider().forceChunk(pos, true);
+    public static ServerWorld queue(UUID uuid, ServerWorld world, ChunkPos pos) {
+        if (world != null) {
+            ChunkScheduler.chunks.put(uuid, new ChunkScheduler(world, pos));
+            world.tickEnvironment(world.getChunk(pos.x, pos.z), 20);
+            world.getChunkProvider().forceChunk(pos, true);
+            return world;
+        } else {
+            return null;
+        }
     }
 }

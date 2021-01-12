@@ -62,9 +62,8 @@ public class CacheNPC {
     public AbstractNPCEntity get(MinecraftServer server) {
         DimBlockPos coord = CacheNPC.positions.get(this.getUUID());
         if (coord == null) { return null; }
-        ServerWorld world = server.getWorld(coord.getDim());
+        ServerWorld world = ChunkScheduler.queue(this.getUUID(), server.getWorld(coord.getDim()), coord.chunk);
         if (world == null) { return null; }
-        ChunkScheduler.queue(this.getUUID(), world, coord.chunk);
         List<AbstractNPCEntity> npcs = world.getEntitiesWithinAABB(AbstractNPCEntity.class, coord.getAABB());
         for (AbstractNPCEntity npc : npcs) {
             if (this.getUUID().equals(npc.getUUID())) { return npc; }
