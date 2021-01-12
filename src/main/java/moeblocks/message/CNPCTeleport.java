@@ -25,11 +25,13 @@ public class CNPCTeleport extends CNPCQuery {
         double x = player.getPosX() - Math.sin(0.0174532925F * player.rotationYaw) * 1.44;
         double z = player.getPosZ() + Math.cos(0.0174532925F * player.rotationYaw) * 1.44;
         ServerWorld world = (ServerWorld) player.world;
+        world.getProfiler().startSection("teleportMoe");
         AbstractNPCEntity npc = this.npc.get(player.getServer());
         if (npc != null) {
             npc.teleport(world, new CellPhoneTeleporter(x, player.getPosY(), z));
         } else {
             this.sim.removeNPC(this.npc.getUUID());
         }
+        world.getProfiler().endSection();
     }
 }

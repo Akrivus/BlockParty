@@ -306,7 +306,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     public void livingTick() {
         this.updateArmSwingProgress();
         super.livingTick();
+        this.world.getProfiler().startSection("stateMachine");
         this.states.forEach((state, machine) -> machine.update());
+        this.world.getProfiler().endSection();
+        this.world.getProfiler().startSection("stateUpdater");
         if (this.isFollowing() && this.isPassenger() && !this.getProtagonist().isPassenger()) { this.dismount(); }
         if (this.isLocal()) {
             if (this.timeSinceSleep > 24000) { this.addStress(0.0005F); }
@@ -321,6 +324,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         } else {
             this.updateAITasks();
         }
+        this.world.getProfiler().endSection();
     }
 
     @Override
@@ -1174,10 +1178,10 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
 
     public void setCharacter(Consumer<CacheNPC> transaction) {
+        this.world.getProfiler().startSection("datingSim");
         CacheNPC character = this.getCharacter();
-        if (character != null) {
-            character.set(DatingData.get(this.world), transaction);
-        }
+        if (character != null) { character.set(DatingData.get(this.world), transaction); }
+        this.world.getProfiler().endSection();
     }
 
     public AbstractNPCEntity sync() {
