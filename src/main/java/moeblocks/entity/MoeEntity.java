@@ -197,12 +197,13 @@ public class MoeEntity extends AbstractNPCEntity implements INamedContainerProvi
     }
 
     public float getInventoryCapacity() {
-        float total = 0.0F, size = this.inventory.getSizeInventory();
-        for (int i = 0; i < size; ++i) {
+        if (this.inventory == null) { return 0.0F; }
+        float total = 0.0F;
+        for (int i = 0; i < 27; ++i) {
             ItemStack stack = this.inventory.getStackInSlot(i);
-            total += stack.getCount() / stack.getMaxStackSize();
+            if (stack.getCount() > 0) { total += 0.037; }
         }
-        return total / size;
+        return total;
     }
 
     @Override
@@ -237,7 +238,7 @@ public class MoeEntity extends AbstractNPCEntity implements INamedContainerProvi
     }
 
     @Override
-    public boolean isProtagonistBusyInChest() {
+    public boolean isBeingRummaged() {
         if (!this.isProtagonistBusy()) { return false; }
         Container container = this.getProtagonist().openContainer;
         if (container instanceof ChestContainer) {

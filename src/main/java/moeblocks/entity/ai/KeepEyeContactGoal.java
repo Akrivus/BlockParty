@@ -15,7 +15,7 @@ public class KeepEyeContactGoal extends Goal {
     
     @Override
     public boolean shouldExecute() {
-        return this.entity.isInConversation();
+        return this.entity.isInConversation() || this.entity.isBeingRummaged();
     }
     
     @Override

@@ -597,7 +597,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
 
     public boolean isOccupied() {
-        return this.isFighting() || this.isVengeful() || this.isSleeping() || this.isFollowing() || this.isInConversation() || this.hasPath();
+        return this.isFighting() || this.isVengeful() || this.isSleeping() || this.isFollowing() || this.isInConversation() || this.isBeingRummaged() || this.hasPath();
     }
 
     public boolean canBeTarget(Entity target) {
@@ -782,7 +782,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         return this.isProtagonistOnline() && this.getProtagonist().openContainer != this.getProtagonist().container;
     }
 
-    public boolean isProtagonistBusyInChest() {
+    public boolean isBeingRummaged() {
         return false;
     }
 
