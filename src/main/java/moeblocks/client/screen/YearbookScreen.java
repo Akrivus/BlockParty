@@ -85,7 +85,7 @@ public class YearbookScreen extends ControllerScreen {
         if (this.npc.isRemovable()) { this.renderOverlay(stack); }
         this.renderBook(stack);
         this.font.drawString(stack, this.name, this.getCenter(this.font.getStringWidth(this.name)) + 3, 91, 0);
-        this.font.drawString(stack, this.page, this.getRight(this.font.getStringWidth(this.page)) - 13, 11, 0);
+        this.font.drawString(stack, this.page, this.getCenter(this.font.getStringWidth(this.name)), 185, 0);
         for (int x = 0; x < this.stats.length; ++x) {
             this.font.drawString(stack, this.stats[x], this.getAbsoluteCenter(38) + x * 25, 104, 0);
         }
@@ -176,7 +176,7 @@ public class YearbookScreen extends ControllerScreen {
     
     @Override
     protected void init() {
-        this.addButton(new Button(this.getCenter(68), 196, 136, 20, DialogTexts.GUI_DONE, (button) -> this.minecraft.displayGuiScreen(null)));
+        this.addButton(new Button(this.getCenter(136), 196, 136, 20, DialogTexts.GUI_DONE, (button) -> this.minecraft.displayGuiScreen(null)));
         this.buttonNextPage = this.addButton(new TurnPageButton(this.getCenter(146) + 122, 51, 1, (button) -> {
             if (this.index + 1 < this.count) { this.getNPC(this.npcs.get(this.index + 1)); }
         }));
