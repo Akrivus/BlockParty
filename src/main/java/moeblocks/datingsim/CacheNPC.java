@@ -1,6 +1,7 @@
 package moeblocks.datingsim;
 
 import moeblocks.entity.AbstractNPCEntity;
+import moeblocks.util.ChunkScheduler;
 import moeblocks.util.DimBlockPos;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityType;
@@ -63,6 +64,7 @@ public class CacheNPC {
         if (coord == null) { return null; }
         ServerWorld world = server.getWorld(coord.getDim());
         if (world == null) { return null; }
+        ChunkScheduler.queue(this.getUUID(), world, coord.chunk);
         List<AbstractNPCEntity> npcs = world.getEntitiesWithinAABB(AbstractNPCEntity.class, coord.getAABB());
         for (AbstractNPCEntity npc : npcs) {
             if (this.getUUID().equals(npc.getUUID())) { return npc; }
