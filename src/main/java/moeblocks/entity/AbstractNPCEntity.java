@@ -383,8 +383,13 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     }
 
     @Override
+    public void remove(boolean keepData) {
+        this.setCharacter((npc) -> npc.setDead(!keepData));
+        super.remove(keepData);
+    }
+
+    @Override
     public void onDeath(DamageSource cause) {
-        this.setCharacter((npc) -> npc.setDead(true));
         super.onDeath(cause);
         if (this.isLocal() && this.isProtagonistOnline()) {
             this.say(this.getProtagonist(), cause.getDeathMessage(this));
