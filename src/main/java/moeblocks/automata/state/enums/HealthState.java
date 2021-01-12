@@ -14,24 +14,24 @@ import java.util.function.Function;
 public enum HealthState implements IStateEnum<AbstractNPCEntity> {
     PERFECT((npc, goals) -> {
 
-    }, (npc) -> npc.getHealth(), 16, 20),
+    }, 16, 20),
     GOOD((npc, goals) -> {
 
-    }, (npc) -> npc.getHealth(), 12, 16),
+    }, 12, 16),
     FAIR((npc, goals) -> {
 
-    }, (npc) -> npc.getHealth(), 8, 12),
+    }, 8, 12),
     SERIOUS((npc, goals) -> {
 
-    }, (npc) -> npc.getHealth(), 4, 8),
+    }, 4, 8),
     CRITICAL((npc, goals) -> {
 
-    }, (npc) -> npc.getHealth(), 0, 4);
+    }, 0, 4);
 
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
-    HealthState(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
-        this.when(0, (npc) -> Trigger.isBetween(function.apply(npc), start, end));
+    HealthState(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, float start, float end) {
+        this.when(0, (npc) -> Trigger.isBetween(npc.getHealth(), start, end));
         this.generator = generator;
     }
 

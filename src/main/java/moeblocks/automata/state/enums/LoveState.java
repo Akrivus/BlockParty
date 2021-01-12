@@ -14,24 +14,24 @@ import java.util.function.Function;
 public enum LoveState implements IStateEnum<AbstractNPCEntity> {
     INTIMATE((npc, goals) -> {
 
-    }, (npc) -> npc.getLove(), 16, 20),
+    }, 16, 20),
     CLOSE((npc, goals) -> {
 
-    }, (npc) -> npc.getLove(), 12, 16),
+    }, 12, 16),
     FRIENDLY((npc, goals) -> {
 
-    }, (npc) -> npc.getLove(), 8, 12),
+    }, 8, 12),
     ACQUAINTED((npc, goals) -> {
 
-    }, (npc) -> npc.getLove(), 4, 8),
+    }, 4, 8),
     ESTRANGED((npc, goals) -> {
 
-    }, (npc) -> npc.getLove(), 0, 4);
+    }, 0, 4);
 
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
-    LoveState(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
-        this.when(0, (npc) -> Trigger.isBetween(function.apply(npc), start, end));
+    LoveState(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, float start, float end) {
+        this.when(0, (npc) -> Trigger.isBetween(npc.getLove(), start, end));
         this.generator = generator;
     }
 

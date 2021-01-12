@@ -14,33 +14,33 @@ import java.util.function.Function;
 public enum TimeOfDay implements IStateEnum<AbstractNPCEntity> {
     MORNING((npc, goals) -> {
 
-    }, (npc) -> (float) npc.world.getDayTime(), 0, 3000),
+    }, 0, 3000),
     NOON((npc, goals) -> {
 
-    }, (npc) -> (float) npc.world.getDayTime(), 3000, 6000),
+    }, 3000, 6000),
     EVENING((npc, goals) -> {
 
-    }, (npc) -> (float) npc.world.getDayTime(), 6000, 9000),
+    }, 6000, 9000),
     DUSK((npc, goals) -> {
 
-    }, (npc) -> (float) npc.world.getDayTime(), 9000, 12000),
+    }, 9000, 12000),
     NIGHT((npc, goals) -> {
 
-    }, (npc) -> (float) npc.world.getDayTime(), 12000, 15000),
+    }, 12000, 15000),
     MIDNIGHT((npc, goals) -> {
 
-    }, (npc) -> (float) npc.world.getDayTime(), 15000, 18000),
+    }, 15000, 18000),
     MORROW((npc, goals) -> {
 
-    }, (npc) -> (float) npc.world.getDayTime(), 18000, 21000),
+    }, 18000, 21000),
     DAWN((npc, goals) -> {
 
-    }, (npc) -> (float) npc.world.getDayTime(), 21000, 24000);
+    }, 21000, 24000);
 
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
-    TimeOfDay(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
-        this.when(0, (npc) -> Trigger.isBetween(function.apply(npc), start, end));
+    TimeOfDay(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, float start, float end) {
+        this.when(0, (npc) -> Trigger.isBetween(npc.world.getDayTime(), start, end));
         this.generator = generator;
     }
 

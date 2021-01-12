@@ -196,6 +196,15 @@ public class MoeEntity extends AbstractNPCEntity implements INamedContainerProvi
         return this.inventory;
     }
 
+    public float getInventoryCapacity() {
+        float total = 0.0F, size = this.inventory.getSizeInventory();
+        for (int i = 0; i < size; ++i) {
+            ItemStack stack = this.inventory.getStackInSlot(i);
+            total += stack.getCount() / stack.getMaxStackSize();
+        }
+        return total / size;
+    }
+
     @Override
     protected void dropLoot(DamageSource cause, boolean player) {
         super.dropLoot(cause, player);
@@ -228,7 +237,7 @@ public class MoeEntity extends AbstractNPCEntity implements INamedContainerProvi
     }
 
     @Override
-    public boolean isProtagonistBeingPerverted() {
+    public boolean isProtagonistBusyInChest() {
         if (!this.isProtagonistBusy()) { return false; }
         Container container = this.getProtagonist().openContainer;
         if (container instanceof ChestContainer) {

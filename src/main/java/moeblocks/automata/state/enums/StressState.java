@@ -14,24 +14,24 @@ import java.util.function.Function;
 public enum StressState implements IStateEnum<AbstractNPCEntity> {
     BURNT_OUT((npc, goals) -> {
 
-    }, (npc) -> npc.getStress(), 16, 20),
+    }, 16, 20),
     PANICKED((npc, goals) -> {
 
-    }, (npc) -> npc.getStress(), 12, 16),
+    }, 12, 16),
     ANXIOUS((npc, goals) -> {
 
-    }, (npc) -> npc.getStress(), 8, 12),
+    }, 8, 12),
     ALERT((npc, goals) -> {
 
-    }, (npc) -> npc.getStress(), 4, 8),
+    }, 4, 8),
     RELAXED((npc, goals) -> {
 
-    }, (npc) -> npc.getStress(), 0, 4);
+    }, 0, 4);
 
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
-    StressState(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
-        this.when(0, (npc) -> Trigger.isBetween(function.apply(npc), start, end));
+    StressState(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, float start, float end) {
+        this.when(0, (npc) -> Trigger.isBetween(npc.getStress(), start, end));
         this.generator = generator;
     }
 

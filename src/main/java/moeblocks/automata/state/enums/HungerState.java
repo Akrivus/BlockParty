@@ -14,18 +14,18 @@ import java.util.function.Function;
 public enum HungerState implements IStateEnum<AbstractNPCEntity> {
     SATISFIED((npc, goals) -> {
 
-    }, (npc) -> npc.getFoodLevel(), 16, 20),
+    }, 16, 20),
     HUNGRY((npc, goals) -> {
 
-    }, (npc) -> npc.getFoodLevel(), 4, 16),
+    }, 4, 16),
     STARVING((npc, goals) -> {
 
-    }, (npc) -> npc.getFoodLevel(), 0, 4);
+    }, 0, 4);
 
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
-    HungerState(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, Function<AbstractNPCEntity, Float> function, float start, float end) {
-        this.when(0, (npc) -> Trigger.isBetween(function.apply(npc), start, end));
+    HungerState(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, float start, float end) {
+        this.when(0, (npc) -> Trigger.isBetween(npc.getFoodLevel(), start, end));
         this.generator = generator;
     }
 
