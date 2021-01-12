@@ -39,6 +39,7 @@ public class YearbookScreen extends ControllerScreen {
     private final String[] lines = new String[4];
     private AbstractNPCEntity entity;
     private String name;
+    private String page;
     private Button buttonPreviousPage;
     private Button buttonNextPage;
     private Button buttonRemovePage;
@@ -80,15 +81,16 @@ public class YearbookScreen extends ControllerScreen {
         if (this.npc == null) { return; }
         this.renderBackground(stack);
         this.renderPortrait(stack);
-        this.renderEntity(this.width / 2 + 3, 90, 40.0F, this.entity);
+        this.renderEntity(this.getAbsoluteCenter(-3), 90, 40.0F, this.entity);
         if (this.npc.isRemovable()) { this.renderOverlay(stack); }
         this.renderBook(stack);
-        this.font.drawString(stack, this.name, (this.width - this.font.getStringWidth(this.name)) / 2 + 3, 91, 0);
+        this.font.drawString(stack, this.name, this.getCenter(this.font.getStringWidth(this.name)) + 3, 91, 0);
+        this.font.drawString(stack, this.page, this.getRight(this.font.getStringWidth(this.page)) - 13, 11, 0);
         for (int x = 0; x < this.stats.length; ++x) {
-            this.font.drawString(stack, this.stats[x], this.width / 2 - 38 + x * 25, 104, 0);
+            this.font.drawString(stack, this.stats[x], this.getAbsoluteCenter(38) + x * 25, 104, 0);
         }
         for (int y = 0; y < this.lines.length; ++y) {
-            this.font.drawString(stack, this.lines[y], this.width / 2 - 40 - (y > 0 ? 5 : y), 123 + 10 * y, 0);
+            this.font.drawString(stack, this.lines[y], this.getAbsoluteCenter(40) - (y > 0 ? 5 : y), 123 + 10 * y, 0);
         }
         super.render(stack, mouseX, mouseY, partialTicks);
         this.renderTooltips(stack, mouseX, mouseY);
@@ -100,16 +102,16 @@ public class YearbookScreen extends ControllerScreen {
             text.add(new TranslationTextComponent("gui.moeblocks.button.remove"));
         }
         if (102 < mouseY && mouseY < 112) {
-            if (this.width / 2 - 50 < mouseX && mouseX < this.width / 2 - 24) {
+            if (this.getAbsoluteCenter(50) < mouseX && mouseX < this.getAbsoluteCenter(24)) {
                 text.add(new StringTextComponent(Trans.late(this.entity.getState(HealthState.class).getTranslationKey())));
             }
-            if (this.width / 2 - 24 < mouseX && mouseX < this.width / 2 + -2) {
+            if (this.getAbsoluteCenter(24) < mouseX && mouseX < this.getAbsoluteCenter(2)) {
                 text.add(new StringTextComponent(Trans.late(this.entity.getState(HungerState.class).getTranslationKey())));
             }
-            if (this.width / 2 + -2 < mouseX && mouseX < this.width / 2 + 24) {
+            if (this.getAbsoluteCenter(2) < mouseX && mouseX < this.getAbsoluteCenter(-24)) {
                 text.add(new StringTextComponent(Trans.late(this.entity.getState(LoveState.class).getTranslationKey())));
             }
-            if (this.width / 2 + 24 < mouseX && mouseX < this.width / 2 + 50) {
+            if (this.getAbsoluteCenter(-24) < mouseX && mouseX < this.getAbsoluteCenter(-50)) {
                 text.add(new StringTextComponent(Trans.late(this.entity.getState(StressState.class).getTranslationKey())));
             }
         }
@@ -121,14 +123,14 @@ public class YearbookScreen extends ControllerScreen {
     public void renderPortrait(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(YEARBOOK_TEXTURES);
-        this.blit(stack, (this.width - 60) / 2 + 3, 27, 161, 25, 58, 58);
+        this.blit(stack, this.getCenter(60) + 3, 27, 161, 25, 58, 58);
     }
     
     public void renderOverlay(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(YEARBOOK_TEXTURES);
-        if (this.npc.isDead()) { this.blit(stack, (this.width - 60) / 2 + 2, 26, 160, 155, 60, 60); }
-        if (this.npc.isEstranged()) { this.blit(stack, (this.width - 60) / 2 + 2, 26, 160, 95, 60, 60); }
+        if (this.npc.isDead()) { this.blit(stack, this.getCenter(60) + 2, 26, 160, 155, 60, 60); }
+        if (this.npc.isEstranged()) { this.blit(stack, this.getCenter(60) + 2, 26, 160, 95, 60, 60); }
     }
     
     public void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
@@ -152,7 +154,7 @@ public class YearbookScreen extends ControllerScreen {
     public void renderBook(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(YEARBOOK_TEXTURES);
-        this.blit(stack, (this.width - 146) / 2, 2, 0, 0, 146, 187);
+        this.blit(stack, this.getCenter(146), 2, 0, 0, 146, 187);
     }
     
     @Override
@@ -174,17 +176,17 @@ public class YearbookScreen extends ControllerScreen {
     
     @Override
     protected void init() {
-        this.addButton(new Button(this.width / 2 - 68, 196, 136, 20, DialogTexts.GUI_DONE, (button) -> this.minecraft.displayGuiScreen(null)));
-        this.buttonNextPage = this.addButton(new TurnPageButton((this.width - 146) / 2 + 122, 51, 1, (button) -> {
-            if (this.index + 1 < this.npcs.size()) { this.getNPC(this.npcs.get(this.index + 1)); }
+        this.addButton(new Button(this.getCenter(68), 196, 136, 20, DialogTexts.GUI_DONE, (button) -> this.minecraft.displayGuiScreen(null)));
+        this.buttonNextPage = this.addButton(new TurnPageButton(this.getCenter(146) + 122, 51, 1, (button) -> {
+            if (this.index + 1 < this.count) { this.getNPC(this.npcs.get(this.index + 1)); }
         }));
-        this.buttonPreviousPage = this.addButton(new TurnPageButton((this.width - 146) / 2 + 21, 51, -1, (button) -> {
+        this.buttonPreviousPage = this.addButton(new TurnPageButton(this.getCenter(146) + 21, 51, -1, (button) -> {
             if (this.index - 1 >= 0) { this.getNPC(this.npcs.get(this.index - 1)); }
         }));
-        this.buttonRemovePage = this.addButton(new RemovePageButton((this.width - 146) / 2 + 115, 9, (button) -> {
+        this.buttonRemovePage = this.addButton(new RemovePageButton(this.getCenter(146) + 115, 9, (button) -> {
             MoeMessages.send(new CRemovePage(this.npc.getUUID()));
             this.npcs.remove(this.npc.getUUID());
-            if (++this.index >= this.npcs.size()) { --this.index; }
+            if (++this.index >= this.count) { --this.index; }
             if (this.index < 0) { this.index = 0; }
             if (this.npcs.isEmpty()) {
                 this.closeScreen();
@@ -199,7 +201,8 @@ public class YearbookScreen extends ControllerScreen {
             this.minecraft.player.sendStatusMessage(new TranslationTextComponent("gui.moeblocks.error.empty"), true);
             this.closeScreen();
         } else {
-            this.buttonNextPage.visible = this.index + 1 < this.npcs.size();
+            this.page = String.format(Trans.late("gui.moeblocks.label.page"), this.index + 1, this.count);
+            this.buttonNextPage.visible = this.index + 1 < this.count;
             this.buttonPreviousPage.visible = this.index - 1 >= 0;
             this.buttonRemovePage.visible = this.npc.isRemovable();
         }

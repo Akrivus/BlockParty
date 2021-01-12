@@ -64,14 +64,14 @@ public class CellPhoneScreen extends ControllerScreen {
     public void renderPhone(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
-        this.blit(stack, (this.width - 108) / 2, 2, 0, 0, 108, 182);
+        this.blit(stack, this.getCenter(108), 2, 0, 0, 108, 182);
     }
     
     public void renderScrollBar(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
         int y = (int) (Math.min((double) this.start / (this.contacts.size() - this.contacts.size() % 4), 1.0) * 35);
-        this.blit(stack, this.width / 2 + 37, 40 + y, 108, 82, 7, 15);
+        this.blit(stack, this.getAbsoluteCenter(-37), 40 + y, 108, 82, 7, 15);
     }
     
     @Override
@@ -100,9 +100,9 @@ public class CellPhoneScreen extends ControllerScreen {
     
     @Override
     protected void init() {
-        this.addButton(new Button(this.width / 2 - 54, 190, 108, 20, DialogTexts.GUI_DONE, (button) -> this.closeScreen()));
-        this.buttonScrollUp = this.addButton(new ScrollButton(this, this.width / 2 + 37, 32, -1));
-        this.buttonScrollDown = this.addButton(new ScrollButton(this, this.width / 2 + 37, 91, 1));
+        this.addButton(new Button(this.getAbsoluteCenter(54), 190, 108, 20, DialogTexts.GUI_DONE, (button) -> this.closeScreen()));
+        this.buttonScrollUp = this.addButton(new ScrollButton(this, this.getAbsoluteCenter(-37), 32, -1));
+        this.buttonScrollDown = this.addButton(new ScrollButton(this, this.getCenter(-37), 91, 1));
         this.updateButtons();
     }
     
@@ -122,7 +122,7 @@ public class CellPhoneScreen extends ControllerScreen {
             this.contacts.forEach((contact) -> this.buttons.remove(contact));
             for (int y = this.start; y < Math.min(this.start + 4, this.contacts.size()); ++y) {
                 Button button = this.contacts.get(y);
-                button.x = this.width / 2 - 45;
+                button.x = this.getCenter(45);
                 button.y = 32 + (y % 4) * 17;
                 this.addButton(button);
             }

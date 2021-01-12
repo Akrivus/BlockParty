@@ -10,11 +10,13 @@ import java.util.UUID;
 public abstract class ControllerScreen extends AbstractScreen {
     protected List<UUID> npcs;
     protected CacheNPC npc;
+    protected int count;
     protected int index;
     
     protected ControllerScreen(List<UUID> npcs, UUID uuid, int x, int y) {
         super(x, y);
         this.npcs = npcs;
+        this.count = this.npcs.size();
         this.index = this.npcs.indexOf(uuid);
         if (this.index < 0) {
             this.index = 0;
