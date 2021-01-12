@@ -102,7 +102,7 @@ public class CellPhoneScreen extends ControllerScreen {
     protected void init() {
         this.addButton(new Button(this.getAbsoluteCenter(54), 190, 108, 20, DialogTexts.GUI_DONE, (button) -> this.closeScreen()));
         this.buttonScrollUp = this.addButton(new ScrollButton(this, this.getAbsoluteCenter(-37), 32, -1));
-        this.buttonScrollDown = this.addButton(new ScrollButton(this, this.getCenter(-37), 91, 1));
+        this.buttonScrollDown = this.addButton(new ScrollButton(this, this.getAbsoluteCenter(-37), 91, 1));
         this.updateButtons();
     }
     
@@ -122,7 +122,7 @@ public class CellPhoneScreen extends ControllerScreen {
             this.contacts.forEach((contact) -> this.buttons.remove(contact));
             for (int y = this.start; y < Math.min(this.start + 4, this.contacts.size()); ++y) {
                 Button button = this.contacts.get(y);
-                button.x = this.getCenter(45);
+                button.x = this.getAbsoluteCenter(45);
                 button.y = 32 + (y % 4) * 17;
                 this.addButton(button);
             }
