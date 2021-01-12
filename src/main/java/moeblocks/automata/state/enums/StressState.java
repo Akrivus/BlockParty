@@ -31,7 +31,7 @@ public enum StressState implements IStateEnum<AbstractNPCEntity> {
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
     StressState(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, float start, float end) {
-        this.when(0, (npc) -> Trigger.isBetween(npc.getStress(), start, end));
+        this.when(1, (npc) -> Trigger.isBetween(npc.getStress(), start, end));
         this.generator = generator;
     }
 

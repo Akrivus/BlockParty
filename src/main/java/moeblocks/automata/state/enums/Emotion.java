@@ -59,7 +59,6 @@ public enum Emotion implements IStateEnum<AbstractNPCEntity> {
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
     Emotion(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator) {
-        this.when(0, (npc) -> this.equals(npc.getEmotion()));
         this.generator = generator;
     }
 
@@ -90,7 +89,6 @@ public enum Emotion implements IStateEnum<AbstractNPCEntity> {
     }
 
     public static void registerTriggers() {
-        Emotion.EMBARRASSED.when(2, (npc) -> npc.isBeingRummaged());
-        Emotion.NORMAL.when(1, (npc) -> true);
+        Emotion.EMBARRASSED.when(5, (npc) -> npc.isBeingRummaged());
     }
 }

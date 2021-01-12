@@ -40,7 +40,7 @@ public enum TimeOfDay implements IStateEnum<AbstractNPCEntity> {
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
     TimeOfDay(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, float start, float end) {
-        this.when(0, (npc) -> Trigger.isBetween(npc.world.getDayTime(), start, end));
+        this.when(1, (npc) -> Trigger.isBetween(npc.world.getDayTime(), start, end));
         this.generator = generator;
     }
 

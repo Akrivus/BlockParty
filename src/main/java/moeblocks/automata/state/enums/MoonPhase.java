@@ -14,24 +14,24 @@ import java.util.function.Function;
 public enum MoonPhase implements IStateEnum<AbstractNPCEntity> {
     NEW((npc, goals) -> {
 
-    }, 0.00F, 0.25F),
+    }, 0.00F),
     CRESCENT((npc, goals) -> {
 
-    }, 0.25F, 0.50F),
+    }, 0.25F),
     QUARTER((npc, goals) -> {
 
-    }, 0.50F, 0.75F),
+    }, 0.50F),
     GIBBOUS((npc, goals) -> {
 
-    }, 0.75F, 1.00F),
+    }, 0.75F),
     FULL((npc, goals) -> {
 
-    }, 1.00F, 1.00F);
+    }, 1.00F);
 
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
-    MoonPhase(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, float start, float end) {
-        this.when(0, (npc) -> Trigger.isBetween(npc.world.getMoonFactor(), start, end));
+    MoonPhase(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, float factor) {
+        this.when(1, (npc) -> factor == npc.world.getMoonFactor());
         this.generator = generator;
     }
 

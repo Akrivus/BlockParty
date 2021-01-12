@@ -25,7 +25,7 @@ public enum HungerState implements IStateEnum<AbstractNPCEntity> {
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
     HungerState(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, float start, float end) {
-        this.when(0, (npc) -> Trigger.isBetween(npc.getFoodLevel(), start, end));
+        this.when(1, (npc) -> Trigger.isBetween(npc.getFoodLevel(), start, end));
         this.generator = generator;
     }
 

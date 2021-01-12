@@ -38,6 +38,7 @@ public enum StoryPhase implements IStateEnum<AbstractNPCEntity> {
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
     StoryPhase(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator) {
+        this.when(1, (npc) -> this.equals(npc.getStoryPhase()));
         this.generator = generator;
     }
 

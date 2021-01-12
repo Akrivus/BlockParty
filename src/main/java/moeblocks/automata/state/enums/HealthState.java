@@ -31,7 +31,7 @@ public enum HealthState implements IStateEnum<AbstractNPCEntity> {
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 
     HealthState(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, float start, float end) {
-        this.when(0, (npc) -> Trigger.isBetween(npc.getHealth(), start, end));
+        this.when(1, (npc) -> Trigger.isBetween(npc.getHealth(), start, end));
         this.generator = generator;
     }
 

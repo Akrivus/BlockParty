@@ -37,7 +37,7 @@ public enum Dere implements IStateEnum<AbstractNPCEntity> {
     private final int color;
 
     Dere(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, int color) {
-        this.when(0, (npc) -> this.equals(npc.getDere()));
+        this.when(1, (npc) -> this.equals(npc.getDere()));
         this.generator = generator;
         this.color = color;
     }

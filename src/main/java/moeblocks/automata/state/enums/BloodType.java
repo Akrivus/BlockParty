@@ -31,7 +31,7 @@ public enum BloodType implements IStateEnum<AbstractNPCEntity> {
     private final List<BloodType> compatibilities;
 
     BloodType(BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator, int weight, BloodType... compatibilities) {
-        this.when(0, (npc) -> this.equals(npc.getBloodType()));
+        this.when(1, (npc) -> this.equals(npc.getBloodType()));
         this.generator = generator;
         this.compatibilities = Arrays.asList(compatibilities);
         for (int i = 0; i < weight; ++i) {

@@ -33,7 +33,7 @@ public enum CupSize implements IStateEnum<MoeEntity> {
     private final BiConsumer<MoeEntity, List<AbstractStateGoal>> generator;
 
     CupSize(BiConsumer<MoeEntity, List<AbstractStateGoal>> generator, float start, float end) {
-        this.when(0, (moe) -> Trigger.isBetween(moe.getInventoryCapacity(), start, end));
+        this.when(1, (moe) -> Trigger.isBetween(moe.getInventoryCapacity(), start, end));
         this.generator = generator;
     }
 
@@ -67,6 +67,6 @@ public enum CupSize implements IStateEnum<MoeEntity> {
         CupSize.D.when(2, (moe) -> moe.isBlock(BlockTags.SHULKER_BOXES));
         CupSize.D.when(2, (moe) -> moe.isBlock(Blocks.BARREL));
         CupSize.D.when(2, (moe) -> moe.isBlock(MoeTags.Blocks.CHESTS));
-        CupSize.A.when(1, (moe) -> moe.is(Gender.MASCULINE));
+        CupSize.A.when(5, (moe) -> moe.is(Gender.MASCULINE));
     }
 }

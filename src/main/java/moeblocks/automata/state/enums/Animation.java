@@ -18,7 +18,6 @@ public enum Animation implements IStateEnum<AbstractNPCEntity> {
     private final Supplier<? extends AnimationState> animation;
 
     Animation(Supplier<? extends AnimationState> animation) {
-        this.when(0, (npc) -> this.equals(npc.getAnimation()));
         this.animation = animation;
     }
 
@@ -49,6 +48,6 @@ public enum Animation implements IStateEnum<AbstractNPCEntity> {
     }
 
     public static void registerTriggers() {
-
+        Animation.DEFAULT.when(1, (npc) -> true);
     }
 }
