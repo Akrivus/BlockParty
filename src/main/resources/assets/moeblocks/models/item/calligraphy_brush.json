@@ -1,6 +1,6 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "moeblocks:item/brush"
+    "layer0": "moeblocks:item/calligraphy_brush"
   }
 }

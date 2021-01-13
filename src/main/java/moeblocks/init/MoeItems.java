@@ -13,7 +13,7 @@ public class MoeItems {
     public static final DeferredRegister<Item> REGISTRY = DeferredRegister.create(ForgeRegistries.ITEMS, MoeMod.ID);
     public static final RegistryObject<Item> BENTO_BOX = REGISTRY.register("bento_box", BentoBoxItem::new);
     public static final RegistryObject<Item> BLUE_SPIDER_LILY = REGISTRY.register("blue_spider_lily", () -> new MoeBlockItem(MoeBlocks.BLUE_SPIDER_LILY));
-    public static final RegistryObject<Item> BRUSH = REGISTRY.register("brush", BrushItem::new);
+    public static final RegistryObject<Item> CALLIGRAPHY_BRUSH = REGISTRY.register("calligraphy_brush", CalligraphyBrushItem::new);
     public static final RegistryObject<Item> CALLIGRAPHY_TABLE = REGISTRY.register("calligraphy_table", () -> new MoeBlockItem(MoeBlocks.CALLIGRAPHY_TABLE));
     public static final RegistryObject<Item> CELL_PHONE = REGISTRY.register("cell_phone", CellPhoneItem::new);
     public static final RegistryObject<Item> CUPCAKE = REGISTRY.register("cupcake", CupcakeItem::new);
