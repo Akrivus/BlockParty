@@ -306,6 +306,18 @@
       "moeblocks:entity/moe/psychotic2"
     ]
   },
+  "entity.moe.say": {
+    "sounds": [
+      "moeblocks:entity/moe/say1",
+      "moeblocks:entity/moe/say2",
+      "moeblocks:entity/moe/say3",
+      "moeblocks:entity/moe/say4",
+      "moeblocks:entity/moe/say5",
+      "moeblocks:entity/moe/say6",
+      "moeblocks:entity/moe/say7",
+      "moeblocks:entity/moe/say8"
+    ]
+  },
   "entity.moe.senpai": {
     "subtitle": "subtitle.moe.senpai",
     "sounds": [

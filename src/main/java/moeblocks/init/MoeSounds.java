@@ -32,6 +32,7 @@ public class MoeSounds {
     public static final RegistryObject<SoundEvent> ENTITY_MOE_NEUTRAL = REGISTRY.register("entity.moe.neutral", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.neutral")));
     public static final RegistryObject<SoundEvent> ENTITY_MOE_NO = REGISTRY.register("entity.moe.no", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.no")));
     public static final RegistryObject<SoundEvent> ENTITY_MOE_PSYCHOTIC = REGISTRY.register("entity.moe.psychotic", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.psychotic")));
+    public static final RegistryObject<SoundEvent> ENTITY_MOE_SAY = REGISTRY.register("entity.moe.say", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.say")));
     public static final RegistryObject<SoundEvent> ENTITY_MOE_SENPAI = REGISTRY.register("entity.moe.senpai", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.senpai")));
     public static final RegistryObject<SoundEvent> ENTITY_MOE_SLEEPING = REGISTRY.register("entity.moe.sleeping", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.sleeping")));
     public static final RegistryObject<SoundEvent> ENTITY_MOE_SMITTEN = REGISTRY.register("entity.moe.smitten", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.smitten")));

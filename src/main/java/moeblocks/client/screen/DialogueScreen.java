@@ -8,12 +8,15 @@ import moeblocks.datingsim.convo.enums.Response;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeMessages;
+import moeblocks.init.MoeSounds;
 import moeblocks.message.CDialogueClose;
 import moeblocks.message.CDialogueRespond;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.lwjgl.glfw.GLFW;
 
@@ -49,6 +52,7 @@ public class DialogueScreen extends AbstractScreen {
         super.render(stack, mouseX, mouseY, partialTicks);
         if (this.cursor < this.line.length()) {
             this.cursor = this.minecraft.player.ticksExisted - this.start;
+            this.playSound(MoeSounds.ENTITY_MOE_SAY.get());
         }
         this.renderTooltips(stack, mouseX, mouseY);
     }
@@ -65,6 +69,10 @@ public class DialogueScreen extends AbstractScreen {
         this.font.drawStringWithShadow(stack, this.lines[1].trim(), this.getLeft(5), this.getBottom(34), this.white);
         this.font.drawStringWithShadow(stack, this.lines[2].trim(), this.getLeft(5), this.getBottom(25), this.white);
         this.font.drawStringWithShadow(stack, this.name, this.getLeft(5), this.getBottom(57), this.white);
+    }
+
+    public void playSound(SoundEvent sound) {
+        this.minecraft.getSoundHandler().play(SimpleSound.master(sound, 1.0F));
     }
     
     @Override
