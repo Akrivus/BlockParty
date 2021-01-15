@@ -49,7 +49,7 @@ public class DatingSim {
     
     public List<UUID> getNPCs() {
         List<UUID> npcs = new ArrayList<>();
-        this.characters.forEach((npc, data) -> npcs.add(npc));
+        this.characters.forEach((npc, data) -> npcs.add(data.isRemovable() ? npcs.size() : 0, npc));
         return npcs;
     }
 }
