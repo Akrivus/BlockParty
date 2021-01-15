@@ -85,7 +85,7 @@ public class YearbookScreen extends ControllerScreen {
         if (this.npc.isRemovable()) { this.renderOverlay(stack); }
         this.renderBook(stack);
         this.font.drawString(stack, this.name, this.getCenter(this.font.getStringWidth(this.name)) + 3, 91, 0);
-        this.font.drawString(stack, this.page, this.getCenter(this.font.getStringWidth(this.name)), 185, 0);
+        this.font.drawString(stack, this.page, this.getCenter(this.font.getStringWidth(this.page)), 185, 0);
         for (int x = 0; x < this.stats.length; ++x) {
             this.font.drawString(stack, this.stats[x], this.getAbsoluteCenter(38) + x * 25, 104, 0);
         }
