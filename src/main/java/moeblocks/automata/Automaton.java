@@ -74,9 +74,11 @@ public class Automaton<E extends AbstractNPCEntity> {
     }
     
     public void fromKey(IStateEnum<E> key) {
-        this.state = (this.key = key).getState(this.applicant);
-        if (this.isBlocked()) { return; }
-        this.state.apply(this.applicant);
+        if (this.key != key) {
+            this.state = (this.key = key).getState(this.applicant);
+            if (this.isBlocked()) { return; }
+            this.state.apply(this.applicant);
+        }
     }
 
     public void fromKey(String key) {
