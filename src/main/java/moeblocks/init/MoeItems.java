@@ -5,6 +5,7 @@ import moeblocks.item.*;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemModelsProperties;
+import net.minecraft.item.MusicDiscItem;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -25,6 +26,9 @@ public class MoeItems {
     public static final RegistryObject<Item> PINK_BOW = REGISTRY.register("pink_bow", PinkBowItem::new);
     public static final RegistryObject<Item> PINK_SAKURA_BLOSSOMS = REGISTRY.register("pink_sakura_blossoms", () -> new MoeBlockItem(MoeBlocks.PINK_SAKURA_BLOSSOMS));
     public static final RegistryObject<Item> PINK_SAKURA_SAPLING = REGISTRY.register("pink_sakura_sapling", () -> new MoeBlockItem(MoeBlocks.PINK_SAKURA_SAPLING));
+    public static final RegistryObject<Item> RECORD_EMBRACE = REGISTRY.register("record_embrace", () -> new MoeMusicItem(1, MoeSounds.RECORD_EMBRACE));
+    public static final RegistryObject<Item> RECORD_THESIS = REGISTRY.register("record_thesis", () -> new MoeMusicItem(1, MoeSounds.RECORD_THESIS));
+    public static final RegistryObject<Item> RECORD_TRAVELER = REGISTRY.register("record_traveler", () -> new MoeMusicItem(1, MoeSounds.RECORD_TRAVELER));
     public static final RegistryObject<Item> RED_SPIDER_LILY = REGISTRY.register("red_spider_lily", () -> new MoeBlockItem(MoeBlocks.RED_SPIDER_LILY));
     public static final RegistryObject<Item> SAKURA_BUTTON = REGISTRY.register("sakura_button", () -> new MoeBlockItem(MoeBlocks.SAKURA_BUTTON));
     public static final RegistryObject<Item> SAKURA_FENCE = REGISTRY.register("sakura_fence", () -> new MoeBlockItem(MoeBlocks.SAKURA_FENCE));
