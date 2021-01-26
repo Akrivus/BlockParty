@@ -4,6 +4,7 @@ import moeblocks.automata.IStateEnum;
 import moeblocks.automata.Trigger;
 import moeblocks.automata.state.enums.*;
 import moeblocks.entity.AbstractNPCEntity;
+import moeblocks.util.Trans;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 
 public class MoeTriggers {
     private static final Map<Class<? extends IStateEnum>, List<Trigger>> REGISTRY = new HashMap<>();
+    private static boolean isInitialized = false;
 
     public static void registerTriggers() {
         register(0, Animation.DEFAULT, (npc) -> true);
@@ -37,6 +39,7 @@ public class MoeTriggers {
         CupSize.registerTriggers();
         Emotion.registerTriggers();
         Mood.registerTriggers();
+        MoeTriggers.isInitialized = true;
     }
 
     public static List<Trigger> registry(IStateEnum state) {
@@ -46,9 +49,14 @@ public class MoeTriggers {
     }
 
     public static <E extends AbstractNPCEntity> void register(int priority, IStateEnum state, Predicate<E> function) {
-        List<Trigger> triggers = registry(state);
-        triggers.add(new Trigger(priority, state, function));
-        REGISTRY.put(state.getClass(), triggers);
+        if (MoeTriggers.isInitialized) {
+            System.out.printf("Attempted post-init addition of key '%s'", Trans.late(state.getTranslationKey()));
+            return;
+        } else {
+            List<Trigger> triggers = registry(state);
+            triggers.add(new Trigger(priority, state, function));
+            REGISTRY.put(state.getClass(), triggers);
+        }
     }
 
     public static Trigger find(IStateEnum state, AbstractNPCEntity applicant) {
