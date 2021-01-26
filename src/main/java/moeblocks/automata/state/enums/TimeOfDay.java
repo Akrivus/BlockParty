@@ -14,28 +14,22 @@ import java.util.function.Function;
 public enum TimeOfDay implements IStateEnum<AbstractNPCEntity> {
     MORNING((npc, goals) -> {
 
-    }, 0, 3000),
+    }, 0, 4000),
     NOON((npc, goals) -> {
 
-    }, 3000, 6000),
+    }, 4000, 8000),
     EVENING((npc, goals) -> {
 
-    }, 6000, 9000),
-    DUSK((npc, goals) -> {
-
-    }, 9000, 12000),
+    }, 8000, 12000),
     NIGHT((npc, goals) -> {
 
-    }, 12000, 15000),
+    }, 12000, 16000),
     MIDNIGHT((npc, goals) -> {
 
-    }, 15000, 18000),
-    MORROW((npc, goals) -> {
-
-    }, 18000, 21000),
+    }, 16000, 20000),
     DAWN((npc, goals) -> {
 
-    }, 21000, 24000);
+    }, 20000, 24000);
 
     private final BiConsumer<AbstractNPCEntity, List<AbstractStateGoal>> generator;
 

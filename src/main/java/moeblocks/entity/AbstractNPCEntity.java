@@ -129,6 +129,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         this.states.put(HungerState.class, new Automaton<>(this, HungerState.SATISFIED::trigger).start());
         this.states.put(HeldItemState.class, new Automaton<>(this, HeldItemState.DEFAULT::trigger).start());
         this.states.put(LoveState.class, new Automaton<>(this, LoveState.FRIENDLY::trigger).start());
+        this.states.put(Mood.class, new Automaton<>(this, Mood.WANDER::trigger).start());
         this.states.put(MoonPhase.class, new Automaton<>(this, MoonPhase.FULL::trigger).start());
         this.states.put(PeriodOfTime.class, new Automaton<>(this, PeriodOfTime.ATTACHED::trigger).start());
         this.states.put(StoryPhase.class, new Automaton<>(this, StoryPhase.INTRODUCTION::trigger).start());
