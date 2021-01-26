@@ -51,7 +51,6 @@ public class MoeTriggers {
     public static <E extends AbstractNPCEntity> void register(int priority, IStateEnum state, Predicate<E> function) {
         if (MoeTriggers.isInitialized) {
             System.out.printf("Attempted post-init addition of key '%s'", Trans.late(state.getTranslationKey()));
-            return;
         } else {
             List<Trigger> triggers = registry(state);
             triggers.add(new Trigger(priority, state, function));
