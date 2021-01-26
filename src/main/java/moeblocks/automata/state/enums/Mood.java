@@ -60,4 +60,13 @@ public enum Mood implements IStateEnum<AbstractNPCEntity> {
             return MoonPhase.FULL;
         }
     }
+
+    public static void registerTriggers() {
+        Mood.SLEEP.when(1, (npc) -> npc.is(TimeOfDay.DAWN) && npc.isTimeToSleep());
+        Mood.SLEEP.when(1, (npc) -> npc.is(TimeOfDay.MIDNIGHT) && npc.isTimeToSleep());
+        Mood.SLEEP.when(1, (npc) -> npc.is(TimeOfDay.NIGHT) && npc.isTimeToSleep());
+        Mood.RELAX.when(1, (npc) -> npc.is(TimeOfDay.EVENING));
+        Mood.WORK.when(1, (npc) -> npc.is(TimeOfDay.NOON));
+        Mood.GATHER.when(1, (npc) -> npc.is(TimeOfDay.MORNING));
+    }
 }
