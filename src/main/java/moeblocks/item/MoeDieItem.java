@@ -2,6 +2,7 @@ package moeblocks.item;
 
 import moeblocks.MoeMod;
 import moeblocks.entity.MoeDieEntity;
+import moeblocks.util.sort.ISortableItem;
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.dispenser.ProjectileDispenseBehavior;
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,7 +14,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
-public class MoeDieItem extends Item {
+public class MoeDieItem extends Item implements ISortableItem {
     public static final ProjectileDispenseBehavior DISPENSER_BEHAVIOR = new ProjectileDispenseBehavior() {
         @Override
         protected ProjectileEntity getProjectileEntity(World world, IPosition position, ItemStack stack) {
@@ -39,5 +40,10 @@ public class MoeDieItem extends Item {
         } else {
             return ActionResult.resultFail(stack);
         }
+    }
+
+    @Override
+    public int getSortOrder() {
+        return 0;
     }
 }

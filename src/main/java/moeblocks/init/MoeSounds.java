@@ -45,7 +45,4 @@ public class MoeSounds {
     public static final RegistryObject<SoundEvent> ITEM_CELL_PHONE_DIAL = REGISTRY.register("item.cell_phone.dial", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "item.cell_phone.dial")));
     public static final RegistryObject<SoundEvent> ITEM_CELL_PHONE_RING = REGISTRY.register("item.cell_phone.ring", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "item.cell_phone.ring")));
     public static final RegistryObject<SoundEvent> ITEM_YEARBOOK_REMOVE_PAGE = REGISTRY.register("item.yearbook.remove_page", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "item.yearbook.remove_page")));
-    public static final RegistryObject<SoundEvent> RECORD_EMBRACE = REGISTRY.register("record.embrace", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "record.embrace")));
-    public static final RegistryObject<SoundEvent> RECORD_THESIS = REGISTRY.register("record.thesis", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "record.thesis")));
-    public static final RegistryObject<SoundEvent> RECORD_TRAVELER = REGISTRY.register("record.traveler", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "record.traveler")));
 }

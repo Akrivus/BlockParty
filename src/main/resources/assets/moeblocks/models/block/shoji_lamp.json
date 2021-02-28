@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/cube_column",
-  "textures": {
-    "end": "moeblocks:block/shoji_lamp_top",
-    "side": "moeblocks:block/shoji_lamp"
-  }
-}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "moeblocks:block/shoji_lantern_top",
+    "side": "moeblocks:block/shoji_lantern"
+  }
+}

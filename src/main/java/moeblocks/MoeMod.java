@@ -3,6 +3,7 @@ package moeblocks;
 import moeblocks.init.*;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -15,13 +16,19 @@ import java.util.Calendar;
 
 @Mod(MoeMod.ID)
 public class MoeMod {
-    public static final String VERSION = "21.1.10";
+    public static final String VERSION = "21.2.27";
     public static final String ID = "moeblocks";
     public static final SimpleChannel CHANNEL = MoeMessages.init(new ResourceLocation(MoeMod.ID));
     public static final ItemGroup ITEMS = new ItemGroup(MoeMod.ID) {
         @Override
         public ItemStack createIcon() {
             return new ItemStack(MoeItems.MOE_DIE.get());
+        }
+
+        @Override
+        public void fill(NonNullList<ItemStack> items) {
+            super.fill(items);
+            items.sort(MoeItems::compare);
         }
     };
     

@@ -1,0 +1,7 @@
+{
+  "parent": "moeblocks:block/calligraphy_scroll",
+  "textures": {
+    "body": "moeblocks:block/cyan_calligraphy_scroll",
+    "icon": "moeblocks:block/icon_midnight"
+  }
+}

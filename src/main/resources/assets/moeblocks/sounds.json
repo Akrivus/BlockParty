@@ -440,23 +440,5 @@
     "sounds": [
       "moeblocks:item/yearbook/remove_page"
     ]
-  },
-  "record.embrace": {
-    "stream": true,
-    "sounds": [
-      "moeblocks:record/embrace"
-    ]
-  },
-  "record.thesis": {
-    "stream": true,
-    "sounds": [
-      "moeblocks:record/thesis"
-    ]
-  },
-  "record.traveler": {
-    "stream": true,
-    "sounds": [
-      "moeblocks:record/traveler"
-    ]
   }
 }

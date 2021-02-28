@@ -3,6 +3,7 @@ package moeblocks.item;
 import moeblocks.MoeMod;
 import moeblocks.automata.state.enums.Dere;
 import moeblocks.entity.MoeEntity;
+import moeblocks.util.sort.ISortableItem;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemUseContext;
@@ -11,7 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
-public class MoeSpawnItem extends Item {
+public class MoeSpawnItem extends Item implements ISortableItem {
     
     public MoeSpawnItem() {
         super(new Properties().group(MoeMod.ITEMS));
@@ -32,5 +33,10 @@ public class MoeSpawnItem extends Item {
             player.sendStatusMessage(new TranslationTextComponent("item.moeblocks.moe_spawn_egg.error", name), true);
             return ActionResultType.FAIL;
         }
+    }
+
+    @Override
+    public int getSortOrder() {
+        return 1;
     }
 }

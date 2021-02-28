@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "moeblocks:block/purple_midnight_calligraphy_scroll",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "moeblocks:block/purple_midnight_calligraphy_scroll",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "moeblocks:block/purple_midnight_calligraphy_scroll",
+      "y": 0
+    },
+    "facing=west": {
+      "model": "moeblocks:block/purple_midnight_calligraphy_scroll",
+      "y": 90
+    }
+  }
+}

@@ -1,5 +1,6 @@
 package moeblocks.item;
 
+import moeblocks.util.sort.ISortableItem;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

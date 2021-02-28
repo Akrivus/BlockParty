@@ -32,6 +32,7 @@ public class MoeTriggers {
         register(0, Mood.WANDER, (npc) -> true);
         register(0, MoonPhase.FULL, (npc) -> true);
         register(0, PeriodOfTime.ATTACHED, (npc) -> true);
+        register(0, RibbonColor.NONE, (npc) -> true);
         register(0, StoryPhase.INTRODUCTION, (npc) -> true);
         register(0, StressState.RELAXED, (npc) -> true);
         register(0, TimeOfDay.MORNING, (npc) -> true);

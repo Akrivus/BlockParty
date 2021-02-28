@@ -5,6 +5,7 @@ import moeblocks.datingsim.DatingData;
 import moeblocks.entity.AbstractNPCEntity;
 import moeblocks.init.MoeMessages;
 import moeblocks.message.SOpenYearbook;
+import moeblocks.util.sort.ISortableItem;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -17,7 +18,7 @@ import net.minecraft.world.World;
 import java.util.List;
 import java.util.UUID;
 
-public class YearbookItem extends Item {
+public class YearbookItem extends Item implements ISortableItem {
     public YearbookItem() {
         super(new Properties().group(MoeMod.ITEMS));
     }
@@ -43,5 +44,10 @@ public class YearbookItem extends Item {
         List<UUID> npcs = DatingData.get(player.world, player.getUniqueID()).getNPCs();
         MoeMessages.send(player, new SOpenYearbook(npcs, uuid == null ? npcs.get(0) : uuid, hand));
         return ActionResultType.SUCCESS;
+    }
+
+    @Override
+    public int getSortOrder() {
+        return 2;
     }
 }
