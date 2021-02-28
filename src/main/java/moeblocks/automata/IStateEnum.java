@@ -15,7 +15,7 @@ public interface IStateEnum<E extends AbstractNPCEntity> {
     IStateEnum<E>[] getKeys();
 
     default IStateEnum<E> trigger(E npc) {
-        return MoeTriggers.find(this, npc).getState();
+        return npc.findTriggerFor(this).getState();
     }
 
     default void when(int priority, Predicate<E> function) {

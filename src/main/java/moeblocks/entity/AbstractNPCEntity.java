@@ -2,6 +2,7 @@ package moeblocks.entity;
 
 import moeblocks.automata.Automaton;
 import moeblocks.automata.IStateEnum;
+import moeblocks.automata.Trigger;
 import moeblocks.automata.state.enums.*;
 import moeblocks.datingsim.CacheNPC;
 import moeblocks.datingsim.DatingData;
@@ -14,10 +15,7 @@ import moeblocks.entity.ai.*;
 import moeblocks.entity.ai.attack.BasicAttackGoal;
 import moeblocks.entity.ai.items.ConsumeGoal;
 import moeblocks.entity.ai.target.RevengeTarget;
-import moeblocks.init.MoeConvos;
-import moeblocks.init.MoeItems;
-import moeblocks.init.MoeMessages;
-import moeblocks.init.MoeTags;
+import moeblocks.init.*;
 import moeblocks.message.SCloseDialogue;
 import moeblocks.message.SOpenDialogue;
 import moeblocks.util.ChunkScheduler;
@@ -68,6 +66,7 @@ import net.minecraftforge.common.util.ITeleporter;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public abstract class AbstractNPCEntity extends CreatureEntity {
     public static final DataParameter<Optional<UUID>> GLOBAL_UUID = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.OPTIONAL_UNIQUE_ID);
@@ -90,6 +89,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
     public static final DataParameter<Float> SATURATION = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
     public static final DataParameter<Float> STRESS = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
     public HashMap<Class<? extends IStateEnum>, Automaton> states;
+    public HashMap<Class<? extends IStateEnum>, List<Trigger>> triggers;
     private final Queue<Consumer<AbstractNPCEntity>> nextTickOps;
     private final boolean isAutomatonReady;
     private PlayerEntity playerInteracted;
@@ -115,6 +115,7 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
         this.nextTickOps = new LinkedList<>();
         this.stepHeight = 1.0F;
         this.states = new HashMap<>();
+        this.triggers = new HashMap<>(MoeTriggers.all());
         this.registerStates();
         this.isAutomatonReady = true;
     }
@@ -1298,5 +1299,13 @@ public abstract class AbstractNPCEntity extends CreatureEntity {
 
     public CompoundNBT getExtraBlockData() {
         return new CompoundNBT();
+    }
+
+    public Trigger findTriggerFor(IStateEnum<? extends AbstractNPCEntity> state) {
+        List<Trigger> triggers = this.triggers.getOrDefault(state.getClass(), new ArrayList<>());
+        triggers = triggers.stream().filter((trigger) -> trigger.fire(this)).collect(Collectors.toList());
+        triggers.sort((one, two) -> -Integer.compare(one.getPriority(), two.getPriority()));
+        if (triggers.isEmpty()) { return new Trigger(0, this.getState(state), (npc) -> true); }
+        return triggers.get(0);
     }
 }

@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 public class MoeTriggers {
     private static final Map<Class<? extends IStateEnum>, List<Trigger>> REGISTRY = new HashMap<>();
-    private static boolean isInitialized = false;
 
     public static void registerTriggers() {
         register(0, Animation.DEFAULT, (npc) -> true);
@@ -40,28 +39,19 @@ public class MoeTriggers {
         CupSize.registerTriggers();
         Emotion.registerTriggers();
         Mood.registerTriggers();
-        MoeTriggers.isInitialized = true;
     }
 
-    public static List<Trigger> registry(IStateEnum state) {
-        List<Trigger> triggers = REGISTRY.getOrDefault(state.getClass(), new ArrayList<>());
-        triggers.sort((one, two) -> -Integer.compare(one.getPriority(), two.getPriority()));
-        return triggers;
+    public static Map<Class<? extends IStateEnum>, List<Trigger>> all() {
+        return REGISTRY;
     }
 
     public static <E extends AbstractNPCEntity> void register(int priority, IStateEnum state, Predicate<E> function) {
-        if (MoeTriggers.isInitialized) {
-            System.out.printf("Attempted post-init addition of key '%s'", Trans.late(state.getTranslationKey()));
-        } else {
-            List<Trigger> triggers = registry(state);
-            triggers.add(new Trigger(priority, state, function));
-            REGISTRY.put(state.getClass(), triggers);
-        }
+        List<Trigger> triggers = getTriggersFor(state);
+        triggers.add(new Trigger(priority, state, function));
+        REGISTRY.put(state.getClass(), triggers);
     }
 
-    public static Trigger find(IStateEnum state, AbstractNPCEntity applicant) {
-        List<Trigger> triggers = registry(state).stream().filter((trigger) -> trigger.fire(applicant)).collect(Collectors.toList());
-        if (triggers.isEmpty()) { return new Trigger(0, applicant.getState(state), (npc) -> true); }
-        return triggers.get(0);
+    protected static List<Trigger> getTriggersFor(IStateEnum state) {
+        return REGISTRY.getOrDefault(state.getClass(), new ArrayList<>());
     }
 }
