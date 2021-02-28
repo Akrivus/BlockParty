@@ -19,7 +19,7 @@ public class PaperLanternBlock extends WaypointBlock {
     }
 
     public PaperLanternBlock(Properties properties, RibbonColor color) {
-        super(properties, color);
+        this(properties, color, null);
     }
 
     @Override
