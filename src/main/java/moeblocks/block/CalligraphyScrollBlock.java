@@ -37,7 +37,7 @@ public class CalligraphyScrollBlock extends WaypointBlock {
 
     @Override
     public void neighborChanged(BlockState state, World world, BlockPos pos, Block block, BlockPos neighbor, boolean isMoving) {
-        BlockPos behind = pos.offset(state.get(FACING).getOpposite());
+        BlockPos behind = pos.offset(state.get(FACING));
         if (world.isAirBlock(behind)) {
             world.destroyBlock(pos, true);
         }
