@@ -7,7 +7,7 @@ import net.minecraft.item.Item;
 
 public class BentoBoxItem extends Item implements ISortableItem {
     private static final Food FOOD = new Food.Builder().hunger(11).saturation(1.9F).build();
-    
+
     public BentoBoxItem() {
         super(new Properties().group(MoeMod.ITEMS).food(FOOD));
     }

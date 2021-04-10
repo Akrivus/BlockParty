@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "up": "moeblocks:block/writing_table_top",
+    "down": "moeblocks:block/writing_table_bottom",
+    "north": "moeblocks:block/writing_table_north",
+    "east": "moeblocks:block/writing_table_east",
+    "south": "moeblocks:block/writing_table_south",
+    "west": "moeblocks:block/writing_table_west",
+    "particle": "#up"
+  }
+}

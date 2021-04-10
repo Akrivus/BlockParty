@@ -1,7 +1,7 @@
 package moeblocks.item;
 
 import moeblocks.MoeMod;
-import moeblocks.datingsim.DatingData;
+import moeblocks.init.MoeData;
 import moeblocks.init.MoeMessages;
 import moeblocks.message.SOpenCellPhone;
 import moeblocks.util.sort.ISortableItem;
@@ -16,11 +16,11 @@ public class CellPhoneItem extends Item implements ISortableItem {
     public CellPhoneItem() {
         super(new Properties().group(MoeMod.ITEMS));
     }
-    
+
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
         if (world.isRemote()) { return ActionResult.resultPass(player.getHeldItem(hand)); }
-        MoeMessages.send(player, new SOpenCellPhone(DatingData.get(player.world, player.getUniqueID()).getNPCs(), hand));
+        MoeMessages.send(player, new SOpenCellPhone(MoeData.get(world).byPlayer.get(player.getUniqueID()), hand));
         return ActionResult.resultSuccess(player.getHeldItem(hand));
     }
 

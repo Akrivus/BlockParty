@@ -1,95 +1,49 @@
 package moeblocks.automata;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import moeblocks.client.model.IRiggableModel;
 import moeblocks.entity.AbstractNPCEntity;
+import net.minecraft.nbt.CompoundNBT;
 
-import java.util.function.Function;
+import java.util.HashMap;
+import java.util.Map;
 
-public class Automaton<E extends AbstractNPCEntity> {
-    protected final E applicant;
-    protected final Function<E, IStateEnum<E>> generator;
+public class Automaton {
+    protected final AbstractNPCEntity applicant;
+    protected final Map<Condition, Integer> timeouts = new HashMap<>();
     protected IState state;
-    protected IStateEnum<E> key;
-    private boolean isServerOnly = true;
-    private boolean canUpdate = true;
 
-    public Automaton(E applicant, Function<E, IStateEnum<E>> generator) {
+    public Automaton(AbstractNPCEntity applicant) {
         this.applicant = applicant;
-        this.generator = generator;
-    }
-
-    public Automaton(E applicant, IStateEnum<E> initial) {
-        this(applicant, (npc) -> initial);
-    }
-    
-    public Automaton setCanRunOnClient() {
-        this.isServerOnly = false;
-        return this;
-    }
-    
-    public Automaton setCanUpdate(boolean updatable) {
-        this.canUpdate = updatable;
-        return this;
-    }
-    
-    public Automaton start() {
-        this.fromKey(this.generator.apply(this.applicant));
-        return this;
-    }
-    
-    public boolean update() {
-        if (this.isBlocked()) { return false; }
-        if (this.state.canClear(this.applicant)) {
-            return this.setNextState();
-        } else if (this.canUpdate) {
-            this.state.tick(this.applicant);
-        }
-        return this.canUpdate;
-    }
-    
-    public boolean setNextState() {
-        return this.setNextState(this.generator.apply(this.applicant));
-    }
-
-    public boolean setNextState(IStateEnum<E> key) {
-        return this.setNextState(key, false);
-    }
-
-    public boolean setNextState(IStateEnum<E> key, boolean forced) {
-        if (this.state.canClear(this.applicant) || forced) {
-            this.state.clear(this.applicant);
-            this.fromKey(key);
-            return true;
-        }
-        return false;
-    }
-    
-    private boolean isBlocked() {
-        return this.applicant.isRemote() && this.isServerOnly;
-    }
-    
-    public IStateEnum<E> getKey() {
-        return this.key;
-    }
-    
-    public void fromKey(IStateEnum<E> key) {
-        if (this.key != key) {
-            this.state = (this.key = key).getState(this.applicant);
-            if (this.isBlocked()) { return; }
-            this.state.apply(this.applicant);
+        for (Condition condition : Condition.values()) {
+            this.timeouts.put(condition, 0);
         }
     }
 
-    public void fromKey(String key) {
-        this.fromKey(this.key.fromKey(key));
+    public void read(CompoundNBT compound) {
+        for (Condition condition : Condition.values()) {
+            this.timeouts.put(condition, compound.getInt(condition.name()));
+        }
     }
-    
-    public void render(MatrixStack stack, float partialTickTime) {
-        this.state.render(this.applicant, stack, partialTickTime);
+
+    public void write(CompoundNBT compound) {
+        for (Condition condition : Condition.values()) {
+            compound.putInt(condition.name(), this.timeouts.get(condition));
+        }
     }
-    
-    public void setRotationAngles(IRiggableModel model, float limbSwing, float limbSwingAmount, float ageInTicks) {
-        this.state.setRotationAngles(model, this.applicant, limbSwing, limbSwingAmount, ageInTicks);
+
+    public void tick(AbstractNPCEntity npc) {
+        if (this.state == null) { this.reset(npc); }
+        if (this.state != null && this.state.isDone(npc)) {
+            this.state.terminate(npc);
+            this.state = this.state.transfer(npc);
+        }
+    }
+
+    public void reset(AbstractNPCEntity npc) {
+        for (Condition condition : Condition.values()) {
+            if (this.timeouts.get(condition) < 0) { continue; }
+            if (condition.isTrue(npc)) {
+                this.state = condition.getStemState();
+            }
+        }
     }
 }

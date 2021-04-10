@@ -39,14 +39,14 @@ public class WisteriaVineTipBlock extends AbstractTopPlantBlock {
     }
 
     @Override
-    protected Block getBodyPlantBlock() {
-        return MoeBlocks.WISTERIA_VINE_BODY.get();
-    }
-
-    @Override
     public boolean isValidPosition(BlockState state, IWorldReader worldIn, BlockPos pos) {
         BlockPos up = pos.up();
         BlockState ceiling = worldIn.getBlockState(up);
-        return ceiling.isIn(MoeTags.Blocks.WISTERIA_BLOCKS);
+        return ceiling.isIn(MoeTags.Blocks.WISTERIA);
+    }
+
+    @Override
+    protected Block getBodyPlantBlock() {
+        return MoeBlocks.WISTERIA_VINE_BODY.get();
     }
 }

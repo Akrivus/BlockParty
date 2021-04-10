@@ -12,8 +12,6 @@ import net.minecraft.client.renderer.entity.LivingRenderer;
 import java.util.function.Consumer;
 
 public abstract class SpecialBlockOverlay {
-    public abstract void render(MoeModel model, MoeEntity entity, MatrixStack stack, IRenderTypeBuffer buffer, int packedLight, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch);
-
     protected MatrixStack renderBlock(MoeEntity entity, BlockState block, MatrixStack stack, IRenderTypeBuffer buffer, int packedLight, Consumer<MatrixStack> consumer) {
         stack.push();
         consumer.accept(stack);
@@ -33,4 +31,6 @@ public abstract class SpecialBlockOverlay {
     protected Minecraft getMinecraft() {
         return Minecraft.getInstance();
     }
+
+    public abstract void render(MoeModel model, MoeEntity entity, MatrixStack stack, IRenderTypeBuffer buffer, int packedLight, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch);
 }

@@ -6,10 +6,12 @@ buildscript {
   }
   dependencies {
     classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+    classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow', version: '4.0.4'
   }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'maven-publish'
 
 version = new Date().format('yy.MM.dd')
@@ -40,9 +42,21 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
   minecraft 'net.minecraftforge:forge:1.16.5-36.0.4'
+  shadow 'org.xerial:sqlite-jdbc:3.34.0'
+  implementation 'org.xerial:sqlite-jdbc:3.34.0'
 }
 
-jar.finalizedBy('reobfJar')
+shadowJar {
+  archiveName = "${archivesBaseName}-${version}.jar"
+  configurations = [project.configurations.shadow]
+}
+
+reobf {
+  shadowJar { }
+}
+
+tasks.build.dependsOn reobfShadowJar
+jar.finalizedBy('reobfShadowJar')
 
 jar {
   manifest {

@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#moeblocks:sakura_logs",
+    "moeblocks:sakura_planks",
+    "moeblocks:sakura_slab",
+    "moeblocks:sakura_stairs",
+    "moeblocks:sakura_fence"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "moeblocks:block/hanging_scroll",
+  "textures": {
+    "symbol": "moeblocks:block/symbol_night",
+    "body": "moeblocks:block/hanging_scroll"
+  }
+}

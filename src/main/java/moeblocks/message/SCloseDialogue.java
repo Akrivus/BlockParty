@@ -10,17 +10,17 @@ public class SCloseDialogue extends AbstractMessage {
     public SCloseDialogue() {
         super();
     }
-    
+
     public SCloseDialogue(PacketBuffer buffer) {
         super(buffer);
     }
-    
+
     @Override
     public void encode(PacketBuffer buffer) { }
-    
+
     @Override
     public void handle(NetworkEvent.Context context, ServerPlayerEntity player) { }
-    
+
     @Override
     public void handle(NetworkEvent.Context context, Minecraft minecraft) {
         if (minecraft.currentScreen instanceof DialogueScreen) { minecraft.displayGuiScreen(null); }

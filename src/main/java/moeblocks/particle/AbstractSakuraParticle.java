@@ -1,18 +1,10 @@
 package moeblocks.particle;
 
-import moeblocks.MoeMod;
-import moeblocks.init.MoeBlocks;
-import moeblocks.init.MoeParticles;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.*;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.particle.IAnimatedSprite;
+import net.minecraft.client.particle.IParticleRenderType;
+import net.minecraft.client.particle.SpriteTexturedParticle;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.particles.BasicParticleType;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.RegistryObject;
 
 public class AbstractSakuraParticle extends SpriteTexturedParticle {
@@ -30,11 +22,6 @@ public class AbstractSakuraParticle extends SpriteTexturedParticle {
     }
 
     @Override
-    public IParticleRenderType getRenderType() {
-        return IParticleRenderType.PARTICLE_SHEET_OPAQUE;
-    }
-
-    @Override
     public void tick() {
         this.prevPosX = this.posX;
         this.prevPosY = this.posY;
@@ -49,5 +36,10 @@ public class AbstractSakuraParticle extends SpriteTexturedParticle {
             this.motionY *= 0.98F;
             this.motionZ *= 0.98F;
         }
+    }
+
+    @Override
+    public IParticleRenderType getRenderType() {
+        return IParticleRenderType.PARTICLE_SHEET_OPAQUE;
     }
 }

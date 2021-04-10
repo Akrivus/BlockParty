@@ -1,7 +1,0 @@
-{
-  "parent": "moeblocks:block/calligraphy_scroll",
-  "textures": {
-    "body": "moeblocks:block/magenta_calligraphy_scroll",
-    "icon": "moeblocks:block/icon_blank"
-  }
-}

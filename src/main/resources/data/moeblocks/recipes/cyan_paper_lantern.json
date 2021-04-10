@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "_",
+    "O"
+  ],
+  "key": {
+    "_": {
+      "item": "minecraft:cyan_dye"
+    },
+    "O": {
+      "item": "moeblocks:shoji_lantern"
+    }
+  },
+  "result": {
+    "item": "moeblocks:cyan_paper_lantern",
+    "count": 1
+  }
+}

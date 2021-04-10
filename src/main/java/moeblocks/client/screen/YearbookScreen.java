@@ -4,9 +4,8 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import moeblocks.MoeMod;
-import moeblocks.automata.state.enums.*;
+import moeblocks.client.animation.Animation;
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.init.MoeEntities;
 import moeblocks.init.MoeMessages;
 import moeblocks.init.MoeSounds;
 import moeblocks.message.CRemovePage;
@@ -43,46 +42,53 @@ public class YearbookScreen extends ControllerScreen {
     private Button buttonPreviousPage;
     private Button buttonNextPage;
     private Button buttonRemovePage;
-    
-    public YearbookScreen(List<UUID> npcs, UUID uuid) {
-        super(npcs, uuid, 146, 187);
-        this.getNPC(uuid);
+
+    public YearbookScreen(List<UUID> npcs, UUID id) {
+        super(npcs, id, 146, 187);
+        this.getNPC(id);
     }
-    
-    @Override
-    public boolean isPauseScreen() {
-        return false;
-    }
-    
+
     @Override
     public void setNPC() {
-        this.entity = this.npc.clone(this.minecraft, MoeEntities.MOE.get());
+        this.entity = this.npc.getClientEntity(this.minecraft);
         this.entity.setAnimation(Animation.YEARBOOK);
-        this.name = this.entity.getFullName();
+        this.name = this.entity.getProfessionName().getString();
         this.updateButtons();
         this.stats[0] = String.format("%.0f", this.entity.getHealth());
-        this.stats[1] = String.format("%.0f", this.entity.getFoodLevel());
-        this.stats[2] = String.format("%.0f", this.entity.getLove());
+        this.stats[1] = String.format("%.0f", this.entity.getFullness());
+        this.stats[2] = String.format("%.0f", this.entity.getLoyalty());
         this.stats[3] = String.format("%.0f", this.entity.getStress());
         this.lines[0] = Trans.late(this.entity.getDere().getTranslationKey());
         this.lines[1] = Trans.late(this.entity.getBloodType().getTranslationKey());
         this.lines[2] = String.format(Trans.late("debug.moeblocks.age"), this.entity.getAgeInYears());
-        if (this.npc.isEstranged()) {
-            this.lines[3] = Trans.late(StoryPhase.ESTRANGED.getTranslationKey());
+        if (this.npc.isEstrangedFrom(this.getPlayer())) {
+            this.lines[3] = Trans.late("debug.moeblocks.storyphase.estranged");
         } else if (this.npc.isDead()) {
-            this.lines[3] = Trans.late(StoryPhase.DEAD.getTranslationKey());
+            this.lines[3] = Trans.late("debug.moeblocks.storyphase.dead");
         } else {
-            this.lines[3] = Trans.late(this.entity.getStoryPhase().getTranslationKey());
+            this.lines[3] = Trans.late("debug.moeblocks.storyphase.introduction");
         }
     }
-    
+
+    private void updateButtons() {
+        if (this.npcs.isEmpty()) {
+            this.getPlayer().sendStatusMessage(new TranslationTextComponent("gui.moeblocks.error.empty"), true);
+            this.closeScreen();
+        } else {
+            this.page = String.format(Trans.late("gui.moeblocks.label.page"), this.index + 1, this.count);
+            this.buttonNextPage.visible = this.index + 1 < this.count;
+            this.buttonPreviousPage.visible = this.index - 1 >= 0;
+            this.buttonRemovePage.visible = this.npc.isDeadOrEstrangedFrom(this.getPlayer());
+        }
+    }
+
     @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         if (this.npc == null) { return; }
         this.renderBackground(stack);
         this.renderPortrait(stack);
         this.renderEntity(this.getAbsoluteCenter(-3), 90, 40.0F, this.entity);
-        if (this.npc.isRemovable()) { this.renderOverlay(stack); }
+        if (this.npc.isDeadOrEstrangedFrom(this.getPlayer())) { this.renderOverlay(stack); }
         this.renderBook(stack);
         this.font.drawString(stack, this.name, this.getCenter(this.font.getStringWidth(this.name)) + 3, 91, 0);
         this.font.drawString(stack, this.page, this.getCenter(this.font.getStringWidth(this.page)), 185, 0);
@@ -95,7 +101,7 @@ public class YearbookScreen extends ControllerScreen {
         super.render(stack, mouseX, mouseY, partialTicks);
         this.renderTooltips(stack, mouseX, mouseY);
     }
-    
+
     public void renderTooltips(MatrixStack stack, int mouseX, int mouseY) {
         List<ITextComponent> text = new ArrayList<>();
         if (this.buttonRemovePage.isHovered()) {
@@ -103,36 +109,38 @@ public class YearbookScreen extends ControllerScreen {
         }
         if (102 < mouseY && mouseY < 112) {
             if (this.getAbsoluteCenter(50) < mouseX && mouseX < this.getAbsoluteCenter(24)) {
-                text.add(new StringTextComponent(Trans.late(this.entity.getState(HealthState.class).getTranslationKey())));
+                //text.add(new StringTextComponent(Trans.late(this.entity.getState(HealthState.class).getTranslationKey())));
             }
             if (this.getAbsoluteCenter(24) < mouseX && mouseX < this.getAbsoluteCenter(2)) {
-                text.add(new StringTextComponent(Trans.late(this.entity.getState(HungerState.class).getTranslationKey())));
+                //text.add(new StringTextComponent(Trans.late(this.entity.getState(HungerState.class).getTranslationKey())));
             }
             if (this.getAbsoluteCenter(2) < mouseX && mouseX < this.getAbsoluteCenter(-24)) {
-                text.add(new StringTextComponent(Trans.late(this.entity.getState(LoveState.class).getTranslationKey())));
+                //text.add(new StringTextComponent(Trans.late(this.entity.getState(LoveState.class).getTranslationKey())));
             }
             if (this.getAbsoluteCenter(-24) < mouseX && mouseX < this.getAbsoluteCenter(-50)) {
-                text.add(new StringTextComponent(Trans.late(this.entity.getState(StressState.class).getTranslationKey())));
+                //text.add(new StringTextComponent(Trans.late(this.entity.getState(StressState.class).getTranslationKey())));
             }
         }
         if (text.size() > 0) {
             this.renderTooltip(stack, Lists.transform(text, ITextComponent::func_241878_f), mouseX, mouseY);
         }
     }
-    
+
     public void renderPortrait(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(YEARBOOK_TEXTURES);
         this.blit(stack, this.getCenter(60) + 3, 27, 161, 25, 58, 58);
     }
-    
+
     public void renderOverlay(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(YEARBOOK_TEXTURES);
         if (this.npc.isDead()) { this.blit(stack, this.getCenter(60) + 2, 26, 160, 155, 60, 60); }
-        if (this.npc.isEstranged()) { this.blit(stack, this.getCenter(60) + 2, 26, 160, 95, 60, 60); }
+        if (this.npc.isEstrangedFrom(this.getPlayer())) {
+            this.blit(stack, this.getCenter(60) + 2, 26, 160, 95, 60, 60);
+        }
     }
-    
+
     public void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
         if (entity == null) { return; }
         RenderSystem.pushMatrix();
@@ -150,13 +158,13 @@ public class YearbookScreen extends ControllerScreen {
         renderer.setRenderShadow(true);
         RenderSystem.popMatrix();
     }
-    
+
     public void renderBook(MatrixStack stack) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(YEARBOOK_TEXTURES);
         this.blit(stack, this.getCenter(146), 2, 0, 0, 146, 187);
     }
-    
+
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (super.keyPressed(keyCode, scanCode, modifiers)) { return true; }
@@ -173,55 +181,48 @@ public class YearbookScreen extends ControllerScreen {
             return false;
         }
     }
-    
+
     @Override
     protected void init() {
         this.addButton(new Button(this.getCenter(136), 196, 136, 20, DialogTexts.GUI_DONE, (button) -> this.minecraft.displayGuiScreen(null)));
         this.buttonNextPage = this.addButton(new TurnPageButton(this.getCenter(146) + 122, 51, 1, (button) -> {
-            if (this.index + 1 < this.count) { this.getNPC(this.npcs.get(this.index + 1)); }
+            if (this.index + 1 < this.count) { this.getNPC(this.index + 1); }
         }));
         this.buttonPreviousPage = this.addButton(new TurnPageButton(this.getCenter(146) + 21, 51, -1, (button) -> {
-            if (this.index - 1 >= 0) { this.getNPC(this.npcs.get(this.index - 1)); }
+            if (this.index - 1 >= 0) { this.getNPC(this.index - 1); }
         }));
         this.buttonRemovePage = this.addButton(new RemovePageButton(this.getCenter(146) + 115, 9, (button) -> {
-            MoeMessages.send(new CRemovePage(this.npc.getUUID()));
-            this.npcs.remove(this.npc.getUUID());
+            MoeMessages.send(new CRemovePage(this.npc.getID()));
+            this.npcs.remove(this.npc.getID());
             if (++this.index >= this.count) { --this.index; }
             if (this.index < 0) { this.index = 0; }
             if (this.npcs.isEmpty()) {
                 this.closeScreen();
             } else {
-                this.getNPC(this.npcs.get(this.index));
+                this.getNPC(this.index);
             }
         }));
     }
-    
-    private void updateButtons() {
-        if (this.npcs.isEmpty()) {
-            this.minecraft.player.sendStatusMessage(new TranslationTextComponent("gui.moeblocks.error.empty"), true);
-            this.closeScreen();
-        } else {
-            this.page = String.format(Trans.late("gui.moeblocks.label.page"), this.index + 1, this.count);
-            this.buttonNextPage.visible = this.index + 1 < this.count;
-            this.buttonPreviousPage.visible = this.index - 1 >= 0;
-            this.buttonRemovePage.visible = this.npc.isRemovable();
-        }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
     }
-    
+
     @OnlyIn(Dist.CLIENT)
     public class TurnPageButton extends Button {
         private final int delta;
-        
+
         public TurnPageButton(int x, int y, int delta, IPressable button) {
             super(x, y, 7, 10, StringTextComponent.EMPTY, button);
             this.delta = delta;
         }
-        
+
         @Override
         public void playDownSound(SoundHandler sound) {
             sound.play(SimpleSound.master(SoundEvents.ITEM_BOOK_PAGE_TURN, 1.0F));
         }
-        
+
         @Override
         public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -231,18 +232,18 @@ public class YearbookScreen extends ControllerScreen {
             this.blit(stack, this.x, this.y, x, y, 7, 10);
         }
     }
-    
+
     @OnlyIn(Dist.CLIENT)
     public class RemovePageButton extends Button {
         public RemovePageButton(int x, int y, IPressable button) {
             super(x, y, 18, 18, StringTextComponent.EMPTY, button);
         }
-        
+
         @Override
         public void playDownSound(SoundHandler sound) {
             sound.play(SimpleSound.master(MoeSounds.ITEM_YEARBOOK_REMOVE_PAGE.get(), 1.0F));
         }
-        
+
         @Override
         public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);

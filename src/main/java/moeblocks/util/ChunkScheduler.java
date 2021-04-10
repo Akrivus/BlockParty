@@ -10,26 +10,26 @@ import java.util.UUID;
 
 public class ChunkScheduler {
     private static final Map<UUID, ChunkScheduler> chunks = new LinkedHashMap<>();
-    
+
     private final World world;
     private final ChunkPos pos;
-    
+
     public ChunkScheduler(World world, ChunkPos pos) {
         this.world = world;
         this.pos = pos;
     }
-    
+
     public void despawn() {
         this.world.getChunkProvider().forceChunk(this.pos, false);
     }
-    
-    public static ChunkScheduler get(UUID uuid) {
-        return ChunkScheduler.chunks.get(uuid);
+
+    public static ChunkScheduler get(UUID id) {
+        return ChunkScheduler.chunks.get(id);
     }
-    
-    public static ServerWorld queue(UUID uuid, ServerWorld world, ChunkPos pos) {
+
+    public static ServerWorld queue(UUID id, ServerWorld world, ChunkPos pos) {
         if (world != null) {
-            ChunkScheduler.chunks.put(uuid, new ChunkScheduler(world, pos));
+            ChunkScheduler.chunks.put(id, new ChunkScheduler(world, pos));
             world.tickEnvironment(world.getChunk(pos.x, pos.z), 20);
             world.getChunkProvider().forceChunk(pos, true);
             return world;

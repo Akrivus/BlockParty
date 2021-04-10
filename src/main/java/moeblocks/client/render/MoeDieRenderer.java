@@ -15,17 +15,17 @@ import net.minecraftforge.fml.client.registry.IRenderFactory;
 public class MoeDieRenderer extends EntityRenderer<MoeDieEntity> implements IRenderFactory<MoeDieEntity> {
     private static final ResourceLocation DIE_TEXTURE = new ResourceLocation(MoeMod.ID, "textures/entity/moe_die.png");
     private final DieCubeModel<MoeDieEntity> model = new DieCubeModel<>();
-    
+
     public MoeDieRenderer(EntityRendererManager manager) {
         super(manager);
         this.shadowSize = 0.1F;
     }
-    
+
     @Override
     public EntityRenderer<MoeDieEntity> createRenderFor(EntityRendererManager manager) {
         return new MoeDieRenderer(manager);
     }
-    
+
     @Override
     public void render(MoeDieEntity die, float yaw, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffer, int packedLight) {
         stack.push();
@@ -37,7 +37,7 @@ public class MoeDieRenderer extends EntityRenderer<MoeDieEntity> implements IRen
         stack.pop();
         super.render(die, yaw, partialTicks, stack, buffer, packedLight);
     }
-    
+
     @Override
     public ResourceLocation getEntityTexture(MoeDieEntity entity) {
         return DIE_TEXTURE;

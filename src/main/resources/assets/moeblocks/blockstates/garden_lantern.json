@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=true": {
+      "model": "moeblocks:block/garden_lantern_lit"
+    },
+    "lit=false": {
+      "model": "moeblocks:block/garden_lantern"
+    }
+  }
+}

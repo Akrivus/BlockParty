@@ -21,11 +21,11 @@ public class MoeDieItem extends Item implements ISortableItem {
             return new MoeDieEntity(world, position.getX(), position.getY(), position.getZ());
         }
     };
-    
+
     public MoeDieItem() {
         super(new Item.Properties().group(MoeMod.ITEMS));
     }
-    
+
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
         if (world.isRemote) { return ActionResult.resultPass(player.getHeldItem(hand)); }

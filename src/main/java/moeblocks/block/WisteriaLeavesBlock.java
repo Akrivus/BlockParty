@@ -14,16 +14,16 @@ public class WisteriaLeavesBlock extends LeavesBlock {
     }
 
     @Override
+    public boolean ticksRandomly(BlockState state) {
+        return true;
+    }
+
+    @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         if (super.ticksRandomly(state)) {
             super.randomTick(state, world, pos, random);
         } else if (world.isAirBlock(pos.down())) {
             world.setBlockState(pos.down(), MoeBlocks.WISTERIA_VINE_TIP.get().getDefaultState());
         }
-    }
-
-    @Override
-    public boolean ticksRandomly(BlockState state) {
-        return true;
     }
 }

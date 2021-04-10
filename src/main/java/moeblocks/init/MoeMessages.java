@@ -18,15 +18,14 @@ import java.util.function.Predicate;
 public class MoeMessages {
     private static final Predicate<String> version = (version) -> version.equals(MoeMod.getVersion());
     private static int messageID = 0;
-    
+
     public static SimpleChannel init(ResourceLocation name) {
         return NetworkRegistry.ChannelBuilder.named(name).clientAcceptedVersions(version).serverAcceptedVersions(version).networkProtocolVersion(MoeMod::getVersion).simpleChannel();
     }
-    
+
     public static void register() {
         register(CDialogueClose.class, CDialogueClose::new);
         register(CDialogueRespond.class, CDialogueRespond::new);
-        register(CNPCQuery.class, CNPCQuery::new);
         register(CNPCRemove.class, CNPCRemove::new);
         register(CNPCRequest.class, CNPCRequest::new);
         register(CNPCTeleport.class, CNPCTeleport::new);
@@ -38,17 +37,17 @@ public class MoeMessages {
         register(SOpenDialogue.class, SOpenDialogue::new);
         register(SOpenYearbook.class, SOpenYearbook::new);
     }
-    
+
     public static <T extends AbstractMessage> void register(Class<T> packet, Function<PacketBuffer, T> con) {
         MoeMod.CHANNEL.messageBuilder(packet, ++MoeMessages.messageID).decoder(con).encoder(AbstractMessage::prepare).consumer(AbstractMessage::consume).add();
     }
-    
+
     public static void send(PlayerEntity player, AbstractMessage message) {
         if (player instanceof AbstractClientPlayerEntity) { return; }
         NetworkManager network = ((ServerPlayerEntity) player).connection.getNetworkManager();
         MoeMod.CHANNEL.sendTo(message, network, NetworkDirection.PLAY_TO_CLIENT);
     }
-    
+
     public static void send(AbstractMessage message) {
         MoeMod.CHANNEL.sendToServer(message);
     }

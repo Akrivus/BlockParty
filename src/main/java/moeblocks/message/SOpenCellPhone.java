@@ -14,16 +14,16 @@ public class SOpenCellPhone extends SOpenController {
     public SOpenCellPhone(List<UUID> npcs, Hand hand) {
         super(npcs, UUID.randomUUID(), hand);
     }
-    
+
     public SOpenCellPhone(PacketBuffer buffer) {
         super(buffer);
     }
-    
+
     @Override
     protected Item getItem() {
         return MoeItems.CELL_PHONE.get();
     }
-    
+
     @Override
     protected ControllerScreen getScreen() {
         return new CellPhoneScreen(this.npcs);

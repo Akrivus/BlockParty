@@ -1,23 +1,19 @@
 package moeblocks.init;
 
-import moeblocks.automata.state.enums.BlockDataState;
-import moeblocks.datingsim.convo.Conversation;
-import moeblocks.datingsim.convo.Scene;
-import moeblocks.datingsim.convo.Transition;
-import moeblocks.datingsim.convo.enums.Interaction;
-import moeblocks.datingsim.convo.enums.Response;
-import moeblocks.entity.AbstractNPCEntity;
-import net.minecraft.block.Blocks;
+import moeblocks.convo.Conversation;
+import moeblocks.convo.Scene;
+import moeblocks.convo.Transition;
+import moeblocks.convo.enums.Interaction;
+import moeblocks.convo.enums.Response;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MoeConvos {
     private static final List<Conversation> REGISTRY = new ArrayList<>();
 
     public static void registerConvos() {
-        register(new Conversation(Interaction.RIGHT_CLICK, (npc) -> npc.hasState(BlockDataState.DEFAULT), new Scene((player, npc) -> {
+        register(new Conversation(Interaction.RIGHT_CLICK, (npc) -> true, new Scene((player, npc) -> {
             npc.say(player, String.format("Oh, hi %s, would you like me to follow you?", player.getScoreboardName()), Response.YES, Response.NO, Response.CHEST, Response.CONVO);
         }, new Transition(Response.YES, new Scene((player, npc) -> {
             npc.say(player, "Okay, I'll be right behind you.");
@@ -26,18 +22,9 @@ public class MoeConvos {
             npc.say(player, "Okay, I'll be right here for you.");
             npc.setFollowing(false);
         })))));
-        register(new Conversation(Interaction.STARE, (npc) -> npc.asMoe((moe) -> moe.isBlock(Blocks.BARREL)), new Scene((player, npc) -> {
-            npc.say(player, "I see you staring at me, and the barrel stays on.");
-        })));
     }
 
     public static void register(Conversation conversation) {
         REGISTRY.add(conversation);
-    }
-    
-    public static Scene find(Interaction interaction, AbstractNPCEntity npc) {
-        List<Conversation> convos = REGISTRY.stream().filter((convo) -> convo.matches(interaction, npc)).collect(Collectors.toList());
-        if (convos.isEmpty()) { return null; }
-        return convos.get(npc.world.rand.nextInt(convos.size())).getScene();
     }
 }

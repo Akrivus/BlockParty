@@ -31,7 +31,7 @@ public class MoeMod {
             items.sort(MoeItems::compare);
         }
     };
-    
+
     public MoeMod() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(MoeParticles::registerParticleFactories);
@@ -42,6 +42,7 @@ public class MoeMod {
         MoeItems.REGISTRY.register(bus);
         MoeParticles.REGISTRY.register(bus);
         MoeSounds.REGISTRY.register(bus);
+        MoeTileEntities.REGISTRY.register(bus);
         MoeMessages.register();
     }
 
@@ -60,19 +61,18 @@ public class MoeMod {
         MoeOverrides.registerAliases();
         MoeOverrides.registerPropertyOverrides();
         MoeOverrides.registerStepSounds();
-        MoeTriggers.registerTriggers();
     }
-    
+
     public static String getVersion() {
         return VERSION;
     }
 
-    public static Calendar getCalendar() {
-        return Calendar.getInstance();
-    }
-    
     public static boolean isChristmas() {
         return getCalendar().get(2) + 1 == 12 && getCalendar().get(5) >= 24 && getCalendar().get(5) <= 26;
+    }
+
+    public static Calendar getCalendar() {
+        return Calendar.getInstance();
     }
 
     public static boolean isHalloween() {

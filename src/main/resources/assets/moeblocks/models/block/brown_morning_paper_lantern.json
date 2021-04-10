@@ -1,7 +1,0 @@
-{
-  "parent": "moeblocks:block/paper_lantern",
-  "textures": {
-    "body": "moeblocks:block/brown_paper_lantern",
-    "icon": "moeblocks:block/icon_morning"
-  }
-}

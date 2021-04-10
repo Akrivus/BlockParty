@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "___",
+    "#i#",
+    "# #"
+  ],
+  "key": {
+    "_": {
+      "item": "minecraft:stone_slab"
+    },
+    "#": {
+      "item": "minecraft:stone"
+    },
+    "i": {
+      "item": "minecraft:torch"
+    }
+  },
+  "result": {
+    "item": "moeblocks:garden_lantern",
+    "count": 1
+  }
+}

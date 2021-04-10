@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "moeblocks:block/writing_table"
+    },
+    "facing=east": {
+      "model": "moeblocks:block/writing_table",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "moeblocks:block/writing_table",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "moeblocks:block/writing_table",
+      "y": 270
+    }
+  }
+}

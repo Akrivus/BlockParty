@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "moeblocks:block/blank_hanging_scroll",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "moeblocks:block/blank_hanging_scroll",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "moeblocks:block/blank_hanging_scroll",
+      "y": 0
+    },
+    "facing=west": {
+      "model": "moeblocks:block/blank_hanging_scroll",
+      "y": 90
+    }
+  }
+}

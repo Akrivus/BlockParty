@@ -1,0 +1,7 @@
+{
+  "parent": "moeblocks:block/paper_lantern",
+  "textures": {
+    "top": "moeblocks:block/light_blue_paper_lantern_top",
+    "body": "moeblocks:block/light_blue_paper_lantern"
+  }
+}

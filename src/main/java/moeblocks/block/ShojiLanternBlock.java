@@ -1,8 +1,7 @@
 package moeblocks.block;
 
-import moeblocks.automata.state.enums.RibbonColor;
-import moeblocks.automata.state.enums.TimeOfDay;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.material.MaterialColor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
@@ -11,7 +10,7 @@ import net.minecraft.world.IBlockReader;
 
 public class ShojiLanternBlock extends PaperLanternBlock {
     public ShojiLanternBlock(Properties properties) {
-        super(properties, RibbonColor.NONE);
+        super(properties, MaterialColor.PINK);
     }
 
     @Override

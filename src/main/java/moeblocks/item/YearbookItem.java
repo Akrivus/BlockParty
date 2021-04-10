@@ -1,8 +1,8 @@
 package moeblocks.item;
 
 import moeblocks.MoeMod;
-import moeblocks.datingsim.DatingData;
 import moeblocks.entity.AbstractNPCEntity;
+import moeblocks.init.MoeData;
 import moeblocks.init.MoeMessages;
 import moeblocks.message.SOpenYearbook;
 import moeblocks.util.sort.ISortableItem;
@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -22,27 +23,31 @@ public class YearbookItem extends Item implements ISortableItem {
     public YearbookItem() {
         super(new Properties().group(MoeMod.ITEMS));
     }
-    
+
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
         if (world.isRemote()) { return ActionResult.resultPass(player.getHeldItem(hand)); }
         return new ActionResult(this.openGui(player, hand, null), player.getHeldItem(hand));
     }
-    
+
     @Override
     public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
         if (player.world.isRemote()) { return ActionResultType.PASS; }
         if (entity instanceof AbstractNPCEntity) {
             AbstractNPCEntity npc = (AbstractNPCEntity) entity;
-            if (npc.getProtagonist().equals(player)) { return this.openGui(player, hand, npc.getUUID()); }
+            if (npc.getPlayer().equals(player)) { return this.openGui(player, hand, npc.getDatabaseID()); }
             return ActionResultType.SUCCESS;
         }
         return ActionResultType.FAIL;
     }
-    
-    private ActionResultType openGui(PlayerEntity player, Hand hand, UUID uuid) {
-        List<UUID> npcs = DatingData.get(player.world, player.getUniqueID()).getNPCs();
-        MoeMessages.send(player, new SOpenYearbook(npcs, uuid == null ? npcs.get(0) : uuid, hand));
+
+    private ActionResultType openGui(PlayerEntity player, Hand hand, UUID id) {
+        List<UUID> npcs = MoeData.get(player.world).byPlayer.get(player.getUniqueID());
+        if (npcs.isEmpty()) {
+            player.sendStatusMessage(new TranslationTextComponent("gui.moeblocks.error.empty"), true);
+        } else {
+            MoeMessages.send(player, new SOpenYearbook(npcs, id == null ? npcs.get(0) : id, hand));
+        }
         return ActionResultType.SUCCESS;
     }
 

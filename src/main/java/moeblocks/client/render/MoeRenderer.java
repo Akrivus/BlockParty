@@ -1,7 +1,7 @@
 package moeblocks.client.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import moeblocks.automata.state.enums.Animation;
+import moeblocks.client.animation.Animation;
 import moeblocks.client.model.MoeModel;
 import moeblocks.client.render.layer.MoeEmotionLayer;
 import moeblocks.client.render.layer.MoeGlowLayer;
@@ -22,7 +22,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 
 public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> implements IRenderFactory<MoeEntity> {
-    
+
     public MoeRenderer(EntityRendererManager manager) {
         super(manager, new MoeModel<>(), 0.25F);
         this.addLayer(new HeldItemLayer<>(this));
@@ -32,17 +32,17 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
         this.addLayer(new HeadLayer<>(this));
         this.addLayer(new MoeSpecialRenderer(this));
     }
-    
+
     @Override
     public MobRenderer<MoeEntity, MoeModel<MoeEntity>> createRenderFor(EntityRendererManager manager) {
         return new MoeRenderer(manager);
     }
-    
+
     @Override
     public ResourceLocation getEntityTexture(MoeEntity entity) {
-        return MoeOverrides.getNameOf(entity.getBlockData());
+        return MoeOverrides.getNameOf(entity.getExternalBlockState());
     }
-    
+
     @Override
     protected void renderName(MoeEntity entity, ITextComponent name, MatrixStack stack, IRenderTypeBuffer buffer, int packedLight) {
         if (entity.getAnimation() != Animation.YEARBOOK) {
@@ -63,15 +63,15 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
             stack.pop();
         }
     }
-    
+
     public String getHealth(MoeEntity entity) {
         return String.format("%d / %d", (int) entity.getHealth(), (int) entity.getMaxHealth());
     }
-    
+
     @Override
     public void preRenderCallback(MoeEntity entity, MatrixStack stack, float partialTickTime) {
         super.preRenderCallback(entity, stack, partialTickTime);
-        entity.states.forEach((state, machine) -> machine.render(stack, partialTickTime));
+        entity.getAnimation().render(entity, stack, partialTickTime);
         stack.scale(0.9375F, 0.9375F, 0.9375F);
         if (entity.getAnimation() != Animation.YEARBOOK) {
             stack.scale(entity.getScale(), entity.getScale(), entity.getScale());

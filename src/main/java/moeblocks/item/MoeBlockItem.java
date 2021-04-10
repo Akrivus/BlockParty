@@ -10,13 +10,13 @@ import net.minecraftforge.fml.RegistryObject;
 public class MoeBlockItem extends BlockItem implements ISortableItem {
     protected final int sortOrder;
 
+    public MoeBlockItem(RegistryObject<Block> block) {
+        this(block, 99);
+    }
+
     public MoeBlockItem(RegistryObject<Block> block, int sortOrder) {
         super(block.get(), new Item.Properties().group(MoeMod.ITEMS));
         this.sortOrder = sortOrder;
-    }
-
-    public MoeBlockItem(RegistryObject<Block> block) {
-        this(block, 99);
     }
 
     @Override

@@ -1,39 +1,46 @@
 package moeblocks.message;
 
-import moeblocks.datingsim.CacheNPC;
-import moeblocks.datingsim.DatingData;
-import moeblocks.datingsim.DatingSim;
+import moeblocks.data.Moe;
+import moeblocks.init.MoeData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
+import java.util.List;
 import java.util.UUID;
 
-public class CNPCQuery extends AbstractMessage {
-    protected final UUID uuid;
-    protected DatingSim sim;
-    protected CacheNPC npc;
-    
-    public CNPCQuery(UUID uuid) {
-        this.uuid = uuid;
-    }
-    
+public abstract class CNPCQuery extends AbstractMessage {
+    protected final UUID id;
+    protected List<UUID> list;
+    protected Moe npc;
+
     public CNPCQuery(PacketBuffer buffer) {
         this(buffer.readUniqueId());
     }
-    
+
+    public CNPCQuery(UUID id) {
+        this.id = id;
+    }
+
     @Override
     public void encode(PacketBuffer buffer) {
-        buffer.writeUniqueId(this.uuid);
+        buffer.writeUniqueId(this.id);
     }
-    
+
     @Override
     public void handle(NetworkEvent.Context context, ServerPlayerEntity player) {
-        this.sim = DatingData.get(player.world, player.getUniqueID());
-        this.npc = this.sim.getNPC(this.uuid);
+        this.list = MoeData.get(player.world).byPlayer.get(player.getUniqueID());
+        this.npc = MoeData.Moes.find(this.id);
+        if (this.npc != null) {
+            this.onFound(context, player);
+        }
     }
-    
+
     @Override
-    public void handle(NetworkEvent.Context context, Minecraft minecraft) { }
+    public void handle(NetworkEvent.Context context, Minecraft minecraft) {
+
+    }
+
+    public abstract void onFound(NetworkEvent.Context context, ServerPlayerEntity player);
 }

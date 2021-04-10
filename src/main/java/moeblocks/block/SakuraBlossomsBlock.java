@@ -1,15 +1,11 @@
 package moeblocks.block;
 
-import moeblocks.init.MoeParticles;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.LeavesBlock;
-import net.minecraft.block.material.MaterialColor;
 import net.minecraft.particles.BasicParticleType;
-import net.minecraft.particles.ParticleType;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -33,6 +29,19 @@ public class SakuraBlossomsBlock extends LeavesBlock {
         this.bloomOrClose(state, pos, world);
     }
 
+    private void bloomOrClose(BlockState state, BlockPos pos, World world) {
+        if (world.getMoonFactor() == 1.0F) {
+            world.setBlockState(pos, state.with(BLOOMING, true));
+        } else if (state.get(BLOOMING)) {
+            world.setBlockState(pos, state.with(BLOOMING, false));
+        }
+    }
+
+    @Override
+    public boolean ticksRandomly(BlockState state) {
+        return true;
+    }
+
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         if (super.ticksRandomly(state)) {
@@ -40,11 +49,6 @@ public class SakuraBlossomsBlock extends LeavesBlock {
         } else if (!state.get(PERSISTENT)) {
             this.bloomOrClose(state, pos, world);
         }
-    }
-
-    @Override
-    public boolean ticksRandomly(BlockState state) {
-        return true;
     }
 
     @Override
@@ -64,13 +68,5 @@ public class SakuraBlossomsBlock extends LeavesBlock {
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(DISTANCE, PERSISTENT, BLOOMING);
-    }
-
-    private void bloomOrClose(BlockState state, BlockPos pos, World world) {
-        if (world.getMoonFactor() == 1.0F) {
-            world.setBlockState(pos, state.with(BLOOMING, true));
-        } else if (state.get(BLOOMING)) {
-            world.setBlockState(pos, state.with(BLOOMING, false));
-        }
     }
 }

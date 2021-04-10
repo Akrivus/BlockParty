@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "moeblocks:calligraphy_table"
+          "name": "moeblocks:writing_table"
         }
       ],
       "conditions": [

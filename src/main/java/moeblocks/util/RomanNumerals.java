@@ -4,7 +4,7 @@ import java.util.TreeMap;
 
 public class RomanNumerals {
     private final static TreeMap<Integer, String> MAP = new TreeMap<>();
-    
+
     static {
         MAP.put(1000, "M");
         MAP.put(900, "CM");
@@ -21,7 +21,7 @@ public class RomanNumerals {
         MAP.put(1, "I");
         MAP.put(0, "");
     }
-    
+
     public static final String convert(int n) {
         if (MAP.containsKey(n)) {
             return MAP.get(n);

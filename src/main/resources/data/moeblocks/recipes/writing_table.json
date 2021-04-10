@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "<_",
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": {
+      "tag": "minecraft:planks"
+    },
+    "<": {
+      "item": "minecraft:feather"
+    },
+    "_": {
+      "item": "minecraft:bowl"
+    }
+  },
+  "result": {
+    "item": "moeblocks:writing_table",
+    "count": 1
+  }
+}

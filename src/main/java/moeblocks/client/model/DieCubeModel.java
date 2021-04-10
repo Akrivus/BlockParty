@@ -8,19 +8,19 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 
 public class DieCubeModel<T extends AbstractDieEntity> extends EntityModel<T> {
     private final ModelRenderer die;
-    
+
     public DieCubeModel() {
         this.textureHeight = this.textureWidth = 64;
         this.die = new ModelRenderer(this, 0, 0);
         this.die.setRotationPoint(0.0F, 16.0F, 0.0F);
         this.die.addBox(-8.0F, -8.0F, -8.0F, 16.0F, 16.0F, 16.0F);
     }
-    
+
     @Override
     public void render(MatrixStack stack, IVertexBuilder buffer, int light, int overlay, float red, float green, float blue, float alpha) {
         this.die.render(stack, buffer, light, overlay, red, green, blue, alpha);
     }
-    
+
     @Override
     public void setRotationAngles(AbstractDieEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float yaw, float pitch) {
         this.die.rotateAngleX = entity.getRotations().getX() * 0.0174532925F;
