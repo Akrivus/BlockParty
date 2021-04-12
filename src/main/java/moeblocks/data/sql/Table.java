@@ -1,10 +1,14 @@
 package moeblocks.data.sql;
 
+import moeblocks.init.MoeData;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.ReportedException;
+import net.minecraft.world.server.ServerWorld;
 
-import java.io.File;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -12,7 +16,7 @@ import java.util.UUID;
 public abstract class Table<R extends Row> {
     private final List<Column> columns = new ArrayList<>();
     private final String name;
-    private UUID gameUUID;
+    private ServerWorld world;
     private Connection connection;
 
     public Table(String name, Column... columns) {
@@ -25,8 +29,8 @@ public abstract class Table<R extends Row> {
         }
     }
 
-    public void setGameUUID(UUID gameUUID) {
-        this.gameUUID = gameUUID;
+    public void setWorld(ServerWorld world) {
+        this.world = world;
     }
 
     public List<Column> getColumns() {
@@ -45,7 +49,8 @@ public abstract class Table<R extends Row> {
     public List<R> select(String SQL, List<Column> columns) {
         ArrayList<R> query = new ArrayList<>();
         try (PreparedStatement sql = this.open(SQL)) {
-            for (int i = 1; i <= columns.size(); ++i) { columns.get(i - 1).in(i, sql); }
+            for (int i = 1; i <= columns.size(); ++i) { columns.get(i - 1).forSet(i, sql); }
+            System.out.println(sql);
             ResultSet set = sql.executeQuery();
             while (set.next()) { query.add(this.getRow(set)); }
             this.shut();
@@ -61,13 +66,14 @@ public abstract class Table<R extends Row> {
     }
 
     public R find(UUID uuid) {
-        List<R> query = this.select(String.format("SELECT * FROM Moes WHERE DatabaseID = '%s'", uuid.toString()));
+        List<R> query = this.select(String.format("SELECT * FROM %s WHERE (DatabaseID = '%s') LIMIT 1;", this.name, uuid));
         return query.isEmpty() ? null : query.get(0);
     }
 
     public void update(String SQL, List<Column> columns) {
         try (PreparedStatement sql = this.open(SQL)) {
-            for (int i = 1; i <= columns.size(); ++i) { columns.get(i - 1).in(i, sql); }
+            for (int i = 1; i <= columns.size(); ++i) { columns.get(i - 1).forSet(i, sql); }
+            System.out.println(sql);
             sql.executeUpdate();
             this.shut();
         } catch (SQLException e) {
@@ -84,6 +90,7 @@ public abstract class Table<R extends Row> {
         for (Column column : this.columns) { columns += String.format("%s %s %s,", column.getColumn(), column.getType(), column.getExtra()); }
         columns = columns.substring(0, columns.length() - 1);
         try (PreparedStatement sql = this.open(String.format("CREATE TABLE IF NOT EXISTS %s (%s);", this.name, columns))) {
+            System.out.println(sql);
             sql.execute();
             this.shut();
         } catch (SQLException e) {
@@ -91,30 +98,20 @@ public abstract class Table<R extends Row> {
         }
     }
 
-    public void create(UUID gameUUID) {
-        this.setGameUUID(gameUUID);
+    public void create(ServerWorld world) {
+        this.setWorld(world);
         this.create();
     }
 
     public abstract R getRow(ResultSet set) throws SQLException;
 
-    private PreparedStatement open(String SQL, Class clazz) throws SQLException {
-        File path = new File(String.format("./databases/%s.moedb", this.gameUUID.toString()));
-        this.connection = DriverManager.getConnection(String.format("jdbc:sqlite:%s", path.getAbsolutePath()));
-        return this.connection.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
-    }
-
     private PreparedStatement open(String SQL) throws SQLException {
-        try {
-            return this.open(SQL, Class.forName("org.sqlite.JDBC"));
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
+        this.connection = MoeData.get(this.world).getConnection();
+        return this.connection.prepareStatement(SQL);
     }
 
     private void shut() throws SQLException {
-        this.connection.close();
+        MoeData.get(this.world).free(this.connection);
     }
 
     private void rescue(SQLException e) {

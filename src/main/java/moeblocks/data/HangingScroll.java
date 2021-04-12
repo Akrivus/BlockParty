@@ -26,7 +26,10 @@ public class HangingScroll extends Row<HangingScrollTileEntity> {
 
     @Override
     public void sync(HangingScrollTileEntity entity) {
-        this.get(SYMBOL).setValue(entity.getSymbol());
+        this.get(DATABASE_ID).set(entity.getDatabaseID());
+        this.get(POS).set(entity.getDimBlockPos());
+        this.get(PLAYER_UUID).set(entity.getPlayerUUID());
+        this.get(SYMBOL).set(entity.getSymbol());
     }
 
     @Override

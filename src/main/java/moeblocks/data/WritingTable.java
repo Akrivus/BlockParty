@@ -24,7 +24,9 @@ public class WritingTable extends Row<WritingTableTileEntity> {
 
     @Override
     public void sync(WritingTableTileEntity entity) {
-
+        this.get(DATABASE_ID).set(entity.getDatabaseID());
+        this.get(POS).set(entity.getDimBlockPos());
+        this.get(PLAYER_UUID).set(entity.getPlayerUUID());
     }
 
     @Override

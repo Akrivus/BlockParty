@@ -39,6 +39,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class MoeEntity extends AbstractNPCEntity<Moe> {
     public static final DataParameter<Optional<BlockState>> BLOCK_STATE = EntityDataManager.createKey(MoeEntity.class, DataSerializers.OPTIONAL_BLOCK_STATE);
@@ -313,6 +314,7 @@ public class MoeEntity extends AbstractNPCEntity<Moe> {
         TileEntity extra = world.getTileEntity(block);
         MoeEntity moe = MoeEntities.MOE.get().create(world);
         moe.setPositionAndRotation(spawn.getX() + 0.5D, spawn.getY(), spawn.getZ() + 0.5D, yaw, pitch);
+        moe.setDatabaseID(UUID.randomUUID());
         moe.setBlockState(state);
         moe.setTileEntityData(extra != null ? extra.getTileData() : new CompoundNBT());
         moe.setDere(dere);

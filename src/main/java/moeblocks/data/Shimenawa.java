@@ -24,7 +24,9 @@ public class Shimenawa extends Row<ShimenawaTileEntity> {
 
     @Override
     public void sync(ShimenawaTileEntity entity) {
-
+        this.get(DATABASE_ID).set(entity.getDatabaseID());
+        this.get(POS).set(entity.getDimBlockPos());
+        this.get(PLAYER_UUID).set(entity.getPlayerUUID());
     }
 
     @Override

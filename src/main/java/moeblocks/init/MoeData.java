@@ -1,12 +1,15 @@
 package moeblocks.init;
 
 import moeblocks.data.*;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.ReportedException;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.DimensionSavedDataManager;
+import net.minecraft.world.storage.FolderName;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.world.WorldEvent;
@@ -14,6 +17,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.*;
 
 @Mod.EventBusSubscriber
@@ -28,10 +34,11 @@ public class MoeData extends WorldSavedData {
     public static WindChimes.Schema WindChimes = new WindChimes.Schema();
     public static WritingTable.Schema WritingTables = new WritingTable.Schema();
     public static Moe.Schema Moes = new Moe.Schema();
-    public static UUID GAME_UUID = UUID.randomUUID();
     public static String KEY = "moedata";
     public List<String> names = new ArrayList<>();
     public Map<UUID, List<UUID>> byPlayer = new HashMap<>();
+    private final List<Connection> connections = new ArrayList<>();
+    private String database;
 
     @Override
     public void read(CompoundNBT compound) {
@@ -42,7 +49,6 @@ public class MoeData extends WorldSavedData {
             compound.getList("Moes", Constants.NBT.TAG_STRING).forEach((moe) -> moes.add(UUID.fromString(moe.getString())));
             this.byPlayer.put(UUID.fromString(tag.getString("Player")), moes);
         });
-        MoeData.GAME_UUID = compound.getUniqueId("GameUUID");
     }
 
     @Override
@@ -57,19 +63,33 @@ public class MoeData extends WorldSavedData {
             byPlayer.put(player.toString(), list);
         });
         compound.put("MoesByPlayer", byPlayer);
-        compound.putUniqueId("GameUUID", MoeData.GAME_UUID);
         return compound;
+    }
+
+    public String getDatabase(ServerWorld world) {
+        File path = world.getServer().func_240776_a_(new FolderName("moeblocks.db")).toFile();
+        return this.database = String.format("jdbc:sqlite:%s", path.getAbsolutePath());
+    }
+
+    public Connection getConnection() throws SQLException {
+        Connection connection = DriverManager.getConnection(this.database);
+        this.connections.add(connection);
+        return connection;
+    }
+
+    public List<Connection> getConnections() {
+        return this.connections;
+    }
+
+    public void free(Connection connection) throws SQLException {
+        connection.close();
+        this.connections.remove(connection);
     }
 
     public static MoeData get(World world) {
         ServerWorld server = world.getServer().getWorld(World.OVERWORLD);
         DimensionSavedDataManager storage = server.getSavedData();
         return storage.getOrCreate(MoeData::new, KEY);
-    }
-
-    public static UUID getGameUUID(World world) {
-        MoeData.get(world);
-        return GAME_UUID;
     }
 
     public MoeData() {
@@ -82,20 +102,38 @@ public class MoeData extends WorldSavedData {
 
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load e) {
-        File databases = new File("./databases");
-        if (!databases.exists()) { databases.mkdir(); }
         if (e.getWorld() instanceof ServerWorld) {
-            MoeData.getGameUUID((ServerWorld)(e.getWorld()));
-            ToriiGates.create(GAME_UUID);
-            GardenLanterns.create(GAME_UUID);
-            SakuraTrees.create(GAME_UUID);
-            Shimenawa.create(GAME_UUID);
-            HangingScrolls.create(GAME_UUID);
-            LuckyCats.create(GAME_UUID);
-            PaperLanterns.create(GAME_UUID);
-            WindChimes.create(GAME_UUID);
-            WritingTables.create(GAME_UUID);
-            Moes.create(GAME_UUID);
+            ServerWorld world = (ServerWorld) e.getWorld();
+            try {
+                Class.forName("org.sqlite.JDBC");
+                MoeData.get(world).getDatabase(world);
+                ToriiGates.create(world);
+                GardenLanterns.create(world);
+                SakuraTrees.create(world);
+                Shimenawa.create(world);
+                HangingScrolls.create(world);
+                LuckyCats.create(world);
+                PaperLanterns.create(world);
+                WindChimes.create(world);
+                WritingTables.create(world);
+                Moes.create(world);
+            } catch (ClassNotFoundException x) {
+                throw new ReportedException(new CrashReport("DB failed.", x));
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onWorldUnload(WorldEvent.Unload e) {
+        if (e.getWorld() instanceof ServerWorld) {
+            ServerWorld world = (ServerWorld) e.getWorld();
+            MoeData.get(world).getConnections().forEach((connection) -> {
+                try {
+                    connection.close();
+                } catch (SQLException x) {
+                    throw new ReportedException(new CrashReport("DB failed.", x));
+                }
+            });
         }
     }
 }

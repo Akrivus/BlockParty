@@ -29,7 +29,9 @@ public class ToriiGate extends Row<ToriiTabletTileEntity> {
 
     @Override
     public void load(ToriiTabletTileEntity entity) {
-
+        this.get(DATABASE_ID).set(entity.getDatabaseID());
+        this.get(POS).set(entity.getDimBlockPos());
+        this.get(PLAYER_UUID).set(entity.getPlayerUUID());
     }
 
     public static class Schema extends Table<ToriiGate> {

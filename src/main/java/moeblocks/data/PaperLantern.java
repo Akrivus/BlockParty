@@ -24,7 +24,9 @@ public class PaperLantern extends Row<PaperLanternTileEntity> {
 
     @Override
     public void sync(PaperLanternTileEntity entity) {
-
+        this.get(DATABASE_ID).set(entity.getDatabaseID());
+        this.get(POS).set(entity.getDimBlockPos());
+        this.get(PLAYER_UUID).set(entity.getPlayerUUID());
     }
 
     @Override

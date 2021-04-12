@@ -24,7 +24,9 @@ public class WindChimes extends Row<WindChimesTileEntity> {
 
     @Override
     public void sync(WindChimesTileEntity entity) {
-
+        this.get(DATABASE_ID).set(entity.getDatabaseID());
+        this.get(POS).set(entity.getDimBlockPos());
+        this.get(PLAYER_UUID).set(entity.getPlayerUUID());
     }
 
     @Override

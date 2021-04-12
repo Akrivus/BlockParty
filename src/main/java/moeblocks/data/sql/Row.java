@@ -26,7 +26,7 @@ public abstract class Row<E extends IModelEntity> {
     public Row(Table table, ResultSet set) throws SQLException {
         this(table);
         for (int i = 0; i < this.columns.size(); ++i) {
-            this.columns.get(i).out(i + 1, set);
+            this.columns.get(i).setFromSet(i + 1, set);
         }
     }
 
@@ -37,9 +37,6 @@ public abstract class Row<E extends IModelEntity> {
 
     public Row(Table table, E entity) {
         this(table);
-        this.get(DATABASE_ID).setValue(entity.getDatabaseID());
-        this.get(POS).setValue(entity.getDimBlockPos());
-        this.get(PLAYER_UUID).setValue(entity.getPlayerUUID());
         this.sync(entity);
     }
 
@@ -52,15 +49,20 @@ public abstract class Row<E extends IModelEntity> {
     }
 
     public void insert() {
-        this.table.update(String.format("INSERT INTO %s(%s) VALUES (%s)", this.name, this.getColumnNames(), this.getQuestionMarks()), this.getColumns());
+        this.table.update(String.format("INSERT INTO %s(%s) VALUES (%s);", this.name, this.getColumnNames(), this.getQuestionMarks()), this.getColumns());
     }
 
     public void update() {
-        this.table.update(String.format("UPDATE %s SET %s WHERE DatabaseID = '%s'", this.name, this.getDirtyColumnSetters(), this.getID()), this.getDirtyColumns());
+        this.table.update(String.format("UPDATE %s SET %s WHERE (DatabaseID = '%s');", this.name, this.getDirtyColumnSetters(), this.getID()), this.getDirtyColumns());
     }
 
     public void delete() {
-        this.table.update(String.format("DELETE FROM %s WHERE DatabaseID = '%s'", this.name, this.getID()));
+        this.table.update(String.format("DELETE FROM %s WHERE (DatabaseID = '%s');", this.name, this.getID()));
+    }
+
+    public void update(E entity) {
+        this.sync(entity);
+        this.update();
     }
 
     public void read(CompoundNBT compound) {
@@ -103,8 +105,8 @@ public abstract class Row<E extends IModelEntity> {
 
     private String getColumnNames(List<Column> columns) {
         String names = "";
-        for (Column column : columns) { names += String.format("%s,", column.getColumn()); }
-        return names.substring(0, names.length() - 1);
+        for (Column column : columns) { names += String.format("%s, ", column.getColumn()); }
+        return names.substring(0, names.length() - 2);
     }
 
     private String getDirtyColumnNames() {
@@ -117,8 +119,8 @@ public abstract class Row<E extends IModelEntity> {
 
     private String getQuestionMarks(List<Column> columns) {
         String marks = "";
-        for (Column column : columns) { marks += "?,"; }
-        return marks.substring(0, marks.length() - 1);
+        for (Column column : columns) { marks += "?, "; }
+        return marks.substring(0, marks.length() - 2);
     }
 
     private String getDirtyQuestionMarks() {
@@ -131,8 +133,8 @@ public abstract class Row<E extends IModelEntity> {
 
     private String getColumnSetters(List<Column> columns) {
         String names = "";
-        for (Column column : columns) { names += String.format("%s = ?,", column.getColumn()); }
-        return names.substring(0, names.length() - 1);
+        for (Column column : columns) { names += String.format("%s = ?, ", column.getColumn()); }
+        return names.substring(0, names.length() - 2);
     }
 
     private String getDirtyColumnSetters() {
@@ -146,4 +148,9 @@ public abstract class Row<E extends IModelEntity> {
     public abstract void sync(E entity);
 
     public abstract void load(E entity);
+
+    @Override
+    public String toString() {
+        return String.format("%s[%s]", this.table, this.get(DATABASE_ID).get());
+    }
 }

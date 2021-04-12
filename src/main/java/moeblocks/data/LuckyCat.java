@@ -24,7 +24,9 @@ public class LuckyCat extends Row<LuckyCatTileEntity> {
 
     @Override
     public void sync(LuckyCatTileEntity entity) {
-
+        this.get(DATABASE_ID).set(entity.getDatabaseID());
+        this.get(POS).set(entity.getDimBlockPos());
+        this.get(PLAYER_UUID).set(entity.getPlayerUUID());
     }
 
     @Override

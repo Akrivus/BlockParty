@@ -1,5 +1,7 @@
 package moeblocks.data;
 
+import moeblocks.automata.trait.BloodType;
+import moeblocks.automata.trait.Dere;
 import moeblocks.data.sql.Column;
 import moeblocks.entity.MoeEntity;
 import moeblocks.init.MoeData;
@@ -16,6 +18,7 @@ import net.minecraft.world.server.ServerWorld;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.UUID;
 
 public class Moe extends AbstractNPC<MoeEntity> {
     protected static final int BLOCK_STATE  = 21;
@@ -32,19 +35,48 @@ public class Moe extends AbstractNPC<MoeEntity> {
 
     public Moe(MoeEntity entity) {
         super(MoeData.Moes, entity);
-        this.get(BLOCK_STATE).setValue(entity.getInternalBlockState());
     }
 
     @Override
     public void sync(MoeEntity entity) {
-        super.sync(entity);
-        this.get(BLOCK_STATE).setValue(entity.getBlockState());
+        this.get(DATABASE_ID).set(entity.getDatabaseID());
+        this.get(POS).set(entity.getDimBlockPos());
+        this.get(PLAYER_UUID).set(entity.getPlayerUUID());
+        this.get(NAME).set(entity.getGivenName());
+        this.get(BLOCK_STATE).set(entity.getInternalBlockState());
+        this.get(BLOOD_TYPE).set(entity.getBloodType());
+        this.get(DERE).set(entity.getDere());
+        this.get(HEALTH).set(entity.getHealth());
+        this.get(FULLNESS).set(entity.getFullness());
+        this.get(EXHAUSTION).set(entity.getExhaustion());
+        this.get(SATURATION).set(entity.getSaturation());
+        this.get(STRESS).set(entity.getStress());
+        this.get(RELAXATION).set(entity.getRelaxation());
+        this.get(LOYALTY).set(entity.getLoyalty());
+        this.get(AFFECTION).set(entity.getAffection());
+        this.get(SLOUCH).set(entity.getSlouch());
+        this.get(AGE).set(entity.getAge());
+        this.get(LAST_SEEN_AT).set(entity.getLastSeen());
+        this.get(DEAD).set(false);
     }
 
     @Override
     public void load(MoeEntity entity) {
-        super.load(entity);
+        entity.setPlayerUUID((UUID) this.get(PLAYER_UUID).get());
+        entity.setGivenName((String) this.get(NAME).get());
         entity.setBlockState((BlockState) this.get(BLOCK_STATE).get());
+        entity.setBloodType((BloodType) this.get(BLOOD_TYPE).get());
+        entity.setDere((Dere) this.get(DERE).get());
+        entity.setHealth((Float) this.get(HEALTH).get());
+        entity.setFullness((Float) this.get(FULLNESS).get());
+        entity.setExhaustion((Float) this.get(EXHAUSTION).get());
+        entity.setSaturation((Float) this.get(SATURATION).get());
+        entity.setStress((Float) this.get(STRESS).get());
+        entity.setRelaxation((Float) this.get(RELAXATION).get());
+        entity.setLoyalty((Float) this.get(LOYALTY).get());
+        entity.setAffection((Float) this.get(AFFECTION).get());
+        entity.setAge((Float) this.get(AGE).get());
+        entity.setLastSeen((Long) this.get(LAST_SEEN_AT).get());
     }
 
     @Override

@@ -24,7 +24,9 @@ public class SakuraSapling extends Row<SakuraSaplingTileEntity> {
 
     @Override
     public void sync(SakuraSaplingTileEntity entity) {
-
+        this.get(DATABASE_ID).set(entity.getDatabaseID());
+        this.get(POS).set(entity.getDimBlockPos());
+        this.get(PLAYER_UUID).set(entity.getPlayerUUID());
     }
 
     @Override

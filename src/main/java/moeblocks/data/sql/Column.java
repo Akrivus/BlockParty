@@ -37,9 +37,9 @@ public abstract class Column<I> {
         this(table, type, column, "");
     }
 
-    public abstract void in(int i, PreparedStatement statement) throws SQLException;
+    public abstract void forSet(int i, PreparedStatement statement) throws SQLException;
 
-    public abstract I out(int i, ResultSet set) throws SQLException;
+    public abstract I fromSet(int i, ResultSet set) throws SQLException;
 
     public abstract void read(CompoundNBT compound);
 
@@ -51,18 +51,20 @@ public abstract class Column<I> {
         return this.value == null ? this.getDefault() : this.value;
     }
 
+    public void setFromSet(int i, ResultSet set) throws SQLException {
+        this.set(this.fromSet(i, set));
+    }
+
     public void setValue(I value) {
         this.value = value;
     }
 
     public void set(I value) {
-        this.setValue(value);
-        this.markDirty();
-    }
-
-    public void markDirty() {
-        this.prev = this.time;
-        this.time = System.nanoTime();
+        if (this.value != value) {
+            this.prev = this.time;
+            this.time = System.nanoTime();
+            this.setValue(value);
+        }
     }
 
     public boolean isDirty() {
@@ -95,12 +97,12 @@ public abstract class Column<I> {
         }
 
         @Override
-        public void in(int i, PreparedStatement statement) throws SQLException {
+        public void forSet(int i, PreparedStatement statement) throws SQLException {
             statement.setInt(i, this.get());
         }
 
         @Override
-        public Integer out(int i, ResultSet set) throws SQLException {
+        public Integer fromSet(int i, ResultSet set) throws SQLException {
             return set.getInt(i);
         }
 
@@ -133,12 +135,12 @@ public abstract class Column<I> {
         }
 
         @Override
-        public void in(int i, PreparedStatement statement) throws SQLException {
+        public void forSet(int i, PreparedStatement statement) throws SQLException {
             statement.setLong(i, this.get());
         }
 
         @Override
-        public Long out(int i, ResultSet set) throws SQLException {
+        public Long fromSet(int i, ResultSet set) throws SQLException {
             return set.getLong(i);
         }
 
@@ -171,12 +173,12 @@ public abstract class Column<I> {
         }
 
         @Override
-        public void in(int i, PreparedStatement statement) throws SQLException {
+        public void forSet(int i, PreparedStatement statement) throws SQLException {
             statement.setBoolean(i, this.get());
         }
 
         @Override
-        public Boolean out(int i, ResultSet set) throws SQLException {
+        public Boolean fromSet(int i, ResultSet set) throws SQLException {
             return set.getBoolean(i);
         }
 
@@ -209,12 +211,12 @@ public abstract class Column<I> {
         }
 
         @Override
-        public void in(int i, PreparedStatement statement) throws SQLException {
+        public void forSet(int i, PreparedStatement statement) throws SQLException {
             statement.setDouble(i, this.get());
         }
 
         @Override
-        public Float out(int i, ResultSet set) throws SQLException {
+        public Float fromSet(int i, ResultSet set) throws SQLException {
             return set.getFloat(i);
         }
 
@@ -247,12 +249,12 @@ public abstract class Column<I> {
         }
 
         @Override
-        public void in(int i, PreparedStatement statement) throws SQLException {
+        public void forSet(int i, PreparedStatement statement) throws SQLException {
             statement.setInt(i, Block.getStateId(this.get()));
         }
 
         @Override
-        public BlockState out(int i, ResultSet set) throws SQLException {
+        public BlockState fromSet(int i, ResultSet set) throws SQLException {
             return Block.getStateById(set.getInt(i));
         }
 
@@ -285,12 +287,12 @@ public abstract class Column<I> {
         }
 
         @Override
-        public void in(int i, PreparedStatement statement) throws SQLException {
+        public void forSet(int i, PreparedStatement statement) throws SQLException {
             statement.setString(i, this.get());
         }
 
         @Override
-        public String out(int i, ResultSet set) throws SQLException {
+        public String fromSet(int i, ResultSet set) throws SQLException {
             return set.getString(i);
         }
 
@@ -323,12 +325,12 @@ public abstract class Column<I> {
         }
 
         @Override
-        public void in(int i, PreparedStatement statement) throws SQLException {
+        public void forSet(int i, PreparedStatement statement) throws SQLException {
             statement.setString(i, this.get().toString());
         }
 
         @Override
-        public UUID out(int i, ResultSet set) throws SQLException {
+        public UUID fromSet(int i, ResultSet set) throws SQLException {
             return UUID.fromString(set.getString(i));
         }
 
@@ -352,17 +354,34 @@ public abstract class Column<I> {
     }
 
     public static class AsPosition extends Column<DimBlockPos> {
+        private Column x;
+        private Column y;
+        private Column z;
+
         public AsPosition(Table table, String column) {
             super(table, "TEXT", String.format("%sDimension", column));
         }
 
         @Override
-        public void in(int i, PreparedStatement statement) throws SQLException {
-            statement.setString(i, this.get().getDim().toString());
+        public void set(DimBlockPos value) {
+            super.set(value);
+            if (this.isDirty()) {
+                this.x.set(value.getPos().getX());
+                this.y.set(value.getPos().getY());
+                this.z.set(value.getPos().getZ());
+            }
         }
 
         @Override
-        public DimBlockPos out(int i, ResultSet set) throws SQLException {
+        public void forSet(int i, PreparedStatement statement) throws SQLException {
+            statement.setString(i, this.get().getDim().getLocation().toString());
+            statement.setInt(i + 1, this.get().getPos().getX());
+            statement.setInt(i + 2, this.get().getPos().getY());
+            statement.setInt(i + 3, this.get().getPos().getZ());
+        }
+
+        @Override
+        public DimBlockPos fromSet(int i, ResultSet set) throws SQLException {
             return new DimBlockPos(
                     RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(set.getString(i))),
                     new BlockPos(
@@ -385,9 +404,9 @@ public abstract class Column<I> {
 
         @Override
         public void afterAdd(Table table) {
-            table.addColumn(new AsInteger(table, String.format("%sX", this.column)));
-            table.addColumn(new AsInteger(table, String.format("%sY", this.column)));
-            table.addColumn(new AsInteger(table, String.format("%sZ", this.column)));
+            table.addColumn(this.x = new AsInteger(table, String.format("%sX", this.column)));
+            table.addColumn(this.y = new AsInteger(table, String.format("%sY", this.column)));
+            table.addColumn(this.z = new AsInteger(table, String.format("%sZ", this.column)));
         }
 
         @Override
@@ -405,12 +424,12 @@ public abstract class Column<I> {
         }
 
         @Override
-        public void in(int i, PreparedStatement statement) throws SQLException {
+        public void forSet(int i, PreparedStatement statement) throws SQLException {
             statement.setString(i, this.value == null ? this.trait.getValue() : this.value.getValue());
         }
 
         @Override
-        public T out(int i, ResultSet set) throws SQLException {
+        public T fromSet(int i, ResultSet set) throws SQLException {
             return (T) this.trait.fromValue(set.getString(i));
         }
 
@@ -442,13 +461,15 @@ public abstract class Column<I> {
         }
 
         @Override
-        public void in(int i, PreparedStatement statement) throws SQLException {
+        public void forSet(int i, PreparedStatement statement) throws SQLException {
             statement.setString(i, this.get() == null ? "00000000-0000-0000-0000-000000000000" : this.get().getID().toString());
         }
 
         @Override
-        public R out(int i, ResultSet set) throws SQLException {
-            return this.query.apply(UUID.fromString(set.getString(i)));
+        public R fromSet(int i, ResultSet set) throws SQLException {
+            UUID uuid = UUID.fromString(set.getString(i));
+            if (uuid.toString().equals("00000000-0000-0000-0000-000000000000")) { return null; }
+            return this.query.apply(uuid);
         }
 
         @Override

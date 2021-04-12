@@ -13,7 +13,6 @@ import net.minecraft.server.MinecraftServer;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.UUID;
 
 public abstract class AbstractNPC<E extends AbstractNPCEntity> extends Row<E> {
     protected static final int DEAD         =  6;
@@ -46,44 +45,6 @@ public abstract class AbstractNPC<E extends AbstractNPCEntity> extends Row<E> {
 
     public String getName() {
         return (String) this.get(NAME).get();
-    }
-
-    @Override
-    public void sync(E entity) {
-        this.get(NAME).setValue(entity.getGivenName());
-        this.get(BLOOD_TYPE).setValue(entity.getBloodType());
-        this.get(DERE).setValue(entity.getDere());
-        this.get(HEALTH).setValue(entity.getHealth());
-        this.get(FULLNESS).setValue(entity.getFullness());
-        this.get(EXHAUSTION).setValue(entity.getExhaustion());
-        this.get(SATURATION).setValue(entity.getSaturation());
-        this.get(STRESS).setValue(entity.getStress());
-        this.get(RELAXATION).setValue(entity.getRelaxation());
-        this.get(LOYALTY).setValue(entity.getLoyalty());
-        this.get(AFFECTION).setValue(entity.getAffection());
-        this.get(SLOUCH).setValue(entity.getSlouch());
-        this.get(AGE).setValue(entity.getAge());
-        this.get(LAST_SEEN_AT).setValue(entity.getLastSeen());
-        this.get(DEAD).setValue(false);
-    }
-
-    @Override
-    public void load(E entity) {
-        entity.setDatabaseID((UUID) this.get(DATABASE_ID).get());
-        entity.setPlayerUUID((UUID) this.get(PLAYER_UUID).get());
-        entity.setGivenName((String) this.get(NAME).get());
-        entity.setBloodType((BloodType) this.get(BLOOD_TYPE).get());
-        entity.setDere((Dere) this.get(DERE).get());
-        entity.setHealth((Float) this.get(HEALTH).get());
-        entity.setFullness((Float) this.get(FULLNESS).get());
-        entity.setExhaustion((Float) this.get(EXHAUSTION).get());
-        entity.setSaturation((Float) this.get(SATURATION).get());
-        entity.setStress((Float) this.get(STRESS).get());
-        entity.setRelaxation((Float) this.get(RELAXATION).get());
-        entity.setLoyalty((Float) this.get(LOYALTY).get());
-        entity.setAffection((Float) this.get(AFFECTION).get());
-        entity.setAge((Float) this.get(AGE).get());
-        entity.setLastSeen((Long) this.get(LAST_SEEN_AT).get());
     }
 
     public boolean isDead() {

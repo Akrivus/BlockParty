@@ -44,15 +44,14 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
 
 import java.util.LinkedList;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends CreatureEntity implements IInventoryChangedListener, IModelEntity<NPC>, INamedContainerProvider {
     public static final DataParameter<Boolean> FOLLOWING = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.BOOLEAN);
-    public static final DataParameter<Optional<UUID>> PLAYER_UUID = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.OPTIONAL_UNIQUE_ID);
-    public static final DataParameter<Optional<UUID>> DATABASE_ID = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.OPTIONAL_UNIQUE_ID);
+    public static final DataParameter<String> PLAYER_UUID = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
+    public static final DataParameter<String> DATABASE_ID = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public static final DataParameter<String> BLOOD_TYPE = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public static final DataParameter<String> DERE = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
     public static final DataParameter<String> EMOTION = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.STRING);
@@ -91,14 +90,14 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
     @Override
     public void registerData() {
         this.dataManager.register(FOLLOWING, false);
-        this.dataManager.register(PLAYER_UUID, Optional.of(UUID.fromString("00000000-0000-0000-0000-000000000000")));
-        this.dataManager.register(DATABASE_ID, Optional.of(UUID.randomUUID()));
+        this.dataManager.register(PLAYER_UUID, "00000000-0000-0000-0000-000000000000");
+        this.dataManager.register(DATABASE_ID, "00000000-0000-0000-0000-000000000000");
         this.dataManager.register(BLOOD_TYPE, BloodType.O.getValue());
         this.dataManager.register(DERE, Dere.NYANDERE.getValue());
         this.dataManager.register(EMOTION, Emotion.NORMAL.getValue());
         this.dataManager.register(GENDER, Gender.FEMININE.getValue());
         this.dataManager.register(ANIMATION, Animation.DEFAULT.name());
-        this.dataManager.register(GIVEN_NAME, "Akri");
+        this.dataManager.register(GIVEN_NAME, "Tokumei");
         this.dataManager.register(SLOUCH, 0.0F);
         this.dataManager.register(FULLNESS, 20.0F);
         this.dataManager.register(EXHAUSTION, 0.0F);
@@ -121,7 +120,6 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
         compound.putInt("TimeUntilStress", this.timeUntilStress);
         compound.putInt("TimeSinceSlept", this.timeSinceSlept);
         this.automaton.write(compound);
-        this.getRow().write(compound);
         super.writeAdditional(compound);
     }
 
@@ -164,8 +162,9 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
     @Override
     public void setRawPosition(double x, double y, double z) {
         super.setRawPosition(x, y, z);
-        if (this.hasRow()) {
-            this.getRow().sync(this);
+        if (this.isRemote() || this.ticksExisted < 1) { return; }
+        if (this.prevPosX != x || this.prevPosY != y || this.prevPosZ != z) {
+            this.getRow().update(this);
         }
     }
 
@@ -186,7 +185,8 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
 
     @Override
     public ILivingEntityData onInitialSpawn(IServerWorld world, DifficultyInstance difficulty, SpawnReason reason, ILivingEntityData data, CompoundNBT compound) {
-        if (world instanceof World) { this.setGivenName(this.getGender().getUniqueName((World) world)); }
+        this.setGivenName(this.getGender().getUniqueName(this.world));
+        this.setBloodType(this.getBloodType().weigh(this.rand));
         return super.onInitialSpawn(world, difficulty, reason, data, compound);
     }
 
@@ -236,19 +236,19 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
     }
 
     public UUID getPlayerUUID() {
-        return this.dataManager.get(PLAYER_UUID).get();
+        return UUID.fromString(this.dataManager.get(PLAYER_UUID));
     }
 
     public void setPlayerUUID(UUID playerUUID) {
-        this.dataManager.set(PLAYER_UUID, Optional.of(playerUUID));
+        this.dataManager.set(PLAYER_UUID, playerUUID.toString());
     }
 
     public UUID getDatabaseID() {
-        return this.dataManager.get(DATABASE_ID).get();
+        return UUID.fromString(this.dataManager.get(DATABASE_ID));
     }
 
-    public void setDatabaseID(UUID id) {
-        this.dataManager.set(DATABASE_ID, Optional.of(id));
+    public void setDatabaseID(UUID uuid) {
+        this.dataManager.set(DATABASE_ID, uuid.toString());
     }
 
     public String getGivenName() {
@@ -538,7 +538,7 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
 
     @Override
     public boolean hasRow() {
-        return this.ticksExisted > 1 && this.getRow() != null;
+        return this.isLocal() && this.getRow() != null;
     }
 
     public boolean is(ICondition condition) {
