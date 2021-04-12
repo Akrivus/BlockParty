@@ -2,16 +2,11 @@ package moeblocks.item;
 
 import moeblocks.MoeMod;
 import moeblocks.util.sort.ISortableItem;
-import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
 
 public class LetterItem extends Item implements ISortableItem {
-    public static final IItemPropertyGetter CLOSED_PROPERTY_GETTER = (stack, world, entity) -> LetterItem.isClosed(stack);
-    public static final ResourceLocation CLOSED_PROPERTY = new ResourceLocation("closed");
-
     public LetterItem() {
         super(new Properties().group(MoeMod.ITEMS));
     }

@@ -43,13 +43,13 @@ public class MoeMod {
         MoeParticles.REGISTRY.register(bus);
         MoeSounds.REGISTRY.register(bus);
         MoeTileEntities.REGISTRY.register(bus);
-        MoeMessages.register();
     }
 
     private void onClientSetup(final FMLClientSetupEvent e) {
         MoeBlocks.registerRenderTypes();
         MoeEntities.registerEntityRenderingHandlers();
         MoeItems.registerModelProperties();
+        MoeMessages.registerClient();
         MoeOverrides.registerSpecialRenderers();
     }
 
@@ -58,6 +58,7 @@ public class MoeMod {
         MoeConvos.registerConvos();
         MoeEntities.registerAttributes();
         MoeItems.registerDispenserBehaviors();
+        MoeMessages.registerServer();
         MoeOverrides.registerAliases();
         MoeOverrides.registerPropertyOverrides();
         MoeOverrides.registerStepSounds();

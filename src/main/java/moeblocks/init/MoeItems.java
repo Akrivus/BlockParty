@@ -7,6 +7,7 @@ import net.minecraft.block.DispenserBlock;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -83,7 +84,7 @@ public class MoeItems {
     }
 
     public static void registerModelProperties() {
-        ItemModelsProperties.registerProperty(MoeItems.LETTER.get(), LetterItem.CLOSED_PROPERTY, LetterItem.CLOSED_PROPERTY_GETTER);
+        ItemModelsProperties.registerProperty(MoeItems.LETTER.get(), new ResourceLocation("closed"), (stack, world, entity) -> LetterItem.isClosed(stack));
     }
 
     public static int compare(ItemStack one, ItemStack two) {

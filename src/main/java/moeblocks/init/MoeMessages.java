@@ -23,13 +23,16 @@ public class MoeMessages {
         return NetworkRegistry.ChannelBuilder.named(name).clientAcceptedVersions(version).serverAcceptedVersions(version).networkProtocolVersion(MoeMod::getVersion).simpleChannel();
     }
 
-    public static void register() {
+    public static void registerServer() {
         register(CDialogueClose.class, CDialogueClose::new);
         register(CDialogueRespond.class, CDialogueRespond::new);
         register(CNPCRemove.class, CNPCRemove::new);
         register(CNPCRequest.class, CNPCRequest::new);
         register(CNPCTeleport.class, CNPCTeleport::new);
         register(CRemovePage.class, CRemovePage::new);
+    }
+
+    public static void registerClient() {
         register(SCloseDialogue.class, SCloseDialogue::new);
         register(SNPCList.class, SNPCList::new);
         register(SNPCResponse.class, SNPCResponse::new);
