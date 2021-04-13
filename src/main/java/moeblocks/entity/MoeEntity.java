@@ -7,6 +7,7 @@ import moeblocks.convo.enums.Response;
 import moeblocks.data.Moe;
 import moeblocks.init.*;
 import moeblocks.message.SOpenDialogue;
+import moeblocks.util.Trans;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -129,7 +130,7 @@ public class MoeEntity extends AbstractNPCEntity<Moe> {
 
     public String getBlockName() {
         ResourceLocation block = MoeOverrides.get(this.getInternalBlockState().getBlock()).getRegistryName();
-        return String.format("%s.%s", block.getNamespace(), block.getPath());
+        return Trans.late(String.format("entity.moeblocks.%s.%s", block.getNamespace(), block.getPath()));
     }
 
     @Override
