@@ -98,7 +98,7 @@ public class Moe extends AbstractNPC<MoeEntity> {
         MoeEntity entity = MoeEntities.MOE.get().create(client.world);
         entity.setPosition(pos.getX(), pos.getY(), pos.getZ());
         this.load(entity);
-        return null;
+        return entity;
     }
 
     public static class Schema extends AbstractNPC.Schema<Moe> {
