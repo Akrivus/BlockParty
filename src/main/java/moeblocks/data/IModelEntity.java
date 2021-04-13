@@ -21,7 +21,12 @@ public interface IModelEntity<M extends Row> {
     M getNewRow();
 
     default void claim(PlayerEntity player) {
-        this.setPlayerUUID(player.getUniqueID());
+        if (player == null) {
+            this.setPlayerUUID(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+        } else {
+            MoeData.get(player.world).addTo(player, this.getDatabaseID());
+            this.setPlayerUUID(player.getUniqueID());
+        }
         if (!this.hasRow()) {
             this.getNewRow().insert();
         }

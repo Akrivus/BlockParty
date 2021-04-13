@@ -3,6 +3,7 @@ package moeblocks.init;
 import moeblocks.data.*;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.ReportedException;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
@@ -64,6 +65,17 @@ public class MoeData extends WorldSavedData {
         });
         compound.put("MoesByPlayer", byPlayer);
         return compound;
+    }
+
+    public List<UUID> getFrom(PlayerEntity player) {
+        return this.byPlayer.getOrDefault(player.getUniqueID(), new ArrayList<>());
+    }
+
+    public void addTo(PlayerEntity player, UUID uuid) {
+        List<UUID> list = this.getFrom(player);
+        list.add(uuid);
+        this.byPlayer.put(player.getUniqueID(), list);
+        MoeData.get(player.world).markDirty();
     }
 
     public String getDatabase(ServerWorld world) {

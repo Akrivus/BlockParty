@@ -13,7 +13,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -42,12 +41,8 @@ public class YearbookItem extends Item implements ISortableItem {
     }
 
     private ActionResultType openGui(PlayerEntity player, Hand hand, UUID id) {
-        List<UUID> npcs = MoeData.get(player.world).byPlayer.get(player.getUniqueID());
-        if (npcs.isEmpty()) {
-            player.sendStatusMessage(new TranslationTextComponent("gui.moeblocks.error.empty"), true);
-        } else {
-            MoeMessages.send(player, new SOpenYearbook(npcs, id == null ? npcs.get(0) : id, hand));
-        }
+        List<UUID> npcs = MoeData.get(player.world).getFrom(player);
+        if (npcs.size() > 0) { MoeMessages.send(player, new SOpenYearbook(npcs, id == null ? npcs.get(0) : id, hand)); }
         return ActionResultType.SUCCESS;
     }
 
