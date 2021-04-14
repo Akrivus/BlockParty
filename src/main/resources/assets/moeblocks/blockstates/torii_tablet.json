@@ -1,16 +1,19 @@
 {
   "variants": {
     "facing=north": {
-      "model": "moeblocks:block/torii_tablet_north"
+      "model": "moeblocks:block/torii_tablet"
     },
     "facing=east": {
-      "model": "moeblocks:block/torii_tablet_east"
+      "model": "moeblocks:block/torii_tablet",
+      "y": 90
     },
     "facing=south": {
-      "model": "moeblocks:block/torii_tablet_south"
+      "model": "moeblocks:block/torii_tablet",
+      "y": 180
     },
     "facing=west": {
-      "model": "moeblocks:block/torii_tablet_west"
+      "model": "moeblocks:block/torii_tablet",
+      "y": 270
     }
   }
 }
