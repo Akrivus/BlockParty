@@ -1,0 +1,155 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "tablet": "moeblocks:block/torii_tablet",
+    "base": "moeblocks:block/torii_tablet_base",
+    "particle": "moeblocks:block/torii_tablet"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        -6,
+        14
+      ],
+      "to": [
+        14,
+        9,
+        15
+      ],
+      "rotation": {
+        "angle": -22.5,
+        "axis": "x",
+        "origin": [
+          0,
+          0,
+          0
+        ]
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            2,
+            0,
+            14,
+            15
+          ],
+          "texture": "#tablet"
+        },
+        "east": {
+          "uv": [
+            13,
+            0,
+            14,
+            15
+          ],
+          "texture": "#tablet"
+        },
+        "south": {
+          "uv": [
+            2,
+            0,
+            14,
+            15
+          ],
+          "texture": "#tablet"
+        },
+        "west": {
+          "uv": [
+            2,
+            0,
+            3,
+            15
+          ],
+          "texture": "#tablet"
+        },
+        "up": {
+          "uv": [
+            2,
+            0,
+            14,
+            1
+          ],
+          "texture": "#tablet"
+        },
+        "down": {
+          "uv": [
+            2,
+            14,
+            14,
+            15
+          ],
+          "texture": "#tablet"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        0,
+        12
+      ],
+      "to": [
+        12,
+        10,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            4,
+            15,
+            12,
+            16
+          ],
+          "texture": "#base"
+        },
+        "east": {
+          "uv": [
+            12,
+            6,
+            16,
+            16
+          ],
+          "texture": "#base"
+        },
+        "south": {
+          "uv": [
+            4,
+            5,
+            12,
+            15
+          ],
+          "texture": "#base"
+        },
+        "west": {
+          "uv": [
+            0,
+            6,
+            4,
+            16
+          ],
+          "texture": "#base"
+        },
+        "up": {
+          "uv": [
+            4,
+            1,
+            12,
+            5
+          ],
+          "texture": "#base"
+        },
+        "down": {
+          "uv": [
+            4,
+            0,
+            12,
+            1
+          ],
+          "texture": "#base"
+        }
+      }
+    }
+  ]
+}
