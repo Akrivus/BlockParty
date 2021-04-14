@@ -24,6 +24,7 @@ public class MoeBlocks {
     public static final Supplier<AbstractBlock.Properties> SHOJI_PROPERTY = () -> AbstractBlock.Properties.create(Material.WOOD, MaterialColor.PINK).sound(SoundType.CROP).hardnessAndResistance(0.5F).notSolid();
     public static final Supplier<AbstractBlock.Properties> PLANT_PROPERTY = () -> AbstractBlock.Properties.create(Material.PLANTS).sound(SoundType.CROP).hardnessAndResistance(0.2F).tickRandomly().notSolid();
     public static final Supplier<AbstractBlock.Properties> NONSOLID_PROPERTY = () -> SOLID_PROPERTY.get().notSolid();
+    public static final Supplier<AbstractBlock.Properties> TRANSPARENT_PROPERTY = () -> NONSOLID_PROPERTY.get().setOpaque((state, reader, pos) -> false);
     public static final DeferredRegister<Block> REGISTRY = DeferredRegister.create(ForgeRegistries.BLOCKS, MoeMod.ID);
     public static final RegistryObject<Block> BLANK_HANGING_SCROLL = REGISTRY.register("blank_hanging_scroll", () -> new HangingScrollBlock(SHOJI_PROPERTY.get(), Condition.NEVER));
     public static final RegistryObject<Block> BLACK_PAPER_LANTERN = REGISTRY.register("black_paper_lantern", () -> new PaperLanternBlock(SHOJI_PROPERTY.get(), MaterialColor.BLACK));
@@ -42,7 +43,7 @@ public class MoeBlocks {
     public static final RegistryObject<Block> LIGHT_BLUE_PAPER_LANTERN = REGISTRY.register("light_blue_paper_lantern", () -> new PaperLanternBlock(SHOJI_PROPERTY.get(), MaterialColor.LIGHT_BLUE_TERRACOTTA));
     public static final RegistryObject<Block> LIGHT_GRAY_PAPER_LANTERN = REGISTRY.register("light_gray_paper_lantern", () -> new PaperLanternBlock(SHOJI_PROPERTY.get(), MaterialColor.LIGHT_GRAY_TERRACOTTA));
     public static final RegistryObject<Block> LIME_PAPER_LANTERN = REGISTRY.register("lime_paper_lantern", () -> new PaperLanternBlock(SHOJI_PROPERTY.get(), MaterialColor.LIME_TERRACOTTA));
-    public static final RegistryObject<Block> LUCKY_CAT = REGISTRY.register("lucky_cat", () -> new LuckyCatBlock(STONE_PROPERTY.get()));
+    public static final RegistryObject<Block> LUCKY_CAT = REGISTRY.register("lucky_cat", () -> new LuckyCatBlock(TRANSPARENT_PROPERTY.get()));
     public static final RegistryObject<Block> MAGENTA_PAPER_LANTERN = REGISTRY.register("magenta_paper_lantern", () -> new PaperLanternBlock(SHOJI_PROPERTY.get(), MaterialColor.MAGENTA_TERRACOTTA));
     public static final RegistryObject<Block> ORANGE_PAPER_LANTERN = REGISTRY.register("orange_paper_lantern", () -> new PaperLanternBlock(SHOJI_PROPERTY.get(), MaterialColor.ORANGE_TERRACOTTA));
     public static final RegistryObject<Block> PINK_PAPER_LANTERN = REGISTRY.register("pink_paper_lantern", () -> new PaperLanternBlock(SHOJI_PROPERTY.get(), MaterialColor.PINK_TERRACOTTA));
@@ -61,7 +62,7 @@ public class MoeBlocks {
     public static final RegistryObject<Block> SAKURA_STAIRS = REGISTRY.register("sakura_stairs", () -> new StairsBlock(() -> SAKURA_PLANKS.get().getDefaultState(), NONSOLID_PROPERTY.get()));
     public static final RegistryObject<Block> SAKURA_WOOD = REGISTRY.register("sakura_wood", () -> new RotatedPillarBlock(SOLID_PROPERTY.get()));
     public static final RegistryObject<Block> SHOJI_BLOCK = REGISTRY.register("shoji_block", () -> new Block(SHOJI_PROPERTY.get()));
-    public static final RegistryObject<Block> SHIMENAWA = REGISTRY.register("shimenawa", () -> new ShimenawaBlock(SOLID_PROPERTY.get()));
+    public static final RegistryObject<Block> SHIMENAWA = REGISTRY.register("shimenawa", () -> new ShimenawaBlock(TRANSPARENT_PROPERTY.get()));
     public static final RegistryObject<Block> SHOJI_LANTERN = REGISTRY.register("shoji_lantern", () -> new ShojiLanternBlock(SHOJI_PROPERTY.get()));
     public static final RegistryObject<Block> SHOJI_PANEL = REGISTRY.register("shoji_panel", () -> new TrapDoorBlock(SHOJI_PROPERTY.get()));
     public static final RegistryObject<Block> SHOJI_SCREEN = REGISTRY.register("shoji_screen", () -> new ShojiScreenBlock(SHOJI_PROPERTY.get()));
@@ -69,7 +70,7 @@ public class MoeBlocks {
     public static final RegistryObject<Block> STRIPPED_SAKURA_LOG = REGISTRY.register("stripped_sakura_log", () -> new RotatedPillarBlock(SOLID_PROPERTY.get()));
     public static final RegistryObject<Block> STRIPPED_SAKURA_WOOD = REGISTRY.register("stripped_sakura_wood", () -> new RotatedPillarBlock(SOLID_PROPERTY.get()));
     public static final RegistryObject<Block> TATAMI_MAT = REGISTRY.register("tatami_mat", () -> new RotatedPillarBlock(SOLID_PROPERTY.get()));
-    public static final RegistryObject<Block> TORII_TABLET = REGISTRY.register("torii_tablet", () -> new ToriiTabletBlock(SOLID_PROPERTY.get()));
+    public static final RegistryObject<Block> TORII_TABLET = REGISTRY.register("torii_tablet", () -> new ToriiTabletBlock(TRANSPARENT_PROPERTY.get()));
     public static final RegistryObject<Block> WHITE_PAPER_LANTERN = REGISTRY.register("white_paper_lantern", () -> new PaperLanternBlock(SHOJI_PROPERTY.get(), MaterialColor.WHITE_TERRACOTTA));
     public static final RegistryObject<Block> WHITE_SAKURA_BLOSSOMS = REGISTRY.register("white_sakura_blossoms", () -> new SakuraBlossomsBlock(MoeParticles.WHITE_SAKURA_PETAL, PLANT_PROPERTY.get()));
     public static final RegistryObject<Block> WHITE_SAKURA_SAPLING = REGISTRY.register("white_sakura_sapling", () -> new SaplingBlock(new WhiteSakuraTree(), PLANT_PROPERTY.get()));
@@ -112,6 +113,7 @@ public class MoeBlocks {
         RenderTypeLookup.setRenderLayer(BLUE_SPIDER_LILY.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(BROWN_PAPER_LANTERN.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(CYAN_PAPER_LANTERN.get(), RenderType.getCutout());
+        RenderTypeLookup.setRenderLayer(GARDEN_LANTERN.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(GRAY_PAPER_LANTERN.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(GREEN_PAPER_LANTERN.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(LIGHT_BLUE_PAPER_LANTERN.get(), RenderType.getCutout());
@@ -132,6 +134,7 @@ public class MoeBlocks {
         RenderTypeLookup.setRenderLayer(RED_SPIDER_LILY.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(SHOJI_PANEL.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(SHOJI_SCREEN.get(), RenderType.getCutout());
+        RenderTypeLookup.setRenderLayer(TORII_TABLET.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(WHITE_PAPER_LANTERN.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(WHITE_SAKURA_BLOSSOMS.get(), RenderType.getCutoutMipped());
         RenderTypeLookup.setRenderLayer(WHITE_SAKURA_SAPLING.get(), RenderType.getCutout());
