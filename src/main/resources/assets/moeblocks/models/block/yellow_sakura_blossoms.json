@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/leaves",
+  "textures": {
+    "all": "moeblocks:block/yellow_sakura_blossoms"
+  }
+}

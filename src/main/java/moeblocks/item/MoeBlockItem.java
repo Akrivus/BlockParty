@@ -11,7 +11,7 @@ public class MoeBlockItem extends BlockItem implements ISortableItem {
     protected final int sortOrder;
 
     public MoeBlockItem(RegistryObject<Block> block) {
-        this(block, 99);
+        this(block, 100);
     }
 
     public MoeBlockItem(RegistryObject<Block> block, int sortOrder) {

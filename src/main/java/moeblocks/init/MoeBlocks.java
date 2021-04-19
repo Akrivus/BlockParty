@@ -82,6 +82,7 @@ public class MoeBlocks {
     public static final RegistryObject<Block> WISTERIA_VINE_TIP = REGISTRY.register("wisteria_vine_tip", () -> new WisteriaVineTipBlock(PLANT_PROPERTY.get()));
     public static final RegistryObject<Block> WRITING_TABLE = REGISTRY.register("writing_table", () -> new WritingTableBlock(SOLID_PROPERTY.get()));
     public static final RegistryObject<Block> YELLOW_PAPER_LANTERN = REGISTRY.register("yellow_paper_lantern", () -> new PaperLanternBlock(SHOJI_PROPERTY.get(), MaterialColor.YELLOW_TERRACOTTA));
+    public static final RegistryObject<Block> YELLOW_SAKURA_BLOSSOMS = REGISTRY.register("yellow_sakura_blossoms", () -> new SakuraBlossomsBlock(MoeParticles.YELLOW_SAKURA_PETAL, PLANT_PROPERTY.get()));
     public static final RegistryObject<Block> POTTED_BLUE_SPIDER_LILY = REGISTRY.register("potted_blue_spider_lily", () -> new FlowerPotBlock(MoeBlocks::getFlowerPot, BLUE_SPIDER_LILY, AbstractBlock.Properties.from(MoeBlocks.getFlowerPot())));
     public static final RegistryObject<Block> POTTED_PINK_SAKURA_SAPLING = REGISTRY.register("potted_pink_sakura_sapling", () -> new FlowerPotBlock(MoeBlocks::getFlowerPot, PINK_SAKURA_SAPLING, AbstractBlock.Properties.from(MoeBlocks.getFlowerPot())));
     public static final RegistryObject<Block> POTTED_RED_SPIDER_LILY = REGISTRY.register("potted_red_spider_lily", () -> new FlowerPotBlock(MoeBlocks::getFlowerPot, RED_SPIDER_LILY, AbstractBlock.Properties.from(MoeBlocks.getFlowerPot())));
@@ -132,6 +133,7 @@ public class MoeBlocks {
         RenderTypeLookup.setRenderLayer(PURPLE_PAPER_LANTERN.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(RED_PAPER_LANTERN.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(RED_SPIDER_LILY.get(), RenderType.getCutout());
+        RenderTypeLookup.setRenderLayer(SHIMENAWA.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(SHOJI_PANEL.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(SHOJI_SCREEN.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(TORII_TABLET.get(), RenderType.getCutout());
@@ -143,5 +145,6 @@ public class MoeBlocks {
         RenderTypeLookup.setRenderLayer(WISTERIA_VINE_BODY.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(WISTERIA_VINE_TIP.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(YELLOW_PAPER_LANTERN.get(), RenderType.getCutout());
+        RenderTypeLookup.setRenderLayer(YELLOW_SAKURA_BLOSSOMS.get(), RenderType.getCutoutMipped());
     }
 }
