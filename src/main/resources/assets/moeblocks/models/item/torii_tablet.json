@@ -1,3 +1,6 @@
 {
-  "parent": "moeblocks:block/torii_tablet_east"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "moeblocks:block/torii_tablet"
+  }
 }

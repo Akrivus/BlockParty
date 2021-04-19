@@ -1,0 +1,45 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "shimenawa": "moeblocks:block/shimenawa",
+    "particle": "moeblocks:block/shimenawa"
+  },
+  "elements": [
+    {
+      "from": [0, 12, 6],
+      "to": [16, 16, 10],
+      "faces": {
+        "north": { "uv": [0, 0, 16, 4], "texture": "#shimenawa" },
+        "east": { "uv": [6, 4, 10, 8], "texture": "#shimenawa" },
+        "south": { "uv": [0, 0, 16, 4], "texture": "#shimenawa" },
+        "west": { "uv": [6, 4, 10, 8], "texture": "#shimenawa" },
+        "up": { "uv": [0, 0, 16, 4], "texture": "#shimenawa" },
+        "down": { "uv": [0, 0, 16, 4], "texture": "#shimenawa" }
+      }
+    },
+    {
+      "from": [10, 0, 8],
+      "to": [14, 12, 8],
+      "faces": {
+        "north": { "uv": [10, 4, 14, 16], "texture": "#shimenawa" },
+        "east": { "uv": [10, 4, 10, 16], "texture": "#shimenawa" },
+        "south": { "uv": [10, 4, 14, 16], "texture": "#shimenawa" },
+        "west": { "uv": [10, 4, 10, 16], "texture": "#shimenawa" },
+        "up": { "uv": [10, 4, 14, 4], "texture": "#shimenawa" },
+        "down": { "uv": [10, 4, 14, 4], "texture": "#shimenawa" }
+      }
+    },
+    {
+      "from": [2, 0, 8],
+      "to": [6, 12, 8],
+      "faces": {
+        "north": { "uv": [10, 4, 14, 16], "texture": "#shimenawa" },
+        "east": { "uv": [10, 4, 10, 16], "texture": "#shimenawa" },
+        "south": { "uv": [10, 4, 14, 16], "texture": "#shimenawa" },
+        "west": { "uv": [10, 4, 10, 16], "texture": "#shimenawa" },
+        "up": { "uv": [10, 4, 14, 4], "texture": "#shimenawa" },
+        "down": { "uv": [10, 4, 14, 4], "texture": "#shimenawa" }
+      }
+    }
+  ]
+}
