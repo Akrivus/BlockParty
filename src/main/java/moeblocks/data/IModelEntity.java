@@ -21,6 +21,7 @@ public interface IModelEntity<M extends Row> {
     M getNewRow();
 
     default void claim(PlayerEntity player) {
+        if (player.world.isRemote()) { return; }
         if (player == null) {
             this.setPlayerUUID(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         } else {
