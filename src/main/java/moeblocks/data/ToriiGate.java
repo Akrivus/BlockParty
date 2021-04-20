@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundNBT;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public class ToriiGate extends Row<ToriiTabletTileEntity> {
     public ToriiGate(ResultSet set) throws SQLException {
@@ -24,14 +25,15 @@ public class ToriiGate extends Row<ToriiTabletTileEntity> {
 
     @Override
     public void sync(ToriiTabletTileEntity entity) {
-
+        this.get(DATABASE_ID).set(entity.getDatabaseID());
+        this.get(POS).set(entity.getDimBlockPos());
+        this.get(PLAYER_UUID).set(entity.getPlayerUUID());
     }
 
     @Override
     public void load(ToriiTabletTileEntity entity) {
-        this.get(DATABASE_ID).set(entity.getDatabaseID());
-        this.get(POS).set(entity.getDimBlockPos());
-        this.get(PLAYER_UUID).set(entity.getPlayerUUID());
+        entity.setDatabaseID((UUID) this.get(DATABASE_ID).get());
+        entity.setPlayerUUID((UUID) this.get(PLAYER_UUID).get());
     }
 
     public static class Schema extends Table<ToriiGate> {

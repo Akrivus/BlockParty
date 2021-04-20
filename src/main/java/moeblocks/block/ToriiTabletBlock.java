@@ -1,17 +1,13 @@
 package moeblocks.block;
 
 import moeblocks.block.entity.ToriiTabletTileEntity;
-import moeblocks.init.MoeBlocks;
 import moeblocks.init.MoeTags;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
-import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.pattern.BlockPattern;
 import net.minecraft.block.pattern.BlockPatternBuilder;
-import net.minecraft.block.pattern.BlockStateMatcher;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.DirectionProperty;
@@ -27,7 +23,7 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
-public class ToriiTabletBlock extends Block implements ITileEntityProvider {
+public class ToriiTabletBlock extends AbstractDataBlock<ToriiTabletTileEntity> {
     public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
     protected static final VoxelShape NORTH_AABB = Block.makeCuboidShape(2.0D, 0.0D, 10.0D, 14.0D, 14.0D, 16.0D);
     protected static final VoxelShape EAST_AABB = Block.makeCuboidShape(0.0D, 0.0D, 2.0D, 6.0D, 14.0D, 14.0D);
@@ -35,7 +31,7 @@ public class ToriiTabletBlock extends Block implements ITileEntityProvider {
     protected static final VoxelShape WEST_AABB = Block.makeCuboidShape(10.0D, 0.0D, 2.0D, 16.0D, 14.0D, 14.0D);
 
     public ToriiTabletBlock(Properties properties) {
-        super(properties);
+        super(ToriiTabletTileEntity::new, properties);
         this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
     }
 
@@ -49,12 +45,8 @@ public class ToriiTabletBlock extends Block implements ITileEntityProvider {
 
     @Override
     public void onBlockPlacedBy(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
-        BlockPattern.PatternHelper match = this.getGatePattern().match(world, pos);
-        if (match != null) { this.getTileEntity(world, pos).claim((PlayerEntity) (placer)); }
-    }
-
-    public ToriiTabletTileEntity getTileEntity(World world, BlockPos pos) {
-        return ((ToriiTabletTileEntity) (world.getTileEntity(pos)));
+        BlockPattern.PatternHelper match = this.getGatePattern().match(world, pos.offset(state.get(FACING).getOpposite()));
+        if (match != null) { super.onBlockPlacedBy(world, pos, state, placer, stack); }
     }
 
     @Override
@@ -83,7 +75,7 @@ public class ToriiTabletBlock extends Block implements ITileEntityProvider {
     }
 
     private BlockPattern getGatePattern() {
-        return BlockPatternBuilder.start().aisle("#######", "###X###", " #   # ", " #   # ", " #   # ", " #   # ").where('#', CachedBlockInfo.hasState((state) -> state.isIn(MoeTags.Blocks.SAKURA_WOOD))).where('X', CachedBlockInfo.hasState(BlockStateMatcher.forBlock(MoeBlocks.TORII_TABLET.get()))).where(' ', CachedBlockInfo.hasState((state) -> !state.isSolid())).build();
+        return BlockPatternBuilder.start().aisle("#######", "#######", " #   # ", " #   # ", " #   # ", " #   # ").where('#', CachedBlockInfo.hasState((state) -> state.isIn(MoeTags.Blocks.SAKURA_WOOD))).where(' ', CachedBlockInfo.hasState((state) -> !state.isSolid())).build();
     }
 
     @Override

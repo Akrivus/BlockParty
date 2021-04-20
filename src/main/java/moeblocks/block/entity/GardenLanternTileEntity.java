@@ -1,6 +1,7 @@
 package moeblocks.block.entity;
 
 import moeblocks.data.GardenLantern;
+import moeblocks.init.MoeData;
 import moeblocks.init.MoeTileEntities;
 
 public class GardenLanternTileEntity extends AbstractDataTileEntity<GardenLantern> {
@@ -10,11 +11,11 @@ public class GardenLanternTileEntity extends AbstractDataTileEntity<GardenLanter
 
     @Override
     public GardenLantern getRow() {
-        return null;
+        return MoeData.GardenLanterns.find(this.getDatabaseID());
     }
 
     @Override
     public GardenLantern getNewRow() {
-        return null;
+        return new GardenLantern(this);
     }
 }

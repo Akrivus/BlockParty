@@ -1,6 +1,7 @@
 package moeblocks.block.entity;
 
 import moeblocks.data.SakuraSapling;
+import moeblocks.init.MoeData;
 import moeblocks.init.MoeTileEntities;
 
 public class SakuraSaplingTileEntity extends AbstractDataTileEntity<SakuraSapling> {
@@ -10,11 +11,11 @@ public class SakuraSaplingTileEntity extends AbstractDataTileEntity<SakuraSaplin
 
     @Override
     public SakuraSapling getRow() {
-        return null;
+        return MoeData.SakuraTrees.find(this.getDatabaseID());
     }
 
     @Override
     public SakuraSapling getNewRow() {
-        return null;
+        return new SakuraSapling(this);
     }
 }

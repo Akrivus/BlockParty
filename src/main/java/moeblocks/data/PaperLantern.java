@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundNBT;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public class PaperLantern extends Row<PaperLanternTileEntity> {
     public PaperLantern(ResultSet set) throws SQLException {
@@ -31,7 +32,8 @@ public class PaperLantern extends Row<PaperLanternTileEntity> {
 
     @Override
     public void load(PaperLanternTileEntity entity) {
-
+        entity.setDatabaseID((UUID) this.get(DATABASE_ID).get());
+        entity.setPlayerUUID((UUID) this.get(PLAYER_UUID).get());
     }
 
     public static class Schema extends Table<PaperLantern> {

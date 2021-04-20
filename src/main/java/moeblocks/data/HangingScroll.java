@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundNBT;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public class HangingScroll extends Row<HangingScrollTileEntity> {
     protected static final int SYMBOL  =  3;
@@ -34,7 +35,8 @@ public class HangingScroll extends Row<HangingScrollTileEntity> {
 
     @Override
     public void load(HangingScrollTileEntity entity) {
-
+        entity.setDatabaseID((UUID) this.get(DATABASE_ID).get());
+        entity.setPlayerUUID((UUID) this.get(PLAYER_UUID).get());
     }
 
     public static class Schema extends Table<HangingScroll> {

@@ -20,17 +20,13 @@ public interface IModelEntity<M extends Row> {
     M getRow();
     M getNewRow();
 
-    default void claim(PlayerEntity player) {
-        if (player.world.isRemote()) { return; }
-        if (player == null) {
-            this.setPlayerUUID(UUID.fromString("00000000-0000-0000-0000-000000000000"));
-        } else {
-            MoeData.get(player.world).addTo(player, this.getDatabaseID());
-            this.setPlayerUUID(player.getUniqueID());
-        }
+    default boolean claim(PlayerEntity player) {
+        if (player.world.isRemote()) { return false; }
+        this.setPlayerUUID(player == null ? UUID.fromString("00000000-0000-0000-0000-000000000000") : player.getUniqueID());
         if (!this.hasRow()) {
             this.getNewRow().insert();
         }
+        return true;
     }
 
     default MoeData getData() {

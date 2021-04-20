@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundNBT;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public class LuckyCat extends Row<LuckyCatTileEntity> {
     public LuckyCat(ResultSet set) throws SQLException {
@@ -31,7 +32,8 @@ public class LuckyCat extends Row<LuckyCatTileEntity> {
 
     @Override
     public void load(LuckyCatTileEntity entity) {
-
+        entity.setDatabaseID((UUID) this.get(DATABASE_ID).get());
+        entity.setPlayerUUID((UUID) this.get(PLAYER_UUID).get());
     }
 
     public static class Schema extends Table<LuckyCat> {

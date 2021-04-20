@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundNBT;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public class SakuraSapling extends Row<SakuraSaplingTileEntity> {
     public SakuraSapling(ResultSet set) throws SQLException {
@@ -31,7 +32,8 @@ public class SakuraSapling extends Row<SakuraSaplingTileEntity> {
 
     @Override
     public void load(SakuraSaplingTileEntity entity) {
-
+        entity.setDatabaseID((UUID) this.get(DATABASE_ID).get());
+        entity.setPlayerUUID((UUID) this.get(PLAYER_UUID).get());
     }
 
     public static class Schema extends Table<SakuraSapling> {

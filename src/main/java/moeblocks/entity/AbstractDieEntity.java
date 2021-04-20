@@ -98,15 +98,15 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
     private int totalHops;
     private int face = -1;
 
-    public AbstractDieEntity(EntityType<? extends AbstractDieEntity> type, World world) {
+    protected AbstractDieEntity(EntityType<? extends AbstractDieEntity> type, World world) {
         super(type, world);
     }
 
-    public AbstractDieEntity(EntityType<? extends AbstractDieEntity> type, World world, double x, double y, double z) {
+    protected AbstractDieEntity(EntityType<? extends AbstractDieEntity> type, World world, double x, double y, double z) {
         super(type, x, y, z, world);
     }
 
-    public AbstractDieEntity(EntityType<? extends AbstractDieEntity> type, World world, LivingEntity thrower) {
+    protected AbstractDieEntity(EntityType<? extends AbstractDieEntity> type, World world, LivingEntity thrower) {
         super(type, thrower, world);
     }
 

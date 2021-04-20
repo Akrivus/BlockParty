@@ -9,9 +9,9 @@ import net.minecraftforge.fml.network.NetworkEvent;
 import java.util.function.Supplier;
 
 public abstract class AbstractMessage {
-    public AbstractMessage(PacketBuffer buffer) { }
+    protected AbstractMessage(PacketBuffer buffer) { }
 
-    public AbstractMessage() { }
+    protected AbstractMessage() { }
 
     public static void prepare(AbstractMessage message, PacketBuffer buffer) {
         message.encode(buffer);

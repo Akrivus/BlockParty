@@ -1,6 +1,7 @@
 package moeblocks.block.entity;
 
 import moeblocks.data.ToriiGate;
+import moeblocks.init.MoeData;
 import moeblocks.init.MoeTileEntities;
 
 public class ToriiTabletTileEntity extends AbstractDataTileEntity<ToriiGate> {
@@ -10,11 +11,11 @@ public class ToriiTabletTileEntity extends AbstractDataTileEntity<ToriiGate> {
 
     @Override
     public ToriiGate getRow() {
-        return null;
+        return MoeData.ToriiGates.find(this.getDatabaseID());
     }
 
     @Override
     public ToriiGate getNewRow() {
-        return null;
+        return new ToriiGate(this);
     }
 }

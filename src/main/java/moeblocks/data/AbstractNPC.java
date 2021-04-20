@@ -31,15 +31,15 @@ public abstract class AbstractNPC<E extends AbstractNPCEntity> extends Row<E> {
     protected static final int AGE          = 19;
     protected static final int LAST_SEEN_AT = 20;
 
-    public AbstractNPC(Table table, ResultSet set) throws SQLException {
+    protected AbstractNPC(Table table, ResultSet set) throws SQLException {
         super(table, set);
     }
 
-    public AbstractNPC(Table table, CompoundNBT compound) {
+    protected AbstractNPC(Table table, CompoundNBT compound) {
         super(table, compound);
     }
 
-    public AbstractNPC(Table table, E entity) {
+    protected AbstractNPC(Table table, E entity) {
         super(table, entity);
     }
 

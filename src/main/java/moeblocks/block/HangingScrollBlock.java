@@ -1,6 +1,7 @@
 package moeblocks.block;
 
 import moeblocks.automata.Condition;
+import moeblocks.block.entity.HangingScrollTileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
@@ -17,7 +18,7 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
-public class HangingScrollBlock extends Block {
+public class HangingScrollBlock extends AbstractDataBlock<HangingScrollTileEntity> {
     public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
     protected static final VoxelShape NORTH_AABB = Block.makeCuboidShape(1.0D, 1.0D, 0.0D, 15.0D, 15.0D, 2.0D);
     protected static final VoxelShape EAST_AABB = Block.makeCuboidShape(14.0D, 1.0D, 1.0D, 16.0D, 15.0D, 15.0D);
@@ -26,7 +27,7 @@ public class HangingScrollBlock extends Block {
     protected final Condition condition;
 
     public HangingScrollBlock(Properties properties, Condition condition) {
-        super(properties);
+        super(HangingScrollTileEntity::new, properties);
         this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
         this.condition = condition;
     }

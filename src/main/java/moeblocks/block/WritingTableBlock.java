@@ -1,5 +1,6 @@
 package moeblocks.block;
 
+import moeblocks.block.entity.WritingTableTileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
@@ -10,11 +11,11 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 
-public class WritingTableBlock extends Block {
+public class WritingTableBlock extends AbstractDataBlock<WritingTableTileEntity> {
     public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
 
     public WritingTableBlock(Properties properties) {
-        super(properties);
+        super(WritingTableTileEntity::new, properties);
         this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
     }
 

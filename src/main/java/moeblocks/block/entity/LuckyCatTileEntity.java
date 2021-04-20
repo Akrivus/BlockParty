@@ -1,6 +1,7 @@
 package moeblocks.block.entity;
 
 import moeblocks.data.LuckyCat;
+import moeblocks.init.MoeData;
 import moeblocks.init.MoeTileEntities;
 
 public class LuckyCatTileEntity extends AbstractDataTileEntity<LuckyCat> {
@@ -10,11 +11,11 @@ public class LuckyCatTileEntity extends AbstractDataTileEntity<LuckyCat> {
 
     @Override
     public LuckyCat getRow() {
-        return null;
+        return MoeData.LuckyCats.find(this.getDatabaseID());
     }
 
     @Override
     public LuckyCat getNewRow() {
-        return null;
+        return new LuckyCat(this);
     }
 }

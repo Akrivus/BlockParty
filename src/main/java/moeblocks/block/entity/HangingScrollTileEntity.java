@@ -2,6 +2,7 @@ package moeblocks.block.entity;
 
 import moeblocks.automata.Condition;
 import moeblocks.data.HangingScroll;
+import moeblocks.init.MoeData;
 import moeblocks.init.MoeTileEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
@@ -36,11 +37,11 @@ public class HangingScrollTileEntity extends AbstractDataTileEntity<HangingScrol
 
     @Override
     public HangingScroll getRow() {
-        return null;
+        return MoeData.HangingScrolls.find(this.getDatabaseID());
     }
 
     @Override
     public HangingScroll getNewRow() {
-        return null;
+        return new HangingScroll(this);
     }
 }

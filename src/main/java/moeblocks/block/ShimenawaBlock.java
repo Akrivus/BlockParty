@@ -1,5 +1,6 @@
 package moeblocks.block;
 
+import moeblocks.block.entity.ShimenawaTileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
@@ -16,7 +17,7 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
-public class ShimenawaBlock extends Block {
+public class ShimenawaBlock extends AbstractDataBlock<ShimenawaTileEntity> {
     public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
     public static final BooleanProperty HANGING = BooleanProperty.create("hanging");
     protected static final VoxelShape NORTH_AABB = Block.makeCuboidShape(0.0D, 12.0D, 12.0D, 16.0D, 16.0D, 16.0D);
@@ -25,7 +26,7 @@ public class ShimenawaBlock extends Block {
     protected static final VoxelShape WEST_AABB = Block.makeCuboidShape(12.0D, 12.0D, 0.0D, 16.0D, 16.0D, 16.0D);
 
     public ShimenawaBlock(Properties properties) {
-        super(properties);
+        super(ShimenawaTileEntity::new, properties);
         this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH).with(HANGING, true));
     }
 

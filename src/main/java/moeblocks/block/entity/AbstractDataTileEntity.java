@@ -4,6 +4,7 @@ import moeblocks.data.IModelEntity;
 import moeblocks.data.sql.Row;
 import moeblocks.util.DimBlockPos;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
@@ -11,33 +12,27 @@ import net.minecraft.tileentity.TileEntityType;
 import java.util.UUID;
 
 public abstract class AbstractDataTileEntity<M extends Row> extends TileEntity implements IModelEntity<M> {
-    protected UUID id;
-    protected UUID entityID;
+    protected UUID id = UUID.randomUUID();
     protected UUID playerUUID;
+    protected boolean claimed;
 
-    public AbstractDataTileEntity(TileEntityType<?> type) {
+    protected AbstractDataTileEntity(TileEntityType<?> type) {
         super(type);
-        this.entityID = UUID.randomUUID();
     }
 
     @Override
     public void read(BlockState state, CompoundNBT compound) {
         super.read(state, compound);
-        this.entityID = compound.getUniqueId("EntityID");
+        this.id = compound.getUniqueId("DatabaseID");
         if (compound.getBoolean("HasRow")) {
-            this.playerUUID = compound.getUniqueId("PlayerUUID");
-            this.id = compound.getUniqueId("DatabaseID");
+            this.getRow().load(this);
         }
     }
 
     @Override
     public CompoundNBT write(CompoundNBT compound) {
+        compound.putUniqueId("DatabaseID", this.id);
         compound.putBoolean("HasRow", this.hasRow());
-        compound.putUniqueId("EntityID", this.entityID);
-        if (compound.getBoolean("HasRow")) {
-            compound.putUniqueId("PlayerUUID", this.playerUUID);
-            compound.putUniqueId("DatabaseID", this.id);
-        }
         return super.write(compound);
     }
 
@@ -80,6 +75,12 @@ public abstract class AbstractDataTileEntity<M extends Row> extends TileEntity i
 
     @Override
     public boolean hasRow() {
-        return this.id != null;
+        return this.claimed && this.getRow() != null;
+    }
+
+    @Override
+    public boolean claim(PlayerEntity player) {
+        if (IModelEntity.super.claim(player)) { this.claimed = true; }
+        return this.claimed;
     }
 }

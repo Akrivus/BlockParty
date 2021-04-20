@@ -541,6 +541,12 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
         return this.isLocal() && this.getRow() != null;
     }
 
+    @Override
+    public boolean claim(PlayerEntity player) {
+        if (IModelEntity.super.claim(player)) { this.getData().addTo(player, this.getDatabaseID()); }
+        return this.isLocal();
+    }
+
     public boolean is(ICondition condition) {
         return condition.isTrue(this);
     }

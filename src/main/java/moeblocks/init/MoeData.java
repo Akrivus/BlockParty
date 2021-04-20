@@ -72,6 +72,7 @@ public class MoeData extends WorldSavedData {
     }
 
     public void addTo(PlayerEntity player, UUID uuid) {
+        if (player == null) { return; }
         List<UUID> list = this.getFrom(player);
         list.add(uuid);
         this.byPlayer.put(player.getUniqueID(), list);
