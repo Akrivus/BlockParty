@@ -3,7 +3,7 @@ package moeblocks.automata.trait;
 import moeblocks.automata.IState;
 import moeblocks.automata.ITrait;
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.init.MoeData;
+import moeblocks.init.MoeWorldData;
 import net.minecraft.world.World;
 
 import java.util.Arrays;
@@ -47,11 +47,11 @@ public enum Gender implements ITrait<Gender> {
         List<String> names = this.getUnclaimedNames(world);
         if (names.isEmpty()) { return null; }
         String name = names.get(world.rand.nextInt(names.size()));
-        MoeData.get(world).names.add(name);
+        MoeWorldData.get(world).names.add(name);
         return name;
     }
 
     protected List<String> getUnclaimedNames(World world) {
-        return Arrays.asList(this.names).stream().filter((name) -> !MoeData.get(world).names.contains(name)).collect(Collectors.toList());
+        return Arrays.asList(this.names).stream().filter((name) -> !MoeWorldData.get(world).names.contains(name)).collect(Collectors.toList());
     }
 }

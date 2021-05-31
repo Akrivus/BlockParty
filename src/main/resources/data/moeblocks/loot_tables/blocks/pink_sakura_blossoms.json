@@ -35,7 +35,7 @@
                   ]
                 }
               ],
-              "name": "moeblocks:pink_sakura_blossoms"
+              "name": "moeblocks:sakura_blossoms"
             },
             {
               "type": "minecraft:item",
@@ -54,7 +54,7 @@
                   ]
                 }
               ],
-              "name": "moeblocks:pink_sakura_sapling"
+              "name": "moeblocks:sakura_sapling"
             }
           ]
         }

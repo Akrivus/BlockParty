@@ -1,17 +1,24 @@
 package moeblocks.client.animation;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import moeblocks.client.model.IRiggableModel;
-import moeblocks.entity.AbstractNPCEntity;
+import moeblocks.client.animation.state.DefaultAnimation;
+import moeblocks.client.animation.state.YearbookAnimation;
+
+import java.util.function.Supplier;
 
 public enum Animation {
-    DEFAULT, YEARBOOK;
+    DEFAULT(DefaultAnimation::new), YEARBOOK(YearbookAnimation::new);
 
-    public void setRotationAngles(AbstractNPCEntity entity, IRiggableModel model, float limbSwing, float limbSwingAmount, float ageInTicks) {
+    private final Supplier<AbstractAnimation> animation;
 
+    Animation(Supplier<AbstractAnimation> animation) {
+        this.animation = animation;
     }
 
-    public void render(AbstractNPCEntity entity, MatrixStack stack, float partialTickTime) {
+    public AbstractAnimation get() {
+        return this.animation.get();
+    }
 
+    public static AbstractAnimation get(String key) {
+        return Animation.valueOf(key).get();
     }
 }

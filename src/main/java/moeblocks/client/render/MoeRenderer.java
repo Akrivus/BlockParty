@@ -45,23 +45,22 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
 
     @Override
     protected void renderName(MoeEntity entity, ITextComponent name, MatrixStack stack, IRenderTypeBuffer buffer, int packedLight) {
-        if (entity.getAnimation() != Animation.YEARBOOK) {
-            if (Minecraft.getInstance().player.getDistance(entity) > 8.0F) { return; }
-            String[] lines = new String[] { this.getHealth(entity), name.getString(), entity.getDatabaseID().toString() };
-            stack.push();
-            stack.translate(0.0D, entity.getHeight() + 0.5F, 0.0D);
-            stack.rotate(this.renderManager.getCameraOrientation());
-            stack.scale(-0.025F, -0.025F, 0.025F);
-            for (int i = 0; i < lines.length; ++i) {
-                FontRenderer font = this.getFontRendererFromRenderManager();
-                int x = -font.getStringWidth(lines[i]) / 2;
-                int y = i * -10;
-                Matrix4f matrix = stack.getLast().getMatrix();
-                int alpha = (int) (Minecraft.getInstance().gameSettings.getTextBackgroundOpacity(0.25F) * 255.0F) << 24;
-                font.renderString(lines[i], x, y, 0xFFFFFFFF, false, matrix, buffer, false, alpha, packedLight);
-            }
-            stack.pop();
+        if (entity.getAnimationKey() == Animation.YEARBOOK) { return; }
+        if (Minecraft.getInstance().player.getDistance(entity) > 8.0F) { return; }
+        String[] lines = new String[] { this.getHealth(entity), name.getString(), entity.getDatabaseID().toString() };
+        stack.push();
+        stack.translate(0.0D, entity.getHeight() + 0.5F, 0.0D);
+        stack.rotate(this.renderManager.getCameraOrientation());
+        stack.scale(-0.025F, -0.025F, 0.025F);
+        for (int i = 0; i < lines.length; ++i) {
+            FontRenderer font = this.getFontRendererFromRenderManager();
+            int x = -font.getStringWidth(lines[i]) / 2;
+            int y = i * -10;
+            Matrix4f matrix = stack.getLast().getMatrix();
+            int alpha = (int) (Minecraft.getInstance().gameSettings.getTextBackgroundOpacity(0.25F) * 255.0F) << 24;
+            font.renderString(lines[i], x, y, 0xFFFFFFFF, false, matrix, buffer, false, alpha, packedLight);
         }
+        stack.pop();
     }
 
     public String getHealth(MoeEntity entity) {
@@ -73,9 +72,8 @@ public class MoeRenderer extends MobRenderer<MoeEntity, MoeModel<MoeEntity>> imp
         super.preRenderCallback(entity, stack, partialTickTime);
         entity.getAnimation().render(entity, stack, partialTickTime);
         stack.scale(0.9375F, 0.9375F, 0.9375F);
-        if (entity.getAnimation() != Animation.YEARBOOK) {
-            stack.scale(entity.getScale(), entity.getScale(), entity.getScale());
-            this.shadowSize = entity.getScale() * 0.25F;
-        }
+        if (entity.getAnimationKey() == Animation.YEARBOOK) { return; }
+        stack.scale(entity.getScale(), entity.getScale(), entity.getScale());
+        this.shadowSize = entity.getScale() * 0.25F;
     }
 }

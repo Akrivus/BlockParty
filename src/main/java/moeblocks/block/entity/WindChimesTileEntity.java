@@ -1,8 +1,8 @@
 package moeblocks.block.entity;
 
 import moeblocks.data.WindChimes;
-import moeblocks.init.MoeData;
 import moeblocks.init.MoeTileEntities;
+import moeblocks.init.MoeWorldData;
 
 public class WindChimesTileEntity extends AbstractDataTileEntity<WindChimes> {
     public WindChimesTileEntity() {
@@ -11,7 +11,7 @@ public class WindChimesTileEntity extends AbstractDataTileEntity<WindChimes> {
 
     @Override
     public WindChimes getRow() {
-        return MoeData.WindChimes.find(this.getDatabaseID());
+        return MoeWorldData.WindChimes.find(this.getDatabaseID());
     }
 
     @Override

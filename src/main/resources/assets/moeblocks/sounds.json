@@ -1,4 +1,10 @@
 {
+  "ambient.japan": {
+    "subtitle": "subtitle.ambient.japan",
+    "sounds": [
+      "moeblocks:ambient/japan"
+    ]
+  },
   "block.shoji_screen.close": {
     "subtitle": "subtitle.shoji_screen",
     "sounds": [
@@ -439,6 +445,26 @@
     "subtitle": "subtitle.yearbook.remove_page",
     "sounds": [
       "moeblocks:item/yearbook/remove_page"
+    ]
+  },
+  "music_disc.anteater_sanctuary": {
+    "sounds": [
+      {
+        "name": "moeblocks:records/anteater_sanctuary_1",
+        "stream": true
+      },
+      {
+        "name": "moeblocks:records/anteater_sanctuary_2",
+        "stream": true
+      }
+    ]
+  },
+  "music_disc.sakura_sakura": {
+    "sounds": [
+      {
+        "name": "moeblocks:records/sakura_sakura",
+        "stream": true
+      }
     ]
   }
 }

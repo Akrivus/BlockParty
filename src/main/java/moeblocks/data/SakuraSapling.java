@@ -3,7 +3,7 @@ package moeblocks.data;
 import moeblocks.block.entity.SakuraSaplingTileEntity;
 import moeblocks.data.sql.Row;
 import moeblocks.data.sql.Table;
-import moeblocks.init.MoeData;
+import moeblocks.init.MoeWorldData;
 import net.minecraft.nbt.CompoundNBT;
 
 import java.sql.ResultSet;
@@ -12,15 +12,15 @@ import java.util.UUID;
 
 public class SakuraSapling extends Row<SakuraSaplingTileEntity> {
     public SakuraSapling(ResultSet set) throws SQLException {
-        super(MoeData.SakuraTrees, set);
+        super(MoeWorldData.SakuraTrees, set);
     }
 
     public SakuraSapling(CompoundNBT compound) {
-        super(MoeData.SakuraTrees, compound);
+        super(MoeWorldData.SakuraTrees, compound);
     }
 
     public SakuraSapling(SakuraSaplingTileEntity entity) {
-        super(MoeData.SakuraTrees, entity);
+        super(MoeWorldData.SakuraTrees, entity);
     }
 
     @Override

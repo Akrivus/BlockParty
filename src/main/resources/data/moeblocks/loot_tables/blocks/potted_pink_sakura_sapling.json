@@ -20,7 +20,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "moeblocks:pink_sakura_sapling"
+          "name": "moeblocks:sakura_sapling"
         }
       ],
       "conditions": [

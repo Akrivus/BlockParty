@@ -1,5 +1,7 @@
 package moeblocks.entity;
 
+import moeblocks.automata.MarkovChain;
+import moeblocks.automata.State;
 import moeblocks.automata.trait.Dere;
 import moeblocks.automata.trait.Gender;
 import moeblocks.convo.Dialogue;
@@ -12,6 +14,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.material.MaterialColor;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.Pose;
@@ -28,6 +31,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.particles.BasicParticleType;
 import net.minecraft.pathfinding.FlyingPathNavigator;
 import net.minecraft.pathfinding.GroundPathNavigator;
 import net.minecraft.pathfinding.PathNodeType;
@@ -41,6 +45,7 @@ import net.minecraft.world.server.ServerWorld;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public class MoeEntity extends AbstractNPCEntity<Moe> {
     public static final DataParameter<Optional<BlockState>> BLOCK_STATE = EntityDataManager.createKey(MoeEntity.class, DataSerializers.OPTIONAL_BLOCK_STATE);
@@ -82,7 +87,13 @@ public class MoeEntity extends AbstractNPCEntity<Moe> {
 
     @Override
     public ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand) {
-        return ActionResultType.PASS;
+        switch (hand) {
+        default:
+            this.setState(MarkovChain.start(0.8, State.JUMP).chain(0.2, State.LOOK_AT_PLAYER));
+            return ActionResultType.SUCCESS;
+        case OFF_HAND:
+            return ActionResultType.PASS;
+        }
     }
 
     @Override
@@ -108,6 +119,18 @@ public class MoeEntity extends AbstractNPCEntity<Moe> {
     @Override
     public void updateSleepState() {
 
+    }
+
+    @Override
+    public void livingTick() {
+        super.livingTick();
+        if (this.isRemote() && this.rand.nextInt(10) == 0 && (!Minecraft.getInstance().player.getUniqueID().equals(this.getPlayerUUID()) || this.getLoyalty() < 5.0F)) {
+            Supplier<BasicParticleType> particle = this.getLoyalty() < 5.0F ? MoeParticles.WHITE_SAKURA : MoeParticles.SAKURA;
+            double x = Math.sin(0.0174444444D * this.world.getDayTime() / 1000 * 15.0D) * this.rand.nextDouble();
+            double z = Math.cos(0.0174444444D * this.world.getDayTime() / 1000 * 15.0D) * this.rand.nextDouble();
+            double y = Math.abs(this.rand.nextGaussian()) * -1.0D;
+            this.world.addParticle(particle.get(), this.getPosX() + this.rand.nextDouble() - 0.5, this.getPosY() + this.rand.nextDouble() * this.getHeight() / 2 + this.getHeight() / 2, this.getPosZ() + this.rand.nextDouble() - 0.5, x, y, z);
+        }
     }
 
     public void say(PlayerEntity player, String line, Response... responses) {
@@ -153,7 +176,7 @@ public class MoeEntity extends AbstractNPCEntity<Moe> {
 
     @Override
     public Moe getRow() {
-        return MoeData.Moes.find(this.getDatabaseID());
+        return MoeWorldData.Moes.find(this.getDatabaseID());
     }
 
     @Override
@@ -261,6 +284,13 @@ public class MoeEntity extends AbstractNPCEntity<Moe> {
     public void notifyDataManagerChange(DataParameter<?> key) {
         if (SCALE.equals(key)) { this.recalculateSize(); }
         super.notifyDataManagerChange(key);
+    }
+
+    @Override
+    public void onMention(PlayerEntity player, String message) {
+        this.playSound(MoeSounds.ENTITY_MOE_CONFUSED.get());
+        this.jump();
+        this.setState(State.LOOK_AT_PLAYER);
     }
 
     @Override

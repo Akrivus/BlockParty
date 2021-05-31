@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "moeblocks:ginkgo_slab",
     "moeblocks:sakura_slab"
   ]
 }

@@ -3,7 +3,7 @@ package moeblocks.data;
 import moeblocks.block.entity.ShimenawaTileEntity;
 import moeblocks.data.sql.Row;
 import moeblocks.data.sql.Table;
-import moeblocks.init.MoeData;
+import moeblocks.init.MoeWorldData;
 import net.minecraft.nbt.CompoundNBT;
 
 import java.sql.ResultSet;
@@ -12,15 +12,15 @@ import java.util.UUID;
 
 public class Shimenawa extends Row<ShimenawaTileEntity> {
     public Shimenawa(ResultSet set) throws SQLException {
-        super(MoeData.Shimenawa, set);
+        super(MoeWorldData.Shimenawa, set);
     }
 
     public Shimenawa(CompoundNBT compound) {
-        super(MoeData.Shimenawa, compound);
+        super(MoeWorldData.Shimenawa, compound);
     }
 
     public Shimenawa(ShimenawaTileEntity entity) {
-        super(MoeData.Shimenawa, entity);
+        super(MoeWorldData.Shimenawa, entity);
     }
 
     @Override

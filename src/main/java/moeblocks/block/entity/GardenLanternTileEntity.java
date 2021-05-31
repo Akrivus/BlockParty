@@ -1,8 +1,8 @@
 package moeblocks.block.entity;
 
 import moeblocks.data.GardenLantern;
-import moeblocks.init.MoeData;
 import moeblocks.init.MoeTileEntities;
+import moeblocks.init.MoeWorldData;
 
 public class GardenLanternTileEntity extends AbstractDataTileEntity<GardenLantern> {
     public GardenLanternTileEntity() {
@@ -11,7 +11,7 @@ public class GardenLanternTileEntity extends AbstractDataTileEntity<GardenLanter
 
     @Override
     public GardenLantern getRow() {
-        return MoeData.GardenLanterns.find(this.getDatabaseID());
+        return MoeWorldData.GardenLanterns.find(this.getDatabaseID());
     }
 
     @Override

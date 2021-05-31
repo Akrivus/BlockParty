@@ -5,10 +5,16 @@ import moeblocks.convo.Scene;
 import moeblocks.convo.Transition;
 import moeblocks.convo.enums.Interaction;
 import moeblocks.convo.enums.Response;
+import moeblocks.entity.AbstractNPCEntity;
+import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Mod.EventBusSubscriber
 public class MoeConvos {
     private static final List<Conversation> REGISTRY = new ArrayList<>();
 
@@ -26,5 +32,12 @@ public class MoeConvos {
 
     public static void register(Conversation conversation) {
         REGISTRY.add(conversation);
+    }
+
+    @SubscribeEvent
+    public static void onServerChat(ServerChatEvent e) {
+        e.getPlayer().world.getEntitiesWithinAABB(AbstractNPCEntity.class, e.getPlayer().getBoundingBox().grow(8, 8, 8)).forEach((npc) -> {
+            if (StringUtils.containsIgnoreCase(e.getMessage(), npc.getGivenName())) { npc.onMention(e.getPlayer(), e.getMessage()); }
+        });
     }
 }

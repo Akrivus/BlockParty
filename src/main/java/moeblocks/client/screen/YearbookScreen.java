@@ -51,7 +51,7 @@ public class YearbookScreen extends ControllerScreen {
     @Override
     public void setNPC() {
         this.entity = this.npc.getClientEntity(this.minecraft);
-        this.entity.setAnimation(Animation.YEARBOOK);
+        this.entity.setAnimation(Animation.YEARBOOK.get());
         this.name = this.entity.getProfessionName().getString();
         this.updateButtons();
         this.stats[0] = String.format("%.0f", this.entity.getHealth());
@@ -60,13 +60,13 @@ public class YearbookScreen extends ControllerScreen {
         this.stats[3] = String.format("%.0f", this.entity.getStress());
         this.lines[0] = Trans.late(this.entity.getDere().getTranslationKey());
         this.lines[1] = Trans.late(this.entity.getBloodType().getTranslationKey());
-        this.lines[2] = String.format(Trans.late("debug.moeblocks.age"), this.entity.getAgeInYears());
+        this.lines[2] = String.format(Trans.late("characteristic.moeblocks.age"), this.entity.getAgeInYears());
         if (this.npc.isEstrangedFrom(this.getPlayer())) {
-            this.lines[3] = Trans.late("debug.moeblocks.storyphase.estranged");
+            this.lines[3] = Trans.late("characteristic.moeblocks.storyphase.estranged");
         } else if (this.npc.isDead()) {
-            this.lines[3] = Trans.late("debug.moeblocks.storyphase.dead");
+            this.lines[3] = Trans.late("characteristic.moeblocks.storyphase.dead");
         } else {
-            this.lines[3] = Trans.late("debug.moeblocks.storyphase.introduction");
+            this.lines[3] = Trans.late("characteristic.moeblocks.storyphase.introduction");
         }
     }
 

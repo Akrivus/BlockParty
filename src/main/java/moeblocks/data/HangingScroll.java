@@ -3,7 +3,7 @@ package moeblocks.data;
 import moeblocks.block.entity.HangingScrollTileEntity;
 import moeblocks.data.sql.Row;
 import moeblocks.data.sql.Table;
-import moeblocks.init.MoeData;
+import moeblocks.init.MoeWorldData;
 import net.minecraft.nbt.CompoundNBT;
 
 import java.sql.ResultSet;
@@ -14,15 +14,15 @@ public class HangingScroll extends Row<HangingScrollTileEntity> {
     protected static final int SYMBOL  =  3;
 
     public HangingScroll(ResultSet set) throws SQLException {
-        super(MoeData.HangingScrolls, set);
+        super(MoeWorldData.HangingScrolls, set);
     }
 
     public HangingScroll(CompoundNBT compound) {
-        super(MoeData.HangingScrolls, compound);
+        super(MoeWorldData.HangingScrolls, compound);
     }
 
     public HangingScroll(HangingScrollTileEntity entity) {
-        super(MoeData.HangingScrolls, entity);
+        super(MoeWorldData.HangingScrolls, entity);
     }
 
     @Override

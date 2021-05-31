@@ -1,7 +1,7 @@
 package moeblocks.message;
 
 import moeblocks.data.Moe;
-import moeblocks.init.MoeData;
+import moeblocks.init.MoeWorldData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
@@ -30,8 +30,8 @@ public abstract class CNPCQuery extends AbstractMessage {
 
     @Override
     public void handle(NetworkEvent.Context context, ServerPlayerEntity player) {
-        this.list = MoeData.get(player.world).byPlayer.get(player.getUniqueID());
-        this.npc = MoeData.Moes.find(this.id);
+        this.list = MoeWorldData.get(player.world).byPlayer.get(player.getUniqueID());
+        this.npc = MoeWorldData.Moes.find(this.id);
         if (this.npc != null) {
             this.onFound(context, player);
         }

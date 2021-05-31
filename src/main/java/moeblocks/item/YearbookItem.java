@@ -2,8 +2,8 @@ package moeblocks.item;
 
 import moeblocks.MoeMod;
 import moeblocks.entity.AbstractNPCEntity;
-import moeblocks.init.MoeData;
 import moeblocks.init.MoeMessages;
+import moeblocks.init.MoeWorldData;
 import moeblocks.message.SOpenYearbook;
 import moeblocks.util.sort.ISortableItem;
 import net.minecraft.entity.LivingEntity;
@@ -41,7 +41,7 @@ public class YearbookItem extends Item implements ISortableItem {
     }
 
     private ActionResultType openGui(PlayerEntity player, Hand hand, UUID id) {
-        List<UUID> npcs = MoeData.get(player.world).getFrom(player);
+        List<UUID> npcs = MoeWorldData.get(player.world).getFrom(player);
         if (npcs.size() > 0) { MoeMessages.send(player, new SOpenYearbook(npcs, id == null ? npcs.get(0) : id, hand)); }
         return ActionResultType.SUCCESS;
     }

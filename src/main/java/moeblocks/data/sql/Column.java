@@ -5,12 +5,15 @@ import moeblocks.util.DimBlockPos;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -274,6 +277,46 @@ public abstract class Column<I> {
         @Override
         public BlockState getDefault() {
             return Blocks.AIR.getDefaultState();
+        }
+    }
+
+    public static class AsItem extends Column<Item> {
+        public AsItem(Table table, String column, String extra) {
+            super(table, "TEXT", column, extra);
+        }
+
+        public AsItem(Table table, String column) {
+            this(table, column, "NOT NULL DEFAULT 'minecraft:air'");
+        }
+
+        @Override
+        public void forSet(int i, PreparedStatement statement) throws SQLException {
+            statement.setString(i, this.get().getRegistryName().toString());
+        }
+
+        @Override
+        public Item fromSet(int i, ResultSet set) throws SQLException {
+            return ForgeRegistries.ITEMS.getValue(new ResourceLocation(set.getString(i)));
+        }
+
+        @Override
+        public void read(CompoundNBT compound) {
+            this.set(ForgeRegistries.ITEMS.getValue(new ResourceLocation(compound.getString(this.getColumn()))));
+        }
+
+        @Override
+        public void write(CompoundNBT compound) {
+            compound.putString(this.getColumn(), this.get().getRegistryName().toString());
+        }
+
+        @Override
+        public void afterAdd(Table table) {
+
+        }
+
+        @Override
+        public Item getDefault() {
+            return Items.AIR;
         }
     }
 

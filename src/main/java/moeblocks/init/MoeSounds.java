@@ -10,6 +10,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class MoeSounds {
     public static final DeferredRegister<SoundEvent> REGISTRY = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, MoeMod.ID);
 
+    public static final RegistryObject<SoundEvent> AMBIENT_JAPAN = REGISTRY.register("ambient.japan", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "ambient.japan")));
     public static final RegistryObject<SoundEvent> BLOCK_SHOJI_SCREEN_CLOSE = REGISTRY.register("block.shoji_screen.close", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "block.shoji_screen.close")));
     public static final RegistryObject<SoundEvent> BLOCK_SHOJI_SCREEN_OPEN = REGISTRY.register("block.shoji_screen.open", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "block.shoji_screen.open")));
     public static final RegistryObject<SoundEvent> ENTITY_MOE_BELL_STEP = REGISTRY.register("entity.moe.bell.step", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "entity.moe.bell.step")));
@@ -45,4 +46,6 @@ public class MoeSounds {
     public static final RegistryObject<SoundEvent> ITEM_CELL_PHONE_DIAL = REGISTRY.register("item.cell_phone.dial", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "item.cell_phone.dial")));
     public static final RegistryObject<SoundEvent> ITEM_CELL_PHONE_RING = REGISTRY.register("item.cell_phone.ring", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "item.cell_phone.ring")));
     public static final RegistryObject<SoundEvent> ITEM_YEARBOOK_REMOVE_PAGE = REGISTRY.register("item.yearbook.remove_page", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "item.yearbook.remove_page")));
+    public static final RegistryObject<SoundEvent> MUSIC_DISC_ANTEATER_SANCTUARY = REGISTRY.register("music_disc.anteater_sanctuary", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "music_disc.anteater_sanctuary")));
+    public static final RegistryObject<SoundEvent> MUSIC_DISC_SAKURA_SAKURA = REGISTRY.register("music_disc.sakura_sakura", () -> new SoundEvent(new ResourceLocation(MoeMod.ID, "music_disc.sakura_sakura")));
 }

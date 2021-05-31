@@ -1,8 +1,8 @@
 package moeblocks.block.entity;
 
 import moeblocks.data.WritingTable;
-import moeblocks.init.MoeData;
 import moeblocks.init.MoeTileEntities;
+import moeblocks.init.MoeWorldData;
 
 public class WritingTableTileEntity extends AbstractDataTileEntity<WritingTable> {
     public WritingTableTileEntity() {
@@ -11,7 +11,7 @@ public class WritingTableTileEntity extends AbstractDataTileEntity<WritingTable>
 
     @Override
     public WritingTable getRow() {
-        return MoeData.WritingTables.find(this.getDatabaseID());
+        return MoeWorldData.WritingTables.find(this.getDatabaseID());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package moeblocks.block;
 
+import moeblocks.particle.SakuraParticle;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.LeavesBlock;
@@ -54,14 +55,8 @@ public class SakuraBlossomsBlock extends LeavesBlock {
     @Override
     public void animateTick(BlockState state, World world, BlockPos pos, Random random) {
         super.animateTick(state, world, pos, random);
-        BlockPos spawn = pos.add(random.nextDouble(), -1.0D, random.nextDouble());
-        if (random.nextInt(10) == 0 && state.get(BLOOMING) && world.isAirBlock(spawn)) {
-            double direction = world.getDayTime() / 1000 * 15.0D;
-            double x = Math.sin(0.0174444444D * direction) * (random.nextDouble() + random.nextInt(6));
-            double z = Math.cos(0.0174444444D * direction) * (random.nextDouble() + random.nextInt(6));
-            double y = Math.abs(random.nextGaussian()) * -1.0D;
-            double start = spawn.getY() + 0.75F;
-            world.addParticle(this.particle.get(), spawn.getX(), start, spawn.getZ(), x, y, z);
+        if (state.get(BLOOMING)) {
+            SakuraParticle.add(this.particle, world, pos, random);
         }
     }
 

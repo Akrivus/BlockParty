@@ -4,8 +4,8 @@ import moeblocks.automata.trait.BloodType;
 import moeblocks.automata.trait.Dere;
 import moeblocks.data.sql.Column;
 import moeblocks.entity.MoeEntity;
-import moeblocks.init.MoeData;
 import moeblocks.init.MoeEntities;
+import moeblocks.init.MoeWorldData;
 import moeblocks.util.ChunkScheduler;
 import moeblocks.util.DimBlockPos;
 import net.minecraft.block.BlockState;
@@ -26,15 +26,15 @@ public class Moe extends AbstractNPC<MoeEntity> {
     protected static final int SHIMENAWA    = 23;
 
     public Moe(ResultSet set) throws SQLException {
-        super(MoeData.Moes, set);
+        super(MoeWorldData.Moes, set);
     }
 
     public Moe(CompoundNBT compound) {
-        super(MoeData.Moes, compound);
+        super(MoeWorldData.Moes, compound);
     }
 
     public Moe(MoeEntity entity) {
-        super(MoeData.Moes, entity);
+        super(MoeWorldData.Moes, entity);
     }
 
     @Override
@@ -105,8 +105,8 @@ public class Moe extends AbstractNPC<MoeEntity> {
         public Schema() {
             super("Moes");
             this.addColumn(new Column.AsBlockState(this, "BlockState"));
-            this.addColumn(new Column.AsReference<>(this, "ToriiGate", (uuid) -> MoeData.ToriiGates.find(uuid)));
-            this.addColumn(new Column.AsReference<>(this, "Shimenawa", (uuid) -> MoeData.Shimenawa.find(uuid)));
+            this.addColumn(new Column.AsReference<>(this, "ToriiGate", (uuid) -> MoeWorldData.ToriiGates.find(uuid)));
+            this.addColumn(new Column.AsReference<>(this, "Shimenawa", (uuid) -> MoeWorldData.Shimenawa.find(uuid)));
         }
 
         @Override

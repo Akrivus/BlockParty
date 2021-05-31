@@ -9,7 +9,7 @@ public interface ITrait<T extends ITrait> extends ICondition {
     }
 
     default String getTranslationKey() {
-        return String.format("debug.moeblocks.%s.%s", this.getKey().toLowerCase(), this.getValue().toLowerCase());
+        return String.format("characteristic.moeblocks.%s.%s", this.getKey().toLowerCase(), this.getValue().toLowerCase());
     }
 
     String getValue();

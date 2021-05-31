@@ -28,6 +28,17 @@ public class MoeItems {
     public static final RegistryObject<Item> DEER_SPAWN_EGG = REGISTRY.register("deer_spawn_egg", () -> new SpawnMobItem(() -> MoeEntities.DEER.get(), 0xc17f3e, 0xdbb47f));
     public static final RegistryObject<Item> EVENING_HANGING_SCROLL = REGISTRY.register("evening_hanging_scroll", () -> new MoeBlockItem(MoeBlocks.EVENING_HANGING_SCROLL, 90));
     public static final RegistryObject<Item> GARDEN_LANTERN = REGISTRY.register("garden_lantern", () -> new MoeBlockItem(MoeBlocks.GARDEN_LANTERN, 5));
+    public static final RegistryObject<Item> GINKGO_BUTTON = REGISTRY.register("ginkgo_button", () -> new MoeBlockItem(MoeBlocks.GINKGO_BUTTON, 20));
+    public static final RegistryObject<Item> GINKGO_FENCE = REGISTRY.register("ginkgo_fence", () -> new MoeBlockItem(MoeBlocks.GINKGO_FENCE, 20));
+    public static final RegistryObject<Item> GINKGO_FENCE_GATE = REGISTRY.register("ginkgo_fence_gate", () -> new MoeBlockItem(MoeBlocks.GINKGO_FENCE_GATE, 20));
+    public static final RegistryObject<Item> GINKGO_LEAVES = REGISTRY.register("ginkgo_leaves", () -> new MoeBlockItem(MoeBlocks.GINKGO_LEAVES, 10));
+    public static final RegistryObject<Item> GINKGO_LOG = REGISTRY.register("ginkgo_log", () -> new MoeBlockItem(MoeBlocks.GINKGO_LOG, 20));
+    public static final RegistryObject<Item> GINKGO_PLANKS = REGISTRY.register("ginkgo_planks", () -> new MoeBlockItem(MoeBlocks.GINKGO_PLANKS, 20));
+    public static final RegistryObject<Item> GINKGO_PRESSURE_PLATE = REGISTRY.register("ginkgo_pressure_plate", () -> new MoeBlockItem(MoeBlocks.GINKGO_PRESSURE_PLATE, 20));
+    public static final RegistryObject<Item> GINKGO_SAPLING = REGISTRY.register("ginkgo_sapling", () -> new MoeBlockItem(MoeBlocks.GINKGO_SAPLING, 10));
+    public static final RegistryObject<Item> GINKGO_SLAB = REGISTRY.register("ginkgo_slab", () -> new MoeBlockItem(MoeBlocks.GINKGO_SLAB, 20));
+    public static final RegistryObject<Item> GINKGO_STAIRS = REGISTRY.register("ginkgo_stairs", () -> new MoeBlockItem(MoeBlocks.GINKGO_STAIRS, 20));
+    public static final RegistryObject<Item> GINKGO_WOOD = REGISTRY.register("ginkgo_wood", () -> new MoeBlockItem(MoeBlocks.GINKGO_WOOD, 20));
     public static final RegistryObject<Item> GRAY_PAPER_LANTERN = REGISTRY.register("gray_paper_lantern", () -> new MoeBlockItem(MoeBlocks.GRAY_PAPER_LANTERN));
     public static final RegistryObject<Item> GREEN_PAPER_LANTERN = REGISTRY.register("green_paper_lantern", () -> new MoeBlockItem(MoeBlocks.GREEN_PAPER_LANTERN));
     public static final RegistryObject<Item> LETTER = REGISTRY.register("letter", LetterItem::new);
@@ -39,23 +50,25 @@ public class MoeItems {
     public static final RegistryObject<Item> MOE_DIE = REGISTRY.register("moe_die", MoeDieItem::new);
     public static final RegistryObject<Item> MOE_SPAWN_EGG = REGISTRY.register("moe_spawn_egg", SpawnMoeItem::new);
     public static final RegistryObject<Item> MORNING_HANGING_SCROLL = REGISTRY.register("morning_hanging_scroll", () -> new MoeBlockItem(MoeBlocks.MORNING_HANGING_SCROLL, 90));
+    public static final RegistryObject<Item> MUSIC_DISC_ANTEATER_SANCTUARY = REGISTRY.register("music_disc_anteater_sanctuary", () -> new MoeMusicDiscItem(MoeSounds.MUSIC_DISC_ANTEATER_SANCTUARY));
+    public static final RegistryObject<Item> MUSIC_DISC_SAKURA_SAKURA = REGISTRY.register("music_disc_sakura_sakura", () -> new MoeMusicDiscItem(MoeSounds.MUSIC_DISC_SAKURA_SAKURA));
     public static final RegistryObject<Item> NIGHT_HANGING_SCROLL = REGISTRY.register("night_hanging_scroll", () -> new MoeBlockItem(MoeBlocks.NIGHT_HANGING_SCROLL, 90));
     public static final RegistryObject<Item> NOON_HANGING_SCROLL = REGISTRY.register("noon_hanging_scroll", () -> new MoeBlockItem(MoeBlocks.NOON_HANGING_SCROLL, 90));
     public static final RegistryObject<Item> ONIGIRI = REGISTRY.register("onigiri", OnigiriItem::new);
     public static final RegistryObject<Item> ORANGE_PAPER_LANTERN = REGISTRY.register("orange_paper_lantern", () -> new MoeBlockItem(MoeBlocks.ORANGE_PAPER_LANTERN));
     public static final RegistryObject<Item> PINK_BOW = REGISTRY.register("pink_bow", PinkBowItem::new);
     public static final RegistryObject<Item> PINK_PAPER_LANTERN = REGISTRY.register("pink_paper_lantern", () -> new MoeBlockItem(MoeBlocks.PINK_PAPER_LANTERN));
-    public static final RegistryObject<Item> PINK_SAKURA_BLOSSOMS = REGISTRY.register("pink_sakura_blossoms", () -> new MoeBlockItem(MoeBlocks.PINK_SAKURA_BLOSSOMS, 10));
-    public static final RegistryObject<Item> PINK_SAKURA_SAPLING = REGISTRY.register("pink_sakura_sapling", () -> new MoeBlockItem(MoeBlocks.PINK_SAKURA_SAPLING, 10));
     public static final RegistryObject<Item> PURPLE_PAPER_LANTERN = REGISTRY.register("purple_paper_lantern", () -> new MoeBlockItem(MoeBlocks.PURPLE_PAPER_LANTERN));
     public static final RegistryObject<Item> RED_PAPER_LANTERN = REGISTRY.register("red_paper_lantern", () -> new MoeBlockItem(MoeBlocks.RED_PAPER_LANTERN));
     public static final RegistryObject<Item> RED_SPIDER_LILY = REGISTRY.register("red_spider_lily", () -> new MoeBlockItem(MoeBlocks.RED_SPIDER_LILY, 10));
+    public static final RegistryObject<Item> SAKURA_BLOSSOMS = REGISTRY.register("sakura_blossoms", () -> new MoeBlockItem(MoeBlocks.SAKURA_BLOSSOMS, 10));
     public static final RegistryObject<Item> SAKURA_BUTTON = REGISTRY.register("sakura_button", () -> new MoeBlockItem(MoeBlocks.SAKURA_BUTTON, 20));
     public static final RegistryObject<Item> SAKURA_FENCE = REGISTRY.register("sakura_fence", () -> new MoeBlockItem(MoeBlocks.SAKURA_FENCE, 20));
     public static final RegistryObject<Item> SAKURA_FENCE_GATE = REGISTRY.register("sakura_fence_gate", () -> new MoeBlockItem(MoeBlocks.SAKURA_FENCE_GATE, 20));
     public static final RegistryObject<Item> SAKURA_LOG = REGISTRY.register("sakura_log", () -> new MoeBlockItem(MoeBlocks.SAKURA_LOG, 20));
     public static final RegistryObject<Item> SAKURA_PLANKS = REGISTRY.register("sakura_planks", () -> new MoeBlockItem(MoeBlocks.SAKURA_PLANKS, 20));
     public static final RegistryObject<Item> SAKURA_PRESSURE_PLATE = REGISTRY.register("sakura_pressure_plate", () -> new MoeBlockItem(MoeBlocks.SAKURA_PRESSURE_PLATE, 20));
+    public static final RegistryObject<Item> SAKURA_SAPLING = REGISTRY.register("sakura_sapling", () -> new MoeBlockItem(MoeBlocks.SAKURA_SAPLING, 10));
     public static final RegistryObject<Item> SAKURA_SLAB = REGISTRY.register("sakura_slab", () -> new MoeBlockItem(MoeBlocks.SAKURA_SLAB, 20));
     public static final RegistryObject<Item> SAKURA_STAIRS = REGISTRY.register("sakura_stairs", () -> new MoeBlockItem(MoeBlocks.SAKURA_STAIRS, 20));
     public static final RegistryObject<Item> SAKURA_WOOD = REGISTRY.register("sakura_wood", () -> new MoeBlockItem(MoeBlocks.SAKURA_WOOD, 20));
@@ -64,6 +77,8 @@ public class MoeItems {
     public static final RegistryObject<Item> SHOJI_LANTERN = REGISTRY.register("shoji_lantern", () -> new MoeBlockItem(MoeBlocks.SHOJI_LANTERN, 20));
     public static final RegistryObject<Item> SHOJI_PANEL = REGISTRY.register("shoji_panel", () -> new MoeBlockItem(MoeBlocks.SHOJI_PANEL, 20));
     public static final RegistryObject<Item> SHOJI_SCREEN = REGISTRY.register("shoji_screen", () -> new MoeBlockItem(MoeBlocks.SHOJI_SCREEN, 20));
+    public static final RegistryObject<Item> STRIPPED_GINKGO_LOG = REGISTRY.register("stripped_ginkgo_log", () -> new MoeBlockItem(MoeBlocks.STRIPPED_GINKGO_LOG, 20));
+    public static final RegistryObject<Item> STRIPPED_GINKGO_WOOD = REGISTRY.register("stripped_ginkgo_wood", () -> new MoeBlockItem(MoeBlocks.STRIPPED_GINKGO_WOOD, 20));
     public static final RegistryObject<Item> STRIPPED_SAKURA_LOG = REGISTRY.register("stripped_sakura_log", () -> new MoeBlockItem(MoeBlocks.STRIPPED_SAKURA_LOG, 20));
     public static final RegistryObject<Item> STRIPPED_SAKURA_WOOD = REGISTRY.register("stripped_sakura_wood", () -> new MoeBlockItem(MoeBlocks.STRIPPED_SAKURA_WOOD, 20));
     public static final RegistryObject<Item> TATAMI_MAT = REGISTRY.register("tatami_mat", () -> new MoeBlockItem(MoeBlocks.TATAMI_MAT, 20));
@@ -79,7 +94,6 @@ public class MoeItems {
     public static final RegistryObject<Item> YEARBOOK = REGISTRY.register("yearbook", YearbookItem::new);
     public static final RegistryObject<Item> YEARBOOK_PAGE = REGISTRY.register("yearbook_page", YearbookPageItem::new);
     public static final RegistryObject<Item> YELLOW_PAPER_LANTERN = REGISTRY.register("yellow_paper_lantern", () -> new MoeBlockItem(MoeBlocks.YELLOW_PAPER_LANTERN));
-    public static final RegistryObject<Item> YELLOW_SAKURA_BLOSSOMS = REGISTRY.register("yellow_sakura_blossoms", () -> new MoeBlockItem(MoeBlocks.YELLOW_SAKURA_BLOSSOMS, 10));
 
     public static void registerDispenserBehaviors() {
         DispenserBlock.registerDispenseBehavior(MoeItems.MOE_DIE.get(), MoeDieItem.DISPENSER_BEHAVIOR);

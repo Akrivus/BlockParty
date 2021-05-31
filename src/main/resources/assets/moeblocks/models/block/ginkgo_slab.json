@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "moeblocks:block/ginkgo_planks",
+    "top": "moeblocks:block/ginkgo_planks",
+    "side": "moeblocks:block/ginkgo_planks"
+  }
+}

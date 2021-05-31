@@ -1,6 +1,6 @@
 package moeblocks.data.sql;
 
-import moeblocks.init.MoeData;
+import moeblocks.init.MoeWorldData;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.ReportedException;
 import net.minecraft.world.server.ServerWorld;
@@ -106,12 +106,12 @@ public abstract class Table<R extends Row> {
     public abstract R getRow(ResultSet set) throws SQLException;
 
     private PreparedStatement open(String SQL) throws SQLException {
-        this.connection = MoeData.get(this.world).getConnection();
+        this.connection = MoeWorldData.get(this.world).getConnection();
         return this.connection.prepareStatement(SQL);
     }
 
     private void shut() throws SQLException {
-        MoeData.get(this.world).free(this.connection);
+        MoeWorldData.get(this.world).free(this.connection);
     }
 
     private void rescue(SQLException e) {

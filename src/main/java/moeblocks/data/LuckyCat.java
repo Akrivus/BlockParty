@@ -3,7 +3,7 @@ package moeblocks.data;
 import moeblocks.block.entity.LuckyCatTileEntity;
 import moeblocks.data.sql.Row;
 import moeblocks.data.sql.Table;
-import moeblocks.init.MoeData;
+import moeblocks.init.MoeWorldData;
 import net.minecraft.nbt.CompoundNBT;
 
 import java.sql.ResultSet;
@@ -12,15 +12,15 @@ import java.util.UUID;
 
 public class LuckyCat extends Row<LuckyCatTileEntity> {
     public LuckyCat(ResultSet set) throws SQLException {
-        super(MoeData.LuckyCats, set);
+        super(MoeWorldData.LuckyCats, set);
     }
 
     public LuckyCat(CompoundNBT compound) {
-        super(MoeData.LuckyCats, compound);
+        super(MoeWorldData.LuckyCats, compound);
     }
 
     public LuckyCat(LuckyCatTileEntity entity) {
-        super(MoeData.LuckyCats, entity);
+        super(MoeWorldData.LuckyCats, entity);
     }
 
     @Override

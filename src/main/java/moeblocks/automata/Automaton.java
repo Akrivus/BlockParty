@@ -33,17 +33,25 @@ public class Automaton {
     public void tick(AbstractNPCEntity npc) {
         if (this.state == null) { this.reset(npc); }
         if (this.state != null && this.state.isDone(npc)) {
-            this.state.terminate(npc);
-            this.state = this.state.transfer(npc);
+            this.setState(npc, this.state.transfer(npc));
         }
     }
 
-    public void reset(AbstractNPCEntity npc) {
+    public IState reset(AbstractNPCEntity npc) {
         for (Condition condition : Condition.values()) {
             if (this.timeouts.get(condition) < 0) { continue; }
             if (condition.isTrue(npc)) {
-                this.state = condition.getStemState();
+                this.setState(npc, condition.getStemState());
             }
+        }
+        return this.state;
+    }
+
+    public void setState(AbstractNPCEntity npc, IState state, IState... states) {
+        if (this.state != null) { this.state.terminate(npc); }
+        this.state = state;
+        if (this.state != null) {
+            this.state.onTransfer(npc);
         }
     }
 }

@@ -3,7 +3,7 @@ package moeblocks.data;
 import moeblocks.block.entity.WindChimesTileEntity;
 import moeblocks.data.sql.Row;
 import moeblocks.data.sql.Table;
-import moeblocks.init.MoeData;
+import moeblocks.init.MoeWorldData;
 import net.minecraft.nbt.CompoundNBT;
 
 import java.sql.ResultSet;
@@ -12,15 +12,15 @@ import java.util.UUID;
 
 public class WindChimes extends Row<WindChimesTileEntity> {
     public WindChimes(ResultSet set) throws SQLException {
-        super(MoeData.WindChimes, set);
+        super(MoeWorldData.WindChimes, set);
     }
 
     public WindChimes(CompoundNBT compound) {
-        super(MoeData.WindChimes, compound);
+        super(MoeWorldData.WindChimes, compound);
     }
 
     public WindChimes(WindChimesTileEntity entity) {
-        super(MoeData.WindChimes, entity);
+        super(MoeWorldData.WindChimes, entity);
     }
 
     @Override

@@ -3,7 +3,7 @@ package moeblocks.data;
 import moeblocks.block.entity.PaperLanternTileEntity;
 import moeblocks.data.sql.Row;
 import moeblocks.data.sql.Table;
-import moeblocks.init.MoeData;
+import moeblocks.init.MoeWorldData;
 import net.minecraft.nbt.CompoundNBT;
 
 import java.sql.ResultSet;
@@ -12,15 +12,15 @@ import java.util.UUID;
 
 public class PaperLantern extends Row<PaperLanternTileEntity> {
     public PaperLantern(ResultSet set) throws SQLException {
-        super(MoeData.PaperLanterns, set);
+        super(MoeWorldData.PaperLanterns, set);
     }
 
     public PaperLantern(CompoundNBT compound) {
-        super(MoeData.PaperLanterns, compound);
+        super(MoeWorldData.PaperLanterns, compound);
     }
 
     public PaperLantern(PaperLanternTileEntity entity) {
-        super(MoeData.PaperLanterns, entity);
+        super(MoeWorldData.PaperLanterns, entity);
     }
 
     @Override

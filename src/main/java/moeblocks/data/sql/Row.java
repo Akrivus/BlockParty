@@ -12,6 +12,9 @@ import java.util.UUID;
 public abstract class Row<E extends IModelEntity> {
     protected static final int DATABASE_ID  =  0;
     protected static final int POS          =  1;
+    protected static final int POS_X        =  2;
+    protected static final int POS_Y        =  3;
+    protected static final int POS_Z        =  4;
     protected static final int PLAYER_UUID  =  5;
     private final Table table;
     private final List<Column> columns;

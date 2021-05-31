@@ -3,7 +3,7 @@ package moeblocks.data;
 import moeblocks.block.entity.WritingTableTileEntity;
 import moeblocks.data.sql.Row;
 import moeblocks.data.sql.Table;
-import moeblocks.init.MoeData;
+import moeblocks.init.MoeWorldData;
 import net.minecraft.nbt.CompoundNBT;
 
 import java.sql.ResultSet;
@@ -12,15 +12,15 @@ import java.util.UUID;
 
 public class WritingTable extends Row<WritingTableTileEntity> {
     public WritingTable(ResultSet set) throws SQLException {
-        super(MoeData.WritingTables, set);
+        super(MoeWorldData.WritingTables, set);
     }
 
     public WritingTable(CompoundNBT compound) {
-        super(MoeData.WritingTables, compound);
+        super(MoeWorldData.WritingTables, compound);
     }
 
     public WritingTable(WritingTableTileEntity entity) {
-        super(MoeData.WritingTables, entity);
+        super(MoeWorldData.WritingTables, entity);
     }
 
     @Override

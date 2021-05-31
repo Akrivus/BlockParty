@@ -2,10 +2,12 @@ package moeblocks.entity;
 
 import moeblocks.automata.Automaton;
 import moeblocks.automata.ICondition;
+import moeblocks.automata.IState;
 import moeblocks.automata.trait.BloodType;
 import moeblocks.automata.trait.Dere;
 import moeblocks.automata.trait.Emotion;
 import moeblocks.automata.trait.Gender;
+import moeblocks.client.animation.AbstractAnimation;
 import moeblocks.client.animation.Animation;
 import moeblocks.data.AbstractNPC;
 import moeblocks.data.IModelEntity;
@@ -68,9 +70,10 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
     public static final DataParameter<Float> SLOUCH = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
     public static final DataParameter<Float> AGE = EntityDataManager.createKey(AbstractNPCEntity.class, DataSerializers.FLOAT);
     public final Inventory inventory = new Inventory(36);
+    public final Automaton automaton;
     private final LazyOptional<?> itemHandler = LazyOptional.of(() -> new InvWrapper(this.inventory));
     private final Queue<Consumer<AbstractNPCEntity>> nextTickOps;
-    private final Automaton automaton;
+    private AbstractAnimation animation;
     private int timeUntilHungry;
     private int timeUntilLonely;
     private int timeUntilStress;
@@ -104,7 +107,7 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
         this.dataManager.register(SATURATION, 6.0F);
         this.dataManager.register(STRESS, 0.0F);
         this.dataManager.register(RELAXATION, 0.0F);
-        this.dataManager.register(LOYALTY, 4.0F);
+        this.dataManager.register(LOYALTY, 6.0F);
         this.dataManager.register(AFFECTION, 0.0F);
         this.dataManager.register(AGE, 0.0F);
         super.registerData();
@@ -156,6 +159,8 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
             this.updateStressState();
             this.updateActionState();
             this.updateSleepState();
+        } else {
+            this.animation.tick(this);
         }
     }
 
@@ -193,6 +198,14 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
     @Override
     public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
         return this.onInteract(player, player.getHeldItem(hand), hand);
+    }
+
+    public void jump() {
+        super.jump();
+    }
+
+    public void setState(IState state, IState... states) {
+        this.automaton.setState(this, state, states);
     }
 
     public abstract ActionResultType onInteract(PlayerEntity player, ItemStack stack, Hand hand);
@@ -516,11 +529,19 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
         this.setAge(this.getAge() + age);
     }
 
-    public Animation getAnimation() {
+    public AbstractAnimation getAnimation() {
+        return this.animation;
+    }
+
+    public void setAnimation(AbstractAnimation animation) {
+        this.animation = animation;
+    }
+
+    public Animation getAnimationKey() {
         return Animation.valueOf(this.dataManager.get(ANIMATION));
     }
 
-    public void setAnimation(Animation animation) {
+    public void setAnimationKey(Animation animation) {
         this.dataManager.set(ANIMATION, animation.name());
     }
 
@@ -582,4 +603,12 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
     public World getWorld() {
         return this.world;
     }
+
+    @Override
+    public void notifyDataManagerChange(DataParameter<?> key) {
+        if (ANIMATION.equals(key)) { this.setAnimation(Animation.get(this.dataManager.get(ANIMATION))); }
+        super.notifyDataManagerChange(key);
+    }
+
+    public abstract void onMention(PlayerEntity player, String message);
 }

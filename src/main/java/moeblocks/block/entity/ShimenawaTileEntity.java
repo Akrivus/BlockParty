@@ -1,8 +1,8 @@
 package moeblocks.block.entity;
 
 import moeblocks.data.Shimenawa;
-import moeblocks.init.MoeData;
 import moeblocks.init.MoeTileEntities;
+import moeblocks.init.MoeWorldData;
 
 public class ShimenawaTileEntity extends AbstractDataTileEntity<Shimenawa> {
     public ShimenawaTileEntity() {
@@ -11,7 +11,7 @@ public class ShimenawaTileEntity extends AbstractDataTileEntity<Shimenawa> {
 
     @Override
     public Shimenawa getRow() {
-        return MoeData.Shimenawa.find(this.getDatabaseID());
+        return MoeWorldData.Shimenawa.find(this.getDatabaseID());
     }
 
     @Override

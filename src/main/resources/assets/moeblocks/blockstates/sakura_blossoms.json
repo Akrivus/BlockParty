@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "blooming=true": {
+      "model": "moeblocks:block/sakura_blossoms"
+    },
+    "blooming=false": {
+      "model": "moeblocks:block/sakura_leaves"
+    }
+  }
+}

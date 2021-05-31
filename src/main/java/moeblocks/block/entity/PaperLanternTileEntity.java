@@ -1,8 +1,8 @@
 package moeblocks.block.entity;
 
 import moeblocks.data.PaperLantern;
-import moeblocks.init.MoeData;
 import moeblocks.init.MoeTileEntities;
+import moeblocks.init.MoeWorldData;
 
 public class PaperLanternTileEntity extends AbstractDataTileEntity<PaperLantern> {
     public PaperLanternTileEntity() {
@@ -11,7 +11,7 @@ public class PaperLanternTileEntity extends AbstractDataTileEntity<PaperLantern>
 
     @Override
     public PaperLantern getRow() {
-        return MoeData.PaperLanterns.find(this.getDatabaseID());
+        return MoeWorldData.PaperLanterns.find(this.getDatabaseID());
     }
 
     @Override

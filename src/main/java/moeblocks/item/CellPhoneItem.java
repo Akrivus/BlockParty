@@ -1,8 +1,8 @@
 package moeblocks.item;
 
 import moeblocks.MoeMod;
-import moeblocks.init.MoeData;
 import moeblocks.init.MoeMessages;
+import moeblocks.init.MoeWorldData;
 import moeblocks.message.SOpenCellPhone;
 import moeblocks.util.sort.ISortableItem;
 import net.minecraft.entity.player.PlayerEntity;
@@ -20,7 +20,7 @@ public class CellPhoneItem extends Item implements ISortableItem {
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
         if (world.isRemote()) { return ActionResult.resultPass(player.getHeldItem(hand)); }
-        MoeMessages.send(player, new SOpenCellPhone(MoeData.get(world).byPlayer.get(player.getUniqueID()), hand));
+        MoeMessages.send(player, new SOpenCellPhone(MoeWorldData.get(world).byPlayer.get(player.getUniqueID()), hand));
         return ActionResult.resultSuccess(player.getHeldItem(hand));
     }
 

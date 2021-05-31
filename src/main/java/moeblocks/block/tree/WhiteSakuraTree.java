@@ -12,6 +12,10 @@ import java.util.Random;
 public class WhiteSakuraTree extends Tree {
     @Override
     protected ConfiguredFeature<BaseTreeFeatureConfig, ?> getTreeFeature(Random random, boolean hive) {
+        return WhiteSakuraTree.build();
+    }
+
+    public static ConfiguredFeature<BaseTreeFeatureConfig, ?> build() {
         return Feature.TREE.withConfiguration(new BaseTreeFeatureConfig.Builder(new SimpleBlockStateProvider(MoeBlocks.SAKURA_LOG.get().getDefaultState()), new SimpleBlockStateProvider(MoeBlocks.WHITE_SAKURA_BLOSSOMS.get().getDefaultState()), new BlobFoliagePlacer(FeatureSpread.func_242252_a(2), FeatureSpread.func_242252_a(0), 2), new ForkyTrunkPlacer(5, 2, 2), new TwoLayerFeature(1, 0, 1)).setIgnoreVines().build());
     }
 }

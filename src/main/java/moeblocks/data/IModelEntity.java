@@ -1,7 +1,7 @@
 package moeblocks.data;
 
 import moeblocks.data.sql.Row;
-import moeblocks.init.MoeData;
+import moeblocks.init.MoeWorldData;
 import moeblocks.util.DimBlockPos;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
@@ -29,7 +29,7 @@ public interface IModelEntity<M extends Row> {
         return true;
     }
 
-    default MoeData getData() {
-        return MoeData.get(this.getWorld());
+    default MoeWorldData getData() {
+        return MoeWorldData.get(this.getWorld());
     }
 }

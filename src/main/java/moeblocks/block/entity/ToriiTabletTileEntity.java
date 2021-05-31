@@ -1,8 +1,8 @@
 package moeblocks.block.entity;
 
 import moeblocks.data.ToriiGate;
-import moeblocks.init.MoeData;
 import moeblocks.init.MoeTileEntities;
+import moeblocks.init.MoeWorldData;
 
 public class ToriiTabletTileEntity extends AbstractDataTileEntity<ToriiGate> {
     public ToriiTabletTileEntity() {
@@ -11,7 +11,7 @@ public class ToriiTabletTileEntity extends AbstractDataTileEntity<ToriiGate> {
 
     @Override
     public ToriiGate getRow() {
-        return MoeData.ToriiGates.find(this.getDatabaseID());
+        return MoeWorldData.ToriiGates.find(this.getDatabaseID());
     }
 
     @Override
