@@ -23,9 +23,11 @@ public abstract class AbstractDataTileEntity<M extends Row> extends TileEntity i
     @Override
     public void read(BlockState state, CompoundNBT compound) {
         super.read(state, compound);
-        this.id = compound.getUniqueId("DatabaseID");
-        if (compound.getBoolean("HasRow")) {
-            this.getRow().load(this);
+        if (compound.hasUniqueId("DatabaseID")) {
+            this.id = compound.getUniqueId("DatabaseID");
+            if (compound.getBoolean("HasRow")) {
+                this.getRow().load(this);
+            }
         }
     }
 
@@ -80,7 +82,10 @@ public abstract class AbstractDataTileEntity<M extends Row> extends TileEntity i
 
     @Override
     public boolean claim(PlayerEntity player) {
-        if (IModelEntity.super.claim(player)) { this.claimed = true; }
+        if (IModelEntity.super.claim(player)) {
+            this.claimed = true;
+            this.markDirty();
+        }
         return this.claimed;
     }
 }
