@@ -16,6 +16,6 @@ public class SakuraTree extends Tree {
     }
 
     public static ConfiguredFeature build() {
-        return Feature.TREE.withConfiguration(new BaseTreeFeatureConfig.Builder(new SimpleBlockStateProvider(MoeBlocks.SAKURA_LOG.get().getDefaultState()), new SimpleBlockStateProvider(MoeBlocks.SAKURA_BLOSSOMS.get().getDefaultState()), new BlobFoliagePlacer(FeatureSpread.func_242252_a(2), FeatureSpread.func_242252_a(0), 2), new ForkyTrunkPlacer(5, 2, 2), new TwoLayerFeature(1, 0, 1)).setIgnoreVines().build());
+        return Feature.TREE.withConfiguration(new BaseTreeFeatureConfig.Builder(new SimpleBlockStateProvider(MoeBlocks.SAKURA_LOG.get().getDefaultState()), new SimpleBlockStateProvider(MoeBlocks.SAKURA_BLOSSOMS.get().getDefaultState()), new BlobFoliagePlacer(FeatureSpread.create(2), FeatureSpread.create(0), 2), new ForkyTrunkPlacer(5, 2, 2), new TwoLayerFeature(1, 0, 1)).setIgnoreVines().build());
     }
 }

@@ -254,10 +254,10 @@ public abstract class AbstractDieEntity extends ProjectileItemEntity {
     }
 
     public PlayerEntity getPlayer() {
-        if (!(this.func_234616_v_() instanceof PlayerEntity)) {
+        if (!(this.getShooter() instanceof PlayerEntity)) {
             return null;
         }
-        return (PlayerEntity) this.func_234616_v_();
+        return (PlayerEntity) this.getShooter();
     }
 
     private Rotations getRandomSpinRotations() {

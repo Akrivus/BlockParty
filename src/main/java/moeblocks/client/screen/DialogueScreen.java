@@ -138,7 +138,7 @@ public class DialogueScreen extends AbstractScreen {
         }
 
         @Override
-        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             Minecraft.getInstance().getTextureManager().bindTexture(DIALOGUE_TEXTURES);
             this.blit(stack, this.x, this.y, this.response.ordinal() * 10, this.isHovered() ? 58 : 48, 10, 10);

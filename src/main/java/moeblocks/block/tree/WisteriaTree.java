@@ -16,6 +16,6 @@ public class WisteriaTree extends Tree {
     }
 
     public static ConfiguredFeature build() {
-        return Feature.TREE.withConfiguration(new BaseTreeFeatureConfig.Builder(new SimpleBlockStateProvider(MoeBlocks.WISTERIA_BINE.get().getDefaultState()), new SimpleBlockStateProvider(MoeBlocks.WISTERIA_LEAVES.get().getDefaultState()), new AcaciaFoliagePlacer(FeatureSpread.func_242252_a(2), FeatureSpread.func_242252_a(1)), new ForkyTrunkPlacer(4, 1, 2), new TwoLayerFeature(1, 0, 2)).setIgnoreVines().build());
+        return Feature.TREE.withConfiguration(new BaseTreeFeatureConfig.Builder(new SimpleBlockStateProvider(MoeBlocks.WISTERIA_BINE.get().getDefaultState()), new SimpleBlockStateProvider(MoeBlocks.WISTERIA_LEAVES.get().getDefaultState()), new AcaciaFoliagePlacer(FeatureSpread.create(2), FeatureSpread.create(1)), new ForkyTrunkPlacer(4, 1, 2), new TwoLayerFeature(1, 0, 2)).setIgnoreVines().build());
     }
 }

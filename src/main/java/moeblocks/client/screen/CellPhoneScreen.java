@@ -139,7 +139,7 @@ public class CellPhoneScreen extends ControllerScreen<Moe> {
         }
 
         @Override
-        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             int color = this.isHovered() ? 0xffffff : 0xff7fb6;
             Minecraft minecraft = Minecraft.getInstance();
@@ -165,7 +165,7 @@ public class CellPhoneScreen extends ControllerScreen<Moe> {
         public void playDownSound(SoundHandler sound) { }
 
         @Override
-        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             Minecraft.getInstance().getTextureManager().bindTexture(CELL_PHONE_TEXTURES);
             int x = this.isHovered() ? 116 : 108;

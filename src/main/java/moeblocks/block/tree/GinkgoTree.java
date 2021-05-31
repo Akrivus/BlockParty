@@ -16,6 +16,6 @@ public class GinkgoTree extends Tree {
     }
 
     public static ConfiguredFeature build() {
-        return Feature.TREE.withConfiguration(new BaseTreeFeatureConfig.Builder(new SimpleBlockStateProvider(MoeBlocks.GINKGO_LOG.get().getDefaultState()), new SimpleBlockStateProvider(MoeBlocks.GINKGO_LEAVES.get().getDefaultState()), new BlobFoliagePlacer(FeatureSpread.func_242252_a(2), FeatureSpread.func_242252_a(0), 5), new StraightTrunkPlacer(7, 1, 0), new TwoLayerFeature(1, 0, 1)).setIgnoreVines().build());
+        return Feature.TREE.withConfiguration(new BaseTreeFeatureConfig.Builder(new SimpleBlockStateProvider(MoeBlocks.GINKGO_LOG.get().getDefaultState()), new SimpleBlockStateProvider(MoeBlocks.GINKGO_LEAVES.get().getDefaultState()), new BlobFoliagePlacer(FeatureSpread.create(2), FeatureSpread.create(0), 5), new StraightTrunkPlacer(7, 1, 0), new TwoLayerFeature(1, 0, 1)).setIgnoreVines().build());
     }
 }

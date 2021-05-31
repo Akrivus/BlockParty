@@ -32,6 +32,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.*;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.DifficultyInstance;
@@ -196,7 +197,7 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
     }
 
     @Override
-    public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
+    public ActionResultType applyPlayerInteraction(PlayerEntity player, Vector3d vector, Hand hand) {
         return this.onInteract(player, player.getHeldItem(hand), hand);
     }
 

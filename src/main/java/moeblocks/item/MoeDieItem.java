@@ -31,7 +31,7 @@ public class MoeDieItem extends Item implements ISortableItem {
         if (world.isRemote) { return ActionResult.resultPass(player.getHeldItem(hand)); }
         ItemStack stack = player.getHeldItem(hand);
         MoeDieEntity die = new MoeDieEntity(world, player);
-        die.func_234612_a_(player, player.rotationPitch, player.rotationYaw, 0.0F, 0.8F, 1.0F);
+        die.setDirectionAndMovement(player, player.rotationPitch, player.rotationYaw, 0.0F, 0.8F, 1.0F);
         die.setItem(stack);
         if (world.addEntity(die)) {
             player.addStat(Stats.ITEM_USED.get(this));

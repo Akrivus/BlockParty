@@ -224,7 +224,7 @@ public class YearbookScreen extends ControllerScreen {
         }
 
         @Override
-        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             Minecraft.getInstance().getTextureManager().bindTexture(YEARBOOK_TEXTURES);
             int x = this.delta > 0 ? 226 : 147;
@@ -245,7 +245,7 @@ public class YearbookScreen extends ControllerScreen {
         }
 
         @Override
-        public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             Minecraft.getInstance().getTextureManager().bindTexture(YEARBOOK_TEXTURES);
             int x = this.isHovered() ? 164 : 146;

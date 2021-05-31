@@ -13,7 +13,7 @@ public class DeerEntity extends AnimalEntity {
     }
 
     @Override
-    public DeerEntity func_241840_a(ServerWorld world, AgeableEntity parent) {
+    public DeerEntity createChild(ServerWorld world, AgeableEntity parent) {
         return MoeEntities.DEER.get().create(world);
     }
 }

@@ -42,7 +42,7 @@ public class ShojiScreenBlock extends DoorBlock {
 
     @Override
     public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
-        world.setBlockState(pos, state = state.func_235896_a_(OPEN), 10);
+        world.setBlockState(pos, state = state.cycleValue(OPEN), 10);
         world.playSound(player, pos, (state.get(OPEN) ? MoeSounds.BLOCK_SHOJI_SCREEN_OPEN : MoeSounds.BLOCK_SHOJI_SCREEN_CLOSE).get(), SoundCategory.BLOCKS, 1.0F, 1.0F);
         return ActionResultType.func_233537_a_(world.isRemote);
     }

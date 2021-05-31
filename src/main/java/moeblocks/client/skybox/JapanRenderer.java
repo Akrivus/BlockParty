@@ -78,7 +78,7 @@ public class JapanRenderer {
             float z = world.rand.nextInt(128) - 64;
             for (int y = 0; y > e.player.getPosY() - 255; --y) {
                 BlockPos pos = e.player.getPosition().add(x, y, z);
-                if (world.getBlockState(pos).isIn(Blocks.GRASS_BLOCK)) {
+                if (world.getBlockState(pos).getBlock() == Blocks.GRASS_BLOCK) {
                     world.addParticle(MoeParticles.FIREFLY.get(), pos.getX(), pos.getY(), pos.getZ(), x, y, z);
                     break;
                 }
