@@ -80,6 +80,7 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
     private int timeUntilStress;
     private int timeSinceSlept;
     private long lastSeen;
+    private boolean readyToSync;
 
     protected AbstractNPCEntity(EntityType<? extends AbstractNPCEntity> type, World world) {
         super(type, world);
@@ -139,6 +140,7 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
         this.automaton.read(compound);
         this.getRow().load(this);
         super.readAdditional(compound);
+        this.readyToSync = true;
     }
 
     @Override
@@ -560,12 +562,15 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
 
     @Override
     public boolean hasRow() {
-        return this.isLocal() && this.getRow() != null;
+        return this.isLocal() && this.readyToSync && this.getRow() != null;
     }
 
     @Override
     public boolean claim(PlayerEntity player) {
-        if (IModelEntity.super.claim(player)) { this.getData().addTo(player, this.getDatabaseID()); }
+        if (IModelEntity.super.claim(player)) {
+            this.getData().addTo(player, this.getDatabaseID());
+            this.readyToSync = true;
+        }
         return this.isLocal();
     }
 
@@ -609,6 +614,9 @@ public abstract class AbstractNPCEntity<NPC extends AbstractNPC> extends Creatur
     public void notifyDataManagerChange(DataParameter<?> key) {
         if (ANIMATION.equals(key)) { this.setAnimation(Animation.get(this.dataManager.get(ANIMATION))); }
         super.notifyDataManagerChange(key);
+        if (this.hasRow()) {
+            this.getRow().update(this);
+        }
     }
 
     public abstract void onMention(PlayerEntity player, String message);
