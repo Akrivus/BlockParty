@@ -2,7 +2,7 @@
   "parent": "minecraft:block/block",
   "textures": {
     "body": "moeblocks:block/garden_lantern",
-    "bottom": "moeblocks:block/garden_lantern_base",
+    "bottom": "moeblocks:block/garden_lantern_bottom",
     "top": "moeblocks:block/garden_lantern_top",
     "particle": "#top"
   },

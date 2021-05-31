@@ -128,7 +128,7 @@ public class MoeBlocks {
         RenderTypeLookup.setRenderLayer(BLUE_SPIDER_LILY.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(BROWN_PAPER_LANTERN.get(), RenderType.getCutout());
         RenderTypeLookup.setRenderLayer(CYAN_PAPER_LANTERN.get(), RenderType.getCutout());
-        RenderTypeLookup.setRenderLayer(GARDEN_LANTERN.get(), RenderType.getCutout());
+        RenderTypeLookup.setRenderLayer(GARDEN_LANTERN.get(), RenderType.getCutoutMipped());
         RenderTypeLookup.setRenderLayer(GINKGO_LEAVES.get(), RenderType.getCutoutMipped());
         RenderTypeLookup.setRenderLayer(GINKGO_SAPLING.get(), RenderType.getCutoutMipped());
         RenderTypeLookup.setRenderLayer(GRAY_PAPER_LANTERN.get(), RenderType.getCutout());
