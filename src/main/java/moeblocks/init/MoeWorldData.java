@@ -58,11 +58,14 @@ public class MoeWorldData extends WorldSavedData {
         ListNBT names = new ListNBT();
         this.names.forEach((name) -> names.add(StringNBT.valueOf(name)));
         compound.put("Names", names);
-        CompoundNBT byPlayer = new CompoundNBT();
+        ListNBT byPlayer = new ListNBT();
         this.byPlayer.forEach((player, moes) -> {
+            CompoundNBT tag = new CompoundNBT();
+            tag.putString("Player", player.toString());
             ListNBT list = new ListNBT();
             moes.forEach((moe) -> list.add(StringNBT.valueOf(moe.toString())));
-            byPlayer.put(player.toString(), list);
+            tag.put("Moes", list);
+            byPlayer.add(tag);
         });
         compound.put("MoesByPlayer", byPlayer);
         return compound;
@@ -77,7 +80,7 @@ public class MoeWorldData extends WorldSavedData {
         List<UUID> list = this.getFrom(player);
         list.add(uuid);
         this.byPlayer.put(player.getUniqueID(), list);
-        get(player.world).markDirty();
+        this.markDirty();
     }
 
     public String getDatabase(ServerWorld world) {
