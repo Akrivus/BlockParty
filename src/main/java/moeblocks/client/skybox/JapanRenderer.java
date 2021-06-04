@@ -31,8 +31,7 @@ public class JapanRenderer {
     private static float r = 0.0F;
     private static float g = 0.0F;
     private static float b = 0.0F;
-    private static final float a = 0.5F;
-
+    
     @SubscribeEvent
     public static void setFogData(EntityViewRenderEvent.FogColors e) {
         horizon = Minecraft.getInstance().gameSettings.renderDistanceChunks * 16;
@@ -49,7 +48,7 @@ public class JapanRenderer {
         RenderSystem.enableTexture();
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.color4f(r, g, b, a);
+        RenderSystem.color4f(r, g, b, 0.8F);
         stack.push();
         stack.rotate(Vector3f.XP.rotationDegrees(-90.0F));
         stack.rotate(Vector3f.YP.rotationDegrees(180.0F));
