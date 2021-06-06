@@ -1,6 +1,7 @@
 package moeblocks.data;
 
 import moeblocks.block.entity.ToriiTabletTileEntity;
+import moeblocks.data.sql.Column;
 import moeblocks.data.sql.Row;
 import moeblocks.data.sql.Table;
 import moeblocks.init.MoeWorldData;
@@ -14,6 +15,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class ToriiGate extends Row<ToriiTabletTileEntity> {
+    protected static final int RANGE =  6;
+
     public ToriiGate(ResultSet set) throws SQLException {
         super(MoeWorldData.ToriiGates, set);
     }
@@ -24,6 +27,18 @@ public class ToriiGate extends Row<ToriiTabletTileEntity> {
 
     public ToriiGate(ToriiTabletTileEntity entity) {
         super(MoeWorldData.ToriiGates, entity);
+    }
+
+    public int getRange() {
+        return (Integer) this.get(RANGE).get();
+    }
+
+    public void addRange() {
+        this.get(RANGE).set(this.getRange() + 1);
+    }
+
+    public void subRange() {
+        this.get(RANGE).set(this.getRange() - 1);
     }
 
     @Override
@@ -40,7 +55,14 @@ public class ToriiGate extends Row<ToriiTabletTileEntity> {
     }
 
     public static ToriiGate findClosest(UUID playerUUID, DimBlockPos pos) {
-        List<ToriiGate> gates = MoeWorldData.ToriiGates.select(String.format("SELECT * FROM ToriiGates WHERE (PlayerUUID = '%s') LIMIT 1;", playerUUID));
+        return getClosest(MoeWorldData.ToriiGates.select(String.format("SELECT * FROM ToriiGates WHERE (PlayerUUID = '%s') LIMIT 1;", playerUUID)), pos);
+    }
+
+    public static ToriiGate findClosest(DimBlockPos pos) {
+        return getClosest(MoeWorldData.ToriiGates.select(String.format("SELECT * FROM ToriiGates LIMIT 1;")), pos);
+    }
+
+    public static ToriiGate getClosest(List<ToriiGate> gates, DimBlockPos pos) {
         gates.sort(new RowDistance(pos));
         return gates.get(0);
     }
@@ -48,6 +70,7 @@ public class ToriiGate extends Row<ToriiTabletTileEntity> {
     public static class Schema extends Table<ToriiGate> {
         public Schema() {
             super("ToriiGates");
+            this.addColumn(new Column.AsBoolean(this, "Range"));
         }
 
         @Override
