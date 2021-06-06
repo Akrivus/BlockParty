@@ -38,7 +38,7 @@ public class MoeWorldData extends WorldSavedData {
     public static Moe.Schema Moes = new Moe.Schema();
     public static String KEY = "moedata";
     public List<String> names = new ArrayList<>();
-    public Map<UUID, List<UUID>> byPlayer = new HashMap<>();
+    private final Map<UUID, List<UUID>> byPlayer = new HashMap<>();
     private final List<Connection> connections = new ArrayList<>();
     private String database;
 

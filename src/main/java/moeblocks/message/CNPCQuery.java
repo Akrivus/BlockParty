@@ -30,7 +30,7 @@ public abstract class CNPCQuery extends AbstractMessage {
 
     @Override
     public void handle(NetworkEvent.Context context, ServerPlayerEntity player) {
-        this.list = MoeWorldData.get(player.world).byPlayer.get(player.getUniqueID());
+        this.list = MoeWorldData.get(player.world).getFrom(player);
         this.npc = MoeWorldData.Moes.find(this.id);
         if (this.npc != null) {
             this.onFound(context, player);

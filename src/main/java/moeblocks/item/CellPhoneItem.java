@@ -12,6 +12,9 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
+import java.util.List;
+import java.util.UUID;
+
 public class CellPhoneItem extends Item implements ISortableItem {
     public CellPhoneItem() {
         super(new Properties().group(MoeMod.ITEMS));
@@ -20,7 +23,8 @@ public class CellPhoneItem extends Item implements ISortableItem {
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
         if (world.isRemote()) { return ActionResult.resultPass(player.getHeldItem(hand)); }
-        MoeMessages.send(player, new SOpenCellPhone(MoeWorldData.get(world).byPlayer.get(player.getUniqueID()), hand));
+        List<UUID> npcs = MoeWorldData.get(player.world).getFrom(player);
+        MoeMessages.send(player, new SOpenCellPhone(npcs, hand));
         return ActionResult.resultSuccess(player.getHeldItem(hand));
     }
 
