@@ -48,7 +48,7 @@ public class MoeWorldData extends WorldSavedData {
         compound.getList("MoesByPlayer", Constants.NBT.TAG_COMPOUND).forEach((nbt) -> {
             CompoundNBT tag = (CompoundNBT) nbt;
             List<UUID> moes = new ArrayList<>();
-            compound.getList("Moes", Constants.NBT.TAG_STRING).forEach((moe) -> moes.add(UUID.fromString(moe.getString())));
+            tag.getList("Moes", Constants.NBT.TAG_STRING).forEach((moe) -> moes.add(UUID.fromString(moe.getString())));
             this.byPlayer.put(UUID.fromString(tag.getString("Player")), moes);
         });
     }
