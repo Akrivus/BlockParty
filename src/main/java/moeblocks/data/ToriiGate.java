@@ -78,4 +78,8 @@ public class ToriiGate extends Row<ToriiTabletTileEntity> {
             return new ToriiGate(set);
         }
     }
+
+    public static class Keeper {
+
+    }
 }

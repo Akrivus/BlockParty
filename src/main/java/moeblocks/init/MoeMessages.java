@@ -39,6 +39,7 @@ public class MoeMessages {
         register(SOpenCellPhone.class, SOpenCellPhone::new);
         register(SOpenDialogue.class, SOpenDialogue::new);
         register(SOpenYearbook.class, SOpenYearbook::new);
+        register(SToriiGatesList.class, SToriiGatesList::new);
     }
 
     public static <T extends AbstractMessage> void register(Class<T> packet, Function<PacketBuffer, T> con) {

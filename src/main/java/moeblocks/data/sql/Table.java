@@ -70,6 +70,10 @@ public abstract class Table<R extends Row> {
         return query.isEmpty() ? null : query.get(0);
     }
 
+    public List<R> all() {
+        return this.select(String.format("SELECT * FROM %s;", this.name));
+    }
+
     public void update(String SQL, List<Column> columns) {
         try (PreparedStatement sql = this.open(SQL)) {
             for (int i = 1; i <= columns.size(); ++i) { columns.get(i - 1).forSet(i, sql); }

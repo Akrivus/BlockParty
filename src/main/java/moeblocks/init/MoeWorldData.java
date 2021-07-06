@@ -1,6 +1,7 @@
 package moeblocks.init;
 
 import moeblocks.data.*;
+import moeblocks.message.SToriiGatesList;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.ReportedException;
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,6 +14,7 @@ import net.minecraft.world.storage.DimensionSavedDataManager;
 import net.minecraft.world.storage.FolderName;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -28,7 +30,7 @@ public class MoeWorldData extends WorldSavedData {
     public static ToriiGate.Schema ToriiGates = new ToriiGate.Schema();
     public static GardenLantern.Schema GardenLanterns = new GardenLantern.Schema();
     public static SakuraSapling.Schema SakuraTrees = new SakuraSapling.Schema();
-    public static moeblocks.data.Shimenawa.Schema Shimenawa = new Shimenawa.Schema();
+    public static Shimenawa.Schema Shimenawa = new Shimenawa.Schema();
     public static HangingScroll.Schema HangingScrolls = new HangingScroll.Schema();
     public static LuckyCat.Schema LuckyCats = new LuckyCat.Schema();
     public static PaperLantern.Schema PaperLanterns = new PaperLantern.Schema();
@@ -152,5 +154,12 @@ public class MoeWorldData extends WorldSavedData {
                 }
             });
         }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent e) {
+        World world = e.getPlayer().world;
+        if (world.isRemote()) { return; }
+        MoeMessages.send(e.getPlayer(), new SToriiGatesList(world.getDimensionKey()));
     }
 }

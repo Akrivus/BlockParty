@@ -1,7 +1,11 @@
 package moeblocks.data.sql;
 
 import moeblocks.data.IModelEntity;
+import moeblocks.util.DimBlockPos;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,6 +53,18 @@ public abstract class Row<E extends IModelEntity> {
 
     public UUID getID() {
         return (UUID) this.get(DATABASE_ID).get();
+    }
+
+    public DimBlockPos getDimPos() {
+        return (DimBlockPos) this.get(POS).get();
+    }
+
+    public BlockPos getPos() {
+        return this.getDimPos().getPos();
+    }
+
+    public boolean isDim(RegistryKey<World> dim) {
+        return this.getDimPos().getDim() == dim;
     }
 
     public void insert() {
