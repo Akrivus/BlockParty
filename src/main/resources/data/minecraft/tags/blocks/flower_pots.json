@@ -1,9 +1,7 @@
 {
   "replace": false,
   "values": [
-    "moeblocks:potted_blue_spider_lily",
     "moeblocks:potted_ginkgo_sapling",
-    "moeblocks:potted_red_spider_lily",
     "moeblocks:potted_sakura_sapling",
     "moeblocks:potted_white_sakura_sapling",
     "moeblocks:potted_wisteria_sapling"

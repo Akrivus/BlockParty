@@ -18,7 +18,6 @@ public class MoeItems {
     public static final RegistryObject<Item> BLACK_PAPER_LANTERN = REGISTRY.register("black_paper_lantern", () -> new MoeBlockItem(MoeBlocks.BLACK_PAPER_LANTERN));
     public static final RegistryObject<Item> BLANK_HANGING_SCROLL = REGISTRY.register("blank_hanging_scroll", () -> new MoeBlockItem(MoeBlocks.BLANK_HANGING_SCROLL, 90));
     public static final RegistryObject<Item> BLUE_PAPER_LANTERN = REGISTRY.register("blue_paper_lantern", () -> new MoeBlockItem(MoeBlocks.BLUE_PAPER_LANTERN));
-    public static final RegistryObject<Item> BLUE_SPIDER_LILY = REGISTRY.register("blue_spider_lily", () -> new MoeBlockItem(MoeBlocks.BLUE_SPIDER_LILY, 10));
     public static final RegistryObject<Item> BROWN_PAPER_LANTERN = REGISTRY.register("brown_paper_lantern", () -> new MoeBlockItem(MoeBlocks.BROWN_PAPER_LANTERN));
     public static final RegistryObject<Item> CALLIGRAPHY_BRUSH = REGISTRY.register("calligraphy_brush", CalligraphyBrushItem::new);
     public static final RegistryObject<Item> CELL_PHONE = REGISTRY.register("cell_phone", CellPhoneItem::new);
@@ -60,7 +59,6 @@ public class MoeItems {
     public static final RegistryObject<Item> PINK_PAPER_LANTERN = REGISTRY.register("pink_paper_lantern", () -> new MoeBlockItem(MoeBlocks.PINK_PAPER_LANTERN));
     public static final RegistryObject<Item> PURPLE_PAPER_LANTERN = REGISTRY.register("purple_paper_lantern", () -> new MoeBlockItem(MoeBlocks.PURPLE_PAPER_LANTERN));
     public static final RegistryObject<Item> RED_PAPER_LANTERN = REGISTRY.register("red_paper_lantern", () -> new MoeBlockItem(MoeBlocks.RED_PAPER_LANTERN));
-    public static final RegistryObject<Item> RED_SPIDER_LILY = REGISTRY.register("red_spider_lily", () -> new MoeBlockItem(MoeBlocks.RED_SPIDER_LILY, 10));
     public static final RegistryObject<Item> SAKURA_BLOSSOMS = REGISTRY.register("sakura_blossoms", () -> new MoeBlockItem(MoeBlocks.SAKURA_BLOSSOMS, 10));
     public static final RegistryObject<Item> SAKURA_BUTTON = REGISTRY.register("sakura_button", () -> new MoeBlockItem(MoeBlocks.SAKURA_BUTTON, 20));
     public static final RegistryObject<Item> SAKURA_FENCE = REGISTRY.register("sakura_fence", () -> new MoeBlockItem(MoeBlocks.SAKURA_FENCE, 20));
