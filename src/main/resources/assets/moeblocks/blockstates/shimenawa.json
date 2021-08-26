@@ -1,33 +1,33 @@
 {
   "variants": {
     "facing=north,hanging=false": {
-      "model": "moeblocks:block/shimenawa"
+      "model": "block_party:block/shimenawa"
     },
     "facing=north,hanging=true": {
-      "model": "moeblocks:block/shimenawa_hanging"
+      "model": "block_party:block/shimenawa_hanging"
     },
     "facing=east,hanging=false": {
-      "model": "moeblocks:block/shimenawa",
+      "model": "block_party:block/shimenawa",
       "y": 90
     },
     "facing=east,hanging=true": {
-      "model": "moeblocks:block/shimenawa_hanging",
+      "model": "block_party:block/shimenawa_hanging",
       "y": 90
     },
     "facing=south,hanging=false": {
-      "model": "moeblocks:block/shimenawa",
+      "model": "block_party:block/shimenawa",
       "y": 180
     },
     "facing=south,hanging=true": {
-      "model": "moeblocks:block/shimenawa_hanging",
+      "model": "block_party:block/shimenawa_hanging",
       "y": 180
     },
     "facing=west,hanging=false": {
-      "model": "moeblocks:block/shimenawa",
+      "model": "block_party:block/shimenawa",
       "y": 270
     },
     "facing=west,hanging=true": {
-      "model": "moeblocks:block/shimenawa_hanging",
+      "model": "block_party:block/shimenawa_hanging",
       "y": 270
     }
   }

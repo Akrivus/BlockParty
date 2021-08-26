@@ -1,8 +1,8 @@
 {
   "replace": false,
   "values": [
-    "moeblocks:sakura_sapling",
-    "moeblocks:white_sakura_sapling",
-    "moeblocks:wisteria_sapling"
+    "block_party:sakura_sapling",
+    "block_party:white_sakura_sapling",
+    "block_party:wisteria_sapling"
   ]
 }

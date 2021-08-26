@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "moeblocks:writing_table"
+          "name": "block_party:writing_table"
         }
       ],
       "conditions": [

@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "moeblocks:sakura_button"
+          "name": "block_party:sakura_button"
         }
       ],
       "conditions": [

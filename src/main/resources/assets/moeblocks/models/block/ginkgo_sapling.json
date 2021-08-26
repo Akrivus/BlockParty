@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cross",
   "textures": {
-    "cross": "moeblocks:block/ginkgo_sapling"
+    "cross": "block_party:block/ginkgo_sapling"
   }
 }

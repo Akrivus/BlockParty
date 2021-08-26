@@ -3,11 +3,11 @@
   "group": "planks",
   "ingredients": [
     {
-      "tag": "moeblocks:sakura_logs"
+      "tag": "block_party:sakura_logs"
     }
   ],
   "result": {
-    "item": "moeblocks:sakura_planks",
+    "item": "block_party:sakura_planks",
     "count": 4
   }
 }

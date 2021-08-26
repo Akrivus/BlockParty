@@ -10,14 +10,14 @@
       "item": "minecraft:stick"
     },
     "S": {
-      "item": "moeblocks:sakura_planks"
+      "item": "block_party:sakura_planks"
     },
     "X": {
       "item": "minecraft:paper"
     }
   },
   "result": {
-    "item": "moeblocks:blank_hanging_scroll",
+    "item": "block_party:blank_hanging_scroll",
     "count": 1
   }
 }

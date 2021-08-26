@@ -9,11 +9,11 @@
       "item": "minecraft:black_dye"
     },
     "O": {
-      "item": "moeblocks:shoji_lantern"
+      "item": "block_party:shoji_lantern"
     }
   },
   "result": {
-    "item": "moeblocks:black_paper_lantern",
+    "item": "block_party:black_paper_lantern",
     "count": 1
   }
 }

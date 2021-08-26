@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "moeblocks:ginkgo_button",
-    "moeblocks:sakura_button"
+    "block_party:ginkgo_button",
+    "block_party:sakura_button"
   ]
 }

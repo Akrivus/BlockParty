@@ -7,11 +7,11 @@
   ],
   "key": {
     "#": {
-      "item": "moeblocks:sakura_log"
+      "item": "block_party:sakura_log"
     }
   },
   "result": {
-    "item": "moeblocks:sakura_wood",
+    "item": "block_party:sakura_wood",
     "count": 3
   }
 }

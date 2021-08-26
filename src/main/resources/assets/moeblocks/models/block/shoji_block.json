@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/cube_column",
   "textures": {
-    "end": "moeblocks:block/shoji_block_top",
-    "side": "moeblocks:block/shoji_block"
+    "end": "block_party:block/shoji_block_top",
+    "side": "block_party:block/shoji_block"
   }
 }

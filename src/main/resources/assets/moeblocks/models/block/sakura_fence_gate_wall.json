@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/template_fence_gate_wall",
   "textures": {
-    "texture": "moeblocks:block/sakura_planks"
+    "texture": "block_party:block/sakura_planks"
   }
 }

@@ -20,7 +20,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "moeblocks:white_sakura_sapling"
+          "name": "block_party:white_sakura_sapling"
         }
       ],
       "conditions": [

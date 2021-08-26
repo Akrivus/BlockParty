@@ -3,10 +3,10 @@
   "group": "wooden_button",
   "ingredients": [
     {
-      "item": "moeblocks:sakura_planks"
+      "item": "block_party:sakura_planks"
     }
   ],
   "result": {
-    "item": "moeblocks:sakura_button"
+    "item": "block_party:sakura_button"
   }
 }

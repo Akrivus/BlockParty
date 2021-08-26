@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "moeblocks:shoji_block"
+          "name": "block_party:shoji_block"
         }
       ],
       "conditions": [

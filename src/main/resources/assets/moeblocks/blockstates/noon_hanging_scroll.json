@@ -1,19 +1,19 @@
 {
   "variants": {
     "facing=north": {
-      "model": "moeblocks:block/noon_hanging_scroll",
+      "model": "block_party:block/noon_hanging_scroll",
       "y": 180
     },
     "facing=east": {
-      "model": "moeblocks:block/noon_hanging_scroll",
+      "model": "block_party:block/noon_hanging_scroll",
       "y": 270
     },
     "facing=south": {
-      "model": "moeblocks:block/noon_hanging_scroll",
+      "model": "block_party:block/noon_hanging_scroll",
       "y": 0
     },
     "facing=west": {
-      "model": "moeblocks:block/noon_hanging_scroll",
+      "model": "block_party:block/noon_hanging_scroll",
       "y": 90
     }
   }

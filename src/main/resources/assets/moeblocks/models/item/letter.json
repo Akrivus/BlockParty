@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "moeblocks:item/opened_letter"
+    "layer0": "block_party:item/opened_letter"
   },
   "overrides": [
     {
-      "model": "moeblocks:item/closed_letter",
+      "model": "block_party:item/closed_letter",
       "predicate": {
         "closed": 1
       }

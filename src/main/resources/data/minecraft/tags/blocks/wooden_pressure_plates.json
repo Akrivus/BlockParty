@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "moeblocks:ginkgo_pressure_plate",
-    "moeblocks:sakura_pressure_plate"
+    "block_party:ginkgo_pressure_plate",
+    "block_party:sakura_pressure_plate"
   ]
 }

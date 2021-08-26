@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "moeblocks:item/music_disc_anteater_sanctuary"
+    "layer0": "block_party:item/music_disc_anteater_sanctuary"
   }
 }

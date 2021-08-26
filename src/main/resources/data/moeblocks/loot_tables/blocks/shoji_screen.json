@@ -9,13 +9,13 @@
           "conditions": [
             {
               "condition": "minecraft:block_state_property",
-              "block": "moeblocks:shoji_screen",
+              "block": "block_party:shoji_screen",
               "properties": {
                 "half": "lower"
               }
             }
           ],
-          "name": "moeblocks:shoji_screen"
+          "name": "block_party:shoji_screen"
         }
       ],
       "conditions": [

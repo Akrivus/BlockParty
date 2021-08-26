@@ -1,7 +1,7 @@
 {
   "textures": {
-    "door": "moeblocks:block/shoji_screen_bottom",
-    "side": "moeblocks:block/shoji_screen_side",
+    "door": "block_party:block/shoji_screen_bottom",
+    "side": "block_party:block/shoji_screen_side",
     "particle": "#door"
   },
   "elements": [

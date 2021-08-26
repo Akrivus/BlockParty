@@ -8,11 +8,11 @@
   ],
   "key": {
     "#": {
-      "item": "moeblocks:sakura_planks"
+      "item": "block_party:sakura_planks"
     }
   },
   "result": {
-    "item": "moeblocks:shoji_screen",
+    "item": "block_party:shoji_screen",
     "count": 3
   }
 }

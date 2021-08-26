@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "moeblocks:block/wisteria_vine_tip"
+      "model": "block_party:block/wisteria_vine_tip"
     }
   }
 }

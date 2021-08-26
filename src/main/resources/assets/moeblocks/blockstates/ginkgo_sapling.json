@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "moeblocks:block/ginkgo_sapling"
+      "model": "block_party:block/ginkgo_sapling"
     }
   }
 }

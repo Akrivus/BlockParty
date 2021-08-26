@@ -1,15 +1,15 @@
 {
   "variants": {
     "axis=x": {
-      "model": "moeblocks:block/wisteria_bine_horizontal",
+      "model": "block_party:block/wisteria_bine_horizontal",
       "x": 90,
       "y": 90
     },
     "axis=y": {
-      "model": "moeblocks:block/wisteria_bine"
+      "model": "block_party:block/wisteria_bine"
     },
     "axis=z": {
-      "model": "moeblocks:block/wisteria_bine_horizontal",
+      "model": "block_party:block/wisteria_bine_horizontal",
       "x": 90
     }
   }

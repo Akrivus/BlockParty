@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "texture": "moeblocks:block/shoji_panel",
+    "texture": "block_party:block/shoji_panel",
     "particle": "#texture"
   },
   "elements": [

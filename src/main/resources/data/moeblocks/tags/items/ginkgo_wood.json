@@ -1,10 +1,10 @@
 {
   "replace": false,
   "values": [
-    "#moeblocks:ginkgo_logs",
-    "moeblocks:ginkgo_planks",
-    "moeblocks:ginkgo_slab",
-    "moeblocks:ginkgo_stairs",
-    "moeblocks:ginkgo_fence"
+    "#block_party:ginkgo_logs",
+    "block_party:ginkgo_planks",
+    "block_party:ginkgo_slab",
+    "block_party:ginkgo_stairs",
+    "block_party:ginkgo_fence"
   ]
 }

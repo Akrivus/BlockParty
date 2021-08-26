@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "moeblocks:block/ginkgo_leaves"
+      "model": "block_party:block/ginkgo_leaves"
     }
   }
 }

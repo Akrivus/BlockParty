@@ -1,15 +1,15 @@
 {
   "variants": {
     "axis=x": {
-      "model": "moeblocks:block/stripped_ginkgo_log_horizontal",
+      "model": "block_party:block/stripped_ginkgo_log_horizontal",
       "x": 90,
       "y": 90
     },
     "axis=y": {
-      "model": "moeblocks:block/stripped_ginkgo_log"
+      "model": "block_party:block/stripped_ginkgo_log"
     },
     "axis=z": {
-      "model": "moeblocks:block/stripped_ginkgo_log_horizontal",
+      "model": "block_party:block/stripped_ginkgo_log_horizontal",
       "x": 90
     }
   }

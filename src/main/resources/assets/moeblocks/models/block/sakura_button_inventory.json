@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/button_inventory",
   "textures": {
-    "texture": "moeblocks:block/sakura_planks"
+    "texture": "block_party:block/sakura_planks"
   }
 }

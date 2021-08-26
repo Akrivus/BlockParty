@@ -9,11 +9,11 @@
       "item": "minecraft:magenta_dye"
     },
     "O": {
-      "item": "moeblocks:shoji_lantern"
+      "item": "block_party:shoji_lantern"
     }
   },
   "result": {
-    "item": "moeblocks:magenta_paper_lantern",
+    "item": "block_party:magenta_paper_lantern",
     "count": 1
   }
 }

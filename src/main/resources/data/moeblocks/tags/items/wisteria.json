@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "moeblocks:wisteria_bine",
-    "moeblocks:wisteria_leaves"
+    "block_party:wisteria_bine",
+    "block_party:wisteria_leaves"
   ]
 }

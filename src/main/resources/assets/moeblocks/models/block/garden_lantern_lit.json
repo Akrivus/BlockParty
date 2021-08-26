@@ -1,6 +1,6 @@
 {
-  "parent": "moeblocks:block/garden_lantern",
+  "parent": "block_party:block/garden_lantern",
   "textures": {
-    "body": "moeblocks:block/garden_lantern_lit"
+    "body": "block_party:block/garden_lantern_lit"
   }
 }

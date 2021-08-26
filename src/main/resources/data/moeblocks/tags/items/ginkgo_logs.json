@@ -1,9 +1,9 @@
 {
   "replace": false,
   "values": [
-    "moeblocks:ginkgo_log",
-    "moeblocks:ginkgo_wood",
-    "moeblocks:stripped_ginkgo_log",
-    "moeblocks:stripped_ginkgo_wood"
+    "block_party:ginkgo_log",
+    "block_party:ginkgo_wood",
+    "block_party:stripped_ginkgo_log",
+    "block_party:stripped_ginkgo_wood"
   ]
 }

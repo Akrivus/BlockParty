@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/cube_column",
   "textures": {
-    "end": "moeblocks:block/tatami_end",
-    "side": "moeblocks:block/tatami_side"
+    "end": "block_party:block/tatami_end",
+    "side": "block_party:block/tatami_side"
   }
 }

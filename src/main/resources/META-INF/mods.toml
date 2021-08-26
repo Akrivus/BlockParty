@@ -3,26 +3,26 @@ loaderVersion = "[35,)"
 license = "MIT"
 
 [[mods]]
-modId = "moeblocks"
+modId = "block_party"
 version = "${file.jarVersion}"
-displayName = "MoeBlocks"
-updateJSONURL = "https://blocks.moe/version"
-displayURL = "https://blocks.moe/"
-logoFile = "moeblocks.png"
+displayName = "BlockParty"
+updateJSONURL = "https://blocks.partyer/version"
+displayURL = "https://blocks.partyer/"
+logoFile = "block_party.png"
 credits = "akrivus, Jüdacraz, dalfaria."
 authors = "akrivus"
 description = '''
-MoeBlocks adds moes, mobs that do chores and bring gifts in attempt to become your favorite,
+Block Party adds partyers, mobs that do chores and bring gifts in attempt to become your favorite,
 offering a fun and inuitive experience in Minecraft.
 '''
 
-[[dependencies.moeblocks]]
+[[dependencies.block_party]]
 modId = "forge"
 mandatory = true
 versionRange = "[35,)"
 ordering = "NONE"
 side = "BOTH"
-[[dependencies.moeblocks]]
+[[dependencies.block_party]]
 modId = "minecraft"
 mandatory = true
 versionRange = "[1.16.4]"

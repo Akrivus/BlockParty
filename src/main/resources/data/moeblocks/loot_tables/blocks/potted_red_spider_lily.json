@@ -20,7 +20,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "moeblocks:red_spider_lily"
+          "name": "block_party:red_spider_lily"
         }
       ],
       "conditions": [

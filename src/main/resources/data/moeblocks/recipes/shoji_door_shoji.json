@@ -8,11 +8,11 @@
   ],
   "key": {
     "#": {
-      "item": "moeblocks:shoji_block"
+      "item": "block_party:shoji_block"
     }
   },
   "result": {
-    "item": "moeblocks:shoji_screen",
+    "item": "block_party:shoji_screen",
     "count": 3
   }
 }

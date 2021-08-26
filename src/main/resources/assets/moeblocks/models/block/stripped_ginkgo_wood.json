@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/cube_column",
   "textures": {
-    "end": "moeblocks:block/stripped_ginkgo_log",
-    "side": "moeblocks:block/stripped_ginkgo_log"
+    "end": "block_party:block/stripped_ginkgo_log",
+    "side": "block_party:block/stripped_ginkgo_log"
   }
 }

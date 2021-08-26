@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "body": "moeblocks:block/garden_lantern",
-    "bottom": "moeblocks:block/garden_lantern_bottom",
-    "top": "moeblocks:block/garden_lantern_top",
+    "body": "block_party:block/garden_lantern",
+    "bottom": "block_party:block/garden_lantern_bottom",
+    "top": "block_party:block/garden_lantern_top",
     "particle": "#top"
   },
   "elements": [

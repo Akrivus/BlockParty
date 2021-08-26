@@ -1,13 +1,13 @@
 {
   "variants": {
     "type=bottom": {
-      "model": "moeblocks:block/sakura_slab"
+      "model": "block_party:block/sakura_slab"
     },
     "type=double": {
-      "model": "moeblocks:block/sakura_planks"
+      "model": "block_party:block/sakura_planks"
     },
     "type=top": {
-      "model": "moeblocks:block/sakura_slab_top"
+      "model": "block_party:block/sakura_slab_top"
     }
   }
 }

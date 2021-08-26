@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "moeblocks:ginkgo_planks",
-    "moeblocks:sakura_planks"
+    "block_party:ginkgo_planks",
+    "block_party:sakura_planks"
   ]
 }

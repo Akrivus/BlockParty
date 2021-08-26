@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/fence_post",
   "textures": {
-    "texture": "moeblocks:block/ginkgo_planks"
+    "texture": "block_party:block/ginkgo_planks"
   }
 }

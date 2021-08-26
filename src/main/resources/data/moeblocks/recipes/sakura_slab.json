@@ -6,11 +6,11 @@
   ],
   "key": {
     "#": {
-      "item": "moeblocks:sakura_planks"
+      "item": "block_party:sakura_planks"
     }
   },
   "result": {
-    "item": "moeblocks:sakura_slab",
+    "item": "block_party:sakura_slab",
     "count": 6
   }
 }

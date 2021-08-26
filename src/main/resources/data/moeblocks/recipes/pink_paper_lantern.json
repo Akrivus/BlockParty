@@ -9,11 +9,11 @@
       "item": "minecraft:pink_dye"
     },
     "O": {
-      "item": "moeblocks:shoji_lantern"
+      "item": "block_party:shoji_lantern"
     }
   },
   "result": {
-    "item": "moeblocks:pink_paper_lantern",
+    "item": "block_party:pink_paper_lantern",
     "count": 1
   }
 }

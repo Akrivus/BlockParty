@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/flower_pot_cross",
   "textures": {
-    "plant": "moeblocks:block/ginkgo_sapling"
+    "plant": "block_party:block/ginkgo_sapling"
   }
 }

@@ -8,11 +8,11 @@
   ],
   "key": {
     "#": {
-      "item": "moeblocks:sakura_planks"
+      "item": "block_party:sakura_planks"
     }
   },
   "result": {
-    "item": "moeblocks:sakura_stairs",
+    "item": "block_party:sakura_stairs",
     "count": 4
   }
 }

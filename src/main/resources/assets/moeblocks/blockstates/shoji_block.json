@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "moeblocks:block/shoji_block"
+      "model": "block_party:block/shoji_block"
     }
   }
 }

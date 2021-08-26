@@ -71,6 +71,6 @@
     }
   },
   "textures": {
-    "layer0": "moeblocks:item/calligraphy_brush"
+    "layer0": "block_party:item/calligraphy_brush"
   }
 }

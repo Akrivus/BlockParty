@@ -9,11 +9,11 @@
       "item": "minecraft:lime_dye"
     },
     "O": {
-      "item": "moeblocks:shoji_lantern"
+      "item": "block_party:shoji_lantern"
     }
   },
   "result": {
-    "item": "moeblocks:lime_paper_lantern",
+    "item": "block_party:lime_paper_lantern",
     "count": 1
   }
 }

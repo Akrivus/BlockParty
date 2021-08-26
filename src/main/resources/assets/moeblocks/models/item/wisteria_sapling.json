@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "moeblocks:block/wisteria_sapling"
+    "layer0": "block_party:block/wisteria_sapling"
   }
 }

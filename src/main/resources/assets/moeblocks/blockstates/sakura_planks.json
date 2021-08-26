@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "moeblocks:block/sakura_planks"
+      "model": "block_party:block/sakura_planks"
     }
   }
 }

@@ -5,7 +5,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+    classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1+', changing: true
     classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow', version: '4.0.4'
   }
 }
@@ -14,25 +14,29 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'maven-publish'
 
+apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
+
 version = new Date().format('yy.MM.dd')
-archivesBaseName = 'MoeBlocks'
-group = 'moeblocks'
+archivesBaseName = 'BlockParty'
+group = 'block_party'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 minecraft {
-  mappings channel: 'snapshot', version: '20210309-1.16.5'
+  mappings channel: 'official', version: '1.17.1'
 
   runs {
     client {
-      mods { moeblocks { source sourceSets.main } }
+      mods { block_party { source sourceSets.main } }
       workingDirectory project.file('run')
     }
     data {
-      args '--mod', 'moeblocks', '--all', '--output', file('src/generated/resources/')
-      mods { moeblocks { source sourceSets.main } }
+      args '--mod', 'block_party', '--all', '--output', file('src/generated/resources/')
+      mods { block_party { source sourceSets.main } }
       workingDirectory project.file('run')
     }
     server {
-      mods { moeblocks { source sourceSets.main } }
+      mods { block_party { source sourceSets.main } }
       workingDirectory project.file('run')
     }
   }
@@ -41,7 +45,7 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-  minecraft 'net.minecraftforge:forge:1.16.5-36.1.24'
+  minecraft 'net.minecraftforge:forge:1.17.1-37.0.32'
   shadow 'org.xerial:sqlite-jdbc:3.34.0'
   implementation 'org.xerial:sqlite-jdbc:3.34.0'
 }

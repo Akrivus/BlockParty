@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "moeblocks:block/white_sakura_sapling"
+      "model": "block_party:block/white_sakura_sapling"
     }
   }
 }

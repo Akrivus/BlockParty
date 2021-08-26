@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "moeblocks:item/opened_invite"
+    "layer0": "block_party:item/opened_invite"
   },
   "overrides": [
     {
-      "model": "moeblocks:item/closed_invite",
+      "model": "block_party:item/closed_invite",
       "predicate": {
         "closed": 1
       }

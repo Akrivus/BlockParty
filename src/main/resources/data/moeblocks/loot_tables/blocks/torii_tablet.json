@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "moeblocks:torii_tablet"
+          "name": "block_party:torii_tablet"
         }
       ],
       "conditions": [

@@ -1,13 +1,13 @@
 {
   "variants": {
     "type=bottom": {
-      "model": "moeblocks:block/ginkgo_slab"
+      "model": "block_party:block/ginkgo_slab"
     },
     "type=double": {
-      "model": "moeblocks:block/ginkgo_planks"
+      "model": "block_party:block/ginkgo_planks"
     },
     "type=top": {
-      "model": "moeblocks:block/ginkgo_slab_top"
+      "model": "block_party:block/ginkgo_slab_top"
     }
   }
 }

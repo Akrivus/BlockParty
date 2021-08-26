@@ -6,14 +6,14 @@
   ],
   "key": {
     "#": {
-      "item": "moeblocks:shoji_panel"
+      "item": "block_party:shoji_panel"
     },
     "I": {
       "item": "minecraft:torch"
     }
   },
   "result": {
-    "item": "moeblocks:shoji_lantern",
+    "item": "block_party:shoji_lantern",
     "count": 1
   }
 }

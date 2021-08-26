@@ -1,8 +1,8 @@
 {
   "replace": false,
   "values": [
-    "#moeblocks:ginkgo_logs",
-    "#moeblocks:sakura_logs",
-    "moeblocks:wisteria_bine"
+    "#block_party:ginkgo_logs",
+    "#block_party:sakura_logs",
+    "block_party:wisteria_bine"
   ]
 }

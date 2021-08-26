@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/pressure_plate_down",
   "textures": {
-    "texture": "moeblocks:block/ginkgo_planks"
+    "texture": "block_party:block/ginkgo_planks"
   }
 }

@@ -1,7 +1,7 @@
 {
-  "parent": "moeblocks:block/hanging_scroll",
+  "parent": "block_party:block/hanging_scroll",
   "textures": {
-    "symbol": "moeblocks:block/symbol_night",
-    "body": "moeblocks:block/hanging_scroll"
+    "symbol": "block_party:block/symbol_night",
+    "body": "block_party:block/hanging_scroll"
   }
 }

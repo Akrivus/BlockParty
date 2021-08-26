@@ -1,10 +1,10 @@
 {
   "variants": {
     "lit=true": {
-      "model": "moeblocks:block/garden_lantern_lit"
+      "model": "block_party:block/garden_lantern_lit"
     },
     "lit=false": {
-      "model": "moeblocks:block/garden_lantern"
+      "model": "block_party:block/garden_lantern"
     }
   }
 }

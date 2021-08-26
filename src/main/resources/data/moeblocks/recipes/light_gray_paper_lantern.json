@@ -9,11 +9,11 @@
       "item": "minecraft:light_gray_dye"
     },
     "O": {
-      "item": "moeblocks:shoji_lantern"
+      "item": "block_party:shoji_lantern"
     }
   },
   "result": {
-    "item": "moeblocks:light_gray_paper_lantern",
+    "item": "block_party:light_gray_paper_lantern",
     "count": 1
   }
 }

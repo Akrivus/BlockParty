@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/fence_post",
   "textures": {
-    "texture": "moeblocks:block/sakura_planks"
+    "texture": "block_party:block/sakura_planks"
   }
 }

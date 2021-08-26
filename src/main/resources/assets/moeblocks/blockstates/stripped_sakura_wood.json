@@ -1,15 +1,15 @@
 {
   "variants": {
     "axis=x": {
-      "model": "moeblocks:block/stripped_sakura_wood",
+      "model": "block_party:block/stripped_sakura_wood",
       "x": 90,
       "y": 90
     },
     "axis=y": {
-      "model": "moeblocks:block/stripped_sakura_wood"
+      "model": "block_party:block/stripped_sakura_wood"
     },
     "axis=z": {
-      "model": "moeblocks:block/stripped_sakura_wood",
+      "model": "block_party:block/stripped_sakura_wood",
       "x": 90
     }
   }

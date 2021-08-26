@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "moeblocks:sakura_log"
+          "name": "block_party:sakura_log"
         }
       ],
       "conditions": [

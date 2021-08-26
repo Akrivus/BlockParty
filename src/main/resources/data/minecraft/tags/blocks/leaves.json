@@ -1,9 +1,9 @@
 {
   "replace": false,
   "values": [
-    "moeblocks:ginkgo_leaves",
-    "moeblocks:sakura_blossoms",
-    "moeblocks:white_sakura_blossoms",
-    "moeblocks:wisteria_leaves"
+    "block_party:ginkgo_leaves",
+    "block_party:sakura_blossoms",
+    "block_party:white_sakura_blossoms",
+    "block_party:wisteria_leaves"
   ]
 }

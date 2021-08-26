@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "moeblocks:ginkgo_slab",
-    "moeblocks:sakura_slab"
+    "block_party:ginkgo_slab",
+    "block_party:sakura_slab"
   ]
 }

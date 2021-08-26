@@ -1,8 +1,8 @@
 {
   "parent": "minecraft:block/stairs",
   "textures": {
-    "bottom": "moeblocks:block/sakura_planks",
-    "top": "moeblocks:block/sakura_planks",
-    "side": "moeblocks:block/sakura_planks"
+    "bottom": "block_party:block/sakura_planks",
+    "top": "block_party:block/sakura_planks",
+    "side": "block_party:block/sakura_planks"
   }
 }

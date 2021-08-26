@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/leaves",
   "textures": {
-    "all": "moeblocks:block/wisteria_leaves"
+    "all": "block_party:block/wisteria_leaves"
   }
 }

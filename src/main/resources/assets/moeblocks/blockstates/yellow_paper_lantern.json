@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "moeblocks:block/yellow_paper_lantern"
+      "model": "block_party:block/yellow_paper_lantern"
     }
   }
 }

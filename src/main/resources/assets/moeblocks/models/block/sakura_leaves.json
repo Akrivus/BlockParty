@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/leaves",
   "textures": {
-    "all": "moeblocks:block/sakura_leaves"
+    "all": "block_party:block/sakura_leaves"
   }
 }

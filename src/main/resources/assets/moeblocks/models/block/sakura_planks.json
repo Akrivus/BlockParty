@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "moeblocks:block/sakura_planks"
+    "all": "block_party:block/sakura_planks"
   }
 }

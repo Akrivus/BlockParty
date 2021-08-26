@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "moeblocks:block/torii_tablet"
+    "layer0": "block_party:block/torii_tablet"
   }
 }

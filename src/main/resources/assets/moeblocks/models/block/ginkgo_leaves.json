@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/leaves",
   "textures": {
-    "all": "moeblocks:block/ginkgo_leaves"
+    "all": "block_party:block/ginkgo_leaves"
   }
 }

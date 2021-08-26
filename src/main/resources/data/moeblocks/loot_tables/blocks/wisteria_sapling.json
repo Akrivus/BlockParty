@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "moeblocks:wisteria_sapling"
+          "name": "block_party:wisteria_sapling"
         }
       ],
       "conditions": [

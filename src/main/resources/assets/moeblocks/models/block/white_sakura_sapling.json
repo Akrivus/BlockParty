@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cross",
   "textures": {
-    "cross": "moeblocks:block/white_sakura_sapling"
+    "cross": "block_party:block/white_sakura_sapling"
   }
 }

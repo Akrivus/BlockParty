@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "ends": "moeblocks:block/paper_lantern",
+    "ends": "block_party:block/paper_lantern",
     "particle": "#body"
   },
   "elements": [

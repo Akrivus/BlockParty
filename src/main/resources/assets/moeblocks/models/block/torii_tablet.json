@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "tablet": "moeblocks:block/torii_tablet",
-    "base": "moeblocks:block/torii_tablet_base",
-    "particle": "moeblocks:block/torii_tablet"
+    "tablet": "block_party:block/torii_tablet",
+    "base": "block_party:block/torii_tablet_base",
+    "particle": "block_party:block/torii_tablet"
   },
   "elements": [
     {

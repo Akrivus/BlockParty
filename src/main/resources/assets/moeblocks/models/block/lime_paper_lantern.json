@@ -1,7 +1,7 @@
 {
-  "parent": "moeblocks:block/paper_lantern",
+  "parent": "block_party:block/paper_lantern",
   "textures": {
-    "body": "moeblocks:block/lime_paper_lantern",
-    "top": "moeblocks:block/lime_paper_lantern_top"
+    "body": "block_party:block/lime_paper_lantern",
+    "top": "block_party:block/lime_paper_lantern_top"
   }
 }

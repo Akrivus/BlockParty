@@ -10,10 +10,10 @@
       "item": "minecraft:stick"
     },
     "W": {
-      "item": "moeblocks:sakura_planks"
+      "item": "block_party:sakura_planks"
     }
   },
   "result": {
-    "item": "moeblocks:sakura_fence_gate"
+    "item": "block_party:sakura_fence_gate"
   }
 }
