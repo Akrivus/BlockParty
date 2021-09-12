@@ -1,6 +1,6 @@
 package block_party.mob.automata;
 
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 
 import java.util.Map;
 import java.util.NavigableMap;
@@ -11,13 +11,13 @@ public class MarkovChain implements IState {
     private double total = 0;
 
     @Override
-    public void terminate(Partyer npc) { }
+    public void terminate(BlockPartyNPC npc) { }
 
     @Override
-    public void onTransfer(Partyer npc) { }
+    public void onTransfer(BlockPartyNPC npc) { }
 
     @Override
-    public IState transfer(Partyer npc) {
+    public IState transfer(BlockPartyNPC npc) {
         double weight = Math.random() * this.total;
         Map.Entry<Double, IState> entry = this.states.higherEntry(weight);
         if (entry == null) { return State.RESET; }
@@ -25,7 +25,7 @@ public class MarkovChain implements IState {
     }
 
     @Override
-    public boolean isDone(Partyer npc) {
+    public boolean isDone(BlockPartyNPC npc) {
         return true;
     }
 

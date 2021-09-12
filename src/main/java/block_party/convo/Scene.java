@@ -3,7 +3,7 @@ package block_party.convo;
 import block_party.convo.enums.Response;
 import block_party.init.BlockPartyMessages;
 import block_party.message.SCloseDialogue;
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.HashMap;
@@ -11,12 +11,12 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class Scene {
-    private final BiConsumer<Player, Partyer> action;
+    private final BiConsumer<Player, BlockPartyNPC> action;
     private final Map<Response, Transition> transitions = new HashMap<>();
     private Player player;
-    private Partyer npc;
+    private BlockPartyNPC npc;
 
-    public Scene(BiConsumer<Player, Partyer> action, Transition... transitions) {
+    public Scene(BiConsumer<Player, BlockPartyNPC> action, Transition... transitions) {
         this.action = action;
         for (Transition transition : transitions) {
             if (this.transitions.get(transition.getResponse()) != null) {
@@ -26,7 +26,7 @@ public class Scene {
         }
     }
 
-    public void act(Player player, Partyer npc) {
+    public void act(Player player, BlockPartyNPC npc) {
         this.action.accept(this.player = player, this.npc = npc);
     }
 

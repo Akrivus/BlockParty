@@ -1,6 +1,5 @@
 package block_party.blocks;
 
-import block_party.blocks.entity.WritingTableBlockEntity;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
@@ -11,11 +10,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 
-public class WritingTableBlock extends AbstractDataBlock<WritingTableBlockEntity> {
+public class WritingTableBlock extends Block {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
     public WritingTableBlock(Properties properties) {
-        super(WritingTableBlockEntity::new, properties);
+        super(properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 

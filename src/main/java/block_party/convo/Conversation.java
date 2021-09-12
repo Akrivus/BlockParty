@@ -1,16 +1,16 @@
 package block_party.convo;
 
 import block_party.convo.enums.Interaction;
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 
 import java.util.function.Predicate;
 
 public class Conversation {
     private final Interaction trigger;
-    private final Predicate<Partyer> function;
+    private final Predicate<BlockPartyNPC> function;
     private final Scene scene;
 
-    public Conversation(Interaction trigger, Predicate<Partyer> function, Scene scene) {
+    public Conversation(Interaction trigger, Predicate<BlockPartyNPC> function, Scene scene) {
         this.trigger = trigger;
         this.function = function;
         this.scene = scene;
@@ -20,7 +20,7 @@ public class Conversation {
         return this.scene;
     }
 
-    public boolean matches(Interaction trigger, Partyer npc) {
+    public boolean matches(Interaction trigger, BlockPartyNPC npc) {
         return this.trigger == trigger && this.function.test(npc);
     }
 }

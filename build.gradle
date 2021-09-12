@@ -14,8 +14,6 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'maven-publish'
 
-apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
-
 version = new Date().format('yy.MM.dd')
 archivesBaseName = 'BlockParty'
 group = 'block_party'

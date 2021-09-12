@@ -1,12 +1,13 @@
 package block_party.client.render;
 
+import block_party.client.BlockPartyRenderers;
 import block_party.client.animation.Animation;
-import block_party.client.model.MoeModel;
+import block_party.client.model.DollModel;
 import block_party.client.render.layer.MoeEmotionLayer;
 import block_party.client.render.layer.MoeGlowLayer;
 import block_party.client.render.layer.MoeSleepingLayer;
 import block_party.client.render.layer.MoeSpecialRenderer;
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
@@ -19,25 +20,25 @@ import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-public class MoeRenderer extends MobRenderer<Partyer, MoeModel<Partyer>> {
+public class DollRenderer extends MobRenderer<BlockPartyNPC, DollModel<BlockPartyNPC>> {
 
-    public MoeRenderer(EntityRendererProvider.Context context) {
-        super(context, new MoeModel<>(), 0.25F);
+    public DollRenderer(EntityRendererProvider.Context context) {
+        super(context, new DollModel<>(context.bakeLayer(BlockPartyRenderers.DOLL)), 0.25F);
         this.addLayer(new ItemInHandLayer<>(this));
         this.addLayer(new MoeEmotionLayer(this));
         this.addLayer(new MoeSleepingLayer(this));
         this.addLayer(new MoeGlowLayer(this));
-        this.addLayer(new CustomHeadLayer<>(this));
+        this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
         this.addLayer(new MoeSpecialRenderer(this));
     }
 
     @Override
-    public ResourceLocation getTextureLocation(Partyer entity) {
-        return Partyer.Overrides.getNameOf(entity.getExternalBlockState());
+    public ResourceLocation getTextureLocation(BlockPartyNPC entity) {
+        return BlockPartyNPC.Overrides.getNameOf(entity.getExternalBlockState());
     }
 
     @Override
-    protected void renderNameTag(Partyer entity, Component name, PoseStack stack, MultiBufferSource buffer, int packedLight) {
+    protected void renderNameTag(BlockPartyNPC entity, Component name, PoseStack stack, MultiBufferSource buffer, int packedLight) {
         if (entity.getAnimationKey() == Animation.YEARBOOK) { return; }
         if (Minecraft.getInstance().player.distanceTo(entity) > 8.0F) { return; }
         String[] lines = new String[] { this.getHealth(entity), name.getString(), entity.getDatabaseID().toString() };
@@ -56,12 +57,12 @@ public class MoeRenderer extends MobRenderer<Partyer, MoeModel<Partyer>> {
         stack.popPose();
     }
 
-    public String getHealth(Partyer entity) {
+    public String getHealth(BlockPartyNPC entity) {
         return String.format("%d / %d", (int) entity.getHealth(), (int) entity.getMaxHealth());
     }
 
     @Override
-    public void scale(Partyer entity, PoseStack stack, float partialTickTime) {
+    public void scale(BlockPartyNPC entity, PoseStack stack, float partialTickTime) {
         super.scale(entity, stack, partialTickTime);
         entity.getAnimation().render(entity, stack, partialTickTime);
         stack.scale(0.9375F, 0.9375F, 0.9375F);

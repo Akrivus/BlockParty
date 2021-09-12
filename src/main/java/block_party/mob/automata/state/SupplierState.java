@@ -1,6 +1,6 @@
 package block_party.mob.automata.state;
 
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import block_party.mob.automata.IState;
 
 import java.util.function.Supplier;
@@ -13,18 +13,18 @@ public class SupplierState implements IState {
     }
 
     @Override
-    public void terminate(Partyer npc) { }
+    public void terminate(BlockPartyNPC npc) { }
 
     @Override
-    public void onTransfer(Partyer npc) { }
+    public void onTransfer(BlockPartyNPC npc) { }
 
     @Override
-    public IState transfer(Partyer npc) {
+    public IState transfer(BlockPartyNPC npc) {
         return this.state.get();
     }
 
     @Override
-    public boolean isDone(Partyer npc) {
+    public boolean isDone(BlockPartyNPC npc) {
         return true;
     }
 }

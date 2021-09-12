@@ -1,6 +1,6 @@
 package block_party.message;
 
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
@@ -18,7 +18,7 @@ public class CDialogueClose extends CNPCQuery {
 
     @Override
     public void onFound(NetworkEvent.Context context, ServerPlayer player) {
-        Partyer npc = this.npc.getServerEntity(player.getServer());
+        BlockPartyNPC npc = this.npc.getServerEntity(player.getServer());
         if (npc != null) {
             //npc.setScene(Response.CLOSE);
         }

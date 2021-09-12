@@ -1,7 +1,7 @@
 package block_party;
 
 import block_party.init.*;
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
@@ -48,20 +48,22 @@ public class BlockParty {
 
     private void onClientSetup(final FMLClientSetupEvent e) {
         BlockPartyBlocks.registerRenderTypes();
-        BlockPartyEntities.registerEntityRenderingHandlers();
         BlockPartyItems.registerModelProperties();
         BlockPartyMessages.registerClient();
-        Partyer.Overrides.registerSpecialRenderers();
+        BlockPartyNPC.Overrides.registerSpecialRenderers();
     }
 
     private void onCommonSetup(final FMLCommonSetupEvent e) {
         BlockPartyBlocks.registerPottedPlants();
         BlockPartyConvos.registerConvos();
-        BlockPartyEntities.registerAttributes();
         BlockPartyMessages.registerServer();
-        Partyer.Overrides.registerAliases();
-        Partyer.Overrides.registerPropertyOverrides();
-        Partyer.Overrides.registerStepSounds();
+        BlockPartyNPC.Overrides.registerAliases();
+        BlockPartyNPC.Overrides.registerPropertyOverrides();
+        BlockPartyNPC.Overrides.registerStepSounds();
+    }
+
+    public static ResourceLocation source(String value) {
+        return new ResourceLocation(ID, value);
     }
 
     public static String getVersion() {

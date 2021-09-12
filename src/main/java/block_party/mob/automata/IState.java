@@ -1,13 +1,13 @@
 package block_party.mob.automata;
 
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 
 public interface IState {
-    void terminate(Partyer npc);
+    void terminate(BlockPartyNPC npc);
 
-    void onTransfer(Partyer npc);
+    void onTransfer(BlockPartyNPC npc);
 
-    IState transfer(Partyer npc);
+    IState transfer(BlockPartyNPC npc);
 
-    boolean isDone(Partyer npc);
+    boolean isDone(BlockPartyNPC npc);
 }

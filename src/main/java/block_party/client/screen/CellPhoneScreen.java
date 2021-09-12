@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class CellPhoneScreen extends ControllerScreen<NPC> {
-    public static final ResourceLocation CELL_PHONE_TEXTURES = new ResourceLocation(BlockParty.ID, "textures/gui/cell_phone.png");
+    public static final ResourceLocation CELL_PHONE_TEXTURES = BlockParty.source("textures/gui/cell_phone.png");
     private final List<ContactButton> contacts = new ArrayList<>();
     private int start;
     private int total;
@@ -53,12 +53,12 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
             this.minecraft.player.displayClientMessage(new TranslatableComponent("gui.block_party.error.empty"), true);
             this.onClose();
         } else {
-            this.contacts.forEach((contact) -> this.buttons.remove(contact));
+            this.contacts.forEach((contact) -> this.removeWidget(contact));
             for (int y = this.start; y < Math.min(this.start + 4, this.contacts.size()); ++y) {
                 Button button = this.contacts.get(y);
                 button.x = this.getAbsoluteCenter(45);
                 button.y = 32 + (y % 4) * 17;
-                this.addButton(button);
+                this.addWidget(button);
             }
         }
     }
@@ -72,14 +72,14 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
     }
 
     public void renderPhone(PoseStack stack) {
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bind(CELL_PHONE_TEXTURES);
+        RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
+        this.minecraft.getTextureManager().bindForSetup(CELL_PHONE_TEXTURES);
         this.blit(stack, this.getCenter(108), 2, 0, 0, 108, 182);
     }
 
     public void renderScrollBar(PoseStack stack) {
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bind(CELL_PHONE_TEXTURES);
+        RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
+        this.minecraft.getTextureManager().bindForSetup(CELL_PHONE_TEXTURES);
         int y = (int) (Math.min((double) this.start / (this.contacts.size() - this.contacts.size() % 4), 1.0) * 35);
         this.blit(stack, this.getAbsoluteCenter(-37), 40 + y, 108, 82, 7, 15);
     }
@@ -103,9 +103,9 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
 
     @Override
     protected void init() {
-        this.addButton(new Button(this.getAbsoluteCenter(54), 190, 108, 20, CommonComponents.GUI_DONE, (button) -> this.onClose()));
-        this.buttonScrollUp = this.addButton(new ScrollButton(this, this.getAbsoluteCenter(-37), 32, -1));
-        this.buttonScrollDown = this.addButton(new ScrollButton(this, this.getAbsoluteCenter(-37), 91, 1));
+        this.addWidget(new Button(this.getAbsoluteCenter(54), 190, 108, 20, CommonComponents.GUI_DONE, (button) -> this.onClose()));
+        this.buttonScrollUp = this.addWidget(new ScrollButton(this, this.getAbsoluteCenter(-37), 32, -1));
+        this.buttonScrollDown = this.addWidget(new ScrollButton(this, this.getAbsoluteCenter(-37), 91, 1));
         this.updateButtons();
     }
 

@@ -1,6 +1,6 @@
 package block_party.client.model;
 
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.ArmedModel;
@@ -13,7 +13,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 
-public class MoeModel<T extends Partyer> extends HierarchicalModel<T> implements ArmedModel, HeadedModel, IRiggableModel {
+public class DollModel<T extends BlockPartyNPC> extends HierarchicalModel<T> implements ArmedModel, HeadedModel, IRiggableModel {
     private final ModelPart root;
     private final ModelPart head;
     private final ModelPart hair;
@@ -58,7 +58,7 @@ public class MoeModel<T extends Partyer> extends HierarchicalModel<T> implements
     private final ModelPart rightLegWear;
     private final ModelPart leftLegWear;
 
-    public MoeModel(ModelPart root) {
+    public DollModel(ModelPart root) {
         this.root = root;
         this.head = this.root.getChild("head");
         this.hair = this.head.getChild("hair");
@@ -304,7 +304,7 @@ public class MoeModel<T extends Partyer> extends HierarchicalModel<T> implements
         return this.tailTip;
     }
 
-    public static LayerDefinition createBodyLayer() {
+    public static LayerDefinition create() {
         MeshDefinition parts = new MeshDefinition();
         PartDefinition root = parts.getRoot();
         PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F), PartPose.offsetAndRotation(0.0F, 12.0F, 0.0F, 0.0F, 0.0F, 0.0F));

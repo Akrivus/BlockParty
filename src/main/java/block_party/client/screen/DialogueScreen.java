@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DialogueScreen extends AbstractScreen {
-    public static final ResourceLocation DIALOGUE_TEXTURES = new ResourceLocation(BlockParty.ID, "textures/gui/dialogue.png");
+    public static final ResourceLocation DIALOGUE_TEXTURES = BlockParty.source("textures/gui/dialogue.png");
     private final List<RespondButton> responses = new ArrayList<>();
     private final String[] lines = new String[] { "", "", "" };
     private final Dialogue dialogue;
@@ -50,12 +50,16 @@ public class DialogueScreen extends AbstractScreen {
     }
 
     public void renderTooltips(PoseStack stack, int mouseX, int mouseY) {
-        this.buttons.forEach((button) -> { if (button.isHovered()) { button.renderToolTip(stack, mouseX, mouseY); } });
+        this.children().forEach((child) -> {
+            if (child instanceof Button) { return; }
+            Button button = (Button) child;
+            if (button.isHovered()) { button.renderToolTip(stack, mouseX, mouseY); }
+        });
     }
 
     public void renderDialogue(PoseStack stack) {
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bind(DIALOGUE_TEXTURES);
+        RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
+        this.minecraft.getTextureManager().bindForSetup(DIALOGUE_TEXTURES);
         this.blit(stack, this.getLeft(), this.getBottom(48), this.zero, this.zero, this.sizeX, this.sizeY);
         this.font.drawShadow(stack, this.lines[0].trim(), this.getLeft(5), this.getBottom(43), this.white);
         this.font.drawShadow(stack, this.lines[1].trim(), this.getLeft(5), this.getBottom(34), this.white);
@@ -107,7 +111,7 @@ public class DialogueScreen extends AbstractScreen {
         this.start = this.minecraft.player.tickCount;
         for (Response response : Response.values()) {
             if (this.dialogue.has(response)) {
-                this.responses.add(this.addButton(new RespondButton(this, this.dialogue, response, this.role++)));
+                this.responses.add(this.addWidget(new RespondButton(this, this.dialogue, response, this.role++)));
             }
         }
     }
@@ -139,8 +143,8 @@ public class DialogueScreen extends AbstractScreen {
 
         @Override
         public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            Minecraft.getInstance().getTextureManager().bind(DIALOGUE_TEXTURES);
+            RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
+            Minecraft.getInstance().getTextureManager().bindForSetup(DIALOGUE_TEXTURES);
             this.blit(stack, this.x, this.y, this.response.ordinal() * 10, this.isHovered() ? 58 : 48, 10, 10);
         }
     }

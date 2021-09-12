@@ -39,7 +39,7 @@ public class BlockPartyMessages {
         register(SOpenCellPhone.class, SOpenCellPhone::new);
         register(SOpenDialogue.class, SOpenDialogue::new);
         register(SOpenYearbook.class, SOpenYearbook::new);
-        register(SToriiGatesList.class, SToriiGatesList::new);
+        register(SShrineList.class, SShrineList::new);
     }
 
     public static <T extends AbstractMessage> void register(Class<T> packet, Function<FriendlyByteBuf, T> con) {

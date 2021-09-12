@@ -13,17 +13,17 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
-public class Party extends Record<ToriiTabletBlockEntity> {
-    public Party(ResultSet set) throws SQLException {
-        super(BlockPartyDB.Parties, set);
+public class Shrine extends Record<ToriiTabletBlockEntity> {
+    public Shrine(ResultSet set) throws SQLException {
+        super(BlockPartyDB.Shrines, set);
     }
 
-    public Party(CompoundTag compound) {
-        super(BlockPartyDB.Parties, compound);
+    public Shrine(CompoundTag compound) {
+        super(BlockPartyDB.Shrines, compound);
     }
 
-    public Party(ToriiTabletBlockEntity entity) {
-        super(BlockPartyDB.Parties, entity);
+    public Shrine(ToriiTabletBlockEntity entity) {
+        super(BlockPartyDB.Shrines, entity);
     }
 
     @Override
@@ -39,23 +39,23 @@ public class Party extends Record<ToriiTabletBlockEntity> {
         entity.setPlayerUUID((UUID) this.get(PLAYER_UUID).get());
     }
 
-    public static Party findClosest(UUID playerUUID, DimBlockPos pos) {
-        return getClosest(BlockPartyDB.Parties.select(String.format("SELECT * FROM Parties WHERE (PlayerUUID = '%s') LIMIT 1;", playerUUID)), pos);
+    public static Shrine findClosest(UUID playerUUID, DimBlockPos pos) {
+        return getClosest(BlockPartyDB.Shrines.select(String.format("SELECT * FROM Shrines WHERE (PlayerUUID = '%s') LIMIT 1;", playerUUID)), pos);
     }
 
-    public static Party getClosest(List<Party> gates, DimBlockPos pos) {
+    public static Shrine getClosest(List<Shrine> gates, DimBlockPos pos) {
         gates.sort(new RowDistance(pos));
         return gates.get(0);
     }
 
-    public static class Schema extends Table<Party> {
+    public static class Schema extends Table<Shrine> {
         public Schema() {
-            super("Parties");
+            super("Shrines");
         }
 
         @Override
-        public Party getRow(ResultSet set) throws SQLException {
-            return new Party(set);
+        public Shrine getRow(ResultSet set) throws SQLException {
+            return new Shrine(set);
         }
     }
 }

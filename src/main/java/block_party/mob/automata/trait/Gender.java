@@ -1,7 +1,7 @@
 package block_party.mob.automata.trait;
 
 import block_party.BlockPartyDB;
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import block_party.mob.automata.IState;
 import block_party.mob.automata.ITrait;
 import net.minecraft.world.level.Level;
@@ -34,7 +34,7 @@ public enum Gender implements ITrait<Gender> {
     }
 
     @Override
-    public boolean isTrue(Partyer entity) {
+    public boolean isTrue(BlockPartyNPC entity) {
         return entity.getGender() == this;
     }
 

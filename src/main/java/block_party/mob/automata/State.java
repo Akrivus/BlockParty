@@ -1,6 +1,6 @@
 package block_party.mob.automata;
 
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import block_party.mob.automata.state.ConsumerState;
 import block_party.mob.state.LookAtPlayerState;
 
@@ -18,7 +18,7 @@ public enum State implements IStateEnum {
     }
 
     @Override
-    public IState transfer(Partyer npc) {
+    public IState transfer(BlockPartyNPC npc) {
         return this.state.get();
     }
 }

@@ -4,7 +4,7 @@ import block_party.BlockParty;
 import block_party.BlockPartyDB;
 import block_party.init.BlockPartyMessages;
 import block_party.message.SOpenYearbook;
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import block_party.util.sort.ISortableItem;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -32,8 +32,8 @@ public class YearbookItem extends Item implements ISortableItem {
     @Override
     public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity entity, InteractionHand hand) {
         if (player.level.isClientSide()) { return InteractionResult.PASS; }
-        if (entity instanceof Partyer) {
-            Partyer npc = (Partyer) entity;
+        if (entity instanceof BlockPartyNPC) {
+            BlockPartyNPC npc = (BlockPartyNPC) entity;
             if (npc.getPlayer().equals(player)) { return this.openGui(player, hand, npc.getDatabaseID()); }
             return InteractionResult.SUCCESS;
         }

@@ -1,7 +1,7 @@
 package block_party.util;
 
 import block_party.init.BlockPartySounds;
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraftforge.fmllegacy.RegistryObject;
 
@@ -14,7 +14,7 @@ public enum VoiceLines {
         this.girl = girl;
     }
 
-    public SoundEvent get(Partyer entity) {
+    public SoundEvent get(BlockPartyNPC entity) {
         return this.girl.get();
     }
 }

@@ -1,6 +1,6 @@
 package block_party.mob.state;
 
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import block_party.mob.automata.IState;
 import block_party.mob.automata.State;
 import block_party.mob.automata.state.GoalState;
@@ -27,7 +27,7 @@ public class LookAtPlayerState extends GoalState {
     }
 
     @Override
-    public IState transfer(Partyer npc) {
+    public IState transfer(BlockPartyNPC npc) {
         return State.RESET;
     }
 }

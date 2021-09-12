@@ -1,6 +1,6 @@
 package block_party.mob.automata.trait;
 
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import block_party.mob.automata.IState;
 import block_party.mob.automata.ITrait;
 
@@ -50,7 +50,7 @@ public enum BloodType implements ITrait<BloodType> {
     }
 
     @Override
-    public boolean isTrue(Partyer entity) {
+    public boolean isTrue(BlockPartyNPC entity) {
         return entity.getBloodType() == this;
     }
 

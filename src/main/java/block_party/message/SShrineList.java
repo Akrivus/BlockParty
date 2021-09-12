@@ -12,26 +12,26 @@ import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SToriiGatesList extends AbstractMessage {
-    protected List<BlockPos> gates = new ArrayList<>();
+public class SShrineList extends AbstractMessage {
+    protected List<BlockPos> shrines = new ArrayList<>();
 
-    public SToriiGatesList(ResourceKey<Level> dim) {
-        BlockPartyDB.ToriiGates.all().forEach((gate) -> {
-            if (gate.isDim(dim)) { this.gates.add(gate.getPos()); }
+    public SShrineList(ResourceKey<Level> dim) {
+        BlockPartyDB.Shrines.all().forEach((shrine) -> {
+            if (shrine.isDim(dim)) { this.shrines.add(shrine.getPos()); }
         });
     }
 
-    public SToriiGatesList(FriendlyByteBuf buffer) {
+    public SShrineList(FriendlyByteBuf buffer) {
         int length = buffer.readInt();
         for (int i = 0; i < length; ++i) {
-            this.gates.add(new BlockPos(buffer.readInt(), buffer.readInt(), buffer.readInt()));
+            this.shrines.add(new BlockPos(buffer.readInt(), buffer.readInt(), buffer.readInt()));
         }
     }
 
     @Override
     public void encode(FriendlyByteBuf buffer) {
-        buffer.writeInt(this.gates.size());
-        this.gates.forEach((pos) -> {
+        buffer.writeInt(this.shrines.size());
+        this.shrines.forEach((pos) -> {
             buffer.writeInt(pos.getX());
             buffer.writeInt(pos.getY());
             buffer.writeInt(pos.getZ());

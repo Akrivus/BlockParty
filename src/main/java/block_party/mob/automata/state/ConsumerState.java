@@ -1,39 +1,39 @@
 package block_party.mob.automata.state;
 
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import block_party.mob.automata.IState;
 import block_party.mob.automata.State;
 
 import java.util.function.Consumer;
 
 public class ConsumerState implements IState {
-    private final Consumer<Partyer> consumer;
+    private final Consumer<BlockPartyNPC> consumer;
     private final IState state;
 
-    public ConsumerState(Consumer<Partyer> consumer, IState state) {
+    public ConsumerState(Consumer<BlockPartyNPC> consumer, IState state) {
         this.consumer = consumer;
         this.state = state;
     }
 
-    public ConsumerState(Consumer<Partyer> consumer) {
+    public ConsumerState(Consumer<BlockPartyNPC> consumer) {
         this(consumer, State.RESET);
     }
 
     @Override
-    public void terminate(Partyer npc) { }
+    public void terminate(BlockPartyNPC npc) { }
 
     @Override
-    public void onTransfer(Partyer npc) {
+    public void onTransfer(BlockPartyNPC npc) {
         this.consumer.accept(npc);
     }
 
     @Override
-    public IState transfer(Partyer npc) {
+    public IState transfer(BlockPartyNPC npc) {
         return this.state;
     }
 
     @Override
-    public boolean isDone(Partyer npc) {
+    public boolean isDone(BlockPartyNPC npc) {
         return true;
     }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "block_party:item/partyer_spawn_egg"
+    "layer0": "block_party:item/npc_spawn_egg"
   }
 }

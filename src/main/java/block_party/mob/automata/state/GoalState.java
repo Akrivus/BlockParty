@@ -1,6 +1,6 @@
 package block_party.mob.automata.state;
 
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import block_party.mob.automata.IState;
 import net.minecraft.world.entity.ai.goal.Goal;
 
@@ -8,7 +8,7 @@ import java.util.EnumSet;
 
 public abstract class GoalState extends Goal implements IState {
     protected boolean complete;
-    protected Partyer npc;
+    protected BlockPartyNPC npc;
     private final int priority;
     private boolean done;
 
@@ -56,17 +56,17 @@ public abstract class GoalState extends Goal implements IState {
     }
 
     @Override
-    public void terminate(Partyer npc) {
+    public void terminate(BlockPartyNPC npc) {
         npc.goalSelector.removeGoal(this);
     }
 
     @Override
-    public void onTransfer(Partyer npc) {
+    public void onTransfer(BlockPartyNPC npc) {
         (this.npc = npc).goalSelector.addGoal(this.priority, this);
     }
 
     @Override
-    public boolean isDone(Partyer npc) {
+    public boolean isDone(BlockPartyNPC npc) {
         return this.done;
     }
 }

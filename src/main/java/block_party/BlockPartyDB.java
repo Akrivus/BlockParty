@@ -2,7 +2,7 @@ package block_party;
 
 import block_party.db.records.*;
 import block_party.init.BlockPartyMessages;
-import block_party.message.SToriiGatesList;
+import block_party.message.SShrineList;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.nbt.CompoundTag;
@@ -28,8 +28,8 @@ import java.util.*;
 
 @Mod.EventBusSubscriber
 public class BlockPartyDB extends SavedData {
-    public static Party.Schema Parties = new Party.Schema();
-    public static Gathering.Schema Gatherings = new Gathering.Schema();
+    public static Shrine.Schema Shrines = new Shrine.Schema();
+    public static Location.Schema Locations = new Location.Schema();
     public static Garden.Schema Gardens = new Garden.Schema();
     public static Sapling.Schema Saplings = new Sapling.Schema();
     public static NPC.Schema NPCs = new NPC.Schema();
@@ -45,7 +45,7 @@ public class BlockPartyDB extends SavedData {
         compound.getList("NPCsByPlayer", Constants.NBT.TAG_COMPOUND).forEach((nbt) -> {
             CompoundTag tag = (CompoundTag) nbt;
             List<UUID> npcs = new ArrayList<>();
-            tag.getList("NPCs", Constants.NBT.TAG_STRING).forEach((partyer) -> npcs.add(UUID.fromString(partyer.getAsString())));
+            tag.getList("NPCs", Constants.NBT.TAG_STRING).forEach((npc) -> npcs.add(UUID.fromString(npc.getAsString())));
             data.byPlayer.put(UUID.fromString(tag.getString("Player")), npcs);
         });
         return data;
@@ -114,8 +114,8 @@ public class BlockPartyDB extends SavedData {
             try {
                 Class.forName("org.sqlite.JDBC");
                 get(world).getDatabase(world);
-                Parties.create(world);
-                Gatherings.create(world);
+                Shrines.create(world);
+                Locations.create(world);
                 Gardens.create(world);
                 NPCs.create(world);
             } catch (ClassNotFoundException x) {
@@ -142,6 +142,6 @@ public class BlockPartyDB extends SavedData {
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent e) {
         Level world = e.getPlayer().level;
         if (world.isClientSide()) { return; }
-        BlockPartyMessages.send(e.getPlayer(), new SToriiGatesList(world.dimension()));
+        BlockPartyMessages.send(e.getPlayer(), new SShrineList(world.dimension()));
     }
 }

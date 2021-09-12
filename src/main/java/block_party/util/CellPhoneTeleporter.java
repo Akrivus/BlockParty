@@ -21,6 +21,6 @@ public class CellPhoneTeleporter implements ITeleporter {
 
     @Override
     public PortalInfo getPortalInfo(Entity entity, ServerLevel world, Function<ServerLevel, PortalInfo> info) {
-        return new PortalInfo(new Vec3(this.x, this.y, this.z), Vec3.ZERO, entity.yRot, entity.xRot);
+        return new PortalInfo(new Vec3(this.x, this.y, this.z), Vec3.ZERO, entity.getYRot(), entity.getXRot());
     }
 }

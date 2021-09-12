@@ -11,12 +11,12 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.function.Supplier;
+import java.util.function.BiFunction;
 
 public class AbstractDataBlock<T extends AbstractDataBlockEntity> extends Block implements EntityBlock {
-    private final Supplier<T> initializer;
+    private final BiFunction<BlockPos, BlockState, T> initializer;
 
-    protected AbstractDataBlock(Supplier<T> initializer, Properties properties) {
+    protected AbstractDataBlock(BiFunction<BlockPos, BlockState, T> initializer, Properties properties) {
         super(properties);
         this.initializer = initializer;
     }
@@ -34,6 +34,6 @@ public class AbstractDataBlock<T extends AbstractDataBlockEntity> extends Block 
 
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return this.initializer.get();
+        return this.initializer.apply(pos, state);
     }
 }

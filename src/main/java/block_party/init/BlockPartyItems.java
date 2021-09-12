@@ -50,7 +50,7 @@ public class BlockPartyItems {
     public static final RegistryObject<Item> NOON_HANGING_SCROLL = REGISTRY.register("noon_hanging_scroll", () -> new MoeBlockItem(BlockPartyBlocks.NOON_HANGING_SCROLL, 90));
     public static final RegistryObject<Item> ONIGIRI = REGISTRY.register("onigiri", OnigiriItem::new);
     public static final RegistryObject<Item> ORANGE_PAPER_LANTERN = REGISTRY.register("orange_paper_lantern", () -> new MoeBlockItem(BlockPartyBlocks.ORANGE_PAPER_LANTERN));
-    public static final RegistryObject<Item> PARTYER_SPAWN_EGG = REGISTRY.register("partyer_spawn_egg", CustomSpawnEggItem::new);
+    public static final RegistryObject<Item> NPC_SPAWN_EGG = REGISTRY.register("npc_spawn_egg", CustomSpawnEggItem::new);
     public static final RegistryObject<Item> PINK_BOW = REGISTRY.register("pink_bow", PinkBowItem::new);
     public static final RegistryObject<Item> PINK_PAPER_LANTERN = REGISTRY.register("pink_paper_lantern", () -> new MoeBlockItem(BlockPartyBlocks.PINK_PAPER_LANTERN));
     public static final RegistryObject<Item> PURPLE_PAPER_LANTERN = REGISTRY.register("purple_paper_lantern", () -> new MoeBlockItem(BlockPartyBlocks.PURPLE_PAPER_LANTERN));

@@ -1,17 +1,17 @@
 package block_party.mob.automata;
 
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Automaton {
-    protected final Partyer applicant;
+    protected final BlockPartyNPC applicant;
     protected final Map<Condition, Integer> timeouts = new HashMap<>();
     protected IState state;
 
-    public Automaton(Partyer applicant) {
+    public Automaton(BlockPartyNPC applicant) {
         this.applicant = applicant;
         for (Condition condition : Condition.values()) {
             this.timeouts.put(condition, 0);
@@ -30,14 +30,14 @@ public class Automaton {
         }
     }
 
-    public void tick(Partyer npc) {
+    public void tick(BlockPartyNPC npc) {
         if (this.state == null) { this.reset(npc); }
         if (this.state != null && this.state.isDone(npc)) {
             this.setState(npc, this.state.transfer(npc));
         }
     }
 
-    public IState reset(Partyer npc) {
+    public IState reset(BlockPartyNPC npc) {
         for (Condition condition : Condition.values()) {
             if (this.timeouts.get(condition) < 0) { continue; }
             if (condition.isTrue(npc)) {
@@ -47,7 +47,7 @@ public class Automaton {
         return this.state;
     }
 
-    public void setState(Partyer npc, IState state, IState... states) {
+    public void setState(BlockPartyNPC npc, IState state, IState... states) {
         if (this.state != null) { this.state.terminate(npc); }
         this.state = state;
         if (this.state != null) {

@@ -1,23 +1,22 @@
 package block_party.blocks.entity;
 
-import block_party.BlockPartyDB;
-import block_party.db.records.Gathering;
 import block_party.init.BlockPartyBlockEntities;
+import block_party.mob.automata.Condition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class PaperLanternBlockEntity extends AbstractDataBlockEntity<Gathering> {
+public class PaperLanternBlockEntity extends LocativeBlockEntity {
     public PaperLanternBlockEntity(BlockPos pos, BlockState state) {
         super(BlockPartyBlockEntities.PAPER_LANTERN.get(), pos, state);
     }
 
     @Override
-    public Gathering getRow() {
-        return BlockPartyDB.Gatherings.find(this.getDatabaseID());
+    public Condition getRequiredCondition() {
+        return Condition.ALWAYS;
     }
 
     @Override
-    public Gathering getNewRow() {
-        return new Gathering(this);
+    public int getPriority() {
+        return 1;
     }
 }

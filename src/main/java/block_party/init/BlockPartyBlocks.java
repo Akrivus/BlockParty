@@ -54,7 +54,6 @@ public class BlockPartyBlocks {
     public static final RegistryObject<Block> LIGHT_BLUE_PAPER_LANTERN = REGISTRY.register("light_blue_paper_lantern", () -> new PaperLanternBlock(SHOJI_PROPERTY.get(), MaterialColor.TERRACOTTA_LIGHT_BLUE));
     public static final RegistryObject<Block> LIGHT_GRAY_PAPER_LANTERN = REGISTRY.register("light_gray_paper_lantern", () -> new PaperLanternBlock(SHOJI_PROPERTY.get(), MaterialColor.TERRACOTTA_LIGHT_GRAY));
     public static final RegistryObject<Block> LIME_PAPER_LANTERN = REGISTRY.register("lime_paper_lantern", () -> new PaperLanternBlock(SHOJI_PROPERTY.get(), MaterialColor.TERRACOTTA_LIGHT_GREEN));
-    public static final RegistryObject<Block> LUCKY_CAT = REGISTRY.register("lucky_cat", () -> new LuckyCatBlock(TRANSPARENT_PROPERTY.get()));
     public static final RegistryObject<Block> MAGENTA_PAPER_LANTERN = REGISTRY.register("magenta_paper_lantern", () -> new PaperLanternBlock(SHOJI_PROPERTY.get(), MaterialColor.TERRACOTTA_MAGENTA));
     public static final RegistryObject<Block> ORANGE_PAPER_LANTERN = REGISTRY.register("orange_paper_lantern", () -> new PaperLanternBlock(SHOJI_PROPERTY.get(), MaterialColor.TERRACOTTA_ORANGE));
     public static final RegistryObject<Block> PINK_PAPER_LANTERN = REGISTRY.register("pink_paper_lantern", () -> new PaperLanternBlock(SHOJI_PROPERTY.get(), MaterialColor.TERRACOTTA_PINK));

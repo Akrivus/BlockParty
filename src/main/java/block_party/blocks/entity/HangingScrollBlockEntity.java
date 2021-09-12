@@ -1,14 +1,12 @@
 package block_party.blocks.entity;
 
-import block_party.BlockPartyDB;
-import block_party.db.records.Gathering;
 import block_party.init.BlockPartyBlockEntities;
 import block_party.mob.automata.Condition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class HangingScrollBlockEntity extends AbstractDataBlockEntity<Gathering> {
+public class HangingScrollBlockEntity extends LocativeBlockEntity {
     protected Condition condition;
 
     public HangingScrollBlockEntity(Condition condition, BlockPos pos, BlockState state) {
@@ -18,10 +16,6 @@ public class HangingScrollBlockEntity extends AbstractDataBlockEntity<Gathering>
 
     public HangingScrollBlockEntity(BlockPos pos, BlockState state) {
         this(Condition.NEVER, pos, state);
-    }
-
-    public Condition getSymbol() {
-        return this.condition;
     }
 
     @Override
@@ -37,12 +31,12 @@ public class HangingScrollBlockEntity extends AbstractDataBlockEntity<Gathering>
     }
 
     @Override
-    public Gathering getRow() {
-        return BlockPartyDB.Gatherings.find(this.getDatabaseID());
+    public Condition getRequiredCondition() {
+        return this.condition;
     }
 
     @Override
-    public Gathering getNewRow() {
-        return new Gathering(this);
+    public int getPriority() {
+        return 0;
     }
 }

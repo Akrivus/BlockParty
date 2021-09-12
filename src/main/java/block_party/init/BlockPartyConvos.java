@@ -5,7 +5,7 @@ import block_party.convo.Scene;
 import block_party.convo.Transition;
 import block_party.convo.enums.Interaction;
 import block_party.convo.enums.Response;
-import block_party.mob.Partyer;
+import block_party.mob.BlockPartyNPC;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -36,7 +36,7 @@ public class BlockPartyConvos {
 
     @SubscribeEvent
     public static void onServerChat(ServerChatEvent e) {
-        e.getPlayer().level.getEntitiesOfClass(Partyer.class, e.getPlayer().getBoundingBox().inflate(8, 8, 8)).forEach((npc) -> {
+        e.getPlayer().level.getEntitiesOfClass(BlockPartyNPC.class, e.getPlayer().getBoundingBox().inflate(8, 8, 8)).forEach((npc) -> {
             if (StringUtils.containsIgnoreCase(e.getMessage(), npc.getGivenName())) { npc.onMention(e.getPlayer(), e.getMessage()); }
         });
     }

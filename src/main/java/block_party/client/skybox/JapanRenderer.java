@@ -5,10 +5,7 @@ import block_party.init.BlockPartyParticles;
 import block_party.init.BlockPartyTags;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
@@ -25,7 +22,7 @@ import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber
 public class JapanRenderer {
-    private static final ResourceLocation FUJI_TEXTURE = new ResourceLocation(BlockParty.ID, "textures/fuji.png");
+    private static final ResourceLocation FUJI_TEXTURE = BlockParty.source("textures/fuji.png");
     private static final int size = 288;
     private static int horizon = 0;
     private static float r = 0.0F;
@@ -48,16 +45,16 @@ public class JapanRenderer {
         RenderSystem.enableTexture();
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.color4f(r, g, b, 0.8F);
+        RenderSystem.clearColor(r, g, b, 0.8F);
         stack.pushPose();
         stack.mulPose(Vector3f.XP.rotationDegrees(-90.0F));
         stack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
         stack.translate(0, 0, -158 + (player.getY() / 32));
-        minecraft.textureManager.bind(FUJI_TEXTURE);
+        minecraft.textureManager.bindForSetup(FUJI_TEXTURE);
         Matrix4f matrix = stack.last().pose();
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(7, DefaultVertexFormat.POSITION_TEX);
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         buffer.vertex(matrix, -size / 2, horizon, -size / 2).uv(0.0F, 0.0F).endVertex();
         buffer.vertex(matrix, size / 2, horizon, -size / 2).uv(1.0F, 0.0F).endVertex();
         buffer.vertex(matrix, size / 2, horizon, size / 2).uv(1.0F, 1.0F).endVertex();

@@ -529,4 +529,43 @@ public abstract class Column<I> {
             return null;
         }
     }
+
+    public static class AsEnum<E extends Enum> extends Column<E> {
+        private final E enumeration;
+        private final Function<String, E> getter;
+
+        public AsEnum(Table table, String column, E enumeration, Function<String, E> getter) {
+            super(table, "TEXT", column, String.format("NOT NULL DEFAULT '%s'", enumeration.toString()));
+            this.enumeration = enumeration;
+            this.getter = getter;
+        }
+
+        @Override
+        public void forSet(int i, PreparedStatement statement) throws SQLException {
+            statement.setString(i, this.value == null ? this.enumeration.toString() : this.value.toString());
+        }
+
+        @Override
+        public E fromSet(int i, ResultSet set) throws SQLException {
+            return this.getter.apply(set.getString(i));
+        }
+
+        @Override
+        public void read(CompoundTag compound) {
+            this.set(this.getter.apply(compound.getString(this.getColumn())));
+        }
+
+        @Override
+        public void write(CompoundTag compound) {
+            compound.putString(this.getColumn(), this.get().toString());
+        }
+
+        @Override
+        public void afterAdd(Table table) { }
+
+        @Override
+        public E getDefault() {
+            return this.enumeration;
+        }
+    }
 }

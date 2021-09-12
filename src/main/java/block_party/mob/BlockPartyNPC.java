@@ -70,12 +70,12 @@ import net.minecraftforge.items.wrapper.InvWrapper;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class Partyer extends PathfinderMob implements ContainerListener, Recordable<NPC>, MenuProvider {
-    public static final EntityDataAccessor<Optional<BlockState>> BLOCK_STATE = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.BLOCK_STATE);
-    public static final EntityDataAccessor<Float> SCALE = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.FLOAT);
+public class BlockPartyNPC extends PathfinderMob implements ContainerListener, Recordable<NPC>, MenuProvider {
+    public static final EntityDataAccessor<Optional<BlockState>> BLOCK_STATE = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.BLOCK_STATE);
+    public static final EntityDataAccessor<Float> SCALE = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
     private CompoundTag tileEntityData = new CompoundTag();
 
-    public Partyer(EntityType<? extends Partyer> type, Level world) {
+    public BlockPartyNPC(EntityType<? extends BlockPartyNPC> type, Level world) {
         super(type, world);
         this.setPathfindingMalus(BlockPathTypes.DOOR_OPEN, 0.0F);
         this.setPathfindingMalus(BlockPathTypes.DOOR_WOOD_CLOSED, 0.0F);
@@ -222,7 +222,7 @@ public class Partyer extends PathfinderMob implements ContainerListener, Recorda
         return honorific;
     }
 
-    public Partyer onTeleport(Partyer entity) {
+    public BlockPartyNPC onTeleport(BlockPartyNPC entity) {
         entity.setFollowing(true);
         entity.playSound(BlockPartySounds.ENTITY_MOE_FOLLOW.get());
         return entity;
@@ -230,7 +230,7 @@ public class Partyer extends PathfinderMob implements ContainerListener, Recorda
 
     @Override
     public NPC getRow() {
-        return BlockPartyDB.Partyers.find(this.getDatabaseID());
+        return BlockPartyDB.NPCs.find(this.getDatabaseID());
     }
 
     @Override
@@ -389,45 +389,45 @@ public class Partyer extends PathfinderMob implements ContainerListener, Recorda
 
     public static boolean spawn(Level world, BlockPos block, BlockPos spawn, float yaw, float pitch, Dere dere, Player player) {
         BlockState state = world.getBlockState(block);
-        if (!state.is(BlockPartyTags.Blocks.MOEABLES)) { return false; }
+        if (!state.is(BlockPartyTags.Blocks.NPC_SPAWN_BLOCKS)) { return false; }
         BlockEntity extra = world.getBlockEntity(block);
-        Partyer partyer = BlockPartyEntities.PARTYER.get().create(world);
-        partyer.absMoveTo(spawn.getX() + 0.5D, spawn.getY(), spawn.getZ() + 0.5D, yaw, pitch);
-        partyer.setDatabaseID(UUID.randomUUID());
-        partyer.setBlockState(state);
-        partyer.setTileEntityData(extra != null ? extra.getTileData() : new CompoundTag());
-        partyer.setDere(dere);
-        partyer.claim(player);
-        if (world.addFreshEntity(partyer)) {
-            partyer.finalizeSpawn((ServerLevel) world, world.getCurrentDifficultyAt(spawn), MobSpawnType.TRIGGERED, null, null);
-            if (player != null) { partyer.setPlayer(player); }
+        BlockPartyNPC npc = BlockPartyEntities.NPC.get().create(world);
+        npc.absMoveTo(spawn.getX() + 0.5D, spawn.getY(), spawn.getZ() + 0.5D, yaw, pitch);
+        npc.setDatabaseID(UUID.randomUUID());
+        npc.setBlockState(state);
+        npc.setTileEntityData(extra != null ? extra.getTileData() : new CompoundTag());
+        npc.setDere(dere);
+        npc.claim(player);
+        if (world.addFreshEntity(npc)) {
+            npc.finalizeSpawn((ServerLevel) world, world.getCurrentDifficultyAt(spawn), MobSpawnType.TRIGGERED, null, null);
+            if (player != null) { npc.setPlayer(player); }
             return world.destroyBlock(block, false);
         }
         return false;
     }
 
-        public static final EntityDataAccessor<Boolean> FOLLOWING = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.BOOLEAN);
-        public static final EntityDataAccessor<String> PLAYER_UUID = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.STRING);
-        public static final EntityDataAccessor<String> DATABASE_ID = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.STRING);
-        public static final EntityDataAccessor<String> BLOOD_TYPE = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.STRING);
-        public static final EntityDataAccessor<String> DERE = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.STRING);
-        public static final EntityDataAccessor<String> EMOTION = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.STRING);
-        public static final EntityDataAccessor<String> GENDER = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.STRING);
-        public static final EntityDataAccessor<String> ANIMATION = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.STRING);
-        public static final EntityDataAccessor<String> GIVEN_NAME = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.STRING);
-        public static final EntityDataAccessor<Float> FULLNESS = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.FLOAT);
-        public static final EntityDataAccessor<Float> EXHAUSTION = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.FLOAT);
-        public static final EntityDataAccessor<Float> SATURATION = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.FLOAT);
-        public static final EntityDataAccessor<Float> STRESS = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.FLOAT);
-        public static final EntityDataAccessor<Float> RELAXATION = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.FLOAT);
-        public static final EntityDataAccessor<Float> LOYALTY = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.FLOAT);
-        public static final EntityDataAccessor<Float> AFFECTION = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.FLOAT);
-        public static final EntityDataAccessor<Float> SLOUCH = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.FLOAT);
-        public static final EntityDataAccessor<Float> AGE = SynchedEntityData.defineId(Partyer.class, EntityDataSerializers.FLOAT);
+        public static final EntityDataAccessor<Boolean> FOLLOWING = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.BOOLEAN);
+        public static final EntityDataAccessor<String> PLAYER_UUID = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
+        public static final EntityDataAccessor<String> DATABASE_ID = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
+        public static final EntityDataAccessor<String> BLOOD_TYPE = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
+        public static final EntityDataAccessor<String> DERE = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
+        public static final EntityDataAccessor<String> EMOTION = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
+        public static final EntityDataAccessor<String> GENDER = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
+        public static final EntityDataAccessor<String> ANIMATION = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
+        public static final EntityDataAccessor<String> GIVEN_NAME = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
+        public static final EntityDataAccessor<Float> FULLNESS = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
+        public static final EntityDataAccessor<Float> EXHAUSTION = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
+        public static final EntityDataAccessor<Float> SATURATION = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
+        public static final EntityDataAccessor<Float> STRESS = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
+        public static final EntityDataAccessor<Float> RELAXATION = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
+        public static final EntityDataAccessor<Float> LOYALTY = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
+        public static final EntityDataAccessor<Float> AFFECTION = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
+        public static final EntityDataAccessor<Float> SLOUCH = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
+        public static final EntityDataAccessor<Float> AGE = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
         public final SimpleContainer inventory = new SimpleContainer(36);
         public final Automaton automaton;
         private final LazyOptional<?> itemHandler = LazyOptional.of(() -> new InvWrapper(this.inventory));
-        private final Queue<Consumer<Partyer>> nextTickOps;
+        private final Queue<Consumer<BlockPartyNPC>> nextTickOps;
         private AbstractAnimation animation;
         private int timeUntilHungry;
         private int timeUntilLonely;
@@ -450,7 +450,7 @@ public class Partyer extends PathfinderMob implements ContainerListener, Recorda
 
         @Override
         public void customServerAiStep() {
-            Consumer<Partyer> op = this.nextTickOps.poll();
+            Consumer<BlockPartyNPC> op = this.nextTickOps.poll();
             if (op != null) { op.accept(this); }
         }
 
@@ -729,10 +729,10 @@ public class Partyer extends PathfinderMob implements ContainerListener, Recorda
             player.sendMessage(component, player.getUUID());
         }
 
-        public Partyer teleport(ServerLevel world, ITeleporter teleporter) {
+        public BlockPartyNPC teleport(ServerLevel world, ITeleporter teleporter) {
             Entity entity = this.changeDimension(world, teleporter);
-            if (entity instanceof Partyer) {
-                return this.onTeleport((Partyer) entity);
+            if (entity instanceof BlockPartyNPC) {
+                return this.onTeleport((BlockPartyNPC) entity);
             } else {
                 return this;
             }
@@ -763,7 +763,7 @@ public class Partyer extends PathfinderMob implements ContainerListener, Recorda
             return true;
         }
 
-        public void addNextTickOp(Consumer<Partyer> op) {
+        public void addNextTickOp(Consumer<BlockPartyNPC> op) {
             this.nextTickOps.add(op);
         }
 
@@ -862,7 +862,7 @@ public class Partyer extends PathfinderMob implements ContainerListener, Recorda
             if (PROPS.containsKey(block)) { key += String.format(".%s", state.getValue(PROPS.get(block))); }
             if (BlockPartyTags.FESTIVES.contains(block) && BlockParty.isChristmas()) { suffix = "christmas"; }
             if (suffix != null) { key += String.format(".%s", suffix); }
-            return new ResourceLocation(BlockParty.ID, String.format("textures/entity/partyer/skins/%s.png", key));
+            return BlockParty.source(String.format("textures/entity/npc/skins/%s.png", key));
         }
 
         public static Block get(Block block) {
