@@ -11,7 +11,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public abstract class Table<R extends Record> {
     private final List<Column> columns = new ArrayList<>();
@@ -21,7 +20,7 @@ public abstract class Table<R extends Record> {
 
     public Table(String name, Column... columns) {
         this.name = name;
-        this.addColumn(new Column.AsUUID(this, "DatabaseID", "PRIMARY_KEY"));
+        this.addColumn(new Column.AsLong(this, "DatabaseID", "PRIMARY_KEY"));
         this.addColumn(new Column.AsPosition(this, "Pos"));
         this.addColumn(new Column.AsUUID(this, "PlayerUUID"));
         for (Column column : columns) {
@@ -65,8 +64,8 @@ public abstract class Table<R extends Record> {
         return this.select(SQL, new ArrayList<>());
     }
 
-    public R find(UUID uuid) {
-        List<R> query = this.select(String.format("SELECT * FROM %s WHERE (DatabaseID = '%s') LIMIT 1;", this.name, uuid));
+    public R find(long id) {
+        List<R> query = this.select(String.format("SELECT * FROM %s WHERE (DatabaseID = '%s') LIMIT 1;", this.name, id));
         return query.isEmpty() ? null : query.get(0);
     }
 

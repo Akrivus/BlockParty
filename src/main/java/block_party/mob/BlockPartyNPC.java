@@ -2,6 +2,7 @@ package block_party.mob;
 
 import block_party.BlockParty;
 import block_party.BlockPartyDB;
+import block_party.blocks.entity.ShimenawaBlockEntity;
 import block_party.client.animation.AbstractAnimation;
 import block_party.client.animation.Animation;
 import block_party.client.render.layer.MoeSpecialRenderer;
@@ -47,6 +48,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -91,7 +93,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         this.entityData.define(SCALE, 1.0F);
         this.entityData.define(FOLLOWING, false);
         this.entityData.define(PLAYER_UUID, "00000000-0000-0000-0000-000000000000");
-        this.entityData.define(DATABASE_ID, "00000000-0000-0000-0000-000000000000");
+        this.entityData.define(DATABASE_ID, "-1");
         this.entityData.define(BLOOD_TYPE, BloodType.O.getValue());
         this.entityData.define(DERE, Dere.NYANDERE.getValue());
         this.entityData.define(EMOTION, Emotion.NORMAL.getValue());
@@ -115,7 +117,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         compound.putInt("BlockState", Block.getId(this.getInternalBlockState()));
         compound.putFloat("Scale", this.getScale());
         compound.put("TileEntity", this.getTileEntityData());
-        compound.putUUID("DatabaseID", this.getDatabaseID());
+        compound.putLong("DatabaseID", this.getDatabaseID());
         compound.putBoolean("Following", this.isFollowing());
         compound.put("Inventory", this.inventory.createTag());
         compound.putInt("TimeUntilHungry", this.timeUntilHungry);
@@ -131,7 +133,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         this.setBlockState(Block.stateById(compound.getInt("BlockState")));
         this.setScale(compound.getFloat("Scale"));
         this.setTileEntityData(compound.getCompound("TileEntity"));
-        this.setDatabaseID(compound.getUUID("DatabaseID"));
+        this.setDatabaseID(compound.getLong("DatabaseID"));
         this.setFollowing(compound.getBoolean("Following"));
         this.inventory.fromTag(compound.getList("Inventory", Constants.NBT.TAG_COMPOUND));
         this.timeUntilHungry = compound.getInt("TimeUntilHungry");
@@ -393,7 +395,10 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         BlockEntity extra = world.getBlockEntity(block);
         BlockPartyNPC npc = BlockPartyEntities.NPC.get().create(world);
         npc.absMoveTo(spawn.getX() + 0.5D, spawn.getY(), spawn.getZ() + 0.5D, yaw, pitch);
-        npc.setDatabaseID(UUID.randomUUID());
+        /**
+         * TODO: Need to move this to {@link ShimenawaBlockEntity#getNewRow()} and {@link CustomSpawnEggItem#useOn(UseOnContext)}
+         */
+        npc.setDatabaseID(block.asLong());
         npc.setBlockState(state);
         npc.setTileEntityData(extra != null ? extra.getTileData() : new CompoundTag());
         npc.setDere(dere);
@@ -516,12 +521,12 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
             this.entityData.set(PLAYER_UUID, playerUUID.toString());
         }
 
-        public UUID getDatabaseID() {
-            return UUID.fromString(this.entityData.get(DATABASE_ID));
+        public long getDatabaseID() {
+            return Long.parseLong(this.entityData.get(DATABASE_ID));
         }
 
-        public void setDatabaseID(UUID uuid) {
-            this.entityData.set(DATABASE_ID, uuid.toString());
+        public void setDatabaseID(long id) {
+            this.entityData.set(DATABASE_ID, Long.toString(id));
         }
 
         public String getGivenName() {

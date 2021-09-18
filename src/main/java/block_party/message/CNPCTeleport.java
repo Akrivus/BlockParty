@@ -7,10 +7,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
-import java.util.UUID;
-
 public class CNPCTeleport extends CNPCQuery {
-    public CNPCTeleport(UUID id) {
+    public CNPCTeleport(long id) {
         super(id);
     }
 

@@ -119,7 +119,7 @@ public class NPC extends Record<BlockPartyNPC> {
         if (world != null) {
             List<BlockPartyNPC> npcs = world.getEntitiesOfClass(BlockPartyNPC.class, pos.getAABB());
             for (BlockPartyNPC npc : npcs) {
-                if (this.getID().equals(npc.getDatabaseID())) { return npc; }
+                if (this.getID() == npc.getDatabaseID()) { return npc; }
             }
         }
         return null;

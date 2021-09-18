@@ -13,8 +13,8 @@ public interface Recordable<M extends Record> {
 
     Level getWorld();
     DimBlockPos getDimBlockPos();
-    void setDatabaseID(UUID uuid);
-    UUID getDatabaseID();
+    void setDatabaseID(long id);
+    long getDatabaseID();
     void setPlayerUUID(UUID uuid);
     UUID getPlayerUUID();
 

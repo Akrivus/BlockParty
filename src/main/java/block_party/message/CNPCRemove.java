@@ -4,12 +4,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
-import java.util.UUID;
-
 public class CNPCRemove extends CNPCQuery {
     protected boolean removed;
 
-    public CNPCRemove(UUID id) {
+    public CNPCRemove(long id) {
         super(id);
     }
 

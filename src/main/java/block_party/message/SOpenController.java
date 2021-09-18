@@ -9,29 +9,28 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.List;
-import java.util.UUID;
 
 public abstract class SOpenController extends SNPCList {
-    protected final UUID id;
+    protected final long id;
     protected final InteractionHand hand;
     protected ItemStack stack;
 
-    public SOpenController(List<UUID> npcs, UUID id, InteractionHand hand) {
+    public SOpenController(List<Long> npcs, long id, InteractionHand hand) {
         super(npcs);
-        this.id = id == null ? UUID.randomUUID() : id;
+        this.id = id;
         this.hand = hand;
     }
 
     public SOpenController(FriendlyByteBuf buffer) {
         super(buffer);
-        this.id = buffer.readUUID();
+        this.id = buffer.readLong();
         this.hand = buffer.readEnum(InteractionHand.class);
     }
 
     @Override
     public void encode(FriendlyByteBuf buffer) {
         super.encode(buffer);
-        buffer.writeUUID(this.id);
+        buffer.writeLong(this.id);
         buffer.writeEnum(this.hand);
     }
 

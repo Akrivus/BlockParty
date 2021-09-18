@@ -5,10 +5,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
-import java.util.UUID;
-
 public class CDialogueClose extends CNPCQuery {
-    public CDialogueClose(UUID id) {
+    public CDialogueClose(long id) {
         super(id);
     }
 

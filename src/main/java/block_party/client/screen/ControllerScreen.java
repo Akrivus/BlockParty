@@ -6,15 +6,14 @@ import block_party.message.CNPCRequest;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
-import java.util.UUID;
 
 public abstract class ControllerScreen<M extends NPC> extends AbstractScreen {
-    protected List<UUID> npcs;
+    protected List<Long> npcs;
     protected M npc;
     protected int index;
     protected int count;
 
-    protected ControllerScreen(List<UUID> npcs, UUID id, int x, int y) {
+    protected ControllerScreen(List<Long> npcs, long id, int x, int y) {
         super(x, y);
         this.npcs = npcs;
         this.index = this.npcs.indexOf(id);
@@ -32,7 +31,7 @@ public abstract class ControllerScreen<M extends NPC> extends AbstractScreen {
         this.getNPC(this.npcs.get(index));
     }
 
-    public void getNPC(UUID id) {
+    public void getNPC(long id) {
         BlockPartyMessages.send(new CNPCRequest(id));
     }
 

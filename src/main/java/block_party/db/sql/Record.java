@@ -11,7 +11,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public abstract class Record<E extends Recordable> {
     protected static final int DATABASE_ID  =  0;
@@ -51,8 +50,8 @@ public abstract class Record<E extends Recordable> {
         return this.columns.get(i);
     }
 
-    public UUID getID() {
-        return (UUID) this.get(DATABASE_ID).get();
+    public long getID() {
+        return (long) this.get(DATABASE_ID).get();
     }
 
     public DimBlockPos getDimPos() {
@@ -170,6 +169,6 @@ public abstract class Record<E extends Recordable> {
 
     @Override
     public String toString() {
-        return String.format("%s[%s]", this.table, this.get(DATABASE_ID).get());
+        return String.format("%s[%d]", this.table, this.get(DATABASE_ID).get());
     }
 }

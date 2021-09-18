@@ -14,19 +14,20 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.UUID;
 
 public abstract class AbstractDataBlockEntity<M extends Record> extends BlockEntity implements Recordable<M> {
-    protected UUID id = UUID.randomUUID();
+    protected long id;
     protected UUID playerUUID;
     protected boolean claimed;
 
     protected AbstractDataBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+        this.id = pos.asLong();
     }
 
     @Override
     public void load(CompoundTag compound) {
         super.load(compound);
         if (compound.hasUUID("DatabaseID")) {
-            this.id = compound.getUUID("DatabaseID");
+            this.id = compound.getLong("DatabaseID");
             if (compound.getBoolean("HasRow")) {
                 this.getRow().load(this);
             }
@@ -35,7 +36,7 @@ public abstract class AbstractDataBlockEntity<M extends Record> extends BlockEnt
 
     @Override
     public CompoundTag save(CompoundTag compound) {
-        compound.putUUID("DatabaseID", this.id);
+        compound.putLong("DatabaseID", this.id);
         compound.putBoolean("HasRow", this.hasRow());
         return super.save(compound);
     }
@@ -68,12 +69,12 @@ public abstract class AbstractDataBlockEntity<M extends Record> extends BlockEnt
     }
 
     @Override
-    public UUID getDatabaseID() {
+    public long getDatabaseID() {
         return this.id;
     }
 
     @Override
-    public void setDatabaseID(UUID id) {
+    public void setDatabaseID(long id) {
         this.id = id;
     }
 

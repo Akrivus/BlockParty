@@ -8,10 +8,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Item;
 
 import java.util.List;
-import java.util.UUID;
 
 public class SOpenYearbook extends SOpenController {
-    public SOpenYearbook(List<UUID> npcs, UUID id, InteractionHand hand) {
+    public SOpenYearbook(List<Long> npcs, long id, InteractionHand hand) {
         super(npcs, id, hand);
     }
 

@@ -8,11 +8,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Item;
 
 import java.util.List;
-import java.util.UUID;
 
 public class SOpenCellPhone extends SOpenController {
-    public SOpenCellPhone(List<UUID> npcs, InteractionHand hand) {
-        super(npcs, UUID.randomUUID(), hand);
+    public SOpenCellPhone(List<Long> npcs, InteractionHand hand) {
+        super(npcs, -1, hand);
     }
 
     public SOpenCellPhone(FriendlyByteBuf buffer) {

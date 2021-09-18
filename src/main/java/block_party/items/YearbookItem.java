@@ -16,7 +16,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
-import java.util.UUID;
 
 public class YearbookItem extends Item implements ISortableItem {
     public YearbookItem() {
@@ -26,7 +25,7 @@ public class YearbookItem extends Item implements ISortableItem {
     @Override
     public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
         if (world.isClientSide()) { return InteractionResultHolder.pass(player.getItemInHand(hand)); }
-        return new InteractionResultHolder(this.openGui(player, hand, null), player.getItemInHand(hand));
+        return new InteractionResultHolder(this.openGui(player, hand, -1), player.getItemInHand(hand));
     }
 
     @Override
@@ -40,9 +39,9 @@ public class YearbookItem extends Item implements ISortableItem {
         return InteractionResult.FAIL;
     }
 
-    private InteractionResult openGui(Player player, InteractionHand hand, UUID id) {
-        List<UUID> npcs = BlockPartyDB.get(player.level).getFrom(player);
-        if (npcs.size() > 0) { BlockPartyMessages.send(player, new SOpenYearbook(npcs, id == null ? npcs.get(0) : id, hand)); }
+    private InteractionResult openGui(Player player, InteractionHand hand, long id) {
+        List<Long> npcs = BlockPartyDB.get(player.level).getFrom(player);
+        if (npcs.size() > 0) { BlockPartyMessages.send(player, new SOpenYearbook(npcs, id < 0 ? npcs.get(0) : id, hand)); }
         return InteractionResult.SUCCESS;
     }
 

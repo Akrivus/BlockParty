@@ -41,7 +41,7 @@ public class DollRenderer extends MobRenderer<BlockPartyNPC, DollModel<BlockPart
     protected void renderNameTag(BlockPartyNPC entity, Component name, PoseStack stack, MultiBufferSource buffer, int packedLight) {
         if (entity.getAnimationKey() == Animation.YEARBOOK) { return; }
         if (Minecraft.getInstance().player.distanceTo(entity) > 8.0F) { return; }
-        String[] lines = new String[] { this.getHealth(entity), name.getString(), entity.getDatabaseID().toString() };
+        String[] lines = new String[] { this.getHealth(entity), name.getString() };
         stack.pushPose();
         stack.translate(0.0D, entity.getBbHeight() + 0.5F, 0.0D);
         stack.mulPose(this.entityRenderDispatcher.cameraOrientation());

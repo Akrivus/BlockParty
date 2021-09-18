@@ -13,7 +13,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
-import java.util.UUID;
 
 public class CellPhoneItem extends Item implements ISortableItem {
     public CellPhoneItem() {
@@ -23,7 +22,7 @@ public class CellPhoneItem extends Item implements ISortableItem {
     @Override
     public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
         if (world.isClientSide()) { return InteractionResultHolder.pass(player.getItemInHand(hand)); }
-        List<UUID> npcs = BlockPartyDB.get(player.level).getFrom(player);
+        List<Long> npcs = BlockPartyDB.get(player.level).getFrom(player);
         BlockPartyMessages.send(player, new SOpenCellPhone(npcs, hand));
         return InteractionResultHolder.success(player.getItemInHand(hand));
     }

@@ -8,24 +8,23 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.List;
-import java.util.UUID;
 
 public abstract class CNPCQuery extends AbstractMessage {
-    protected final UUID id;
-    protected List<UUID> list;
+    protected final long id;
+    protected List<Long> list;
     protected NPC npc;
 
     public CNPCQuery(FriendlyByteBuf buffer) {
-        this(buffer.readUUID());
+        this(buffer.readLong());
     }
 
-    public CNPCQuery(UUID id) {
+    public CNPCQuery(long id) {
         this.id = id;
     }
 
     @Override
     public void encode(FriendlyByteBuf buffer) {
-        buffer.writeUUID(this.id);
+        buffer.writeLong(this.id);
     }
 
     @Override

@@ -39,7 +39,7 @@ public class Location extends Record<LocativeBlockEntity> {
 
     @Override
     public void load(LocativeBlockEntity entity) {
-        entity.setDatabaseID((UUID) this.get(DATABASE_ID).get());
+        entity.setDatabaseID((long) this.get(DATABASE_ID).get());
         entity.setPlayerUUID((UUID) this.get(PLAYER_UUID).get());
     }
 

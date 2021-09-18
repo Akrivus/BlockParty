@@ -22,7 +22,6 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class CellPhoneScreen extends ControllerScreen<NPC> {
     public static final ResourceLocation CELL_PHONE_TEXTURES = BlockParty.source("textures/gui/cell_phone.png");
@@ -32,8 +31,8 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
     private Button buttonScrollUp;
     private Button buttonScrollDown;
 
-    public CellPhoneScreen(List<UUID> npcs) {
-        super(npcs, UUID.randomUUID(), 108, 182);
+    public CellPhoneScreen(List<Long> npcs) {
+        super(npcs, -1, 108, 182);
         this.npcs.forEach(this::getNPC);
     }
 

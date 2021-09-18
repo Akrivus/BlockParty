@@ -31,7 +31,6 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class YearbookScreen extends ControllerScreen {
     public static final ResourceLocation YEARBOOK_TEXTURES = BlockParty.source("textures/gui/yearbook.png");
@@ -44,7 +43,7 @@ public class YearbookScreen extends ControllerScreen {
     private Button buttonNextPage;
     private Button buttonRemovePage;
 
-    public YearbookScreen(List<UUID> npcs, UUID id) {
+    public YearbookScreen(List<Long> npcs, long id) {
         super(npcs, id, 146, 187);
         this.getNPC(id);
     }

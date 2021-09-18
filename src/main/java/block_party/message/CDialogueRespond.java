@@ -6,12 +6,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
-import java.util.UUID;
-
 public class CDialogueRespond extends CNPCQuery {
     private final Response response;
 
-    public CDialogueRespond(UUID id, Response response) {
+    public CDialogueRespond(long id, Response response) {
         super(id);
         this.response = response;
     }

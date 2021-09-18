@@ -7,6 +7,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
@@ -35,7 +36,7 @@ public class BlockPartyDB extends SavedData {
     public static NPC.Schema NPCs = new NPC.Schema();
     public static String KEY = "blockparty_db";
     public List<String> names = new ArrayList<>();
-    private final Map<UUID, List<UUID>> byPlayer = new HashMap<>();
+    private final Map<UUID, List<Long>> byPlayer = new HashMap<>();
     private final List<Connection> connections = new ArrayList<>();
     private String database;
 
@@ -44,8 +45,8 @@ public class BlockPartyDB extends SavedData {
         compound.getList("Names", Constants.NBT.TAG_STRING).forEach((name) -> data.names.add(name.getAsString()));
         compound.getList("NPCsByPlayer", Constants.NBT.TAG_COMPOUND).forEach((nbt) -> {
             CompoundTag tag = (CompoundTag) nbt;
-            List<UUID> npcs = new ArrayList<>();
-            tag.getList("NPCs", Constants.NBT.TAG_STRING).forEach((npc) -> npcs.add(UUID.fromString(npc.getAsString())));
+            List<Long> npcs = new ArrayList<>();
+            tag.getList("NPCs", Constants.NBT.TAG_LONG).forEach((npc) -> npcs.add(((LongTag) npc).getAsLong()));
             data.byPlayer.put(UUID.fromString(tag.getString("Player")), npcs);
         });
         return data;
@@ -69,14 +70,14 @@ public class BlockPartyDB extends SavedData {
         return compound;
     }
 
-    public List<UUID> getFrom(Player player) {
+    public List<Long> getFrom(Player player) {
         return this.byPlayer.getOrDefault(player.getUUID(), new ArrayList<>());
     }
 
-    public void addTo(Player player, UUID uuid) {
+    public void addTo(Player player, long id) {
         if (player == null) { return; }
-        List<UUID> list = this.getFrom(player);
-        list.add(uuid);
+        List<Long> list = this.getFrom(player);
+        list.add(id);
         this.byPlayer.put(player.getUUID(), list);
         this.setDirty();
     }

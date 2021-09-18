@@ -6,10 +6,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
-import java.util.UUID;
-
 public class CRemovePage extends CNPCRemove {
-    public CRemovePage(UUID id) {
+    public CRemovePage(long id) {
         super(id);
     }
 

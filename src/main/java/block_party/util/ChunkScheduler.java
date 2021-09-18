@@ -6,10 +6,9 @@ import net.minecraft.world.level.Level;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class ChunkScheduler {
-    private static final Map<UUID, ChunkScheduler> chunks = new LinkedHashMap<>();
+    private static final Map<Long, ChunkScheduler> chunks = new LinkedHashMap<>();
 
     private final Level level;
     private final ChunkPos pos;
@@ -23,11 +22,11 @@ public class ChunkScheduler {
         this.level.getChunkSource().updateChunkForced(this.pos, false);
     }
 
-    public static ChunkScheduler get(UUID id) {
+    public static ChunkScheduler get(long id) {
         return ChunkScheduler.chunks.get(id);
     }
 
-    public static ServerLevel queue(UUID id, ServerLevel world, ChunkPos pos) {
+    public static ServerLevel queue(long id, ServerLevel world, ChunkPos pos) {
         if (world != null) {
             ChunkScheduler.chunks.put(id, new ChunkScheduler(world, pos));
             world.tickChunk(world.getChunk(pos.x, pos.z), 20);

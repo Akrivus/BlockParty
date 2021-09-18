@@ -496,23 +496,23 @@ public abstract class Column<I> {
     }
 
     public static class AsReference<R extends Record> extends Column<R> {
-        private final Function<UUID, R> query;
+        private final Function<Long, R> query;
 
-        public AsReference(Table table, String column, Function<UUID, R> query) {
+        public AsReference(Table table, String column, Function<Long, R> query) {
             super(table, "TEXT", column);
             this.query = query;
         }
 
         @Override
         public void forSet(int i, PreparedStatement statement) throws SQLException {
-            statement.setString(i, this.get() == null ? "00000000-0000-0000-0000-000000000000" : this.get().getID().toString());
+            statement.setLong(i, this.get() == null ? -1 : this.get().getID());
         }
 
         @Override
         public R fromSet(int i, ResultSet set) throws SQLException {
-            UUID uuid = UUID.fromString(set.getString(i));
-            if (uuid.toString().equals("00000000-0000-0000-0000-000000000000")) { return null; }
-            return this.query.apply(uuid);
+            long id = set.getLong(i);
+            if (id < 0) { return null; }
+            return this.query.apply(id);
         }
 
         @Override
