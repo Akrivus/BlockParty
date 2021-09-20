@@ -1,7 +1,7 @@
 package block_party.blocks;
 
-import block_party.init.BlockPartyBlocks;
-import block_party.init.BlockPartyTags;
+import block_party.custom.CustomBlocks;
+import block_party.custom.CustomTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
@@ -42,11 +42,11 @@ public class WisteriaVineTipBlock extends GrowingPlantHeadBlock {
     public boolean canSurvive(BlockState state, LevelReader worldIn, BlockPos pos) {
         BlockPos up = pos.above();
         BlockState ceiling = worldIn.getBlockState(up);
-        return ceiling.is(BlockPartyTags.Blocks.WISTERIA);
+        return ceiling.is(CustomTags.Blocks.WISTERIA);
     }
 
     @Override
     protected Block getBodyBlock() {
-        return BlockPartyBlocks.WISTERIA_VINE_BODY.get();
+        return CustomBlocks.WISTERIA_VINE_BODY.get();
     }
 }

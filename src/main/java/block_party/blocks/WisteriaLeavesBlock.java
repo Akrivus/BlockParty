@@ -1,6 +1,6 @@
 package block_party.blocks;
 
-import block_party.init.BlockPartyBlocks;
+import block_party.custom.CustomBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -19,11 +19,11 @@ public class WisteriaLeavesBlock extends LeavesBlock {
     }
 
     @Override
-    public void randomTick(BlockState state, ServerLevel world, BlockPos pos, Random random) {
+    public void randomTick(BlockState state, ServerLevel level, BlockPos pos, Random random) {
         if (super.isRandomlyTicking(state)) {
-            super.randomTick(state, world, pos, random);
-        } else if (world.isEmptyBlock(pos.below())) {
-            world.setBlockAndUpdate(pos.below(), BlockPartyBlocks.WISTERIA_VINE_TIP.get().defaultBlockState());
+            super.randomTick(state, level, pos, random);
+        } else if (level.isEmptyBlock(pos.below())) {
+            level.setBlockAndUpdate(pos.below(), CustomBlocks.WISTERIA_VINE_TIP.get().defaultBlockState());
         }
     }
 }

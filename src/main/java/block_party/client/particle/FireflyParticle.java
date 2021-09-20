@@ -10,14 +10,20 @@ public class FireflyParticle extends TextureSheetParticle {
     private final double origPosX;
     private final double origPosY;
     private final double origPosZ;
+    private final double bearing;
+    private final double distance;
+    private final double factor;
 
-    public FireflyParticle(SpriteSet sprite, ClientLevel world, double x, double y, double z) {
-        super(world, x, y, z, 0.1, 0.2, 0.1);
+    public FireflyParticle(SpriteSet sprite, ClientLevel level, double x, double y, double z, double bearing, double distance, double factor) {
+        super(level, x, y, z, 0.1, 0.2, 0.1);
         this.setSize(0.25F, 0.25F);
         this.pickSprite(sprite);
         this.origPosX = x;
         this.origPosY = y;
         this.origPosZ = z;
+        this.bearing = bearing;
+        this.distance = distance;
+        this.factor = factor;
         this.lifetime = 200;
     }
 
@@ -57,8 +63,8 @@ public class FireflyParticle extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType type, ClientLevel world, double x, double y, double z, double mX, double mY, double mZ) {
-            return new FireflyParticle(this.sprite, world, x, y, z);
+        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double bearing, double distance, double factor) {
+            return new FireflyParticle(this.sprite, level, x, y, z, bearing, distance, factor);
         }
     }
 }

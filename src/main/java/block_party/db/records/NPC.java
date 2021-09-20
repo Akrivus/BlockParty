@@ -1,15 +1,15 @@
 package block_party.db.records;
 
-import block_party.BlockPartyDB;
+import block_party.db.BlockPartyDB;
 import block_party.db.sql.Column;
-import block_party.db.sql.Record;
+import block_party.db.sql.Row;
 import block_party.db.sql.Table;
-import block_party.init.BlockPartyEntities;
-import block_party.mob.BlockPartyNPC;
-import block_party.mob.automata.trait.BloodType;
-import block_party.mob.automata.trait.Dere;
-import block_party.util.ChunkScheduler;
-import block_party.util.DimBlockPos;
+import block_party.custom.CustomEntities;
+import block_party.npc.BlockPartyNPC;
+import block_party.npc.automata.trait.BloodType;
+import block_party.npc.automata.trait.Dere;
+import block_party.world.chunk.ChunkScheduler;
+import block_party.db.DimBlockPos;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -23,7 +23,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
-public class NPC extends Record<BlockPartyNPC> {
+public class NPC extends Row<BlockPartyNPC> {
     protected static final int DEAD         =  6;
     protected static final int NAME         =  7;
     protected static final int BLOOD_TYPE   =  8;
@@ -40,7 +40,7 @@ public class NPC extends Record<BlockPartyNPC> {
     protected static final int AGE          = 19;
     protected static final int LAST_SEEN_AT = 20;
     protected static final int BLOCK_STATE  = 21;
-    protected static final int TORII_GATE   = 22;
+    protected static final int SHRINE_GATE   = 22;
     protected static final int SHIMENAWA    = 23;
 
     public NPC(ResultSet set) throws SQLException {
@@ -115,9 +115,9 @@ public class NPC extends Record<BlockPartyNPC> {
 
     public BlockPartyNPC getServerEntity(MinecraftServer server) {
         DimBlockPos pos = (DimBlockPos) this.get(POS).get();
-        ServerLevel world = ChunkScheduler.queue(this.getID(), server.getLevel(pos.getDim()), pos.getChunk());
-        if (world != null) {
-            List<BlockPartyNPC> npcs = world.getEntitiesOfClass(BlockPartyNPC.class, pos.getAABB());
+        ServerLevel level = ChunkScheduler.queue(this.getID(), server.getLevel(pos.getDim()), pos.getChunk());
+        if (level != null) {
+            List<BlockPartyNPC> npcs = level.getEntitiesOfClass(BlockPartyNPC.class, pos.getAABB());
             for (BlockPartyNPC npc : npcs) {
                 if (this.getID() == npc.getDatabaseID()) { return npc; }
             }
@@ -127,7 +127,7 @@ public class NPC extends Record<BlockPartyNPC> {
 
     public BlockPartyNPC getClientEntity(Minecraft client) {
         BlockPos pos = client.player.blockPosition();
-        BlockPartyNPC entity = BlockPartyEntities.NPC.get().create(client.level);
+        BlockPartyNPC entity = CustomEntities.NPC.get().create(client.level);
         entity.setPos(pos.getX(), pos.getY(), pos.getZ());
         this.load(entity);
         return entity;

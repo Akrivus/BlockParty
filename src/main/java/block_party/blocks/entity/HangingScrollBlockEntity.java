@@ -1,7 +1,7 @@
 package block_party.blocks.entity;
 
-import block_party.init.BlockPartyBlockEntities;
-import block_party.mob.automata.Condition;
+import block_party.custom.CustomBlockEntities;
+import block_party.npc.automata.Condition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
@@ -10,7 +10,7 @@ public class HangingScrollBlockEntity extends LocativeBlockEntity {
     protected Condition condition;
 
     public HangingScrollBlockEntity(Condition condition, BlockPos pos, BlockState state) {
-        super(BlockPartyBlockEntities.HANGING_SCROLL.get(), pos, state);
+        super(CustomBlockEntities.HANGING_SCROLL.get(), pos, state);
         this.condition = condition;
     }
 

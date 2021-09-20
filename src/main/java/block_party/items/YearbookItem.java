@@ -1,11 +1,11 @@
 package block_party.items;
 
 import block_party.BlockParty;
-import block_party.BlockPartyDB;
-import block_party.init.BlockPartyMessages;
-import block_party.message.SOpenYearbook;
-import block_party.mob.BlockPartyNPC;
-import block_party.util.sort.ISortableItem;
+import block_party.db.BlockPartyDB;
+import block_party.custom.CustomMessenger;
+import block_party.messages.SOpenYearbook;
+import block_party.npc.BlockPartyNPC;
+import block_party.utils.sorters.ISortableItem;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -19,12 +19,12 @@ import java.util.List;
 
 public class YearbookItem extends Item implements ISortableItem {
     public YearbookItem() {
-        super(new Properties().tab(BlockParty.ITEMS));
+        super(new Properties().tab(BlockParty.CreativeModeTab));
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
-        if (world.isClientSide()) { return InteractionResultHolder.pass(player.getItemInHand(hand)); }
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        if (level.isClientSide()) { return InteractionResultHolder.pass(player.getItemInHand(hand)); }
         return new InteractionResultHolder(this.openGui(player, hand, -1), player.getItemInHand(hand));
     }
 
@@ -41,7 +41,7 @@ public class YearbookItem extends Item implements ISortableItem {
 
     private InteractionResult openGui(Player player, InteractionHand hand, long id) {
         List<Long> npcs = BlockPartyDB.get(player.level).getFrom(player);
-        if (npcs.size() > 0) { BlockPartyMessages.send(player, new SOpenYearbook(npcs, id < 0 ? npcs.get(0) : id, hand)); }
+        if (npcs.size() > 0) { CustomMessenger.send(player, new SOpenYearbook(npcs, id < 0 ? npcs.get(0) : id, hand)); }
         return InteractionResult.SUCCESS;
     }
 

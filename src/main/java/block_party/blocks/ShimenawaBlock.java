@@ -1,11 +1,13 @@
 package block_party.blocks;
 
 import block_party.blocks.entity.ShimenawaBlockEntity;
+import block_party.custom.CustomTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
@@ -31,11 +33,16 @@ public class ShimenawaBlock extends AbstractDataBlock<ShimenawaBlockEntity> {
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos neighbor, boolean isMoving) {
-        BlockPos base = pos.relative(state.getValue(HANGING) ? Direction.UP : state.getValue(FACING).getOpposite());
-        if (world.isEmptyBlock(base)) {
-            world.destroyBlock(pos, true);
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos neighbor, boolean isMoving) {
+        if (this.canSurvive(state, level, pos)) {
+            level.destroyBlock(pos, true);
         }
+    }
+
+    @Override
+    public boolean canSurvive(BlockState state, LevelReader reader, BlockPos pos) {
+        BlockPos base = pos.relative(state.getValue(HANGING) ? Direction.UP : state.getValue(FACING).getOpposite());
+        return reader.getBlockState(base).is(CustomTags.Blocks.NPC_SPAWN_BLOCKS);
     }
 
     @Override

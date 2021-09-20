@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "block_party:block/shrine_tablet"
+    },
+    "facing=east": {
+      "model": "block_party:block/shrine_tablet",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "block_party:block/shrine_tablet",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "block_party:block/shrine_tablet",
+      "y": 270
+    }
+  }
+}

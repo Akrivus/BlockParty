@@ -1,6 +1,6 @@
 package block_party.items;
 
-import block_party.util.sort.ISortableItem;
+import block_party.utils.sorters.ISortableItem;
 import net.minecraft.world.item.Item;
 
 public class PinkBowItem extends Item implements ISortableItem {

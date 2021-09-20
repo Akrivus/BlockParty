@@ -22,14 +22,14 @@ public class AbstractDataBlock<T extends AbstractDataBlockEntity> extends Block 
     }
 
     @Override
-    public void setPlacedBy(Level world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
         if (placer instanceof Player) {
-            this.getTileEntity(world, pos).claim((Player) (placer));
+            this.getTileEntity(level, pos).claim((Player) (placer));
         }
     }
 
-    public T getTileEntity(Level world, BlockPos pos) {
-        return ((T) (world.getBlockEntity(pos)));
+    public T getTileEntity(Level level, BlockPos pos) {
+        return ((T) (level.getBlockEntity(pos)));
     }
 
     @Override

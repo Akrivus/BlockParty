@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "X",
+    "*",
+    "_"
+  ],
+  "key": {
+    "X": {
+      "item": "block_party:calligraphy_brush"
+    },
+    "*": {
+      "item": "minecraft:gold_ingot"
+    },
+    "_": {
+      "item": "block_party:sakura_slab"
+    }
+  },
+  "result": {
+    "item": "block_party:shrine_tablet"
+  }
+}

@@ -1,14 +1,12 @@
 package block_party.db;
 
-import block_party.BlockPartyDB;
-import block_party.db.sql.Record;
-import block_party.util.DimBlockPos;
+import block_party.db.sql.Row;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import java.util.UUID;
 
-public interface Recordable<M extends Record> {
+public interface Recordable<M extends Row> {
     UUID BLANK_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     Level getWorld();

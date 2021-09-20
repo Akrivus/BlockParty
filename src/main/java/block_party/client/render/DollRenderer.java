@@ -7,7 +7,8 @@ import block_party.client.render.layer.MoeEmotionLayer;
 import block_party.client.render.layer.MoeGlowLayer;
 import block_party.client.render.layer.MoeSleepingLayer;
 import block_party.client.render.layer.MoeSpecialRenderer;
-import block_party.mob.BlockPartyNPC;
+import block_party.npc.BlockPartyNPC;
+import block_party.npc.Quirks;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
@@ -34,7 +35,7 @@ public class DollRenderer extends MobRenderer<BlockPartyNPC, DollModel<BlockPart
 
     @Override
     public ResourceLocation getTextureLocation(BlockPartyNPC entity) {
-        return BlockPartyNPC.Overrides.getNameOf(entity.getExternalBlockState());
+        return Quirks.getNameOf(entity.getExternalBlockState());
     }
 
     @Override

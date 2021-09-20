@@ -1,14 +1,14 @@
 package block_party.items;
 
 import block_party.BlockParty;
-import block_party.util.sort.ISortableItem;
+import block_party.utils.sorters.ISortableItem;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public class LetterItem extends Item implements ISortableItem {
     public LetterItem() {
-        super(new Properties().tab(BlockParty.ITEMS));
+        super(new Properties().tab(BlockParty.CreativeModeTab));
     }
 
     @Override

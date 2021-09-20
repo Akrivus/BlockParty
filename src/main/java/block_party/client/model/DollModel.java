@@ -1,6 +1,6 @@
 package block_party.client.model;
 
-import block_party.mob.BlockPartyNPC;
+import block_party.npc.BlockPartyNPC;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.ArmedModel;
@@ -71,7 +71,7 @@ public class DollModel<T extends BlockPartyNPC> extends HierarchicalModel<T> imp
         this.rightEar = this.head.getChild("rightEar");
         this.leftEar = this.head.getChild("leftEar");
         this.hatTop = this.head.getChild("hatTop");
-        this.hatBrim = this.head.getChild("hatBrim");
+        this.hatBrim = this.hatTop.getChild("hatBrim");
         this.body = this.root.getChild("body");
         this.tiddies = this.body.getChild("tiddies");
         this.skirt = this.body.getChild("skirt");

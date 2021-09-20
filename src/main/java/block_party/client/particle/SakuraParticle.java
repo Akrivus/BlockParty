@@ -10,12 +10,12 @@ import net.minecraftforge.fmllegacy.RegistryObject;
 import java.util.Random;
 
 public class SakuraParticle extends TextureSheetParticle {
-    public SakuraParticle(SpriteSet sprite, ClientLevel world, double x, double y, double z, double mX, double mY, double mZ) {
-        super(world, x, y, z, mX, mY, mZ);
+    public SakuraParticle(SpriteSet sprite, ClientLevel level, double x, double y, double z, double mX, double mY, double mZ) {
+        super(level, x, y, z, mX, mY, mZ);
         this.setSize(0.25F, 0.25F);
         this.pickSprite(sprite);
         this.scale(0.5F);
-        this.roll = world.random.nextFloat() * 360.0F;
+        this.roll = level.random.nextFloat() * 360.0F;
         this.gravity = 0.01F;
         this.lifetime = 1000;
     }
@@ -42,15 +42,15 @@ public class SakuraParticle extends TextureSheetParticle {
         return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
     }
 
-    public static void add(RegistryObject<SimpleParticleType> particle, Level world, BlockPos pos, Random random) {
+    public static void add(RegistryObject<SimpleParticleType> particle, Level level, BlockPos pos, Random random) {
         BlockPos spawn = pos.offset(random.nextDouble(), -1.0D, random.nextDouble());
-        if (random.nextInt(10) == 0 && world.isEmptyBlock(spawn)) {
-            double direction = world.getDayTime() / 1000 * 15.0D;
+        if (random.nextInt(10) == 0 && level.isEmptyBlock(spawn)) {
+            double direction = level.getDayTime() / 1000 * 15.0D;
             double x = Math.sin(0.0174444444D * direction) * (random.nextDouble() + random.nextInt(6));
             double z = Math.cos(0.0174444444D * direction) * (random.nextDouble() + random.nextInt(6));
             double y = Math.abs(random.nextGaussian()) * -1.0D;
             double start = spawn.getY() + 0.75F;
-            world.addParticle(particle.get(), spawn.getX(), start, spawn.getZ(), x, y, z);
+            level.addParticle(particle.get(), spawn.getX(), start, spawn.getZ(), x, y, z);
         }
     }
 
@@ -62,8 +62,8 @@ public class SakuraParticle extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType type, ClientLevel world, double x, double y, double z, double mX, double mY, double mZ) {
-            return new SakuraParticle(this.sprite, world, x, y, z, mX, mY, mZ);
+        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double mX, double mY, double mZ) {
+            return new SakuraParticle(this.sprite, level, x, y, z, mX, mY, mZ);
         }
     }
 }

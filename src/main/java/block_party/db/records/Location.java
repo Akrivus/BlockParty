@@ -1,18 +1,18 @@
 package block_party.db.records;
 
-import block_party.BlockPartyDB;
+import block_party.db.BlockPartyDB;
 import block_party.blocks.entity.LocativeBlockEntity;
 import block_party.db.sql.Column;
-import block_party.db.sql.Record;
+import block_party.db.sql.Row;
 import block_party.db.sql.Table;
-import block_party.mob.automata.Condition;
+import block_party.npc.automata.Condition;
 import net.minecraft.nbt.CompoundTag;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class Location extends Record<LocativeBlockEntity> {
+public class Location extends Row<LocativeBlockEntity> {
     protected static final int REQUIRED_CONDITION = 3;
     protected static final int PRIORITY = 4;
 

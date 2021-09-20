@@ -1,6 +1,6 @@
 package block_party.blocks.tree;
 
-import block_party.init.BlockPartyBlocks;
+import block_party.custom.CustomBlocks;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.level.block.grower.AbstractTreeGrower;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -20,6 +20,6 @@ public class WisteriaTree extends AbstractTreeGrower {
     }
 
     public static ConfiguredFeature build() {
-        return Feature.TREE.configured(new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(BlockPartyBlocks.WISTERIA_BINE.get().defaultBlockState()), new ForkingTrunkPlacer(4, 1, 2), new SimpleStateProvider(BlockPartyBlocks.WISTERIA_LEAVES.get().defaultBlockState()), new SimpleStateProvider(BlockPartyBlocks.WISTERIA_SAPLING.get().defaultBlockState()), new AcaciaFoliagePlacer(ConstantInt.of(2), ConstantInt.of(1)), new TwoLayersFeatureSize(1, 0, 2)).ignoreVines().build());
+        return Feature.TREE.configured(new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(CustomBlocks.WISTERIA_BINE.get().defaultBlockState()), new ForkingTrunkPlacer(4, 1, 2), new SimpleStateProvider(CustomBlocks.WISTERIA_LEAVES.get().defaultBlockState()), new SimpleStateProvider(CustomBlocks.WISTERIA_SAPLING.get().defaultBlockState()), new AcaciaFoliagePlacer(ConstantInt.of(2), ConstantInt.of(1)), new TwoLayersFeatureSize(1, 0, 2)).ignoreVines().build());
     }
 }

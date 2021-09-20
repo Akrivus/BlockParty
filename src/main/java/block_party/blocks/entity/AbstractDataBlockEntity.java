@@ -1,8 +1,8 @@
 package block_party.blocks.entity;
 
 import block_party.db.Recordable;
-import block_party.db.sql.Record;
-import block_party.util.DimBlockPos;
+import block_party.db.sql.Row;
+import block_party.db.DimBlockPos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.UUID;
 
-public abstract class AbstractDataBlockEntity<M extends Record> extends BlockEntity implements Recordable<M> {
+public abstract class AbstractDataBlockEntity<M extends Row> extends BlockEntity implements Recordable<M> {
     protected long id;
     protected UUID playerUUID;
     protected boolean claimed;
@@ -43,13 +43,21 @@ public abstract class AbstractDataBlockEntity<M extends Record> extends BlockEnt
 
     @Override
     public void setChanged() {
-        if (this.hasRow()) { this.getRow().update(); }
+        if (this.hasRow()) {
+            this.getRow().update();
+            this.afterUpdate();
+            this.afterChange();
+        }
         super.setChanged();
     }
 
     @Override
     public void setRemoved() {
-        if (this.hasRow()) { this.getRow().delete(); }
+        if (this.hasRow()) {
+            this.getRow().delete();
+            this.afterDelete();
+            this.afterChange();
+        }
         super.setRemoved();
     }
 
@@ -96,4 +104,10 @@ public abstract class AbstractDataBlockEntity<M extends Record> extends BlockEnt
     public Level getWorld() {
         return this.level;
     }
+
+    public void afterChange() { }
+
+    public void afterDelete() { }
+
+    public void afterUpdate() { }
 }

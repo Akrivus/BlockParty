@@ -1,7 +1,7 @@
 package block_party.db.sql;
 
-import block_party.mob.automata.ITrait;
-import block_party.util.DimBlockPos;
+import block_party.npc.automata.ITrait;
+import block_party.db.DimBlockPos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -495,7 +495,7 @@ public abstract class Column<I> {
         }
     }
 
-    public static class AsReference<R extends Record> extends Column<R> {
+    public static class AsReference<R extends Row> extends Column<R> {
         private final Function<Long, R> query;
 
         public AsReference(Table table, String column, Function<Long, R> query) {

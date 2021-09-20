@@ -1,77 +1,69 @@
 buildscript {
   repositories {
     maven { url = 'https://files.minecraftforge.net/maven' }
-    jcenter()
     mavenCentral()
   }
   dependencies {
-    classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1+', changing: true
-    classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow', version: '4.0.4'
+    classpath 'net.minecraftforge.gradle:ForgeGradle:5.1+'
   }
 }
 
+plugins {
+  id 'com.github.johnrengelman.shadow' version '7.0.0'
+}
+
 apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'maven-publish'
 
 version = new Date().format('yy.MM.dd')
-archivesBaseName = 'BlockParty'
 group = 'block_party'
+archivesBaseName = 'BlockParty'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 minecraft {
   mappings channel: 'official', version: '1.17.1'
+  accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
   runs {
-    client {
+    server { }
+    client { }
+    all {
       mods { block_party { source sourceSets.main } }
-      workingDirectory project.file('run')
+      workingDirectory file('run')
+      lazyToken('minecraft_classpath') {
+        configurations.integrate.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
+      }
     }
     data {
       args '--mod', 'block_party', '--all', '--output', file('src/generated/resources/')
-      mods { block_party { source sourceSets.main } }
-      workingDirectory project.file('run')
-    }
-    server {
-      mods { block_party { source sourceSets.main } }
-      workingDirectory project.file('run')
     }
   }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
+configurations {
+  integrate
+  implementation.extendsFrom integrate
+}
+
 dependencies {
-  minecraft 'net.minecraftforge:forge:1.17.1-37.0.32'
-  shadow 'org.xerial:sqlite-jdbc:3.34.0'
-  implementation 'org.xerial:sqlite-jdbc:3.34.0'
+  minecraft 'net.minecraftforge:forge:1.17.1-37.0.69'
+  integrate 'org.xerial:sqlite-jdbc:3.36.0.2'
 }
 
 shadowJar {
-  archiveName = "${archivesBaseName}-${version}.jar"
-  configurations = [project.configurations.shadow]
+  archiveName("${archivesBaseName}-${project.version}.jar")
+  configurations = [project.configurations.integrate]
 }
 
 reobf {
   shadowJar { }
 }
 
-tasks.build.dependsOn reobfShadowJar
+tasks.build.dependsOn shadowJar
 jar.finalizedBy('reobfShadowJar')
 
-jar {
-  manifest {
-    attributes([
-      "Implementation-Title"    :  archivesBaseName,  "Specification-Title"   : archivesBaseName,
-      "Implementation-Vendor"   : "Owen Adrian",      "Specification-Vendor"  : "Owen Adrian",
-      "Implementation-Version"  :  version,           "Specification-Version" : "1",
-      "Implementation-Timestamp":  new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-    ])
-  }
-}
-
-publishing {
-  repositories { maven { url "file:///${project.projectDir}/mcmodsrepo" } }
-  publications { mavenJava(MavenPublication) { artifact jar } }
+artifacts {
+  archives tasks.shadowJar
 }

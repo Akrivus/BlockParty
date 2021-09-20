@@ -1,7 +1,8 @@
 package block_party.client.render.layer;
 
 import block_party.client.model.DollModel;
-import block_party.mob.BlockPartyNPC;
+import block_party.npc.BlockPartyNPC;
+import block_party.npc.Quirks;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -31,6 +32,6 @@ public class MoeGlowLayer extends RenderLayer<BlockPartyNPC, DollModel<BlockPart
     }
 
     public ResourceLocation getTexture(BlockPartyNPC entity) {
-        return BlockPartyNPC.Overrides.getNameOf(entity.getExternalBlockState(), "glow");
+        return Quirks.getNameOf(entity.getExternalBlockState(), "glow");
     }
 }

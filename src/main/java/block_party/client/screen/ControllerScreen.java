@@ -1,8 +1,8 @@
 package block_party.client.screen;
 
+import block_party.custom.CustomMessenger;
 import block_party.db.records.NPC;
-import block_party.init.BlockPartyMessages;
-import block_party.message.CNPCRequest;
+import block_party.messages.CNPCRequest;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
@@ -32,7 +32,7 @@ public abstract class ControllerScreen<M extends NPC> extends AbstractScreen {
     }
 
     public void getNPC(long id) {
-        BlockPartyMessages.send(new CNPCRequest(id));
+        CustomMessenger.send(new CNPCRequest(id));
     }
 
     public void setNPC(M npc) {

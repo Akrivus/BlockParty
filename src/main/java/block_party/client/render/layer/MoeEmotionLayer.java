@@ -2,7 +2,7 @@ package block_party.client.render.layer;
 
 import block_party.BlockParty;
 import block_party.client.model.DollModel;
-import block_party.mob.BlockPartyNPC;
+import block_party.npc.BlockPartyNPC;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -33,7 +33,7 @@ public class MoeEmotionLayer extends RenderLayer<BlockPartyNPC, DollModel<BlockP
     }
 
     public ResourceLocation getEyesTexture(BlockPartyNPC entity) {
-        return BlockParty.source(String.format("textures/entity/npc/emotions/%s.eyes.png", entity.getEmotion().toString().toLowerCase()));
+        return BlockParty.source(String.format("textures/npc/emotions/%s.eyes.png", entity.getEmotion().toString().toLowerCase()));
     }
 
     public float getRGB(BlockPartyNPC entity, int index) {
@@ -41,6 +41,6 @@ public class MoeEmotionLayer extends RenderLayer<BlockPartyNPC, DollModel<BlockP
     }
 
     public ResourceLocation getFaceTexture(BlockPartyNPC entity) {
-        return BlockParty.source(String.format("textures/entity/npc/emotions/%s.png", entity.getEmotion().toString().toLowerCase()));
+        return BlockParty.source(String.format("textures/npc/emotions/%s.png", entity.getEmotion().toString().toLowerCase()));
     }
 }

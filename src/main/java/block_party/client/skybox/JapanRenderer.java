@@ -1,8 +1,10 @@
 package block_party.client.skybox;
 
 import block_party.BlockParty;
-import block_party.init.BlockPartyParticles;
-import block_party.init.BlockPartyTags;
+import block_party.client.ShrineLocation;
+import block_party.custom.CustomParticles;
+import block_party.custom.CustomTags;
+import block_party.db.BlockPartyDB;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -10,6 +12,7 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -20,65 +23,98 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.Optional;
+
 @Mod.EventBusSubscriber
 public class JapanRenderer {
     private static final ResourceLocation FUJI_TEXTURE = BlockParty.source("textures/fuji.png");
     private static final int size = 288;
     private static int horizon = 0;
+    private static float distance = Float.POSITIVE_INFINITY;
+    private static float bearing = 0.0F;
     private static float r = 0.0F;
     private static float g = 0.0F;
     private static float b = 0.0F;
-    
-    @SubscribeEvent
-    public static void setFogData(EntityViewRenderEvent.FogColors e) {
-        horizon = Minecraft.getInstance().options.renderDistance * 16;
-        r = e.getRed();
-        g = e.getGreen();
-        b = e.getBlue();
-    }
+    private static float factor = 0.0F;
 
     @SubscribeEvent
-    public static void renderFuji(RenderWorldLastEvent e) {
+    public static void fuji(RenderWorldLastEvent e) {
         PoseStack stack = e.getMatrixStack();
-        Minecraft minecraft = Minecraft.getInstance();
-        LocalPlayer player = minecraft.player;
         RenderSystem.enableTexture();
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.clearColor(r, g, b, 0.8F);
         stack.pushPose();
         stack.mulPose(Vector3f.XP.rotationDegrees(-90.0F));
         stack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
-        stack.translate(0, 0, -158 + (player.getY() / 32));
-        minecraft.textureManager.bindForSetup(FUJI_TEXTURE);
+        stack.mulPose(Vector3f.ZP.rotationDegrees(bearing - 90.0F));
+        stack.translate(0, 0, -156);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(r, g, b, factor);
+        RenderSystem.setShaderTexture(0, FUJI_TEXTURE);
         Matrix4f matrix = stack.last().pose();
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder buffer = tesselator.getBuilder();
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         buffer.vertex(matrix, -size / 2, horizon, -size / 2).uv(0.0F, 0.0F).endVertex();
         buffer.vertex(matrix, size / 2, horizon, -size / 2).uv(1.0F, 0.0F).endVertex();
         buffer.vertex(matrix, size / 2, horizon, size / 2).uv(1.0F, 1.0F).endVertex();
         buffer.vertex(matrix, -size / 2, horizon, size / 2).uv(0.0F, 1.0F).endVertex();
-        tessellator.end();
+        tesselator.end();
         stack.popPose();
     }
 
     @SubscribeEvent
-    public static void renderFireflies(TickEvent.PlayerTickEvent e) {
-        Level world = e.player.level;
-        if (world instanceof ServerLevel) { return; }
-        long time = world.getDayTime() % 24000;
+    public static void fireflies(TickEvent.PlayerTickEvent e) {
+        Level level = e.player.level;
+        if (level instanceof ServerLevel || factor < 0.8F) { return; }
+        long time = level.getDayTime() % 24000;
         if (21500 < time || time < 12500) { return; }
-        for (int generation = 0; generation < 4; ++generation) {
-            float x = world.random.nextInt(128) - 64;
-            float z = world.random.nextInt(128) - 64;
+        for (int generation = 0; generation < 3; ++generation) {
+            float x = level.random.nextInt(128) - 64;
+            float z = level.random.nextInt(128) - 64;
             for (int y = 0; y > e.player.getY() - 255; --y) {
                 BlockPos pos = e.player.blockPosition().offset(x, y, z);
-                if (world.getBlockState(pos).is(BlockPartyTags.Blocks.FIREFLY_BLOCKS)) {
-                    world.addParticle(BlockPartyParticles.FIREFLY.get(), pos.getX(), pos.getY(), pos.getZ(), x, y, z);
+                if (level.getBlockState(pos).is(CustomTags.Blocks.FIREFLY_BLOCKS)) {
+                    level.addParticle(CustomParticles.FIREFLY.get(),
+                            pos.getX(),
+                            pos.getY(),
+                            pos.getZ(),
+                            bearing,
+                            distance,
+                            factor);
                     break;
                 }
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void fogData(EntityViewRenderEvent.FogColors e) {
+        horizon = Minecraft.getInstance().options.renderDistance * 16;
+        Optional<BlockPos> shrine = BlockPartyDB.ShrineLocation.get(player().blockPosition());
+        if (shrine.isPresent()) {
+            BlockPos pos = shrine.get();
+            float x1 = player().getBlockX();
+            float x2 = pos.getX();
+            float x = x1 - x2;
+            float z1 = player().getBlockZ();
+            float z2 = pos.getZ();
+            float z = z1 - z2;
+            bearing = (float) (Math.atan2(z, x) * 180 / Math.PI);
+            distance = Math.abs(x) + Math.abs(z);
+            factor = (float) (-Math.sqrt(distance / 2048.0 - 0.03125) + 1.0);
+            if (distance < 64) { factor = 1.0F; }
+            if (distance > 2048) { factor = 0; }
+        } else {
+            distance = Float.POSITIVE_INFINITY;
+            factor = 0;
+        }
+        e.setRed(r = ((0.95F - e.getRed()) * factor * 0.5F + e.getRed()));
+        e.setGreen(g = ((0.36F - e.getGreen()) * factor * 0.5F + e.getGreen()));
+        e.setBlue(b = ((0.38F - e.getBlue()) * factor * 0.5F + e.getBlue()));
+    }
+
+    private static LocalPlayer player() {
+        return Minecraft.getInstance().player;
     }
 }

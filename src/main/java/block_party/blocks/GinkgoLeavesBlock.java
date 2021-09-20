@@ -19,8 +19,8 @@ public class GinkgoLeavesBlock extends LeavesBlock {
     }
 
     @Override
-    public void animateTick(BlockState state, Level world, BlockPos pos, Random random) {
-        super.animateTick(state, world, pos, random);
-        SakuraParticle.add(this.particle, world, pos, random);
+    public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
+        super.animateTick(state, level, pos, random);
+        SakuraParticle.add(this.particle, level, pos, random);
     }
 }

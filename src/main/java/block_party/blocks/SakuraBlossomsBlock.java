@@ -25,16 +25,16 @@ public class SakuraBlossomsBlock extends LeavesBlock {
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos neighbor, boolean isMoving) {
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos neighbor, boolean isMoving) {
         if (state.getValue(PERSISTENT)) { return; }
-        this.bloomOrClose(state, pos, world);
+        this.bloomOrClose(state, pos, level);
     }
 
-    private void bloomOrClose(BlockState state, BlockPos pos, Level world) {
-        if (world.getMoonBrightness() == 1.0F) {
-            world.setBlockAndUpdate(pos, state.setValue(BLOOMING, true));
+    private void bloomOrClose(BlockState state, BlockPos pos, Level level) {
+        if (level.getMoonBrightness() == 1.0F) {
+            level.setBlockAndUpdate(pos, state.setValue(BLOOMING, true));
         } else if (state.getValue(BLOOMING)) {
-            world.setBlockAndUpdate(pos, state.setValue(BLOOMING, false));
+            level.setBlockAndUpdate(pos, state.setValue(BLOOMING, false));
         }
     }
 
@@ -44,19 +44,19 @@ public class SakuraBlossomsBlock extends LeavesBlock {
     }
 
     @Override
-    public void randomTick(BlockState state, ServerLevel world, BlockPos pos, Random random) {
+    public void randomTick(BlockState state, ServerLevel level, BlockPos pos, Random random) {
         if (super.isRandomlyTicking(state)) {
-            super.randomTick(state, world, pos, random);
+            super.randomTick(state, level, pos, random);
         } else if (!state.getValue(PERSISTENT)) {
-            this.bloomOrClose(state, pos, world);
+            this.bloomOrClose(state, pos, level);
         }
     }
 
     @Override
-    public void animateTick(BlockState state, Level world, BlockPos pos, Random random) {
-        super.animateTick(state, world, pos, random);
+    public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
+        super.animateTick(state, level, pos, random);
         if (state.getValue(BLOOMING)) {
-            SakuraParticle.add(this.particle, world, pos, random);
+            SakuraParticle.add(this.particle, level, pos, random);
         }
     }
 

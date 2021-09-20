@@ -1,65 +1,66 @@
 package block_party;
 
-import block_party.init.*;
-import block_party.mob.BlockPartyNPC;
+import block_party.client.BlockPartyRenderers;
+import block_party.convo.ConvoEngine;
+import block_party.npc.Quirks;
+import block_party.custom.*;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Calendar;
 
 @Mod(BlockParty.ID)
 public class BlockParty {
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITIES, BlockParty.ID);
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, BlockParty.ID);
+    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, BlockParty.ID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, BlockParty.ID);
+    public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, BlockParty.ID);
+    public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, BlockParty.ID);
+    public static final SimpleChannel MESSENGER = CustomMessenger.create();
+
     public static final String VERSION = "21.8.25";
     public static final String ID = "block_party";
-    public static final SimpleChannel CHANNEL = BlockPartyMessages.init(new ResourceLocation(BlockParty.ID));
-    public static final CreativeModeTab ITEMS = new CreativeModeTab(BlockParty.ID) {
+
+    public static final CreativeModeTab CreativeModeTab = new CreativeModeTab(BlockParty.ID) {
         @Override
         public ItemStack makeIcon() {
-            return new ItemStack(BlockPartyItems.CUPCAKE.get());
+            return new ItemStack(CustomItems.CUPCAKE.get());
         }
 
         @Override
         public void fillItemList(NonNullList<ItemStack> items) {
             super.fillItemList(items);
-            items.sort(BlockPartyItems::compare);
+            items.sort(CustomItems::compare);
         }
     };
 
     public BlockParty() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-        bus.addListener(BlockPartyParticles::registerParticleFactories);
-        bus.addListener(this::onClientSetup);
-        bus.addListener(this::onCommonSetup);
-        BlockPartyBlocks.REGISTRY.register(bus);
-        BlockPartyEntities.REGISTRY.register(bus);
-        BlockPartyItems.REGISTRY.register(bus);
-        BlockPartyParticles.REGISTRY.register(bus);
-        BlockPartySounds.REGISTRY.register(bus);
-        BlockPartyBlockEntities.REGISTRY.register(bus);
-    }
-
-    private void onClientSetup(final FMLClientSetupEvent e) {
-        BlockPartyBlocks.registerRenderTypes();
-        BlockPartyItems.registerModelProperties();
-        BlockPartyMessages.registerClient();
-        BlockPartyNPC.Overrides.registerSpecialRenderers();
-    }
-
-    private void onCommonSetup(final FMLCommonSetupEvent e) {
-        BlockPartyBlocks.registerPottedPlants();
-        BlockPartyConvos.registerConvos();
-        BlockPartyMessages.registerServer();
-        BlockPartyNPC.Overrides.registerAliases();
-        BlockPartyNPC.Overrides.registerPropertyOverrides();
-        BlockPartyNPC.Overrides.registerStepSounds();
+        CustomMessenger.register(bus);
+        CustomBlockEntities.add(BLOCK_ENTITIES, bus);
+        CustomBlocks.add(BLOCKS, bus);
+        CustomEntities.add(ENTITIES, bus);
+        CustomItems.add(ITEMS, bus);
+        CustomParticles.add(PARTICLES, bus);
+        CustomSounds.add(SOUNDS, bus);
+        BlockPartyRenderers.register(bus);
+        Quirks.register(bus);
+        ConvoEngine.registerConvos();
     }
 
     public static ResourceLocation source(String value) {

@@ -1,6 +1,6 @@
 package block_party.db.sql;
 
-import block_party.BlockPartyDB;
+import block_party.db.BlockPartyDB;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.server.level.ServerLevel;
@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Table<R extends Record> {
+public abstract class Table<R extends Row> {
     private final List<Column> columns = new ArrayList<>();
     private final String name;
     private ServerLevel level;
@@ -28,8 +28,8 @@ public abstract class Table<R extends Record> {
         }
     }
 
-    public void setWorld(ServerLevel world) {
-        this.level = world;
+    public void setWorld(ServerLevel level) {
+        this.level = level;
     }
 
     public List<Column> getColumns() {
@@ -101,8 +101,8 @@ public abstract class Table<R extends Record> {
         }
     }
 
-    public void create(ServerLevel world) {
-        this.setWorld(world);
+    public void create(ServerLevel level) {
+        this.setWorld(level);
         this.create();
     }
 

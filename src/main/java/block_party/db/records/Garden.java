@@ -1,8 +1,8 @@
 package block_party.db.records;
 
-import block_party.BlockPartyDB;
+import block_party.db.BlockPartyDB;
 import block_party.blocks.entity.GardenLanternBlockEntity;
-import block_party.db.sql.Record;
+import block_party.db.sql.Row;
 import block_party.db.sql.Table;
 import net.minecraft.nbt.CompoundTag;
 
@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class Garden extends Record<GardenLanternBlockEntity> {
+public class Garden extends Row<GardenLanternBlockEntity> {
     public Garden(ResultSet set) throws SQLException {
         super(BlockPartyDB.Gardens, set);
     }

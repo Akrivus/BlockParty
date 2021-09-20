@@ -1,0 +1,470 @@
+{
+  "ambient.japan": {
+    "subtitle": "subtitle.ambient.japan",
+    "sounds": [
+      "block_party:ambient/japan"
+    ]
+  },
+  "block.shoji_screen.close": {
+    "subtitle": "subtitle.shoji_screen",
+    "sounds": [
+      "block_party:block/shoji_screen/close1",
+      "block_party:block/shoji_screen/close2",
+      "block_party:block/shoji_screen/close3"
+    ]
+  },
+  "block.shoji_screen.open": {
+    "subtitle": "subtitle.shoji_screen",
+    "sounds": [
+      "block_party:block/shoji_screen/open1",
+      "block_party:block/shoji_screen/open2",
+      "block_party:block/shoji_screen/open3"
+    ]
+  },
+  "npc.bell.step": {
+    "subtitle": "subtitle.npc.bell.step",
+    "sounds": [
+      "block_party:npc/bell/step1",
+      "block_party:npc/bell/step2",
+      "block_party:npc/bell/step3"
+    ]
+  },
+  "npc.angry": {
+    "subtitle": "subtitle.npc.angry",
+    "sounds": [
+      "block_party:npc/angry1",
+      "block_party:npc/angry2",
+      "block_party:npc/angry3",
+      "block_party:npc/angry4",
+      "block_party:npc/angry5",
+      "block_party:npc/angry6",
+      "block_party:npc/angry7",
+      "block_party:npc/angry8",
+      "block_party:npc/angry9",
+      "block_party:npc/angry10",
+      "block_party:npc/angry11",
+      "block_party:npc/angry12",
+      "block_party:npc/angry13",
+      "block_party:npc/angry14",
+      "block_party:npc/angry15"
+    ]
+  },
+  "npc.attack": {
+    "subtitle": "subtitle.npc.attack",
+    "sounds": [
+      "block_party:npc/attack1",
+      "block_party:npc/attack2",
+      "block_party:npc/attack3",
+      "block_party:npc/attack4",
+      "block_party:npc/attack5",
+      "block_party:npc/attack6",
+      "block_party:npc/attack7",
+      "block_party:npc/attack8",
+      "block_party:npc/attack9",
+      "block_party:npc/attack10",
+      "block_party:npc/attack11",
+      "block_party:npc/attack12",
+      "block_party:npc/attack13",
+      "block_party:npc/attack14",
+      "block_party:npc/attack15",
+      "block_party:npc/attack16",
+      "block_party:npc/attack17",
+      "block_party:npc/attack18",
+      "block_party:npc/attack19",
+      "block_party:npc/attack20",
+      "block_party:npc/attack21",
+      "block_party:npc/attack22",
+      "block_party:npc/attack23",
+      "block_party:npc/attack24",
+      "block_party:npc/attack25",
+      "block_party:npc/attack26"
+    ]
+  },
+  "npc.confused": {
+    "subtitle": "subtitle.npc.confused",
+    "sounds": [
+      "block_party:npc/confused1",
+      "block_party:npc/confused2",
+      "block_party:npc/confused3",
+      "block_party:npc/confused4",
+      "block_party:npc/confused5",
+      "block_party:npc/confused6",
+      "block_party:npc/confused7",
+      "block_party:npc/confused8",
+      "block_party:npc/confused9",
+      "block_party:npc/confused10",
+      "block_party:npc/confused11",
+      "block_party:npc/confused12"
+    ]
+  },
+  "npc.crying": {
+    "subtitle": "subtitle.npc.crying",
+    "sounds": [
+      "block_party:npc/crying1",
+      "block_party:npc/crying2",
+      "block_party:npc/crying3",
+      "block_party:npc/crying4",
+      "block_party:npc/crying5",
+      "block_party:npc/crying6",
+      "block_party:npc/crying7",
+      "block_party:npc/crying8",
+      "block_party:npc/crying9"
+    ]
+  },
+  "npc.dead": {
+    "subtitle": "subtitle.npc.dead",
+    "sounds": [
+      "block_party:npc/dead1",
+      "block_party:npc/dead2",
+      "block_party:npc/dead3",
+      "block_party:npc/dead4",
+      "block_party:npc/dead5",
+      "block_party:npc/dead6",
+      "block_party:npc/dead7",
+      "block_party:npc/dead8",
+      "block_party:npc/dead9"
+    ]
+  },
+  "npc.eat": {
+    "subtitle": "subtitle.npc.eat",
+    "sounds": [
+      "block_party:npc/eat1",
+      "block_party:npc/eat2",
+      "block_party:npc/eat3",
+      "block_party:npc/eat4",
+      "block_party:npc/eat5",
+      "block_party:npc/eat6",
+      "block_party:npc/eat7",
+      "block_party:npc/eat8",
+      "block_party:npc/eat9",
+      "block_party:npc/eat10",
+      "block_party:npc/eat11"
+    ]
+  },
+  "npc.equip": {
+    "subtitle": "subtitle.npc.equip",
+    "sounds": [
+      "block_party:npc/equip1",
+      "block_party:npc/equip2",
+      "block_party:npc/equip3",
+      "block_party:npc/equip4",
+      "block_party:npc/equip5",
+      "block_party:npc/equip6",
+      "block_party:npc/equip7"
+    ]
+  },
+  "npc.feed": {
+    "subtitle": "subtitle.npc.feed",
+    "sounds": [
+      "block_party:npc/feed1",
+      "block_party:npc/feed2",
+      "block_party:npc/feed3",
+      "block_party:npc/feed4"
+    ]
+  },
+  "npc.follow": {
+    "subtitle": "subtitle.npc.follow",
+    "sounds": [
+      "block_party:npc/follow1",
+      "block_party:npc/follow2",
+      "block_party:npc/follow3",
+      "block_party:npc/follow4",
+      "block_party:npc/follow5",
+      "block_party:npc/follow6"
+    ]
+  },
+  "npc.gift": {
+    "subtitle": "subtitle.npc.gift",
+    "sounds": [
+      "block_party:npc/gift1",
+      "block_party:npc/gift2",
+      "block_party:npc/gift3",
+      "block_party:npc/gift4",
+      "block_party:npc/gift5"
+    ]
+  },
+  "npc.giggle": {
+    "subtitle": "subtitle.npc.giggle",
+    "sounds": [
+      "block_party:npc/giggle1",
+      "block_party:npc/giggle2",
+      "block_party:npc/giggle3",
+      "block_party:npc/giggle4"
+    ]
+  },
+  "npc.grief": {
+    "subtitle": "subtitle.npc.grief",
+    "sounds": [
+      "block_party:npc/grief1",
+      "block_party:npc/grief2",
+      "block_party:npc/grief3",
+      "block_party:npc/grief4",
+      "block_party:npc/grief5",
+      "block_party:npc/grief6",
+      "block_party:npc/grief7",
+      "block_party:npc/grief8"
+    ]
+  },
+  "npc.happy": {
+    "subtitle": "subtitle.npc.happy",
+    "sounds": [
+      "block_party:npc/happy1",
+      "block_party:npc/happy2",
+      "block_party:npc/happy3",
+      "block_party:npc/happy4",
+      "block_party:npc/happy5",
+      "block_party:npc/happy6",
+      "block_party:npc/happy7",
+      "block_party:npc/happy8"
+    ]
+  },
+  "npc.hello": {
+    "subtitle": "subtitle.npc.hello",
+    "sounds": [
+      "block_party:npc/hello1",
+      "block_party:npc/hello2",
+      "block_party:npc/hello3",
+      "block_party:npc/hello4",
+      "block_party:npc/hello5",
+      "block_party:npc/hello6",
+      "block_party:npc/hello7",
+      "block_party:npc/hello8",
+      "block_party:npc/hello9",
+      "block_party:npc/hello10"
+    ]
+  },
+  "npc.hurt": {
+    "subtitle": "subtitle.npc.hurt",
+    "sounds": [
+      "block_party:npc/hurt1",
+      "block_party:npc/hurt2",
+      "block_party:npc/hurt3",
+      "block_party:npc/hurt4",
+      "block_party:npc/hurt5",
+      "block_party:npc/hurt6",
+      "block_party:npc/hurt7",
+      "block_party:npc/hurt8",
+      "block_party:npc/hurt9",
+      "block_party:npc/hurt10",
+      "block_party:npc/hurt11",
+      "block_party:npc/hurt12",
+      "block_party:npc/hurt13"
+    ]
+  },
+  "npc.laugh": {
+    "subtitle": "subtitle.npc.laugh",
+    "sounds": [
+      "block_party:npc/laugh1",
+      "block_party:npc/laugh2",
+      "block_party:npc/laugh3",
+      "block_party:npc/laugh4",
+      "block_party:npc/laugh5",
+      "block_party:npc/laugh6",
+      "block_party:npc/laugh7",
+      "block_party:npc/laugh8",
+      "block_party:npc/laugh9"
+    ]
+  },
+  "npc.meow": {
+    "subtitle": "subtitle.npc.meow",
+    "sounds": [
+      "block_party:npc/meow1",
+      "block_party:npc/meow2",
+      "block_party:npc/meow3",
+      "block_party:npc/meow4",
+      "block_party:npc/meow5",
+      "block_party:npc/meow6",
+      "block_party:npc/meow7",
+      "block_party:npc/meow8"
+    ]
+  },
+  "npc.neutral": {
+    "subtitle": "subtitle.npc.neutral",
+    "sounds": [
+      "block_party:npc/neutral1",
+      "block_party:npc/neutral2",
+      "block_party:npc/neutral3",
+      "block_party:npc/neutral4",
+      "block_party:npc/neutral5",
+      "block_party:npc/neutral6",
+      "block_party:npc/neutral7",
+      "block_party:npc/neutral8",
+      "block_party:npc/neutral9"
+    ]
+  },
+  "npc.no": {
+    "subtitle": "subtitle.npc.no",
+    "sounds": [
+      "block_party:npc/no1",
+      "block_party:npc/no2",
+      "block_party:npc/no3",
+      "block_party:npc/no4",
+      "block_party:npc/no5",
+      "block_party:npc/no6",
+      "block_party:npc/no7",
+      "block_party:npc/no8"
+    ]
+  },
+  "npc.psychotic": {
+    "subtitle": "subtitle.npc.psychotic",
+    "sounds": [
+      "block_party:npc/psychotic1",
+      "block_party:npc/psychotic2"
+    ]
+  },
+  "npc.say": {
+    "sounds": [
+      "block_party:npc/say1",
+      "block_party:npc/say2",
+      "block_party:npc/say3",
+      "block_party:npc/say4",
+      "block_party:npc/say5",
+      "block_party:npc/say6",
+      "block_party:npc/say7",
+      "block_party:npc/say8"
+    ]
+  },
+  "npc.senpai": {
+    "subtitle": "subtitle.npc.senpai",
+    "sounds": [
+      "block_party:npc/senpai1",
+      "block_party:npc/senpai2",
+      "block_party:npc/senpai3",
+      "block_party:npc/senpai4",
+      "block_party:npc/senpai5",
+      "block_party:npc/senpai6",
+      "block_party:npc/senpai7",
+      "block_party:npc/senpai8"
+    ]
+  },
+  "npc.sleeping": {
+    "subtitle": "subtitle.npc.sleeping",
+    "sounds": [
+      "block_party:npc/sleeping1",
+      "block_party:npc/sleeping2",
+      "block_party:npc/sleeping3",
+      "block_party:npc/sleeping4",
+      "block_party:npc/sleeping5",
+      "block_party:npc/sleeping6"
+    ]
+  },
+  "npc.smitten": {
+    "subtitle": "subtitle.npc.smitten",
+    "sounds": [
+      "block_party:npc/smitten1",
+      "block_party:npc/smitten2",
+      "block_party:npc/smitten3",
+      "block_party:npc/smitten4",
+      "block_party:npc/smitten5"
+    ]
+  },
+  "npc.sneeze": {
+    "subtitle": "subtitle.npc.sneeze",
+    "sounds": [
+      "block_party:npc/sneeze1",
+      "block_party:npc/sneeze2",
+      "block_party:npc/sneeze3",
+      "block_party:npc/sneeze4",
+      "block_party:npc/sneeze5",
+      "block_party:npc/sneeze6",
+      "block_party:npc/sneeze7",
+      "block_party:npc/sneeze8"
+    ]
+  },
+  "npc.snicker": {
+    "subtitle": "subtitle.npc.snicker",
+    "sounds": [
+      "block_party:npc/snicker1",
+      "block_party:npc/snicker2",
+      "block_party:npc/snicker3",
+      "block_party:npc/snicker4",
+      "block_party:npc/snicker5",
+      "block_party:npc/snicker6",
+      "block_party:npc/snicker7"
+    ]
+  },
+  "npc.snooty": {
+    "subtitle": "subtitle.npc.snooty",
+    "sounds": [
+      "block_party:npc/snooty1",
+      "block_party:npc/snooty2",
+      "block_party:npc/snooty3",
+      "block_party:npc/snooty4",
+      "block_party:npc/snooty5",
+      "block_party:npc/snooty6",
+      "block_party:npc/snooty7"
+    ]
+  },
+  "npc.yawn": {
+    "subtitle": "subtitle.npc.yawn",
+    "sounds": [
+      "block_party:npc/yawn1",
+      "block_party:npc/yawn2",
+      "block_party:npc/yawn3",
+      "block_party:npc/yawn4",
+      "block_party:npc/yawn5"
+    ]
+  },
+  "npc.yes": {
+    "subtitle": "subtitle.npc.yes",
+    "sounds": [
+      "block_party:npc/yes1",
+      "block_party:npc/yes2",
+      "block_party:npc/yes3",
+      "block_party:npc/yes4",
+      "block_party:npc/yes5",
+      "block_party:npc/yes6",
+      "block_party:npc/yes7",
+      "block_party:npc/yes8",
+      "block_party:npc/yes9",
+      "block_party:npc/yes10",
+      "block_party:npc/yes11"
+    ]
+  },
+  "item.cell_phone.button": {
+    "subtitle": "subtitle.cell_phone.button",
+    "sounds": [
+      "block_party:item/cell_phone/button1",
+      "block_party:item/cell_phone/button2",
+      "block_party:item/cell_phone/button3"
+    ]
+  },
+  "item.cell_phone.dial": {
+    "subtitle": "subtitle.cell_phone.dial",
+    "sounds": [
+      "block_party:item/cell_phone/dial"
+    ]
+  },
+  "item.cell_phone.ring": {
+    "subtitle": "subtitle.cell_phone.ring",
+    "sounds": [
+      "block_party:item/cell_phone/ring"
+    ]
+  },
+  "item.yearbook.remove_page": {
+    "subtitle": "subtitle.yearbook.remove_page",
+    "sounds": [
+      "block_party:item/yearbook/remove_page"
+    ]
+  },
+  "music_disc.anteater_sanctuary": {
+    "sounds": [
+      {
+        "name": "block_party:records/anteater_sanctuary_1",
+        "stream": true
+      },
+      {
+        "name": "block_party:records/anteater_sanctuary_2",
+        "stream": true
+      }
+    ]
+  },
+  "music_disc.sakura_sakura": {
+    "sounds": [
+      {
+        "name": "block_party:records/sakura_sakura",
+        "stream": true
+      }
+    ]
+  }
+}

@@ -1,11 +1,11 @@
 package block_party.db.records;
 
-import block_party.BlockPartyDB;
-import block_party.blocks.entity.ToriiTabletBlockEntity;
-import block_party.db.sql.Record;
+import block_party.db.BlockPartyDB;
+import block_party.blocks.entity.ShrineTabletBlockEntity;
+import block_party.db.sql.Row;
 import block_party.db.sql.Table;
-import block_party.util.DimBlockPos;
-import block_party.util.sort.RowDistance;
+import block_party.db.DimBlockPos;
+import block_party.utils.sorters.RowDistance;
 import net.minecraft.nbt.CompoundTag;
 
 import java.sql.ResultSet;
@@ -13,7 +13,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
-public class Shrine extends Record<ToriiTabletBlockEntity> {
+public class Shrine extends Row<ShrineTabletBlockEntity> {
     public Shrine(ResultSet set) throws SQLException {
         super(BlockPartyDB.Shrines, set);
     }
@@ -22,19 +22,19 @@ public class Shrine extends Record<ToriiTabletBlockEntity> {
         super(BlockPartyDB.Shrines, compound);
     }
 
-    public Shrine(ToriiTabletBlockEntity entity) {
+    public Shrine(ShrineTabletBlockEntity entity) {
         super(BlockPartyDB.Shrines, entity);
     }
 
     @Override
-    public void sync(ToriiTabletBlockEntity entity) {
+    public void sync(ShrineTabletBlockEntity entity) {
         this.get(DATABASE_ID).set(entity.getDatabaseID());
         this.get(POS).set(entity.getDimBlockPos());
         this.get(PLAYER_UUID).set(entity.getPlayerUUID());
     }
 
     @Override
-    public void load(ToriiTabletBlockEntity entity) {
+    public void load(ShrineTabletBlockEntity entity) {
         entity.setDatabaseID((long) this.get(DATABASE_ID).get());
         entity.setPlayerUUID((UUID) this.get(PLAYER_UUID).get());
     }

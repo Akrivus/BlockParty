@@ -1,9 +1,9 @@
 package block_party.convo;
 
+import block_party.custom.CustomMessenger;
 import block_party.convo.enums.Response;
-import block_party.init.BlockPartyMessages;
-import block_party.message.SCloseDialogue;
-import block_party.mob.BlockPartyNPC;
+import block_party.messages.SCloseDialogue;
+import block_party.npc.BlockPartyNPC;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.HashMap;
@@ -41,7 +41,7 @@ public class Scene {
             this.npc.openChestFor(this.player);
             return this.next(Response.CLOSE);
         case CLOSE:
-            BlockPartyMessages.send(this.player, new SCloseDialogue());
+            CustomMessenger.send(this.player, new SCloseDialogue());
         default:
             Transition transition = this.transitions.get(response);
             if (transition == null) { return null; }

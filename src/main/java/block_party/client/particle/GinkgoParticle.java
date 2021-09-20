@@ -8,8 +8,8 @@ import net.minecraft.core.particles.SimpleParticleType;
 
 public class GinkgoParticle extends SakuraParticle {
 
-    public GinkgoParticle(SpriteSet sprite, ClientLevel world, double x, double y, double z, double mX, double mY, double mZ) {
-        super(sprite, world, x, y, z, mX, mY, mZ);
+    public GinkgoParticle(SpriteSet sprite, ClientLevel level, double x, double y, double z, double mX, double mY, double mZ) {
+        super(sprite, level, x, y, z, mX, mY, mZ);
     }
 
     public static class Factory implements ParticleProvider<SimpleParticleType> {
@@ -20,8 +20,8 @@ public class GinkgoParticle extends SakuraParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType type, ClientLevel world, double x, double y, double z, double mX, double mY, double mZ) {
-            return new GinkgoParticle(this.sprite, world, x, y, z, mX, mY, mZ);
+        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double mX, double mY, double mZ) {
+            return new GinkgoParticle(this.sprite, level, x, y, z, mX, mY, mZ);
         }
     }
 }

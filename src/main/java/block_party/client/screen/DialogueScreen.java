@@ -3,15 +3,15 @@ package block_party.client.screen;
 import block_party.BlockParty;
 import block_party.convo.Dialogue;
 import block_party.convo.enums.Response;
-import block_party.init.BlockPartyMessages;
-import block_party.init.BlockPartySounds;
-import block_party.message.CDialogueClose;
-import block_party.message.CDialogueRespond;
+import block_party.custom.CustomMessenger;
+import block_party.custom.CustomSounds;
+import block_party.messages.CDialogueClose;
+import block_party.messages.CDialogueRespond;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -44,7 +44,7 @@ public class DialogueScreen extends AbstractScreen {
         super.render(stack, mouseX, mouseY, partialTicks);
         if (this.cursor < this.line.length()) {
             this.cursor = this.minecraft.player.tickCount - this.start;
-            this.playSound(BlockPartySounds.ENTITY_MOE_SAY.get());
+            this.playSound(CustomSounds.NPC_SAY.get());
         }
         this.renderTooltips(stack, mouseX, mouseY);
     }
@@ -58,8 +58,9 @@ public class DialogueScreen extends AbstractScreen {
     }
 
     public void renderDialogue(PoseStack stack) {
-        RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindForSetup(DIALOGUE_TEXTURES);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, DIALOGUE_TEXTURES);
         this.blit(stack, this.getLeft(), this.getBottom(48), this.zero, this.zero, this.sizeX, this.sizeY);
         this.font.drawShadow(stack, this.lines[0].trim(), this.getLeft(5), this.getBottom(43), this.white);
         this.font.drawShadow(stack, this.lines[1].trim(), this.getLeft(5), this.getBottom(34), this.white);
@@ -98,7 +99,7 @@ public class DialogueScreen extends AbstractScreen {
             this.cursor = this.line.length();
             return true;
         case GLFW.GLFW_KEY_ESCAPE:
-            BlockPartyMessages.send(new CDialogueClose(this.dialogue.getSpeaker().getID()));
+            CustomMessenger.send(new CDialogueClose(this.dialogue.getSpeaker().getID()));
         default:
             return super.keyPressed(keyCode, scanCode, modifiers);
         }
@@ -137,14 +138,15 @@ public class DialogueScreen extends AbstractScreen {
         private final Response response;
 
         public RespondButton(DialogueScreen parent, Dialogue dialogue, Response response, int index) {
-            super(parent.getLeft(index * 15 + 5), parent.getBottom(14), 10, 10, NarratorChatListener.NO_TITLE, (button) -> BlockPartyMessages.send(new CDialogueRespond(dialogue.getSpeaker().getID(), response)), (button, stack, x, y) -> parent.renderTooltip(stack, new TranslatableComponent(response.getKey()), x, y));
+            super(parent.getLeft(index * 15 + 5), parent.getBottom(14), 10, 10, NarratorChatListener.NO_TITLE, (button) -> CustomMessenger.send(new CDialogueRespond(dialogue.getSpeaker().getID(), response)), (button, stack, x, y) -> parent.renderTooltip(stack, new TranslatableComponent(response.getKey()), x, y));
             this.response = response;
         }
 
         @Override
         public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-            Minecraft.getInstance().getTextureManager().bindForSetup(DIALOGUE_TEXTURES);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.setShaderTexture(0, DIALOGUE_TEXTURES);
             this.blit(stack, this.x, this.y, this.response.ordinal() * 10, this.isHovered() ? 58 : 48, 10, 10);
         }
     }

@@ -1,8 +1,8 @@
 package block_party.blocks.entity;
 
-import block_party.BlockPartyDB;
+import block_party.db.BlockPartyDB;
 import block_party.db.records.Location;
-import block_party.mob.automata.Condition;
+import block_party.npc.automata.Condition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;

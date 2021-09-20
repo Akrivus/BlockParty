@@ -1,10 +1,10 @@
 package block_party.items;
 
 import block_party.BlockParty;
-import block_party.BlockPartyDB;
-import block_party.init.BlockPartyMessages;
-import block_party.message.SOpenCellPhone;
-import block_party.util.sort.ISortableItem;
+import block_party.db.BlockPartyDB;
+import block_party.custom.CustomMessenger;
+import block_party.messages.SOpenCellPhone;
+import block_party.utils.sorters.ISortableItem;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -16,14 +16,14 @@ import java.util.List;
 
 public class CellPhoneItem extends Item implements ISortableItem {
     public CellPhoneItem() {
-        super(new Properties().tab(BlockParty.ITEMS));
+        super(new Properties().tab(BlockParty.CreativeModeTab));
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
-        if (world.isClientSide()) { return InteractionResultHolder.pass(player.getItemInHand(hand)); }
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        if (level.isClientSide()) { return InteractionResultHolder.pass(player.getItemInHand(hand)); }
         List<Long> npcs = BlockPartyDB.get(player.level).getFrom(player);
-        BlockPartyMessages.send(player, new SOpenCellPhone(npcs, hand));
+        CustomMessenger.send(player, new SOpenCellPhone(npcs, hand));
         return InteractionResultHolder.success(player.getItemInHand(hand));
     }
 

@@ -1,6 +1,6 @@
 package block_party.blocks;
 
-import block_party.init.BlockPartySounds;
+import block_party.custom.CustomSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -41,9 +41,9 @@ public class ShojiScreenBlock extends DoorBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        world.setBlock(pos, state = state.cycle(OPEN), 10);
-        world.playSound(player, pos, (state.getValue(OPEN) ? BlockPartySounds.BLOCK_SHOJI_SCREEN_OPEN : BlockPartySounds.BLOCK_SHOJI_SCREEN_CLOSE).get(), SoundSource.BLOCKS, 1.0F, 1.0F);
-        return InteractionResult.sidedSuccess(world.isClientSide);
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        level.setBlock(pos, state = state.cycle(OPEN), 10);
+        level.playSound(player, pos, (state.getValue(OPEN) ? CustomSounds.BLOCK_SHOJI_SCREEN_OPEN : CustomSounds.BLOCK_SHOJI_SCREEN_CLOSE).get(), SoundSource.BLOCKS, 1.0F, 1.0F);
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 }

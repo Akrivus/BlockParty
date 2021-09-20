@@ -2,7 +2,7 @@ package block_party.client.render.layer;
 
 import block_party.BlockParty;
 import block_party.client.model.DollModel;
-import block_party.mob.BlockPartyNPC;
+import block_party.npc.BlockPartyNPC;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -32,6 +32,6 @@ public class MoeSleepingLayer extends RenderLayer<BlockPartyNPC, DollModel<Block
     }
 
     public ResourceLocation getSleepingTexture() {
-        return BlockParty.source(String.format("textures/entity/npc/sleeping.png"));
+        return BlockParty.source(String.format("textures/npc/sleeping.png"));
     }
 }

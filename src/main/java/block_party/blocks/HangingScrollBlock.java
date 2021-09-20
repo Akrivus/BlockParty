@@ -1,7 +1,7 @@
 package block_party.blocks;
 
 import block_party.blocks.entity.HangingScrollBlockEntity;
-import block_party.mob.automata.Condition;
+import block_party.npc.automata.Condition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -33,10 +33,10 @@ public class HangingScrollBlock extends AbstractDataBlock<HangingScrollBlockEnti
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos neighbor, boolean isMoving) {
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos neighbor, boolean isMoving) {
         BlockPos behind = pos.relative(state.getValue(FACING));
-        if (world.isEmptyBlock(behind)) {
-            world.destroyBlock(pos, true);
+        if (level.isEmptyBlock(behind)) {
+            level.destroyBlock(pos, true);
         }
     }
 

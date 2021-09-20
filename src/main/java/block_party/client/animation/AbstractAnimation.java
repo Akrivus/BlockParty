@@ -1,7 +1,7 @@
 package block_party.client.animation;
 
 import block_party.client.model.IRiggableModel;
-import block_party.mob.BlockPartyNPC;
+import block_party.npc.BlockPartyNPC;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public abstract class AbstractAnimation {

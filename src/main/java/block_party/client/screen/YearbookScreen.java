@@ -1,19 +1,19 @@
 package block_party.client.screen;
 
 import block_party.BlockParty;
+import block_party.custom.CustomMessenger;
 import block_party.client.animation.Animation;
-import block_party.init.BlockPartyMessages;
-import block_party.init.BlockPartySounds;
-import block_party.message.CRemovePage;
-import block_party.mob.BlockPartyNPC;
-import block_party.util.Trans;
+import block_party.custom.CustomSounds;
+import block_party.messages.CRemovePage;
+import block_party.npc.BlockPartyNPC;
+import block_party.utils.Trans;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -127,14 +127,16 @@ public class YearbookScreen extends ControllerScreen {
     }
 
     public void renderPortrait(PoseStack stack) {
-        RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindForSetup(YEARBOOK_TEXTURES);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
         this.blit(stack, this.getCenter(60) + 3, 27, 161, 25, 58, 58);
     }
 
     public void renderOverlay(PoseStack stack) {
-        RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindForSetup(YEARBOOK_TEXTURES);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
         if (this.npc.isDead()) { this.blit(stack, this.getCenter(60) + 2, 26, 160, 155, 60, 60); }
         if (this.npc.isEstrangedFrom(this.getPlayer())) {
             this.blit(stack, this.getCenter(60) + 2, 26, 160, 95, 60, 60);
@@ -164,8 +166,9 @@ public class YearbookScreen extends ControllerScreen {
     }
 
     public void renderBook(PoseStack stack) {
-        RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindForSetup(YEARBOOK_TEXTURES);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
         this.blit(stack, this.getCenter(146), 2, 0, 0, 146, 187);
     }
 
@@ -196,7 +199,7 @@ public class YearbookScreen extends ControllerScreen {
             if (this.index - 1 >= 0) { this.getNPC(this.index - 1); }
         }));
         this.buttonRemovePage = this.addWidget(new RemovePageButton(this.getCenter(146) + 115, 9, (button) -> {
-            BlockPartyMessages.send(new CRemovePage(this.npc.getID()));
+            CustomMessenger.send(new CRemovePage(this.npc.getID()));
             this.npcs.remove(this.npc.getID());
             if (++this.index >= this.count) { --this.index; }
             if (this.index < 0) { this.index = 0; }
@@ -229,8 +232,9 @@ public class YearbookScreen extends ControllerScreen {
 
         @Override
         public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-            Minecraft.getInstance().getTextureManager().bindForSetup(YEARBOOK_TEXTURES);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
             int x = this.delta > 0 ? 226 : 147;
             int y = this.isHovered() ? 35 : 63;
             this.blit(stack, this.x, this.y, x, y, 7, 10);
@@ -245,13 +249,14 @@ public class YearbookScreen extends ControllerScreen {
 
         @Override
         public void playDownSound(SoundManager sound) {
-            sound.play(SimpleSoundInstance.forUI(BlockPartySounds.ITEM_YEARBOOK_REMOVE_PAGE.get(), 1.0F));
+            sound.play(SimpleSoundInstance.forUI(CustomSounds.ITEM_YEARBOOK_REMOVE_PAGE.get(), 1.0F));
         }
 
         @Override
         public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-            Minecraft.getInstance().getTextureManager().bindForSetup(YEARBOOK_TEXTURES);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
             int x = this.isHovered() ? 164 : 146;
             this.blit(stack, this.x, this.y, x, 7, 18, 18);
         }

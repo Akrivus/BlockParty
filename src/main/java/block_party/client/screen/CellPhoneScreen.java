@@ -2,14 +2,15 @@ package block_party.client.screen;
 
 import block_party.BlockParty;
 import block_party.db.records.NPC;
-import block_party.init.BlockPartyMessages;
-import block_party.init.BlockPartySounds;
-import block_party.message.CNPCTeleport;
+import block_party.custom.CustomMessenger;
+import block_party.custom.CustomSounds;
+import block_party.messages.CNPCTeleport;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.CommonComponents;
@@ -71,14 +72,16 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
     }
 
     public void renderPhone(PoseStack stack) {
-        RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindForSetup(CELL_PHONE_TEXTURES);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
         this.blit(stack, this.getCenter(108), 2, 0, 0, 108, 182);
     }
 
     public void renderScrollBar(PoseStack stack) {
-        RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindForSetup(CELL_PHONE_TEXTURES);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
         int y = (int) (Math.min((double) this.start / (this.contacts.size() - this.contacts.size() % 4), 1.0) * 35);
         this.blit(stack, this.getAbsoluteCenter(-37), 40 + y, 108, 82, 7, 15);
     }
@@ -132,25 +135,26 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
     public static class ContactButton extends Button {
         public ContactButton(CellPhoneScreen parent, NPC npc) {
             super(0, 0, 81, 15, new TextComponent(npc.getName()), (button) -> {
-                BlockPartyMessages.send(new CNPCTeleport(npc.getID()));
+                CustomMessenger.send(new CNPCTeleport(npc.getID()));
                 parent.onClose();
             });
         }
 
         @Override
         public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
             int color = this.isHovered() ? 0xffffff : 0xff7fb6;
             Minecraft minecraft = Minecraft.getInstance();
             Font font = minecraft.font;
-            minecraft.getTextureManager().bindForSetup(CELL_PHONE_TEXTURES);
             this.blit(stack, this.x, this.y, 108, this.isHovered() ? 98 : 115, 81, 15);
             font.draw(stack, this.getMessage().getString(), this.x + 10, this.y + 4, color);
         }
 
         @Override
         public void playDownSound(SoundManager sound) {
-            sound.play(SimpleSoundInstance.forUI(BlockPartySounds.ITEM_CELL_PHONE_BUTTON.get(), 1.0F));
+            sound.play(SimpleSoundInstance.forUI(CustomSounds.ITEM_CELL_PHONE_BUTTON.get(), 1.0F));
         }
     }
 
@@ -165,8 +169,9 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
 
         @Override
         public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
-            Minecraft.getInstance().getTextureManager().bindForSetup(CELL_PHONE_TEXTURES);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
             int x = this.isHovered() ? 116 : 108;
             this.blit(stack, this.x, this.y, x, 73, 7, 7);
         }
