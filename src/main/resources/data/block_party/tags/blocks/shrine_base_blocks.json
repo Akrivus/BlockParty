@@ -1,0 +1,32 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:andesite",
+    "minecraft:basalt",
+    "minecraft:blackstone",
+    "minecraft:chiseled_deepslate_bricks",
+    "minecraft:chiseled_stone_bricks",
+    "minecraft:cobbled_deepslate",
+    "minecraft:cobblestone",
+    "minecraft:cracked_deepslate_tiles",
+    "minecraft:cracked_stone_bricks",
+    "minecraft:deepslate",
+    "minecraft:deepslate_bricks",
+    "minecraft:deepslate_tiles",
+    "minecraft:diorite",
+    "minecraft:mossy_cobblestone",
+    "minecraft:mossy_stone_bricks",
+    "minecraft:obsidian",
+    "minecraft:polished_andesite",
+    "minecraft:polished_basalt",
+    "minecraft:polished_deepslate",
+    "minecraft:polished_diorite",
+    "minecraft:polished_granite",
+    "minecraft:granite",
+    "minecraft:smooth_basalt",
+    "minecraft:smooth_stone",
+    "minecraft:stone",
+    "minecraft:stone_bricks",
+    "minecraft:tuff"
+  ]
+}
