@@ -3,7 +3,7 @@ package block_party.messages;
 import block_party.client.screen.DialogueScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 
 public class SCloseDialogue extends AbstractMessage.Server {
     public SCloseDialogue() {

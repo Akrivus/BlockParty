@@ -5,7 +5,7 @@ import block_party.utils.sorters.ISortableItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.fmllegacy.RegistryObject;
+import net.minecraftforge.registries.RegistryObject;
 
 public class MoeBlockItem extends BlockItem implements ISortableItem {
     protected final int sortOrder;

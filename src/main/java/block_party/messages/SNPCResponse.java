@@ -5,7 +5,7 @@ import block_party.db.records.NPC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 
 public class SNPCResponse extends AbstractMessage.Server {
     protected final NPC npc;

@@ -145,10 +145,10 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
-            int color = this.isHovered() ? 0xffffff : 0xff7fb6;
+            int color = this.isHovered ? 0xffffff : 0xff7fb6;
             Minecraft minecraft = Minecraft.getInstance();
             Font font = minecraft.font;
-            this.blit(stack, this.x, this.y, 108, this.isHovered() ? 98 : 115, 81, 15);
+            this.blit(stack, this.x, this.y, 108, this.isHovered ? 98 : 115, 81, 15);
             font.draw(stack, this.getMessage().getString(), this.x + 10, this.y + 4, color);
         }
 
@@ -172,7 +172,7 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
-            int x = this.isHovered() ? 116 : 108;
+            int x = this.isHovered ? 116 : 108;
             this.blit(stack, this.x, this.y, x, 73, 7, 7);
         }
     }

@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
+import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -33,7 +33,7 @@ public class BlockParty {
     public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, BlockParty.ID);
     public static final SimpleChannel MESSENGER = CustomMessenger.create();
 
-    public static final String VERSION = "21.8.25";
+    public static final String VERSION = "21.12.21";
     public static final String ID = "block_party";
 
     public static final CreativeModeTab CreativeModeTab = new CreativeModeTab(BlockParty.ID) {

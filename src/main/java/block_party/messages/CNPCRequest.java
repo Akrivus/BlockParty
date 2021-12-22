@@ -3,7 +3,7 @@ package block_party.messages;
 import block_party.custom.CustomMessenger;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 
 public class CNPCRequest extends CNPCQuery {
     public CNPCRequest(long id) {

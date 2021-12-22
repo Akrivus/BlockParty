@@ -4,7 +4,7 @@ import block_party.custom.CustomItems;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 
 public class CRemovePage extends CNPCRemove {
     public CRemovePage(long id) {

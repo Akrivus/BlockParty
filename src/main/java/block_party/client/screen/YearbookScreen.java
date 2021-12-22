@@ -104,7 +104,7 @@ public class YearbookScreen extends ControllerScreen {
 
     public void renderTooltips(PoseStack stack, int mouseX, int mouseY) {
         List<Component> text = new ArrayList<>();
-        if (this.buttonRemovePage.isHovered()) {
+        if (this.buttonRemovePage.isMouseOver(mouseX, mouseY)) {
             text.add(new TranslatableComponent("gui.block_party.button.remove"));
         }
         if (102 < mouseY && mouseY < 112) {
@@ -236,7 +236,7 @@ public class YearbookScreen extends ControllerScreen {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
             int x = this.delta > 0 ? 226 : 147;
-            int y = this.isHovered() ? 35 : 63;
+            int y = this.isHovered ? 35 : 63;
             this.blit(stack, this.x, this.y, x, y, 7, 10);
         }
     }
@@ -257,7 +257,7 @@ public class YearbookScreen extends ControllerScreen {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
-            int x = this.isHovered() ? 164 : 146;
+            int x = this.isHovered ? 164 : 146;
             this.blit(stack, this.x, this.y, x, 7, 18, 18);
         }
     }

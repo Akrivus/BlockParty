@@ -4,7 +4,7 @@ import block_party.convo.enums.Response;
 import block_party.npc.BlockPartyNPC;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 
 public class CDialogueRespond extends CNPCQuery {
     private final Response response;

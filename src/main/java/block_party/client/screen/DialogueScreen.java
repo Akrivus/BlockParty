@@ -51,9 +51,9 @@ public class DialogueScreen extends AbstractScreen {
 
     public void renderTooltips(PoseStack stack, int mouseX, int mouseY) {
         this.children().forEach((child) -> {
-            if (child instanceof Button) { return; }
+            if (!(child instanceof Button)) { return; }
             Button button = (Button) child;
-            if (button.isHovered()) { button.renderToolTip(stack, mouseX, mouseY); }
+            if (button.isMouseOver(mouseX, mouseY)) { button.renderToolTip(stack, mouseX, mouseY); }
         });
     }
 
@@ -147,7 +147,7 @@ public class DialogueScreen extends AbstractScreen {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, DIALOGUE_TEXTURES);
-            this.blit(stack, this.x, this.y, this.response.ordinal() * 10, this.isHovered() ? 58 : 48, 10, 10);
+            this.blit(stack, this.x, this.y, this.response.ordinal() * 10, this.isHovered ? 58 : 48, 10, 10);
         }
     }
 }
