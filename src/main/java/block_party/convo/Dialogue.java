@@ -2,10 +2,10 @@ package block_party.convo;
 
 import block_party.convo.enums.Response;
 import block_party.db.records.NPC;
+import block_party.utils.NBT;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraftforge.common.util.Constants;
 
 public class Dialogue {
     private final NPC speaker;
@@ -21,7 +21,7 @@ public class Dialogue {
     public Dialogue(CompoundTag compound) {
         this.speaker = NPC.create(compound);
         this.line = compound.getString("Line");
-        ListTag list = compound.getList("Responses", Constants.NBT.TAG_STRING);
+        ListTag list = compound.getList("Responses", NBT.STRING);
         this.responses = new Response[list.size()];
         for (int i = 0; i < list.size(); ++i) {
             this.responses[i] = Response.valueOf(list.getString(i));

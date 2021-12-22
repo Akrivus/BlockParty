@@ -4,6 +4,7 @@ import block_party.client.ShrineLocation;
 import block_party.db.records.*;
 import block_party.messages.SShrineList;
 import block_party.custom.CustomMessenger;
+import block_party.utils.NBT;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.nbt.CompoundTag;
@@ -16,7 +17,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelResource;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -44,11 +44,11 @@ public class BlockPartyDB extends SavedData {
 
     public static BlockPartyDB load(CompoundTag compound) {
         BlockPartyDB data = new BlockPartyDB();
-        compound.getList("Names", Constants.NBT.TAG_STRING).forEach((name) -> data.names.add(name.getAsString()));
-        compound.getList("NPCsByPlayer", Constants.NBT.TAG_COMPOUND).forEach((nbt) -> {
+        compound.getList("Names", NBT.STRING).forEach((name) -> data.names.add(name.getAsString()));
+        compound.getList("NPCsByPlayer", NBT.COMPOUND).forEach((nbt) -> {
             CompoundTag tag = (CompoundTag) nbt;
             List<Long> npcs = new ArrayList<>();
-            tag.getList("NPCs", Constants.NBT.TAG_LONG).forEach((npc) -> npcs.add(((LongTag) npc).getAsLong()));
+            tag.getList("NPCs", NBT.LONG).forEach((npc) -> npcs.add(((LongTag) npc).getAsLong()));
             data.byPlayer.put(UUID.fromString(tag.getString("Player")), npcs);
         });
         return data;

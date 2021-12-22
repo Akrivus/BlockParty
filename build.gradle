@@ -18,7 +18,7 @@ version = new Date().format('yy.MM.dd')
 group = 'block_party'
 archivesBaseName = 'BlockParty'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(16)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
   mappings channel: 'official', version: '1.17.1'
@@ -48,7 +48,7 @@ configurations {
 }
 
 dependencies {
-  minecraft 'net.minecraftforge:forge:1.17.1-37.0.69'
+  minecraft 'net.minecraftforge:forge:1.17.1-37.1.1'
   integrate 'org.xerial:sqlite-jdbc:3.36.0.2'
 }
 

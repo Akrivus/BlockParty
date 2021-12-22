@@ -1,6 +1,7 @@
 package block_party.blocks;
 
 import block_party.blocks.entity.ShrineTabletBlockEntity;
+import block_party.custom.CustomBlocks;
 import block_party.custom.CustomTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -75,7 +76,20 @@ public class ShrineTabletBlock extends AbstractDataBlock<ShrineTabletBlockEntity
     }
 
     private BlockPattern getGatePattern() {
-        return BlockPatternBuilder.start().aisle("#######", "#######", " #   # ", " #   # ", " #   # ", " #   # ").where('#', BlockInWorld.hasState((state) -> state.is(CustomTags.Blocks.SAKURA_WOOD))).where(' ', BlockInWorld.hasState((state) -> !state.canOcclude())).build();
+        return BlockPatternBuilder.start().aisle(
+                "#########",
+                "  # # #  ",
+                " ####### ",
+                "  #~~~#  ",
+                "  #   #  ",
+                "  #   #  ",
+                "  #   #  ",
+                "  X   X  "
+        ).where('#', BlockInWorld.hasState((state) -> state.is(CustomTags.Blocks.SAKURA_WOOD))
+        ).where('X', BlockInWorld.hasState((state) -> state.is(CustomTags.Blocks.SHRINE_BASE_BLOCKS))
+        ).where('~', BlockInWorld.hasState((state) -> !state.canOcclude() || state.is(CustomBlocks.SHIMENAWA.get()))
+        ).where(' ', BlockInWorld.hasState((state) -> !state.canOcclude())
+        ).build();
     }
 
     @Override
