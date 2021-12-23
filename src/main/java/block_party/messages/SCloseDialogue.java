@@ -1,6 +1,6 @@
 package block_party.messages;
 
-import block_party.client.screen.DialogueScreen;
+import block_party.client.screens.DialogueScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;

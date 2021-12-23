@@ -1,6 +1,6 @@
 package block_party.messages;
 
-import block_party.client.screen.ControllerScreen;
+import block_party.client.screens.ControllerScreen;
 import block_party.db.records.NPC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;

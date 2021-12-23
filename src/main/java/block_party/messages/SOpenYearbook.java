@@ -1,7 +1,7 @@
 package block_party.messages;
 
-import block_party.client.screen.ControllerScreen;
-import block_party.client.screen.YearbookScreen;
+import block_party.client.screens.ControllerScreen;
+import block_party.client.screens.YearbookScreen;
 import block_party.custom.CustomItems;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;

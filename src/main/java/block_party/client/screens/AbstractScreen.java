@@ -1,4 +1,4 @@
-package block_party.client.screen;
+package block_party.client.screens;
 
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;

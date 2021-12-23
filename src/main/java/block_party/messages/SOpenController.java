@@ -1,6 +1,6 @@
 package block_party.messages;
 
-import block_party.client.screen.ControllerScreen;
+import block_party.client.screens.ControllerScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;

@@ -1,4 +1,4 @@
-package block_party.client.screen;
+package block_party.client.screens;
 
 import block_party.custom.CustomMessenger;
 import block_party.db.records.NPC;

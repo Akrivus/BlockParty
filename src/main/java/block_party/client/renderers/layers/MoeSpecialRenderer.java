@@ -1,7 +1,7 @@
-package block_party.client.render.layer;
+package block_party.client.renderers.layers;
 
 import block_party.client.model.DollModel;
-import block_party.client.render.layer.special.SpecialBlockOverlay;
+import block_party.client.renderers.layers.special.SpecialBlockOverlay;
 import block_party.npc.BlockPartyNPC;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;

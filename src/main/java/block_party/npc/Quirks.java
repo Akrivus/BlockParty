@@ -2,8 +2,8 @@ package block_party.npc;
 
 import block_party.BlockParty;
 import block_party.custom.CustomTags;
-import block_party.client.render.layer.MoeSpecialRenderer;
-import block_party.client.render.layer.special.BarrelOverlay;
+import block_party.client.renderers.layers.MoeSpecialRenderer;
+import block_party.client.renderers.layers.special.BarrelOverlay;
 import block_party.custom.CustomSounds;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;

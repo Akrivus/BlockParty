@@ -1,4 +1,4 @@
-package block_party.client.render.layer;
+package block_party.client.renderers.layers;
 
 import block_party.BlockParty;
 import block_party.client.model.DollModel;

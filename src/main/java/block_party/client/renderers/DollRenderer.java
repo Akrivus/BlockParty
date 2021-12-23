@@ -1,12 +1,12 @@
-package block_party.client.render;
+package block_party.client.renderers;
 
 import block_party.client.BlockPartyRenderers;
 import block_party.client.animation.Animation;
 import block_party.client.model.DollModel;
-import block_party.client.render.layer.MoeEmotionLayer;
-import block_party.client.render.layer.MoeGlowLayer;
-import block_party.client.render.layer.MoeSleepingLayer;
-import block_party.client.render.layer.MoeSpecialRenderer;
+import block_party.client.renderers.layers.MoeEmotionLayer;
+import block_party.client.renderers.layers.MoeGlowLayer;
+import block_party.client.renderers.layers.MoeSleepingLayer;
+import block_party.client.renderers.layers.MoeSpecialRenderer;
 import block_party.npc.BlockPartyNPC;
 import block_party.npc.Quirks;
 import com.mojang.blaze3d.vertex.PoseStack;
