@@ -104,7 +104,7 @@ public class YearbookScreen extends ControllerScreen {
 
     public void renderTooltips(PoseStack stack, int mouseX, int mouseY) {
         List<Component> text = new ArrayList<>();
-        if (this.buttonRemovePage.isMouseOver(mouseX, mouseY)) {
+        if (this.buttonRemovePage.isHoveredOrFocused()) {
             text.add(new TranslatableComponent("gui.block_party.button.remove"));
         }
         if (102 < mouseY && mouseY < 112) {
@@ -192,14 +192,14 @@ public class YearbookScreen extends ControllerScreen {
 
     @Override
     protected void init() {
-        this.addWidget(new Button(this.getCenter(136), 196, 136, 20, CommonComponents.GUI_DONE, (button) -> this.minecraft.setScreen(null)));
-        this.buttonNextPage = this.addWidget(new TurnPageButton(this.getCenter(146) + 122, 51, 1, (button) -> {
+        this.addRenderableWidget(new Button(this.getCenter(136), 196, 136, 20, CommonComponents.GUI_DONE, (button) -> this.minecraft.setScreen(null)));
+        this.addRenderableWidget(this.buttonNextPage = new TurnPageButton(this.getCenter(146) + 122, 51, 1, (button) -> {
             if (this.index + 1 < this.count) { this.getNPC(this.index + 1); }
         }));
-        this.buttonPreviousPage = this.addWidget(new TurnPageButton(this.getCenter(146) + 21, 51, -1, (button) -> {
+        this.addRenderableWidget(this.buttonPreviousPage = new TurnPageButton(this.getCenter(146) + 21, 51, -1, (button) -> {
             if (this.index - 1 >= 0) { this.getNPC(this.index - 1); }
         }));
-        this.buttonRemovePage = this.addWidget(new RemovePageButton(this.getCenter(146) + 115, 9, (button) -> {
+        this.addRenderableWidget(this.buttonRemovePage = new RemovePageButton(this.getCenter(146) + 115, 9, (button) -> {
             CustomMessenger.send(new CRemovePage(this.npc.getID()));
             this.npcs.remove(this.npc.getID());
             if (++this.index >= this.count) { --this.index; }
@@ -232,12 +232,12 @@ public class YearbookScreen extends ControllerScreen {
         }
 
         @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void renderButton(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
             int x = this.delta > 0 ? 226 : 147;
-            int y = this.isHovered ? 35 : 63;
+            int y = this.isHoveredOrFocused() ? 35 : 63;
             this.blit(stack, this.x, this.y, x, y, 7, 10);
         }
     }
@@ -254,11 +254,11 @@ public class YearbookScreen extends ControllerScreen {
         }
 
         @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void renderButton(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
-            int x = this.isHovered ? 164 : 146;
+            int x = this.isHoveredOrFocused() ? 164 : 146;
             this.blit(stack, this.x, this.y, x, 7, 18, 18);
         }
     }

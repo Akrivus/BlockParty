@@ -53,7 +53,7 @@ public class DialogueScreen extends AbstractScreen {
         this.children().forEach((child) -> {
             if (!(child instanceof Button)) { return; }
             Button button = (Button) child;
-            if (button.isMouseOver(mouseX, mouseY)) { button.renderToolTip(stack, mouseX, mouseY); }
+            if (button.isHoveredOrFocused()) { button.renderToolTip(stack, mouseX, mouseY); }
         });
     }
 
@@ -112,7 +112,9 @@ public class DialogueScreen extends AbstractScreen {
         this.start = this.minecraft.player.tickCount;
         for (Response response : Response.values()) {
             if (this.dialogue.has(response)) {
-                this.responses.add(this.addWidget(new RespondButton(this, this.dialogue, response, this.role++)));
+                RespondButton button = new RespondButton(this, this.dialogue, response, ++this.role);
+                this.addWidget(button);
+                this.responses.add(button);
             }
         }
     }
@@ -143,11 +145,11 @@ public class DialogueScreen extends AbstractScreen {
         }
 
         @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void renderButton(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, DIALOGUE_TEXTURES);
-            this.blit(stack, this.x, this.y, this.response.ordinal() * 10, this.isHovered ? 58 : 48, 10, 10);
+            this.blit(stack, this.x, this.y, this.response.ordinal() * 10, this.isHoveredOrFocused() ? 58 : 48, 10, 10);
         }
     }
 }

@@ -58,7 +58,7 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
                 Button button = this.contacts.get(y);
                 button.x = this.getAbsoluteCenter(45);
                 button.y = 32 + (y % 4) * 17;
-                this.addWidget(button);
+                this.addRenderableWidget(button);
             }
         }
     }
@@ -105,9 +105,9 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
 
     @Override
     protected void init() {
-        this.addWidget(new Button(this.getAbsoluteCenter(54), 190, 108, 20, CommonComponents.GUI_DONE, (button) -> this.onClose()));
-        this.buttonScrollUp = this.addWidget(new ScrollButton(this, this.getAbsoluteCenter(-37), 32, -1));
-        this.buttonScrollDown = this.addWidget(new ScrollButton(this, this.getAbsoluteCenter(-37), 91, 1));
+        this.addRenderableWidget(new Button(this.getAbsoluteCenter(54), 190, 108, 20, CommonComponents.GUI_DONE, (button) -> this.onClose()));
+        this.addRenderableWidget(this.buttonScrollUp = new ScrollButton(this, this.getAbsoluteCenter(-37), 32, -1));
+        this.addRenderableWidget(this.buttonScrollDown = new ScrollButton(this, this.getAbsoluteCenter(-37), 91, 1));
         this.updateButtons();
     }
 
@@ -141,14 +141,14 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
         }
 
         @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void renderButton(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
-            int color = this.isHovered ? 0xffffff : 0xff7fb6;
+            int color = this.isHoveredOrFocused() ? 0xffffff : 0xff7fb6;
             Minecraft minecraft = Minecraft.getInstance();
             Font font = minecraft.font;
-            this.blit(stack, this.x, this.y, 108, this.isHovered ? 98 : 115, 81, 15);
+            this.blit(stack, this.x, this.y, 108, this.isHoveredOrFocused() ? 98 : 115, 81, 15);
             font.draw(stack, this.getMessage().getString(), this.x + 10, this.y + 4, color);
         }
 
@@ -168,11 +168,11 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
         public void playDownSound(SoundManager sound) { }
 
         @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void renderButton(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
-            int x = this.isHovered ? 116 : 108;
+            int x = this.isHoveredOrFocused() ? 116 : 108;
             this.blit(stack, this.x, this.y, x, 73, 7, 7);
         }
     }
