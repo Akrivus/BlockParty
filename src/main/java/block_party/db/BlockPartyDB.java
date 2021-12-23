@@ -64,7 +64,7 @@ public class BlockPartyDB extends SavedData {
             CompoundTag tag = new CompoundTag();
             tag.putString("Player", player.toString());
             ListTag list = new ListTag();
-            npcs.forEach((npc) -> list.add(StringTag.valueOf(npc.toString())));
+            npcs.forEach((npc) -> list.add(LongTag.valueOf(npc)));
             tag.put("NPCs", list);
             byPlayer.add(tag);
         });

@@ -165,6 +165,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         this.timeSinceSlept = compound.getInt("TimeSinceSlept");
         this.automaton.read(compound);
         this.getRow().load(this);
+        System.out.println(this.getPlayerUUID());
         super.readAdditionalSaveData(compound);
         this.readyToSync = true;
     }
