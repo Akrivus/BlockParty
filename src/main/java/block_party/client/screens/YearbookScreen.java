@@ -161,6 +161,7 @@ public class YearbookScreen extends ControllerScreen {
         renderer.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, stack, buffer, 0xf000f0);
         buffer.endBatch();
         renderer.setRenderShadow(true);
+        pose.popPose();
         RenderSystem.applyModelViewMatrix();
         Lighting.setupFor3DItems();
     }
