@@ -12,10 +12,10 @@ import net.minecraft.world.level.block.Block;
 import java.util.HashMap;
 import java.util.function.Supplier;
 
-public class MoeSpecialRenderer extends RenderLayer<BlockPartyNPC, DollModel<BlockPartyNPC>> {
+public class SpecialLayer extends RenderLayer<BlockPartyNPC, DollModel<BlockPartyNPC>> {
     private static final HashMap<Block, Supplier<SpecialBlockOverlay>> OVERLAYS = new HashMap<>();
 
-    public MoeSpecialRenderer(RenderLayerParent<BlockPartyNPC, DollModel<BlockPartyNPC>> renderer) {
+    public SpecialLayer(RenderLayerParent<BlockPartyNPC, DollModel<BlockPartyNPC>> renderer) {
         super(renderer);
     }
 

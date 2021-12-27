@@ -14,8 +14,8 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 
-public class MoeEmotionLayer extends RenderLayer<BlockPartyNPC, DollModel<BlockPartyNPC>> {
-    public MoeEmotionLayer(RenderLayerParent<BlockPartyNPC, DollModel<BlockPartyNPC>> renderer) {
+public class EmoteLayer extends RenderLayer<BlockPartyNPC, DollModel<BlockPartyNPC>> {
+    public EmoteLayer(RenderLayerParent<BlockPartyNPC, DollModel<BlockPartyNPC>> renderer) {
         super(renderer);
     }
 

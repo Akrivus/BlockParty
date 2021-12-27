@@ -3,10 +3,9 @@ package block_party.client.renderers;
 import block_party.client.BlockPartyRenderers;
 import block_party.client.animation.Animation;
 import block_party.client.model.DollModel;
-import block_party.client.renderers.layers.MoeEmotionLayer;
-import block_party.client.renderers.layers.MoeGlowLayer;
-import block_party.client.renderers.layers.MoeSleepingLayer;
-import block_party.client.renderers.layers.MoeSpecialRenderer;
+import block_party.client.renderers.layers.EmoteLayer;
+import block_party.client.renderers.layers.GlowLayer;
+import block_party.client.renderers.layers.SpecialLayer;
 import block_party.npc.BlockPartyNPC;
 import block_party.npc.Quirks;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -26,11 +25,10 @@ public class DollRenderer extends MobRenderer<BlockPartyNPC, DollModel<BlockPart
     public DollRenderer(EntityRendererProvider.Context context) {
         super(context, new DollModel<>(context.bakeLayer(BlockPartyRenderers.DOLL)), 0.25F);
         this.addLayer(new ItemInHandLayer<>(this));
-        this.addLayer(new MoeEmotionLayer(this));
-        this.addLayer(new MoeSleepingLayer(this));
-        this.addLayer(new MoeGlowLayer(this));
+        this.addLayer(new EmoteLayer(this));
+        this.addLayer(new GlowLayer(this));
         this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
-        this.addLayer(new MoeSpecialRenderer(this));
+        this.addLayer(new SpecialLayer(this));
     }
 
     @Override

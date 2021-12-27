@@ -2,7 +2,7 @@ package block_party.npc;
 
 import block_party.BlockParty;
 import block_party.custom.CustomTags;
-import block_party.client.renderers.layers.MoeSpecialRenderer;
+import block_party.client.renderers.layers.SpecialLayer;
 import block_party.client.renderers.layers.special.BarrelOverlay;
 import block_party.custom.CustomSounds;
 import net.minecraft.resources.ResourceLocation;
@@ -129,7 +129,7 @@ public class Quirks {
     }
 
     private static void registerSpecialRenderers(FMLClientSetupEvent e) {
-        MoeSpecialRenderer.registerOverlay(Blocks.BARREL, BarrelOverlay::new);
+        SpecialLayer.registerOverlay(Blocks.BARREL, BarrelOverlay::new);
     }
 
     public static ResourceLocation getNameOf(BlockState state) {
