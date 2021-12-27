@@ -8,7 +8,7 @@ import block_party.custom.CustomEntities;
 import block_party.npc.BlockPartyNPC;
 import block_party.npc.automata.trait.BloodType;
 import block_party.npc.automata.trait.Dere;
-import block_party.world.chunk.ChunkScheduler;
+import block_party.world.chunk.ForcedChunk;
 import block_party.db.DimBlockPos;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -115,7 +115,7 @@ public class NPC extends Row<BlockPartyNPC> {
 
     public BlockPartyNPC getServerEntity(MinecraftServer server) {
         DimBlockPos pos = (DimBlockPos) this.get(POS).get();
-        ServerLevel level = ChunkScheduler.queue(this.getID(), server.getLevel(pos.getDim()), pos.getChunk());
+        ServerLevel level = ForcedChunk.queue(this.getID(), server.getLevel(pos.getDim()), pos.getChunk());
         if (level != null) {
             List<BlockPartyNPC> npcs = level.getEntitiesOfClass(BlockPartyNPC.class, pos.getAABB());
             for (BlockPartyNPC npc : npcs) {

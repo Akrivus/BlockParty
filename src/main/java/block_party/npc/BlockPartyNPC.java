@@ -668,12 +668,9 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     }
 
     public BlockPartyNPC teleport(ServerLevel level, ITeleporter teleporter) {
-        Entity entity = this.changeDimension(level, teleporter);
-        if (entity instanceof BlockPartyNPC) {
-            return this.onTeleport((BlockPartyNPC) entity);
-        } else {
-            return this;
-        }
+        if (this.changeDimension(level, teleporter) instanceof BlockPartyNPC npc)
+            return this.onTeleport(npc);
+        return this;
     }
 
     public BlockPartyNPC onTeleport(BlockPartyNPC entity) {
