@@ -2,11 +2,13 @@ package block_party.registry.resources;
 
 import block_party.BlockParty;
 import block_party.npc.BlockPartyNPC;
-import block_party.registry.CustomBlocks;
 import block_party.utils.JsonUtils;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -31,25 +33,8 @@ public class DollTextures extends SimpleJsonResourceReloadListener {
 
     public DollTextures() {
         super(GSON, "dolls/textures");
-        if (DollTextures.instance != null)
-            LOGGER.warn("DollTextures was already instantiated; overwriting.");
+        if (DollTextures.instance != null) { LOGGER.warn("DollTextures was already instantiated; overwriting."); }
         DollTextures.instance = this;
-    }
-
-    public static ResourceLocation get(BlockPartyNPC npc) {
-        Block block = npc.getBlock();
-        Map<BlockStatePattern, ResourceLocation> textures = DollTextures.instance.map.getOrDefault(block,
-                ImmutableMap.of(new BlockStatePattern(block, ImmutableMap.of()), getDefaultPathFor(block)));
-        for (BlockStatePattern pattern : textures.keySet())
-            if (pattern.matches(npc.getActualBlockState()))
-                return textures.get(pattern);
-        return getDefaultPathFor(block);
-    }
-
-    private static ResourceLocation getDefaultPathFor(Block block) {
-        ResourceLocation location = block.getRegistryName();
-        String path = String.format("textures/doll/%s.png", location.getPath());
-        return new ResourceLocation(location.getNamespace(), path);
     }
 
     @Override
@@ -74,7 +59,7 @@ public class DollTextures extends SimpleJsonResourceReloadListener {
                 String name = GsonHelper.getAsString(object, "name");
 
                 for (Property<?> prop : props) {
-                    if (!prop.getName().equals(name)) continue;
+                    if (!prop.getName().equals(name)) { continue; }
                     Comparable<?> value = GSON.fromJson(object.get("value"), prop.getValueClass());
                     builder.put(prop, value);
                 }
@@ -86,6 +71,21 @@ public class DollTextures extends SimpleJsonResourceReloadListener {
         }
 
         this.map = map.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, (entry) -> entry.getValue().build()));
+    }
+
+    public static ResourceLocation get(BlockPartyNPC npc) {
+        Block block = npc.getBlock();
+        Map<BlockStatePattern, ResourceLocation> textures = DollTextures.instance.map.getOrDefault(block, ImmutableMap.of(new BlockStatePattern(block, ImmutableMap.of()), getDefaultPathFor(block)));
+        for (BlockStatePattern pattern : textures.keySet()) {
+            if (pattern.matches(npc.getActualBlockState())) { return textures.get(pattern); }
+        }
+        return getDefaultPathFor(block);
+    }
+
+    private static ResourceLocation getDefaultPathFor(Block block) {
+        ResourceLocation location = block.getRegistryName();
+        String path = String.format("textures/doll/%s.png", location.getPath());
+        return new ResourceLocation(location.getNamespace(), path);
     }
 
     record BlockStatePattern(Block block, Map<Property<?>, Comparable<?>> props) {

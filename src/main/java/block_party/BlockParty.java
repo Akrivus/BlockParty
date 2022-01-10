@@ -2,8 +2,6 @@ package block_party;
 
 import block_party.client.BlockPartyRenderers;
 import block_party.registry.*;
-import block_party.registry.SceneActions;
-import block_party.registry.SceneRequirements;
 import com.google.gson.GsonBuilder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleType;
@@ -27,6 +25,8 @@ import java.util.Calendar;
 
 @Mod(BlockParty.ID)
 public class BlockParty {
+    public static final String VERSION = "21.12.30";
+    public static final String ID = "block_party";
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITIES, BlockParty.ID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, BlockParty.ID);
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, BlockParty.ID);
@@ -36,9 +36,6 @@ public class BlockParty {
     public static final DeferredRegister<SceneActions.Factory> SCENE_ACTIONS = DeferredRegister.create(SceneActions.Factory.class, BlockParty.ID);
     public static final DeferredRegister<SceneRequirements.Factory> SCENE_REQUIREMENTS = DeferredRegister.create(SceneRequirements.Factory.class, BlockParty.ID);
     public static final SimpleChannel MESSENGER = CustomMessenger.create();
-
-    public static final String VERSION = "21.12.30";
-    public static final String ID = "block_party";
     public static final GsonBuilder GSON = new GsonBuilder();
 
     public static final CreativeModeTab CreativeModeTab = new CreativeModeTab(BlockParty.ID) {
@@ -81,11 +78,11 @@ public class BlockParty {
         return getCalendar().get(2) + 1 == 12 && getCalendar().get(5) >= 24 && getCalendar().get(5) <= 26;
     }
 
-    public static boolean isHalloween() {
-        return getCalendar().get(2) + 1 == 10 && getCalendar().get(5) == 31;
-    }
-
     public static Calendar getCalendar() {
         return Calendar.getInstance();
+    }
+
+    public static boolean isHalloween() {
+        return getCalendar().get(2) + 1 == 10 && getCalendar().get(5) == 31;
     }
 }

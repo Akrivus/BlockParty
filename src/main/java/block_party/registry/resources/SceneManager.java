@@ -2,7 +2,10 @@ package block_party.registry.resources;
 
 import block_party.BlockParty;
 import block_party.npc.BlockPartyNPC;
-import block_party.scene.*;
+import block_party.scene.ISceneAction;
+import block_party.scene.ISceneRequirement;
+import block_party.scene.Scene;
+import block_party.scene.SceneTrigger;
 import block_party.utils.JsonUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -15,8 +18,6 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraftforge.registries.IForgeRegistryEntry;
-import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,17 +36,6 @@ public class SceneManager extends SimpleJsonResourceReloadListener {
 
     public SceneManager() {
         super(GSON, "scenes");
-    }
-
-    public Scene get(SceneTrigger trigger, BlockPartyNPC npc) {
-        List<Scene> scenes = new ArrayList(this.scenes.getOrDefault(trigger, ImmutableList.of()));
-        if (scenes.isEmpty())
-            return null;
-        Collections.shuffle(scenes);
-        scenes.removeIf((scene) -> !scene.fulfills(npc));
-        if (scenes.isEmpty())
-            return null;
-        return scenes.get(0);
     }
 
     @Override
@@ -70,6 +60,15 @@ public class SceneManager extends SimpleJsonResourceReloadListener {
 
         this.scenes = map.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, (entry) -> entry.getValue().build()));
         this.byName = builder.build();
+    }
+
+    public Scene get(SceneTrigger trigger, BlockPartyNPC npc) {
+        List<Scene> scenes = new ArrayList(this.scenes.getOrDefault(trigger, ImmutableList.of()));
+        if (scenes.isEmpty()) { return null; }
+        Collections.shuffle(scenes);
+        scenes.removeIf((scene) -> !scene.fulfills(npc));
+        if (scenes.isEmpty()) { return null; }
+        return scenes.get(0);
     }
 }
 

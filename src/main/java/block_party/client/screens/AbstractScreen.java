@@ -3,7 +3,6 @@ package block_party.client.screens;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Quaternion;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -67,14 +66,6 @@ public class AbstractScreen extends Screen {
         return this.minecraft.player;
     }
 
-    protected void setEntityViewStack(PoseStack pose, int posX, int posY) {
-
-    }
-
-    protected void setEntityModelStack(PoseStack pose, float scale) {
-
-    }
-
     protected void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
         if (entity == null) { return; }
         PoseStack pose = RenderSystem.getModelViewStack();
@@ -93,5 +84,13 @@ public class AbstractScreen extends Screen {
         pose.popPose();
         RenderSystem.applyModelViewMatrix();
         Lighting.setupFor3DItems();
+    }
+
+    protected void setEntityViewStack(PoseStack pose, int posX, int posY) {
+
+    }
+
+    protected void setEntityModelStack(PoseStack pose, float scale) {
+
     }
 }

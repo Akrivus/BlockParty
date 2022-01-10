@@ -2,14 +2,10 @@ package block_party.registry;
 
 import block_party.BlockParty;
 import block_party.blocks.entity.*;
-import com.google.gson.JsonSyntaxException;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 
 public class CustomBlockEntities {
     public static final RegistryObject<BlockEntityType<GardenLanternBlockEntity>> GARDEN_LANTERN = BlockParty.BLOCK_ENTITIES.register("garden_lantern", () -> BlockEntityType.Builder.of(GardenLanternBlockEntity::new, CustomBlocks.GARDEN_LANTERN.get()).build(null));

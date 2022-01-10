@@ -19,7 +19,6 @@ public class CNPCTeleport extends CNPCQuery {
     public void onFound(NetworkEvent.Context context, ServerPlayer player) {
         CellPhone cellPhone = new CellPhone(this.npc, player);
         BlockPartyNPC npc = cellPhone.call();
-        if (npc != null)
-            npc.teleport(player.getLevel(), cellPhone);
+        if (npc != null) { npc.teleport(player.getLevel(), cellPhone); }
     }
 }

@@ -12,12 +12,12 @@ public class SakuraSaplingBlockEntity extends AbstractDataBlockEntity<Sapling> {
     }
 
     @Override
-    public Sapling getRow() {
-        return BlockPartyDB.Saplings.find(this.getDatabaseID());
+    public Sapling getNewRow() {
+        return new Sapling(this);
     }
 
     @Override
-    public Sapling getNewRow() {
-        return new Sapling(this);
+    public Sapling getRow() {
+        return BlockPartyDB.Saplings.find(this.getDatabaseID());
     }
 }

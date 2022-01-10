@@ -5,21 +5,20 @@ import block_party.scene.ISceneRequirement;
 import block_party.utils.Trans;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 
 public interface ITrait<T extends ITrait> extends ISceneRequirement {
+    default boolean verify(BlockPartyNPC npc) {
+        return this.isSharedWith(npc);
+    }
+
+    boolean isSharedWith(BlockPartyNPC npc);
+
     default String getString() {
         return Trans.late(this.getTranslationKey());
     }
 
     default String getTranslationKey() {
         return String.format("trait.block_party.%s.%s", this.getKey().toLowerCase(), this.getValue().toLowerCase());
-    }
-
-    boolean isSharedWith(BlockPartyNPC npc);
-
-    default boolean verify(BlockPartyNPC npc) {
-        return this.isSharedWith(npc);
     }
 
     String getValue();

@@ -28,21 +28,26 @@ public abstract class Table<R extends Row> {
         }
     }
 
-    public void setWorld(ServerLevel level) {
-        this.level = level;
+    public void addColumn(Column column) {
+        this.columns.add(column);
+        column.afterAdd(this);
     }
 
     public List<Column> getColumns() {
         return new ArrayList<>(this.columns);
     }
 
-    public void addColumn(Column column) {
-        this.columns.add(column);
-        column.afterAdd(this);
-    }
-
     public String getName() {
         return this.name;
+    }
+
+    public R find(long id) {
+        List<R> query = this.select(String.format("SELECT * FROM %s WHERE (DatabaseID = '%s') LIMIT 1;", this.name, id));
+        return query.isEmpty() ? null : query.get(0);
+    }
+
+    public List<R> select(String SQL) {
+        return this.select(SQL, new ArrayList<>());
     }
 
     public List<R> select(String SQL, List<Column> columns) {
@@ -60,52 +65,6 @@ public abstract class Table<R extends Row> {
         }
     }
 
-    public List<R> select(String SQL) {
-        return this.select(SQL, new ArrayList<>());
-    }
-
-    public R find(long id) {
-        List<R> query = this.select(String.format("SELECT * FROM %s WHERE (DatabaseID = '%s') LIMIT 1;", this.name, id));
-        return query.isEmpty() ? null : query.get(0);
-    }
-
-    public List<R> all() {
-        return this.select(String.format("SELECT * FROM %s;", this.name));
-    }
-
-    public void update(String SQL, List<Column> columns) {
-        try (PreparedStatement sql = this.open(SQL)) {
-            for (int i = 1; i <= columns.size(); ++i) { columns.get(i - 1).forSet(i, sql); }
-            System.out.println(sql);
-            sql.executeUpdate();
-            this.shut();
-        } catch (SQLException e) {
-            this.rescue(e);
-        }
-    }
-
-    public void update(String SQL) {
-        this.update(SQL, new ArrayList<>());
-    }
-
-    public void create() {
-        String columns = "";
-        for (Column column : this.columns) { columns += String.format("%s %s %s,", column.getColumn(), column.getType(), column.getExtra()); }
-        columns = columns.substring(0, columns.length() - 1);
-        try (PreparedStatement sql = this.open(String.format("CREATE TABLE IF NOT EXISTS %s (%s);", this.name, columns))) {
-            System.out.println(sql);
-            sql.execute();
-            this.shut();
-        } catch (SQLException e) {
-            this.rescue(e);
-        }
-    }
-
-    public void create(ServerLevel level) {
-        this.setWorld(level);
-        this.create();
-    }
-
     public abstract R getRow(ResultSet set) throws SQLException;
 
     private PreparedStatement open(String SQL) throws SQLException {
@@ -119,5 +78,48 @@ public abstract class Table<R extends Row> {
 
     private void rescue(SQLException e) {
         throw new ReportedException(new CrashReport("DB failed.", e));
+    }
+
+    public List<R> all() {
+        return this.select(String.format("SELECT * FROM %s;", this.name));
+    }
+
+    public void update(String SQL) {
+        this.update(SQL, new ArrayList<>());
+    }
+
+    public void update(String SQL, List<Column> columns) {
+        try (PreparedStatement sql = this.open(SQL)) {
+            for (int i = 1; i <= columns.size(); ++i) { columns.get(i - 1).forSet(i, sql); }
+            System.out.println(sql);
+            sql.executeUpdate();
+            this.shut();
+        } catch (SQLException e) {
+            this.rescue(e);
+        }
+    }
+
+    public void create(ServerLevel level) {
+        this.setWorld(level);
+        this.create();
+    }
+
+    public void setWorld(ServerLevel level) {
+        this.level = level;
+    }
+
+    public void create() {
+        String columns = "";
+        for (Column column : this.columns) {
+            columns += String.format("%s %s %s,", column.getColumn(), column.getType(), column.getExtra());
+        }
+        columns = columns.substring(0, columns.length() - 1);
+        try (PreparedStatement sql = this.open(String.format("CREATE TABLE IF NOT EXISTS %s (%s);", this.name, columns))) {
+            System.out.println(sql);
+            sql.execute();
+            this.shut();
+        } catch (SQLException e) {
+            this.rescue(e);
+        }
     }
 }

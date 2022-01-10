@@ -1,8 +1,6 @@
 package block_party.scene;
 
 import block_party.npc.BlockPartyNPC;
-import block_party.scene.ISceneRequirement;
-import net.minecraft.world.entity.player.Player;
 
 import java.util.function.Predicate;
 

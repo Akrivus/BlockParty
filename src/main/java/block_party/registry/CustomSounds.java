@@ -1,17 +1,10 @@
 package block_party.registry;
 
 import block_party.BlockParty;
-import block_party.registry.resources.DollSounds;
-import com.google.gson.JsonSyntaxException;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.level.block.Block;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
-
-import java.util.function.Supplier;
+import net.minecraftforge.registries.RegistryObject;
 
 public class CustomSounds {
     public static final RegistryObject<SoundEvent> AMBIENT_JAPAN = BlockParty.SOUNDS.register("ambient.japan", () -> new SoundEvent(BlockParty.source("ambient.japan")));

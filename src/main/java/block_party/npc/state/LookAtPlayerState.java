@@ -1,11 +1,10 @@
 package block_party.npc.state;
 
-import block_party.npc.BlockPartyNPC;
 import block_party.npc.automata.state.GoalState;
 
 public class LookAtPlayerState extends GoalState {
-    private int totalTicks = 20;
     private final float multiplier;
+    private int totalTicks = 20;
 
     public LookAtPlayerState(float multiplier, int extraTicks) {
         super(3, Flag.LOOK);

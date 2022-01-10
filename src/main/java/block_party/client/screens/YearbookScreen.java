@@ -1,21 +1,18 @@
 package block_party.client.screens;
 
 import block_party.BlockParty;
-import block_party.registry.CustomMessenger;
 import block_party.client.animation.Animation;
-import block_party.registry.CustomSounds;
 import block_party.messages.CRemovePage;
 import block_party.npc.BlockPartyNPC;
+import block_party.registry.CustomMessenger;
+import block_party.registry.CustomSounds;
 import block_party.utils.Trans;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.CommonComponents;
@@ -24,7 +21,6 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
@@ -157,19 +153,6 @@ public class YearbookScreen extends ControllerScreen {
     }
 
     @Override
-    protected void setEntityViewStack(PoseStack pose, int posX, int posY) {
-        pose.translate(posX, posY, 1050.0);
-        pose.scale(-1.0F, -1.0F, -1.0F);
-    }
-
-    @Override
-    protected void setEntityModelStack(PoseStack pose, float scale) {
-        pose.translate(0.0D, 0.0D, 1000.0D);
-        pose.scale(scale, scale, scale);
-        pose.mulPose(new Quaternion(0.0F, -1.0F, 0.0F, 0.0F));
-    }
-
-    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (super.keyPressed(keyCode, scanCode, modifiers)) { return true; }
         switch (keyCode) {
@@ -211,6 +194,19 @@ public class YearbookScreen extends ControllerScreen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    @Override
+    protected void setEntityViewStack(PoseStack pose, int posX, int posY) {
+        pose.translate(posX, posY, 1050.0);
+        pose.scale(-1.0F, -1.0F, -1.0F);
+    }
+
+    @Override
+    protected void setEntityModelStack(PoseStack pose, float scale) {
+        pose.translate(0.0D, 0.0D, 1000.0D);
+        pose.scale(scale, scale, scale);
+        pose.mulPose(new Quaternion(0.0F, -1.0F, 0.0F, 0.0F));
     }
 
     @OnlyIn(Dist.CLIENT)

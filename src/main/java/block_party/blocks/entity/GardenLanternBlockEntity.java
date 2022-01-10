@@ -12,12 +12,12 @@ public class GardenLanternBlockEntity extends AbstractDataBlockEntity<Garden> {
     }
 
     @Override
-    public Garden getRow() {
-        return BlockPartyDB.Gardens.find(this.getDatabaseID());
+    public Garden getNewRow() {
+        return new Garden(this);
     }
 
     @Override
-    public Garden getNewRow() {
-        return new Garden(this);
+    public Garden getRow() {
+        return BlockPartyDB.Gardens.find(this.getDatabaseID());
     }
 }

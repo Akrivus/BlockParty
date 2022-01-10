@@ -1,15 +1,15 @@
 package block_party.db.records;
 
 import block_party.db.BlockPartyDB;
+import block_party.db.DimBlockPos;
 import block_party.db.sql.Column;
 import block_party.db.sql.Row;
 import block_party.db.sql.Table;
-import block_party.registry.CustomEntities;
 import block_party.npc.BlockPartyNPC;
 import block_party.npc.automata.trait.BloodType;
 import block_party.npc.automata.trait.Dere;
+import block_party.registry.CustomEntities;
 import block_party.world.chunk.ForcedChunk;
-import block_party.db.DimBlockPos;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -24,24 +24,24 @@ import java.util.List;
 import java.util.UUID;
 
 public class NPC extends Row<BlockPartyNPC> {
-    protected static final int DEAD         =  6;
-    protected static final int NAME         =  7;
-    protected static final int BLOOD_TYPE   =  8;
-    protected static final int DERE         =  9;
-    protected static final int HEALTH       = 10;
-    protected static final int FULLNESS     = 11;
-    protected static final int EXHAUSTION   = 12;
-    protected static final int SATURATION   = 13;
-    protected static final int STRESS       = 14;
-    protected static final int RELAXATION   = 15;
-    protected static final int LOYALTY      = 16;
-    protected static final int AFFECTION    = 17;
-    protected static final int SLOUCH       = 18;
-    protected static final int AGE          = 19;
+    protected static final int DEAD = 6;
+    protected static final int NAME = 7;
+    protected static final int BLOOD_TYPE = 8;
+    protected static final int DERE = 9;
+    protected static final int HEALTH = 10;
+    protected static final int FULLNESS = 11;
+    protected static final int EXHAUSTION = 12;
+    protected static final int SATURATION = 13;
+    protected static final int STRESS = 14;
+    protected static final int RELAXATION = 15;
+    protected static final int LOYALTY = 16;
+    protected static final int AFFECTION = 17;
+    protected static final int SLOUCH = 18;
+    protected static final int AGE = 19;
     protected static final int LAST_SEEN_AT = 20;
-    protected static final int BLOCK_STATE  = 21;
-    protected static final int SHRINE_GATE   = 22;
-    protected static final int SHIMENAWA    = 23;
+    protected static final int BLOCK_STATE = 21;
+    protected static final int SHRINE_GATE = 22;
+    protected static final int SHIMENAWA = 23;
 
     public NPC(ResultSet set) throws SQLException {
         super(BlockPartyDB.NPCs, set);
@@ -78,27 +78,12 @@ public class NPC extends Row<BlockPartyNPC> {
         this.get(DEAD).set(false);
     }
 
-    @Override
-    public void load(BlockPartyNPC entity) {
-        entity.setPlayerUUID((UUID) this.get(PLAYER_UUID).get());
-        entity.setGivenName((String) this.get(NAME).get());
-        entity.setBlockState((BlockState) this.get(BLOCK_STATE).get());
-        entity.setBloodType((BloodType) this.get(BLOOD_TYPE).get());
-        entity.setDere((Dere) this.get(DERE).get());
-        entity.setHealth((Float) this.get(HEALTH).get());
-        entity.setFullness((Float) this.get(FULLNESS).get());
-        entity.setExhaustion((Float) this.get(EXHAUSTION).get());
-        entity.setSaturation((Float) this.get(SATURATION).get());
-        entity.setStress((Float) this.get(STRESS).get());
-        entity.setRelaxation((Float) this.get(RELAXATION).get());
-        entity.setLoyalty((Float) this.get(LOYALTY).get());
-        entity.setAffection((Float) this.get(AFFECTION).get());
-        entity.setAge((Float) this.get(AGE).get());
-        entity.setLastSeen((Long) this.get(LAST_SEEN_AT).get());
-    }
-
     public String getName() {
         return (String) this.get(NAME).get();
+    }
+
+    public boolean isDeadOrEstrangedFrom(Player player) {
+        return this.isDead() || this.isEstrangedFrom(player);
     }
 
     public boolean isDead() {
@@ -107,10 +92,6 @@ public class NPC extends Row<BlockPartyNPC> {
 
     public boolean isEstrangedFrom(Player player) {
         return !player.getUUID().equals(this.get(PLAYER_UUID).get());
-    }
-
-    public boolean isDeadOrEstrangedFrom(Player player) {
-        return this.isDead() || this.isEstrangedFrom(player);
     }
 
     public BlockPartyNPC getServerEntity(MinecraftServer server) {
@@ -131,6 +112,25 @@ public class NPC extends Row<BlockPartyNPC> {
         entity.setPos(pos.getX(), pos.getY(), pos.getZ());
         this.load(entity);
         return entity;
+    }
+
+    @Override
+    public void load(BlockPartyNPC entity) {
+        entity.setPlayerUUID((UUID) this.get(PLAYER_UUID).get());
+        entity.setGivenName((String) this.get(NAME).get());
+        entity.setBlockState((BlockState) this.get(BLOCK_STATE).get());
+        entity.setBloodType((BloodType) this.get(BLOOD_TYPE).get());
+        entity.setDere((Dere) this.get(DERE).get());
+        entity.setHealth((Float) this.get(HEALTH).get());
+        entity.setFullness((Float) this.get(FULLNESS).get());
+        entity.setExhaustion((Float) this.get(EXHAUSTION).get());
+        entity.setSaturation((Float) this.get(SATURATION).get());
+        entity.setStress((Float) this.get(STRESS).get());
+        entity.setRelaxation((Float) this.get(RELAXATION).get());
+        entity.setLoyalty((Float) this.get(LOYALTY).get());
+        entity.setAffection((Float) this.get(AFFECTION).get());
+        entity.setAge((Float) this.get(AGE).get());
+        entity.setLastSeen((Long) this.get(LAST_SEEN_AT).get());
     }
 
     public static NPC create(CompoundTag compound) {

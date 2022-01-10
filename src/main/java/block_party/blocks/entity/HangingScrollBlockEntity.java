@@ -9,13 +9,13 @@ import net.minecraft.world.level.block.state.BlockState;
 public class HangingScrollBlockEntity extends LocativeBlockEntity {
     protected SceneRequirement condition;
 
+    public HangingScrollBlockEntity(BlockPos pos, BlockState state) {
+        this(SceneRequirement.NEVER, pos, state);
+    }
+
     public HangingScrollBlockEntity(SceneRequirement condition, BlockPos pos, BlockState state) {
         super(CustomBlockEntities.HANGING_SCROLL.get(), pos, state);
         this.condition = condition;
-    }
-
-    public HangingScrollBlockEntity(BlockPos pos, BlockState state) {
-        this(SceneRequirement.NEVER, pos, state);
     }
 
     @Override

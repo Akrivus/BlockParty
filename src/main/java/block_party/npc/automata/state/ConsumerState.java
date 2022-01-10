@@ -9,13 +9,13 @@ public class ConsumerState implements ISceneAction {
     private final Consumer<BlockPartyNPC> consumer;
     private final ISceneAction state;
 
+    public ConsumerState(Consumer<BlockPartyNPC> consumer) {
+        this(consumer, null);
+    }
+
     public ConsumerState(Consumer<BlockPartyNPC> consumer, ISceneAction state) {
         this.consumer = consumer;
         this.state = state;
-    }
-
-    public ConsumerState(Consumer<BlockPartyNPC> consumer) {
-        this(consumer, null);
     }
 
     @Override

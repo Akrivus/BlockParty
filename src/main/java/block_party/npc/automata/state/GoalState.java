@@ -3,29 +3,18 @@ package block_party.npc.automata.state;
 import block_party.npc.BlockPartyNPC;
 import block_party.scene.ISceneAction;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.player.Player;
 
 import java.util.EnumSet;
 
 public abstract class GoalState extends Goal implements ISceneAction {
+    private final int priority;
     protected boolean complete;
     protected BlockPartyNPC npc;
-    private final int priority;
     private boolean done;
 
     public GoalState(int priority, Flag flag, Flag... flags) {
         this.setFlags(EnumSet.of(flag, flags));
         this.priority = priority;
-    }
-
-    protected abstract boolean canCompleteOnFirstTry();
-
-    protected boolean canCompleteOnOtherTry() {
-        return this.canCompleteOnFirstTry();
-    }
-
-    protected boolean canContinue() {
-        return true;
     }
 
     @Override
@@ -34,19 +23,20 @@ public abstract class GoalState extends Goal implements ISceneAction {
     }
 
     @Override
-    public void start() {
-        this.complete = this.canCompleteOnFirstTry();
-    }
-
-    @Override
     public boolean canContinueToUse() {
         return !this.complete && this.canContinue();
     }
 
-    @Override
-    public void tick() {
-        this.complete = this.canCompleteOnOtherTry();
+    protected boolean canContinue() {
+        return true;
     }
+
+    @Override
+    public void start() {
+        this.complete = this.canCompleteOnFirstTry();
+    }
+
+    protected abstract boolean canCompleteOnFirstTry();
 
     @Override
     public void stop() {
@@ -55,13 +45,22 @@ public abstract class GoalState extends Goal implements ISceneAction {
     }
 
     @Override
-    public void apply(BlockPartyNPC npc) {
-        (this.npc = npc).goalSelector.addGoal(this.priority, this);
+    public void tick() {
+        this.complete = this.canCompleteOnOtherTry();
+    }
+
+    protected boolean canCompleteOnOtherTry() {
+        return this.canCompleteOnFirstTry();
     }
 
     @Override
     public void onComplete() {
         this.npc.goalSelector.removeGoal(this);
+    }
+
+    @Override
+    public void apply(BlockPartyNPC npc) {
+        (this.npc = npc).goalSelector.addGoal(this.priority, this);
     }
 
     @Override

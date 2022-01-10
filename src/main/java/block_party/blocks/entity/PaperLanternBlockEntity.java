@@ -1,7 +1,7 @@
 package block_party.blocks.entity;
 
-import block_party.scene.SceneRequirement;
 import block_party.registry.CustomBlockEntities;
+import block_party.scene.SceneRequirement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 

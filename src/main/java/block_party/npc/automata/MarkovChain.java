@@ -29,13 +29,13 @@ public class MarkovChain implements ISceneAction {
 
     }
 
+    public static MarkovChain start(double probability, ISceneAction state) {
+        return new MarkovChain().chain(probability, state);
+    }
+
     public MarkovChain chain(double probability, ISceneAction state) {
         this.total += probability;
         this.states.put(probability, state);
         return this;
-    }
-
-    public static MarkovChain start(double probability, ISceneAction state) {
-        return new MarkovChain().chain(probability, state);
     }
 }

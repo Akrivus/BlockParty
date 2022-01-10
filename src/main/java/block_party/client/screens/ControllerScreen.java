@@ -1,16 +1,8 @@
 package block_party.client.screens;
 
-import block_party.registry.CustomMessenger;
 import block_party.db.records.NPC;
 import block_party.messages.CNPCRequest;
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Quaternion;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
+import block_party.registry.CustomMessenger;
 
 import java.util.List;
 

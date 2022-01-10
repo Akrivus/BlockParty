@@ -13,13 +13,13 @@ public abstract class LocativeBlockEntity extends AbstractDataBlockEntity<Locati
     }
 
     @Override
-    public Location getRow() {
-        return BlockPartyDB.Locations.find(this.getDatabaseID());
+    public Location getNewRow() {
+        return new Location(this);
     }
 
     @Override
-    public Location getNewRow() {
-        return new Location(this);
+    public Location getRow() {
+        return BlockPartyDB.Locations.find(this.getDatabaseID());
     }
 
     public abstract SceneRequirement getRequiredCondition();

@@ -1,6 +1,5 @@
 package block_party.scene;
 
-import block_party.scene.dialogue.ResponseIcon;
 import net.minecraft.resources.ResourceLocation;
 
 public enum SceneTrigger {
@@ -24,15 +23,15 @@ public enum SceneTrigger {
         return this.priority;
     }
 
+    public SceneTrigger fromValue(ResourceLocation location) {
+        return fromValue(location.getPath());
+    }
+
     public SceneTrigger fromValue(String key) {
         try {
             return SceneTrigger.valueOf(key.toUpperCase());
         } catch (IllegalArgumentException e) {
             return this;
         }
-    }
-
-    public SceneTrigger fromValue(ResourceLocation location) {
-        return fromValue(location.getPath());
     }
 }

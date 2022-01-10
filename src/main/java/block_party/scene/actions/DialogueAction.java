@@ -3,9 +3,7 @@ package block_party.scene.actions;
 import block_party.client.animation.Animation;
 import block_party.npc.BlockPartyNPC;
 import block_party.npc.automata.trait.Emotion;
-import block_party.registry.CustomSounds;
 import block_party.registry.SceneActions;
-import block_party.registry.SceneRequirements;
 import block_party.scene.ISceneAction;
 import block_party.scene.dialogue.ResponseIcon;
 import block_party.utils.JsonUtils;
@@ -54,8 +52,7 @@ public class DialogueAction implements ISceneAction {
         this.animation = Animation.DEFAULT.fromKey(JsonUtils.getAsResourceLocation(json, "animation", "default"));
         this.emotion = Emotion.NORMAL.fromValue(JsonUtils.getAsResourceLocation(json, "emotion", "normal"));
         this.voiceLine = json.has("voice");
-        if (this.voiceLine)
-            this.voice = JsonUtils.getAs(JsonUtils.SOUND_EVENT, json, "voice");
+        if (this.voiceLine) { this.voice = JsonUtils.getAs(JsonUtils.SOUND_EVENT, json, "voice"); }
 
         this.responses = Maps.newHashMap();
 

@@ -5,7 +5,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ForcedChunk {

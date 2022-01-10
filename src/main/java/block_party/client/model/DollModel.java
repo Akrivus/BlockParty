@@ -121,6 +121,11 @@ public class DollModel<T extends BlockPartyNPC> extends HierarchicalModel<T> imp
     }
 
     @Override
+    public ModelPart root() {
+        return this.root;
+    }
+
+    @Override
     public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float yaw, float pitch) {
         entity.getAnimation().setRotationAngles(entity, this, limbSwing, limbSwingAmount, ageInTicks);
         this.rightArm.xRot += Mth.sin(ageInTicks * 0.067F) * 0.05F;
@@ -245,11 +250,6 @@ public class DollModel<T extends BlockPartyNPC> extends HierarchicalModel<T> imp
     }
 
     @Override
-    public ModelPart root() {
-        return this.root;
-    }
-
-    @Override
     public ModelPart getRightArm() {
         return this.rightArm;
     }
@@ -280,11 +280,6 @@ public class DollModel<T extends BlockPartyNPC> extends HierarchicalModel<T> imp
     }
 
     @Override
-    public ModelPart getHead() {
-        return this.head;
-    }
-
-    @Override
     public ModelPart getHair() {
         return this.headWear;
     }
@@ -302,6 +297,11 @@ public class DollModel<T extends BlockPartyNPC> extends HierarchicalModel<T> imp
     @Override
     public ModelPart getTailTip() {
         return this.tailTip;
+    }
+
+    @Override
+    public ModelPart getHead() {
+        return this.head;
     }
 
     public static LayerDefinition create() {

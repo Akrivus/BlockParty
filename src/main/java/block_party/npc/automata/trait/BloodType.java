@@ -2,8 +2,6 @@ package block_party.npc.automata.trait;
 
 import block_party.npc.BlockPartyNPC;
 import block_party.npc.automata.ITrait;
-import block_party.scene.ISceneRequirement;
-import net.minecraft.world.entity.player.Player;
 
 import java.util.Arrays;
 import java.util.List;

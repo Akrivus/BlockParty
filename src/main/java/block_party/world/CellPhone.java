@@ -26,12 +26,12 @@ public class CellPhone implements ITeleporter {
         this.player = player;
     }
 
-    public BlockPartyNPC call() {
-        return this.npc.getServerEntity(this.player.getServer());
-    }
-
     @Override
     public PortalInfo getPortalInfo(Entity entity, ServerLevel level, Function<ServerLevel, PortalInfo> info) {
         return new PortalInfo(new Vec3(this.x, this.y, this.z), Vec3.ZERO, entity.getYRot(), entity.getXRot());
+    }
+
+    public BlockPartyNPC call() {
+        return this.npc.getServerEntity(this.player.getServer());
     }
 }

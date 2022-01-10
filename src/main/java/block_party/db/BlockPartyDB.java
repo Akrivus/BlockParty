@@ -28,7 +28,10 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Mod.EventBusSubscriber
 public class BlockPartyDB extends SavedData {
@@ -43,18 +46,6 @@ public class BlockPartyDB extends SavedData {
     private final Map<UUID, List<Long>> byPlayer = Maps.newHashMap();
     private final List<Connection> connections = Lists.newArrayList();
     private String database;
-
-    public static BlockPartyDB load(CompoundTag compound) {
-        BlockPartyDB data = new BlockPartyDB();
-        compound.getList("Names", NBT.STRING).forEach((name) -> data.names.add(name.getAsString()));
-        compound.getList("NPCsByPlayer", NBT.COMPOUND).forEach((nbt) -> {
-            CompoundTag tag = (CompoundTag) nbt;
-            List<Long> npcs = new ArrayList<>();
-            tag.getList("NPCs", NBT.LONG).forEach((npc) -> npcs.add(((LongTag) npc).getAsLong()));
-            data.byPlayer.put(UUID.fromString(tag.getString("Player")), npcs);
-        });
-        return data;
-    }
 
     @Override
     public CompoundTag save(CompoundTag compound) {
@@ -74,10 +65,6 @@ public class BlockPartyDB extends SavedData {
         return compound;
     }
 
-    public List<Long> getFrom(Player player) {
-        return this.byPlayer.getOrDefault(player.getUUID(), new ArrayList<>());
-    }
-
     public void addTo(Player player, long id) {
         if (player == null) { return; }
         List<Long> list = this.getFrom(player);
@@ -86,9 +73,8 @@ public class BlockPartyDB extends SavedData {
         this.setDirty();
     }
 
-    public void getDatabase(ServerLevel level) {
-        File path = level.getServer().getWorldPath(new LevelResource("blockparty.db")).toFile();
-        this.database = String.format("jdbc:sqlite:%s", path.getAbsolutePath());
+    public List<Long> getFrom(Player player) {
+        return this.byPlayer.getOrDefault(player.getUUID(), new ArrayList<>());
     }
 
     public Connection getConnection() throws SQLException {
@@ -97,23 +83,9 @@ public class BlockPartyDB extends SavedData {
         return connection;
     }
 
-    public List<Connection> getConnections() {
-        return this.connections;
-    }
-
     public void free(Connection connection) throws SQLException {
         connection.close();
         this.connections.remove(connection);
-    }
-
-    public static BlockPartyDB get(Level level) {
-        try {
-            ServerLevel server = level.getServer().getLevel(Level.OVERWORLD);
-            DimensionDataStorage storage = server.getDataStorage();
-            return storage.computeIfAbsent(BlockPartyDB::load, BlockPartyDB::new, KEY);
-        } catch (NullPointerException e) {
-            return new BlockPartyDB();
-        }
     }
 
     @SubscribeEvent
@@ -132,6 +104,33 @@ public class BlockPartyDB extends SavedData {
         }
     }
 
+    public void getDatabase(ServerLevel level) {
+        File path = level.getServer().getWorldPath(new LevelResource("blockparty.db")).toFile();
+        this.database = String.format("jdbc:sqlite:%s", path.getAbsolutePath());
+    }
+
+    public static BlockPartyDB get(Level level) {
+        try {
+            ServerLevel server = level.getServer().getLevel(Level.OVERWORLD);
+            DimensionDataStorage storage = server.getDataStorage();
+            return storage.computeIfAbsent(BlockPartyDB::load, BlockPartyDB::new, KEY);
+        } catch (NullPointerException e) {
+            return new BlockPartyDB();
+        }
+    }
+
+    public static BlockPartyDB load(CompoundTag compound) {
+        BlockPartyDB data = new BlockPartyDB();
+        compound.getList("Names", NBT.STRING).forEach((name) -> data.names.add(name.getAsString()));
+        compound.getList("NPCsByPlayer", NBT.COMPOUND).forEach((nbt) -> {
+            CompoundTag tag = (CompoundTag) nbt;
+            List<Long> npcs = new ArrayList<>();
+            tag.getList("NPCs", NBT.LONG).forEach((npc) -> npcs.add(((LongTag) npc).getAsLong()));
+            data.byPlayer.put(UUID.fromString(tag.getString("Player")), npcs);
+        });
+        return data;
+    }
+
     @SubscribeEvent
     public static void onWorldUnload(WorldEvent.Unload e) {
         if (e.getWorld() instanceof ServerLevel level) {
@@ -143,6 +142,10 @@ public class BlockPartyDB extends SavedData {
                 }
             });
         }
+    }
+
+    public List<Connection> getConnections() {
+        return this.connections;
     }
 
     @SubscribeEvent

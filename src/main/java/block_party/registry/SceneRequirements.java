@@ -1,11 +1,8 @@
 package block_party.registry;
 
 import block_party.BlockParty;
-import block_party.scene.ISceneAction;
 import block_party.scene.ISceneRequirement;
 import block_party.scene.SceneRequirement;
-import block_party.scene.actions.TransferAction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistryEntry;

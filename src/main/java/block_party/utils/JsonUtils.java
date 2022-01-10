@@ -1,12 +1,8 @@
 package block_party.utils;
 
-import block_party.BlockParty;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryManager;
 
@@ -21,12 +17,12 @@ public class JsonUtils {
     public static final ResourceLocation SCENE_ACTION = new ResourceLocation("block_party:scene_action");
     public static final ResourceLocation SCENE_REQUIREMENT = new ResourceLocation("block_party:scene_requirement");
 
-    public static <T extends IForgeRegistryEntry> T getAs(ResourceLocation registry, ResourceLocation location) {
-        return (T) RegistryManager.ACTIVE.getRegistry(registry).getValue(location);
-    }
-
     public static <T extends IForgeRegistryEntry> T getAs(ResourceLocation registry, String location) {
         return getAs(registry, new ResourceLocation(location));
+    }
+
+    public static <T extends IForgeRegistryEntry> T getAs(ResourceLocation registry, ResourceLocation location) {
+        return (T) RegistryManager.ACTIVE.getRegistry(registry).getValue(location);
     }
 
     public static <T extends IForgeRegistryEntry> T getAs(ResourceLocation registry, JsonObject json, String key) {

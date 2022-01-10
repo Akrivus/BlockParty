@@ -3,9 +3,7 @@ package block_party.client.screens.widget;
 import block_party.client.screens.DialogueScreen;
 import block_party.db.records.NPC;
 import block_party.scene.dialogue.ResponseIcon;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.TextComponent;
 
 public class RespondTextButton extends DialogueScreen.RespondButton {

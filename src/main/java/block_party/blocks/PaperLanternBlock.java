@@ -19,12 +19,12 @@ public class PaperLanternBlock extends AbstractDataBlock<PaperLanternBlockEntity
     }
 
     @Override
-    public MaterialColor defaultMaterialColor() {
-        return this.color;
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        return AABB;
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
-        return AABB;
+    public MaterialColor defaultMaterialColor() {
+        return this.color;
     }
 }

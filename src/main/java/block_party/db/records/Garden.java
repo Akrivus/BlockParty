@@ -1,7 +1,7 @@
 package block_party.db.records;
 
-import block_party.db.BlockPartyDB;
 import block_party.blocks.entity.GardenLanternBlockEntity;
+import block_party.db.BlockPartyDB;
 import block_party.db.sql.Row;
 import block_party.db.sql.Table;
 import net.minecraft.nbt.CompoundTag;

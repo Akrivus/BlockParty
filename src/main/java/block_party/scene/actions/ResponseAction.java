@@ -15,14 +15,6 @@ public class ResponseAction implements ISceneAction {
     protected List<ISceneAction> actions;
     private boolean complete;
 
-    public ResponseIcon getIcon() {
-        return this.icon;
-    }
-
-    public String getText() {
-        return this.text;
-    }
-
     @Override
     public void apply(BlockPartyNPC npc) {
         npc.automaton.putActions(this.actions);
@@ -39,5 +31,13 @@ public class ResponseAction implements ISceneAction {
         this.icon = ResponseIcon.CLOSE_DIALOGUE.fromValue(JsonUtils.getAsResourceLocation(json, "icon"));
         this.text = GsonHelper.getAsString(json, "text");
         this.actions = ISceneAction.parseArray(json.getAsJsonArray("actions"));
+    }
+
+    public ResponseIcon getIcon() {
+        return this.icon;
+    }
+
+    public String getText() {
+        return this.text;
     }
 }

@@ -46,16 +46,6 @@ public class ShimenawaBlock extends AbstractDataBlock<ShimenawaBlockEntity> {
     }
 
     @Override
-    public BlockState rotate(BlockState state, Rotation rotation) {
-        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
-    }
-
-    @Override
-    public BlockState mirror(BlockState state, Mirror mirror) {
-        return state.rotate(mirror.getRotation(state.getValue(FACING)));
-    }
-
-    @Override
     public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         switch (state.getValue(FACING)) {
         default:
@@ -68,6 +58,16 @@ public class ShimenawaBlock extends AbstractDataBlock<ShimenawaBlockEntity> {
         case WEST:
             return state.getValue(HANGING) ? WEST_AABB.move(-0.375, 0.0, 0.0) : WEST_AABB;
         }
+    }
+
+    @Override
+    public BlockState rotate(BlockState state, Rotation rotation) {
+        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
+    }
+
+    @Override
+    public BlockState mirror(BlockState state, Mirror mirror) {
+        return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
     @Override

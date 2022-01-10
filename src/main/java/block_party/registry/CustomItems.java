@@ -3,17 +3,14 @@ package block_party.registry;
 import block_party.BlockParty;
 import block_party.items.*;
 import block_party.utils.sorters.ISortableItem;
-import com.google.gson.JsonSyntaxException;
 import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 
 public class CustomItems {
     public static final RegistryObject<Item> BENTO_BOX = BlockParty.ITEMS.register("bento_box", BentoBoxItem::new);
@@ -98,6 +95,10 @@ public class CustomItems {
         registry.register(bus);
     }
 
+    private static void registerModelProperties(FMLCommonSetupEvent e) {
+        ItemProperties.register(CustomItems.LETTER.get(), new ResourceLocation("closed"), (stack, world, entity, damage) -> LetterItem.isClosed(stack));
+    }
+
     public static int compare(ItemStack one, ItemStack two) {
         Item item1 = one.getItem();
         Item item2 = two.getItem();
@@ -119,9 +120,5 @@ public class CustomItems {
         } else {
             return name1.compareToIgnoreCase(name2);
         }
-    }
-
-    private static void registerModelProperties(FMLCommonSetupEvent e) {
-        ItemProperties.register(CustomItems.LETTER.get(), new ResourceLocation("closed"), (stack, world, entity, damage) -> LetterItem.isClosed(stack));
     }
 }

@@ -3,8 +3,6 @@ package block_party.npc.automata.trait;
 import block_party.db.BlockPartyDB;
 import block_party.npc.BlockPartyNPC;
 import block_party.npc.automata.ITrait;
-import block_party.scene.ISceneRequirement;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import java.util.Arrays;
@@ -32,6 +30,25 @@ public enum Gender implements ITrait<Gender> {
         this.names = names;
     }
 
+    @Override
+    public boolean isSharedWith(BlockPartyNPC npc) {
+        return npc.getGender() == this;
+    }
+
+    @Override
+    public String getValue() {
+        return this.name();
+    }
+
+    @Override
+    public Gender fromValue(String key) {
+        try {
+            return Gender.valueOf(key.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return this;
+        }
+    }
+
     public String getPronounAsSubject() {
         return this.nominative;
     }
@@ -50,25 +67,6 @@ public enum Gender implements ITrait<Gender> {
 
     public String getHonorific() {
         return this.honorific;
-    }
-
-    @Override
-    public boolean isSharedWith(BlockPartyNPC npc) {
-        return npc.getGender() == this;
-    }
-
-    @Override
-    public String getValue() {
-        return this.name();
-    }
-
-    @Override
-    public Gender fromValue(String key) {
-        try {
-            return Gender.valueOf(key.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return this;
-        }
     }
 
     public String getUniqueName(Level level) {

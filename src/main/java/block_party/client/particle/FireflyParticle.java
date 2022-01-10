@@ -46,13 +46,13 @@ public class FireflyParticle extends TextureSheetParticle {
     }
 
     @Override
-    public int getLightColor(float partialTick) {
-        return 0xf000f0;
+    public ParticleRenderType getRenderType() {
+        return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
+    public int getLightColor(float partialTick) {
+        return 0xf000f0;
     }
 
     public static class Factory implements ParticleProvider<SimpleParticleType> {

@@ -26,15 +26,8 @@ public class BlockAliases extends SimpleJsonResourceReloadListener {
 
     public BlockAliases() {
         super(GSON, "dolls/aliases");
-        if (BlockAliases.instance != null)
-            LOGGER.warn("BlockAliases was already instantiated; overwriting.");
+        if (BlockAliases.instance != null) { LOGGER.warn("BlockAliases was already instantiated; overwriting."); }
         BlockAliases.instance = this;
-    }
-
-    public static BlockState get(BlockState state) {
-        Block block = state.getBlock();
-        Block alias = BlockAliases.instance.map.getOrDefault(block, block);
-        return alias.defaultBlockState();
     }
 
     @Override
@@ -65,5 +58,11 @@ public class BlockAliases extends SimpleJsonResourceReloadListener {
         }
 
         this.map = builder.build();
+    }
+
+    public static BlockState get(BlockState state) {
+        Block block = state.getBlock();
+        Block alias = BlockAliases.instance.map.getOrDefault(block, block);
+        return alias.defaultBlockState();
     }
 }

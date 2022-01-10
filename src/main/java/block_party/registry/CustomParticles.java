@@ -5,17 +5,13 @@ import block_party.client.particle.FireflyParticle;
 import block_party.client.particle.GinkgoParticle;
 import block_party.client.particle.SakuraParticle;
 import block_party.client.particle.WhiteSakuraParticle;
-import com.google.gson.JsonSyntaxException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 
 public class CustomParticles {
     public static final RegistryObject<SimpleParticleType> FIREFLY = BlockParty.PARTICLES.register("firefly", () -> new SimpleParticleType(false));

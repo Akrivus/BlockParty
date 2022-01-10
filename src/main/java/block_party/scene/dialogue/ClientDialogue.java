@@ -3,15 +3,12 @@ package block_party.scene.dialogue;
 import block_party.client.animation.Animation;
 import block_party.npc.BlockPartyNPC;
 import block_party.npc.automata.trait.Emotion;
-import block_party.registry.CustomSounds;
 import block_party.utils.JsonUtils;
 import block_party.utils.NBT;
 import com.google.common.collect.Maps;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.GsonHelper;
 
 import java.util.Map;
 
@@ -48,11 +45,14 @@ public class ClientDialogue {
             CompoundTag response = list.getCompound(i);
             ResponseIcon icon = ResponseIcon.CLOSE_DIALOGUE.fromValue(response.getString("Icon"));
             String text = null;
-            if (response.contains("Text"))
-                text = response.getString("Text");
+            if (response.contains("Text")) { text = response.getString("Text"); }
             responses.put(icon, text);
         }
         this.responses = responses;
+    }
+
+    public CompoundTag write() {
+        return this.write(new CompoundTag());
     }
 
     public CompoundTag write(CompoundTag compound) {
@@ -74,10 +74,6 @@ public class ClientDialogue {
         return compound;
     }
 
-    public CompoundTag write() {
-        return this.write(new CompoundTag());
-    }
-
     public void stage(BlockPartyNPC npc) {
         npc.setAnimationKey(this.animation);
         npc.setEmotion(this.emotion);
@@ -87,7 +83,7 @@ public class ClientDialogue {
         return this.text;
     }
 
-    public boolean isTooltip()  {
+    public boolean isTooltip() {
         return this.tooltip;
     }
 

@@ -14,9 +14,9 @@ public class Scene {
     }
 
     public boolean fulfills(BlockPartyNPC npc) {
-        for (ISceneRequirement requirement : this.requirements)
-            if (!requirement.verify(npc))
-                return false;
+        for (ISceneRequirement requirement : this.requirements) {
+            if (!requirement.verify(npc)) { return false; }
+        }
         return true;
     }
 

@@ -12,12 +12,12 @@ public class ShimenawaBlockEntity extends AbstractDataBlockEntity<NPC> {
     }
 
     @Override
-    public NPC getRow() {
-        return BlockPartyDB.NPCs.find(this.getDatabaseID());
+    public NPC getNewRow() {
+        return new NPC(this.getTileData());
     }
 
     @Override
-    public NPC getNewRow() {
-        return new NPC(this.getTileData());
+    public NPC getRow() {
+        return BlockPartyDB.NPCs.find(this.getDatabaseID());
     }
 }

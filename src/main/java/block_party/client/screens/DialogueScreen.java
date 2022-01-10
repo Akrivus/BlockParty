@@ -1,32 +1,26 @@
 package block_party.client.screens;
 
 import block_party.BlockParty;
-import block_party.client.animation.Animation;
 import block_party.client.screens.widget.RespondIconButton;
 import block_party.client.screens.widget.RespondTextButton;
 import block_party.db.records.NPC;
+import block_party.messages.CDialogueClose;
 import block_party.messages.CDialogueRespond;
 import block_party.npc.BlockPartyNPC;
-import block_party.scene.dialogue.ClientDialogue;
 import block_party.registry.CustomMessenger;
-import block_party.messages.CDialogueClose;
+import block_party.scene.dialogue.ClientDialogue;
 import block_party.scene.dialogue.ResponseIcon;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -55,25 +49,6 @@ public class DialogueScreen extends AbstractScreen {
         super(242, 48);
         this.dialogue = dialogue;
         this.npc = npc;
-    }
-
-    @Override
-    protected void init() {
-        this.start = this.minecraft.player.tickCount;
-        this.text = this.dialogue.getText();
-        this.name = this.npc.getName();
-        this.entity = this.npc.getClientEntity(this.minecraft);
-        this.dialogue.stage(this.entity);
-        this.buttonSeeResponse = new SeeButton(this, false);
-        this.buttonSeeDialogue = new SeeButton(this, true);
-        this.dialogue.getResponses().forEach((icon, text) -> {
-            this.responses.add(RespondButton.create(this, ++this.role, this.npc, icon, new TextComponent(text), this.dialogue.isTooltip()));
-        });
-        updateButtons(true);
-        if (this.dialogue.isVoiceLine()) {
-            this.playSound(this.dialogue.getVoice());
-            this.cursor = this.text.length();
-        }
     }
 
     @Override
@@ -130,10 +105,6 @@ public class DialogueScreen extends AbstractScreen {
         });
     }
 
-    public void playSound(SoundEvent sound) {
-        this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(sound, 1.0F));
-    }
-
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         switch (keyCode) {
@@ -157,20 +128,31 @@ public class DialogueScreen extends AbstractScreen {
     }
 
     @Override
-    public boolean isPauseScreen() {
-        return false;
+    protected void init() {
+        this.start = this.minecraft.player.tickCount;
+        this.text = this.dialogue.getText();
+        this.name = this.npc.getName();
+        this.entity = this.npc.getClientEntity(this.minecraft);
+        this.dialogue.stage(this.entity);
+        this.buttonSeeResponse = new SeeButton(this, false);
+        this.buttonSeeDialogue = new SeeButton(this, true);
+        this.dialogue.getResponses().forEach((icon, text) -> {
+            this.responses.add(RespondButton.create(this, ++this.role, this.npc, icon, new TextComponent(text), this.dialogue.isTooltip()));
+        });
+        updateButtons(true);
+        if (this.dialogue.isVoiceLine()) {
+            this.playSound(this.dialogue.getVoice());
+            this.cursor = this.text.length();
+        }
     }
 
-    private void setLines(String words, int i) {
-        this.lines[0] = this.lines[1] = this.lines[2] = "";
-        for (String word : words.split(" ")) {
-            String line = this.lines[i] + " " + word;
-            if (this.font.width(line) > 232) {
-                ++i;
-                line = word;
-            }
-            this.lines[i] = line;
-        }
+    public void playSound(SoundEvent sound) {
+        this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(sound, 1.0F));
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
     }
 
     private void updateButtons(boolean toggle) {
@@ -187,6 +169,56 @@ public class DialogueScreen extends AbstractScreen {
             this.responses.forEach((button) -> this.addRenderableWidget(button));
             this.addRenderableWidget(this.buttonSeeDialogue);
             this.removeWidget(this.buttonSeeResponse);
+        }
+    }
+
+    private void setLines(String words, int i) {
+        this.lines[0] = this.lines[1] = this.lines[2] = "";
+        for (String word : words.split(" ")) {
+            String line = this.lines[i] + " " + word;
+            if (this.font.width(line) > 232) {
+                ++i;
+                line = word;
+            }
+            this.lines[i] = line;
+        }
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public abstract static class RespondButton extends Button {
+        protected final ResponseIcon icon;
+        protected final String text;
+        protected final Font font;
+
+        public RespondButton(int posX, int posY, int sizeX, int sizeY, DialogueScreen parent, NPC npc, ResponseIcon icon, TextComponent text, boolean tooltip) {
+            super(posX, posY, sizeX, sizeY, text, (button) -> RespondButton.act(parent, npc, icon), tooltip ? (button, stack, x, y) -> parent.renderTooltip(stack, text, x, y) : NO_TOOLTIP);
+            this.icon = icon;
+            this.text = text.getText();
+            this.font = parent.font;
+        }
+
+        private static void act(DialogueScreen parent, NPC npc, ResponseIcon icon) {
+            CustomMessenger.send(new CDialogueRespond(npc.getID(), icon));
+            parent.onClose();
+        }
+
+        @Override
+        public void renderButton(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.setShaderTexture(0, DialogueScreen.DIALOGUE_TEXTURES);
+        }
+
+        protected void renderIcon(PoseStack stack, int posX, int posY) {
+            this.blit(stack, posX, posY, this.icon.ordinal() * 10, this.isHoveredOrFocused() ? 84 : 74, 10, 10);
+        }
+
+        public static RespondButton create(DialogueScreen parent, int index, NPC npc, ResponseIcon icon, TextComponent text, boolean tooltip) {
+            if (tooltip) {
+                return new RespondIconButton(parent, index, npc, icon, text);
+            } else {
+                return new RespondTextButton(parent, index, npc, icon, text);
+            }
         }
     }
 
@@ -219,44 +251,6 @@ public class DialogueScreen extends AbstractScreen {
                 this.ticks = 0.0F;
                 this.offset = 0;
                 this.backwards = false;
-            }
-        }
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public abstract static class RespondButton extends Button {
-        protected final ResponseIcon icon;
-        protected final String text;
-        protected final Font font;
-
-        public RespondButton(int posX, int posY, int sizeX, int sizeY, DialogueScreen parent, NPC npc, ResponseIcon icon, TextComponent text, boolean tooltip) {
-            super(posX, posY, sizeX, sizeY, text, (button) -> RespondButton.act(parent, npc, icon), tooltip ? (button, stack, x, y) -> parent.renderTooltip(stack, text, x, y) : NO_TOOLTIP);
-            this.icon = icon;
-            this.text = text.getText();
-            this.font = parent.font;
-        }
-
-        @Override
-        public void renderButton(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShaderTexture(0, DialogueScreen.DIALOGUE_TEXTURES);
-        }
-
-        protected void renderIcon(PoseStack stack, int posX, int posY) {
-            this.blit(stack, posX, posY, this.icon.ordinal() * 10, this.isHoveredOrFocused() ? 84 : 74, 10, 10);
-        }
-
-        private static void act(DialogueScreen parent, NPC npc, ResponseIcon icon) {
-            CustomMessenger.send(new CDialogueRespond(npc.getID(), icon));
-            parent.onClose();
-        }
-
-        public static RespondButton create(DialogueScreen parent, int index, NPC npc, ResponseIcon icon, TextComponent text, boolean tooltip) {
-            if (tooltip) {
-                return new RespondIconButton(parent, index, npc, icon, text);
-            } else {
-                return new RespondTextButton(parent, index, npc, icon, text);
             }
         }
     }

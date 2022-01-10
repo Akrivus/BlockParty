@@ -45,12 +45,6 @@ public class ShrineTabletBlock extends AbstractDataBlock<ShrineTabletBlockEntity
     }
 
     @Override
-    public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
-        BlockPattern.BlockPatternMatch match = this.getGatePattern().find(level, pos.relative(state.getValue(FACING).getOpposite()));
-        if (match != null) { super.setPlacedBy(level, pos, state, placer, stack); }
-    }
-
-    @Override
     public BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
@@ -75,6 +69,12 @@ public class ShrineTabletBlock extends AbstractDataBlock<ShrineTabletBlockEntity
         }
     }
 
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+        BlockPattern.BlockPatternMatch match = this.getGatePattern().find(level, pos.relative(state.getValue(FACING).getOpposite()));
+        if (match != null) { super.setPlacedBy(level, pos, state, placer, stack); }
+    }
+
     private BlockPattern getGatePattern() {
         return BlockPatternBuilder.start().aisle(
                 "#########",
@@ -93,6 +93,11 @@ public class ShrineTabletBlock extends AbstractDataBlock<ShrineTabletBlockEntity
     }
 
     @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new ShrineTabletBlockEntity(pos, state);
+    }
+
+    @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         Direction facing = context.getHorizontalDirection();
         if (context.getLevel().getBlockState(context.getClickedPos().relative(facing)).is(CustomTags.Blocks.SAKURA_WOOD)) {
@@ -105,10 +110,5 @@ public class ShrineTabletBlock extends AbstractDataBlock<ShrineTabletBlockEntity
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
-    }
-
-    @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new ShrineTabletBlockEntity(pos, state);
     }
 }

@@ -1,15 +1,15 @@
 buildscript {
-  repositories {
-    maven { url = 'https://files.minecraftforge.net/maven' }
-    mavenCentral()
-  }
-  dependencies {
-    classpath 'net.minecraftforge.gradle:ForgeGradle:5.1+'
-  }
+    repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:5.1+'
+    }
 }
 
 plugins {
-  id 'com.github.johnrengelman.shadow' version '7.0.0'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -21,49 +21,49 @@ archivesBaseName = 'BlockParty'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
-  mappings channel: 'official', version: '1.18.1'
-  accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    mappings channel: 'official', version: '1.18.1'
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
-  runs {
-    server { }
-    client { }
-    all {
-      mods { block_party { source sourceSets.main } }
-      workingDirectory file('run')
-      lazyToken('minecraft_classpath') {
-        configurations.integrate.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
-      }
+    runs {
+        server {}
+        client {}
+        all {
+            mods { block_party { source sourceSets.main } }
+            workingDirectory file('run')
+            lazyToken('minecraft_classpath') {
+                configurations.integrate.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
+            }
+        }
+        data {
+            args '--mod', 'block_party', '--all', '--output', file('src/generated/resources/')
+        }
     }
-    data {
-      args '--mod', 'block_party', '--all', '--output', file('src/generated/resources/')
-    }
-  }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 configurations {
-  integrate
-  implementation.extendsFrom integrate
+    integrate
+    implementation.extendsFrom integrate
 }
 
 dependencies {
-  minecraft 'net.minecraftforge:forge:1.18.1-39.0.7'
-  integrate 'org.xerial:sqlite-jdbc:3.36.0.2'
+    minecraft 'net.minecraftforge:forge:1.18.1-39.0.17'
+    integrate 'org.xerial:sqlite-jdbc:3.36.0.2'
 }
 
 shadowJar {
-  archiveName("${archivesBaseName}-${project.version}.jar")
-  configurations = [project.configurations.integrate]
+    archiveName("${archivesBaseName}-${project.version}.jar")
+    configurations = [project.configurations.integrate]
 }
 
 reobf {
-  shadowJar { }
+    shadowJar {}
 }
 
 tasks.build.dependsOn shadowJar
 jar.finalizedBy('reobfShadowJar')
 
 artifacts {
-  archives tasks.shadowJar
+    archives tasks.shadowJar
 }

@@ -36,8 +36,17 @@ public class DimBlockPos {
     }
 
     @Override
+    public int hashCode() {
+        return (int) (this.dim.toString().hashCode() + this.pos.asLong());
+    }
+
+    @Override
     public String toString() {
         return this.getDim().location().toString();
+    }
+
+    public ResourceKey<Level> getDim() {
+        return this.dim;
     }
 
     public BlockPos getPos() {
@@ -47,10 +56,6 @@ public class DimBlockPos {
     public void setPos(BlockPos pos) {
         this.chunk = new ChunkPos(this.pos = pos);
         this.isEmpty = false;
-    }
-
-    public ResourceKey<Level> getDim() {
-        return this.dim;
     }
 
     public boolean isEmpty() {
@@ -82,11 +87,6 @@ public class DimBlockPos {
         double bZ = this.chunk.getMinBlockZ() - 1;
         double eZ = bZ + 16 + 1;
         return new AABB(bX, bY, bZ, eX, eY, eZ);
-    }
-
-    @Override
-    public int hashCode() {
-        return (int)(this.dim.toString().hashCode() + this.pos.asLong());
     }
 
     public ChunkPos getChunk() {

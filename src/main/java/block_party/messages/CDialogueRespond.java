@@ -28,7 +28,6 @@ public class CDialogueRespond extends CNPCQuery {
     @Override
     public void onFound(NetworkEvent.Context context, ServerPlayer player) {
         BlockPartyNPC npc = this.npc.getServerEntity(player.getServer());
-        if (npc != null)
-            npc.setResponse(this.response);
+        if (npc != null) { npc.setResponse(this.response); }
     }
 }

@@ -7,11 +7,8 @@ import block_party.blocks.tree.SakuraTree;
 import block_party.blocks.tree.WhiteSakuraTree;
 import block_party.blocks.tree.WisteriaTree;
 import block_party.scene.SceneRequirement;
-import com.google.gson.JsonSyntaxException;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
@@ -19,8 +16,8 @@ import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.function.Supplier;
 
@@ -148,14 +145,10 @@ public class CustomBlocks {
     }
 
     private static void registerPottedPlants(FMLCommonSetupEvent e) {
-        flowerPot().addPlant(BlockParty.source("ginkgo_sapling"),
-                CustomBlocks.POTTED_GINKGO_SAPLING);
-        flowerPot().addPlant(BlockParty.source("sakura_sapling"),
-                CustomBlocks.POTTED_SAKURA_SAPLING);
-        flowerPot().addPlant(BlockParty.source("white_sakura_sapling"),
-                CustomBlocks.POTTED_WHITE_SAKURA_SAPLING);
-        flowerPot().addPlant(BlockParty.source("wisteria_sapling"),
-                CustomBlocks.POTTED_WISTERIA_SAPLING);
+        flowerPot().addPlant(BlockParty.source("ginkgo_sapling"), CustomBlocks.POTTED_GINKGO_SAPLING);
+        flowerPot().addPlant(BlockParty.source("sakura_sapling"), CustomBlocks.POTTED_SAKURA_SAPLING);
+        flowerPot().addPlant(BlockParty.source("white_sakura_sapling"), CustomBlocks.POTTED_WHITE_SAKURA_SAPLING);
+        flowerPot().addPlant(BlockParty.source("wisteria_sapling"), CustomBlocks.POTTED_WISTERIA_SAPLING);
     }
 
     private static FlowerPotBlock flowerPot() {
