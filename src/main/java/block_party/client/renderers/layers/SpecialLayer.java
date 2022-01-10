@@ -20,7 +20,7 @@ public class SpecialLayer extends RenderLayer<BlockPartyNPC, DollModel<BlockPart
     }
 
     public void render(PoseStack stack, MultiBufferSource buffer, int packedLight, BlockPartyNPC entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        Supplier<SpecialBlockOverlay> supplier = OVERLAYS.get(entity.getExternalBlockState().getBlock());
+        Supplier<SpecialBlockOverlay> supplier = OVERLAYS.get(entity.getBlock());
         if (entity.isInvisible() || supplier == null) { return; }
         supplier.get().render(this.getParentModel(), entity, stack, buffer, packedLight, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch);
     }

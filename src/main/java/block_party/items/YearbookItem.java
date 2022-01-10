@@ -2,7 +2,7 @@ package block_party.items;
 
 import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
-import block_party.custom.CustomMessenger;
+import block_party.registry.CustomMessenger;
 import block_party.messages.SOpenYearbook;
 import block_party.npc.BlockPartyNPC;
 import block_party.utils.sorters.ISortableItem;

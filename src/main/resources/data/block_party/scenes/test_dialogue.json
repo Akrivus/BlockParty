@@ -1,0 +1,39 @@
+{
+  "trigger": "block_party:right_click",
+  "requirements": [
+    "block_party:always"
+  ],
+  "actions": [
+    {
+      "type": "block_party:dialogue",
+      "action": {
+        "text": "What is up?",
+        "emotion": "block_party:happy",
+        "animation": "block_party:wave",
+        "responses": [
+          {
+            "icon": "block_party:green_checkmark",
+            "text": "Good!",
+            "actions": [
+              "block_party:transfer"
+            ]
+          },
+          {
+            "icon": "block_party:red_x",
+            "text": "Bad!",
+            "actions": [
+              "block_party:transfer"
+            ]
+          },
+          {
+            "icon": "block_party:chat_bubble",
+            "text": "Hello!",
+            "actions": [
+              "block_party:transfer"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,39 +1,35 @@
 package block_party.npc.automata.state;
 
 import block_party.npc.BlockPartyNPC;
-import block_party.npc.automata.IState;
-import block_party.npc.automata.State;
+import block_party.scene.ISceneAction;
 
 import java.util.function.Consumer;
 
-public class ConsumerState implements IState {
+public class ConsumerState implements ISceneAction {
     private final Consumer<BlockPartyNPC> consumer;
-    private final IState state;
+    private final ISceneAction state;
 
-    public ConsumerState(Consumer<BlockPartyNPC> consumer, IState state) {
+    public ConsumerState(Consumer<BlockPartyNPC> consumer, ISceneAction state) {
         this.consumer = consumer;
         this.state = state;
     }
 
     public ConsumerState(Consumer<BlockPartyNPC> consumer) {
-        this(consumer, State.RESET);
+        this(consumer, null);
     }
 
     @Override
-    public void terminate(BlockPartyNPC npc) { }
-
-    @Override
-    public void onTransfer(BlockPartyNPC npc) {
+    public void apply(BlockPartyNPC npc) {
         this.consumer.accept(npc);
     }
 
     @Override
-    public IState transfer(BlockPartyNPC npc) {
-        return this.state;
+    public boolean isComplete() {
+        return true;
     }
 
     @Override
-    public boolean isDone(BlockPartyNPC npc) {
-        return true;
+    public void onComplete() {
+
     }
 }

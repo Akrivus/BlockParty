@@ -1,0 +1,10 @@
+{
+  "texture": "minecraft:textures/doll/note_block.note22",
+  "block": "minecraft:note_block",
+  "props": [
+    {
+      "name": "note",
+      "value": 22
+    }
+  ]
+}

@@ -4,21 +4,24 @@ import block_party.db.BlockPartyDB;
 import block_party.blocks.entity.ShimenawaBlockEntity;
 import block_party.client.animation.AbstractAnimation;
 import block_party.client.animation.Animation;
-import block_party.convo.Dialogue;
-import block_party.convo.enums.Response;
+import block_party.messages.SOpenDialogue;
+import block_party.registry.*;
+import block_party.registry.resources.BlockAliases;
+import block_party.registry.resources.DollSounds;
 import block_party.db.Recordable;
 import block_party.db.records.NPC;
-import block_party.custom.CustomEntities;
-import block_party.custom.CustomMessenger;
-import block_party.custom.CustomSounds;
-import block_party.custom.CustomTags;
-import block_party.messages.SOpenDialogue;
 import block_party.npc.automata.*;
 import block_party.npc.automata.trait.BloodType;
 import block_party.npc.automata.trait.Dere;
 import block_party.npc.automata.trait.Emotion;
 import block_party.npc.automata.trait.Gender;
 import block_party.db.DimBlockPos;
+import block_party.scene.Scene;
+import block_party.scene.SceneRequirement;
+import block_party.scene.SceneTrigger;
+import block_party.scene.actions.DialogueAction;
+import block_party.scene.dialogue.ResponseIcon;
+import block_party.scene.dialogue.ClientDialogue;
 import block_party.utils.NBT;
 import block_party.utils.Trans;
 import net.minecraft.core.BlockPos;
@@ -36,10 +39,16 @@ import net.minecraft.tags.Tag;
 import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.behavior.Swim;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
+import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.target.NonTameRandomTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.animal.Cat;
+import net.minecraft.world.entity.animal.Rabbit;
+import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -56,7 +65,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.common.util.LazyOptional;
@@ -65,10 +73,10 @@ import net.minecraftforge.items.wrapper.InvWrapper;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class BlockPartyNPC extends PathfinderMob implements ContainerListener, Recordable<NPC>, MenuProvider {
     public static final EntityDataAccessor<Optional<BlockState>> BLOCK_STATE = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.BLOCK_STATE);
-    public static final EntityDataAccessor<Float> SCALE = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
     public static final EntityDataAccessor<Boolean> FOLLOWING = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<String> PLAYER_UUID = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
     public static final EntityDataAccessor<String> DATABASE_ID = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
@@ -91,8 +99,10 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     public final Automaton automaton;
     private final LazyOptional<?> itemHandler = LazyOptional.of(() -> new InvWrapper(this.inventory));
     private final Queue<Consumer<BlockPartyNPC>> nextTickOps;
+    private BlockState actualBlockState = Blocks.AIR.defaultBlockState();
     private CompoundTag tileEntityData = new CompoundTag();
-    private AbstractAnimation animation;
+    private AbstractAnimation animation = Animation.DEFAULT.get();
+    private DialogueAction dialogue;
     private int timeUntilHungry;
     private int timeUntilLonely;
     private int timeUntilStress;
@@ -113,14 +123,13 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     @Override
     public void defineSynchedData() {
         this.entityData.define(BLOCK_STATE, Optional.of(Blocks.AIR.defaultBlockState()));
-        this.entityData.define(SCALE, 1.0F);
         this.entityData.define(FOLLOWING, false);
         this.entityData.define(PLAYER_UUID, "00000000-0000-0000-0000-000000000000");
         this.entityData.define(DATABASE_ID, "-1");
         this.entityData.define(BLOOD_TYPE, BloodType.O.getValue());
         this.entityData.define(DERE, Dere.NYANDERE.getValue());
         this.entityData.define(EMOTION, Emotion.NORMAL.getValue());
-        this.entityData.define(GENDER, Gender.FEMININE.getValue());
+        this.entityData.define(GENDER, Gender.FEMALE.getValue());
         this.entityData.define(ANIMATION, Animation.DEFAULT.name());
         this.entityData.define(GIVEN_NAME, "Tokumei");
         this.entityData.define(SLOUCH, 0.0F);
@@ -137,8 +146,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
 
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
-        compound.putInt("BlockState", Block.getId(this.getInternalBlockState()));
-        compound.putFloat("Scale", this.getScale());
+        compound.putInt("BlockState", Block.getId(this.getActualBlockState()));
         compound.put("TileEntity", this.getTileEntityData());
         compound.putLong("DatabaseID", this.getDatabaseID());
         compound.putBoolean("Following", this.isFollowing());
@@ -154,7 +162,6 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         this.setBlockState(Block.stateById(compound.getInt("BlockState")));
-        this.setScale(compound.getFloat("Scale"));
         this.setTileEntityData(compound.getCompound("TileEntity"));
         this.setDatabaseID(compound.getLong("DatabaseID"));
         this.setFollowing(compound.getBoolean("Following"));
@@ -165,7 +172,6 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         this.timeSinceSlept = compound.getInt("TimeSinceSlept");
         this.automaton.read(compound);
         this.getRow().load(this);
-        System.out.println(this.getPlayerUUID());
         super.readAdditionalSaveData(compound);
         this.readyToSync = true;
     }
@@ -190,27 +196,22 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     }
 
     public void setBlockState(BlockState state) {
-        this.entityData.set(BLOCK_STATE, Optional.of(state));
+        this.entityData.set(BLOCK_STATE, Optional.of(BlockAliases.get(state)));
+        this.actualBlockState = state;
         if (this.isLocal()) {
-            this.setScale(state.is(CustomTags.FULLSIZED) ? 1.0F : this.getBlockVolume(state));
             this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, this.fireImmune() ? 0.0F : -1.0F);
             this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, this.fireImmune() ? 0.0F : -1.0F);
-            this.setCanFly(state.is(CustomTags.WINGED));
+            this.setCanFly(state.is(CustomTags.HAS_WINGS));
         }
     }
 
-    private float getBlockVolume(BlockState state) {
-        VoxelShape shape = state.getOcclusionShape(this.level, this.blockPosition());
-        float dX = (float) (shape.max(Direction.Axis.X) - shape.min(Direction.Axis.X));
-        float dY = (float) (shape.max(Direction.Axis.Y) - shape.min(Direction.Axis.Y));
-        float dZ = (float) (shape.max(Direction.Axis.Z) - shape.min(Direction.Axis.Z));
-        float volume = (float) (Math.cbrt(dX * dY * dZ));
-        return Float.isFinite(volume) ? Math.min(Math.max(volume, 0.25F), 1.5F) : 1.0F;
+    public Block getBlock() {
+        return this.getVisibleBlockState().getBlock();
     }
 
     @Override
     public boolean fireImmune() {
-        return !this.getInternalBlockState().isFlammable(this.level, this.blockPosition(), this.getDirection());
+        return !this.getActualBlockState().isFlammable(this.level, this.blockPosition(), this.getDirection());
     }
 
     public Component getTypeName() {
@@ -218,7 +219,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     }
 
     public String getBlockName() {
-        ResourceLocation block = Quirks.getRenderedBlock(this.getInternalBlockState().getBlock()).getRegistryName();
+        ResourceLocation block = this.getBlock().getRegistryName();
         return Trans.late(String.format("entity.block_party.%s.%s", block.getNamespace(), block.getPath()));
     }
 
@@ -238,25 +239,19 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     }
 
     public String getHonorific() {
-        String honorific = this.is(Gender.MASCULINE) ? "kun" : "chan";
-        if (this.is(CustomTags.FULLSIZED)) {
-            return honorific;
-        } else if (this.is(CustomTags.BABY) || this.getScale() < 1.0F) {
-            return "tan";
-        }
-        return honorific;
+        return this.getGender().getHonorific();
     }
 
-    public boolean is(ICondition condition) {
-        return condition.isTrue(this);
+    public boolean is(ITrait condition) {
+        return condition.isSharedWith(this);
     }
 
     public boolean is(Tag<Block> tag) {
-        return this.getExternalBlockState().is(tag);
+        return this.getVisibleBlockState().is(tag);
     }
 
-    public BlockState getExternalBlockState() {
-        return Quirks.getRenderedBlock(this.getInternalBlockState().getBlock()).defaultBlockState();
+    public BlockState getVisibleBlockState() {
+        return this.entityData.get(BLOCK_STATE).orElse(this.getActualBlockState());
     }
 
     @Override
@@ -264,17 +259,11 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
 
     @Override
     public InteractionResult interactAt(Player player, Vec3 vector, InteractionHand hand) {
-        return this.onInteract(player, player.getItemInHand(hand), hand);
-    }
-
-    public InteractionResult onInteract(Player player, ItemStack stack, InteractionHand hand) {
-        switch (hand) {
-        default:
-            this.setState(MarkovChain.start(0.8, State.JUMP).chain(0.2, State.LOOK_AT_PLAYER));
-            return InteractionResult.SUCCESS;
-        case OFF_HAND:
+        if (hand == InteractionHand.OFF_HAND)
             return InteractionResult.PASS;
-        }
+        if (this.isPlayer(player))
+            this.automaton.trigger(player.isCrouching() ? SceneTrigger.SHIFT_RIGHT_CLICK : SceneTrigger.RIGHT_CLICK);
+        return InteractionResult.SUCCESS;
     }
 
     public String getGivenName() {
@@ -353,6 +342,10 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     public void customServerAiStep() {
         Consumer<BlockPartyNPC> op = this.nextTickOps.poll();
         if (op != null) { op.accept(this); }
+        if (this.random.nextInt(20) == 0)
+            this.automaton.trigger(SceneTrigger.RANDOM_TICK);
+        if (this.isBeingLookedAt())
+            this.automaton.trigger(SceneTrigger.STARE);
     }
 
     @Override
@@ -376,21 +369,38 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         this.tileEntityData = compound == null ? new CompoundTag() : compound;
     }
 
-    public float getScale() {
-        return this.entityData.get(SCALE);
-    }
-
-    public void setScale(float scale) {
-        this.entityData.set(SCALE, scale);
-    }
-
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        return super.hurt(source, amount * this.getBlockBuffer());
+        Entity entity = source.getDirectEntity();
+        if (this.isPlayer(entity)) {
+            this.automaton.trigger(entity.isCrouching() ? SceneTrigger.SHIFT_LEFT_CLICK : SceneTrigger.LEFT_CLICK);
+            return false;
+        } else if (super.hurt(source, amount * this.getBlockBuffer())) {
+            this.automaton.trigger(SceneTrigger.HURT);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void setDialogue(DialogueAction dialogue) {
+        if (dialogue != null) {
+            SoundEvent voice = dialogue.hasVoiceLine() ? dialogue.getVoiceLine() : DollSounds.get(this, DollSounds.Sound.SAY);
+            ClientDialogue message = new ClientDialogue(dialogue.getText(), dialogue.isTooltip(), dialogue.getAnimation(), dialogue.getEmotion(), voice, dialogue.hasVoiceLine());
+            for (ResponseIcon icon : dialogue.responses.keySet())
+                message.add(icon, dialogue.responses.get(icon).getText());
+            CustomMessenger.send(this.getPlayer(), new SOpenDialogue(this.getRow(), message));
+            this.dialogue = dialogue;
+        }
+    }
+
+    public void setResponse(ResponseIcon response) {
+        if (this.dialogue != null)
+            this.dialogue.setResponse(response);
     }
 
     private float getBlockBuffer() {
-        return 0.5F / this.getInternalBlockState().getDestroySpeed(this.level, this.blockPosition());
+        return 0.5F / (this.getActualBlockState().getDestroySpeed(this.level, this.blockPosition()) + 1);
     }
 
     @Override
@@ -402,8 +412,8 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         }
     }
 
-    public BlockState getInternalBlockState() {
-        return this.entityData.get(BLOCK_STATE).orElseGet(() -> Blocks.AIR.defaultBlockState());
+    public BlockState getActualBlockState() {
+        return this.actualBlockState;
     }
 
     public boolean isFollowing() {
@@ -424,8 +434,25 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
 
     @Override
     protected void playStepSound(BlockPos pos, BlockState block) {
-        this.playSound(Quirks.getStepSound(this.getInternalBlockState()), 0.15F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+        this.playSound(DollSounds.get(this, DollSounds.Sound.STEP), 0.15F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
         super.playStepSound(pos, block);
+    }
+
+    @Override
+    public SoundEvent getHurtSound(DamageSource cause) {
+        return DollSounds.get(this, DollSounds.Sound.HURT);
+    }
+
+    @Override
+    public SoundEvent getDeathSound() {
+        return DollSounds.get(this, DollSounds.Sound.DEAD);
+    }
+
+    @Override
+    public SoundEvent getAmbientSound() {
+        if (this.isBlock(CustomTags.HAS_CAT_FEATURES))
+            return DollSounds.get(this, DollSounds.Sound.MEOW);
+        return super.getAmbientSound();
     }
 
     @Override
@@ -461,18 +488,14 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         return new DimBlockPos(this.level.dimension(), this.blockPosition());
     }
 
-    public void say(Player player, String line, Response... responses) {
-        if (line.length() > 128) { throw new IllegalArgumentException("Lines can't be over 128 characters long."); }
-        if (responses.length == 0) { responses = new Response[] { Response.CLOSE }; }
-        CustomMessenger.send(player, new SOpenDialogue(new Dialogue(this.getRow(), line, responses)));
-    }
-
     public Gender getGender() {
-        return this.isBlock(CustomTags.MALE) ? Gender.MASCULINE : Gender.FEMININE;
-    }
-
-    public void setGender(Gender gender) {
-        this.entityData.set(GENDER, gender.getValue());
+        if (this.isBlock(CustomTags.HAS_MALE_PRONOUNS)) {
+            return Gender.MALE;
+        } else if (this.isBlock(CustomTags.HAS_NONBINARY_PRONOUNS)) {
+            return Gender.NONBINARY;
+        } else {
+            return Gender.FEMALE;
+        }
     }
 
     public boolean isSitting() {
@@ -483,34 +506,32 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         return false;
     }
 
-    public void onMention(Player player, String message) {
-        this.playSound(CustomSounds.NPC_CONFUSED.get());
-        this.jumpFromGround();
-        this.setState(State.LOOK_AT_PLAYER);
-    }
-
     public void jumpFromGround() {
+        this.playSound(DollSounds.get(this, DollSounds.Sound.ATTACK));
         super.jumpFromGround();
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
-        if (SCALE.equals(key)) { this.refreshDimensions(); }
-        if (ANIMATION.equals(key)) { this.setAnimation(Animation.get(this.entityData.get(ANIMATION))); }
-        super.onSyncedDataUpdated(key);
-        if (this.hasRow()) {
-            this.getRow().update(this);
+    public boolean doHurtTarget(Entity target) {
+        boolean attacked = super.doHurtTarget(target);
+        if (attacked) {
+            this.playSound(DollSounds.get(this, DollSounds.Sound.ATTACK));
+            this.automaton.trigger(SceneTrigger.ATTACK);
         }
+        return attacked;
     }
 
     @Override
-    public EntityDimensions getDimensions(Pose pose) {
-        return super.getDimensions(pose).scale(this.getScale());
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        if (ANIMATION.equals(key)) { this.setAnimation(Animation.DEFAULT.fromValue(this.entityData.get(ANIMATION))); }
+        super.onSyncedDataUpdated(key);
+        if (this.hasRow())
+            this.getRow().update(this);
     }
 
     @Override
     protected float getStandingEyeHeight(Pose pose, EntityDimensions size) {
-        return 0.908203125F * this.getScale();
+        return 0.908203125F;
     }
 
     @Override
@@ -525,18 +546,13 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         this.itemHandler.invalidate();
     }
 
-    public void setState(IState state, IState... states) {
-        this.automaton.setState(this, state, states);
-    }
-
     public void playSound(SoundEvent sound) {
         this.playSound(sound, this.getSoundVolume(), this.getVoicePitch());
     }
 
     @Override
     public float getVoicePitch() {
-        float hardness = (1.0F - this.getBlockBuffer()) * 0.25F;
-        return super.getVoicePitch() + hardness + (1.0F - this.getScale());
+        return (super.getVoicePitch() + this.getBlockBuffer() + 0.6F) / 2;
     }
 
     public float[] getEyeColor() {
@@ -558,17 +574,17 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     }
 
     private int[] getAuraColor() {
-        MaterialColor block = this.getInternalBlockState().getMaterial().getColor();
+        MaterialColor block = this.getActualBlockState().getMaterial().getColor();
         return new int[] { block.col, 0xffffff };
     }
 
     public boolean isBlockGlowing() {
-        return this.isBlock(CustomTags.GLOWING);
+        return this.isBlock(CustomTags.HAS_GLOW);
     }
 
     public boolean isBlock(Tag<Block> tag) {
         try {
-            return this.getInternalBlockState().is(tag);
+            return this.getActualBlockState().is(tag);
         } catch (IllegalStateException e) {
             return false;
         }
@@ -611,7 +627,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     }
 
     public Emotion getEmotion() {
-        return Emotion.NORMAL.fromValue(this.entityData.get(GENDER));
+        return Emotion.NORMAL.fromValue(this.entityData.get(EMOTION));
     }
 
     public void setEmotion(Emotion emotion) {
@@ -626,6 +642,17 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
             return inventory.equals(this.inventory);
         }
         return false;
+    }
+
+    public boolean isBeingLookedAt() {
+        if (!this.isPlayerOnline()) { return false; }
+        Player player = this.getPlayer();
+        Vec3 look = player.getViewVector(1.0F).normalize();
+        Vec3 dist = new Vec3(this.getX() - player.getX(), this.getEyeY() - player.getEyeY(), this.getZ() - player.getZ());
+        double d0 = dist.length();
+        dist = dist.normalize();
+        double d1 = look.dot(dist);
+        return d1 > 1.0D - 0.025D / d0 ? player.hasLineOfSight(this) : false;
     }
 
     public boolean isPlayerBusy() {
@@ -653,17 +680,17 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         return this.isLocal() && this.readyToSync && this.getRow() != null;
     }
 
-    public void say(String key, Object... params) {
+    public void sayInChat(String key, Object... params) {
         this.level.players().forEach((player) -> {
-            if (player.distanceTo(this) < 8.0D) { this.say(player, key, params); }
+            if (player.distanceTo(this) < 8.0D) { this.sayInChat(player, key, params); }
         });
     }
 
-    public void say(Player player, String key, Object... params) {
-        this.say(player, new TranslatableComponent(key, params));
+    public void sayInChat(Player player, String key, Object... params) {
+        this.sayInChat(player, new TranslatableComponent(key, params));
     }
 
-    public void say(Player player, Component component) {
+    public void sayInChat(Player player, Component component) {
         player.sendMessage(component, player.getUUID());
     }
 
@@ -793,7 +820,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     }
 
     public Animation getAnimationKey() {
-        return Animation.valueOf(this.entityData.get(ANIMATION));
+        return Animation.DEFAULT.fromKey(this.entityData.get(ANIMATION));
     }
 
     public void setAnimationKey(Animation animation) {
@@ -813,7 +840,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     }
 
     public int getBaseAge() {
-        return (int) (this.getScale() * 5) + 13;
+        return 18;
     }
 
     public boolean isTimeBetween(int start, int end) {
@@ -823,7 +850,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
 
     public static boolean spawn(Level level, BlockPos block, BlockPos spawn, float yaw, float pitch, Dere dere, Player player) {
         BlockState state = level.getBlockState(block);
-        if (!state.is(CustomTags.Blocks.NPC_SPAWN_BLOCKS)) { return false; }
+        if (!state.is(CustomTags.Blocks.SPAWNS_DOLLS)) { return false; }
         BlockEntity extra = level.getBlockEntity(block);
         BlockPartyNPC npc = CustomEntities.NPC.get().create(level);
         npc.absMoveTo(spawn.getX() + 0.5D, spawn.getY(), spawn.getZ() + 0.5D, yaw, pitch);

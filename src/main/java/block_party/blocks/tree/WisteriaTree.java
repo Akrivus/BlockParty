@@ -1,6 +1,6 @@
 package block_party.blocks.tree;
 
-import block_party.custom.CustomBlocks;
+import block_party.registry.CustomBlocks;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.level.block.grower.AbstractTreeGrower;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;

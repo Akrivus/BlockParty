@@ -3,7 +3,7 @@ package block_party.client;
 import block_party.BlockParty;
 import block_party.client.model.DollModel;
 import block_party.client.renderers.DollRenderer;
-import block_party.custom.CustomEntities;
+import block_party.registry.CustomEntities;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.IEventBus;

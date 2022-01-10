@@ -1,8 +1,6 @@
 package block_party.npc.state;
 
 import block_party.npc.BlockPartyNPC;
-import block_party.npc.automata.IState;
-import block_party.npc.automata.State;
 import block_party.npc.automata.state.GoalState;
 
 public class LookAtPlayerState extends GoalState {
@@ -22,12 +20,7 @@ public class LookAtPlayerState extends GoalState {
     }
 
     @Override
-    protected void onComplete() {
+    public void onComplete() {
         this.totalTicks = 0;
-    }
-
-    @Override
-    public IState transfer(BlockPartyNPC npc) {
-        return State.RESET;
     }
 }

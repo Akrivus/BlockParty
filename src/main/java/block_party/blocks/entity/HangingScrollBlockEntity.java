@@ -1,26 +1,26 @@
 package block_party.blocks.entity;
 
-import block_party.custom.CustomBlockEntities;
-import block_party.npc.automata.Condition;
+import block_party.registry.CustomBlockEntities;
+import block_party.scene.SceneRequirement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class HangingScrollBlockEntity extends LocativeBlockEntity {
-    protected Condition condition;
+    protected SceneRequirement condition;
 
-    public HangingScrollBlockEntity(Condition condition, BlockPos pos, BlockState state) {
+    public HangingScrollBlockEntity(SceneRequirement condition, BlockPos pos, BlockState state) {
         super(CustomBlockEntities.HANGING_SCROLL.get(), pos, state);
         this.condition = condition;
     }
 
     public HangingScrollBlockEntity(BlockPos pos, BlockState state) {
-        this(Condition.NEVER, pos, state);
+        this(SceneRequirement.NEVER, pos, state);
     }
 
     @Override
     public void load(CompoundTag compound) {
-        this.condition = Condition.valueOf(compound.getString("Condition"));
+        this.condition = SceneRequirement.valueOf(compound.getString("Condition"));
         super.load(compound);
     }
 
@@ -31,7 +31,7 @@ public class HangingScrollBlockEntity extends LocativeBlockEntity {
     }
 
     @Override
-    public Condition getRequiredCondition() {
+    public SceneRequirement getRequiredCondition() {
         return this.condition;
     }
 

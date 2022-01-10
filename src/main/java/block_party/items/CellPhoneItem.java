@@ -2,7 +2,7 @@ package block_party.items;
 
 import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
-import block_party.custom.CustomMessenger;
+import block_party.registry.CustomMessenger;
 import block_party.messages.SOpenCellPhone;
 import block_party.utils.sorters.ISortableItem;
 import net.minecraft.world.InteractionHand;

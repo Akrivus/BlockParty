@@ -3,8 +3,9 @@ package block_party.db;
 import block_party.client.ShrineLocation;
 import block_party.db.records.*;
 import block_party.messages.SShrineList;
-import block_party.custom.CustomMessenger;
+import block_party.registry.CustomMessenger;
 import block_party.utils.NBT;
+import com.google.common.collect.Maps;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.nbt.CompoundTag;
@@ -21,6 +22,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.apache.commons.compress.utils.Lists;
 
 import java.io.File;
 import java.sql.Connection;
@@ -37,9 +39,9 @@ public class BlockPartyDB extends SavedData {
     public static NPC.Schema NPCs = new NPC.Schema();
     public static String KEY = "blockparty_db";
     public static ShrineLocation ShrineLocation;
-    public List<String> names = new ArrayList<>();
-    private final Map<UUID, List<Long>> byPlayer = new HashMap<>();
-    private final List<Connection> connections = new ArrayList<>();
+    public final List<String> names = Lists.newArrayList();
+    private final Map<UUID, List<Long>> byPlayer = Maps.newHashMap();
+    private final List<Connection> connections = Lists.newArrayList();
     private String database;
 
     public static BlockPartyDB load(CompoundTag compound) {

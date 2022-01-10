@@ -1,7 +1,7 @@
 package block_party.blocks.entity;
 
-import block_party.custom.CustomBlockEntities;
-import block_party.npc.automata.Condition;
+import block_party.registry.CustomBlockEntities;
+import block_party.scene.SceneRequirement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -11,8 +11,8 @@ public class WindChimesBlockEntity extends LocativeBlockEntity {
     }
 
     @Override
-    public Condition getRequiredCondition() {
-        return Condition.NEVER;
+    public SceneRequirement getRequiredCondition() {
+        return SceneRequirement.NEVER;
     }
 
     @Override

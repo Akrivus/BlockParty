@@ -1,8 +1,9 @@
 package block_party.npc.automata.trait;
 
 import block_party.npc.BlockPartyNPC;
-import block_party.npc.automata.IState;
 import block_party.npc.automata.ITrait;
+import block_party.scene.ISceneRequirement;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +21,11 @@ public enum BloodType implements ITrait<BloodType> {
     }
 
     @Override
+    public boolean isSharedWith(BlockPartyNPC npc) {
+        return npc.getBloodType() == this;
+    }
+
+    @Override
     public String getValue() {
         return this.name();
     }
@@ -27,9 +33,9 @@ public enum BloodType implements ITrait<BloodType> {
     @Override
     public BloodType fromValue(String key) {
         try {
-            return BloodType.valueOf(key);
+            return BloodType.valueOf(key.toUpperCase());
         } catch (IllegalArgumentException e) {
-            return BloodType.O;
+            return this;
         }
     }
 
@@ -47,15 +53,5 @@ public enum BloodType implements ITrait<BloodType> {
 
     public int getWeight() {
         return this.weight;
-    }
-
-    @Override
-    public boolean isTrue(BlockPartyNPC entity) {
-        return entity.getBloodType() == this;
-    }
-
-    @Override
-    public IState getStemState() {
-        return null;
     }
 }

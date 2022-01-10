@@ -1,12 +1,13 @@
 package block_party.npc.automata.state;
 
 import block_party.npc.BlockPartyNPC;
-import block_party.npc.automata.IState;
+import block_party.scene.ISceneAction;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.EnumSet;
 
-public abstract class GoalState extends Goal implements IState {
+public abstract class GoalState extends Goal implements ISceneAction {
     protected boolean complete;
     protected BlockPartyNPC npc;
     private final int priority;
@@ -16,8 +17,6 @@ public abstract class GoalState extends Goal implements IState {
         this.setFlags(EnumSet.of(flag, flags));
         this.priority = priority;
     }
-
-    protected abstract void onComplete();
 
     protected abstract boolean canCompleteOnFirstTry();
 
@@ -56,17 +55,17 @@ public abstract class GoalState extends Goal implements IState {
     }
 
     @Override
-    public void terminate(BlockPartyNPC npc) {
-        npc.goalSelector.removeGoal(this);
-    }
-
-    @Override
-    public void onTransfer(BlockPartyNPC npc) {
+    public void apply(BlockPartyNPC npc) {
         (this.npc = npc).goalSelector.addGoal(this.priority, this);
     }
 
     @Override
-    public boolean isDone(BlockPartyNPC npc) {
+    public void onComplete() {
+        this.npc.goalSelector.removeGoal(this);
+    }
+
+    @Override
+    public boolean isComplete() {
         return this.done;
     }
 }

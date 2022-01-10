@@ -1,5 +1,6 @@
 package block_party.world.chunk;
 
+import com.google.common.collect.Maps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -8,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ForcedChunk {
-    private static final Map<Long, ForcedChunk> chunks = new LinkedHashMap<>();
+    private static final Map<Long, ForcedChunk> chunks = Maps.newLinkedHashMap();
 
     private final Level level;
     private final ChunkPos pos;

@@ -7,7 +7,7 @@ import block_party.client.renderers.layers.EmoteLayer;
 import block_party.client.renderers.layers.GlowLayer;
 import block_party.client.renderers.layers.SpecialLayer;
 import block_party.npc.BlockPartyNPC;
-import block_party.npc.Quirks;
+import block_party.registry.resources.DollTextures;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
@@ -32,8 +32,8 @@ public class DollRenderer extends MobRenderer<BlockPartyNPC, DollModel<BlockPart
     }
 
     @Override
-    public ResourceLocation getTextureLocation(BlockPartyNPC entity) {
-        return Quirks.getNameOf(entity.getExternalBlockState());
+    public ResourceLocation getTextureLocation(BlockPartyNPC npc) {
+        return DollTextures.get(npc);
     }
 
     @Override
@@ -63,10 +63,8 @@ public class DollRenderer extends MobRenderer<BlockPartyNPC, DollModel<BlockPart
     @Override
     public void scale(BlockPartyNPC entity, PoseStack stack, float partialTickTime) {
         super.scale(entity, stack, partialTickTime);
-        entity.getAnimation().render(entity, stack, partialTickTime);
         stack.scale(0.9375F, 0.9375F, 0.9375F);
         if (entity.getAnimationKey() == Animation.YEARBOOK) { return; }
-        stack.scale(entity.getScale(), entity.getScale(), entity.getScale());
-        this.shadowRadius = entity.getScale() * 0.25F;
+        this.shadowRadius = 0.25F;
     }
 }

@@ -1,7 +1,7 @@
 package block_party.blocks.entity;
 
-import block_party.custom.CustomBlockEntities;
-import block_party.npc.automata.Condition;
+import block_party.scene.SceneRequirement;
+import block_party.registry.CustomBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -11,8 +11,8 @@ public class PaperLanternBlockEntity extends LocativeBlockEntity {
     }
 
     @Override
-    public Condition getRequiredCondition() {
-        return Condition.ALWAYS;
+    public SceneRequirement getRequiredCondition() {
+        return SceneRequirement.ALWAYS;
     }
 
     @Override

@@ -1,6 +1,6 @@
 package block_party.messages;
 
-import block_party.custom.CustomMessenger;
+import block_party.registry.CustomMessenger;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;

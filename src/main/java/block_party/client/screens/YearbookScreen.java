@@ -1,9 +1,9 @@
 package block_party.client.screens;
 
 import block_party.BlockParty;
-import block_party.custom.CustomMessenger;
+import block_party.registry.CustomMessenger;
 import block_party.client.animation.Animation;
-import block_party.custom.CustomSounds;
+import block_party.registry.CustomSounds;
 import block_party.messages.CRemovePage;
 import block_party.npc.BlockPartyNPC;
 import block_party.utils.Trans;
@@ -60,13 +60,19 @@ public class YearbookScreen extends ControllerScreen {
         this.stats[3] = String.format("%.0f", this.entity.getStress());
         this.lines[0] = Trans.late(this.entity.getDere().getTranslationKey());
         this.lines[1] = Trans.late(this.entity.getBloodType().getTranslationKey());
-        this.lines[2] = String.format(Trans.late("characteristic.block_party.age"), this.entity.getAgeInYears());
+        this.lines[2] = String.format(Trans.late("trait.block_party.age"), this.entity.getAgeInYears());
         if (this.npc.isEstrangedFrom(this.getPlayer())) {
-            this.lines[3] = Trans.late("characteristic.block_party.storyphase.estranged");
+            this.lines[3] = Trans.late("trait.block_party.relationship.estranged");
         } else if (this.npc.isDead()) {
-            this.lines[3] = Trans.late("characteristic.block_party.storyphase.dead");
+            this.lines[3] = Trans.late("trait.block_party.relationship.dead");
+        } else if (this.entity.getLoyalty() > 18) {
+            this.lines[3] = Trans.late("trait.block_party.relationship.obsessed");
+        } else if (this.entity.getLoyalty() > 15) {
+            this.lines[3] = Trans.late("trait.block_party.relationship.close");
+        } else if (this.entity.getLoyalty() > 10) {
+            this.lines[3] = Trans.late("trait.block_party.relationship.friendly");
         } else {
-            this.lines[3] = Trans.late("characteristic.block_party.storyphase.introduction");
+            this.lines[3] = Trans.late("trait.block_party.relationship.acquainted");
         }
     }
 
@@ -109,16 +115,16 @@ public class YearbookScreen extends ControllerScreen {
         }
         if (102 < mouseY && mouseY < 112) {
             if (this.getAbsoluteCenter(50) < mouseX && mouseX < this.getAbsoluteCenter(24)) {
-                //text.add(new StringTextComponent(Trans.late(this.entity.getState(HealthState.class).getTranslationKey())));
+                text.add(new TranslatableComponent("gui.block_party.label.health"));
             }
             if (this.getAbsoluteCenter(24) < mouseX && mouseX < this.getAbsoluteCenter(2)) {
-                //text.add(new StringTextComponent(Trans.late(this.entity.getState(HungerState.class).getTranslationKey())));
+                text.add(new TranslatableComponent("gui.block_party.label.energy"));
             }
             if (this.getAbsoluteCenter(2) < mouseX && mouseX < this.getAbsoluteCenter(-24)) {
-                //text.add(new StringTextComponent(Trans.late(this.entity.getState(LoveState.class).getTranslationKey())));
+                text.add(new TranslatableComponent("gui.block_party.label.loyalty"));
             }
             if (this.getAbsoluteCenter(-24) < mouseX && mouseX < this.getAbsoluteCenter(-50)) {
-                //text.add(new StringTextComponent(Trans.late(this.entity.getState(StressState.class).getTranslationKey())));
+                text.add(new TranslatableComponent("gui.block_party.label.stress"));
             }
         }
         if (text.size() > 0) {
@@ -143,34 +149,24 @@ public class YearbookScreen extends ControllerScreen {
         }
     }
 
-    public void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
-        if (entity == null) { return; }
-        PoseStack pose = RenderSystem.getModelViewStack();
-        pose.pushPose();
-        pose.translate(posX, posY, 1050.0);
-        pose.scale(-1.0F, -1.0F, -1.0F);
-        RenderSystem.applyModelViewMatrix();
-        PoseStack stack = new PoseStack();
-        stack.translate(0.0D, 0.0D, 1000.0D);
-        stack.scale(scale, scale, scale);
-        stack.mulPose(new Quaternion(0.0F, -1.0F, 0.0F, 0.0F));
-        Lighting.setupForEntityInInventory();
-        EntityRenderDispatcher renderer = this.minecraft.getEntityRenderDispatcher();
-        renderer.setRenderShadow(false);
-        MultiBufferSource.BufferSource buffer = this.minecraft.renderBuffers().bufferSource();
-        renderer.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, stack, buffer, 0xf000f0);
-        buffer.endBatch();
-        renderer.setRenderShadow(true);
-        pose.popPose();
-        RenderSystem.applyModelViewMatrix();
-        Lighting.setupFor3DItems();
-    }
-
     public void renderBook(PoseStack stack) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
         this.blit(stack, this.getCenter(146), 2, 0, 0, 146, 187);
+    }
+
+    @Override
+    protected void setEntityViewStack(PoseStack pose, int posX, int posY) {
+        pose.translate(posX, posY, 1050.0);
+        pose.scale(-1.0F, -1.0F, -1.0F);
+    }
+
+    @Override
+    protected void setEntityModelStack(PoseStack pose, float scale) {
+        pose.translate(0.0D, 0.0D, 1000.0D);
+        pose.scale(scale, scale, scale);
+        pose.mulPose(new Quaternion(0.0F, -1.0F, 0.0F, 0.0F));
     }
 
     @Override

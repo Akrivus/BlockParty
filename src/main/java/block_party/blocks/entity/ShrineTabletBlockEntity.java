@@ -1,9 +1,9 @@
 package block_party.blocks.entity;
 
-import block_party.custom.CustomMessenger;
+import block_party.registry.CustomMessenger;
 import block_party.db.BlockPartyDB;
 import block_party.db.records.Shrine;
-import block_party.custom.CustomBlockEntities;
+import block_party.registry.CustomBlockEntities;
 import block_party.messages.SShrineList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;

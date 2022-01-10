@@ -2,8 +2,8 @@ package block_party.client.screens;
 
 import block_party.BlockParty;
 import block_party.db.records.NPC;
-import block_party.custom.CustomMessenger;
-import block_party.custom.CustomSounds;
+import block_party.registry.CustomMessenger;
+import block_party.registry.CustomSounds;
 import block_party.messages.CNPCTeleport;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;

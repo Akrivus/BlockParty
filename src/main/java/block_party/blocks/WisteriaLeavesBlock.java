@@ -1,6 +1,6 @@
 package block_party.blocks;
 
-import block_party.custom.CustomBlocks;
+import block_party.registry.CustomBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.LeavesBlock;

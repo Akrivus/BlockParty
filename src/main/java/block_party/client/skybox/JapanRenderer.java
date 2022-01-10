@@ -1,9 +1,8 @@
 package block_party.client.skybox;
 
 import block_party.BlockParty;
-import block_party.client.ShrineLocation;
-import block_party.custom.CustomParticles;
-import block_party.custom.CustomTags;
+import block_party.registry.CustomParticles;
+import block_party.registry.CustomTags;
 import block_party.db.BlockPartyDB;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -74,7 +73,7 @@ public class JapanRenderer {
             float z = level.random.nextInt(128) - 64;
             for (int y = 0; y > e.player.getY() - 255; --y) {
                 BlockPos pos = e.player.blockPosition().offset(x, y, z);
-                if (level.getBlockState(pos).is(CustomTags.Blocks.FIREFLY_BLOCKS)) {
+                if (level.getBlockState(pos).is(CustomTags.Blocks.SPAWNS_FIREFLIES)) {
                     level.addParticle(CustomParticles.FIREFLY.get(),
                             pos.getX(),
                             pos.getY(),

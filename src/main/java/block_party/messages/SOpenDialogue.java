@@ -1,32 +1,34 @@
 package block_party.messages;
 
 import block_party.client.screens.DialogueScreen;
-import block_party.convo.Dialogue;
+import block_party.db.records.NPC;
+import block_party.scene.dialogue.ClientDialogue;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
 public class SOpenDialogue extends AbstractMessage.Server {
-    private final Dialogue dialogue;
+    private final NPC npc;
+    private final ClientDialogue dialogue;
 
     public SOpenDialogue(FriendlyByteBuf buffer) {
-        this(new Dialogue(buffer.readNbt()));
+        this(new NPC(buffer.readNbt()), new ClientDialogue(buffer.readNbt()));
     }
 
-    public SOpenDialogue(Dialogue dialogue) {
-        super();
+    public SOpenDialogue(NPC npc, ClientDialogue dialogue) {
+        this.npc = npc;
         this.dialogue = dialogue;
     }
 
     @Override
     public void encode(FriendlyByteBuf buffer) {
-        buffer.writeNbt(this.dialogue.write(new CompoundTag()));
+        buffer.writeNbt(this.npc.write());
+        buffer.writeNbt(this.dialogue.write());
     }
 
     @Override
     public void handle(NetworkEvent.Context context, Minecraft minecraft) {
         if (minecraft.screen != null) { minecraft.screen.onClose(); }
-        minecraft.setScreen(new DialogueScreen(this.dialogue));
+        minecraft.setScreen(new DialogueScreen(this.dialogue, this.npc));
     }
 }

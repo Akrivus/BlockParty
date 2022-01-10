@@ -2,7 +2,6 @@ package block_party.client.renderers.layers;
 
 import block_party.client.model.DollModel;
 import block_party.npc.BlockPartyNPC;
-import block_party.npc.Quirks;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -31,7 +30,9 @@ public class GlowLayer extends RenderLayer<BlockPartyNPC, DollModel<BlockPartyNP
         return renderInfo.getPosition().distanceTo(pos) < 16;
     }
 
-    public ResourceLocation getTexture(BlockPartyNPC entity) {
-        return Quirks.getNameOf(entity.getExternalBlockState(), "glow");
+    public ResourceLocation getTexture(BlockPartyNPC npc) {
+        ResourceLocation block = npc.getBlock().getRegistryName();
+        String path = String.format("textures/doll/%s.glow.png", block.getPath());
+        return new ResourceLocation(block.getNamespace(), path);
     }
 }

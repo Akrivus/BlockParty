@@ -5,7 +5,7 @@ import block_party.blocks.entity.LocativeBlockEntity;
 import block_party.db.sql.Column;
 import block_party.db.sql.Row;
 import block_party.db.sql.Table;
-import block_party.npc.automata.Condition;
+import block_party.scene.SceneRequirement;
 import net.minecraft.nbt.CompoundTag;
 
 import java.sql.ResultSet;
@@ -46,7 +46,7 @@ public class Location extends Row<LocativeBlockEntity> {
     public static class Schema extends Table<Location> {
         public Schema() {
             super("Locations");
-            this.addColumn(new Column.AsEnum<>(this, "RequiredCondition", Condition.ALWAYS, (value) -> Condition.valueOf(value)));
+            this.addColumn(new Column.AsEnum<>(this, "RequiredCondition", SceneRequirement.ALWAYS, (value) -> SceneRequirement.valueOf(value)));
             this.addColumn(new Column.AsInteger(this, "Priority"));
         }
 

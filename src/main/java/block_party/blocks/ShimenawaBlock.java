@@ -1,7 +1,7 @@
 package block_party.blocks;
 
 import block_party.blocks.entity.ShimenawaBlockEntity;
-import block_party.custom.CustomTags;
+import block_party.registry.CustomTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -42,7 +42,7 @@ public class ShimenawaBlock extends AbstractDataBlock<ShimenawaBlockEntity> {
     @Override
     public boolean canSurvive(BlockState state, LevelReader reader, BlockPos pos) {
         BlockPos base = pos.relative(state.getValue(HANGING) ? Direction.UP : state.getValue(FACING).getOpposite());
-        return reader.getBlockState(base).is(CustomTags.Blocks.NPC_SPAWN_BLOCKS);
+        return reader.getBlockState(base).is(CustomTags.Blocks.SPAWNS_DOLLS);
     }
 
     @Override

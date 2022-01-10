@@ -1,7 +1,15 @@
 package block_party.client.screens;
 
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Quaternion;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 
 public class AbstractScreen extends Screen {
     protected final int white = 0xffffff;
@@ -53,5 +61,37 @@ public class AbstractScreen extends Screen {
 
     public int getAbsoluteCenter(int margin) {
         return this.getCenter(0) - margin;
+    }
+
+    public Player getPlayer() {
+        return this.minecraft.player;
+    }
+
+    protected void setEntityViewStack(PoseStack pose, int posX, int posY) {
+
+    }
+
+    protected void setEntityModelStack(PoseStack pose, float scale) {
+
+    }
+
+    protected void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
+        if (entity == null) { return; }
+        PoseStack pose = RenderSystem.getModelViewStack();
+        pose.pushPose();
+        this.setEntityViewStack(pose, posX, posY);
+        RenderSystem.applyModelViewMatrix();
+        PoseStack stack = new PoseStack();
+        this.setEntityModelStack(stack, scale);
+        Lighting.setupForEntityInInventory();
+        EntityRenderDispatcher renderer = this.minecraft.getEntityRenderDispatcher();
+        renderer.setRenderShadow(false);
+        MultiBufferSource.BufferSource buffer = this.minecraft.renderBuffers().bufferSource();
+        renderer.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, stack, buffer, 0xf000f0);
+        buffer.endBatch();
+        renderer.setRenderShadow(true);
+        pose.popPose();
+        RenderSystem.applyModelViewMatrix();
+        Lighting.setupFor3DItems();
     }
 }

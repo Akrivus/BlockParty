@@ -4,7 +4,7 @@ import block_party.db.BlockPartyDB;
 import block_party.db.sql.Column;
 import block_party.db.sql.Row;
 import block_party.db.sql.Table;
-import block_party.custom.CustomEntities;
+import block_party.registry.CustomEntities;
 import block_party.npc.BlockPartyNPC;
 import block_party.npc.automata.trait.BloodType;
 import block_party.npc.automata.trait.Dere;
@@ -61,7 +61,7 @@ public class NPC extends Row<BlockPartyNPC> {
         this.get(POS).set(entity.getDimBlockPos());
         this.get(PLAYER_UUID).set(entity.getPlayerUUID());
         this.get(NAME).set(entity.getGivenName());
-        this.get(BLOCK_STATE).set(entity.getInternalBlockState());
+        this.get(BLOCK_STATE).set(entity.getActualBlockState());
         this.get(BLOOD_TYPE).set(entity.getBloodType());
         this.get(DERE).set(entity.getDere());
         this.get(HEALTH).set(entity.getHealth());

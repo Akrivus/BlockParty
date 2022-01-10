@@ -1,6 +1,6 @@
 package block_party.blocks;
 
-import block_party.custom.CustomSounds;
+import block_party.registry.CustomSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;

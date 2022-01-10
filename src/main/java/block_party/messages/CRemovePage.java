@@ -1,6 +1,6 @@
 package block_party.messages;
 
-import block_party.custom.CustomItems;
+import block_party.registry.CustomItems;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
