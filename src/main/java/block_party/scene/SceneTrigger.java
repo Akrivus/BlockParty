@@ -3,15 +3,31 @@ package block_party.scene;
 import net.minecraft.resources.ResourceLocation;
 
 public enum SceneTrigger {
-    SHIFT_LEFT_CLICK(6),
-    LEFT_CLICK(6),
-    SHIFT_RIGHT_CLICK(5),
-    RIGHT_CLICK(5),
-    HURT(4),
-    ATTACK(3),
-    STARE(2),
+    CREATION(10),
+    SHIFT_LEFT_CLICK(9),
+    LEFT_CLICK(9),
+    SHIFT_RIGHT_CLICK(8),
+    RIGHT_CLICK(8),
+    HURT(7),
+    ATTACK(6),
+    STARE(5),
+    SNOWY_WEATHER(4),
+    STORMY_WEATHER(4),
+    RAINY_WEATHER(4),
+    CLEAR_WEATHER(4),
+    FULL_MOON(3),
+    GIBBOUS_MOON(3),
+    CRESCENT_MOON(3),
+    NEW_MOON(3),
+    SUNRISE(2),
+    NOON(2),
+    SUNSET(2),
+    NIGHT(2),
+    EVERY_MINUTE(1),
+    EVERY_SECOND(1),
+    EVERY_TICK(1),
     RANDOM_TICK(1),
-    INITIALIZED(0);
+    NULL(0);
 
     private final int priority;
 

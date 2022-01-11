@@ -48,7 +48,7 @@ public class SceneManager extends SimpleJsonResourceReloadListener {
             ResourceLocation location = entry.getKey();
             JsonObject json = GsonHelper.convertToJsonObject(entry.getValue(), "scene");
 
-            SceneTrigger trigger = SceneTrigger.INITIALIZED.fromValue(JsonUtils.getAsResourceLocation(json, "trigger"));
+            SceneTrigger trigger = SceneTrigger.NULL.fromValue(JsonUtils.getAsResourceLocation(json, "trigger"));
 
             List<ISceneRequirement> requirements = ISceneRequirement.parseArray(json.getAsJsonArray("requirements"));
             List<ISceneAction> actions = ISceneAction.parseArray(json.getAsJsonArray("actions"));

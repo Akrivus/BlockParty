@@ -10,10 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -71,24 +68,27 @@ public class ShrineTabletBlock extends AbstractDataBlock<ShrineTabletBlockEntity
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
-        BlockPattern.BlockPatternMatch match = this.getGatePattern().find(level, pos.relative(state.getValue(FACING).getOpposite()));
+        BlockPos check = pos.relative(state.getValue(FACING).getOpposite());
+        BlockPattern.BlockPatternMatch match = this.getGatePattern().find(level, check);
         if (match != null) { super.setPlacedBy(level, pos, state, placer, stack); }
     }
 
     private BlockPattern getGatePattern() {
-        return BlockPatternBuilder.start().aisle(
+        return BlockPatternBuilder.start(
+        ).where('#', BlockInWorld.hasState((state) -> state.is(CustomTags.Blocks.SAKURA_WOOD))
+        ).where('X', BlockInWorld.hasState((state) -> state.is(CustomTags.Blocks.SHRINE_BASE_BLOCKS))
+        ).where('~', BlockInWorld.hasState((state) -> state.isAir()) // state.is(CustomBlocks.SHIMENAWA.get())
+        ).where('.', BlockInWorld.hasState((state) ->!state.canOcclude())
+        ).where(' ', BlockInWorld.hasState((state) -> state.isAir())
+        ).aisle(
                 "#########",
-                "  # # #  ",
+                " .#.#.#. ",
                 " ####### ",
                 "  #~~~#  ",
                 "  #   #  ",
                 "  #   #  ",
                 "  #   #  ",
-                "  X   X  "
-        ).where('#', BlockInWorld.hasState((state) -> state.is(CustomTags.Blocks.SAKURA_WOOD))
-        ).where('X', BlockInWorld.hasState((state) -> state.is(CustomTags.Blocks.SHRINE_BASE_BLOCKS))
-        ).where('~', BlockInWorld.hasState((state) -> !state.canOcclude() || state.is(CustomBlocks.SHIMENAWA.get()))
-        ).where(' ', BlockInWorld.hasState((state) -> !state.canOcclude())
+                "..X...X.."
         ).build();
     }
 

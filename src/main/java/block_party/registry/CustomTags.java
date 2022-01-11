@@ -18,7 +18,7 @@ public class CustomTags {
         public static final Tag.Named<Block> SAKURA_WOOD = BlockTags.createOptional(BlockParty.source("sakura_wood"));
         public static final Tag.Named<Block> SHRINE_BASE_BLOCKS = BlockTags.createOptional(BlockParty.source("shrine_base_blocks"));
         public static final Tag.Named<Block> SPAWNS_DOLLS = BlockTags.createOptional(BlockParty.source("spawns_dolls"));
-        public static final Tag.Named<Block> SPAWNS_FIREFLIES = BlockTags.createOptional(BlockParty.source("spawns_fireflys"));
+        public static final Tag.Named<Block> SPAWNS_FIREFLIES = BlockTags.createOptional(BlockParty.source("spawns_fireflies"));
         public static final Tag.Named<Block> WISTERIA = BlockTags.createOptional(BlockParty.source("wisteria"));
     }
 

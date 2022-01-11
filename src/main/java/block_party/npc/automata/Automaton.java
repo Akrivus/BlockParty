@@ -14,7 +14,7 @@ import java.util.List;
 
 public class Automaton {
     protected final BlockPartyNPC npc;
-    protected SceneTrigger trigger = SceneTrigger.INITIALIZED;
+    protected SceneTrigger trigger = SceneTrigger.CREATION;
     protected LinkedList<ISceneAction> actions;
     protected ISceneAction action;
 
@@ -42,7 +42,7 @@ public class Automaton {
             this.action.onComplete();
             this.action = null;
         }
-        if (this.action == null) { this.trigger = SceneTrigger.INITIALIZED; }
+        if (this.action == null) { this.trigger = SceneTrigger.NULL; }
     }
 
     public void trigger(SceneTrigger trigger) {
