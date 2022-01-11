@@ -6,6 +6,8 @@ import block_party.registry.SceneActions;
 import block_party.scene.ISceneAction;
 import block_party.scene.Scene;
 import block_party.scene.SceneTrigger;
+import block_party.scene.dialogue.Cookies;
+import block_party.scene.dialogue.Counters;
 import com.google.common.collect.Lists;
 import net.minecraft.nbt.CompoundTag;
 
@@ -17,6 +19,8 @@ public class Automaton {
     protected SceneTrigger trigger = SceneTrigger.CREATION;
     protected LinkedList<ISceneAction> actions;
     protected ISceneAction action;
+    protected Cookies cookies = new Cookies();
+    protected Counters counters = new Counters();
 
     public Automaton(BlockPartyNPC npc) {
         this.actions = Lists.newLinkedList();
@@ -25,11 +29,13 @@ public class Automaton {
     }
 
     public void read(CompoundTag compound) {
-
+        this.cookies = new Cookies(compound);
+        this.counters = new Counters(compound);
     }
 
     public void write(CompoundTag compound) {
-
+        this.cookies.save(compound);
+        this.counters.save(compound);
     }
 
     public void tick(BlockPartyNPC npc) {
