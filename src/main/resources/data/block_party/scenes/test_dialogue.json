@@ -1,6 +1,6 @@
 {
   "trigger": "block_party:right_click",
-  "requirements": [
+  "filters": [
     "block_party:always"
   ],
   "actions": [

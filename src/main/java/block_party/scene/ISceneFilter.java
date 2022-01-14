@@ -1,7 +1,7 @@
 package block_party.scene;
 
 import block_party.npc.BlockPartyNPC;
-import block_party.registry.SceneRequirements;
+import block_party.registry.SceneFilters;
 import block_party.utils.JsonUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
@@ -11,22 +11,22 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
-public interface ISceneRequirement {
+public interface ISceneFilter {
     boolean verify(BlockPartyNPC npc);
 
-    static List<ISceneRequirement> parseArray(JsonArray array) {
-        ImmutableList.Builder<ISceneRequirement> requirements = ImmutableList.builder();
+    static List<ISceneFilter> parseArray(JsonArray array) {
+        ImmutableList.Builder<ISceneFilter> filters = ImmutableList.builder();
         for (int i = 0; i < array.size(); ++i) {
             JsonElement member = array.get(i);
             ResourceLocation location = null;
             if (member.isJsonObject()) { location = JsonUtils.getAsResourceLocation(member.getAsJsonObject(), "type"); }
             if (member.isJsonPrimitive()) { location = new ResourceLocation(member.getAsString()); }
             if (location == null) { continue; }
-            ISceneRequirement requirement = JsonUtils.<SceneRequirements.Factory>getAs(JsonUtils.SCENE_REQUIREMENT, location).get();
-            if (member.isJsonObject()) { requirement.parse(member.getAsJsonObject().getAsJsonObject("requirement")); }
-            requirements.add(requirement);
+            ISceneFilter filter = JsonUtils.<SceneFilters.Factory>getAs(JsonUtils.SCENE_FILTER, location).get();
+            if (member.isJsonObject()) { filter.parse(member.getAsJsonObject().getAsJsonObject("filter")); }
+            filters.add(filter);
         }
-        return requirements.build();
+        return filters.build();
     }
 
     default void parse(JsonObject json) { }

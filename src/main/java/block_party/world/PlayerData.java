@@ -1,7 +1,7 @@
 package block_party.world;
 
-import block_party.scene.dialogue.Cookies;
-import block_party.scene.dialogue.Counters;
+import block_party.scene.Cookies;
+import block_party.scene.Counters;
 import block_party.utils.NBT;
 import com.google.common.collect.Maps;
 import net.minecraft.nbt.CompoundTag;

@@ -1,16 +1,16 @@
-package block_party.scene.actions;
+package block_party.scene;
 
 import block_party.npc.BlockPartyNPC;
 import block_party.scene.ISceneAction;
-import block_party.scene.dialogue.ResponseIcon;
 import block_party.utils.JsonUtils;
 import com.google.gson.JsonObject;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 
 import java.util.List;
 
-public class ResponseAction implements ISceneAction {
-    protected ResponseIcon icon;
+public class Response implements ISceneAction {
+    protected Icon icon;
     protected String text;
     protected List<ISceneAction> actions;
     private boolean complete;
@@ -28,16 +28,32 @@ public class ResponseAction implements ISceneAction {
 
     @Override
     public void parse(JsonObject json) {
-        this.icon = ResponseIcon.CLOSE_DIALOGUE.fromValue(JsonUtils.getAsResourceLocation(json, "icon"));
+        this.icon = Icon.CLOSE_DIALOGUE.fromValue(JsonUtils.getAsResourceLocation(json, "icon"));
         this.text = GsonHelper.getAsString(json, "text");
         this.actions = ISceneAction.parseArray(json.getAsJsonArray("actions"));
     }
 
-    public ResponseIcon getIcon() {
+    public Icon getIcon() {
         return this.icon;
     }
 
     public String getText() {
         return this.text;
+    }
+
+    public enum Icon {
+        GREEN_CHECKMARK, RED_X, CHAT_BUBBLE, LOVELY_HEART, TRUSTY_ARMOR, STRESSFUL_SKULL, LEATHER_BAG, ANVIL, NEXT_RESPONSE, CLOSE_DIALOGUE, OPEN_DIALOGUE;
+
+        public Icon fromValue(ResourceLocation location) {
+            return fromValue(location.getPath());
+        }
+
+        public Icon fromValue(String key) {
+            try {
+                return Icon.valueOf(key.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return this;
+            }
+        }
     }
 }

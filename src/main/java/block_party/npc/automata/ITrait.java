@@ -1,12 +1,12 @@
 package block_party.npc.automata;
 
 import block_party.npc.BlockPartyNPC;
-import block_party.scene.ISceneRequirement;
+import block_party.scene.ISceneFilter;
 import block_party.utils.Trans;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 
-public interface ITrait<T extends ITrait> extends ISceneRequirement {
+public interface ITrait<T extends ITrait> extends ISceneFilter {
     default boolean verify(BlockPartyNPC npc) {
         return this.isSharedWith(npc);
     }

@@ -5,17 +5,17 @@ import block_party.npc.BlockPartyNPC;
 import java.util.List;
 
 public class Scene {
-    private final List<ISceneRequirement> requirements;
+    private final List<ISceneFilter> filters;
     private final List<ISceneAction> actions;
 
-    public Scene(List<ISceneRequirement> requirements, List<ISceneAction> actions) {
-        this.requirements = requirements;
+    public Scene(List<ISceneFilter> filters, List<ISceneAction> actions) {
+        this.filters = filters;
         this.actions = actions;
     }
 
     public boolean fulfills(BlockPartyNPC npc) {
-        for (ISceneRequirement requirement : this.requirements) {
-            if (!requirement.verify(npc)) { return false; }
+        for (ISceneFilter filter : this.filters) {
+            if (!filter.verify(npc)) { return false; }
         }
         return true;
     }

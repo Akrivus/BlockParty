@@ -8,8 +8,8 @@ import block_party.messages.CDialogueClose;
 import block_party.messages.CDialogueRespond;
 import block_party.npc.BlockPartyNPC;
 import block_party.registry.CustomMessenger;
-import block_party.scene.dialogue.ClientDialogue;
-import block_party.scene.dialogue.ResponseIcon;
+import block_party.scene.Dialogue;
+import block_party.scene.Response;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
@@ -33,7 +33,7 @@ public class DialogueScreen extends AbstractScreen {
     public static final ResourceLocation DIALOGUE_TEXTURES = BlockParty.source("textures/gui/dialogue.png");
     private final List<RespondButton> responses = new ArrayList<>();
     private final String[] lines = new String[] { "", "", "" };
-    private final ClientDialogue dialogue;
+    private final Dialogue.Model dialogue;
     private final NPC npc;
     private BlockPartyNPC entity;
     private String name;
@@ -45,7 +45,7 @@ public class DialogueScreen extends AbstractScreen {
     private Button buttonSeeResponse;
     private Button buttonSeeDialogue;
 
-    public DialogueScreen(ClientDialogue dialogue, NPC npc) {
+    public DialogueScreen(Dialogue.Model dialogue, NPC npc) {
         super(242, 48);
         this.dialogue = dialogue;
         this.npc = npc;
@@ -186,18 +186,18 @@ public class DialogueScreen extends AbstractScreen {
 
     @OnlyIn(Dist.CLIENT)
     public abstract static class RespondButton extends Button {
-        protected final ResponseIcon icon;
+        protected final Response.Icon icon;
         protected final String text;
         protected final Font font;
 
-        public RespondButton(int posX, int posY, int sizeX, int sizeY, DialogueScreen parent, NPC npc, ResponseIcon icon, TextComponent text, boolean tooltip) {
+        public RespondButton(int posX, int posY, int sizeX, int sizeY, DialogueScreen parent, NPC npc, Response.Icon icon, TextComponent text, boolean tooltip) {
             super(posX, posY, sizeX, sizeY, text, (button) -> RespondButton.act(parent, npc, icon), tooltip ? (button, stack, x, y) -> parent.renderTooltip(stack, text, x, y) : NO_TOOLTIP);
             this.icon = icon;
             this.text = text.getText();
             this.font = parent.font;
         }
 
-        private static void act(DialogueScreen parent, NPC npc, ResponseIcon icon) {
+        private static void act(DialogueScreen parent, NPC npc, Response.Icon icon) {
             CustomMessenger.send(new CDialogueRespond(npc.getID(), icon));
             parent.onClose();
         }
@@ -213,7 +213,7 @@ public class DialogueScreen extends AbstractScreen {
             this.blit(stack, posX, posY, this.icon.ordinal() * 10, this.isHoveredOrFocused() ? 84 : 74, 10, 10);
         }
 
-        public static RespondButton create(DialogueScreen parent, int index, NPC npc, ResponseIcon icon, TextComponent text, boolean tooltip) {
+        public static RespondButton create(DialogueScreen parent, int index, NPC npc, Response.Icon icon, TextComponent text, boolean tooltip) {
             if (tooltip) {
                 return new RespondIconButton(parent, index, npc, icon, text);
             } else {

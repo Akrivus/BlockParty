@@ -21,9 +21,8 @@ import block_party.registry.CustomTags;
 import block_party.registry.resources.BlockAliases;
 import block_party.registry.resources.DollSounds;
 import block_party.scene.SceneTrigger;
-import block_party.scene.actions.DialogueAction;
-import block_party.scene.dialogue.ClientDialogue;
-import block_party.scene.dialogue.ResponseIcon;
+import block_party.scene.Response;
+import block_party.scene.Dialogue;
 import block_party.utils.NBT;
 import block_party.utils.Trans;
 import net.minecraft.core.BlockPos;
@@ -100,7 +99,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     private BlockState actualBlockState = Blocks.AIR.defaultBlockState();
     private CompoundTag tileEntityData = new CompoundTag();
     private AbstractAnimation animation = Animation.DEFAULT.get();
-    private DialogueAction dialogue;
+    private Dialogue dialogue;
     private int timeUntilHungry;
     private int timeUntilLonely;
     private int timeUntilStress;
@@ -515,17 +514,19 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         return this.getVisibleBlockState().is(tag);
     }
 
-    public void setDialogue(DialogueAction dialogue) {
+    public void setDialogue(Dialogue dialogue) {
         if (dialogue != null) {
             SoundEvent voice = dialogue.hasVoiceLine() ? dialogue.getVoiceLine() : DollSounds.get(this, DollSounds.Sound.SAY);
-            ClientDialogue message = new ClientDialogue(dialogue.getText(), dialogue.isTooltip(), dialogue.getAnimation(), dialogue.getEmotion(), voice, dialogue.hasVoiceLine());
-            for (ResponseIcon icon : dialogue.responses.keySet()) {
+            Dialogue.Model message = new Dialogue.Model(dialogue.getText(), dialogue.isTooltip(), dialogue.getAnimation(), dialogue.getEmotion(), voice, dialogue.hasVoiceLine());
+            for (Response.Icon icon : dialogue.responses.keySet()) {
                 message.add(icon, dialogue.responses.get(icon).getText());
             }
             CustomMessenger.send(this.getPlayer(), new SOpenDialogue(this.getRow(), message));
             this.dialogue = dialogue;
         }
-    }    @Override
+    }
+    
+    @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         if (ANIMATION.equals(key)) { this.setAnimation(Animation.DEFAULT.fromValue(this.entityData.get(ANIMATION))); }
         super.onSyncedDataUpdated(key);
@@ -534,22 +535,28 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
 
     public Player getPlayer() {
         return this.level.getPlayerByUUID(this.getPlayerUUID());
-    }    @Override
+    }
+    
+    @Override
     protected float getStandingEyeHeight(Pose pose, EntityDimensions size) {
         return 0.908203125F;
     }
 
     public void setPlayer(Player player) {
         this.setPlayerUUID(player.getUUID());
-    }    @Override
+    }
+    
+    @Override
     public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction facing) {
         if (CapabilityItemHandler.ITEM_HANDLER_CAPABILITY == capability) { return this.itemHandler.cast(); }
         return super.getCapability(capability, facing);
     }
 
-    public void setResponse(ResponseIcon response) {
+    public void setResponse(Response.Icon response) {
         if (this.dialogue != null) { this.dialogue.setResponse(response); }
-    }    @Override
+    }
+    
+    @Override
     public void invalidateCaps() {
         super.invalidateCaps();
         this.itemHandler.invalidate();
@@ -557,13 +564,17 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
 
     public boolean isSitting() {
         return false;
-    }    public void playSound(SoundEvent sound) {
+    }
+
+    public void playSound(SoundEvent sound) {
         this.playSound(sound, this.getSoundVolume(), this.getVoicePitch());
     }
 
     public boolean openSpecialMenuFor(Player player) {
         return false;
-    }    @Override
+    }
+    
+    @Override
     public float getVoicePitch() {
         return (super.getVoicePitch() + this.getBlockBuffer() + 0.6F) / 2;
     }

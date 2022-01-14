@@ -6,8 +6,8 @@ import block_party.registry.SceneActions;
 import block_party.scene.ISceneAction;
 import block_party.scene.Scene;
 import block_party.scene.SceneTrigger;
-import block_party.scene.dialogue.Cookies;
-import block_party.scene.dialogue.Counters;
+import block_party.scene.Cookies;
+import block_party.scene.Counters;
 import com.google.common.collect.Lists;
 import net.minecraft.nbt.CompoundTag;
 
@@ -24,7 +24,7 @@ public class Automaton {
 
     public Automaton(BlockPartyNPC npc) {
         this.actions = Lists.newLinkedList();
-        this.action = SceneActions.get(SceneActions.TRANSFER);
+        this.action = SceneActions.get(SceneActions.RESET);
         this.npc = npc;
     }
 
@@ -85,5 +85,37 @@ public class Automaton {
 
     public void addAction(ISceneAction action) {
         this.actions.addLast(action);
+    }
+
+    public int getCounter(String counter) {
+        return this.counters.get(counter);
+    }
+
+    public void setCounter(String counter, int value) {
+        this.counters.set(counter, value);
+    }
+
+    public void deleteCounter(String counter) {
+        this.counters.delete(counter);
+    }
+
+    public void increment(String counter, int value) {
+        this.counters.increment(counter, value);
+    }
+
+    public void decrement(String counter, int value) {
+        this.counters.decrement(counter, value);
+    }
+
+    public boolean hasCookie(String cookie) {
+        return this.cookies.has(cookie);
+    }
+
+    public void addCookie(String cookie) {
+        this.cookies.add(cookie);
+    }
+
+    public void eatCookie(String cookie) {
+        this.cookies.eat(cookie);
     }
 }

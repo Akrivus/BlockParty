@@ -1,4 +1,4 @@
-package block_party.scene.dialogue;
+package block_party.scene;
 
 import block_party.utils.NBT;
 import com.google.common.collect.Maps;
@@ -33,5 +33,25 @@ public class Counters {
 
     public CompoundTag save() {
         return this.save(new CompoundTag());
+    }
+
+    public int get(String counter) {
+        return this.counters.getOrDefault(counter, 0);
+    }
+
+    public void set(String counter, int value) {
+        this.counters.put(counter, value);
+    }
+
+    public void delete(String counter) {
+        this.set(counter, 0);
+    }
+
+    public void increment(String counter, int value) {
+        this.set(counter, this.get(counter) + value);
+    }
+
+    public void decrement(String counter, int value) {
+        this.set(counter, this.get(counter) - value);
     }
 }

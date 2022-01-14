@@ -2,20 +2,20 @@ package block_party.messages;
 
 import block_party.client.screens.DialogueScreen;
 import block_party.db.records.NPC;
-import block_party.scene.dialogue.ClientDialogue;
+import block_party.scene.Dialogue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
 public class SOpenDialogue extends AbstractMessage.Server {
     private final NPC npc;
-    private final ClientDialogue dialogue;
+    private final Dialogue.Model dialogue;
 
     public SOpenDialogue(FriendlyByteBuf buffer) {
-        this(new NPC(buffer.readNbt()), new ClientDialogue(buffer.readNbt()));
+        this(new NPC(buffer.readNbt()), new Dialogue.Model(buffer.readNbt()));
     }
 
-    public SOpenDialogue(NPC npc, ClientDialogue dialogue) {
+    public SOpenDialogue(NPC npc, Dialogue.Model dialogue) {
         this.npc = npc;
         this.dialogue = dialogue;
     }

@@ -1,22 +1,22 @@
 package block_party.messages;
 
 import block_party.npc.BlockPartyNPC;
-import block_party.scene.dialogue.ResponseIcon;
+import block_party.scene.Response;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 
 public class CDialogueRespond extends CNPCQuery {
-    private final ResponseIcon response;
+    private final Response.Icon response;
 
-    public CDialogueRespond(long id, ResponseIcon icon) {
+    public CDialogueRespond(long id, Response.Icon icon) {
         super(id);
         this.response = icon;
     }
 
     public CDialogueRespond(FriendlyByteBuf buffer) {
         super(buffer);
-        this.response = buffer.readEnum(ResponseIcon.class);
+        this.response = buffer.readEnum(Response.Icon.class);
     }
 
     @Override
