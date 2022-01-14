@@ -114,7 +114,7 @@ public class YearbookScreen extends ControllerScreen {
                 text.add(new TranslatableComponent("gui.block_party.label.health"));
             }
             if (this.getAbsoluteCenter(24) < mouseX && mouseX < this.getAbsoluteCenter(2)) {
-                text.add(new TranslatableComponent("gui.block_party.label.energy"));
+                text.add(new TranslatableComponent("gui.block_party.label.fullness"));
             }
             if (this.getAbsoluteCenter(2) < mouseX && mouseX < this.getAbsoluteCenter(-24)) {
                 text.add(new TranslatableComponent("gui.block_party.label.loyalty"));
