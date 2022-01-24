@@ -54,9 +54,10 @@ public class CustomMessenger {
     }
 
     public static void send(Player player, AbstractMessage message) {
-        if (player instanceof AbstractClientPlayer) { return; }
-        Connection network = ((ServerPlayer) player).connection.getConnection();
-        BlockParty.MESSENGER.sendTo(message, network, NetworkDirection.PLAY_TO_CLIENT);
+        if (player instanceof ServerPlayer server) {
+            Connection network = server.connection.getConnection();
+            BlockParty.MESSENGER.sendTo(message, network, NetworkDirection.PLAY_TO_CLIENT);
+        }
     }
 
     public static void send(AbstractMessage message) {
