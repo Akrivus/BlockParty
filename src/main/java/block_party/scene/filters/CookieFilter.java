@@ -1,10 +1,7 @@
 package block_party.scene.filters;
 
-import block_party.npc.BlockPartyNPC;
-import block_party.scene.ISceneFilter;
 import block_party.world.PlayerData;
 import com.google.gson.JsonObject;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 
 public class CookieFilter extends StringFilter {

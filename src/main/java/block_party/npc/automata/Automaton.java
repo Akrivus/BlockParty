@@ -3,11 +3,7 @@ package block_party.npc.automata;
 import block_party.npc.BlockPartyNPC;
 import block_party.registry.CustomResources;
 import block_party.registry.SceneActions;
-import block_party.scene.ISceneAction;
-import block_party.scene.Scene;
-import block_party.scene.SceneTrigger;
-import block_party.scene.Cookies;
-import block_party.scene.Counters;
+import block_party.scene.*;
 import com.google.common.collect.Lists;
 import net.minecraft.nbt.CompoundTag;
 

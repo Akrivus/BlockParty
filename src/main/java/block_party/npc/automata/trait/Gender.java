@@ -8,7 +8,6 @@ import net.minecraft.world.level.Level;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 public enum Gender implements ITrait<Gender> {

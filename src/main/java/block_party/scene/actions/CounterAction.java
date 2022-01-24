@@ -3,12 +3,9 @@ package block_party.scene.actions;
 import block_party.npc.BlockPartyNPC;
 import block_party.scene.Counters;
 import block_party.scene.ISceneAction;
-import block_party.scene.filters.NumberFilter;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 import org.apache.logging.log4j.util.TriConsumer;
-
-import java.util.function.BiConsumer;
 
 public class CounterAction implements ISceneAction {
     private Operation operation;

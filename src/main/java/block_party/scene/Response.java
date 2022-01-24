@@ -1,7 +1,6 @@
 package block_party.scene;
 
 import block_party.npc.BlockPartyNPC;
-import block_party.scene.ISceneAction;
 import block_party.utils.JsonUtils;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;

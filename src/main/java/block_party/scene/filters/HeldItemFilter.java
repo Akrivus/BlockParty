@@ -1,10 +1,8 @@
 package block_party.scene.filters;
 
 import com.google.gson.JsonObject;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.Item;
 
 public class HeldItemFilter extends ItemFilter {
     protected InteractionHand hand;

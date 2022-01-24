@@ -8,7 +8,6 @@ import block_party.npc.automata.trait.Gender;
 import block_party.scene.ISceneFilter;
 import block_party.scene.SceneFilter;
 import block_party.scene.filters.*;
-import net.minecraft.world.InteractionHand;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistryEntry;

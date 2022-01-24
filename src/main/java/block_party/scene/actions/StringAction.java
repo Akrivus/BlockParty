@@ -6,8 +6,6 @@ import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class StringAction implements ISceneAction {
     protected BiConsumer<BlockPartyNPC, String> setter;

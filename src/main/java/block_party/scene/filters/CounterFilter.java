@@ -2,7 +2,6 @@ package block_party.scene.filters;
 
 import block_party.world.PlayerData;
 import com.google.gson.JsonObject;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 
 public class CounterFilter extends NumberFilter {

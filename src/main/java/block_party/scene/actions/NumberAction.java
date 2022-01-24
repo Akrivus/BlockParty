@@ -2,13 +2,11 @@ package block_party.scene.actions;
 
 import block_party.npc.BlockPartyNPC;
 import block_party.scene.ISceneAction;
-import block_party.scene.filters.NumberFilter;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
 import java.util.function.Function;
 
 public class NumberAction implements ISceneAction {

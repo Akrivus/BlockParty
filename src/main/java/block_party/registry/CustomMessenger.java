@@ -2,7 +2,6 @@ package block_party.registry;
 
 import block_party.BlockParty;
 import block_party.messages.*;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;

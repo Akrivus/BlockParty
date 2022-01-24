@@ -1,8 +1,8 @@
 package block_party.registry;
 
 import block_party.BlockParty;
-import block_party.scene.ISceneAction;
 import block_party.scene.Dialogue;
+import block_party.scene.ISceneAction;
 import block_party.scene.actions.EndAction;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
