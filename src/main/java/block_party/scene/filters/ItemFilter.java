@@ -15,7 +15,7 @@ import java.util.function.Function;
 
 public class ItemFilter implements ISceneFilter {
     protected Function<BlockPartyNPC, ItemStack> getter;
-    private final NumberFilter counter = new NumberFilter((npc) -> this.getter.apply(npc).getCount());
+    private final IntegerFilter counter = new IntegerFilter((npc) -> this.getter.apply(npc).getCount());
     private Item item;
     private Tag<Item> tag;
 

@@ -4,7 +4,7 @@ import block_party.world.PlayerData;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 
-public class CounterFilter extends NumberFilter {
+public class CounterFilter extends IntegerFilter {
     protected String name;
 
     public CounterFilter() {
