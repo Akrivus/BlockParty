@@ -35,6 +35,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.*;
@@ -535,6 +536,10 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
 
     public Player getPlayer() {
         return this.level.getPlayerByUUID(this.getPlayerUUID());
+    }
+
+    public ServerPlayer getServerPlayer() {
+        return this.getServer().getPlayerList().getPlayer(this.getPlayerUUID());
     }
     
     @Override
