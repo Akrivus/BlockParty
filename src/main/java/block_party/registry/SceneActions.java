@@ -13,32 +13,32 @@ import net.minecraftforge.registries.RegistryObject;
 import java.util.function.Supplier;
 
 public class SceneActions {
-    public static final RegistryObject<Factory> DIALOGUE = BlockParty.SCENE_ACTIONS.register("dialogue", () -> f(() -> new Dialogue()));
-    public static final RegistryObject<Factory> RESPONSE = BlockParty.SCENE_ACTIONS.register("response", () -> f(() -> new Dialogue()));
-    public static final RegistryObject<Factory> END = BlockParty.SCENE_ACTIONS.register("end", () -> f(() -> new EndAction()));
+    public static final RegistryObject<Builder> DIALOGUE = BlockParty.SCENE_ACTIONS.register("dialogue", () -> f(() -> new Dialogue()));
+    public static final RegistryObject<Builder> RESPONSE = BlockParty.SCENE_ACTIONS.register("response", () -> f(() -> new Dialogue()));
+    public static final RegistryObject<Builder> END = BlockParty.SCENE_ACTIONS.register("end", () -> f(() -> new EndAction()));
 
-    public static void add(DeferredRegister<Factory> registry, IEventBus bus) {
-        registry.makeRegistry("scene_action", () -> new RegistryBuilder<Factory>().setType(Factory.class));
+    public static void add(DeferredRegister<Builder> registry, IEventBus bus) {
+        registry.makeRegistry("scene_action", () -> new RegistryBuilder<Builder>().setType(Builder.class));
         registry.register(bus);
     }
 
-    public static ISceneAction get(RegistryObject<Factory> action) {
-        return action.get().get();
+    public static ISceneAction build(RegistryObject<Builder> action) {
+        return action.get().build();
     }
 
-    private static Factory f(Supplier<ISceneAction> action) {
-        return new Factory(action);
+    private static Builder f(Supplier<ISceneAction> action) {
+        return new Builder(action);
     }
 
-    public static class Factory extends ForgeRegistryEntry<Factory> {
-        private final Supplier<ISceneAction> factory;
+    public static class Builder extends ForgeRegistryEntry<Builder> {
+        private final Supplier<ISceneAction> builder;
 
-        public Factory(Supplier<ISceneAction> factory) {
-            this.factory = factory;
+        public Builder(Supplier<ISceneAction> factory) {
+            this.builder = factory;
         }
 
-        public ISceneAction get() {
-            return this.factory.get();
+        public ISceneAction build() {
+            return this.builder.get();
         }
     }
 }

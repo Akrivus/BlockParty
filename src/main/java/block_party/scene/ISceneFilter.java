@@ -22,7 +22,7 @@ public interface ISceneFilter {
             if (member.isJsonObject()) { location = JsonUtils.getAsResourceLocation(member.getAsJsonObject(), "type"); }
             if (member.isJsonPrimitive()) { location = new ResourceLocation(member.getAsString()); }
             if (location == null) { continue; }
-            ISceneFilter filter = JsonUtils.<SceneFilters.Factory>getAs(JsonUtils.SCENE_FILTER, location).get();
+            ISceneFilter filter = JsonUtils.<SceneFilters.Builder>getAs(JsonUtils.SCENE_FILTER, location).build();
             if (member.isJsonObject()) { filter.parse(member.getAsJsonObject().getAsJsonObject("filter")); }
             filters.add(filter);
         }

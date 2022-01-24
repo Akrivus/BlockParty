@@ -20,7 +20,7 @@ public class Automaton {
 
     public Automaton(BlockPartyNPC npc) {
         this.actions = Lists.newLinkedList();
-        this.action = SceneActions.get(SceneActions.END);
+        this.action = SceneActions.build(SceneActions.END);
         this.npc = npc;
     }
 

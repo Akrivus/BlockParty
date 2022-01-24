@@ -42,7 +42,7 @@ public class Dialogue implements ISceneAction {
     @Override
     public void onComplete() {
         Response response = this.responses.get(this.response);
-        this.npc.automaton.putAction(response == null ? SceneActions.get(SceneActions.END) : response);
+        this.npc.automaton.putAction(response == null ? SceneActions.build(SceneActions.END) : response);
         this.npc.setDialogue(null);
     }
 

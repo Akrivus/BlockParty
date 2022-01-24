@@ -26,7 +26,7 @@ public interface ISceneAction {
             if (member.isJsonObject()) { location = JsonUtils.getAsResourceLocation(member.getAsJsonObject(), "type"); }
             if (member.isJsonPrimitive()) { location = new ResourceLocation(member.getAsString()); }
             if (location == null) { continue; }
-            ISceneAction action = JsonUtils.<SceneActions.Factory>getAs(JsonUtils.SCENE_ACTION, location).get();
+            ISceneAction action = JsonUtils.<SceneActions.Builder>getAs(JsonUtils.SCENE_ACTION, location).build();
             if (member.isJsonObject()) { action.parse(member.getAsJsonObject().getAsJsonObject("action")); }
             actions.add(action);
         }

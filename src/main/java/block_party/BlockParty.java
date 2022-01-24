@@ -33,8 +33,8 @@ public class BlockParty {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, BlockParty.ID);
     public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, BlockParty.ID);
     public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, BlockParty.ID);
-    public static final DeferredRegister<SceneActions.Factory> SCENE_ACTIONS = DeferredRegister.create(SceneActions.Factory.class, BlockParty.ID);
-    public static final DeferredRegister<SceneFilters.Factory> SCENE_FILTERS = DeferredRegister.create(SceneFilters.Factory.class, BlockParty.ID);
+    public static final DeferredRegister<SceneActions.Builder> SCENE_ACTIONS = DeferredRegister.create(SceneActions.Builder.class, BlockParty.ID);
+    public static final DeferredRegister<SceneFilters.Builder> SCENE_FILTERS = DeferredRegister.create(SceneFilters.Builder.class, BlockParty.ID);
     public static final SimpleChannel MESSENGER = CustomMessenger.create();
     public static final GsonBuilder GSON = new GsonBuilder();
 
