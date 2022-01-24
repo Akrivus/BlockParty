@@ -19,12 +19,12 @@ public class Automaton {
     protected SceneTrigger trigger = SceneTrigger.CREATION;
     protected LinkedList<ISceneAction> actions;
     protected ISceneAction action;
-    protected Cookies cookies = new Cookies();
-    protected Counters counters = new Counters();
+    public Cookies cookies = new Cookies();
+    public Counters counters = new Counters();
 
     public Automaton(BlockPartyNPC npc) {
         this.actions = Lists.newLinkedList();
-        this.action = SceneActions.get(SceneActions.RESET);
+        this.action = SceneActions.get(SceneActions.END);
         this.npc = npc;
     }
 
@@ -85,37 +85,5 @@ public class Automaton {
 
     public void addAction(ISceneAction action) {
         this.actions.addLast(action);
-    }
-
-    public int getCounter(String counter) {
-        return this.counters.get(counter);
-    }
-
-    public void setCounter(String counter, int value) {
-        this.counters.set(counter, value);
-    }
-
-    public void deleteCounter(String counter) {
-        this.counters.delete(counter);
-    }
-
-    public void increment(String counter, int value) {
-        this.counters.increment(counter, value);
-    }
-
-    public void decrement(String counter, int value) {
-        this.counters.decrement(counter, value);
-    }
-
-    public boolean hasCookie(String cookie) {
-        return this.cookies.has(cookie);
-    }
-
-    public void addCookie(String cookie) {
-        this.cookies.add(cookie);
-    }
-
-    public void eatCookie(String cookie) {
-        this.cookies.eat(cookie);
     }
 }
