@@ -1,6 +1,7 @@
 package block_party.registry;
 
 import block_party.BlockParty;
+import block_party.npc.BlockPartyNPC;
 import block_party.npc.automata.trait.BloodType;
 import block_party.npc.automata.trait.Dere;
 import block_party.npc.automata.trait.Emotion;
@@ -32,7 +33,7 @@ public class SceneFilters {
     public static final RegistryObject<SceneFilters.Factory> NIGHT = BlockParty.SCENE_FILTERS.register("night", () -> f(() -> SceneFilter.NIGHT));
     public static final RegistryObject<SceneFilters.Factory> MIDNIGHT = BlockParty.SCENE_FILTERS.register("midnight", () -> f(() -> SceneFilter.MIDNIGHT));
     public static final RegistryObject<SceneFilters.Factory> DAWN = BlockParty.SCENE_FILTERS.register("dawn", () -> f(() -> SceneFilter.DAWN));
-    public static final RegistryObject<SceneFilters.Factory> TIME = BlockParty.SCENE_FILTERS.register("time", () -> f(() -> new NumberFilter((npc) -> (int) npc.level.getDayTime())));
+    public static final RegistryObject<SceneFilters.Factory> TIME = BlockParty.SCENE_FILTERS.register("time", () -> f(() -> new IntegerFilter((npc) -> (int) npc.level.getDayTime())));
     public static final RegistryObject<SceneFilters.Factory> BLOOD_TYPE_AB = BlockParty.SCENE_FILTERS.register("blood_type_ab", () -> f(() -> BloodType.AB));
     public static final RegistryObject<SceneFilters.Factory> BLOOD_TYPE_B = BlockParty.SCENE_FILTERS.register("blood_type_b", () -> f(() -> BloodType.B));
     public static final RegistryObject<SceneFilters.Factory> BLOOD_TYPE_A = BlockParty.SCENE_FILTERS.register("blood_type_a", () -> f(() -> BloodType.A));
@@ -61,19 +62,19 @@ public class SceneFilters {
     public static final RegistryObject<SceneFilters.Factory> MALE = BlockParty.SCENE_FILTERS.register("male", () -> f(() -> Gender.MALE));
     public static final RegistryObject<SceneFilters.Factory> FEMALE = BlockParty.SCENE_FILTERS.register("female", () -> f(() -> Gender.FEMALE));
     public static final RegistryObject<SceneFilters.Factory> NONBINARY = BlockParty.SCENE_FILTERS.register("nonbinary", () -> f(() -> Gender.NONBINARY));
-    public static final RegistryObject<SceneFilters.Factory> HEALTH = BlockParty.SCENE_FILTERS.register("health", () -> f(() -> new NumberFilter((npc) -> (int) npc.getHealth())));
-    public static final RegistryObject<SceneFilters.Factory> FULLNESS = BlockParty.SCENE_FILTERS.register("fullness", () -> f(() -> new NumberFilter((npc) -> (int) npc.getFullness())));
-    public static final RegistryObject<SceneFilters.Factory> LOYALTY = BlockParty.SCENE_FILTERS.register("loyalty", () -> f(() -> new NumberFilter((npc) -> (int) npc.getLoyalty())));
-    public static final RegistryObject<SceneFilters.Factory> STRESS = BlockParty.SCENE_FILTERS.register("stress", () -> f(() -> new NumberFilter((npc) -> (int) npc.getStress())));
-    public static final RegistryObject<SceneFilters.Factory> PLAYER_COUNTER = BlockParty.SCENE_FILTERS.register("player_counter", () -> f(() -> new CounterFilter.Player()));
-    public static final RegistryObject<SceneFilters.Factory> PLAYER_HAS_COOKIE = BlockParty.SCENE_FILTERS.register("player_has_cookie", () -> f(() -> new CookieFilter.Player()));
-    public static final RegistryObject<SceneFilters.Factory> PLAYER_HELD_ITEM = BlockParty.SCENE_FILTERS.register("player_held_item", () -> f(() -> new HeldItemFilter.Player()));
-    public static final RegistryObject<SceneFilters.Factory> COUNTER = BlockParty.SCENE_FILTERS.register("counter", () -> f(() -> new CounterFilter()));
-    public static final RegistryObject<SceneFilters.Factory> HAS_COOKIE = BlockParty.SCENE_FILTERS.register("has_cookie", () -> f(() -> new CookieFilter()));
-    public static final RegistryObject<SceneFilters.Factory> HELD_ITEM = BlockParty.SCENE_FILTERS.register("held_item", () -> f(() -> new HeldItemFilter()));
-    public static final RegistryObject<SceneFilters.Factory> BLOCK = BlockParty.SCENE_FILTERS.register("block", () -> f(() -> new BlockFilter((npc) -> npc.getVisibleBlockState())));
-    public static final RegistryObject<SceneFilters.Factory> FAMILY = BlockParty.SCENE_FILTERS.register("family", () -> f(() -> new StringFilter((npc) -> npc.getBlockName())));
-    public static final RegistryObject<SceneFilters.Factory> NAME = BlockParty.SCENE_FILTERS.register("name", () -> f(() -> new StringFilter((npc) -> npc.getGivenName())));
+    public static final RegistryObject<SceneFilters.Factory> HEALTH = BlockParty.SCENE_FILTERS.register("health", () -> f(() -> new FloatFilter(BlockPartyNPC::getHealth)));
+    public static final RegistryObject<SceneFilters.Factory> FULLNESS = BlockParty.SCENE_FILTERS.register("fullness", () -> f(() -> new FloatFilter(BlockPartyNPC::getFullness)));
+    public static final RegistryObject<SceneFilters.Factory> LOYALTY = BlockParty.SCENE_FILTERS.register("loyalty", () -> f(() -> new FloatFilter(BlockPartyNPC::getLoyalty)));
+    public static final RegistryObject<SceneFilters.Factory> STRESS = BlockParty.SCENE_FILTERS.register("stress", () -> f(() -> new FloatFilter(BlockPartyNPC::getStress)));
+    public static final RegistryObject<SceneFilters.Factory> PLAYER_COUNTER = BlockParty.SCENE_FILTERS.register("player_counter", () -> f(CounterFilter.Player::new));
+    public static final RegistryObject<SceneFilters.Factory> PLAYER_HAS_COOKIE = BlockParty.SCENE_FILTERS.register("player_has_cookie", () -> f(CookieFilter.Player::new));
+    public static final RegistryObject<SceneFilters.Factory> PLAYER_HELD_ITEM = BlockParty.SCENE_FILTERS.register("player_held_item", () -> f(HeldItemFilter.Player::new));
+    public static final RegistryObject<SceneFilters.Factory> COUNTER = BlockParty.SCENE_FILTERS.register("counter", () -> f(CounterFilter::new));
+    public static final RegistryObject<SceneFilters.Factory> HAS_COOKIE = BlockParty.SCENE_FILTERS.register("has_cookie", () -> f(CookieFilter::new));
+    public static final RegistryObject<SceneFilters.Factory> HELD_ITEM = BlockParty.SCENE_FILTERS.register("held_item", () -> f(HeldItemFilter::new));
+    public static final RegistryObject<SceneFilters.Factory> BLOCK = BlockParty.SCENE_FILTERS.register("block", () -> f(() -> new BlockFilter(BlockPartyNPC::getVisibleBlockState)));
+    public static final RegistryObject<SceneFilters.Factory> FAMILY = BlockParty.SCENE_FILTERS.register("family", () -> f(() -> new StringFilter(BlockPartyNPC::getBlockName)));
+    public static final RegistryObject<SceneFilters.Factory> NAME = BlockParty.SCENE_FILTERS.register("name", () -> f(() -> new StringFilter(BlockPartyNPC::getGivenName)));
 
     public static void add(DeferredRegister<Factory> registry, IEventBus bus) {
         registry.makeRegistry("scene_filter", () -> new RegistryBuilder<Factory>().setType(Factory.class));
