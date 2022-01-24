@@ -3,7 +3,7 @@ package block_party.scene.actions;
 import block_party.npc.BlockPartyNPC;
 import block_party.scene.ISceneAction;
 
-public class ResetAction implements ISceneAction {
+public class EndAction implements ISceneAction {
     @Override
     public void apply(BlockPartyNPC npc) {
         return;

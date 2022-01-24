@@ -7,21 +7,21 @@ import com.google.gson.JsonObject;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 
-public class CookieFilter implements ISceneFilter {
-    protected String cookie;
+public class CookieFilter extends StringFilter {
+    protected String name;
 
-    public boolean verify(BlockPartyNPC npc) {
-        return npc.automaton.hasCookie(this.cookie);
+    public CookieFilter() {
+        this.function = (npc) -> npc.automaton.cookies.get(this.name);
     }
 
     public void parse(JsonObject json) {
-        this.cookie = GsonHelper.getAsString(json, "cookie");
+        this.name = GsonHelper.getAsString(json, "name");
+        super.parse(json);
     }
 
     public static class Player extends CookieFilter {
-        public boolean verify(BlockPartyNPC npc) {
-            ServerPlayer player = (ServerPlayer) npc.getPlayer();
-            return PlayerData.getCookiesFor(player).has(this.cookie);
+        public Player() {
+            this.function = (npc) -> PlayerData.getCookiesFor(npc.getServerPlayer()).get(this.name);
         }
     }
 }

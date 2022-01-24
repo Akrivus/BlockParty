@@ -11,7 +11,7 @@ import java.util.function.Function;
 public class NumberFilter implements ISceneFilter {
     protected Function<BlockPartyNPC, Integer> function;
     private Operation operation;
-    private int numeric;
+    private int value;
 
     public NumberFilter(Function<BlockPartyNPC, Integer> function) {
         this.function = function;
@@ -20,12 +20,12 @@ public class NumberFilter implements ISceneFilter {
     public NumberFilter() { }
 
     public boolean verify(BlockPartyNPC npc) {
-        return this.operation.test(this.numeric, this.function.apply(npc));
+        return this.operation.test(this.value, this.function.apply(npc));
     }
 
     public void parse(JsonObject json) {
         this.operation = Operation.get(GsonHelper.getAsString(json, "operation", "equals"));
-        this.numeric = GsonHelper.getAsInt(json, "numeric", 0);
+        this.value = GsonHelper.getAsInt(json, "value", 0);
     }
 
     public enum Operation {
@@ -46,7 +46,7 @@ public class NumberFilter implements ISceneFilter {
         }
 
         private static Operation get(String key) {
-            return Operation.get(key.toUpperCase());
+            return Operation.valueOf(key.toUpperCase());
         }
     }
 }

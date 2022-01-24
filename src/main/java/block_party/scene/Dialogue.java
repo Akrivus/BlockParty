@@ -42,7 +42,7 @@ public class Dialogue implements ISceneAction {
     @Override
     public void onComplete() {
         Response response = this.responses.get(this.response);
-        this.npc.automaton.putAction(response == null ? SceneActions.get(SceneActions.RESET) : response);
+        this.npc.automaton.putAction(response == null ? SceneActions.get(SceneActions.END) : response);
         this.npc.setDialogue(null);
     }
 
@@ -101,7 +101,7 @@ public class Dialogue implements ISceneAction {
         private final Emotion emotion;
         private final SoundEvent voice;
         private final boolean isVoiceLine;
-        private Map<Response.Icon, String> responses;
+        private final Map<Response.Icon, String> responses;
     
         public Model(String text, boolean tooltip, Animation animation, Emotion emotion, SoundEvent voice, boolean isVoiceLine) {
             this.text = text;

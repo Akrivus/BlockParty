@@ -15,21 +15,21 @@
             "icon": "block_party:green_checkmark",
             "text": "Good!",
             "actions": [
-              "block_party:transfer"
+              "block_party:end"
             ]
           },
           {
             "icon": "block_party:red_x",
             "text": "Bad!",
             "actions": [
-              "block_party:transfer"
+              "block_party:end"
             ]
           },
           {
             "icon": "block_party:chat_bubble",
             "text": "Hello!",
             "actions": [
-              "block_party:transfer"
+              "block_party:end"
             ]
           }
         ]

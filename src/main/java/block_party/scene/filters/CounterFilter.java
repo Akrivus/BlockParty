@@ -6,24 +6,21 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 
 public class CounterFilter extends NumberFilter {
-    protected String counter;
+    protected String name;
 
     public CounterFilter() {
-        this.function = (npc) -> npc.automaton.getCounter(this.counter);
+        this.function = (npc) -> npc.automaton.counters.get(this.name);
     }
 
     @Override
     public void parse(JsonObject json) {
-        this.counter = GsonHelper.getAsString(json, "counter");
+        this.name = GsonHelper.getAsString(json, "name");
         super.parse(json);
     }
 
     public static class Player extends CounterFilter {
         public Player() {
-            this.function = (npc) -> {
-                ServerPlayer player = (ServerPlayer) npc.getPlayer();
-                return PlayerData.getCountersFor(player).get(this.counter);
-            };
+            this.function = (npc) -> PlayerData.getCountersFor(npc.getServerPlayer()).get(this.name);
         }
     }
 }

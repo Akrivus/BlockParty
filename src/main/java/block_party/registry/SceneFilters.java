@@ -68,18 +68,11 @@ public class SceneFilters {
     public static final RegistryObject<SceneFilters.Factory> STRESS = BlockParty.SCENE_FILTERS.register("stress", () -> f(() -> new NumberFilter((npc) -> (int) npc.getStress())));
     public static final RegistryObject<SceneFilters.Factory> PLAYER_COUNTER = BlockParty.SCENE_FILTERS.register("player_counter", () -> f(() -> new CounterFilter.Player()));
     public static final RegistryObject<SceneFilters.Factory> PLAYER_HAS_COOKIE = BlockParty.SCENE_FILTERS.register("player_has_cookie", () -> f(() -> new CookieFilter.Player()));
-    public static final RegistryObject<SceneFilters.Factory> PLAYER_MAIN_HAND_ITEM = BlockParty.SCENE_FILTERS.register("player_main_hand_item", () -> f(() -> new ItemFilter((npc) -> npc.getPlayer().getItemInHand(InteractionHand.MAIN_HAND))));
-    public static final RegistryObject<SceneFilters.Factory> PLAYER_MAIN_HAND_ITEM_COUNT = BlockParty.SCENE_FILTERS.register("player_main_hand_item_count", () -> f(() -> new NumberFilter((npc) -> npc.getPlayer().getItemInHand(InteractionHand.MAIN_HAND).getCount())));
-    public static final RegistryObject<SceneFilters.Factory> PLAYER_OFF_HAND_ITEM = BlockParty.SCENE_FILTERS.register("player_off_hand_item", () -> f(() -> new ItemFilter((npc) -> npc.getPlayer().getItemInHand(InteractionHand.OFF_HAND))));
-    public static final RegistryObject<SceneFilters.Factory> PLAYER_OFF_HAND_ITEM_COUNT = BlockParty.SCENE_FILTERS.register("player_off_hand_item_count", () -> f(() -> new NumberFilter((npc) -> npc.getPlayer().getItemInHand(InteractionHand.OFF_HAND).getCount())));
+    public static final RegistryObject<SceneFilters.Factory> PLAYER_HELD_ITEM = BlockParty.SCENE_FILTERS.register("player_held_item", () -> f(() -> new HeldItemFilter.Player()));
     public static final RegistryObject<SceneFilters.Factory> COUNTER = BlockParty.SCENE_FILTERS.register("counter", () -> f(() -> new CounterFilter()));
     public static final RegistryObject<SceneFilters.Factory> HAS_COOKIE = BlockParty.SCENE_FILTERS.register("has_cookie", () -> f(() -> new CookieFilter()));
-    public static final RegistryObject<SceneFilters.Factory> MAIN_HAND_ITEM = BlockParty.SCENE_FILTERS.register("main_hand_item", () -> f(() -> new ItemFilter((npc) -> npc.getItemInHand(InteractionHand.MAIN_HAND))));
-    public static final RegistryObject<SceneFilters.Factory> MAIN_HAND_ITEM_COUNT = BlockParty.SCENE_FILTERS.register("main_hand_item_count", () -> f(() -> new NumberFilter((npc) -> npc.getItemInHand(InteractionHand.MAIN_HAND).getCount())));
-    public static final RegistryObject<SceneFilters.Factory> OFF_HAND_ITEM = BlockParty.SCENE_FILTERS.register("off_hand_item", () -> f(() -> new ItemFilter((npc) -> npc.getItemInHand(InteractionHand.OFF_HAND))));
-    public static final RegistryObject<SceneFilters.Factory> OFF_HAND_ITEM_COUNT = BlockParty.SCENE_FILTERS.register("off_hand_item_count", () -> f(() -> new NumberFilter((npc) -> npc.getItemInHand(InteractionHand.OFF_HAND).getCount())));
+    public static final RegistryObject<SceneFilters.Factory> HELD_ITEM = BlockParty.SCENE_FILTERS.register("held_item", () -> f(() -> new HeldItemFilter()));
     public static final RegistryObject<SceneFilters.Factory> BLOCK = BlockParty.SCENE_FILTERS.register("block", () -> f(() -> new BlockFilter((npc) -> npc.getVisibleBlockState())));
-    public static final RegistryObject<SceneFilters.Factory> BLOCK_TAG = BlockParty.SCENE_FILTERS.register("block_tag", () -> f(() -> new BlockFilter.WithTag()));
     public static final RegistryObject<SceneFilters.Factory> FAMILY = BlockParty.SCENE_FILTERS.register("family", () -> f(() -> new StringFilter((npc) -> npc.getBlockName())));
     public static final RegistryObject<SceneFilters.Factory> NAME = BlockParty.SCENE_FILTERS.register("name", () -> f(() -> new StringFilter((npc) -> npc.getGivenName())));
 
