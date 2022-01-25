@@ -33,9 +33,8 @@ public class Dialogue implements ISceneAction {
 
     @Override
     public void apply(BlockPartyNPC npc) {
-        this.text = this.getFormattedText();
         this.npc = npc;
-        npc.setDialogue(this);
+        this.npc.setDialogue(this);
     }
 
     @Override
@@ -66,15 +65,12 @@ public class Dialogue implements ISceneAction {
     }
 
     public String getText() {
-        return this.text;
-    }
-
-    private String getFormattedText() {
+        if (this.npc == null) { return this.text; }
         String text = this.text;
-        text = Markdown.highlight(text, COUNTER_PATTERN, "yellow", (match) -> String.valueOf(npc.automaton.counters.get(match)));
-        text = Markdown.highlight(text, PLAYER_COUNTER_PATTERN, "yellow", (match) -> String.valueOf(PlayerData.getCountersFor(npc.getServerPlayer()).get(match)));
-        text = Markdown.highlight(text, COOKIE_PATTERN, "magenta", (match) -> npc.automaton.cookies.get(match));
-        text = Markdown.highlight(text, PLAYER_COOKIE_PATTERN, "magenta", (match) -> PlayerData.getCookiesFor(npc.getServerPlayer()).get(match));
+        text = Markdown.highlight(text, COUNTER_PATTERN, "yellow", (match) -> String.valueOf(this.npc.automaton.counters.get(match)));
+        text = Markdown.highlight(text, PLAYER_COUNTER_PATTERN, "yellow", (match) -> String.valueOf(PlayerData.getCountersFor(this.npc.getServerPlayer()).get(match)));
+        text = Markdown.highlight(text, COOKIE_PATTERN, "magenta", (match) -> this.npc.automaton.cookies.get(match));
+        text = Markdown.highlight(text, PLAYER_COOKIE_PATTERN, "magenta", (match) -> PlayerData.getCookiesFor(this.npc.getServerPlayer()).get(match));
         return Markdown.parse(text);
     }
 
