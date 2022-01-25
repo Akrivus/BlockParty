@@ -9,23 +9,23 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class NumberAction implements ISceneAction {
-    protected Function<BlockPartyNPC, Integer> getter;
-    protected BiConsumer<BlockPartyNPC, Integer> setter;
+public class FloatAction implements ISceneAction {
+    protected Function<BlockPartyNPC, Float> getter;
+    protected BiConsumer<BlockPartyNPC, Float> setter;
     private Operation operation;
-    private int value;
+    private float value;
 
-    public NumberAction(Function<BlockPartyNPC, Integer> getter, BiConsumer<BlockPartyNPC, Integer> setter) {
+    public FloatAction(Function<BlockPartyNPC, Float> getter, BiConsumer<BlockPartyNPC, Float> setter) {
         this.getter = getter;
         this.setter = setter;
     }
 
-    public NumberAction() { }
+    public FloatAction() { }
 
     @Override
     public void apply(BlockPartyNPC npc) {
-        int x = this.getter.apply(npc);
-        int z = this.operation.accept(x, this.value);
+        float x = this.getter.apply(npc);
+        float z = this.operation.accept(x, this.value);
         this.setter.accept(npc, z);
     }
 
@@ -45,13 +45,13 @@ public class NumberAction implements ISceneAction {
         SUBTRACT((x, y) -> y - x),
         SET((x, y) -> y);
 
-        private final BiFunction<Integer, Integer, Integer> function;
+        private final BiFunction<Float, Float, Float> function;
 
-        Operation(BiFunction<Integer, Integer, Integer> function) {
+        Operation(BiFunction<Float, Float, Float> function) {
             this.function = function;
         }
 
-        public int accept(int x, int y) {
+        public float accept(float x, float y) {
             return this.function.apply(x, y);
         }
 
