@@ -26,6 +26,7 @@ public class Cookies {
             CompoundTag element = new CompoundTag();
             element.putString("Key", key);
             element.putString("Value", value);
+            list.add(element);
         });
         compound.put("Cookies", list);
         return compound;

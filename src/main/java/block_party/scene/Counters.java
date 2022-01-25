@@ -26,6 +26,7 @@ public class Counters {
             CompoundTag element = new CompoundTag();
             element.putString("Key", key);
             element.putInt("Value", value);
+            list.add(element);
         });
         compound.put("Counters", list);
         return compound;
