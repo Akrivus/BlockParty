@@ -8,6 +8,7 @@
       "type": "block_party:dialogue",
       "action": {
         "text": "You hit me #number_of_hits *times!*",
+        "tooltip": true,
         "speaker": {
           "animation": "wave",
           "emotion": "happy"

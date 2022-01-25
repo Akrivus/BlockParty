@@ -2,6 +2,7 @@ package block_party.scene;
 
 import block_party.npc.BlockPartyNPC;
 import block_party.utils.JsonUtils;
+import block_party.utils.Trans;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -28,7 +29,7 @@ public class Response implements ISceneAction {
     @Override
     public void parse(JsonObject json) {
         this.icon = Icon.CLOSE_DIALOGUE.fromValue(JsonUtils.getAsResourceLocation(json, "icon"));
-        this.text = GsonHelper.getAsString(json, "text");
+        this.text = GsonHelper.getAsString(json, "text", Trans.late(this.icon.getTranslationKey()));
         this.actions = ISceneAction.parseArray(json.getAsJsonArray("actions"));
     }
 
@@ -53,6 +54,10 @@ public class Response implements ISceneAction {
             } catch (IllegalArgumentException e) {
                 return this;
             }
+        }
+
+        public String getTranslationKey() {
+            return String.format("gui.block_party.dialogue.response.%s", this.name().toLowerCase());
         }
     }
 }
