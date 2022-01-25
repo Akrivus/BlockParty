@@ -10,6 +10,7 @@ import block_party.npc.BlockPartyNPC;
 import block_party.registry.CustomMessenger;
 import block_party.scene.Dialogue;
 import block_party.scene.Response;
+import block_party.scene.Speaker;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
@@ -34,6 +35,7 @@ public class DialogueScreen extends AbstractScreen {
     private final List<RespondButton> responses = new ArrayList<>();
     private final String[] lines = new String[] { "", "", "" };
     private final Dialogue.Model dialogue;
+    private final Speaker speaker;
     private final NPC npc;
     private BlockPartyNPC entity;
     private String name;
@@ -48,6 +50,7 @@ public class DialogueScreen extends AbstractScreen {
     public DialogueScreen(Dialogue.Model dialogue, NPC npc) {
         super(242, 48);
         this.dialogue = dialogue;
+        this.speaker = dialogue.getSpeaker();
         this.npc = npc;
     }
 
@@ -60,7 +63,7 @@ public class DialogueScreen extends AbstractScreen {
         super.render(stack, mouseX, mouseY, partialTicks);
         if (this.cursor < this.text.length()) {
             this.cursor = this.minecraft.player.tickCount - this.start;
-            this.playSound(this.dialogue.getVoice());
+            this.playSound(this.dialogue.getSound());
         }
         this.renderTooltips(stack, mouseX, mouseY);
     }
@@ -70,16 +73,18 @@ public class DialogueScreen extends AbstractScreen {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, DIALOGUE_TEXTURES);
         this.blit(stack, this.getLeft(), this.getBottom(48), this.zero, this.zero, this.sizeX, this.sizeY);
-        this.font.drawShadow(stack, this.name, this.getLeft(5), this.getBottom(57), this.white);
-        if (this.dialogue.isTooltip() || this.onDialogueScreen) {
+        if (this.onDialogueScreen || this.dialogue.isTooltip()) {
             this.font.drawShadow(stack, this.lines[0].trim(), this.getLeft(5), this.getBottom(43), this.white);
             this.font.drawShadow(stack, this.lines[1].trim(), this.getLeft(5), this.getBottom(34), this.white);
             this.font.drawShadow(stack, this.lines[2].trim(), this.getLeft(5), this.getBottom(25), this.white);
         }
+        if (this.speaker.identity == Speaker.Identity.NARRATOR) { return; }
+        this.font.drawShadow(stack, this.name, this.getLeft(5), this.getBottom(57), this.white);
     }
 
     @Override
     protected void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
+        if (this.speaker.identity == Speaker.Identity.NARRATOR) { return; }
         super.renderEntity(posX, posY, scale, entity);
         ++entity.tickCount;
     }
@@ -92,9 +97,24 @@ public class DialogueScreen extends AbstractScreen {
 
     @Override
     protected void setEntityModelStack(PoseStack pose, float scale) {
-        pose.translate(0.0D, 0.0D, 1000.0D);
-        pose.scale(scale, scale, scale);
-        pose.mulPose(new Quaternion(0.0F, 1.0F, 0.0F, 0.2F));
+        scale *= this.speaker.scale;
+        switch (this.speaker.position) {
+        case LEFT:
+            pose.translate( 0.0D, 0.0D, 1000.0D);
+            pose.scale(scale, scale, scale);
+            pose.mulPose(new Quaternion(0.0F, 1.0F, 0.0F,  0.2F));
+            return;
+        case CENTER:
+            pose.translate(25.0D, 0.0D, 1000.0D);
+            pose.scale(scale, scale, scale);
+            pose.mulPose(new Quaternion(0.0F, 1.0F, 0.0F,  0.0F));
+            return;
+        case RIGHT:
+            pose.translate(50.0D, 0.0D, 1000.0D);
+            pose.scale(scale, scale, scale);
+            pose.mulPose(new Quaternion(0.0F, 1.0F, 0.0F, -0.2F));
+            return;
+        }
     }
 
     public void renderTooltips(PoseStack stack, int mouseX, int mouseY) {
@@ -133,15 +153,15 @@ public class DialogueScreen extends AbstractScreen {
         this.text = this.dialogue.getText();
         this.name = this.npc.getName();
         this.entity = this.npc.getClientEntity(this.minecraft);
-        this.dialogue.stage(this.entity);
+        this.speaker.stage(this.entity);
         this.buttonSeeResponse = new SeeButton(this, false);
         this.buttonSeeDialogue = new SeeButton(this, true);
         this.dialogue.getResponses().forEach((icon, text) -> {
             this.responses.add(RespondButton.create(this, ++this.role, this.npc, icon, new TextComponent(text), this.dialogue.isTooltip()));
         });
         updateButtons(true);
-        if (this.dialogue.isVoiceLine()) {
-            this.playSound(this.dialogue.getVoice());
+        if (this.speaker.speaks) {
+            this.playSound(this.speaker.voice);
             this.cursor = this.text.length();
         }
     }

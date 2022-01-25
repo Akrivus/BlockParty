@@ -7,9 +7,11 @@
     {
       "type": "block_party:dialogue",
       "action": {
-        "text": "What is up?",
-        "emotion": "block_party:happy",
-        "animation": "block_party:wave",
+        "text": "*What* is /up?/",
+        "speaker": {
+          "animation": "wave",
+          "emotion": "happy"
+        },
         "responses": [
           {
             "icon": "block_party:green_checkmark",

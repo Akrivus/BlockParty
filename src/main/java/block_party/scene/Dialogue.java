@@ -1,11 +1,11 @@
 package block_party.scene;
 
-import block_party.client.animation.Animation;
 import block_party.npc.BlockPartyNPC;
-import block_party.npc.automata.trait.Emotion;
 import block_party.registry.SceneActions;
 import block_party.utils.JsonUtils;
+import block_party.utils.Markdown;
 import block_party.utils.NBT;
+import block_party.world.PlayerData;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -16,20 +16,24 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Dialogue implements ISceneAction {
+    private static final Pattern COUNTER_PATTERN = Pattern.compile("#(\\w+)");
+    private static final Pattern PLAYER_COUNTER_PATTERN = Pattern.compile("#player\\.(\\w+)");
+    private static final Pattern COOKIE_PATTERN = Pattern.compile("@(\\w+)");
+    private static final Pattern PLAYER_COOKIE_PATTERN = Pattern.compile("@player\\.(\\w+)");
     public Map<Response.Icon, Response> responses;
     protected boolean tooltip;
     protected String text;
-    protected Animation animation;
-    protected Emotion emotion;
-    protected SoundEvent voice;
-    protected boolean voiceLine;
+    protected Speaker speaker;
     private Response.Icon response;
     private BlockPartyNPC npc;
 
     @Override
     public void apply(BlockPartyNPC npc) {
+        this.text = this.getFormattedText();
         this.npc = npc;
         npc.setDialogue(this);
     }
@@ -50,13 +54,8 @@ public class Dialogue implements ISceneAction {
     public void parse(JsonObject json) {
         this.tooltip = GsonHelper.getAsBoolean(json, "tooltip", false);
         this.text = GsonHelper.getAsString(json, "text");
-        this.animation = Animation.DEFAULT.fromKey(JsonUtils.getAsResourceLocation(json, "animation", "default"));
-        this.emotion = Emotion.NORMAL.fromValue(JsonUtils.getAsResourceLocation(json, "emotion", "normal"));
-        this.voiceLine = json.has("voice");
-        if (this.voiceLine) { this.voice = JsonUtils.getAs(JsonUtils.SOUND_EVENT, json, "voice"); }
-
+        this.speaker = new Speaker(json.getAsJsonObject("speaker"));
         this.responses = Maps.newHashMap();
-
         JsonArray responses = json.getAsJsonArray("responses");
         for (int i = 0; i < responses.size(); ++i) {
             Response response = new Response();
@@ -70,24 +69,21 @@ public class Dialogue implements ISceneAction {
         return this.text;
     }
 
+    private String getFormattedText() {
+        String text = this.text;
+        text = Markdown.highlight(text, COUNTER_PATTERN, "yellow", (match) -> String.valueOf(npc.automaton.counters.get(match)));
+        text = Markdown.highlight(text, PLAYER_COUNTER_PATTERN, "yellow", (match) -> String.valueOf(PlayerData.getCountersFor(npc.getServerPlayer()).get(match)));
+        text = Markdown.highlight(text, COOKIE_PATTERN, "magenta", (match) -> npc.automaton.cookies.get(match));
+        text = Markdown.highlight(text, PLAYER_COOKIE_PATTERN, "magenta", (match) -> PlayerData.getCookiesFor(npc.getServerPlayer()).get(match));
+        return Markdown.parse(text);
+    }
+
     public boolean isTooltip() {
         return this.tooltip;
     }
 
-    public Animation getAnimation() {
-        return this.animation;
-    }
-
-    public Emotion getEmotion() {
-        return this.emotion;
-    }
-
-    public SoundEvent getVoiceLine() {
-        return this.voice;
-    }
-
-    public boolean hasVoiceLine() {
-        return this.voiceLine;
+    public Speaker getSpeaker() {
+        return this.speaker;
     }
 
     public void setResponse(Response.Icon icon) {
@@ -95,32 +91,21 @@ public class Dialogue implements ISceneAction {
     }
 
     public static class Model {
+        private final Map<Response.Icon, String> responses;
         private final String text;
         private final boolean tooltip;
-        private final Animation animation;
-        private final Emotion emotion;
-        private final SoundEvent voice;
-        private final boolean isVoiceLine;
-        private final Map<Response.Icon, String> responses;
+        private final Speaker speaker;
+        private final SoundEvent sound;
     
-        public Model(String text, boolean tooltip, Animation animation, Emotion emotion, SoundEvent voice, boolean isVoiceLine) {
+        public Model(String text, boolean tooltip, Speaker speaker, SoundEvent sound) {
+            this.responses = Maps.newHashMap();
             this.text = text;
             this.tooltip = tooltip;
-            this.animation = animation;
-            this.emotion = emotion;
-            this.voice = voice;
-            this.isVoiceLine = isVoiceLine;
-            this.responses = Maps.newHashMap();
+            this.speaker = speaker;
+            this.sound = sound;
         }
     
         public Model(CompoundTag compound) {
-            this.text = compound.getString("Text");
-            this.tooltip = compound.getBoolean("Tooltip");
-            this.animation = Animation.DEFAULT.fromKey(compound.getString("Animation"));
-            this.emotion = Emotion.NORMAL.fromValue(compound.getString("Emotion"));
-            this.voice = JsonUtils.getAs(JsonUtils.SOUND_EVENT, compound.getString("Voice"));
-            this.isVoiceLine = compound.getBoolean("IsVoiceLine");
-    
             Map<Response.Icon, String> responses = Maps.newHashMap();
             ListTag list = compound.getList("Responses", NBT.COMPOUND);
             for (int i = 0; i < list.size(); ++i) {
@@ -131,6 +116,10 @@ public class Dialogue implements ISceneAction {
                 responses.put(icon, text);
             }
             this.responses = responses;
+            this.text = compound.getString("Text");
+            this.tooltip = compound.getBoolean("Tooltip");
+            this.speaker = new Speaker(compound.getCompound("Speaker"));
+            this.sound = JsonUtils.getAs(JsonUtils.SOUND_EVENT, compound.getString("Sound"));
         }
     
         public CompoundTag write() {
@@ -138,13 +127,6 @@ public class Dialogue implements ISceneAction {
         }
     
         public CompoundTag write(CompoundTag compound) {
-            compound.putString("Text", this.text);
-            compound.putBoolean("Tooltip", this.tooltip);
-            compound.putString("Animation", this.animation.name());
-            compound.putString("Emotion", this.emotion.name());
-            compound.putString("Voice", this.voice.getLocation().toString());
-            compound.putBoolean("IsVoiceLine", this.isVoiceLine);
-    
             ListTag list = new ListTag();
             for (Response.Icon icon : this.responses.keySet()) {
                 CompoundTag response = new CompoundTag();
@@ -153,12 +135,11 @@ public class Dialogue implements ISceneAction {
                 list.add(response);
             }
             compound.put("Responses", list);
+            compound.putString("Text", this.text);
+            compound.putBoolean("Tooltip", this.tooltip);
+            compound.put("Speaker", this.speaker.write(new CompoundTag()));
+            compound.putString("Sound", this.sound.getLocation().toString());
             return compound;
-        }
-    
-        public void stage(BlockPartyNPC npc) {
-            npc.setAnimationKey(this.animation);
-            npc.setEmotion(this.emotion);
         }
     
         public String getText() {
@@ -168,13 +149,13 @@ public class Dialogue implements ISceneAction {
         public boolean isTooltip() {
             return this.tooltip;
         }
-    
-        public SoundEvent getVoice() {
-            return this.voice;
+
+        public Speaker getSpeaker() {
+            return this.speaker;
         }
-    
-        public boolean isVoiceLine() {
-            return this.isVoiceLine;
+
+        public SoundEvent getSound() {
+            return this.sound;
         }
     
         public Map<Response.Icon, String> getResponses() {
@@ -184,6 +165,5 @@ public class Dialogue implements ISceneAction {
         public void add(Response.Icon icon, String text) {
             this.responses.put(icon, text);
         }
-    
     }
 }

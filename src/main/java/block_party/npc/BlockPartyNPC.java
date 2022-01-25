@@ -516,15 +516,13 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     }
 
     public void setDialogue(Dialogue dialogue) {
-        if (dialogue != null) {
-            SoundEvent voice = dialogue.hasVoiceLine() ? dialogue.getVoiceLine() : DollSounds.get(this, DollSounds.Sound.SAY);
-            Dialogue.Model message = new Dialogue.Model(dialogue.getText(), dialogue.isTooltip(), dialogue.getAnimation(), dialogue.getEmotion(), voice, dialogue.hasVoiceLine());
-            for (Response.Icon icon : dialogue.responses.keySet()) {
-                message.add(icon, dialogue.responses.get(icon).getText());
-            }
-            CustomMessenger.send(this.getPlayer(), new SOpenDialogue(this.getRow(), message));
-            this.dialogue = dialogue;
+        if (dialogue == null) { return; }
+        Dialogue.Model message = new Dialogue.Model(dialogue.getText(), dialogue.isTooltip(), dialogue.getSpeaker(), DollSounds.get(this, DollSounds.Sound.SAY));
+        for (Response.Icon icon : dialogue.responses.keySet()) {
+            message.add(icon, dialogue.responses.get(icon).getText());
         }
+        CustomMessenger.send(this.getPlayer(), new SOpenDialogue(this.getRow(), message));
+        this.dialogue = dialogue;
     }
     
     @Override
