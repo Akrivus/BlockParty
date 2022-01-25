@@ -7,29 +7,14 @@
     {
       "type": "block_party:dialogue",
       "action": {
-        "text": "*What* is /up?/",
+        "text": "You hit me #number_of_hits *times!*",
         "speaker": {
           "animation": "wave",
           "emotion": "happy"
         },
         "responses": [
           {
-            "icon": "block_party:green_checkmark",
-            "text": "Good!",
-            "actions": [
-              "block_party:end"
-            ]
-          },
-          {
-            "icon": "block_party:red_x",
-            "text": "Bad!",
-            "actions": [
-              "block_party:end"
-            ]
-          },
-          {
-            "icon": "block_party:chat_bubble",
-            "text": "Hello!",
+            "icon": "block_party:next_response",
             "actions": [
               "block_party:end"
             ]
