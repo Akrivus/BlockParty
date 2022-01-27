@@ -14,7 +14,9 @@ public class LookAtPlayerState extends GoalBasedAction {
 
     @Override
     protected boolean canCompleteOnFirstTry() {
-        this.npc.getLookControl().setLookAt(this.npc.getPlayer(), this.npc.getHeadRotSpeed() * this.multiplier, this.npc.getMaxHeadXRot() * this.multiplier);
+        this.npc.ifPlayer(player -> {
+            this.npc.getLookControl().setLookAt(player, this.npc.getHeadRotSpeed() * this.multiplier, this.npc.getMaxHeadXRot() * this.multiplier);
+        });
         return --this.totalTicks < 0;
     }
 

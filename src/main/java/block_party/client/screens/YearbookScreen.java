@@ -51,7 +51,7 @@ public class YearbookScreen extends ControllerScreen {
         this.name = this.entity.getTypeName().getString();
         this.updateButtons();
         this.stats[0] = String.format("%.0f", this.entity.getHealth());
-        this.stats[1] = String.format("%.0f", this.entity.getFullness());
+        this.stats[1] = String.format("%.0f", this.entity.getFoodLevel());
         this.stats[2] = String.format("%.0f", this.entity.getLoyalty());
         this.stats[3] = String.format("%.0f", this.entity.getStress());
         this.lines[0] = Trans.late(this.entity.getDere().getTranslationKey());
@@ -114,7 +114,7 @@ public class YearbookScreen extends ControllerScreen {
                 text.add(new TranslatableComponent("gui.block_party.label.health"));
             }
             if (this.getAbsoluteCenter(24) < mouseX && mouseX < this.getAbsoluteCenter(2)) {
-                text.add(new TranslatableComponent("gui.block_party.label.fullness"));
+                text.add(new TranslatableComponent("gui.block_party.label.food_level"));
             }
             if (this.getAbsoluteCenter(2) < mouseX && mouseX < this.getAbsoluteCenter(-24)) {
                 text.add(new TranslatableComponent("gui.block_party.label.loyalty"));

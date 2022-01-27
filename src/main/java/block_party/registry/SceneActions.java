@@ -20,7 +20,7 @@ public class SceneActions {
     public static final RegistryObject<Builder> DIALOGUE = BlockParty.SCENE_ACTIONS.register("dialogue", () -> f(() -> new Dialogue()));
     public static final RegistryObject<Builder> RESPONSE = BlockParty.SCENE_ACTIONS.register("response", () -> f(() -> new Dialogue()));
     public static final RegistryObject<Builder> HEALTH = BlockParty.SCENE_ACTIONS.register("health", () -> f(() -> new FloatAction(BlockPartyNPC::getHealth, BlockPartyNPC::setHealth)));
-    public static final RegistryObject<Builder> FULLNESS = BlockParty.SCENE_ACTIONS.register("fullness", () -> f(() -> new FloatAction(BlockPartyNPC::getFullness, BlockPartyNPC::setFullness)));
+    public static final RegistryObject<Builder> FOOD_LEVEL = BlockParty.SCENE_ACTIONS.register("food_level", () -> f(() -> new FloatAction(BlockPartyNPC::getFoodLevel, BlockPartyNPC::setFoodLevel)));
     public static final RegistryObject<Builder> LOYALTY = BlockParty.SCENE_ACTIONS.register("loyalty", () -> f(() -> new FloatAction(BlockPartyNPC::getLoyalty, BlockPartyNPC::setLoyalty)));
     public static final RegistryObject<Builder> STRESS = BlockParty.SCENE_ACTIONS.register("stress", () -> f(() -> new FloatAction(BlockPartyNPC::getStress, BlockPartyNPC::setStress)));
     public static final RegistryObject<Builder> COUNTER = BlockParty.SCENE_ACTIONS.register("counter", () -> f(CounterAction::new));

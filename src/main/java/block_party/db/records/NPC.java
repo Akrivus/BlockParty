@@ -29,7 +29,7 @@ public class NPC extends Row<BlockPartyNPC> {
     protected static final int BLOOD_TYPE = 8;
     protected static final int DERE = 9;
     protected static final int HEALTH = 10;
-    protected static final int FULLNESS = 11;
+    protected static final int FOOD_LEVEL = 11;
     protected static final int EXHAUSTION = 12;
     protected static final int SATURATION = 13;
     protected static final int STRESS = 14;
@@ -65,7 +65,7 @@ public class NPC extends Row<BlockPartyNPC> {
         this.get(BLOOD_TYPE).set(entity.getBloodType());
         this.get(DERE).set(entity.getDere());
         this.get(HEALTH).set(entity.getHealth());
-        this.get(FULLNESS).set(entity.getFullness());
+        this.get(FOOD_LEVEL).set(entity.getFoodLevel());
         this.get(EXHAUSTION).set(entity.getExhaustion());
         this.get(SATURATION).set(entity.getSaturation());
         this.get(STRESS).set(entity.getStress());
@@ -122,7 +122,7 @@ public class NPC extends Row<BlockPartyNPC> {
         entity.setBloodType((BloodType) this.get(BLOOD_TYPE).get());
         entity.setDere((Dere) this.get(DERE).get());
         entity.setHealth((Float) this.get(HEALTH).get());
-        entity.setFullness((Float) this.get(FULLNESS).get());
+        entity.setFoodLevel((Float) this.get(FOOD_LEVEL).get());
         entity.setExhaustion((Float) this.get(EXHAUSTION).get());
         entity.setSaturation((Float) this.get(SATURATION).get());
         entity.setStress((Float) this.get(STRESS).get());
@@ -145,7 +145,7 @@ public class NPC extends Row<BlockPartyNPC> {
             this.addColumn(new Column.AsTrait<>(this, "BloodType", BloodType.O));
             this.addColumn(new Column.AsTrait<>(this, "Dere", Dere.NYANDERE));
             this.addColumn(new Column.AsFloat(this, "Health"));
-            this.addColumn(new Column.AsFloat(this, "Fullness"));
+            this.addColumn(new Column.AsFloat(this, "FoodLevel"));
             this.addColumn(new Column.AsFloat(this, "Exhaustion"));
             this.addColumn(new Column.AsFloat(this, "Saturation"));
             this.addColumn(new Column.AsFloat(this, "Stress"));

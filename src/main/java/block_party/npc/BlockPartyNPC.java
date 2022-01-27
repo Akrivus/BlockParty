@@ -8,8 +8,7 @@ import block_party.db.DimBlockPos;
 import block_party.db.Recordable;
 import block_party.db.records.NPC;
 import block_party.messages.SOpenDialogue;
-import block_party.scene.SceneManager;
-import block_party.scene.ITrait;
+import block_party.scene.*;
 import block_party.scene.filters.BloodType;
 import block_party.scene.filters.Dere;
 import block_party.scene.filters.Emotion;
@@ -20,9 +19,6 @@ import block_party.registry.CustomSounds;
 import block_party.registry.CustomTags;
 import block_party.registry.resources.BlockAliases;
 import block_party.registry.resources.DollSounds;
-import block_party.scene.Dialogue;
-import block_party.scene.Response;
-import block_party.scene.SceneTrigger;
 import block_party.utils.NBT;
 import block_party.utils.Trans;
 import net.minecraft.core.BlockPos;
@@ -86,7 +82,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     public static final EntityDataAccessor<String> GENDER = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
     public static final EntityDataAccessor<String> ANIMATION = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
     public static final EntityDataAccessor<String> GIVEN_NAME = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
-    public static final EntityDataAccessor<Float> FULLNESS = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
+    public static final EntityDataAccessor<Float> FOOD_LEVEL = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
     public static final EntityDataAccessor<Float> EXHAUSTION = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
     public static final EntityDataAccessor<Float> SATURATION = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
     public static final EntityDataAccessor<Float> STRESS = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
@@ -106,7 +102,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     private int timeUntilHungry;
     private int timeUntilLonely;
     private int timeUntilStress;
-    private int timeSinceSlept;
+    private int timeSinceSleep;
     private long lastSeen;
     private boolean readyToSync;
 
@@ -134,7 +130,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         this.entityData.define(ANIMATION, Animation.DEFAULT.name());
         this.entityData.define(GIVEN_NAME, "Tokumei");
         this.entityData.define(SLOUCH, 0.0F);
-        this.entityData.define(FULLNESS, 20.0F);
+        this.entityData.define(FOOD_LEVEL, 20.0F);
         this.entityData.define(EXHAUSTION, 0.0F);
         this.entityData.define(SATURATION, 6.0F);
         this.entityData.define(STRESS, 0.0F);
@@ -162,7 +158,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         compound.putInt("TimeUntilHungry", this.timeUntilHungry);
         compound.putInt("TimeUntilLonely", this.timeUntilLonely);
         compound.putInt("TimeUntilStress", this.timeUntilStress);
-        compound.putInt("TimeSinceSlept", this.timeSinceSlept);
+        compound.putInt("TimeSinceSleep", this.timeSinceSleep);
         this.sceneManager.write(compound);
         super.addAdditionalSaveData(compound);
     }
@@ -178,7 +174,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         this.timeUntilHungry = compound.getInt("TimeUntilHungry");
         this.timeUntilLonely = compound.getInt("TimeUntilLonely");
         this.timeUntilStress = compound.getInt("TimeUntilStress");
-        this.timeSinceSlept = compound.getInt("TimeSinceSlept");
+        this.timeSinceSleep = compound.getInt("TimeSinceSleep");
         this.sceneManager.read(compound);
         this.getRow().load(this);
         super.readAdditionalSaveData(compound);
@@ -570,8 +566,18 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         return this.level.getPlayerByUUID(this.getPlayerUUID());
     }
 
+    public void ifPlayer(Consumer<Player> function) {
+        Player player = this.getPlayer();
+        if (player != null) { function.accept(player); }
+    }
+
     public ServerPlayer getServerPlayer() {
         return this.getServer().getPlayerList().getPlayer(this.getPlayerUUID());
+    }
+
+    public void ifServerPlayer(Consumer<ServerPlayer> function) {
+        ServerPlayer player = this.getServerPlayer();
+        if (player != null) { function.accept(player); }
     }
 
     public void setPlayer(Player player) {
@@ -761,16 +767,16 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         this.entityData.set(SATURATION, saturation);
     }
 
-    public void addFullness(float fullness) {
-        this.setFullness(this.getFullness() + fullness);
+    public void addFoodLevel(float food_level) {
+        this.setFoodLevel(this.getFoodLevel() + food_level);
     }
 
-    public float getFullness() {
-        return this.entityData.get(FULLNESS);
+    public float getFoodLevel() {
+        return this.entityData.get(FOOD_LEVEL);
     }
 
-    public void setFullness(float fullness) {
-        this.entityData.set(FULLNESS, fullness);
+    public void setFoodLevel(float food_level) {
+        this.entityData.set(FOOD_LEVEL, food_level);
     }
 
     public void addAffection(float affection) {
