@@ -2,7 +2,7 @@ package block_party.items;
 
 import block_party.BlockParty;
 import block_party.entities.Moe;
-import block_party.scene.filters.Dere;
+import block_party.scene.filters.traits.Dere;
 import block_party.utils.sorters.ISortableItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TranslatableComponent;
