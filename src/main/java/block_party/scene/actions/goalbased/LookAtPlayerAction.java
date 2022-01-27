@@ -1,4 +1,4 @@
-package block_party.scene.actions.goals;
+package block_party.scene.actions.goalbased;
 
 import block_party.scene.actions.GoalBasedAction;
 
