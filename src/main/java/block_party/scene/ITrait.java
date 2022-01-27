@@ -1,7 +1,6 @@
-package block_party.npc.automata;
+package block_party.scene;
 
 import block_party.npc.BlockPartyNPC;
-import block_party.scene.ISceneFilter;
 import block_party.utils.Trans;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;

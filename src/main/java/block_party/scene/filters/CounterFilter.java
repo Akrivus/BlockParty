@@ -8,7 +8,7 @@ public class CounterFilter extends IntegerFilter {
     protected String name;
 
     public CounterFilter() {
-        this.function = (npc) -> npc.automaton.counters.get(this.name);
+        this.function = (npc) -> npc.sceneManager.counters.get(this.name);
     }
 
     @Override

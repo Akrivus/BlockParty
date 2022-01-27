@@ -17,7 +17,7 @@ public class Response implements ISceneAction {
 
     @Override
     public void apply(BlockPartyNPC npc) {
-        npc.automaton.putActions(this.actions);
+        npc.sceneManager.putActions(this.actions);
         this.complete = true;
     }
 

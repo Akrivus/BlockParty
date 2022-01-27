@@ -2,10 +2,10 @@ package block_party.registry;
 
 import block_party.BlockParty;
 import block_party.npc.BlockPartyNPC;
-import block_party.npc.automata.trait.BloodType;
-import block_party.npc.automata.trait.Dere;
-import block_party.npc.automata.trait.Emotion;
-import block_party.npc.automata.trait.Gender;
+import block_party.scene.filters.BloodType;
+import block_party.scene.filters.Dere;
+import block_party.scene.filters.Emotion;
+import block_party.scene.filters.Gender;
 import block_party.scene.ISceneFilter;
 import block_party.scene.SceneFilter;
 import block_party.scene.filters.*;

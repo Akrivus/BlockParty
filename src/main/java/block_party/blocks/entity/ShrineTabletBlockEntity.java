@@ -4,7 +4,7 @@ import block_party.db.BlockPartyDB;
 import block_party.db.records.Shrine;
 import block_party.messages.SShrineList;
 import block_party.npc.BlockPartyNPC;
-import block_party.npc.automata.trait.Dere;
+import block_party.scene.filters.Dere;
 import block_party.registry.CustomBlockEntities;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomMessenger;

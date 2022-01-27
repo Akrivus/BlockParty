@@ -8,7 +8,7 @@ public class CookieFilter extends StringFilter {
     protected String name;
 
     public CookieFilter() {
-        this.function = (npc) -> npc.automaton.cookies.get(this.name);
+        this.function = (npc) -> npc.sceneManager.cookies.get(this.name);
     }
 
     public void parse(JsonObject json) {

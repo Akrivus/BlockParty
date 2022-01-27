@@ -1,4 +1,4 @@
-package block_party.npc.automata.state;
+package block_party.scene.actions;
 
 import block_party.npc.BlockPartyNPC;
 import block_party.scene.ISceneAction;
@@ -6,13 +6,13 @@ import net.minecraft.world.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
 
-public abstract class GoalState extends Goal implements ISceneAction {
+public abstract class GoalBasedAction extends Goal implements ISceneAction {
     private final int priority;
     protected boolean complete;
     protected BlockPartyNPC npc;
     private boolean done;
 
-    public GoalState(int priority, Flag flag, Flag... flags) {
+    public GoalBasedAction(int priority, Flag flag, Flag... flags) {
         this.setFlags(EnumSet.of(flag, flags));
         this.priority = priority;
     }

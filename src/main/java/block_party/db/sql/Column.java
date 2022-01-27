@@ -1,7 +1,7 @@
 package block_party.db.sql;
 
 import block_party.db.DimBlockPos;
-import block_party.npc.automata.ITrait;
+import block_party.scene.ITrait;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;

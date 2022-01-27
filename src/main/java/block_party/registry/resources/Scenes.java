@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class SceneManager extends SimpleJsonResourceReloadListener {
+public class Scenes extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = BlockParty.GSON.create();
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -34,7 +34,7 @@ public class SceneManager extends SimpleJsonResourceReloadListener {
     private Map<ResourceLocation, Scene> byName = ImmutableMap.of();
     private boolean hasErrors;
 
-    public SceneManager() {
+    public Scenes() {
         super(GSON, "scenes");
     }
 

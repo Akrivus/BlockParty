@@ -1,8 +1,8 @@
 package block_party.npc.state;
 
-import block_party.npc.automata.state.GoalState;
+import block_party.scene.actions.GoalBasedAction;
 
-public class LookAtPlayerState extends GoalState {
+public class LookAtPlayerState extends GoalBasedAction {
     private final float multiplier;
     private int totalTicks = 20;
 

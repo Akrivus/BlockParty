@@ -1,8 +1,8 @@
-package block_party.npc.automata.trait;
+package block_party.scene.filters;
 
 import block_party.db.BlockPartyDB;
 import block_party.npc.BlockPartyNPC;
-import block_party.npc.automata.ITrait;
+import block_party.scene.ITrait;
 import block_party.utils.Trans;
 import net.minecraft.world.level.Level;
 

@@ -8,12 +8,12 @@ import block_party.db.DimBlockPos;
 import block_party.db.Recordable;
 import block_party.db.records.NPC;
 import block_party.messages.SOpenDialogue;
-import block_party.npc.automata.Automaton;
-import block_party.npc.automata.ITrait;
-import block_party.npc.automata.trait.BloodType;
-import block_party.npc.automata.trait.Dere;
-import block_party.npc.automata.trait.Emotion;
-import block_party.npc.automata.trait.Gender;
+import block_party.scene.SceneManager;
+import block_party.scene.ITrait;
+import block_party.scene.filters.BloodType;
+import block_party.scene.filters.Dere;
+import block_party.scene.filters.Emotion;
+import block_party.scene.filters.Gender;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomMessenger;
 import block_party.registry.CustomSounds;
@@ -96,7 +96,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     public static final EntityDataAccessor<Float> SLOUCH = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
     public static final EntityDataAccessor<Float> AGE = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
     public final SimpleContainer inventory = new SimpleContainer(36);
-    public final Automaton automaton;
+    public final SceneManager sceneManager;
     private final LazyOptional<?> itemHandler = LazyOptional.of(() -> new InvWrapper(this.inventory));
     private final Queue<Consumer<BlockPartyNPC>> nextTickOps;
     private BlockState actualBlockState = Blocks.AIR.defaultBlockState();
@@ -117,7 +117,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         this.setPathfindingMalus(BlockPathTypes.TRAPDOOR, 0.0F);
         this.restrictTo(this.blockPosition(), 16);
         this.nextTickOps = new LinkedList<>();
-        this.automaton = new Automaton(this);
+        this.sceneManager = new SceneManager(this);
     }
 
     @Override
@@ -163,7 +163,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         compound.putInt("TimeUntilLonely", this.timeUntilLonely);
         compound.putInt("TimeUntilStress", this.timeUntilStress);
         compound.putInt("TimeSinceSlept", this.timeSinceSlept);
-        this.automaton.write(compound);
+        this.sceneManager.write(compound);
         super.addAdditionalSaveData(compound);
     }
 
@@ -179,7 +179,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         this.timeUntilLonely = compound.getInt("TimeUntilLonely");
         this.timeUntilStress = compound.getInt("TimeUntilStress");
         this.timeSinceSlept = compound.getInt("TimeSinceSlept");
-        this.automaton.read(compound);
+        this.sceneManager.read(compound);
         this.getRow().load(this);
         super.readAdditionalSaveData(compound);
         this.readyToSync = true;
@@ -276,7 +276,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     public InteractionResult interactAt(Player player, Vec3 vector, InteractionHand hand) {
         if (hand == InteractionHand.OFF_HAND) { return InteractionResult.PASS; }
         if (this.isPlayer(player)) {
-            this.automaton.trigger(player.isCrouching() ? SceneTrigger.SHIFT_RIGHT_CLICK : SceneTrigger.RIGHT_CLICK);
+            this.sceneManager.trigger(player.isCrouching() ? SceneTrigger.SHIFT_RIGHT_CLICK : SceneTrigger.RIGHT_CLICK);
         }
         return InteractionResult.SUCCESS;
     }
@@ -330,7 +330,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     @Override
     public void aiStep() {
         super.aiStep();
-        this.automaton.tick(this);
+        this.sceneManager.tick(this);
         if (this.isLocal()) {
             this.updateHungerState();
             this.updateLonelyState();
@@ -369,8 +369,8 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     public void customServerAiStep() {
         Consumer<BlockPartyNPC> op = this.nextTickOps.poll();
         if (op != null) { op.accept(this); }
-        if (this.random.nextInt(20) == 0) { this.automaton.trigger(SceneTrigger.RANDOM_TICK); }
-        if (this.isBeingLookedAt()) { this.automaton.trigger(SceneTrigger.STARE); }
+        if (this.random.nextInt(20) == 0) { this.sceneManager.trigger(SceneTrigger.RANDOM_TICK); }
+        if (this.isBeingLookedAt()) { this.sceneManager.trigger(SceneTrigger.STARE); }
     }
 
     @Override
@@ -391,7 +391,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         boolean attacked = super.doHurtTarget(target);
         if (attacked) {
             this.playSound(DollSounds.get(this, DollSounds.Sound.ATTACK));
-            this.automaton.trigger(SceneTrigger.ATTACK);
+            this.sceneManager.trigger(SceneTrigger.ATTACK);
         }
         return attacked;
     }
@@ -465,10 +465,10 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     public boolean hurt(DamageSource source, float amount) {
         Entity entity = source.getDirectEntity();
         if (this.isPlayer(entity)) {
-            this.automaton.trigger(entity.isCrouching() ? SceneTrigger.SHIFT_LEFT_CLICK : SceneTrigger.LEFT_CLICK);
+            this.sceneManager.trigger(entity.isCrouching() ? SceneTrigger.SHIFT_LEFT_CLICK : SceneTrigger.LEFT_CLICK);
             return false;
         } else if (super.hurt(source, amount * this.getBlockBuffer())) {
-            this.automaton.trigger(SceneTrigger.HURT);
+            this.sceneManager.trigger(SceneTrigger.HURT);
             return true;
         } else {
             return false;

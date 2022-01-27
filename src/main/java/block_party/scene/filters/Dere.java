@@ -1,7 +1,7 @@
-package block_party.npc.automata.trait;
+package block_party.scene.filters;
 
 import block_party.npc.BlockPartyNPC;
-import block_party.npc.automata.ITrait;
+import block_party.scene.ITrait;
 
 public enum Dere implements ITrait<Dere> {
     NYANDERE(0xffffff), HIMEDERE(0xcc00ff), KUUDERE(0x0000ff), TSUNDERE(0xffcc00), YANDERE(0xff0000), DEREDERE(0x0000ff), DANDERE(0x00ccff);

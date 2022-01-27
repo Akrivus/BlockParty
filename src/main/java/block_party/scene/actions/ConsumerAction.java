@@ -1,19 +1,19 @@
-package block_party.npc.automata.state;
+package block_party.scene.actions;
 
 import block_party.npc.BlockPartyNPC;
 import block_party.scene.ISceneAction;
 
 import java.util.function.Consumer;
 
-public class ConsumerState implements ISceneAction {
+public class ConsumerAction implements ISceneAction {
     private final Consumer<BlockPartyNPC> consumer;
     private final ISceneAction state;
 
-    public ConsumerState(Consumer<BlockPartyNPC> consumer) {
+    public ConsumerAction(Consumer<BlockPartyNPC> consumer) {
         this(consumer, null);
     }
 
-    public ConsumerState(Consumer<BlockPartyNPC> consumer, ISceneAction state) {
+    public ConsumerAction(Consumer<BlockPartyNPC> consumer, ISceneAction state) {
         this.consumer = consumer;
         this.state = state;
     }

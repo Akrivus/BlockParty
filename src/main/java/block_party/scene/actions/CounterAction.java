@@ -14,7 +14,7 @@ public class CounterAction implements ISceneAction {
 
     @Override
     public void apply(BlockPartyNPC npc) {
-        this.operation.accept(npc.automaton.counters, this.name, this.value);
+        this.operation.accept(npc.sceneManager.counters, this.name, this.value);
     }
 
     @Override

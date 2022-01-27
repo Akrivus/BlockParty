@@ -16,7 +16,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
 
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Dialogue implements ISceneAction {
@@ -45,7 +44,7 @@ public class Dialogue implements ISceneAction {
     @Override
     public void onComplete() {
         Response response = this.responses.get(this.response);
-        this.npc.automaton.putAction(response == null ? SceneActions.build(SceneActions.END) : response);
+        this.npc.sceneManager.putAction(response == null ? SceneActions.build(SceneActions.END) : response);
         this.npc.setDialogue(null);
     }
 
@@ -67,9 +66,9 @@ public class Dialogue implements ISceneAction {
     public String getText() {
         if (this.npc == null) { return this.text; }
         String text = this.text;
-        text = Markdown.highlight(text, COUNTER_PATTERN, "yellow", (match) -> String.valueOf(this.npc.automaton.counters.get(match)));
+        text = Markdown.highlight(text, COUNTER_PATTERN, "yellow", (match) -> String.valueOf(this.npc.sceneManager.counters.get(match)));
         text = Markdown.highlight(text, PLAYER_COUNTER_PATTERN, "yellow", (match) -> String.valueOf(PlayerData.getCountersFor(this.npc.getServerPlayer()).get(match)));
-        text = Markdown.highlight(text, COOKIE_PATTERN, "magenta", (match) -> this.npc.automaton.cookies.get(match));
+        text = Markdown.highlight(text, COOKIE_PATTERN, "magenta", (match) -> this.npc.sceneManager.cookies.get(match));
         text = Markdown.highlight(text, PLAYER_COOKIE_PATTERN, "magenta", (match) -> PlayerData.getCookiesFor(this.npc.getServerPlayer()).get(match));
         return Markdown.parse(text);
     }

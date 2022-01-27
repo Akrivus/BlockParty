@@ -1,4 +1,4 @@
-package block_party.npc.automata;
+package block_party.scene;
 
 import block_party.npc.BlockPartyNPC;
 import block_party.registry.CustomResources;
@@ -10,7 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Automaton {
+public class SceneManager {
     protected final BlockPartyNPC npc;
     protected SceneTrigger trigger = SceneTrigger.CREATION;
     protected LinkedList<ISceneAction> actions;
@@ -18,7 +18,7 @@ public class Automaton {
     public Cookies cookies = new Cookies();
     public Counters counters = new Counters();
 
-    public Automaton(BlockPartyNPC npc) {
+    public SceneManager(BlockPartyNPC npc) {
         this.actions = Lists.newLinkedList();
         this.action = SceneActions.build(SceneActions.END);
         this.npc = npc;
@@ -50,7 +50,7 @@ public class Automaton {
     public void trigger(SceneTrigger trigger) {
         if (this.trigger.getPriority() < trigger.getPriority()) {
             this.trigger = trigger;
-            Scene scene = CustomResources.SCENE_MANAGER.get(trigger, this.npc);
+            Scene scene = CustomResources.SCENES.get(trigger, this.npc);
             if (scene == null) { return; }
             this.setAction(null);
             this.setActions(scene.getActions());
