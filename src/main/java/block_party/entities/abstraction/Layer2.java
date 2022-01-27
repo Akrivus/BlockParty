@@ -30,8 +30,8 @@ import java.util.Optional;
  * Abstraction layer 2: block data and catch-all block behaviors.
  */
 public abstract class Layer2 extends Layer1 {
-    public static final EntityDataAccessor<Optional<BlockState>> BLOCK_STATE = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.BLOCK_STATE);
-    public static final EntityDataAccessor<Float> SCALE = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
+    public static final EntityDataAccessor<Optional<BlockState>> BLOCK_STATE = SynchedEntityData.defineId(Layer2.class, EntityDataSerializers.BLOCK_STATE);
+    public static final EntityDataAccessor<Float> SCALE = SynchedEntityData.defineId(Layer2.class, EntityDataSerializers.FLOAT);
     private BlockState actualBlockState = Blocks.AIR.defaultBlockState();
     private CompoundTag tileEntityData = new CompoundTag();
 

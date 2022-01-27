@@ -18,8 +18,8 @@ import java.util.UUID;
  * Abstraction layer 3: player ownership.
  */
 public abstract class Layer3 extends Layer2 {
-    public static final EntityDataAccessor<String> PLAYER_UUID = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
-    public static final EntityDataAccessor<Boolean> FOLLOWING = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.BOOLEAN);
+    public static final EntityDataAccessor<String> PLAYER_UUID = SynchedEntityData.defineId(Layer3.class, EntityDataSerializers.STRING);
+    public static final EntityDataAccessor<Boolean> FOLLOWING = SynchedEntityData.defineId(Layer3.class, EntityDataSerializers.BOOLEAN);
 
     protected Layer3(EntityType<? extends BlockPartyNPC> type, Level level) {
         super(type, level);

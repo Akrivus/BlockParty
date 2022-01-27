@@ -17,7 +17,7 @@ import net.minecraft.world.level.Level;
  * Abstraction layer 5: database row and sync.
  */
 public abstract class Layer5 extends Layer4 implements Recordable<NPC> {
-    public static final EntityDataAccessor<String> DATABASE_ID = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
+    public static final EntityDataAccessor<String> DATABASE_ID = SynchedEntityData.defineId(Layer5.class, EntityDataSerializers.STRING);
     private boolean syncWithDB;
     private boolean readyToSync;
 

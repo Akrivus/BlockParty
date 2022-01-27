@@ -1,10 +1,10 @@
 package block_party.entities.abstraction;
 
 import block_party.entities.BlockPartyNPC;
-import block_party.scene.filters.BloodType;
-import block_party.scene.filters.Dere;
-import block_party.scene.filters.Emotion;
-import block_party.scene.filters.Gender;
+import block_party.scene.filters.traits.BloodType;
+import block_party.scene.filters.traits.Dere;
+import block_party.scene.filters.traits.Emotion;
+import block_party.scene.filters.traits.Gender;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -20,20 +20,20 @@ import net.minecraft.world.level.ServerLevelAccessor;
  * Abstraction layer 4: entity data and accessors.
  */
 public abstract class Layer4 extends Layer3 {
-    public static final EntityDataAccessor<String> BLOOD_TYPE = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
-    public static final EntityDataAccessor<String> DERE = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
-    public static final EntityDataAccessor<String> EMOTION = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
-    public static final EntityDataAccessor<String> GENDER = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
-    public static final EntityDataAccessor<String> GIVEN_NAME = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
-    public static final EntityDataAccessor<Float> FOOD_LEVEL = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
-    public static final EntityDataAccessor<Float> EXHAUSTION = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
-    public static final EntityDataAccessor<Float> SATURATION = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
-    public static final EntityDataAccessor<Float> STRESS = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
-    public static final EntityDataAccessor<Float> RELAXATION = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
-    public static final EntityDataAccessor<Float> LOYALTY = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
-    public static final EntityDataAccessor<Float> AFFECTION = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
-    public static final EntityDataAccessor<Float> SLOUCH = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
-    public static final EntityDataAccessor<Float> AGE = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
+    public static final EntityDataAccessor<String> BLOOD_TYPE = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.STRING);
+    public static final EntityDataAccessor<String> DERE = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.STRING);
+    public static final EntityDataAccessor<String> EMOTION = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.STRING);
+    public static final EntityDataAccessor<String> GENDER = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.STRING);
+    public static final EntityDataAccessor<String> GIVEN_NAME = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.STRING);
+    public static final EntityDataAccessor<Float> FOOD_LEVEL = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.FLOAT);
+    public static final EntityDataAccessor<Float> EXHAUSTION = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.FLOAT);
+    public static final EntityDataAccessor<Float> SATURATION = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.FLOAT);
+    public static final EntityDataAccessor<Float> STRESS = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.FLOAT);
+    public static final EntityDataAccessor<Float> RELAXATION = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.FLOAT);
+    public static final EntityDataAccessor<Float> LOYALTY = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.FLOAT);
+    public static final EntityDataAccessor<Float> AFFECTION = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.FLOAT);
+    public static final EntityDataAccessor<Float> SLOUCH = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.FLOAT);
+    public static final EntityDataAccessor<Float> AGE = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.FLOAT);
 
     public Layer4(EntityType<? extends BlockPartyNPC> type, Level level) {
         super(type, level);

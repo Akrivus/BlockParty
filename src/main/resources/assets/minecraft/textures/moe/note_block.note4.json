@@ -1,0 +1,10 @@
+{
+  "texture": "minecraft:textures/moe/note_block.note4",
+  "block": "minecraft:note_block",
+  "props": [
+    {
+      "name": "note",
+      "value": 4
+    }
+  ]
+}

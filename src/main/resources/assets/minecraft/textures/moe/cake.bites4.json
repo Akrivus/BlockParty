@@ -1,0 +1,10 @@
+{
+  "texture": "minecraft:textures/moe/cake.bites4",
+  "block": "minecraft:cake",
+  "props": [
+    {
+      "name": "bites",
+      "value": 4
+    }
+  ]
+}
