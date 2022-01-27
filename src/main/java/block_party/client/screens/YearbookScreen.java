@@ -3,7 +3,7 @@ package block_party.client.screens;
 import block_party.BlockParty;
 import block_party.client.animation.Animation;
 import block_party.messages.CRemovePage;
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import block_party.registry.CustomMessenger;
 import block_party.registry.CustomSounds;
 import block_party.utils.Trans;

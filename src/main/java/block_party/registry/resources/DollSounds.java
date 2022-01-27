@@ -1,7 +1,7 @@
 package block_party.registry.resources;
 
 import block_party.BlockParty;
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import block_party.registry.CustomSounds;
 import block_party.utils.JsonUtils;
 import com.google.common.collect.ImmutableMap;

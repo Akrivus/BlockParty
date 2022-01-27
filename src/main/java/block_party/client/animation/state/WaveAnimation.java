@@ -2,7 +2,7 @@ package block_party.client.animation.state;
 
 import block_party.client.animation.AbstractAnimation;
 import block_party.client.model.IRiggableModel;
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.world.entity.HumanoidArm;
 

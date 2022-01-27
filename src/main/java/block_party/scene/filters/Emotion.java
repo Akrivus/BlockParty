@@ -1,6 +1,6 @@
 package block_party.scene.filters;
 
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import block_party.scene.ITrait;
 import block_party.registry.resources.DollSounds;
 

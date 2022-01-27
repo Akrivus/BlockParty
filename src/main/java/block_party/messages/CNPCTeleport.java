@@ -1,6 +1,6 @@
 package block_party.messages;
 
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import block_party.world.CellPhone;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;

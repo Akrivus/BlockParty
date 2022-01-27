@@ -1,6 +1,6 @@
 package block_party.scene;
 
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import block_party.registry.SceneFilters;
 import block_party.utils.JsonUtils;
 import com.google.common.collect.ImmutableList;

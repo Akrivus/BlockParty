@@ -1,6 +1,6 @@
 package block_party.client.model;
 
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.ArmedModel;

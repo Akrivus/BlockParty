@@ -1,7 +1,7 @@
 package block_party.registry;
 
 import block_party.BlockParty;
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import block_party.scene.Dialogue;
 import block_party.scene.ISceneAction;
 import block_party.scene.actions.CookieAction;

@@ -1,6 +1,6 @@
 package block_party.scene;
 
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 
 import java.util.function.Predicate;
 

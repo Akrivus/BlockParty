@@ -1,6 +1,6 @@
 package block_party.scene.actions;
 
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import block_party.scene.Cookies;
 import block_party.scene.ISceneAction;
 import block_party.scene.PlayerSceneManager;

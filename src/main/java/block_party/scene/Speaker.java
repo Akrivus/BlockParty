@@ -1,7 +1,7 @@
 package block_party.scene;
 
 import block_party.client.animation.Animation;
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import block_party.scene.filters.Emotion;
 import block_party.utils.JsonUtils;
 import com.google.gson.JsonObject;

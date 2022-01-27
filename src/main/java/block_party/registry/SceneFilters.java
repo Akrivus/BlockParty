@@ -1,7 +1,7 @@
 package block_party.registry;
 
 import block_party.BlockParty;
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import block_party.scene.filters.BloodType;
 import block_party.scene.filters.Dere;
 import block_party.scene.filters.Emotion;
@@ -73,7 +73,7 @@ public class SceneFilters {
     public static final RegistryObject<Builder> HAS_COOKIE = BlockParty.SCENE_FILTERS.register("has_cookie", () -> f(CookieFilter::new));
     public static final RegistryObject<Builder> HELD_ITEM = BlockParty.SCENE_FILTERS.register("held_item", () -> f(HeldItemFilter::new));
     public static final RegistryObject<Builder> BLOCK = BlockParty.SCENE_FILTERS.register("block", () -> f(() -> new BlockFilter(BlockPartyNPC::getVisibleBlockState)));
-    public static final RegistryObject<Builder> FAMILY = BlockParty.SCENE_FILTERS.register("family", () -> f(() -> new StringFilter(BlockPartyNPC::getBlockName)));
+    public static final RegistryObject<Builder> FAMILY = BlockParty.SCENE_FILTERS.register("family", () -> f(() -> new StringFilter(BlockPartyNPC::getFamilyName)));
     public static final RegistryObject<Builder> NAME = BlockParty.SCENE_FILTERS.register("name", () -> f(() -> new StringFilter(BlockPartyNPC::getGivenName)));
 
     public static void add(DeferredRegister<Builder> registry, IEventBus bus) {

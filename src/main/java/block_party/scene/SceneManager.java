@@ -1,6 +1,6 @@
 package block_party.scene;
 
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import block_party.registry.CustomResources;
 import block_party.registry.SceneActions;
 import block_party.utils.Trans;
@@ -11,17 +11,17 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class SceneManager {
-    protected final BlockPartyNPC npc;
+    protected final BlockPartyNPC actor;
     protected SceneTrigger trigger = SceneTrigger.CREATION;
     protected LinkedList<ISceneAction> actions;
     protected ISceneAction action;
     public Cookies cookies = new Cookies();
     public Counters counters = new Counters();
 
-    public SceneManager(BlockPartyNPC npc) {
+    public SceneManager(BlockPartyNPC actor) {
         this.actions = Lists.newLinkedList();
         this.action = SceneActions.build(SceneActions.END);
-        this.npc = npc;
+        this.actor = actor;
     }
 
     public void read(CompoundTag compound) {
@@ -34,12 +34,12 @@ public class SceneManager {
         this.counters.save(compound);
     }
 
-    public void tick(BlockPartyNPC npc) {
-        this.setDefaultVariables(npc);
+    public void tick(BlockPartyNPC actor) {
+        this.setDefaultVariables(actor);
         if (this.action == null && this.actions.isEmpty()) { return; }
         if (this.action == null) {
             this.action = this.actions.remove();
-            this.action.apply(npc);
+            this.action.apply(actor);
         }
         if (this.action.isComplete()) {
             this.action.onComplete();
@@ -51,7 +51,7 @@ public class SceneManager {
     public void trigger(SceneTrigger trigger) {
         if (this.trigger.getPriority() < trigger.getPriority()) {
             this.trigger = trigger;
-            Scene scene = CustomResources.SCENES.get(trigger, this.npc);
+            Scene scene = CustomResources.SCENES.get(trigger, this.actor);
             if (scene == null) { return; }
             this.setAction(null);
             this.setActions(scene.getActions());
@@ -84,23 +84,23 @@ public class SceneManager {
         this.actions.addLast(action);
     }
 
-    private void setDefaultVariables(BlockPartyNPC npc) {
-        this.cookies.add( "given_name",  npc.getGivenName());
-        this.cookies.add( "family_name", npc.getBlockName());
-        this.cookies.add( "blood_type",  Trans.late(npc.getBloodType().getTranslationKey()));
-        this.cookies.add( "dere",        Trans.late(npc.getDere().getTranslationKey()));
-        this.cookies.add( "emotion",     Trans.late(npc.getEmotion().getTranslationKey()));
-        this.cookies.add( "gender",      Trans.late(npc.getGender().getTranslationKey()));
-        this.counters.set("health",      (int) npc.getHealth());
-        this.counters.set("food_level",  (int) npc.getFoodLevel());
-        this.counters.set("exhaustion",  (int) npc.getExhaustion());
-        this.counters.set("saturation",  (int) npc.getSaturation());
-        this.counters.set("stress",      (int) npc.getStress());
-        this.counters.set("relaxation",  (int) npc.getRelaxation());
-        this.counters.set("loyalty",     (int) npc.getLoyalty());
-        this.counters.set("affection",   (int) npc.getAffection());
-        this.counters.set("slouch",      (int) npc.getSlouch());
-        this.counters.set("scale",       (int) npc.getScale());
-        this.counters.set("age",         (int) npc.getAgeInYears());
+    private void setDefaultVariables(BlockPartyNPC actor) {
+        this.cookies.add( "given_name",  actor.getGivenName());
+        this.cookies.add( "family_name", actor.getFamilyName());
+        this.cookies.add( "blood_type",  Trans.late(actor.getBloodType().getTranslationKey()));
+        this.cookies.add( "dere",        Trans.late(actor.getDere().getTranslationKey()));
+        this.cookies.add( "emotion",     Trans.late(actor.getEmotion().getTranslationKey()));
+        this.cookies.add( "gender",      Trans.late(actor.getGender().getTranslationKey()));
+        this.counters.set("health",      (int) actor.getHealth());
+        this.counters.set("food_level",  (int) actor.getFoodLevel());
+        this.counters.set("exhaustion",  (int) actor.getExhaustion());
+        this.counters.set("saturation",  (int) actor.getSaturation());
+        this.counters.set("stress",      (int) actor.getStress());
+        this.counters.set("relaxation",  (int) actor.getRelaxation());
+        this.counters.set("loyalty",     (int) actor.getLoyalty());
+        this.counters.set("affection",   (int) actor.getAffection());
+        this.counters.set("slouch",      (int) actor.getSlouch());
+        this.counters.set("scale",       (int) actor.getScale());
+        this.counters.set("age",         (int) actor.getAgeInYears());
     }
 }

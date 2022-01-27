@@ -2,8 +2,8 @@ package block_party.items;
 
 import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
+import block_party.entities.BlockPartyNPC;
 import block_party.messages.SOpenYearbook;
-import block_party.npc.BlockPartyNPC;
 import block_party.registry.CustomMessenger;
 import block_party.utils.sorters.ISortableItem;
 import net.minecraft.world.InteractionHand;

@@ -5,7 +5,7 @@ import block_party.db.DimBlockPos;
 import block_party.db.sql.Column;
 import block_party.db.sql.Row;
 import block_party.db.sql.Table;
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import block_party.scene.filters.BloodType;
 import block_party.scene.filters.Dere;
 import block_party.registry.CustomEntities;

@@ -1,6 +1,6 @@
 package block_party.scene;
 
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import block_party.utils.Trans;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;

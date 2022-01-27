@@ -6,7 +6,7 @@ import block_party.client.model.DollModel;
 import block_party.client.renderers.layers.EmoteLayer;
 import block_party.client.renderers.layers.GlowLayer;
 import block_party.client.renderers.layers.SpecialLayer;
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import block_party.registry.resources.DollTextures;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;

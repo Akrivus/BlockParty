@@ -1,7 +1,7 @@
 package block_party.world;
 
 import block_party.db.records.NPC;
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.BlockPartyNPC;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;

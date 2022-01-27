@@ -1,7 +1,7 @@
 package block_party.items;
 
 import block_party.BlockParty;
-import block_party.npc.BlockPartyNPC;
+import block_party.entities.Doll;
 import block_party.scene.filters.Dere;
 import block_party.utils.sorters.ISortableItem;
 import net.minecraft.core.BlockPos;
@@ -25,7 +25,7 @@ public class CustomSpawnEggItem extends Item implements ISortableItem {
         Player player = context.getPlayer();
         BlockPos block = context.getClickedPos();
         BlockPos spawn = block.relative(context.getClickedFace());
-        if (BlockPartyNPC.spawn(level, block, spawn, player.getYRot(), player.getXRot(), Dere.random(), player)) {
+        if (Doll.spawn(level, block, spawn, player.getYRot(), player.getXRot(), Dere.random(), player)) {
             context.getItemInHand().shrink(1);
             return InteractionResult.CONSUME;
         } else {
