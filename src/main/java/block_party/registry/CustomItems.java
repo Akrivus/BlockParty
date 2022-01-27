@@ -51,7 +51,7 @@ public class CustomItems {
     public static final RegistryObject<Item> NOON_HANGING_SCROLL = BlockParty.ITEMS.register("noon_hanging_scroll", () -> new MoeBlockItem(CustomBlocks.NOON_HANGING_SCROLL, 90));
     public static final RegistryObject<Item> ONIGIRI = BlockParty.ITEMS.register("onigiri", OnigiriItem::new);
     public static final RegistryObject<Item> ORANGE_PAPER_LANTERN = BlockParty.ITEMS.register("orange_paper_lantern", () -> new MoeBlockItem(CustomBlocks.ORANGE_PAPER_LANTERN));
-    public static final RegistryObject<Item> NPC_SPAWN_EGG = BlockParty.ITEMS.register("moe_spawn_egg", CustomSpawnEggItem::new);
+    public static final RegistryObject<Item> MOE_SPAWN_EGG = BlockParty.ITEMS.register("moe_spawn_egg", CustomSpawnEggItem::new);
     public static final RegistryObject<Item> PINK_BOW = BlockParty.ITEMS.register("pink_bow", PinkBowItem::new);
     public static final RegistryObject<Item> PINK_PAPER_LANTERN = BlockParty.ITEMS.register("pink_paper_lantern", () -> new MoeBlockItem(CustomBlocks.PINK_PAPER_LANTERN));
     public static final RegistryObject<Item> PURPLE_PAPER_LANTERN = BlockParty.ITEMS.register("purple_paper_lantern", () -> new MoeBlockItem(CustomBlocks.PURPLE_PAPER_LANTERN));

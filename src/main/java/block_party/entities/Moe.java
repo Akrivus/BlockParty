@@ -42,7 +42,7 @@ public class Moe extends BlockPartyNPC {
     @Override
     public BlockPartyNPC onTeleport(BlockPartyNPC entity) {
         entity.setFollowing(true);
-        entity.playSound(CustomSounds.NPC_FOLLOW.get());
+        entity.playSound(CustomSounds.MOE_FOLLOW.get());
         return entity;
     }
 
