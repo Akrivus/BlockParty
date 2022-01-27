@@ -21,21 +21,10 @@ public enum Gender implements ITrait<Gender> {
     FEMALE("chan"),
     NONBINARY("kun");
 
-    private final String nominative;
-    private final String accusative;
-    private final String possessive;
-    private final String reflexive;
     private final String honorific;
-    private final List<String> names;
 
     Gender(String honorific) {
-        String prefix = "trait.block_party.gender." + this.name().toLowerCase() + ".";
-        this.nominative = Trans.late(prefix + "nominative");
-        this.accusative = Trans.late(prefix + "accusative");
-        this.possessive = Trans.late(prefix + "possessive");
-        this.reflexive  = Trans.late(prefix + "reflexive");
         this.honorific  = honorific;
-        this.names = Names.get(this);
     }
 
     @Override
@@ -58,19 +47,19 @@ public enum Gender implements ITrait<Gender> {
     }
 
     public String getPronounAsSubject() {
-        return this.nominative;
+        return Trans.late("trait.block_party.gender." + this.name().toLowerCase() + ".nominative");
     }
 
     public String getPronounAsObject() {
-        return this.accusative;
+        return Trans.late("trait.block_party.gender." + this.name().toLowerCase() + ".accusative");
     }
 
     public String getPossessivePronoun() {
-        return this.possessive;
+        return Trans.late("trait.block_party.gender." + this.name().toLowerCase() + ".possessive");
     }
 
     public String getReflexivePronoun() {
-        return this.reflexive;
+        return Trans.late("trait.block_party.gender." + this.name().toLowerCase() + ".reflexive");
     }
 
     public String getHonorific() {
@@ -86,6 +75,6 @@ public enum Gender implements ITrait<Gender> {
     }
 
     protected List<String> getUnclaimedNames(Level level) {
-        return this.names.stream().filter((name) -> !BlockPartyDB.get(level).names.contains(name)).collect(Collectors.toList());
+        return Names.get(this).stream().filter((name) -> !BlockPartyDB.get(level).names.contains(name)).collect(Collectors.toList());
     }
 }
