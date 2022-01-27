@@ -1,6 +1,6 @@
 package block_party.client.renderers.layers;
 
-import block_party.client.model.DollModel;
+import block_party.client.model.MoeModel;
 import block_party.client.renderers.layers.special.SpecialBlockOverlay;
 import block_party.entities.BlockPartyNPC;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -12,10 +12,10 @@ import net.minecraft.world.level.block.Block;
 import java.util.HashMap;
 import java.util.function.Supplier;
 
-public class SpecialLayer extends RenderLayer<BlockPartyNPC, DollModel<BlockPartyNPC>> {
+public class SpecialLayer extends RenderLayer<BlockPartyNPC, MoeModel<BlockPartyNPC>> {
     private static final HashMap<Block, Supplier<SpecialBlockOverlay>> OVERLAYS = new HashMap<>();
 
-    public SpecialLayer(RenderLayerParent<BlockPartyNPC, DollModel<BlockPartyNPC>> renderer) {
+    public SpecialLayer(RenderLayerParent<BlockPartyNPC, MoeModel<BlockPartyNPC>> renderer) {
         super(renderer);
     }
 

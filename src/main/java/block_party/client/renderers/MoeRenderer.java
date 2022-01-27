@@ -2,12 +2,12 @@ package block_party.client.renderers;
 
 import block_party.client.BlockPartyRenderers;
 import block_party.client.animation.Animation;
-import block_party.client.model.DollModel;
+import block_party.client.model.MoeModel;
 import block_party.client.renderers.layers.EmoteLayer;
 import block_party.client.renderers.layers.GlowLayer;
 import block_party.client.renderers.layers.SpecialLayer;
 import block_party.entities.BlockPartyNPC;
-import block_party.registry.resources.DollTextures;
+import block_party.registry.resources.MoeTextures;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
@@ -20,10 +20,10 @@ import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-public class DollRenderer extends MobRenderer<BlockPartyNPC, DollModel<BlockPartyNPC>> {
+public class MoeRenderer extends MobRenderer<BlockPartyNPC, MoeModel<BlockPartyNPC>> {
 
-    public DollRenderer(EntityRendererProvider.Context context) {
-        super(context, new DollModel<>(context.bakeLayer(BlockPartyRenderers.DOLL)), 0.25F);
+    public MoeRenderer(EntityRendererProvider.Context context) {
+        super(context, new MoeModel<>(context.bakeLayer(BlockPartyRenderers.MOE)), 0.25F);
         this.addLayer(new ItemInHandLayer<>(this));
         this.addLayer(new EmoteLayer(this));
         this.addLayer(new GlowLayer(this));
@@ -33,7 +33,7 @@ public class DollRenderer extends MobRenderer<BlockPartyNPC, DollModel<BlockPart
 
     @Override
     public ResourceLocation getTextureLocation(BlockPartyNPC npc) {
-        return DollTextures.get(npc);
+        return MoeTextures.get(npc);
     }
 
     @Override

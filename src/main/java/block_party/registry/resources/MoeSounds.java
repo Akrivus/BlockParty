@@ -22,10 +22,10 @@ import org.apache.logging.log4j.Logger;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class DollSounds extends SimpleJsonResourceReloadListener {
+public class MoeSounds extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = BlockParty.GSON.create();
     private static final Logger LOGGER = LogManager.getLogger();
-    private static DollSounds instance;
+    private static MoeSounds instance;
 
     public enum Sound {
         ANGRY("angry", CustomSounds.NPC_ANGRY), ATTACK("attack", CustomSounds.NPC_ATTACK), CONFUSED("confused", CustomSounds.NPC_CONFUSED), CRYING("crying", CustomSounds.NPC_CRYING), DEAD("dead", CustomSounds.NPC_DEAD), EAT("eat", CustomSounds.NPC_EAT), EQUIP("equip", CustomSounds.NPC_EQUIP), FEED("feed", CustomSounds.NPC_FEED), FOLLOW("follow", CustomSounds.NPC_FOLLOW), GIGGLE("giggle", CustomSounds.NPC_GIGGLE), GRIEF("grief", CustomSounds.NPC_GRIEF), HAPPY("happy", CustomSounds.NPC_HAPPY), HELLO("hello", CustomSounds.NPC_HELLO), HURT("hurt", CustomSounds.NPC_HURT), LAUGH("laugh", CustomSounds.NPC_LAUGH), MEOW("meow", CustomSounds.NPC_MEOW), NEUTRAL("neutral", CustomSounds.NPC_NEUTRAL), NO("no", CustomSounds.NPC_NO), PSYCHOTIC("psychotic", CustomSounds.NPC_PSYCHOTIC), SAY("say", CustomSounds.NPC_SAY), SENPAI("senpai", CustomSounds.NPC_SENPAI), SLEEPING("sleeping", CustomSounds.NPC_SLEEPING), SMITTEN("smitten", CustomSounds.NPC_SMITTEN), SNEEZE("sneeze", CustomSounds.NPC_SNEEZE), SNICKER("snicker", CustomSounds.NPC_SNICKER), SNOOTY("snooty", CustomSounds.NPC_SNOOTY), STEP("step", CustomSounds.NPC_STEP), YAWN("yawn", CustomSounds.NPC_YAWN), YES("yes", CustomSounds.NPC_YES);
@@ -55,10 +55,10 @@ public class DollSounds extends SimpleJsonResourceReloadListener {
     private Map<Block, Map<Sound, Supplier<SoundEvent>>> map = ImmutableMap.of();
     private boolean hasErrors;
 
-    public DollSounds() {
-        super(GSON, "dolls/sounds");
-        if (DollSounds.instance != null) { LOGGER.warn("DollSounds was already instantiated; overwriting."); }
-        DollSounds.instance = this;
+    public MoeSounds() {
+        super(GSON, "moes/sounds");
+        if (MoeSounds.instance != null) { LOGGER.warn("DollSounds was already instantiated; overwriting."); }
+        MoeSounds.instance = this;
     }
 
     @Override
@@ -85,6 +85,6 @@ public class DollSounds extends SimpleJsonResourceReloadListener {
     }
 
     public static SoundEvent get(BlockPartyNPC npc, Sound sound) {
-        return DollSounds.instance.map.getOrDefault(npc.getBlock(), Sound.map()).get(sound).get();
+        return MoeSounds.instance.map.getOrDefault(npc.getBlock(), Sound.map()).get(sound).get();
     }
 }

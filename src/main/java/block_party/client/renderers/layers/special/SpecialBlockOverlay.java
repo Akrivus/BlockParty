@@ -1,6 +1,6 @@
 package block_party.client.renderers.layers.special;
 
-import block_party.client.model.DollModel;
+import block_party.client.model.MoeModel;
 import block_party.entities.BlockPartyNPC;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
@@ -32,5 +32,5 @@ public abstract class SpecialBlockOverlay {
         return Minecraft.getInstance();
     }
 
-    public abstract void render(DollModel model, BlockPartyNPC entity, PoseStack stack, MultiBufferSource buffer, int packedLight, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch);
+    public abstract void render(MoeModel model, BlockPartyNPC entity, PoseStack stack, MultiBufferSource buffer, int packedLight, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch);
 }

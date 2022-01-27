@@ -13,7 +13,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 
-public class DollModel<T extends BlockPartyNPC> extends HierarchicalModel<T> implements ArmedModel, HeadedModel, IRiggableModel {
+public class MoeModel<T extends BlockPartyNPC> extends HierarchicalModel<T> implements ArmedModel, HeadedModel, IRiggableModel {
     private final ModelPart root;
     private final ModelPart head;
     private final ModelPart hair;
@@ -58,7 +58,7 @@ public class DollModel<T extends BlockPartyNPC> extends HierarchicalModel<T> imp
     private final ModelPart rightLegWear;
     private final ModelPart leftLegWear;
 
-    public DollModel(ModelPart root) {
+    public MoeModel(ModelPart root) {
         this.root = root;
         this.head = this.root.getChild("head");
         this.hair = this.head.getChild("hair");

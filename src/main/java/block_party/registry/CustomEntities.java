@@ -1,7 +1,7 @@
 package block_party.registry;
 
 import block_party.BlockParty;
-import block_party.entities.Doll;
+import block_party.entities.Moe;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
@@ -12,7 +12,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
 public class CustomEntities {
-    public static final RegistryObject<EntityType<Doll>> NPC = BlockParty.ENTITIES.register("npc", () -> EntityType.Builder.of(Doll::new, MobCategory.CREATURE).sized(0.60F, 1.35F).setTrackingRange(32).setUpdateInterval(2).build("npc"));
+    public static final RegistryObject<EntityType<Moe>> NPC = BlockParty.ENTITIES.register("npc", () -> EntityType.Builder.of(Moe::new, MobCategory.CREATURE).sized(0.60F, 1.35F).setTrackingRange(32).setUpdateInterval(2).build("npc"));
 
     public static void add(DeferredRegister<EntityType<?>> registry, IEventBus bus) {
         bus.addListener(CustomEntities::registerAttributes);

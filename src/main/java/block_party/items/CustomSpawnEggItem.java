@@ -1,7 +1,7 @@
 package block_party.items;
 
 import block_party.BlockParty;
-import block_party.entities.Doll;
+import block_party.entities.Moe;
 import block_party.scene.filters.Dere;
 import block_party.utils.sorters.ISortableItem;
 import net.minecraft.core.BlockPos;
@@ -25,12 +25,12 @@ public class CustomSpawnEggItem extends Item implements ISortableItem {
         Player player = context.getPlayer();
         BlockPos block = context.getClickedPos();
         BlockPos spawn = block.relative(context.getClickedFace());
-        if (Doll.spawn(level, block, spawn, player.getYRot(), player.getXRot(), Dere.random(), player)) {
+        if (Moe.spawn(level, block, spawn, player.getYRot(), player.getXRot(), Dere.random(), player)) {
             context.getItemInHand().shrink(1);
             return InteractionResult.CONSUME;
         } else {
             String name = level.getBlockState(block).getBlock().getName().getString();
-            player.displayClientMessage(new TranslatableComponent("item.block_party.npc_spawn_egg.error", name), true);
+            player.displayClientMessage(new TranslatableComponent("item.block_party.moe_spawn_egg.error", name), true);
             return InteractionResult.FAIL;
         }
     }

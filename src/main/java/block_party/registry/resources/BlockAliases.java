@@ -25,7 +25,7 @@ public class BlockAliases extends SimpleJsonResourceReloadListener {
     private boolean hasErrors;
 
     public BlockAliases() {
-        super(GSON, "dolls/aliases");
+        super(GSON, "moes/aliases");
         if (BlockAliases.instance != null) { LOGGER.warn("BlockAliases was already instantiated; overwriting."); }
         BlockAliases.instance = this;
     }

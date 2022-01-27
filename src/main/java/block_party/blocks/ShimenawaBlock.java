@@ -42,7 +42,7 @@ public class ShimenawaBlock extends AbstractDataBlock<ShimenawaBlockEntity> {
     @Override
     public boolean canSurvive(BlockState state, LevelReader reader, BlockPos pos) {
         BlockPos base = pos.relative(state.getValue(HANGING) ? Direction.UP : state.getValue(FACING).getOpposite());
-        return reader.getBlockState(base).is(CustomTags.Blocks.SPAWNS_DOLLS);
+        return reader.getBlockState(base).is(CustomTags.Blocks.SPAWNS_MOES);
     }
 
     @Override

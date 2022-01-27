@@ -21,404 +21,404 @@
       "block_party:block/shoji_screen/open3"
     ]
   },
-  "npc.bell.step": {
-    "subtitle": "subtitle.npc.bell.step",
+  "moe.bell.step": {
+    "subtitle": "subtitle.moe.bell.step",
     "sounds": [
-      "block_party:npc/bell/step1",
-      "block_party:npc/bell/step2",
-      "block_party:npc/bell/step3"
+      "block_party:moe/bell/step1",
+      "block_party:moe/bell/step2",
+      "block_party:moe/bell/step3"
     ]
   },
-  "npc.angry": {
-    "subtitle": "subtitle.npc.angry",
+  "moe.angry": {
+    "subtitle": "subtitle.moe.angry",
     "sounds": [
-      "block_party:npc/angry1",
-      "block_party:npc/angry2",
-      "block_party:npc/angry3",
-      "block_party:npc/angry4",
-      "block_party:npc/angry5",
-      "block_party:npc/angry6",
-      "block_party:npc/angry7",
-      "block_party:npc/angry8",
-      "block_party:npc/angry9",
-      "block_party:npc/angry10",
-      "block_party:npc/angry11",
-      "block_party:npc/angry12",
-      "block_party:npc/angry13",
-      "block_party:npc/angry14",
-      "block_party:npc/angry15"
+      "block_party:moe/angry1",
+      "block_party:moe/angry2",
+      "block_party:moe/angry3",
+      "block_party:moe/angry4",
+      "block_party:moe/angry5",
+      "block_party:moe/angry6",
+      "block_party:moe/angry7",
+      "block_party:moe/angry8",
+      "block_party:moe/angry9",
+      "block_party:moe/angry10",
+      "block_party:moe/angry11",
+      "block_party:moe/angry12",
+      "block_party:moe/angry13",
+      "block_party:moe/angry14",
+      "block_party:moe/angry15"
     ]
   },
-  "npc.attack": {
-    "subtitle": "subtitle.npc.attack",
+  "moe.attack": {
+    "subtitle": "subtitle.moe.attack",
     "sounds": [
-      "block_party:npc/attack1",
-      "block_party:npc/attack2",
-      "block_party:npc/attack3",
-      "block_party:npc/attack4",
-      "block_party:npc/attack5",
-      "block_party:npc/attack6",
-      "block_party:npc/attack7",
-      "block_party:npc/attack8",
-      "block_party:npc/attack9",
-      "block_party:npc/attack10",
-      "block_party:npc/attack11",
-      "block_party:npc/attack12",
-      "block_party:npc/attack13",
-      "block_party:npc/attack14",
-      "block_party:npc/attack15",
-      "block_party:npc/attack16",
-      "block_party:npc/attack17",
-      "block_party:npc/attack18",
-      "block_party:npc/attack19",
-      "block_party:npc/attack20",
-      "block_party:npc/attack21",
-      "block_party:npc/attack22",
-      "block_party:npc/attack23",
-      "block_party:npc/attack24",
-      "block_party:npc/attack25",
-      "block_party:npc/attack26"
+      "block_party:moe/attack1",
+      "block_party:moe/attack2",
+      "block_party:moe/attack3",
+      "block_party:moe/attack4",
+      "block_party:moe/attack5",
+      "block_party:moe/attack6",
+      "block_party:moe/attack7",
+      "block_party:moe/attack8",
+      "block_party:moe/attack9",
+      "block_party:moe/attack10",
+      "block_party:moe/attack11",
+      "block_party:moe/attack12",
+      "block_party:moe/attack13",
+      "block_party:moe/attack14",
+      "block_party:moe/attack15",
+      "block_party:moe/attack16",
+      "block_party:moe/attack17",
+      "block_party:moe/attack18",
+      "block_party:moe/attack19",
+      "block_party:moe/attack20",
+      "block_party:moe/attack21",
+      "block_party:moe/attack22",
+      "block_party:moe/attack23",
+      "block_party:moe/attack24",
+      "block_party:moe/attack25",
+      "block_party:moe/attack26"
     ]
   },
-  "npc.confused": {
-    "subtitle": "subtitle.npc.confused",
+  "moe.confused": {
+    "subtitle": "subtitle.moe.confused",
     "sounds": [
-      "block_party:npc/confused1",
-      "block_party:npc/confused2",
-      "block_party:npc/confused3",
-      "block_party:npc/confused4",
-      "block_party:npc/confused5",
-      "block_party:npc/confused6",
-      "block_party:npc/confused7",
-      "block_party:npc/confused8",
-      "block_party:npc/confused9",
-      "block_party:npc/confused10",
-      "block_party:npc/confused11",
-      "block_party:npc/confused12"
+      "block_party:moe/confused1",
+      "block_party:moe/confused2",
+      "block_party:moe/confused3",
+      "block_party:moe/confused4",
+      "block_party:moe/confused5",
+      "block_party:moe/confused6",
+      "block_party:moe/confused7",
+      "block_party:moe/confused8",
+      "block_party:moe/confused9",
+      "block_party:moe/confused10",
+      "block_party:moe/confused11",
+      "block_party:moe/confused12"
     ]
   },
-  "npc.crying": {
-    "subtitle": "subtitle.npc.crying",
+  "moe.crying": {
+    "subtitle": "subtitle.moe.crying",
     "sounds": [
-      "block_party:npc/crying1",
-      "block_party:npc/crying2",
-      "block_party:npc/crying3",
-      "block_party:npc/crying4",
-      "block_party:npc/crying5",
-      "block_party:npc/crying6",
-      "block_party:npc/crying7",
-      "block_party:npc/crying8",
-      "block_party:npc/crying9"
+      "block_party:moe/crying1",
+      "block_party:moe/crying2",
+      "block_party:moe/crying3",
+      "block_party:moe/crying4",
+      "block_party:moe/crying5",
+      "block_party:moe/crying6",
+      "block_party:moe/crying7",
+      "block_party:moe/crying8",
+      "block_party:moe/crying9"
     ]
   },
-  "npc.dead": {
-    "subtitle": "subtitle.npc.dead",
+  "moe.dead": {
+    "subtitle": "subtitle.moe.dead",
     "sounds": [
-      "block_party:npc/dead1",
-      "block_party:npc/dead2",
-      "block_party:npc/dead3",
-      "block_party:npc/dead4",
-      "block_party:npc/dead5",
-      "block_party:npc/dead6",
-      "block_party:npc/dead7",
-      "block_party:npc/dead8",
-      "block_party:npc/dead9"
+      "block_party:moe/dead1",
+      "block_party:moe/dead2",
+      "block_party:moe/dead3",
+      "block_party:moe/dead4",
+      "block_party:moe/dead5",
+      "block_party:moe/dead6",
+      "block_party:moe/dead7",
+      "block_party:moe/dead8",
+      "block_party:moe/dead9"
     ]
   },
-  "npc.eat": {
-    "subtitle": "subtitle.npc.eat",
+  "moe.eat": {
+    "subtitle": "subtitle.moe.eat",
     "sounds": [
-      "block_party:npc/eat1",
-      "block_party:npc/eat2",
-      "block_party:npc/eat3",
-      "block_party:npc/eat4",
-      "block_party:npc/eat5",
-      "block_party:npc/eat6",
-      "block_party:npc/eat7",
-      "block_party:npc/eat8",
-      "block_party:npc/eat9",
-      "block_party:npc/eat10",
-      "block_party:npc/eat11"
+      "block_party:moe/eat1",
+      "block_party:moe/eat2",
+      "block_party:moe/eat3",
+      "block_party:moe/eat4",
+      "block_party:moe/eat5",
+      "block_party:moe/eat6",
+      "block_party:moe/eat7",
+      "block_party:moe/eat8",
+      "block_party:moe/eat9",
+      "block_party:moe/eat10",
+      "block_party:moe/eat11"
     ]
   },
-  "npc.equip": {
-    "subtitle": "subtitle.npc.equip",
+  "moe.equip": {
+    "subtitle": "subtitle.moe.equip",
     "sounds": [
-      "block_party:npc/equip1",
-      "block_party:npc/equip2",
-      "block_party:npc/equip3",
-      "block_party:npc/equip4",
-      "block_party:npc/equip5",
-      "block_party:npc/equip6",
-      "block_party:npc/equip7"
+      "block_party:moe/equip1",
+      "block_party:moe/equip2",
+      "block_party:moe/equip3",
+      "block_party:moe/equip4",
+      "block_party:moe/equip5",
+      "block_party:moe/equip6",
+      "block_party:moe/equip7"
     ]
   },
-  "npc.feed": {
-    "subtitle": "subtitle.npc.feed",
+  "moe.feed": {
+    "subtitle": "subtitle.moe.feed",
     "sounds": [
-      "block_party:npc/feed1",
-      "block_party:npc/feed2",
-      "block_party:npc/feed3",
-      "block_party:npc/feed4"
+      "block_party:moe/feed1",
+      "block_party:moe/feed2",
+      "block_party:moe/feed3",
+      "block_party:moe/feed4"
     ]
   },
-  "npc.follow": {
-    "subtitle": "subtitle.npc.follow",
+  "moe.follow": {
+    "subtitle": "subtitle.moe.follow",
     "sounds": [
-      "block_party:npc/follow1",
-      "block_party:npc/follow2",
-      "block_party:npc/follow3",
-      "block_party:npc/follow4",
-      "block_party:npc/follow5",
-      "block_party:npc/follow6"
+      "block_party:moe/follow1",
+      "block_party:moe/follow2",
+      "block_party:moe/follow3",
+      "block_party:moe/follow4",
+      "block_party:moe/follow5",
+      "block_party:moe/follow6"
     ]
   },
-  "npc.gift": {
-    "subtitle": "subtitle.npc.gift",
+  "moe.gift": {
+    "subtitle": "subtitle.moe.gift",
     "sounds": [
-      "block_party:npc/gift1",
-      "block_party:npc/gift2",
-      "block_party:npc/gift3",
-      "block_party:npc/gift4",
-      "block_party:npc/gift5"
+      "block_party:moe/gift1",
+      "block_party:moe/gift2",
+      "block_party:moe/gift3",
+      "block_party:moe/gift4",
+      "block_party:moe/gift5"
     ]
   },
-  "npc.giggle": {
-    "subtitle": "subtitle.npc.giggle",
+  "moe.giggle": {
+    "subtitle": "subtitle.moe.giggle",
     "sounds": [
-      "block_party:npc/giggle1",
-      "block_party:npc/giggle2",
-      "block_party:npc/giggle3",
-      "block_party:npc/giggle4"
+      "block_party:moe/giggle1",
+      "block_party:moe/giggle2",
+      "block_party:moe/giggle3",
+      "block_party:moe/giggle4"
     ]
   },
-  "npc.grief": {
-    "subtitle": "subtitle.npc.grief",
+  "moe.grief": {
+    "subtitle": "subtitle.moe.grief",
     "sounds": [
-      "block_party:npc/grief1",
-      "block_party:npc/grief2",
-      "block_party:npc/grief3",
-      "block_party:npc/grief4",
-      "block_party:npc/grief5",
-      "block_party:npc/grief6",
-      "block_party:npc/grief7",
-      "block_party:npc/grief8"
+      "block_party:moe/grief1",
+      "block_party:moe/grief2",
+      "block_party:moe/grief3",
+      "block_party:moe/grief4",
+      "block_party:moe/grief5",
+      "block_party:moe/grief6",
+      "block_party:moe/grief7",
+      "block_party:moe/grief8"
     ]
   },
-  "npc.happy": {
-    "subtitle": "subtitle.npc.happy",
+  "moe.happy": {
+    "subtitle": "subtitle.moe.happy",
     "sounds": [
-      "block_party:npc/happy1",
-      "block_party:npc/happy2",
-      "block_party:npc/happy3",
-      "block_party:npc/happy4",
-      "block_party:npc/happy5",
-      "block_party:npc/happy6",
-      "block_party:npc/happy7",
-      "block_party:npc/happy8"
+      "block_party:moe/happy1",
+      "block_party:moe/happy2",
+      "block_party:moe/happy3",
+      "block_party:moe/happy4",
+      "block_party:moe/happy5",
+      "block_party:moe/happy6",
+      "block_party:moe/happy7",
+      "block_party:moe/happy8"
     ]
   },
-  "npc.hello": {
-    "subtitle": "subtitle.npc.hello",
+  "moe.hello": {
+    "subtitle": "subtitle.moe.hello",
     "sounds": [
-      "block_party:npc/hello1",
-      "block_party:npc/hello2",
-      "block_party:npc/hello3",
-      "block_party:npc/hello4",
-      "block_party:npc/hello5",
-      "block_party:npc/hello6",
-      "block_party:npc/hello7",
-      "block_party:npc/hello8",
-      "block_party:npc/hello9",
-      "block_party:npc/hello10"
+      "block_party:moe/hello1",
+      "block_party:moe/hello2",
+      "block_party:moe/hello3",
+      "block_party:moe/hello4",
+      "block_party:moe/hello5",
+      "block_party:moe/hello6",
+      "block_party:moe/hello7",
+      "block_party:moe/hello8",
+      "block_party:moe/hello9",
+      "block_party:moe/hello10"
     ]
   },
-  "npc.hurt": {
-    "subtitle": "subtitle.npc.hurt",
+  "moe.hurt": {
+    "subtitle": "subtitle.moe.hurt",
     "sounds": [
-      "block_party:npc/hurt1",
-      "block_party:npc/hurt2",
-      "block_party:npc/hurt3",
-      "block_party:npc/hurt4",
-      "block_party:npc/hurt5",
-      "block_party:npc/hurt6",
-      "block_party:npc/hurt7",
-      "block_party:npc/hurt8",
-      "block_party:npc/hurt9",
-      "block_party:npc/hurt10",
-      "block_party:npc/hurt11",
-      "block_party:npc/hurt12",
-      "block_party:npc/hurt13"
+      "block_party:moe/hurt1",
+      "block_party:moe/hurt2",
+      "block_party:moe/hurt3",
+      "block_party:moe/hurt4",
+      "block_party:moe/hurt5",
+      "block_party:moe/hurt6",
+      "block_party:moe/hurt7",
+      "block_party:moe/hurt8",
+      "block_party:moe/hurt9",
+      "block_party:moe/hurt10",
+      "block_party:moe/hurt11",
+      "block_party:moe/hurt12",
+      "block_party:moe/hurt13"
     ]
   },
-  "npc.laugh": {
-    "subtitle": "subtitle.npc.laugh",
+  "moe.laugh": {
+    "subtitle": "subtitle.moe.laugh",
     "sounds": [
-      "block_party:npc/laugh1",
-      "block_party:npc/laugh2",
-      "block_party:npc/laugh3",
-      "block_party:npc/laugh4",
-      "block_party:npc/laugh5",
-      "block_party:npc/laugh6",
-      "block_party:npc/laugh7",
-      "block_party:npc/laugh8",
-      "block_party:npc/laugh9"
+      "block_party:moe/laugh1",
+      "block_party:moe/laugh2",
+      "block_party:moe/laugh3",
+      "block_party:moe/laugh4",
+      "block_party:moe/laugh5",
+      "block_party:moe/laugh6",
+      "block_party:moe/laugh7",
+      "block_party:moe/laugh8",
+      "block_party:moe/laugh9"
     ]
   },
-  "npc.meow": {
-    "subtitle": "subtitle.npc.meow",
+  "moe.meow": {
+    "subtitle": "subtitle.moe.meow",
     "sounds": [
-      "block_party:npc/meow1",
-      "block_party:npc/meow2",
-      "block_party:npc/meow3",
-      "block_party:npc/meow4",
-      "block_party:npc/meow5",
-      "block_party:npc/meow6",
-      "block_party:npc/meow7",
-      "block_party:npc/meow8"
+      "block_party:moe/meow1",
+      "block_party:moe/meow2",
+      "block_party:moe/meow3",
+      "block_party:moe/meow4",
+      "block_party:moe/meow5",
+      "block_party:moe/meow6",
+      "block_party:moe/meow7",
+      "block_party:moe/meow8"
     ]
   },
-  "npc.neutral": {
-    "subtitle": "subtitle.npc.neutral",
+  "moe.neutral": {
+    "subtitle": "subtitle.moe.neutral",
     "sounds": [
-      "block_party:npc/neutral1",
-      "block_party:npc/neutral2",
-      "block_party:npc/neutral3",
-      "block_party:npc/neutral4",
-      "block_party:npc/neutral5",
-      "block_party:npc/neutral6",
-      "block_party:npc/neutral7",
-      "block_party:npc/neutral8",
-      "block_party:npc/neutral9"
+      "block_party:moe/neutral1",
+      "block_party:moe/neutral2",
+      "block_party:moe/neutral3",
+      "block_party:moe/neutral4",
+      "block_party:moe/neutral5",
+      "block_party:moe/neutral6",
+      "block_party:moe/neutral7",
+      "block_party:moe/neutral8",
+      "block_party:moe/neutral9"
     ]
   },
-  "npc.no": {
-    "subtitle": "subtitle.npc.no",
+  "moe.no": {
+    "subtitle": "subtitle.moe.no",
     "sounds": [
-      "block_party:npc/no1",
-      "block_party:npc/no2",
-      "block_party:npc/no3",
-      "block_party:npc/no4",
-      "block_party:npc/no5",
-      "block_party:npc/no6",
-      "block_party:npc/no7",
-      "block_party:npc/no8"
+      "block_party:moe/no1",
+      "block_party:moe/no2",
+      "block_party:moe/no3",
+      "block_party:moe/no4",
+      "block_party:moe/no5",
+      "block_party:moe/no6",
+      "block_party:moe/no7",
+      "block_party:moe/no8"
     ]
   },
-  "npc.psychotic": {
-    "subtitle": "subtitle.npc.psychotic",
+  "moe.psychotic": {
+    "subtitle": "subtitle.moe.psychotic",
     "sounds": [
-      "block_party:npc/psychotic1",
-      "block_party:npc/psychotic2"
+      "block_party:moe/psychotic1",
+      "block_party:moe/psychotic2"
     ]
   },
-  "npc.say": {
+  "moe.say": {
     "sounds": [
-      "block_party:npc/say1",
-      "block_party:npc/say2",
-      "block_party:npc/say3",
-      "block_party:npc/say4",
-      "block_party:npc/say5",
-      "block_party:npc/say6",
-      "block_party:npc/say7",
-      "block_party:npc/say8"
+      "block_party:moe/say1",
+      "block_party:moe/say2",
+      "block_party:moe/say3",
+      "block_party:moe/say4",
+      "block_party:moe/say5",
+      "block_party:moe/say6",
+      "block_party:moe/say7",
+      "block_party:moe/say8"
     ]
   },
-  "npc.senpai": {
-    "subtitle": "subtitle.npc.senpai",
+  "moe.senpai": {
+    "subtitle": "subtitle.moe.senpai",
     "sounds": [
-      "block_party:npc/senpai1",
-      "block_party:npc/senpai2",
-      "block_party:npc/senpai3",
-      "block_party:npc/senpai4",
-      "block_party:npc/senpai5",
-      "block_party:npc/senpai6",
-      "block_party:npc/senpai7",
-      "block_party:npc/senpai8"
+      "block_party:moe/senpai1",
+      "block_party:moe/senpai2",
+      "block_party:moe/senpai3",
+      "block_party:moe/senpai4",
+      "block_party:moe/senpai5",
+      "block_party:moe/senpai6",
+      "block_party:moe/senpai7",
+      "block_party:moe/senpai8"
     ]
   },
-  "npc.sleeping": {
-    "subtitle": "subtitle.npc.sleeping",
+  "moe.sleeping": {
+    "subtitle": "subtitle.moe.sleeping",
     "sounds": [
-      "block_party:npc/sleeping1",
-      "block_party:npc/sleeping2",
-      "block_party:npc/sleeping3",
-      "block_party:npc/sleeping4",
-      "block_party:npc/sleeping5",
-      "block_party:npc/sleeping6"
+      "block_party:moe/sleeping1",
+      "block_party:moe/sleeping2",
+      "block_party:moe/sleeping3",
+      "block_party:moe/sleeping4",
+      "block_party:moe/sleeping5",
+      "block_party:moe/sleeping6"
     ]
   },
-  "npc.smitten": {
-    "subtitle": "subtitle.npc.smitten",
+  "moe.smitten": {
+    "subtitle": "subtitle.moe.smitten",
     "sounds": [
-      "block_party:npc/smitten1",
-      "block_party:npc/smitten2",
-      "block_party:npc/smitten3",
-      "block_party:npc/smitten4",
-      "block_party:npc/smitten5"
+      "block_party:moe/smitten1",
+      "block_party:moe/smitten2",
+      "block_party:moe/smitten3",
+      "block_party:moe/smitten4",
+      "block_party:moe/smitten5"
     ]
   },
-  "npc.sneeze": {
-    "subtitle": "subtitle.npc.sneeze",
+  "moe.sneeze": {
+    "subtitle": "subtitle.moe.sneeze",
     "sounds": [
-      "block_party:npc/sneeze1",
-      "block_party:npc/sneeze2",
-      "block_party:npc/sneeze3",
-      "block_party:npc/sneeze4",
-      "block_party:npc/sneeze5",
-      "block_party:npc/sneeze6",
-      "block_party:npc/sneeze7",
-      "block_party:npc/sneeze8"
+      "block_party:moe/sneeze1",
+      "block_party:moe/sneeze2",
+      "block_party:moe/sneeze3",
+      "block_party:moe/sneeze4",
+      "block_party:moe/sneeze5",
+      "block_party:moe/sneeze6",
+      "block_party:moe/sneeze7",
+      "block_party:moe/sneeze8"
     ]
   },
-  "npc.snicker": {
-    "subtitle": "subtitle.npc.snicker",
+  "moe.snicker": {
+    "subtitle": "subtitle.moe.snicker",
     "sounds": [
-      "block_party:npc/snicker1",
-      "block_party:npc/snicker2",
-      "block_party:npc/snicker3",
-      "block_party:npc/snicker4",
-      "block_party:npc/snicker5",
-      "block_party:npc/snicker6",
-      "block_party:npc/snicker7"
+      "block_party:moe/snicker1",
+      "block_party:moe/snicker2",
+      "block_party:moe/snicker3",
+      "block_party:moe/snicker4",
+      "block_party:moe/snicker5",
+      "block_party:moe/snicker6",
+      "block_party:moe/snicker7"
     ]
   },
-  "npc.snooty": {
-    "subtitle": "subtitle.npc.snooty",
+  "moe.snooty": {
+    "subtitle": "subtitle.moe.snooty",
     "sounds": [
-      "block_party:npc/snooty1",
-      "block_party:npc/snooty2",
-      "block_party:npc/snooty3",
-      "block_party:npc/snooty4",
-      "block_party:npc/snooty5",
-      "block_party:npc/snooty6",
-      "block_party:npc/snooty7"
+      "block_party:moe/snooty1",
+      "block_party:moe/snooty2",
+      "block_party:moe/snooty3",
+      "block_party:moe/snooty4",
+      "block_party:moe/snooty5",
+      "block_party:moe/snooty6",
+      "block_party:moe/snooty7"
     ]
   },
-  "npc.yawn": {
-    "subtitle": "subtitle.npc.yawn",
+  "moe.yawn": {
+    "subtitle": "subtitle.moe.yawn",
     "sounds": [
-      "block_party:npc/yawn1",
-      "block_party:npc/yawn2",
-      "block_party:npc/yawn3",
-      "block_party:npc/yawn4",
-      "block_party:npc/yawn5"
+      "block_party:moe/yawn1",
+      "block_party:moe/yawn2",
+      "block_party:moe/yawn3",
+      "block_party:moe/yawn4",
+      "block_party:moe/yawn5"
     ]
   },
-  "npc.yes": {
-    "subtitle": "subtitle.npc.yes",
+  "moe.yes": {
+    "subtitle": "subtitle.moe.yes",
     "sounds": [
-      "block_party:npc/yes1",
-      "block_party:npc/yes2",
-      "block_party:npc/yes3",
-      "block_party:npc/yes4",
-      "block_party:npc/yes5",
-      "block_party:npc/yes6",
-      "block_party:npc/yes7",
-      "block_party:npc/yes8",
-      "block_party:npc/yes9",
-      "block_party:npc/yes10",
-      "block_party:npc/yes11"
+      "block_party:moe/yes1",
+      "block_party:moe/yes2",
+      "block_party:moe/yes3",
+      "block_party:moe/yes4",
+      "block_party:moe/yes5",
+      "block_party:moe/yes6",
+      "block_party:moe/yes7",
+      "block_party:moe/yes8",
+      "block_party:moe/yes9",
+      "block_party:moe/yes10",
+      "block_party:moe/yes11"
     ]
   },
   "item.cell_phone.button": {

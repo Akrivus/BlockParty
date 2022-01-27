@@ -23,18 +23,18 @@ import org.apache.logging.log4j.Logger;
 import java.util.Collection;
 import java.util.Map;
 
-public class DollTextures extends SimpleJsonResourceReloadListener {
+public class MoeTextures extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = BlockParty.GSON.create();
     private static final Logger LOGGER = LogManager.getLogger();
-    private static DollTextures instance;
+    private static MoeTextures instance;
 
     private Map<Block, Map<BlockStatePattern, ResourceLocation>> map = ImmutableMap.of();
     private boolean hasErrors;
 
-    public DollTextures() {
-        super(GSON, "dolls/textures");
-        if (DollTextures.instance != null) { LOGGER.warn("DollTextures was already instantiated; overwriting."); }
-        DollTextures.instance = this;
+    public MoeTextures() {
+        super(GSON, "moes/textures");
+        if (MoeTextures.instance != null) { LOGGER.warn("DollTextures was already instantiated; overwriting."); }
+        MoeTextures.instance = this;
     }
 
     @Override
@@ -75,7 +75,7 @@ public class DollTextures extends SimpleJsonResourceReloadListener {
 
     public static ResourceLocation get(BlockPartyNPC npc) {
         Block block = npc.getBlock();
-        Map<BlockStatePattern, ResourceLocation> textures = DollTextures.instance.map.getOrDefault(block, ImmutableMap.of(new BlockStatePattern(block, ImmutableMap.of()), getDefaultPathFor(block)));
+        Map<BlockStatePattern, ResourceLocation> textures = MoeTextures.instance.map.getOrDefault(block, ImmutableMap.of(new BlockStatePattern(block, ImmutableMap.of()), getDefaultPathFor(block)));
         for (BlockStatePattern pattern : textures.keySet()) {
             if (pattern.matches(npc.getActualBlockState())) { return textures.get(pattern); }
         }
@@ -84,7 +84,7 @@ public class DollTextures extends SimpleJsonResourceReloadListener {
 
     private static ResourceLocation getDefaultPathFor(Block block) {
         ResourceLocation location = block.getRegistryName();
-        String path = String.format("textures/doll/%s.png", location.getPath());
+        String path = String.format("textures/moe/%s.png", location.getPath());
         return new ResourceLocation(location.getNamespace(), path);
     }
 

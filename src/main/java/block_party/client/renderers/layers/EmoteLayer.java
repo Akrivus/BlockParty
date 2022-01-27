@@ -1,7 +1,7 @@
 package block_party.client.renderers.layers;
 
 import block_party.BlockParty;
-import block_party.client.model.DollModel;
+import block_party.client.model.MoeModel;
 import block_party.entities.BlockPartyNPC;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
@@ -14,8 +14,8 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 
-public class EmoteLayer extends RenderLayer<BlockPartyNPC, DollModel<BlockPartyNPC>> {
-    public EmoteLayer(RenderLayerParent<BlockPartyNPC, DollModel<BlockPartyNPC>> renderer) {
+public class EmoteLayer extends RenderLayer<BlockPartyNPC, MoeModel<BlockPartyNPC>> {
+    public EmoteLayer(RenderLayerParent<BlockPartyNPC, MoeModel<BlockPartyNPC>> renderer) {
         super(renderer);
     }
 
