@@ -2,8 +2,10 @@ package block_party.scene.filters.traits;
 
 import block_party.db.BlockPartyDB;
 import block_party.entities.BlockPartyNPC;
+import block_party.registry.resources.Names;
 import block_party.scene.ITrait;
 import block_party.utils.Trans;
+import com.google.common.io.Resources;
 import net.minecraft.world.level.Level;
 import org.apache.commons.compress.utils.Lists;
 
@@ -33,7 +35,7 @@ public enum Gender implements ITrait<Gender> {
         this.possessive = Trans.late(prefix + "possessive");
         this.reflexive  = Trans.late(prefix + "reflexive");
         this.honorific  = honorific;
-        this.names = this.readNamesFromJar();
+        this.names = Names.get(this);
     }
 
     @Override
@@ -85,12 +87,5 @@ public enum Gender implements ITrait<Gender> {
 
     protected List<String> getUnclaimedNames(Level level) {
         return this.names.stream().filter((name) -> !BlockPartyDB.get(level).names.contains(name)).collect(Collectors.toList());
-    }
-
-    protected List<String> readNamesFromJar() {
-        String path = String.format("data/block_party/names/%s.txt", this.name().toLowerCase());
-        InputStream stream = Gender.class.getResourceAsStream(path);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-        return reader.lines().collect(Collectors.toList());
     }
 }
