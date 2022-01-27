@@ -1,12 +1,12 @@
-package block_party.npc.state;
+package block_party.scene.actions.goals;
 
 import block_party.scene.actions.GoalBasedAction;
 
-public class LookAtPlayerState extends GoalBasedAction {
+public class LookAtPlayerAction extends GoalBasedAction {
     private final float multiplier;
     private int totalTicks = 20;
 
-    public LookAtPlayerState(float multiplier, int extraTicks) {
+    public LookAtPlayerAction(float multiplier, int extraTicks) {
         super(3, Flag.LOOK);
         this.totalTicks += extraTicks / multiplier;
         this.multiplier = multiplier;
