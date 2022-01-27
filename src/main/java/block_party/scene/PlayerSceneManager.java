@@ -1,7 +1,5 @@
-package block_party.world;
+package block_party.scene;
 
-import block_party.scene.Cookies;
-import block_party.scene.Counters;
 import block_party.utils.NBT;
 import com.google.common.collect.Maps;
 import net.minecraft.nbt.CompoundTag;
@@ -15,14 +13,14 @@ import net.minecraft.world.level.storage.DimensionDataStorage;
 import java.util.Map;
 import java.util.UUID;
 
-public class PlayerData extends SavedData {
+public class PlayerSceneManager extends SavedData {
     public static String KEY = "blockparty_playerdata";
     private final Map<UUID, Cookies> cookies = Maps.newHashMap();
     private final Map<UUID, Counters> counters = Maps.newHashMap();
 
-    public PlayerData() { }
+    public PlayerSceneManager() { }
 
-    public PlayerData(CompoundTag compound) {
+    public PlayerSceneManager(CompoundTag compound) {
         ListTag cookies = compound.getList("PlayerCookies", NBT.COMPOUND);
         cookies.forEach((element) -> {
             CompoundTag member = (CompoundTag) element;
@@ -56,37 +54,40 @@ public class PlayerData extends SavedData {
         return compound;
     }
 
-    public static PlayerData load(CompoundTag compound) {
-        return new PlayerData(compound);
+    public static PlayerSceneManager load(CompoundTag compound) {
+        return new PlayerSceneManager(compound);
     }
 
-    public static PlayerData get(Level level) {
+    public static PlayerSceneManager get(Level level) {
         try {
             ServerLevel server = level.getServer().getLevel(Level.OVERWORLD);
             DimensionDataStorage storage = server.getDataStorage();
-            return storage.computeIfAbsent(PlayerData::load, PlayerData::new, KEY);
+            return storage.computeIfAbsent(PlayerSceneManager::load, PlayerSceneManager::new, KEY);
         } catch (NullPointerException e) {
-            return new PlayerData();
+            return new PlayerSceneManager();
         }
     }
 
     public static Cookies getCookiesFor(ServerPlayer player) {
-        PlayerData data = get(player.getLevel());
+        PlayerSceneManager data = get(player.getLevel());
         Cookies cookies = data.cookies.get(player.getUUID());
-        if (cookies == null) {
-            cookies = new Cookies();
-            data.cookies.put(player.getUUID(), cookies);
-        }
+        if (cookies == null) { cookies = new Cookies(); }
+        data.cookies.put(player.getUUID(), cookies);
+        cookies.add("name",   player.getGameProfile().getName());
+        cookies.add("server", player.getServer().name());
         return cookies;
     }
 
     public static Counters getCountersFor(ServerPlayer player) {
-        PlayerData data = get(player.getLevel());
+        PlayerSceneManager data = get(player.getLevel());
         Counters counters = data.counters.get(player.getUUID());
-        if (counters == null) {
-            counters = new Counters();
-            data.counters.put(player.getUUID(), counters);
-        }
+        if (counters == null) { counters = new Counters(); }
+        counters.set("health",     (int) player.getHealth());
+        counters.set("exhaustion", (int) player.getFoodData().getExhaustionLevel());
+        counters.set("saturation", (int) player.getFoodData().getSaturationLevel());
+        counters.set("food_level", player.getFoodData().getFoodLevel());
+        counters.set("air_supply", player.getAirSupply());
+        data.counters.put(player.getUUID(), counters);
         return counters;
     }
 
