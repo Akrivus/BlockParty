@@ -33,7 +33,7 @@ public class EmoteLayer extends RenderLayer<BlockPartyNPC, MoeModel<BlockPartyNP
     }
 
     public ResourceLocation getEyesTexture(BlockPartyNPC entity) {
-        return BlockParty.source(String.format("textures/npc/emotions/%s.eyes.png", entity.getEmotion().toString().toLowerCase()));
+        return BlockParty.source(String.format("textures/moe/emotions/%s.eyes.png", entity.getEmotion().toString().toLowerCase()));
     }
 
     public float getRGB(BlockPartyNPC entity, int index) {
@@ -41,6 +41,6 @@ public class EmoteLayer extends RenderLayer<BlockPartyNPC, MoeModel<BlockPartyNP
     }
 
     public ResourceLocation getFaceTexture(BlockPartyNPC entity) {
-        return BlockParty.source(String.format("textures/npc/emotions/%s.png", entity.getEmotion().toString().toLowerCase()));
+        return BlockParty.source(String.format("textures/moe/emotions/%s.png", entity.getEmotion().toString().toLowerCase()));
     }
 }
