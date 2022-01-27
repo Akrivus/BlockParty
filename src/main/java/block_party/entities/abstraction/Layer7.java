@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
  * Abstraction layer 7: scene management and animation.
  */
 public abstract class Layer7 extends Layer6 {
-    public static final EntityDataAccessor<String> ANIMATION = SynchedEntityData.defineId(Layer5.class, EntityDataSerializers.STRING);
+    public static final EntityDataAccessor<String> ANIMATION = SynchedEntityData.defineId(Layer7.class, EntityDataSerializers.STRING);
     public final SceneManager sceneManager;
     private AbstractAnimation animation = Animation.DEFAULT.get();
     private Dialogue dialogue;
