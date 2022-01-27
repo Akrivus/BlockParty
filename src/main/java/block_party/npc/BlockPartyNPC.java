@@ -568,18 +568,8 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         return this.level.getPlayerByUUID(this.getPlayerUUID());
     }
 
-    public void ifPlayer(Consumer<Player> function) {
-        Player player = this.getPlayer();
-        if (player != null) { function.accept(player); }
-    }
-
     public ServerPlayer getServerPlayer() {
         return this.getServer().getPlayerList().getPlayer(this.getPlayerUUID());
-    }
-
-    public void ifServerPlayer(Consumer<ServerPlayer> function) {
-        ServerPlayer player = this.getServerPlayer();
-        if (player != null) { function.accept(player); }
     }
 
     public void setPlayer(Player player) {
