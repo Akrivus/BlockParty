@@ -5,7 +5,6 @@ import block_party.registry.SceneActions;
 import block_party.utils.JsonUtils;
 import block_party.utils.Markdown;
 import block_party.utils.NBT;
-import block_party.world.PlayerData;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -67,9 +66,9 @@ public class Dialogue implements ISceneAction {
         if (this.npc == null) { return this.text; }
         String text = this.text;
         text = Markdown.highlight(text, COUNTER_PATTERN, "yellow", (match) -> String.valueOf(this.npc.sceneManager.counters.get(match)));
-        text = Markdown.highlight(text, PLAYER_COUNTER_PATTERN, "yellow", (match) -> String.valueOf(PlayerData.getCountersFor(this.npc.getServerPlayer()).get(match)));
+        text = Markdown.highlight(text, PLAYER_COUNTER_PATTERN, "yellow", (match) -> String.valueOf(PlayerSceneManager.getCountersFor(this.npc.getServerPlayer()).get(match)));
         text = Markdown.highlight(text, COOKIE_PATTERN, "magenta", (match) -> this.npc.sceneManager.cookies.get(match));
-        text = Markdown.highlight(text, PLAYER_COOKIE_PATTERN, "magenta", (match) -> PlayerData.getCookiesFor(this.npc.getServerPlayer()).get(match));
+        text = Markdown.highlight(text, PLAYER_COOKIE_PATTERN, "magenta", (match) -> PlayerSceneManager.getCookiesFor(this.npc.getServerPlayer()).get(match));
         return Markdown.parse(text);
     }
 

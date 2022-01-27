@@ -1,6 +1,6 @@
 package block_party.scene.filters;
 
-import block_party.world.PlayerData;
+import block_party.scene.PlayerSceneManager;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 
@@ -19,7 +19,7 @@ public class CounterFilter extends IntegerFilter {
 
     public static class Player extends CounterFilter {
         public Player() {
-            this.function = (npc) -> PlayerData.getCountersFor(npc.getServerPlayer()).get(this.name);
+            this.function = (npc) -> PlayerSceneManager.getCountersFor(npc.getServerPlayer()).get(this.name);
         }
     }
 }

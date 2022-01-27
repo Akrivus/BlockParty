@@ -1,6 +1,6 @@
 package block_party.scene.filters;
 
-import block_party.world.PlayerData;
+import block_party.scene.PlayerSceneManager;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 
@@ -18,7 +18,7 @@ public class CookieFilter extends StringFilter {
 
     public static class Player extends CookieFilter {
         public Player() {
-            this.function = (npc) -> PlayerData.getCookiesFor(npc.getServerPlayer()).get(this.name);
+            this.function = (npc) -> PlayerSceneManager.getCookiesFor(npc.getServerPlayer()).get(this.name);
         }
     }
 }

@@ -3,14 +3,18 @@ package block_party.scene.actions;
 import block_party.npc.BlockPartyNPC;
 import block_party.scene.Cookies;
 import block_party.scene.ISceneAction;
+import block_party.scene.PlayerSceneManager;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 import org.apache.logging.log4j.util.TriConsumer;
 
+import java.util.List;
+
 public class CookieAction implements ISceneAction {
-    private Operation operation;
-    private String name;
-    private String value;
+    protected Operation operation;
+    protected String name;
+    protected String value;
 
     @Override
     public void apply(BlockPartyNPC npc) {
@@ -27,6 +31,16 @@ public class CookieAction implements ISceneAction {
     @Override
     public boolean isComplete() {
         return true;
+    }
+
+    public static class Player extends CookieAction {
+        @Override
+        public void apply(BlockPartyNPC npc) {
+            if (!npc.isPlayerOnline()) { return; }
+            Cookies cookies = PlayerSceneManager.getCookiesFor(npc.getServerPlayer());
+            this.operation.accept(cookies, this.name, this.value);
+            PlayerSceneManager.saveFor(npc.getServerPlayer());
+        }
     }
 
     public enum Operation {

@@ -3,14 +3,15 @@ package block_party.scene.actions;
 import block_party.npc.BlockPartyNPC;
 import block_party.scene.Counters;
 import block_party.scene.ISceneAction;
+import block_party.scene.PlayerSceneManager;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 import org.apache.logging.log4j.util.TriConsumer;
 
 public class CounterAction implements ISceneAction {
-    private Operation operation;
-    private String name;
-    private int value;
+    protected Operation operation;
+    protected String name;
+    protected int value;
 
     @Override
     public void apply(BlockPartyNPC npc) {
@@ -27,6 +28,15 @@ public class CounterAction implements ISceneAction {
     @Override
     public boolean isComplete() {
         return true;
+    }
+
+    public static class Player extends CounterAction {
+        @Override
+        public void apply(BlockPartyNPC npc) {
+            Counters counters = PlayerSceneManager.getCountersFor(npc.getServerPlayer());
+            this.operation.accept(counters, this.name, this.value);
+            PlayerSceneManager.saveFor(npc.getServerPlayer());
+        }
     }
 
     public enum Operation {
