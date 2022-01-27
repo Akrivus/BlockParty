@@ -41,7 +41,7 @@ public abstract class Layer5 extends Layer4 implements Recordable<NPC> {
     public void readAdditionalSaveData(CompoundTag compound) {
         this.setDatabaseID(compound.getLong("DatabaseID"));
         super.readAdditionalSaveData(compound);
-        if (this.hasRow()) {
+        if (this.isSyncWithDB()) {
             this.getRow().load(this.cast());
             this.readyToSync = true;
         }
@@ -69,8 +69,7 @@ public abstract class Layer5 extends Layer4 implements Recordable<NPC> {
 
     @Override
     public boolean claim(Player player) {
-        if (!this.syncWithDB) { return false; }
-        if (Recordable.super.claim(player)) {
+        if (this.syncWithDB && Recordable.super.claim(player)) {
             this.getData().addTo(player, this.getDatabaseID());
             this.readyToSync = true;
         }
@@ -95,7 +94,7 @@ public abstract class Layer5 extends Layer4 implements Recordable<NPC> {
         this.entityData.set(DATABASE_ID, Long.toString(id));
     }
 
-    public void doSyncWithDatabase(boolean syncWithDatabase) {
+    public void doSyncWithDatabase(boolean syncWithDB) {
         this.syncWithDB = syncWithDB;
     }
 

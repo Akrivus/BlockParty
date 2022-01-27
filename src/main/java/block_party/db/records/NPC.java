@@ -139,7 +139,7 @@ public class NPC extends Row<BlockPartyNPC> {
 
     public static class Schema extends Table<NPC> {
         public Schema() {
-            super("BlockPartyNPCs");
+            super("NPCs");
             this.addColumn(new Column.AsBoolean(this, "Dead"));
             this.addColumn(new Column.AsString(this, "Name"));
             this.addColumn(new Column.AsTrait<>(this, "BloodType", BloodType.O));
