@@ -29,6 +29,7 @@ public abstract class Layer3 extends Layer2 {
     public void defineSynchedData() {
         this.entityData.define(PLAYER_UUID, "00000000-0000-0000-0000-000000000000");
         this.entityData.define(FOLLOWING, false);
+        super.defineSynchedData();
     }
 
     @Override

@@ -28,6 +28,7 @@ public abstract class Layer5 extends Layer4 implements Recordable<NPC> {
     @Override
     public void defineSynchedData() {
         this.entityData.define(DATABASE_ID, "-1");
+        super.defineSynchedData();
     }
 
     @Override
