@@ -525,7 +525,9 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
 
     public boolean is(ITrait condition) {
         return condition.isSharedWith(this);
-    }    public void jumpFromGround() {
+    }
+
+    public void jumpFromGround() {
         this.playSound(DollSounds.get(this, DollSounds.Sound.ATTACK));
         super.jumpFromGround();
     }
