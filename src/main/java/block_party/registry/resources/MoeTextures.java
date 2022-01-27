@@ -2,6 +2,7 @@ package block_party.registry.resources;
 
 import block_party.BlockParty;
 import block_party.entities.BlockPartyNPC;
+import block_party.registry.CustomResources;
 import block_party.utils.JsonUtils;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -26,23 +27,20 @@ import java.util.Map;
 public class MoeTextures extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = BlockParty.GSON.create();
     private static final Logger LOGGER = LogManager.getLogger();
-    private static MoeTextures instance;
 
     private Map<Block, Map<BlockStatePattern, ResourceLocation>> map = ImmutableMap.of();
     private boolean hasErrors;
 
     public MoeTextures() {
         super(GSON, "moes/textures");
-        if (MoeTextures.instance != null) { LOGGER.warn("DollTextures was already instantiated; overwriting."); }
-        MoeTextures.instance = this;
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> sceneFolder, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+    protected void apply(Map<ResourceLocation, JsonElement> folder, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         this.hasErrors = false;
         Map<Block, ImmutableMap.Builder<BlockStatePattern, ResourceLocation>> map = Maps.newHashMap();
 
-        for (Map.Entry<ResourceLocation, JsonElement> entry : sceneFolder.entrySet()) {
+        for (Map.Entry<ResourceLocation, JsonElement> entry : folder.entrySet()) {
             JsonObject json = GsonHelper.convertToJsonObject(entry.getValue(), "texture");
 
             ImmutableMap.Builder<Property<?>, Comparable<?>> builder = ImmutableMap.builder();
@@ -75,7 +73,7 @@ public class MoeTextures extends SimpleJsonResourceReloadListener {
 
     public static ResourceLocation get(BlockPartyNPC npc) {
         Block block = npc.getBlock();
-        Map<BlockStatePattern, ResourceLocation> textures = MoeTextures.instance.map.getOrDefault(block, ImmutableMap.of(new BlockStatePattern(block, ImmutableMap.of()), getDefaultPathFor(block)));
+        Map<BlockStatePattern, ResourceLocation> textures = CustomResources.MOE_TEXTURES.map.getOrDefault(block, ImmutableMap.of(new BlockStatePattern(block, ImmutableMap.of()), getDefaultPathFor(block)));
         for (BlockStatePattern pattern : textures.keySet()) {
             if (pattern.matches(npc.getActualBlockState())) { return textures.get(pattern); }
         }

@@ -1,6 +1,7 @@
 package block_party.registry.resources;
 
 import block_party.BlockParty;
+import block_party.registry.CustomResources;
 import block_party.utils.JsonUtils;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.*;
@@ -19,23 +20,20 @@ import java.util.Map;
 public class BlockAliases extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = BlockParty.GSON.create();
     private static final Logger LOGGER = LogManager.getLogger();
-    private static BlockAliases instance;
 
     private Map<Block, Block> map = ImmutableMap.of();
     private boolean hasErrors;
 
     public BlockAliases() {
         super(GSON, "moes/aliases");
-        if (BlockAliases.instance != null) { LOGGER.warn("BlockAliases was already instantiated; overwriting."); }
-        BlockAliases.instance = this;
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> sceneFolder, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+    protected void apply(Map<ResourceLocation, JsonElement> folder, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         this.hasErrors = false;
         ImmutableMap.Builder<Block, Block> builder = ImmutableMap.builder();
 
-        for (Map.Entry<ResourceLocation, JsonElement> entry : sceneFolder.entrySet()) {
+        for (Map.Entry<ResourceLocation, JsonElement> entry : folder.entrySet()) {
             ResourceLocation location = entry.getKey();
             try {
                 Block alias = JsonUtils.getAs(JsonUtils.BLOCK, location);
@@ -62,7 +60,7 @@ public class BlockAliases extends SimpleJsonResourceReloadListener {
 
     public static BlockState get(BlockState state) {
         Block block = state.getBlock();
-        Block alias = BlockAliases.instance.map.getOrDefault(block, block);
+        Block alias = CustomResources.BLOCK_ALIASES.map.getOrDefault(block, block);
         return alias.defaultBlockState();
     }
 }

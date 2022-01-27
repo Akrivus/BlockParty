@@ -39,12 +39,12 @@ public class Scenes extends SimpleJsonResourceReloadListener {
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> sceneFolder, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+    protected void apply(Map<ResourceLocation, JsonElement> folder, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         this.hasErrors = false;
         Map<SceneTrigger, ImmutableList.Builder<Scene>> map = Maps.newHashMap();
         ImmutableMap.Builder<ResourceLocation, Scene> builder = ImmutableMap.builder();
 
-        for (Map.Entry<ResourceLocation, JsonElement> entry : sceneFolder.entrySet()) {
+        for (Map.Entry<ResourceLocation, JsonElement> entry : folder.entrySet()) {
             ResourceLocation location = entry.getKey();
             JsonObject json = GsonHelper.convertToJsonObject(entry.getValue(), "scene");
 
