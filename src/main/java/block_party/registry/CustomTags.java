@@ -12,6 +12,7 @@ public class CustomTags {
     public static final Tag.Named<Block> HAS_MALE_PRONOUNS = BlockTags.createOptional(BlockParty.source("doll/has_male_pronouns"));
     public static final Tag.Named<Block> HAS_NONBINARY_PRONOUNS = BlockTags.createOptional(BlockParty.source("doll/has_nonbinary_pronouns"));
     public static final Tag.Named<Block> HAS_WINGS = BlockTags.createOptional(BlockParty.source("doll/has_wings"));
+    public static final Tag.Named<Block> IGNORES_VOLUME = BlockTags.createOptional(BlockParty.source("doll/ignores_volume"));
 
     public static class Blocks {
         public static final Tag.Named<Block> SAKURA_LOGS = BlockTags.createOptional(BlockParty.source("sakura_logs"));

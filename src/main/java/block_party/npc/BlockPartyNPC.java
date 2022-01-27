@@ -61,6 +61,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.common.util.LazyOptional;
@@ -75,6 +76,7 @@ import java.util.function.Consumer;
 
 public class BlockPartyNPC extends PathfinderMob implements ContainerListener, Recordable<NPC>, MenuProvider {
     public static final EntityDataAccessor<Optional<BlockState>> BLOCK_STATE = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.BLOCK_STATE);
+    public static final EntityDataAccessor<Float> SCALE = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.FLOAT);
     public static final EntityDataAccessor<Boolean> FOLLOWING = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<String> PLAYER_UUID = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
     public static final EntityDataAccessor<String> DATABASE_ID = SynchedEntityData.defineId(BlockPartyNPC.class, EntityDataSerializers.STRING);
@@ -121,6 +123,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     @Override
     public void defineSynchedData() {
         this.entityData.define(BLOCK_STATE, Optional.of(Blocks.AIR.defaultBlockState()));
+        this.entityData.define(SCALE, 1.0F);
         this.entityData.define(FOLLOWING, false);
         this.entityData.define(PLAYER_UUID, "00000000-0000-0000-0000-000000000000");
         this.entityData.define(DATABASE_ID, "-1");
@@ -151,6 +154,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
         compound.putInt("BlockState", Block.getId(this.getActualBlockState()));
+        compound.putFloat("Scale", this.getScale());
         compound.put("TileEntity", this.getTileEntityData());
         compound.putLong("DatabaseID", this.getDatabaseID());
         compound.putBoolean("Following", this.isFollowing());
@@ -166,6 +170,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         this.setBlockState(Block.stateById(compound.getInt("BlockState")));
+        this.setScale(compound.getFloat("Scale"));
         this.setTileEntityData(compound.getCompound("TileEntity"));
         this.setDatabaseID(compound.getLong("DatabaseID"));
         this.setFollowing(compound.getBoolean("Following"));
@@ -189,10 +194,20 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         this.entityData.set(BLOCK_STATE, Optional.of(BlockAliases.get(state)));
         this.actualBlockState = state;
         if (this.isLocal()) {
+            this.setScale(state.is(CustomTags.IGNORES_VOLUME) ? 1.0F : this.getBlockVolume(state));
             this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, this.fireImmune() ? 0.0F : -1.0F);
             this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, this.fireImmune() ? 0.0F : -1.0F);
             this.setCanFly(state.is(CustomTags.HAS_WINGS));
         }
+    }
+
+    private float getBlockVolume(BlockState state) {
+        VoxelShape shape = state.getOcclusionShape(this.level, this.blockPosition());
+        float dX = (float) (shape.max(Direction.Axis.X) - shape.min(Direction.Axis.X));
+        float dY = (float) (shape.max(Direction.Axis.Y) - shape.min(Direction.Axis.Y));
+        float dZ = (float) (shape.max(Direction.Axis.Z) - shape.min(Direction.Axis.Z));
+        float volume = (float) (Math.cbrt(dX * dY * dZ));
+        return Float.isFinite(volume) ? Math.min(Math.max(volume, 0.25F), 1.5F) : 1.0F;
     }
 
     @Override
@@ -389,6 +404,14 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
         this.tileEntityData = compound == null ? new CompoundTag() : compound;
     }
 
+    public float getScale() {
+        return this.entityData.get(SCALE);
+    }
+
+    public void setScale(float scale) {
+        this.entityData.set(SCALE, scale);
+    }
+
     public BlockState getActualBlockState() {
         return this.actualBlockState;
     }
@@ -527,9 +550,20 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        if (SCALE.equals(key)) { this.refreshDimensions(); }
         if (ANIMATION.equals(key)) { this.setAnimation(Animation.DEFAULT.fromValue(this.entityData.get(ANIMATION))); }
         super.onSyncedDataUpdated(key);
         if (this.hasRow()) { this.getRow().update(this); }
+    }
+
+    @Override
+    public EntityDimensions getDimensions(Pose pose) {
+        return super.getDimensions(pose).scale(this.getScale());
+    }
+
+    @Override
+    protected float getStandingEyeHeight(Pose pose, EntityDimensions size) {
+        return 0.908203125F * this.getScale();
     }
 
     public Player getPlayer() {
@@ -538,11 +572,6 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
 
     public ServerPlayer getServerPlayer() {
         return this.getServer().getPlayerList().getPlayer(this.getPlayerUUID());
-    }
-    
-    @Override
-    protected float getStandingEyeHeight(Pose pose, EntityDimensions size) {
-        return 0.908203125F;
     }
 
     public void setPlayer(Player player) {
@@ -579,7 +608,8 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     
     @Override
     public float getVoicePitch() {
-        return (super.getVoicePitch() + this.getBlockBuffer() + 0.6F) / 2;
+        float pitch = (super.getVoicePitch() + this.getBlockBuffer() + 0.6F) / 2;
+        return pitch + (1.0F - this.getScale());
     }
 
     public float[] getEyeColor() {
@@ -833,7 +863,7 @@ public class BlockPartyNPC extends PathfinderMob implements ContainerListener, R
     }
 
     public int getBaseAge() {
-        return 18;
+        return (int) (this.getScale() * 5) + 14;
     }
 
     public boolean isTimeBetween(int start, int end) {
