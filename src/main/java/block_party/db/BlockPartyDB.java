@@ -35,12 +35,12 @@ import java.util.UUID;
 
 @Mod.EventBusSubscriber
 public class BlockPartyDB extends SavedData {
+    public static String KEY = "blockparty_db";
     public static Shrine.Schema Shrines = new Shrine.Schema();
     public static Location.Schema Locations = new Location.Schema();
     public static Garden.Schema Gardens = new Garden.Schema();
     public static Sapling.Schema Saplings = new Sapling.Schema();
     public static NPC.Schema NPCs = new NPC.Schema();
-    public static String KEY = "blockparty_db";
     public static ShrineLocation ShrineLocation;
     public final List<String> names = Lists.newArrayList();
     private final Map<UUID, List<Long>> byPlayer = Maps.newHashMap();
