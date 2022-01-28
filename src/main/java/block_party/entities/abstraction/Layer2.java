@@ -174,4 +174,9 @@ public abstract class Layer2 extends Layer1 {
     public int getBaseAge() {
         return (int) (this.getScale() * 5) + 14;
     }
+
+    public void hide() {
+        this.level.setBlock(this.getBlockPos(), this.getActualBlockState(), 3);
+        this.remove(RemovalReason.DISCARDED);
+    }
 }

@@ -97,6 +97,10 @@ public abstract class Layer1 extends PathfinderMob {
         return false;
     }
 
+    public BlockPos getBlockPos() {
+        return this.getOnPos().above();
+    }
+
     public boolean isLocal() {
         return !this.isRemote();
     }

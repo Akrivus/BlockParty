@@ -1,0 +1,11 @@
+{
+  "trigger": "block_party:left_click",
+  "filters": [
+    "block_party:always"
+  ],
+  "actions": [
+    {
+      "type": "block_party:hide"
+    }
+  ]
+}

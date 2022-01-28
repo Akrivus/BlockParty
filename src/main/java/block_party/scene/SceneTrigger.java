@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public enum SceneTrigger {
     CREATION(10),
+    HIDING_SPOT_DISCOVERED(10),
     SHIFT_LEFT_CLICK(9),
     LEFT_CLICK(9),
     SHIFT_RIGHT_CLICK(8),

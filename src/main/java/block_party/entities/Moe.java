@@ -2,12 +2,12 @@ package block_party.entities;
 
 import block_party.blocks.entity.ShimenawaBlockEntity;
 import block_party.registry.CustomEntities;
-import block_party.registry.CustomSounds;
 import block_party.registry.CustomTags;
 import block_party.registry.resources.MoeSounds;
 import block_party.scene.filters.traits.Dere;
 import block_party.scene.filters.traits.Gender;
 import block_party.utils.Trans;
+import block_party.entities.data.HidingSpots;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -25,6 +25,24 @@ import net.minecraft.world.level.block.state.BlockState;
 public class Moe extends BlockPartyNPC {
     public Moe(EntityType<Moe> type, Level level) {
         super(type, level);
+        this.doSyncWithDatabase(true);
+    }
+
+    public Moe(Level level) {
+        this(CustomEntities.MOE.get(), level);
+    }
+
+    @Override
+    public void hide() {
+        HidingSpots.add(this);
+        super.hide();
+    }
+
+    @Override
+    public BlockPartyNPC onTeleport(BlockPartyNPC entity) {
+        entity.setFollowing(true);
+        MoeSounds.get(entity, MoeSounds.Sound.FOLLOW);
+        return entity;
     }
 
     public String getFamilyName() {
@@ -37,13 +55,6 @@ public class Moe extends BlockPartyNPC {
         if (this.is(CustomTags.HAS_MALE_PRONOUNS)) { return Gender.MALE; }
         if (this.is(CustomTags.HAS_NONBINARY_PRONOUNS)) { return Gender.NONBINARY; }
         return Gender.FEMALE;
-    }
-
-    @Override
-    public BlockPartyNPC onTeleport(BlockPartyNPC entity) {
-        entity.setFollowing(true);
-        entity.playSound(CustomSounds.MOE_FOLLOW.get());
-        return entity;
     }
 
     @Override
@@ -80,19 +91,19 @@ public class Moe extends BlockPartyNPC {
         BlockState state = level.getBlockState(block);
         if (!state.is(CustomTags.Blocks.SPAWNS_MOES)) { return false; }
         BlockEntity extra = level.getBlockEntity(block);
-        BlockPartyNPC npc = CustomEntities.NPC.get().create(level);
-        npc.absMoveTo(spawn.getX() + 0.5D, spawn.getY(), spawn.getZ() + 0.5D, yaw, pitch);
+        Moe moe = CustomEntities.MOE.get().create(level);
+        moe.absMoveTo(spawn.getX() + 0.5D, spawn.getY(), spawn.getZ() + 0.5D, yaw, pitch);
         /**
          * TODO: Need to move this to {@link ShimenawaBlockEntity#getNewRow()} and {@link CustomSpawnEggItem#useOn(UseOnContext)}
          */
-        npc.setDatabaseID(block.asLong());
-        npc.setBlockState(state);
-        npc.setTileEntityData(extra != null ? extra.getTileData() : new CompoundTag());
-        npc.setDere(dere);
-        npc.claim(player);
-        if (level.addFreshEntity(npc)) {
-            npc.finalizeSpawn((ServerLevel) level, level.getCurrentDifficultyAt(spawn), MobSpawnType.TRIGGERED, null, null);
-            if (player != null) { npc.setPlayer(player); }
+        moe.setDatabaseID(block.asLong());
+        moe.setBlockState(state);
+        moe.setTileEntityData(extra != null ? extra.getTileData() : new CompoundTag());
+        moe.setDere(dere);
+        moe.claim(player);
+        if (level.addFreshEntity(moe)) {
+            moe.finalizeSpawn((ServerLevel) level, level.getCurrentDifficultyAt(spawn), MobSpawnType.TRIGGERED, null, null);
+            if (player != null) { moe.setPlayer(player); }
             return level.destroyBlock(block, false);
         }
         return false;
