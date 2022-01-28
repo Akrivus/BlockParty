@@ -5,9 +5,9 @@
   ],
   "actions": [
     {
-      "type": "block_party:dialogue",
+      "type": "block_party:send_dialogue",
       "action": {
-        "text": "You hit me #number_of_hits *times!*",
+        "text": "Hi @.name, I'm @name, I am a Moe you spawned!",
         "tooltip": true,
         "speaker": {
           "animation": "wave",
@@ -17,7 +17,41 @@
           {
             "icon": "block_party:next_response",
             "actions": [
-              "block_party:end"
+              {
+                "type": "block_party:send_dialogue",
+                "action": {
+                  "text": "As a Moe, my job is to do something, but my developer hasn't thought of what yet.",
+                  "tooltip": true,
+                  "speaker": {
+                    "emotion": "crying"
+                  },
+                  "responses": [
+                    {
+                      "icon": "block_party:next_response",
+                      "actions": [
+                        {
+                          "type": "block_party:send_dialogue",
+                          "action": {
+                            "text": "So for now, all I can really do is make this conversation.",
+                            "tooltip": true,
+                            "speaker": {
+                              "emotion": "embarrassed"
+                            },
+                            "responses": [
+                              {
+                                "icon": "block_party:next_response",
+                                "actions": [
+                                  "block_party:end"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
             ]
           }
         ]
