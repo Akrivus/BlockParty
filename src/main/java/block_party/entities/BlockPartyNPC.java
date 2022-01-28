@@ -9,7 +9,6 @@ import net.minecraft.world.level.Level;
 public abstract class BlockPartyNPC extends Layer7 {
     public BlockPartyNPC(EntityType<? extends BlockPartyNPC> type, Level level) {
         super(type, level);
-        this.doSyncWithDatabase(true);
     }
 
     @Override
