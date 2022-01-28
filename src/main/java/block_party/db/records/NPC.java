@@ -108,7 +108,7 @@ public class NPC extends Row<BlockPartyNPC> {
 
     public BlockPartyNPC getClientEntity(Minecraft client) {
         BlockPos pos = client.player.blockPosition();
-        BlockPartyNPC entity = CustomEntities.NPC.get().create(client.level);
+        BlockPartyNPC entity = CustomEntities.MOE.get().create(client.level);
         entity.setPos(pos.getX(), pos.getY(), pos.getZ());
         this.load(entity);
         return entity;

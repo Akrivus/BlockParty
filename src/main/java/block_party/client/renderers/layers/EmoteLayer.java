@@ -3,6 +3,7 @@ package block_party.client.renderers.layers;
 import block_party.BlockParty;
 import block_party.client.model.MoeModel;
 import block_party.entities.BlockPartyNPC;
+import block_party.entities.Moe;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -14,16 +15,16 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 
-public class EmoteLayer extends RenderLayer<BlockPartyNPC, MoeModel<BlockPartyNPC>> {
-    public EmoteLayer(RenderLayerParent<BlockPartyNPC, MoeModel<BlockPartyNPC>> renderer) {
+public class EmoteLayer extends RenderLayer<Moe, MoeModel<Moe>> {
+    public EmoteLayer(RenderLayerParent<Moe, MoeModel<Moe>> renderer) {
         super(renderer);
     }
 
     @Override
-    public void render(PoseStack stack, MultiBufferSource buffer, int packedLight, BlockPartyNPC entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (this.isWithinDistance(entity.position()) && !entity.isInvisible() && !entity.isSleeping()) {
-            this.getParentModel().renderToBuffer(stack, buffer.getBuffer(RenderType.entityCutout(this.getEyesTexture(entity))), packedLight, LivingEntityRenderer.getOverlayCoords(entity, 0.0F), this.getRGB(entity, 0), this.getRGB(entity, 1), this.getRGB(entity, 2), 1.0F);
-            this.getParentModel().renderToBuffer(stack, buffer.getBuffer(RenderType.entityTranslucent(this.getFaceTexture(entity))), packedLight, LivingEntityRenderer.getOverlayCoords(entity, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
+    public void render(PoseStack stack, MultiBufferSource buffer, int packedLight, Moe moe, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+        if (this.isWithinDistance(moe.position()) && !moe.isInvisible() && !moe.isSleeping()) {
+            this.getParentModel().renderToBuffer(stack, buffer.getBuffer(RenderType.entityCutout(this.getEyesTexture(moe))), packedLight, LivingEntityRenderer.getOverlayCoords(moe, 0.0F), this.getRGB(moe, 0), this.getRGB(moe, 1), this.getRGB(moe, 2), 1.0F);
+            this.getParentModel().renderToBuffer(stack, buffer.getBuffer(RenderType.entityTranslucent(this.getFaceTexture(moe))), packedLight, LivingEntityRenderer.getOverlayCoords(moe, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 
@@ -32,15 +33,15 @@ public class EmoteLayer extends RenderLayer<BlockPartyNPC, MoeModel<BlockPartyNP
         return renderInfo.getPosition().distanceTo(pos) < 16;
     }
 
-    public ResourceLocation getEyesTexture(BlockPartyNPC entity) {
-        return BlockParty.source(String.format("textures/moe/emotions/%s.eyes.png", entity.getEmotion().toString().toLowerCase()));
+    public ResourceLocation getEyesTexture(Moe moe) {
+        return BlockParty.source(String.format("textures/moe/emotions/%s.eyes.png", moe.getEmotion().toString().toLowerCase()));
     }
 
-    public float getRGB(BlockPartyNPC entity, int index) {
-        return entity.getEyeColor()[index];
+    public float getRGB(Moe moe, int index) {
+        return moe.getEyeColor()[index];
     }
 
-    public ResourceLocation getFaceTexture(BlockPartyNPC entity) {
-        return BlockParty.source(String.format("textures/moe/emotions/%s.png", entity.getEmotion().toString().toLowerCase()));
+    public ResourceLocation getFaceTexture(Moe moe) {
+        return BlockParty.source(String.format("textures/moe/emotions/%s.png", moe.getEmotion().toString().toLowerCase()));
     }
 }

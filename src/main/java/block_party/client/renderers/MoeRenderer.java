@@ -7,6 +7,7 @@ import block_party.client.renderers.layers.EmoteLayer;
 import block_party.client.renderers.layers.GlowLayer;
 import block_party.client.renderers.layers.SpecialLayer;
 import block_party.entities.BlockPartyNPC;
+import block_party.entities.Moe;
 import block_party.registry.resources.MoeTextures;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
@@ -20,7 +21,7 @@ import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-public class MoeRenderer extends MobRenderer<BlockPartyNPC, MoeModel<BlockPartyNPC>> {
+public class MoeRenderer extends MobRenderer<Moe, MoeModel<Moe>> {
 
     public MoeRenderer(EntityRendererProvider.Context context) {
         super(context, new MoeModel<>(context.bakeLayer(BlockPartyRenderers.MOE)), 0.25F);
@@ -32,17 +33,17 @@ public class MoeRenderer extends MobRenderer<BlockPartyNPC, MoeModel<BlockPartyN
     }
 
     @Override
-    public ResourceLocation getTextureLocation(BlockPartyNPC npc) {
-        return MoeTextures.get(npc);
+    public ResourceLocation getTextureLocation(Moe moe) {
+        return MoeTextures.get(moe);
     }
 
     @Override
-    protected void renderNameTag(BlockPartyNPC entity, Component name, PoseStack stack, MultiBufferSource buffer, int packedLight) {
-        if (entity.getAnimationKey() == Animation.YEARBOOK) { return; }
-        if (Minecraft.getInstance().player.distanceTo(entity) > 8.0F) { return; }
-        String[] lines = new String[] { this.getHealth(entity), name.getString() };
+    protected void renderNameTag(Moe moe, Component name, PoseStack stack, MultiBufferSource buffer, int packedLight) {
+        if (moe.getAnimationKey() == Animation.YEARBOOK) { return; }
+        if (Minecraft.getInstance().player.distanceTo(moe) > 8.0F) { return; }
+        String[] lines = new String[] { this.getHealth(moe), name.getString() };
         stack.pushPose();
-        stack.translate(0.0D, entity.getBbHeight() + 0.5F, 0.0D);
+        stack.translate(0.0D, moe.getBbHeight() + 0.5F, 0.0D);
         stack.mulPose(this.entityRenderDispatcher.cameraOrientation());
         stack.scale(-0.025F, -0.025F, 0.025F);
         for (int i = 0; i < lines.length; ++i) {
@@ -56,15 +57,15 @@ public class MoeRenderer extends MobRenderer<BlockPartyNPC, MoeModel<BlockPartyN
         stack.popPose();
     }
 
-    public String getHealth(BlockPartyNPC entity) {
-        return String.format("%d / %d", (int) entity.getHealth(), (int) entity.getMaxHealth());
+    public String getHealth(Moe moe) {
+        return String.format("%d / %d", (int) moe.getHealth(), (int) moe.getMaxHealth());
     }
 
     @Override
-    public void scale(BlockPartyNPC entity, PoseStack stack, float partialTickTime) {
-        super.scale(entity, stack, partialTickTime);
+    public void scale(Moe moe, PoseStack stack, float partialTickTime) {
+        super.scale(moe, stack, partialTickTime);
         stack.scale(0.9375F, 0.9375F, 0.9375F);
-        if (entity.getAnimationKey() == Animation.YEARBOOK) { return; }
+        if (moe.getAnimationKey() == Animation.YEARBOOK) { return; }
         this.shadowRadius = 0.25F;
     }
 }

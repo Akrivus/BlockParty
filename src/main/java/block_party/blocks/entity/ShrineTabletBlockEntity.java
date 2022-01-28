@@ -41,7 +41,7 @@ public class ShrineTabletBlockEntity extends AbstractDataBlockEntity<Shrine> {
         lightning.moveTo(Vec3.atBottomCenterOf(pos));
         lightning.setVisualOnly(true);
         if (level.addFreshEntity(lightning)) {
-            BlockPartyNPC npc = CustomEntities.NPC.get().create(level);
+            BlockPartyNPC npc = CustomEntities.MOE.get().create(level);
             npc.absMoveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, 0.0F, 0.0F);
             npc.setDatabaseID(pos.asLong());
             npc.setBlockState(Blocks.BELL.defaultBlockState());

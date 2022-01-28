@@ -17,7 +17,7 @@ public class BlockPartyRenderers {
     }
 
     private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers e) {
-        e.registerEntityRenderer(CustomEntities.NPC.get(), MoeRenderer::new);
+        e.registerEntityRenderer(CustomEntities.MOE.get(), MoeRenderer::new);
     }
 
     private static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions e) {
