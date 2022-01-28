@@ -7,7 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.TextComponent;
 
 public class RespondIconButton extends DialogueScreen.RespondButton {
-    public RespondIconButton(DialogueScreen parent, int index, NPC npc, Response.Icon icon, TextComponent text) {
+    public RespondIconButton(DialogueScreen parent, int index, NPC npc, Response icon, TextComponent text) {
         super(parent.getLeft((index - 1) * 10 + index * 4), parent.getBottom(14), 10, 10, parent, npc, icon, text, true);
     }
 

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-public class ActionSeries implements ISceneAction {
+public class Markov extends Abstract1Shot {
     private final NavigableMap<Double, ISceneAction> actions = new TreeMap<>();
     private double total = 0;
 
@@ -19,21 +19,11 @@ public class ActionSeries implements ISceneAction {
         npc.sceneManager.putAction(entry.getValue());
     }
 
-    @Override
-    public boolean isComplete() {
-        return true;
+    public static Markov start(double probability, ISceneAction state) {
+        return new Markov().chain(probability, state);
     }
 
-    @Override
-    public void onComplete() {
-
-    }
-
-    public static ActionSeries start(double probability, ISceneAction state) {
-        return new ActionSeries().chain(probability, state);
-    }
-
-    public ActionSeries chain(double probability, ISceneAction state) {
+    public Markov chain(double probability, ISceneAction state) {
         this.total += probability;
         this.actions.put(probability, state);
         return this;

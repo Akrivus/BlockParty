@@ -9,13 +9,13 @@ import net.minecraftforge.network.NetworkEvent;
 
 public class SOpenDialogue extends AbstractMessage.Server {
     private final NPC npc;
-    private final Dialogue.Model dialogue;
+    private final Dialogue dialogue;
 
     public SOpenDialogue(FriendlyByteBuf buffer) {
-        this(new NPC(buffer.readNbt()), new Dialogue.Model(buffer.readNbt()));
+        this(new NPC(buffer.readNbt()), new Dialogue(buffer.readNbt()));
     }
 
-    public SOpenDialogue(NPC npc, Dialogue.Model dialogue) {
+    public SOpenDialogue(NPC npc, Dialogue dialogue) {
         this.npc = npc;
         this.dialogue = dialogue;
     }

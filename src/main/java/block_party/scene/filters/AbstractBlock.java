@@ -13,12 +13,12 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.function.Function;
 
-public class BlockFilter implements ISceneFilter {
+public class AbstractBlock implements ISceneFilter {
     protected Function<BlockPartyNPC, BlockState> getter;
     private Block block;
     private Tag<Block> tag;
 
-    public BlockFilter(Function<BlockPartyNPC, BlockState> function) {
+    public AbstractBlock(Function<BlockPartyNPC, BlockState> function) {
         this.getter = function;
     }
 

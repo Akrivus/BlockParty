@@ -8,16 +8,16 @@ import net.minecraft.util.GsonHelper;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
-public class IntegerFilter implements ISceneFilter {
+public class AbstractInteger implements ISceneFilter {
     protected Function<BlockPartyNPC, Integer> function;
     private Operation operation;
     private int value;
 
-    public IntegerFilter(Function<BlockPartyNPC, Integer> function) {
+    public AbstractInteger(Function<BlockPartyNPC, Integer> function) {
         this.function = function;
     }
 
-    public IntegerFilter() { }
+    public AbstractInteger() { }
 
     public boolean verify(BlockPartyNPC npc) {
         return this.operation.test(this.value, this.function.apply(npc));

@@ -11,17 +11,17 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class SceneManager {
-    protected final BlockPartyNPC actor;
+    protected final BlockPartyNPC npc;
     protected SceneTrigger trigger = SceneTrigger.CREATION;
     protected LinkedList<ISceneAction> actions;
     protected ISceneAction action;
     public Cookies cookies = new Cookies();
     public Counters counters = new Counters();
 
-    public SceneManager(BlockPartyNPC actor) {
+    public SceneManager(BlockPartyNPC npc) {
         this.actions = Lists.newLinkedList();
         this.action = SceneActions.build(SceneActions.END);
-        this.actor = actor;
+        this.npc = npc;
     }
 
     public void read(CompoundTag compound) {
@@ -34,15 +34,15 @@ public class SceneManager {
         this.counters.save(compound);
     }
 
-    public void tick(BlockPartyNPC actor) {
-        this.setDefaultVariables(actor);
+    public void tick() {
+        this.setDefaultVariables(this.npc);
         if (this.action == null && this.actions.isEmpty()) { return; }
         if (this.action == null) {
             this.action = this.actions.remove();
-            this.action.apply(actor);
+            this.action.apply(this.npc);
         }
-        if (this.action.isComplete()) {
-            this.action.onComplete();
+        if (this.action.isComplete(this.npc)) {
+            this.action.onComplete(this.npc);
             this.action = null;
         }
         if (this.action == null) { this.trigger = SceneTrigger.NULL; }
@@ -51,7 +51,7 @@ public class SceneManager {
     public void trigger(SceneTrigger trigger) {
         if (this.trigger.getPriority() < trigger.getPriority()) {
             this.trigger = trigger;
-            Scene scene = CustomResources.SCENES.get(trigger, this.actor);
+            Scene scene = CustomResources.SCENES.get(trigger, this.npc);
             if (scene == null) { return; }
             this.setAction(null);
             this.setActions(scene.getActions());
@@ -59,7 +59,8 @@ public class SceneManager {
     }
 
     public void setAction(ISceneAction action) {
-        if (this.action != null) { this.action.onComplete(); }
+        if (this.action != null)
+            this.action.onComplete(this.npc);
         this.action = action;
     }
 
@@ -69,7 +70,7 @@ public class SceneManager {
     }
 
     public void putActions(List<ISceneAction> actions) {
-        for (int i = actions.size() - 1; i > 0; --i) { this.putAction(actions.get(i)); }
+        for (int i = actions.size(); i-- > 0;) { this.putAction(actions.get(i)); }
     }
 
     public void putAction(ISceneAction action) {
@@ -85,7 +86,7 @@ public class SceneManager {
     }
 
     private void setDefaultVariables(BlockPartyNPC actor) {
-        this.cookies.add( "given_name",  actor.getGivenName());
+        this.cookies.add( "name",        actor.getGivenName());
         this.cookies.add( "family_name", actor.getFamilyName());
         this.cookies.add( "blood_type",  Trans.late(actor.getBloodType().getTranslationKey()));
         this.cookies.add( "dere",        Trans.late(actor.getDere().getTranslationKey()));

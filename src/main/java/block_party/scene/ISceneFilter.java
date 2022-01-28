@@ -30,5 +30,4 @@ public interface ISceneFilter {
     }
 
     default void parse(JsonObject json) { }
-
 }

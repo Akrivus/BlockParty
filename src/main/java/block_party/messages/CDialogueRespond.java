@@ -7,16 +7,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 
 public class CDialogueRespond extends CNPCQuery {
-    private final Response.Icon response;
+    private final Response response;
 
-    public CDialogueRespond(long id, Response.Icon icon) {
+    public CDialogueRespond(long id, Response icon) {
         super(id);
         this.response = icon;
     }
 
     public CDialogueRespond(FriendlyByteBuf buffer) {
         super(buffer);
-        this.response = buffer.readEnum(Response.Icon.class);
+        this.response = buffer.readEnum(Response.class);
     }
 
     @Override

@@ -4,22 +4,21 @@ import block_party.scene.PlayerSceneManager;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 
-public class CounterFilter extends IntegerFilter {
+public class WithCookie extends AbstractString {
     protected String name;
 
-    public CounterFilter() {
-        this.function = (npc) -> npc.sceneManager.counters.get(this.name);
+    public WithCookie() {
+        this.function = (npc) -> npc.sceneManager.cookies.get(this.name);
     }
 
-    @Override
     public void parse(JsonObject json) {
         this.name = GsonHelper.getAsString(json, "name");
         super.parse(json);
     }
 
-    public static class Player extends CounterFilter {
+    public static class Player extends WithCookie {
         public Player() {
-            this.function = (npc) -> PlayerSceneManager.getCountersFor(npc.getServerPlayer()).get(this.name);
+            this.function = (npc) -> PlayerSceneManager.getCookiesFor(npc.getServerPlayer()).get(this.name);
         }
     }
 }

@@ -6,6 +6,8 @@ import block_party.entities.BlockPartyNPC;
 import block_party.messages.SOpenDialogue;
 import block_party.registry.CustomMessenger;
 import block_party.scene.*;
+import block_party.scene.Response;
+import block_party.scene.actions.SendDialogue;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -30,6 +32,7 @@ public abstract class Layer7 extends Layer6 {
     public final SceneManager sceneManager;
     private AbstractAnimation animation = Animation.DEFAULT.get();
     private Dialogue dialogue;
+    private Response response;
     private int timeUntilHungry;
     private int timeUntilLonely;
     private int timeUntilStress;
@@ -74,15 +77,15 @@ public abstract class Layer7 extends Layer6 {
     @Override
     public void aiStep() {
         super.aiStep();
-        this.sceneManager.tick(this.cast());
-        if (this.isLocal()) {
+        if (this.isRemote()) {
+            this.animation.tick(this.cast());
+        } else {
+            this.sceneManager.tick();
             this.updateHungerState();
             this.updateLonelyState();
             this.updateStressState();
             this.updateActionState();
             this.updateSleepState();
-        } else {
-            this.animation.tick(this.cast());
         }
     }
 
@@ -140,18 +143,30 @@ public abstract class Layer7 extends Layer6 {
         player.sendMessage(component, player.getUUID());
     }
 
-    public void setDialogue(Dialogue dialogue) {
-        if (dialogue == null) { return; }
-        Dialogue.Model message = new Dialogue.Model(dialogue.getText(), dialogue.isTooltip(), dialogue.getSpeaker(), this.getSpeakSound());
-        for (Response.Icon icon : dialogue.responses.keySet()) {
-            message.add(icon, dialogue.responses.get(icon).getText());
+    public void setDialogue(SendDialogue action) {
+        this.response = null;
+        if (action != null) {
+            Dialogue dialogue = new Dialogue(action.getText(this.cast()), action.isTooltip(), action.getSpeaker(), this.getSpeakSound());
+            for (Response icon : action.responses.keySet())
+                dialogue.add(icon, action.responses.get(icon).getText());
+            CustomMessenger.send(this.getPlayer(), new SOpenDialogue(this.getRow(), dialogue));
+            this.dialogue = dialogue;
+        } else {
+            this.dialogue = null;
         }
-        CustomMessenger.send(this.getPlayer(), new SOpenDialogue(this.getRow(), message));
-        this.dialogue = dialogue;
     }
 
-    public void setResponse(Response.Icon response) {
-        if (this.dialogue != null) { this.dialogue.setResponse(response); }
+    public void setResponse(Response response) {
+        if (this.dialogue == null) { return; }
+        this.response = response;
+    }
+
+    public boolean hasResponse() {
+        return this.response != null;
+    }
+
+    public Response getResponse() {
+        return this.response;
     }
 
     public Animation getAnimationKey() {

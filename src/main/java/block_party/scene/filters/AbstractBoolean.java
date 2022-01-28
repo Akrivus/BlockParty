@@ -5,10 +5,10 @@ import block_party.scene.ISceneFilter;
 
 import java.util.function.Predicate;
 
-public class BooleanFilter implements ISceneFilter {
+public class AbstractBoolean implements ISceneFilter {
     protected Predicate<BlockPartyNPC> function;
 
-    public BooleanFilter(Predicate<BlockPartyNPC> function) {
+    public AbstractBoolean(Predicate<BlockPartyNPC> function) {
         this.function = function;
     }
 

@@ -13,17 +13,17 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Function;
 
-public class ItemFilter implements ISceneFilter {
+public class AbstractItem implements ISceneFilter {
     protected Function<BlockPartyNPC, ItemStack> getter;
-    private final IntegerFilter counter = new IntegerFilter((npc) -> this.getter.apply(npc).getCount());
+    private final AbstractInteger counter = new AbstractInteger((npc) -> this.getter.apply(npc).getCount());
     private Item item;
     private Tag<Item> tag;
 
-    public ItemFilter(Function<BlockPartyNPC, ItemStack> function) {
+    public AbstractItem(Function<BlockPartyNPC, ItemStack> function) {
         this.getter = function;
     }
 
-    public ItemFilter() { }
+    public AbstractItem() { }
 
     public boolean verify(BlockPartyNPC npc) {
         ItemStack stack = this.getter.apply(npc);

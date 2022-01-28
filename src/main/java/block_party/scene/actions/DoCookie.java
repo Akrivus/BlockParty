@@ -2,13 +2,12 @@ package block_party.scene.actions;
 
 import block_party.entities.BlockPartyNPC;
 import block_party.scene.Cookies;
-import block_party.scene.ISceneAction;
 import block_party.scene.PlayerSceneManager;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 import org.apache.logging.log4j.util.TriConsumer;
 
-public class CookieAction implements ISceneAction {
+public class DoCookie extends Abstract1Shot {
     protected Operation operation;
     protected String name;
     protected String value;
@@ -25,12 +24,7 @@ public class CookieAction implements ISceneAction {
         this.value = GsonHelper.getAsString(json, "value", "");
     }
 
-    @Override
-    public boolean isComplete() {
-        return true;
-    }
-
-    public static class Player extends CookieAction {
+    public static class Player extends DoCookie {
         @Override
         public void apply(BlockPartyNPC npc) {
             if (!npc.isPlayerOnline()) { return; }

@@ -4,10 +4,10 @@ import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.InteractionHand;
 
-public class HeldItemFilter extends ItemFilter {
+public class WithHeldItem extends AbstractItem {
     protected InteractionHand hand;
 
-    public HeldItemFilter() {
+    public WithHeldItem() {
         this.getter = (npc) -> npc.getItemInHand(this.hand);
     }
 
@@ -16,7 +16,7 @@ public class HeldItemFilter extends ItemFilter {
         super.parse(json);
     }
 
-    public static class Player extends HeldItemFilter {
+    public static class Player extends WithHeldItem {
         public Player() {
             this.getter = (npc) -> npc.getServerPlayer().getItemInHand(this.hand);
         }

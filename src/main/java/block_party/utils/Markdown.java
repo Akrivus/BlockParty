@@ -1,5 +1,8 @@
 package block_party.utils;
 
+import block_party.entities.BlockPartyNPC;
+import block_party.scene.PlayerSceneManager;
+
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -7,19 +10,36 @@ import java.util.regex.Pattern;
 
 public class Markdown {
     private static final BiFunction<String, String, Pattern> HTML = (p, b) -> Pattern.compile(p+"(.+?)"+b);
+    private static final Pattern COUNTER_PATTERN = Pattern.compile("#(\\w+)");
+    private static final Pattern PLAYER_COUNTER_PATTERN = Pattern.compile("#\\.(\\w+)");
+    private static final Pattern COOKIE_PATTERN = Pattern.compile("@(\\w+)");
+    private static final Pattern PLAYER_COOKIE_PATTERN = Pattern.compile("@\\.(\\w+)");
 
-    public static String highlight(String line, Pattern pattern, String color, Function<String, String> replacement) {
-        return replace(line, pattern, "<color="+color+"><b>%s</b></color>", replacement);
+    public static String highlight(String line, Pattern pattern, String color, Function<String, String> mapper) {
+        return replace(line, pattern, "<color="+color+"><b>%s</b></color>", mapper);
     }
 
-    public static String replace(String line, Pattern pattern, String markdown, Function<String, String> replacement) {
+    public static String replace(String line, Pattern pattern, String markdown, Function<String, String> mapper) {
         Matcher matcher = pattern.matcher(line);
-        while (matcher.find())
-            line = matcher.replaceFirst(String.format(markdown, replacement.apply(matcher.group(1))));
-        return line;
+        StringBuffer buffer = new StringBuffer();
+        while (matcher.find()) {
+            String group = matcher.group(1);
+            String replacement = String.format(markdown, mapper.apply(group));
+            matcher.appendReplacement(buffer, replacement);
+        }
+        matcher.appendTail(buffer);
+        return buffer.toString();
     }
 
-    public static String parse(String line) {
+    public static String markWithSubs(String line, BlockPartyNPC npc) {
+        line = highlight(line, COUNTER_PATTERN, "yellow", (match) -> String.valueOf(npc.sceneManager.counters.get(match)));
+        line = highlight(line, PLAYER_COUNTER_PATTERN, "yellow", (match) -> String.valueOf(PlayerSceneManager.getCountersFor(npc.getServerPlayer()).get(match)));
+        line = highlight(line, COOKIE_PATTERN, "cyan", (match) -> npc.sceneManager.cookies.get(match));
+        line = highlight(line, PLAYER_COOKIE_PATTERN, "cyan", (match) -> PlayerSceneManager.getCookiesFor(npc.getServerPlayer()).get(match));
+        return mark(line);
+    }
+
+    public static String mark(String line) {
         line = parse(line, "<color=black>", "</color>", "0");
         line = parse(line, "<color=navy>", "</color>", "1");
         line = parse(line, "<color=green>", "</color>", "2");

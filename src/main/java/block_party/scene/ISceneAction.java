@@ -12,11 +12,11 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.List;
 
 public interface ISceneAction {
-    default void onComplete() { }
+    default void onComplete(BlockPartyNPC npc) { }
 
     void apply(BlockPartyNPC npc);
 
-    boolean isComplete();
+    boolean isComplete(BlockPartyNPC npc);
 
     static List<ISceneAction> parseArray(JsonArray array) {
         ImmutableList.Builder<ISceneAction> actions = ImmutableList.builder();
@@ -35,4 +35,5 @@ public interface ISceneAction {
 
     default void parse(JsonObject json) { }
 
+    default ISceneAction copy() { return this; }
 }

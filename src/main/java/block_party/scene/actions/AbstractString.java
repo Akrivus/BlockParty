@@ -1,21 +1,20 @@
 package block_party.scene.actions;
 
 import block_party.entities.BlockPartyNPC;
-import block_party.scene.ISceneAction;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 
 import java.util.function.BiConsumer;
 
-public class StringAction implements ISceneAction {
+public class AbstractString extends Abstract1Shot {
     protected BiConsumer<BlockPartyNPC, String> setter;
     private String value;
 
-    public StringAction(BiConsumer<BlockPartyNPC, String> setter) {
+    public AbstractString(BiConsumer<BlockPartyNPC, String> setter) {
         this.setter = setter;
     }
 
-    public StringAction() { }
+    public AbstractString() { }
 
     @Override
     public void apply(BlockPartyNPC npc) {
@@ -25,10 +24,5 @@ public class StringAction implements ISceneAction {
     @Override
     public void parse(JsonObject json) {
         this.value = GsonHelper.getAsString(json, "value");
-    }
-
-    @Override
-    public boolean isComplete() {
-        return true;
     }
 }

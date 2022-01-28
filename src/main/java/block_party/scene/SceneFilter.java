@@ -19,9 +19,7 @@ public enum SceneFilter implements ISceneFilter {
     EVENING((npc) -> npc.isTimeBetween(8000, 12000)),
     NIGHT((npc) -> npc.isTimeBetween(12000, 16000)),
     MIDNIGHT((npc) -> npc.isTimeBetween(16000, 20000)),
-    DAWN((npc) -> npc.isTimeBetween(20000, 24000)),
-
-    ;
+    DAWN((npc) -> npc.isTimeBetween(20000, 24000));
 
     private final Predicate<BlockPartyNPC> condition;
 

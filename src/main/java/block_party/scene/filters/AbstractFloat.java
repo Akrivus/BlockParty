@@ -8,16 +8,16 @@ import net.minecraft.util.GsonHelper;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
-public class FloatFilter implements ISceneFilter {
+public class AbstractFloat implements ISceneFilter {
     protected Function<BlockPartyNPC, Float> function;
     private Operation operation;
     private float value;
 
-    public FloatFilter(Function<BlockPartyNPC, Float> function) {
+    public AbstractFloat(Function<BlockPartyNPC, Float> function) {
         this.function = function;
     }
 
-    public FloatFilter() { }
+    public AbstractFloat() { }
 
     public boolean verify(BlockPartyNPC npc) {
         return this.operation.test(this.value, this.function.apply(npc));

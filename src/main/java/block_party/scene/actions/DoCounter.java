@@ -2,13 +2,12 @@ package block_party.scene.actions;
 
 import block_party.entities.BlockPartyNPC;
 import block_party.scene.Counters;
-import block_party.scene.ISceneAction;
 import block_party.scene.PlayerSceneManager;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 import org.apache.logging.log4j.util.TriConsumer;
 
-public class CounterAction implements ISceneAction {
+public class DoCounter extends Abstract1Shot {
     protected Operation operation;
     protected String name;
     protected int value;
@@ -25,12 +24,7 @@ public class CounterAction implements ISceneAction {
         this.value = GsonHelper.getAsInt(json, "value", 1);
     }
 
-    @Override
-    public boolean isComplete() {
-        return true;
-    }
-
-    public static class Player extends CounterAction {
+    public static class Player extends DoCounter {
         @Override
         public void apply(BlockPartyNPC npc) {
             Counters counters = PlayerSceneManager.getCountersFor(npc.getServerPlayer());
