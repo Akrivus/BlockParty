@@ -2,7 +2,7 @@ package block_party.scene.actions;
 
 import block_party.entities.BlockPartyNPC;
 import block_party.scene.CookieJar;
-import block_party.scene.Counters;
+import block_party.scene.data.Counters;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 import org.apache.logging.log4j.util.TriConsumer;

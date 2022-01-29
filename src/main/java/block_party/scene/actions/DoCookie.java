@@ -2,7 +2,7 @@ package block_party.scene.actions;
 
 import block_party.entities.BlockPartyNPC;
 import block_party.scene.CookieJar;
-import block_party.scene.Cookies;
+import block_party.scene.data.Cookies;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 import org.apache.logging.log4j.util.TriConsumer;
@@ -35,7 +35,7 @@ public class DoCookie extends Abstract1Shot {
     }
 
     public enum Operation {
-        SET((x, y, z) -> x.add(y, z)),
+        SET((x, y, z) -> x.set(y, z)),
         DELETE((x, y, z) -> x.delete(y));
 
         private final TriConsumer<Cookies, String, String> function;
