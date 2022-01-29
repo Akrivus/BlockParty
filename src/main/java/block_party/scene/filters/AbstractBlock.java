@@ -15,6 +15,7 @@ import java.util.function.Function;
 
 public class AbstractBlock implements ISceneFilter {
     protected Function<BlockPartyNPC, BlockState> getter;
+    private boolean not = false;
     private Block block;
     private Tag<Block> tag;
 
@@ -24,16 +25,18 @@ public class AbstractBlock implements ISceneFilter {
 
     public boolean verify(BlockPartyNPC npc) {
         BlockState state = this.getter.apply(npc);
-        if (this.tag != null) { return state.is(this.tag); }
-        return state.is(this.block);
+        boolean pass = this.tag == null ? state.is(this.block) : state.is(this.tag);
+        return this.not ? !pass : pass;
     }
 
     public void parse(JsonObject json) {
-        String location = GsonHelper.getAsString(json, "name");
-        if (location.startsWith("#")) {
-            this.tag = BlockTags.createOptional(new ResourceLocation(location.substring(1)));
+        this.not = GsonHelper.getAsBoolean(json, "not", false);
+        String name = GsonHelper.getAsString(json, "name");
+        if (name.startsWith("#")) {
+            ResourceLocation loc = new ResourceLocation(name.substring(1));
+            this.tag = BlockTags.createOptional(loc);
         } else {
-            this.block = JsonUtils.getAs(JsonUtils.BLOCK, location);
+            this.block = JsonUtils.getAs(JsonUtils.BLOCK, name);
         }
     }
 }

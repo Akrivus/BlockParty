@@ -33,7 +33,8 @@ public class AbstractString implements ISceneFilter {
         SUFFIX((x, y) -> y.endsWith(x)),
         CONTAINS((x, y) -> y.contains(x)),
         MATCHES((x, y) -> y.matches(x)),
-        EQUALS((x, y) -> y.equals(x));
+        EQUALS((x, y) -> y.equals(x)),
+        NOT_EQUALS((x, y) -> !y.equals(x));
 
         private final BiPredicate<String, String> function;
 
