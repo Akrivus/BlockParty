@@ -73,7 +73,7 @@ public class HidingSpots extends SavedData {
         e.setCanceled(true);
     }
 
-    public Moe getNewMoe(LevelAccessor level, BlockPos pos, long id) {
+    private Moe getNewMoe(LevelAccessor level, BlockPos pos, long id) {
         BlockState state = level.getBlockState(pos);
         BlockEntity extra = level.getBlockEntity(pos);
         Moe moe = new Moe((Level) level);

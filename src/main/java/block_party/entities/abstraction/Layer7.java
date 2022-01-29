@@ -91,8 +91,10 @@ public abstract class Layer7 extends Layer6 {
 
     @Override
     public void customServerAiStep() {
-        if (this.random.nextInt(20) == 0) { this.sceneManager.trigger(SceneTrigger.RANDOM_TICK); }
-        if (this.isBeingLookedAt()) { this.sceneManager.trigger(SceneTrigger.STARE); }
+        if (this.random.nextInt(20) == 0)
+            this.sceneManager.trigger(SceneTrigger.RANDOM_TICK);
+        if (this.isBeingLookedAt())
+            this.sceneManager.trigger(SceneTrigger.STARE);
     }
 
     @Override
