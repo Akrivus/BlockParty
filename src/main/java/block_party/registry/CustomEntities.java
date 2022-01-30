@@ -2,6 +2,7 @@ package block_party.registry;
 
 import block_party.BlockParty;
 import block_party.entities.Moe;
+import block_party.entities.MoeInHiding;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
@@ -13,6 +14,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 public class CustomEntities {
     public static final RegistryObject<EntityType<Moe>> MOE = BlockParty.ENTITIES.register("moe", () -> EntityType.Builder.<Moe>of(Moe::new, MobCategory.CREATURE).sized(0.60F, 1.35F).setTrackingRange(32).setUpdateInterval(2).build("moe"));
+    public static final RegistryObject<EntityType<MoeInHiding>> MOE_IN_HIDING = BlockParty.ENTITIES.register("moe_in_hiding", () -> EntityType.Builder.<MoeInHiding>of(MoeInHiding::new, MobCategory.MISC).sized(1.0F, 0.0F).build("moe_in_hiding"));
 
     public static void add(DeferredRegister<EntityType<?>> registry, IEventBus bus) {
         bus.addListener(CustomEntities::registerAttributes);

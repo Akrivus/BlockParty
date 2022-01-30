@@ -64,8 +64,10 @@ public class MoeRenderer extends MobRenderer<Moe, MoeModel<Moe>> {
     @Override
     public void scale(Moe moe, PoseStack stack, float partialTickTime) {
         super.scale(moe, stack, partialTickTime);
+        moe.getAnimation().render(moe, stack, partialTickTime);
         stack.scale(0.9375F, 0.9375F, 0.9375F);
         if (moe.getAnimationKey() == Animation.YEARBOOK) { return; }
+        stack.scale(moe.getScale(), moe.getScale(), moe.getScale());
         this.shadowRadius = 0.25F;
     }
 }
