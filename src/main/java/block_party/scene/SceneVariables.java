@@ -18,16 +18,16 @@ import net.minecraft.world.level.storage.DimensionDataStorage;
 
 import java.util.Map;
 
-public class CookieJar extends SavedData {
-    public static String KEY = "blockparty_cookiejar";
+public class SceneVariables extends SavedData {
+    public static String KEY = "BlockParty_SceneVariables";
     private final Map<Long, Cookies>   cookies   = Maps.newHashMap();
     private final Map<Long, Counters>  counters  = Maps.newHashMap();
     private final Map<Long, Locations> locations = Maps.newHashMap();
     private final Map<Long, Targets>   targets   = Maps.newHashMap();
 
-    public CookieJar() { }
+    public SceneVariables() { }
 
-    public CookieJar(CompoundTag compound) {
+    public SceneVariables(CompoundTag compound) {
         ListTag list;
         list = compound.getList("Cookies", NBT.COMPOUND);
         list.forEach((element) -> {
@@ -88,18 +88,18 @@ public class CookieJar extends SavedData {
         return compound;
     }
 
-    public static CookieJar get(Level level) {
+    public static SceneVariables get(Level level) {
         try {
             ServerLevel server = level.getServer().getLevel(Level.OVERWORLD);
             DimensionDataStorage storage = server.getDataStorage();
-            return storage.computeIfAbsent(CookieJar::new, CookieJar::new, KEY);
+            return storage.computeIfAbsent(SceneVariables::new, SceneVariables::new, KEY);
         } catch (NullPointerException e) {
-            return new CookieJar();
+            return new SceneVariables();
         }
     }
 
     public static Cookies cookies(Level level, Long id) {
-        CookieJar data = get(level);
+        SceneVariables data = get(level);
         Cookies cookies = data.cookies.get(id);
         if (cookies == null) { cookies = new Cookies(); }
         data.cookies.put(id, cookies);
@@ -125,7 +125,7 @@ public class CookieJar extends SavedData {
     }
 
     public static Counters counters(Level level, Long id) {
-        CookieJar data = get(level);
+        SceneVariables data = get(level);
         Counters counters = data.counters.get(id);
         if (counters == null) { counters = new Counters(); }
         data.counters.put(id, counters);
@@ -159,7 +159,7 @@ public class CookieJar extends SavedData {
     }
 
     public static Locations locations(Level level, Long id) {
-        CookieJar data = get(level);
+        SceneVariables data = get(level);
         Locations locations = data.locations.get(id);
         if (locations == null) { locations = new Locations(); }
         data.locations.put(id, locations);
@@ -175,7 +175,7 @@ public class CookieJar extends SavedData {
     }
 
     public static Targets targets(Level level, Long id) {
-        CookieJar data = get(level);
+        SceneVariables data = get(level);
         Targets targets = data.targets.get(id);
         if (targets == null) { targets = new Targets(); }
         data.targets.put(id, targets);

@@ -1,7 +1,7 @@
 package block_party.scene.actions;
 
 import block_party.entities.BlockPartyNPC;
-import block_party.scene.CookieJar;
+import block_party.scene.SceneVariables;
 import block_party.scene.data.Cookies;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
@@ -14,7 +14,7 @@ public class DoCookie extends Abstract1Shot {
 
     @Override
     public void apply(BlockPartyNPC npc) {
-        this.operation.accept(CookieJar.getCookies(npc), this.name, this.value);
+        this.operation.accept(SceneVariables.getCookies(npc), this.name, this.value);
     }
 
     @Override
@@ -28,9 +28,9 @@ public class DoCookie extends Abstract1Shot {
         @Override
         public void apply(BlockPartyNPC npc) {
             if (!npc.isPlayerOnline()) { return; }
-            Cookies cookies = CookieJar.getCookies(npc.getServerPlayer());
+            Cookies cookies = SceneVariables.getCookies(npc.getServerPlayer());
             this.operation.accept(cookies, this.name, this.value);
-            CookieJar.save(npc.getLevel());
+            SceneVariables.save(npc.getLevel());
         }
     }
 

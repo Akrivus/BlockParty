@@ -35,7 +35,7 @@ import java.util.UUID;
 
 @Mod.EventBusSubscriber
 public class BlockPartyDB extends SavedData {
-    public static String KEY = "blockparty_db";
+    public static String KEY = "BlockParty_DB";
     public static Shrine.Schema Shrines = new Shrine.Schema();
     public static Location.Schema Locations = new Location.Schema();
     public static Garden.Schema Gardens = new Garden.Schema();

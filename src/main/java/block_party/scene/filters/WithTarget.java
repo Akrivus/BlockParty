@@ -1,6 +1,6 @@
 package block_party.scene.filters;
 
-import block_party.scene.CookieJar;
+import block_party.scene.SceneVariables;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 
@@ -8,7 +8,7 @@ public class WithTarget extends AbstractEntity {
     protected String name;
 
     public WithTarget() {
-        this.getter = (npc) -> CookieJar.getTargets(npc).getEntity(npc.level, this.name);
+        this.getter = (npc) -> SceneVariables.getTargets(npc).getEntity(npc.level, this.name);
     }
 
     public void parse(JsonObject json) {
@@ -18,7 +18,7 @@ public class WithTarget extends AbstractEntity {
 
     public static class Player extends WithTarget {
         public Player() {
-            this.getter = (npc) -> CookieJar.getTargets(npc.getServerPlayer()).getEntity(npc.level, this.name);
+            this.getter = (npc) -> SceneVariables.getTargets(npc.getServerPlayer()).getEntity(npc.level, this.name);
         }
     }
 }

@@ -1,7 +1,7 @@
 package block_party.scene.actions;
 
 import block_party.entities.BlockPartyNPC;
-import block_party.scene.CookieJar;
+import block_party.scene.SceneVariables;
 import block_party.scene.data.Counters;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
@@ -14,7 +14,7 @@ public class DoCounter extends Abstract1Shot {
 
     @Override
     public void apply(BlockPartyNPC npc) {
-        this.operation.accept(CookieJar.getCounters(npc), this.name, this.value);
+        this.operation.accept(SceneVariables.getCounters(npc), this.name, this.value);
     }
 
     @Override
@@ -27,9 +27,9 @@ public class DoCounter extends Abstract1Shot {
     public static class Player extends DoCounter {
         @Override
         public void apply(BlockPartyNPC npc) {
-            Counters counters = CookieJar.getCounters(npc.getServerPlayer());
+            Counters counters = SceneVariables.getCounters(npc.getServerPlayer());
             this.operation.accept(counters, this.name, this.value);
-            CookieJar.save(npc.getLevel());
+            SceneVariables.save(npc.getLevel());
         }
     }
 

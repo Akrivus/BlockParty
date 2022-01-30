@@ -1,7 +1,7 @@
 package block_party.utils;
 
 import block_party.entities.BlockPartyNPC;
-import block_party.scene.CookieJar;
+import block_party.scene.SceneVariables;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -32,10 +32,10 @@ public class Markdown {
     }
 
     public static String markWithSubs(String line, BlockPartyNPC npc) {
-        line = highlight(line, COUNTER_PATTERN, "yellow", (match) -> String.valueOf(CookieJar.getCounters(npc).get(match)));
-        line = highlight(line, PLAYER_COUNTER_PATTERN, "yellow", (match) -> String.valueOf(CookieJar.getCounters(npc.getServerPlayer()).get(match)));
-        line = highlight(line, COOKIE_PATTERN, "cyan", (match) -> CookieJar.getCookies(npc).get(match));
-        line = highlight(line, PLAYER_COOKIE_PATTERN, "cyan", (match) -> CookieJar.getCookies(npc.getServerPlayer()).get(match));
+        line = highlight(line, COUNTER_PATTERN, "yellow", (match) -> String.valueOf(SceneVariables.getCounters(npc).get(match)));
+        line = highlight(line, PLAYER_COUNTER_PATTERN, "yellow", (match) -> String.valueOf(SceneVariables.getCounters(npc.getServerPlayer()).get(match)));
+        line = highlight(line, COOKIE_PATTERN, "cyan", (match) -> SceneVariables.getCookies(npc).get(match));
+        line = highlight(line, PLAYER_COOKIE_PATTERN, "cyan", (match) -> SceneVariables.getCookies(npc.getServerPlayer()).get(match));
         return mark(line);
     }
 
