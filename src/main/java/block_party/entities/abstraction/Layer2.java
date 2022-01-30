@@ -1,8 +1,10 @@
 package block_party.entities.abstraction;
 
 import block_party.entities.BlockPartyNPC;
+import block_party.entities.Moe;
 import block_party.registry.CustomTags;
 import block_party.registry.resources.BlockAliases;
+import block_party.scene.SceneTrigger;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -176,7 +178,7 @@ public abstract class Layer2 extends Layer1 {
     }
 
     public void hide() {
-        this.level.setBlock(this.getBlockPos(), this.getActualBlockState(), 3);
+        this.level.setBlock(this.blockPosition(), this.getActualBlockState(), 3);
         this.remove(RemovalReason.DISCARDED);
     }
 }

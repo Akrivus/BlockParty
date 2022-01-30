@@ -3,7 +3,6 @@ package block_party.db;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
@@ -12,32 +11,30 @@ import net.minecraft.world.phys.AABB;
 
 import java.util.UUID;
 
-public class DimBlockPos {
+public class DimBlockPos extends BlockPos {
     private final ResourceKey<Level> dim;
-    private ChunkPos chunk;
-    private BlockPos pos;
     private boolean isEmpty;
 
     public DimBlockPos(CompoundTag compound) {
+        super(BlockPos.of(compound.getLong("Coordinates")));
         this.dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(compound.getString("Dimension")));
-        this.setPos(BlockPos.of(compound.getLong("Coordinates")));
         this.isEmpty = compound.getBoolean("IsEmpty");
     }
 
     public DimBlockPos(ResourceKey<Level> dim, BlockPos pos) {
+        super(pos);
         this.dim = dim;
-        this.setPos(pos);
     }
 
     public DimBlockPos() {
+        super(BlockPos.ZERO);
         this.dim = Level.OVERWORLD;
-        this.setPos(BlockPos.ZERO);
         this.isEmpty = true;
     }
 
     @Override
     public int hashCode() {
-        return (int) (this.dim.toString().hashCode() + this.pos.asLong());
+        return (int) (this.dim.toString().hashCode() + this.asLong());
     }
 
     @Override
@@ -50,12 +47,11 @@ public class DimBlockPos {
     }
 
     public BlockPos getPos() {
-        return this.pos;
+        return new BlockPos(this.getX(), this.getY(), this.getZ());
     }
 
-    public void setPos(BlockPos pos) {
-        this.chunk = new ChunkPos(this.pos = pos);
-        this.isEmpty = false;
+    public String getDimKey() {
+        return this.dim.location().toString();
     }
 
     public boolean isEmpty() {
@@ -67,8 +63,8 @@ public class DimBlockPos {
     }
 
     public CompoundTag write(CompoundTag compound) {
+        compound.putLong("Coordinates", this.asLong());
         compound.putString("Dimension", this.dim.location().toString());
-        compound.putLong("Coordinates", this.pos.asLong());
         compound.putBoolean("IsEmpty", this.isEmpty);
         return compound;
     }
@@ -80,20 +76,16 @@ public class DimBlockPos {
     }
 
     public AABB getAABB() {
-        double bX = this.chunk.getMinBlockX() - 1;
-        double eX = bX + 16 + 1;
-        double bY = 0;
-        double eY = 255;
-        double bZ = this.chunk.getMinBlockZ() - 1;
-        double eZ = bZ + 16 + 1;
+        double bX = this.getX() - 1;
+        double eX = bX + 2;
+        double bY = this.getY() - 1;
+        double eY = bY + 2;
+        double bZ = this.getZ() - 1;
+        double eZ = bZ + 2;
         return new AABB(bX, bY, bZ, eX, eY, eZ);
     }
 
     public ChunkPos getChunk() {
-        return this.chunk;
-    }
-
-    public static DimBlockPos fromNBT(Tag nbt) {
-        return new DimBlockPos((CompoundTag) nbt);
+        return new ChunkPos(this);
     }
 }

@@ -1,7 +1,9 @@
 package block_party.entities.abstraction;
 
+import block_party.db.DimBlockPos;
 import block_party.entities.BlockPartyNPC;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -13,6 +15,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraftforge.common.util.ITeleporter;
@@ -26,12 +29,59 @@ import java.util.function.Consumer;
  * Abstraction layer 1: pathfinding, sound, and bug fixes.
  */
 public abstract class Layer1 extends PathfinderMob {
+    private boolean hasHome;
+    private DimBlockPos home;
+
     protected Layer1(EntityType<? extends BlockPartyNPC> type, Level level) {
         super(type, level);
         this.setPathfindingMalus(BlockPathTypes.DOOR_OPEN, 0.0F);
         this.setPathfindingMalus(BlockPathTypes.DOOR_WOOD_CLOSED, 0.0F);
         this.setPathfindingMalus(BlockPathTypes.TRAPDOOR, 0.0F);
         this.restrictTo(this.blockPosition(), 16);
+        this.home = this.getDimBlockPos();
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag compound) {
+        compound.putBoolean("HasHome", this.hasHome());
+        compound.put("Home", this.getHome().write());
+        super.addAdditionalSaveData(compound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag compound) {
+        this.setHasHome(compound.getBoolean("HasHome"));
+        this.setHome(new DimBlockPos(compound.getCompound("Home")));
+        super.readAdditionalSaveData(compound);
+    }
+
+    public DimBlockPos getDimBlockPos() {
+        return new DimBlockPos(this.level.dimension(), this.blockPosition());
+    }
+
+    public boolean hasHome() {
+        return this.hasHome;
+    }
+
+    public void setHasHome(boolean hasHome) {
+        this.hasHome = hasHome;
+    }
+
+    public DimBlockPos getHome() {
+        return this.home;
+    }
+
+    public void setHome(DimBlockPos home) {
+        this.home = home;
+    }
+
+    public BlockPartyNPC teleport(ServerLevel level, ITeleporter teleporter) {
+        if (this.changeDimension(level, teleporter) instanceof BlockPartyNPC entity) { return this.onTeleport(entity.cast()); }
+        return this.cast();
+    }
+
+    public BlockPartyNPC onTeleport(BlockPartyNPC entity) {
+        return entity.cast();
     }
 
     @Override
@@ -48,11 +98,6 @@ public abstract class Layer1 extends PathfinderMob {
         boolean attacked = this.doHurtTarget(target);
         if (attacked) { this.playSound(this.getAttackSound()); }
         return attacked;
-    }
-
-    @Override
-    public boolean isInvulnerableTo(DamageSource source) {
-        return super.isInvulnerableTo(source) || source == DamageSource.DROWN;
     }
 
     @Override
@@ -84,29 +129,16 @@ public abstract class Layer1 extends PathfinderMob {
         return null;
     }
 
-    public BlockPartyNPC teleport(ServerLevel level, ITeleporter teleporter) {
-        if (this.changeDimension(level, teleporter) instanceof BlockPartyNPC entity) { return this.onTeleport(entity.cast()); }
-        return this.cast();
-    }
-
-    public BlockPartyNPC onTeleport(BlockPartyNPC entity) {
-        return entity.cast();
-    }
-
-    public boolean isSitting() {
-        return false;
-    }
-
-    public BlockPos getBlockPos() {
-        return this.getOnPos().above();
+    public boolean isRemote() {
+        return this.level.isClientSide();
     }
 
     public boolean isLocal() {
         return !this.isRemote();
     }
 
-    public boolean isRemote() {
-        return this.level.isClientSide();
+    public boolean isSitting() {
+        return false;
     }
 
     protected float[] getRGB(int hex) {

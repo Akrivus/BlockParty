@@ -81,11 +81,6 @@ public abstract class Layer5 extends Layer4 implements Recordable<NPC> {
         return this.level;
     }
 
-    @Override
-    public DimBlockPos getDimBlockPos() {
-        return new DimBlockPos(this.level.dimension(), this.blockPosition());
-    }
-
     public long getDatabaseID() {
         return Long.parseLong(this.entityData.get(DATABASE_ID));
     }

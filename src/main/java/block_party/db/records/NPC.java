@@ -24,24 +24,30 @@ import java.util.List;
 import java.util.UUID;
 
 public class NPC extends Row<BlockPartyNPC> {
-    protected static final int DEAD = 6;
-    protected static final int NAME = 7;
-    protected static final int BLOOD_TYPE = 8;
-    protected static final int DERE = 9;
-    protected static final int HEALTH = 10;
-    protected static final int FOOD_LEVEL = 11;
-    protected static final int EXHAUSTION = 12;
-    protected static final int SATURATION = 13;
-    protected static final int STRESS = 14;
-    protected static final int RELAXATION = 15;
-    protected static final int LOYALTY = 16;
-    protected static final int AFFECTION = 17;
-    protected static final int SLOUCH = 18;
-    protected static final int AGE = 19;
-    protected static final int LAST_SEEN_AT = 20;
-    protected static final int BLOCK_STATE = 21;
-    protected static final int SHRINE_GATE = 22;
-    protected static final int SHIMENAWA = 23;
+    public static final int DEAD = 6;
+    public static final int NAME = 7;
+    public static final int BLOOD_TYPE = 8;
+    public static final int DERE = 9;
+    public static final int HEALTH = 10;
+    public static final int FOOD_LEVEL = 11;
+    public static final int EXHAUSTION = 12;
+    public static final int SATURATION = 13;
+    public static final int STRESS = 14;
+    public static final int RELAXATION = 15;
+    public static final int LOYALTY = 16;
+    public static final int AFFECTION = 17;
+    public static final int SLOUCH = 18;
+    public static final int AGE = 19;
+    public static final int LAST_SEEN_AT = 20;
+    public static final int BLOCK_STATE = 21;
+    public static final int HIDING = 22;
+    public static final int HAS_HOME = 23;
+    public static final int HOME_POS = 24;
+    public static final int HOME_POS_X = 25;
+    public static final int HOME_POS_Y = 26;
+    public static final int HOME_POS_Z = 27;
+    public static final int SHRINE_GATE = 28;
+    public static final int SHIMENAWA = 29;
 
     public NPC(ResultSet set) throws SQLException {
         super(BlockPartyDB.NPCs, set);
@@ -75,6 +81,8 @@ public class NPC extends Row<BlockPartyNPC> {
         this.get(SLOUCH).set(entity.getSlouch());
         this.get(AGE).set(entity.getAge());
         this.get(LAST_SEEN_AT).set(entity.getLastSeen());
+        this.get(HAS_HOME).set(entity.hasHome());
+        this.get(HOME_POS).set(entity.getHome());
         this.get(DEAD).set(false);
     }
 
@@ -94,6 +102,10 @@ public class NPC extends Row<BlockPartyNPC> {
         return !player.getUUID().equals(this.get(PLAYER_UUID).get());
     }
 
+    public boolean isHiding() {
+        return (Boolean) this.get(HIDING).get();
+    }
+
     public BlockPartyNPC getServerEntity(MinecraftServer server) {
         DimBlockPos pos = (DimBlockPos) this.get(POS).get();
         ServerLevel level = ForcedChunk.queue(this.getID(), server.getLevel(pos.getDim()), pos.getChunk());
@@ -109,8 +121,8 @@ public class NPC extends Row<BlockPartyNPC> {
     public BlockPartyNPC getClientEntity(Minecraft client) {
         BlockPos pos = client.player.blockPosition();
         BlockPartyNPC entity = CustomEntities.MOE.get().create(client.level);
-        entity.setPos(pos.getX(), pos.getY(), pos.getZ());
         this.load(entity);
+        entity.setPos(pos.getX(), pos.getY(), pos.getZ());
         return entity;
     }
 
@@ -131,6 +143,9 @@ public class NPC extends Row<BlockPartyNPC> {
         entity.setAffection((Float) this.get(AFFECTION).get());
         entity.setAge((Float) this.get(AGE).get());
         entity.setLastSeen((Long) this.get(LAST_SEEN_AT).get());
+        entity.setHasHome((Boolean) this.get(HAS_HOME).get());
+        entity.setHome((DimBlockPos) this.get(HOME_POS).get());
+        entity.setDatabaseID(this.getID());
     }
 
     public static NPC create(CompoundTag compound) {
@@ -156,6 +171,9 @@ public class NPC extends Row<BlockPartyNPC> {
             this.addColumn(new Column.AsFloat(this, "Age"));
             this.addColumn(new Column.AsLong(this, "LastSeenAt"));
             this.addColumn(new Column.AsBlockState(this, "BlockState"));
+            this.addColumn(new Column.AsBoolean(this, "Hiding"));
+            this.addColumn(new Column.AsBoolean(this, "HasHome"));
+            this.addColumn(new Column.AsPosition(this, "HomePos"));
             this.addColumn(new Column.AsReference<>(this, "Shrine", (uuid) -> BlockPartyDB.Shrines.find(uuid)));
         }
 

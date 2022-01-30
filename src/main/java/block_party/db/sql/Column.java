@@ -397,12 +397,14 @@ public abstract class Column<I> {
     }
 
     public static class AsPosition extends Column<DimBlockPos> {
+        private String prefix;
         private Column x;
         private Column y;
         private Column z;
 
         public AsPosition(Table table, String column) {
-            super(table, "TEXT", String.format("%sDimension", column));
+            super(table, "TEXT", String.format("%sDim", column));
+            this.prefix = column;
         }
 
         @Override
@@ -420,11 +422,13 @@ public abstract class Column<I> {
 
         @Override
         public void read(CompoundTag compound) {
-            this.set(DimBlockPos.fromNBT(compound.getCompound(this.getColumn())));
+            this.set(new DimBlockPos(compound.getCompound(this.getColumn())));
         }
 
         @Override
         public void set(DimBlockPos value) {
+            if (value == null)
+                return;
             super.set(value);
             if (this.isDirty()) {
                 this.x.set(value.getPos().getX());
@@ -445,9 +449,9 @@ public abstract class Column<I> {
 
         @Override
         public void afterAdd(Table table) {
-            table.addColumn(this.x = new AsInteger(table, String.format("%sX", this.column)));
-            table.addColumn(this.y = new AsInteger(table, String.format("%sY", this.column)));
-            table.addColumn(this.z = new AsInteger(table, String.format("%sZ", this.column)));
+            table.addColumn(this.x = new AsInteger(table, String.format("%sX", this.prefix)));
+            table.addColumn(this.y = new AsInteger(table, String.format("%sY", this.prefix)));
+            table.addColumn(this.z = new AsInteger(table, String.format("%sZ", this.prefix)));
         }
     }
 

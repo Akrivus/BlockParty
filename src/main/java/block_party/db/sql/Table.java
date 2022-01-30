@@ -42,8 +42,12 @@ public abstract class Table<R extends Row> {
     }
 
     public R find(long id) {
-        List<R> query = this.select(String.format("SELECT * FROM %s WHERE (DatabaseID = '%s') LIMIT 1;", this.name, id));
+        List<R> query = this.select(String.format("SELECT * FROM %s WHERE DatabaseID = %s LIMIT 1;", this.name, id));
         return query.isEmpty() ? null : query.get(0);
+    }
+
+    public List<R> select(String SQL, Object... columns) {
+        return this.select(String.format(SQL, columns));
     }
 
     public List<R> select(String SQL) {
@@ -77,6 +81,7 @@ public abstract class Table<R extends Row> {
     }
 
     private void rescue(SQLException e) {
+        e.printStackTrace();
         throw new ReportedException(new CrashReport("DB failed.", e));
     }
 
@@ -110,9 +115,8 @@ public abstract class Table<R extends Row> {
 
     public void create() {
         String columns = "";
-        for (Column column : this.columns) {
+        for (Column column : this.columns)
             columns += String.format("%s %s %s,", column.getColumn(), column.getType(), column.getExtra());
-        }
         columns = columns.substring(0, columns.length() - 1);
         try (PreparedStatement sql = this.open(String.format("CREATE TABLE IF NOT EXISTS %s (%s);", this.name, columns))) {
             System.out.println(sql);

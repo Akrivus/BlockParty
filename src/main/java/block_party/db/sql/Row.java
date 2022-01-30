@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public abstract class Row<E extends Recordable> {
     public static final int DATABASE_ID = 0;
@@ -109,6 +110,16 @@ public abstract class Row<E extends Recordable> {
 
     public long getID() {
         return (long) this.get(DATABASE_ID).get();
+    }
+
+    public void update(Consumer<Row> query) {
+        query.accept(this);
+        this.update();
+    }
+
+    public void update(E entity, Consumer<Row> query) {
+        query.accept(this);
+        this.update(entity);
     }
 
     public void update(E entity) {
