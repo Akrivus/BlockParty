@@ -62,6 +62,7 @@ public class SceneFilters {
     public static final RegistryObject<Builder> MALE = BlockParty.SCENE_FILTERS.register("if_male", () -> f(() -> Gender.MALE));
     public static final RegistryObject<Builder> FEMALE = BlockParty.SCENE_FILTERS.register("if_female", () -> f(() -> Gender.FEMALE));
     public static final RegistryObject<Builder> NONBINARY = BlockParty.SCENE_FILTERS.register("if_nonbinary", () -> f(() -> Gender.NONBINARY));
+    public static final RegistryObject<Builder> SELF = BlockParty.SCENE_FILTERS.register("self", () -> f(() -> new AbstractEntity((npc) -> npc)));
     public static final RegistryObject<Builder> HEALTH = BlockParty.SCENE_FILTERS.register("health", () -> f(() -> new AbstractFloat(BlockPartyNPC::getHealth)));
     public static final RegistryObject<Builder> FOOD_LEVEL = BlockParty.SCENE_FILTERS.register("food_level", () -> f(() -> new AbstractFloat(BlockPartyNPC::getFoodLevel)));
     public static final RegistryObject<Builder> LOYALTY = BlockParty.SCENE_FILTERS.register("loyalty", () -> f(() -> new AbstractFloat(BlockPartyNPC::getLoyalty)));
