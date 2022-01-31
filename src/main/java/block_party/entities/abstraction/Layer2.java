@@ -1,11 +1,8 @@
 package block_party.entities.abstraction;
 
 import block_party.entities.BlockPartyNPC;
-import block_party.entities.Moe;
 import block_party.registry.CustomTags;
 import block_party.registry.resources.BlockAliases;
-import block_party.scene.SceneTrigger;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -24,8 +21,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.AABB;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -73,11 +71,6 @@ public abstract class Layer2 extends Layer1 {
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         if (SCALE.equals(key)) { this.refreshDimensions(); }
         super.onSyncedDataUpdated(key);
-    }
-
-    @Override
-    public EntityDimensions getDimensions(Pose pose) {
-        return super.getDimensions(pose).scale(this.getScale());
     }
 
     @Override
@@ -139,12 +132,14 @@ public abstract class Layer2 extends Layer1 {
     }
 
     protected float getBlockVolume(BlockState state) {
-        VoxelShape shape = state.getOcclusionShape(this.level, this.blockPosition());
-        float dX = (float) (shape.max(Direction.Axis.X) - shape.min(Direction.Axis.X));
-        float dY = (float) (shape.max(Direction.Axis.Y) - shape.min(Direction.Axis.Y));
-        float dZ = (float) (shape.max(Direction.Axis.Z) - shape.min(Direction.Axis.Z));
-        float volume = (float) (Math.cbrt(dX * dY * dZ));
-        return Float.isFinite(volume) ? Math.min(Math.max(volume, 0.25F), 1.5F) : 1.0F;
+        double volume = 0.0F;
+        List<AABB> aabbs = state.getOcclusionShape(this.level, this.blockPosition()).toAabbs();
+        for (AABB aabb : aabbs)
+            volume += (aabb.maxX - aabb.minX) * (aabb.maxY - aabb.minY) * (aabb.maxZ - aabb.minZ);
+        volume = Math.cbrt(volume);
+        if (!Double.isFinite(volume) || volume < 0.25F)
+            volume = 1.0F;
+        return (float) volume * 0.9375F;
     }
 
     protected float getBlockBuffer() {

@@ -38,6 +38,12 @@ public class MoeRenderer extends MobRenderer<Moe, MoeModel<Moe>> {
     }
 
     @Override
+    public void render(Moe moe, float limbSwing, float partialTickTime, PoseStack stack, MultiBufferSource buffer, int packedLight) {
+        moe.getAnimation().render(moe, stack, partialTickTime);
+        super.render(moe, limbSwing, partialTickTime, stack, buffer, packedLight);
+    }
+
+    @Override
     protected void renderNameTag(Moe moe, Component name, PoseStack stack, MultiBufferSource buffer, int packedLight) {
         if (moe.getAnimationKey() == Animation.YEARBOOK) { return; }
         if (Minecraft.getInstance().player.distanceTo(moe) > 8.0F) { return; }
@@ -64,10 +70,7 @@ public class MoeRenderer extends MobRenderer<Moe, MoeModel<Moe>> {
     @Override
     public void scale(Moe moe, PoseStack stack, float partialTickTime) {
         super.scale(moe, stack, partialTickTime);
-        moe.getAnimation().render(moe, stack, partialTickTime);
-        stack.scale(0.9375F, 0.9375F, 0.9375F);
-        if (moe.getAnimationKey() == Animation.YEARBOOK) { return; }
         stack.scale(moe.getScale(), moe.getScale(), moe.getScale());
-        this.shadowRadius = 0.25F;
+        this.shadowRadius = 0.25F * moe.getScale();
     }
 }
