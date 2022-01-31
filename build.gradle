@@ -49,7 +49,7 @@ configurations {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.18.1-39.0.17'
-    integrate 'org.xerial:sqlite-jdbc:3.36.0.2'
+    integrate 'org.xerial:sqlite-jdbc:3.36.0.3'
 }
 
 shadowJar {
