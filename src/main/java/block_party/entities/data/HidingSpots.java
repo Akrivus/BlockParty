@@ -5,15 +5,15 @@ import block_party.db.DimBlockPos;
 import block_party.db.records.NPC;
 import block_party.entities.Moe;
 import block_party.entities.MoeInHiding;
-import block_party.scene.SceneTrigger;
 import block_party.utils.NBT;
 import com.google.common.collect.Maps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.PistonEvent;
@@ -67,9 +67,7 @@ public class HidingSpots extends SavedData {
     }
 
     private static HidingSpots get(ServerLevel level) {
-        HidingSpots spot = level.getDataStorage().get(HidingSpots::new, KEY);
-        if (spot == null) { spot = new HidingSpots(); }
-        return spot;
+        return level.getDataStorage().computeIfAbsent(HidingSpots::new, HidingSpots::new, KEY);
     }
 
     private static void set(ServerLevel level, Consumer<HidingSpots> action) {
@@ -83,39 +81,50 @@ public class HidingSpots extends SavedData {
         return spot.list.get(pos);
     }
 
-    private static void spawn(ServerLevel level, DimBlockPos pos) {
+    private static boolean isNormalBlock(ServerLevel level, BlockPos pos) {
+        HidingSpots spot = get(level);
+        return spot.list.get(pos) == null;
+    }
+
+    public static boolean spawn(ServerLevel level, DimBlockPos pos) {
+        if (isNormalBlock(level, pos.getPos()))
+            return false;
         NPC record = BlockPartyDB.NPCs.find(get(level, pos.getPos()));
         record.update((row) -> row.get(NPC.HIDING).set(false));
-        List<MoeInHiding> npcs = level.getEntitiesOfClass(MoeInHiding.class, pos.getAABB());
-        for (MoeInHiding npc : npcs) {
-            Moe moe = new Moe(level);
-            moe.absMoveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
-            moe.sceneManager.trigger(SceneTrigger.HIDING_SPOT_DISCOVERED);
-            npc.getRow().load(moe);
-            moe.setBlockState(level.getBlockState(pos));
-            if (moe.getActualBlockState().hasBlockEntity())
-                moe.setTileEntityData(level.getBlockEntity(pos).getTileData());
-            level.destroyBlock(pos, false);
-            if (level.addFreshEntity(moe)) { npc.setRemoved(Entity.RemovalReason.DISCARDED); }
-            return;
+        List<MoeInHiding> moesInHiding = level.getEntitiesOfClass(MoeInHiding.class, pos.getAABB());
+        if (moesInHiding.isEmpty())
+            return false;
+        MoeInHiding moeInHiding = moesInHiding.get(0);
+        return moeInHiding.spawn();
+    }
+
+    @SubscribeEvent
+    public static void onBreakStart(PlayerInteractEvent.LeftClickBlock e) {
+        if (e.getWorld() instanceof ServerLevel level)
+            spawn(level, new DimBlockPos(level.dimension(), e.getPos()));
+    }
+
+    @SubscribeEvent
+    public static void onBreakEnd(BlockEvent.BreakEvent e) {
+        if (e.getWorld() instanceof ServerLevel level)
+            spawn(level, new DimBlockPos(level.dimension(), e.getPos()));
+    }
+
+    @SubscribeEvent
+    public static void onPistonPush(PistonEvent.Pre e) {
+        if (e.getWorld() instanceof ServerLevel level)
+            spawn(level, new DimBlockPos(level.dimension(), e.getPos()));
+    }
+
+    @SubscribeEvent
+    public static void onFalling(EntityJoinWorldEvent e) {
+        if (e.getEntity() instanceof FallingBlockEntity entity) {
+            if (entity.level.isClientSide())
+                return;
+            ServerLevel level = (ServerLevel) entity.level;
+            BlockPos pos = entity.getStartPos();
+            if (spawn(level, new DimBlockPos(level.dimension(), pos)))
+                e.setCanceled(true);
         }
-    }
-
-    @SubscribeEvent
-    public static void onBlockBreaking(PlayerInteractEvent.LeftClickBlock e) {
-        if (e.getWorld() instanceof ServerLevel level)
-            spawn(level, new DimBlockPos(level.dimension(), e.getPos()));
-    }
-
-    @SubscribeEvent
-    public static void onBlockBreak(BlockEvent.BreakEvent e) {
-        if (e.getWorld() instanceof ServerLevel level)
-            spawn(level, new DimBlockPos(level.dimension(), e.getPos()));
-    }
-
-    @SubscribeEvent
-    public static void onBlockMove(PistonEvent.Pre e) {
-        if (e.getWorld() instanceof ServerLevel level)
-            spawn(level, new DimBlockPos(level.dimension(), e.getPos()));
     }
 }
