@@ -81,8 +81,7 @@ public class MoeInHiding extends Entity {
     }
 
     public boolean spawn() {
-        if (this.level.isClientSide())
-            return false;
+        if (this.level.isClientSide()) { return false; }
         BlockPos pos = this.getAttachPos();
         Moe moe = new Moe(this.level);
         moe.absMoveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
