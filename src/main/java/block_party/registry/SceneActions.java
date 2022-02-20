@@ -21,7 +21,7 @@ public class SceneActions {
     public static final RegistryObject<Builder> STRESS = BlockParty.SCENE_ACTIONS.register("stress", () -> f(() -> new AbstractFloat(BlockPartyNPC::getStress, BlockPartyNPC::setStress)));
     public static final RegistryObject<Builder> COOKIE = BlockParty.SCENE_ACTIONS.register("cookie", () -> f(DoCookie::new));
     public static final RegistryObject<Builder> COUNTER = BlockParty.SCENE_ACTIONS.register("counter", () -> f(DoCounter::new));
-    public static final RegistryObject<Builder> HIDE = BlockParty.SCENE_ACTIONS.register("hide", () -> f(() -> new Abstract1Shot((npc) -> npc.hide())));
+    public static final RegistryObject<Builder> HIDE = BlockParty.SCENE_ACTIONS.register("hide", () -> f(Hide::new));
     public static final RegistryObject<Builder> END = BlockParty.SCENE_ACTIONS.register("end", () -> f(() -> new End()));
 
     public static void add(DeferredRegister<Builder> registry, IEventBus bus) {

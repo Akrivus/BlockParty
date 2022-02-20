@@ -5,7 +5,10 @@
   ],
   "actions": [
     {
-      "type": "block_party:hide"
+      "type": "block_party:hide",
+      "action": {
+        "until": "one_second_passes"
+      }
     }
   ]
 }

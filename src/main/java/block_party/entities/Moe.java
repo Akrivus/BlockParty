@@ -1,6 +1,7 @@
 package block_party.entities;
 
 import block_party.db.records.NPC;
+import block_party.entities.goals.HideUntil;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomTags;
 import block_party.registry.resources.MoeSounds;
@@ -23,12 +24,13 @@ public class Moe extends BlockPartyNPC {
     }
 
     @Override
-    public void hide() {
+    public void hide(HideUntil until) {
         if (this.isRemote()) { return; }
         this.getRow().update(this, (row) -> row.get(NPC.HIDING).set(true));
         MoeInHiding ghost = new MoeInHiding(this);
+        ghost.setHideUntil(until);
         if (this.level.addFreshEntity(ghost))
-            super.hide();
+            super.hide(until);
     }
 
     @Override

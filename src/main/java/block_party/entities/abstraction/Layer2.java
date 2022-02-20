@@ -1,6 +1,7 @@
 package block_party.entities.abstraction;
 
 import block_party.entities.BlockPartyNPC;
+import block_party.entities.goals.HideUntil;
 import block_party.registry.CustomTags;
 import block_party.registry.resources.BlockAliases;
 import net.minecraft.nbt.CompoundTag;
@@ -172,7 +173,7 @@ public abstract class Layer2 extends Layer1 {
         return (int) (this.getScale() * 5) + 14;
     }
 
-    public void hide() {
+    public void hide(HideUntil until) {
         this.level.setBlock(this.blockPosition(), this.getActualBlockState(), 3);
         this.remove(RemovalReason.DISCARDED);
     }
