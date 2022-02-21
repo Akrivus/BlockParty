@@ -7,6 +7,8 @@ import java.util.function.Predicate;
 public enum SceneFilter implements ISceneFilter {
     ALWAYS((npc) -> true),
     NEVER((npc) -> false),
+    IS_CORPOREAL((npc) -> npc.isCorporeal()),
+    IS_ETHEREAL((npc) -> npc.isEthereal()),
     RAINING((npc) -> npc.level.isRaining()),
     SUNNY((npc) -> !npc.level.isRaining()),
     FULL_MOON((npc) -> npc.level.getMoonBrightness() == 1.0F),

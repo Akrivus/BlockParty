@@ -20,6 +20,8 @@ import java.util.function.Supplier;
 public class SceneFilters {
     public static final RegistryObject<Builder> ALWAYS = BlockParty.SCENE_FILTERS.register("always", () -> f(() -> SceneFilter.ALWAYS));
     public static final RegistryObject<Builder> NEVER = BlockParty.SCENE_FILTERS.register("never", () -> f(() -> SceneFilter.NEVER));
+    public static final RegistryObject<Builder> IS_CORPOREAL = BlockParty.SCENE_FILTERS.register("is_corporeal", () -> f(() -> SceneFilter.IS_CORPOREAL));
+    public static final RegistryObject<Builder> IS_ETHEREAL = BlockParty.SCENE_FILTERS.register("is_ethereal", () -> f(() -> SceneFilter.IS_ETHEREAL));
     public static final RegistryObject<Builder> RAINING = BlockParty.SCENE_FILTERS.register("if_raining", () -> f(() -> SceneFilter.RAINING));
     public static final RegistryObject<Builder> SUNNY = BlockParty.SCENE_FILTERS.register("if_sunny", () -> f(() -> SceneFilter.SUNNY));
     public static final RegistryObject<Builder> FULL_MOON = BlockParty.SCENE_FILTERS.register("if_full_moon", () -> f(() -> SceneFilter.FULL_MOON));

@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.Tag;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Pose;
@@ -33,6 +34,7 @@ import java.util.Optional;
 public abstract class Layer2 extends Layer1 {
     public static final EntityDataAccessor<Optional<BlockState>> BLOCK_STATE = SynchedEntityData.defineId(Layer2.class, EntityDataSerializers.BLOCK_STATE);
     public static final EntityDataAccessor<Float> SCALE = SynchedEntityData.defineId(Layer2.class, EntityDataSerializers.FLOAT);
+    public static final EntityDataAccessor<Boolean> CORPOREAL = SynchedEntityData.defineId(Layer2.class, EntityDataSerializers.BOOLEAN);
     private BlockState actualBlockState = Blocks.AIR.defaultBlockState();
     private CompoundTag tileEntityData = new CompoundTag();
 
@@ -44,6 +46,7 @@ public abstract class Layer2 extends Layer1 {
     public void defineSynchedData() {
         this.entityData.define(BLOCK_STATE, Optional.of(Blocks.AIR.defaultBlockState()));
         this.entityData.define(SCALE, 1.0F);
+        this.entityData.define(CORPOREAL, true);
         super.defineSynchedData();
     }
 
@@ -51,6 +54,7 @@ public abstract class Layer2 extends Layer1 {
     public void addAdditionalSaveData(CompoundTag compound) {
         compound.putInt("BlockState", Block.getId(this.getActualBlockState()));
         compound.putFloat("Scale", this.getScale());
+        compound.putBoolean("IsCorporeal", this.isCorporeal());
         compound.put("TileEntity", this.getTileEntityData());
         super.addAdditionalSaveData(compound);
     }
@@ -59,6 +63,7 @@ public abstract class Layer2 extends Layer1 {
     public void readAdditionalSaveData(CompoundTag compound) {
         this.setBlockState(Block.stateById(compound.getInt("BlockState")));
         this.setScale(compound.getFloat("Scale"));
+        this.setIsCorporeal(compound.getBoolean("IsCorporeal"));
         this.setTileEntityData(compound.getCompound("TileEntity"));
         super.readAdditionalSaveData(compound);
     }
@@ -66,6 +71,14 @@ public abstract class Layer2 extends Layer1 {
     @Override
     public boolean fireImmune() {
         return !this.getActualBlockState().isFlammable(this.level, this.blockPosition(), this.getDirection());
+    }
+
+    @Override
+    protected void dropAllDeathLoot(DamageSource cause) {
+        super.dropAllDeathLoot(cause);
+        if (this.isCorporeal())
+            return;
+        this.hide(HideUntil.EXPOSED);
     }
 
     @Override
@@ -176,5 +189,21 @@ public abstract class Layer2 extends Layer1 {
     public void hide(HideUntil until) {
         this.level.setBlock(this.blockPosition(), this.getActualBlockState(), 3);
         this.remove(RemovalReason.DISCARDED);
+    }
+
+    public boolean isCorporeal() {
+        return this.entityData.get(CORPOREAL);
+    }
+
+    public boolean isEthereal() {
+        return !this.isCorporeal();
+    }
+
+    public void setIsCorporeal(boolean corporeal) {
+        this.entityData.set(CORPOREAL, corporeal);
+    }
+
+    public void setIsEthereal(boolean corporeal) {
+        this.setIsCorporeal(!corporeal);
     }
 }
