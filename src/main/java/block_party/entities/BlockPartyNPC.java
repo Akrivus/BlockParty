@@ -14,12 +14,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 public abstract class BlockPartyNPC extends Layer7 {
     public BlockPartyNPC(EntityType<? extends BlockPartyNPC> type, Level level) {
         super(type, level);
-    }
-
-    @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType reason, SpawnGroupData data, CompoundTag compound) {
         this.setBloodType(this.getBloodType().weigh(this.random));
-        return super.finalizeSpawn(world, difficulty, reason, data, compound);
     }
 
     @Override
