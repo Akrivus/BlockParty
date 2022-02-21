@@ -2,8 +2,8 @@ package block_party.scene.actions;
 
 import block_party.entities.BlockPartyNPC;
 import block_party.registry.SceneActions;
-import block_party.scene.Response;
 import block_party.scene.ISceneAction;
+import block_party.scene.Response;
 import block_party.scene.Speaker;
 import block_party.utils.Markdown;
 import com.google.common.collect.Maps;

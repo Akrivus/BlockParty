@@ -1,7 +1,6 @@
 package block_party.entities.abstraction;
 
 import block_party.db.BlockPartyDB;
-import block_party.db.DimBlockPos;
 import block_party.db.Recordable;
 import block_party.db.records.NPC;
 import block_party.entities.BlockPartyNPC;

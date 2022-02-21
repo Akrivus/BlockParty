@@ -2,7 +2,6 @@ package block_party.client.renderers.layers;
 
 import block_party.BlockParty;
 import block_party.client.model.MoeModel;
-import block_party.entities.BlockPartyNPC;
 import block_party.entities.Moe;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;

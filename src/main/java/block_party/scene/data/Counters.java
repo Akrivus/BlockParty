@@ -1,11 +1,6 @@
 package block_party.scene.data;
 
-import block_party.utils.NBT;
-import com.google.common.collect.Maps;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-
-import java.util.Map;
 
 public class Counters extends AbstractVariables<Integer> {
     public Counters(CompoundTag compound) {

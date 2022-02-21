@@ -6,7 +6,6 @@ import block_party.entities.BlockPartyNPC;
 import block_party.messages.SOpenDialogue;
 import block_party.registry.CustomMessenger;
 import block_party.scene.*;
-import block_party.scene.Response;
 import block_party.scene.actions.SendDialogue;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;

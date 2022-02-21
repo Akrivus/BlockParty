@@ -5,14 +5,8 @@ import block_party.entities.BlockPartyNPC;
 import block_party.registry.resources.Names;
 import block_party.scene.ITrait;
 import block_party.utils.Trans;
-import com.google.common.io.Resources;
 import net.minecraft.world.level.Level;
-import org.apache.commons.compress.utils.Lists;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 

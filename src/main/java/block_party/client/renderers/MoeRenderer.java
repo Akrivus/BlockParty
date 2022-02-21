@@ -6,7 +6,6 @@ import block_party.client.model.MoeModel;
 import block_party.client.renderers.layers.EmoteLayer;
 import block_party.client.renderers.layers.GlowLayer;
 import block_party.client.renderers.layers.SpecialLayer;
-import block_party.entities.BlockPartyNPC;
 import block_party.entities.Moe;
 import block_party.registry.resources.MoeTextures;
 import com.mojang.blaze3d.vertex.PoseStack;

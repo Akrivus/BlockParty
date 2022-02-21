@@ -7,16 +7,11 @@ import block_party.registry.CustomTags;
 import block_party.registry.resources.MoeSounds;
 import block_party.scene.filters.traits.Gender;
 import block_party.utils.Trans;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.ServerLevelAccessor;
 
 public class Moe extends BlockPartyNPC {
     public Moe(EntityType<Moe> type, Level level) {
