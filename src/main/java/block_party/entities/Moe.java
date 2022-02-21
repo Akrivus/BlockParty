@@ -7,11 +7,16 @@ import block_party.registry.CustomTags;
 import block_party.registry.resources.MoeSounds;
 import block_party.scene.filters.traits.Gender;
 import block_party.utils.Trans;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 
 public class Moe extends BlockPartyNPC {
     public Moe(EntityType<Moe> type, Level level) {
@@ -21,6 +26,12 @@ public class Moe extends BlockPartyNPC {
 
     public Moe(Level level) {
         this(CustomEntities.MOE.get(), level);
+    }
+
+    @Override
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType reason, SpawnGroupData data, CompoundTag compound) {
+        this.setGivenName(this.getGender().getUniqueName(this.level));
+        return super.finalizeSpawn(world, difficulty, reason, data, compound);
     }
 
     @Override
