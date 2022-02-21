@@ -21,17 +21,12 @@ import net.minecraft.world.level.ServerLevelAccessor;
 public class Moe extends BlockPartyNPC {
     public Moe(EntityType<Moe> type, Level level) {
         super(type, level);
+        this.setGivenName(this.getGender().getUniqueName(this.level));
         this.doSyncWithDatabase(true);
     }
 
     public Moe(Level level) {
         this(CustomEntities.MOE.get(), level);
-    }
-
-    @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType reason, SpawnGroupData data, CompoundTag compound) {
-        this.setGivenName(this.getGender().getUniqueName(this.level));
-        return super.finalizeSpawn(world, difficulty, reason, data, compound);
     }
 
     @Override
