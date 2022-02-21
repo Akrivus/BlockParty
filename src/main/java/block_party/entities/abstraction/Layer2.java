@@ -69,16 +69,15 @@ public abstract class Layer2 extends Layer1 {
     }
 
     @Override
-    public boolean fireImmune() {
-        return !this.getActualBlockState().isFlammable(this.level, this.blockPosition(), this.getDirection());
+    public void die(DamageSource cause) {
+        super.die(cause);
+        if (this.isCorporeal())
+            this.hide(HideUntil.EXPOSED);
     }
 
     @Override
-    protected void dropAllDeathLoot(DamageSource cause) {
-        super.dropAllDeathLoot(cause);
-        if (this.isCorporeal())
-            return;
-        this.hide(HideUntil.EXPOSED);
+    public boolean fireImmune() {
+        return !this.getActualBlockState().isFlammable(this.level, this.blockPosition(), this.getDirection());
     }
 
     @Override
