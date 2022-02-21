@@ -45,7 +45,7 @@ public class Scenes extends SimpleJsonResourceReloadListener {
         ImmutableMap.Builder<ResourceLocation, Scene> builder = ImmutableMap.builder();
 
         for (Map.Entry<ResourceLocation, JsonElement> entry : folder.entrySet()) {
-            ResourceLocation location = entry.getKey();
+            ResourceLocation location = Scenes.own(entry.getKey());
             JsonObject json = GsonHelper.convertToJsonObject(entry.getValue(), "scene");
 
             SceneTrigger trigger = SceneTrigger.NULL.fromValue(JsonUtils.getAsResourceLocation(json, "trigger"));
@@ -69,6 +69,12 @@ public class Scenes extends SimpleJsonResourceReloadListener {
         scenes.removeIf((scene) -> !scene.fulfills(npc));
         if (scenes.isEmpty()) { return null; }
         return scenes.get(0);
+    }
+
+    public static ResourceLocation own(ResourceLocation location) {
+        if (location.getNamespace().equals("minecraft"))
+            return new ResourceLocation(BlockParty.ID, location.getPath());
+        return location;
     }
 }
 
