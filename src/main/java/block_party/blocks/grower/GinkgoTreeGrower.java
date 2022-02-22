@@ -1,4 +1,4 @@
-package block_party.blocks.tree;
+package block_party.blocks.grower;
 
 import block_party.registry.CustomBlocks;
 import net.minecraft.util.valueproviders.ConstantInt;
@@ -13,10 +13,10 @@ import net.minecraft.world.level.levelgen.feature.trunkplacers.StraightTrunkPlac
 
 import java.util.Random;
 
-public class GinkgoTree extends AbstractTreeGrower {
+public class GinkgoTreeGrower extends AbstractTreeGrower {
     @Override
     protected ConfiguredFeature<TreeConfiguration, ?> getConfiguredFeature(Random random, boolean hive) {
-        return GinkgoTree.build();
+        return GinkgoTreeGrower.build();
     }
 
     public static ConfiguredFeature build() {
