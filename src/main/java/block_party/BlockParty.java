@@ -13,9 +13,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.registries.DeferredRegister;
@@ -33,6 +35,7 @@ public class BlockParty {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, BlockParty.ID);
     public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, BlockParty.ID);
     public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, BlockParty.ID);
+    public static final DeferredRegister<Feature<?>> WORLDGEN_FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, BlockParty.ID);
     public static final DeferredRegister<SceneActions.Builder> SCENE_ACTIONS = DeferredRegister.create(SceneActions.Builder.class, BlockParty.ID);
     public static final DeferredRegister<SceneFilters.Builder> SCENE_FILTERS = DeferredRegister.create(SceneFilters.Builder.class, BlockParty.ID);
     public static final SimpleChannel MESSENGER = CustomMessenger.create();
@@ -60,10 +63,16 @@ public class BlockParty {
         CustomItems.add(ITEMS, bus);
         CustomParticles.add(PARTICLES, bus);
         CustomSounds.add(SOUNDS, bus);
+        CustomWorldGen.Features.add(WORLDGEN_FEATURES, MinecraftForge.EVENT_BUS, bus);
+        CustomResources.register(MinecraftForge.EVENT_BUS);
         SceneActions.add(SCENE_ACTIONS, bus);
         SceneFilters.add(SCENE_FILTERS, bus);
         BlockPartyRenderers.register(bus);
-        CustomResources.register(MinecraftForge.EVENT_BUS);
+        bus.addListener(this::setup);
+    }
+
+    public void setup(FMLCommonSetupEvent e) {
+        e.enqueueWork(() -> CustomWorldGen.Features.setup());
     }
 
     public static ResourceLocation source(String value) {

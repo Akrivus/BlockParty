@@ -1,0 +1,49 @@
+{
+  "type": "minecraft:tree",
+  "config": {
+    "max_water_depth": 0,
+    "heightmap": "OCEAN_FLOOR",
+    "ignoreVines": true,
+    "minimum_size": {
+      "type": "minecraft:two_layers_feature_size",
+      "lower_size": 0,
+      "upper_size": 2,
+      "limit": 1
+    },
+    "trunk_provider": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Properties": { "axis": "y" },
+        "Name": "block_party:wisteria_bine"
+      }
+    },
+    "trunk_placer": {
+      "type": "minecraft:forking_trunk_placer",
+      "base_height": 4,
+      "height_rand_a": 1,
+      "height_rand_b": 2
+    },
+    "foliage_provider": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "block_party:wisteria_leaves",
+        "Properties": {
+          "persistent": "false",
+          "distance": "7"
+        }
+      }
+    },
+    "foliage_placer": {
+      "type": "minecraft:acacia_foliage_placer",
+      "radius": 2,
+      "offset": 1
+    },
+    "dirt_provider": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "minecraft:dirt"
+      }
+    },
+    "decorators": []
+  }
+}
