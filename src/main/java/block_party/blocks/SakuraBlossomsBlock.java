@@ -1,9 +1,12 @@
 package block_party.blocks;
 
 import block_party.client.particle.SakuraParticle;
+import block_party.registry.CustomSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -12,6 +15,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.List;
 import java.util.Random;
 
 public class SakuraBlossomsBlock extends LeavesBlock {
@@ -45,10 +49,13 @@ public class SakuraBlossomsBlock extends LeavesBlock {
 
     @Override
     public void randomTick(BlockState state, ServerLevel level, BlockPos pos, Random random) {
-        if (super.isRandomlyTicking(state)) {
-            super.randomTick(state, level, pos, random);
-        } else if (!state.getValue(PERSISTENT)) {
-            this.bloomOrClose(state, pos, level);
+        super.randomTick(state, level, pos, random);
+        if (state.getValue(PERSISTENT)) { return; }
+        this.bloomOrClose(state, pos, level);
+        if (state.getValue(BLOOMING) && random.nextInt(2000) == 0) {
+            List<ServerPlayer> players = level.getPlayers(player -> pos.distSqr(player.blockPosition()) < 50);
+            for (ServerPlayer player : players)
+                player.playNotifySound(CustomSounds.AMBIENT_JAPAN.get(), SoundSource.AMBIENT, 1.0F, 1.0F);
         }
     }
 

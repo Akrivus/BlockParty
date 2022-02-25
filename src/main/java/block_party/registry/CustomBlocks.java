@@ -55,7 +55,7 @@ public class CustomBlocks {
     public static final RegistryObject<Block> PINK_PAPER_LANTERN = BlockParty.BLOCKS.register("pink_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_PINK));
     public static final RegistryObject<Block> PURPLE_PAPER_LANTERN = BlockParty.BLOCKS.register("purple_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_PURPLE));
     public static final RegistryObject<Block> RED_PAPER_LANTERN = BlockParty.BLOCKS.register("red_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_RED));
-    public static final RegistryObject<Block> SAKURA_BLOSSOMS = BlockParty.BLOCKS.register("sakura_blossoms", () -> new SakuraBlossomsBlock(CustomParticles.SAKURA, Prop.PLANT.get()));
+    public static final RegistryObject<Block> SAKURA_BLOSSOMS = BlockParty.BLOCKS.register("sakura_blossoms", () -> new SakuraBlossomsBlock(CustomParticles.SAKURA, Prop.LEAVES.get()));
     public static final RegistryObject<Block> SAKURA_BUTTON = BlockParty.BLOCKS.register("sakura_button", () -> new WoodButtonBlock(Prop.NONSOLID.get()));
     public static final RegistryObject<Block> SAKURA_FENCE = BlockParty.BLOCKS.register("sakura_fence", () -> new FenceBlock(Prop.NONSOLID.get()));
     public static final RegistryObject<Block> SAKURA_FENCE_GATE = BlockParty.BLOCKS.register("sakura_fence_gate", () -> new FenceGateBlock(Prop.NONSOLID.get()));
@@ -78,11 +78,11 @@ public class CustomBlocks {
     public static final RegistryObject<Block> TATAMI_MAT = BlockParty.BLOCKS.register("tatami_mat", () -> new RotatedPillarBlock(Prop.SOLID.get()));
     public static final RegistryObject<Block> SHRINE_TABLET = BlockParty.BLOCKS.register("shrine_tablet", () -> new ShrineTabletBlock(Prop.TRANSPARENT.get()));
     public static final RegistryObject<Block> WHITE_PAPER_LANTERN = BlockParty.BLOCKS.register("white_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_WHITE));
-    public static final RegistryObject<Block> WHITE_SAKURA_BLOSSOMS = BlockParty.BLOCKS.register("white_sakura_blossoms", () -> new SakuraBlossomsBlock(CustomParticles.WHITE_SAKURA, Prop.PLANT.get()));
+    public static final RegistryObject<Block> WHITE_SAKURA_BLOSSOMS = BlockParty.BLOCKS.register("white_sakura_blossoms", () -> new SakuraBlossomsBlock(CustomParticles.WHITE_SAKURA, Prop.LEAVES.get()));
     public static final RegistryObject<Block> WHITE_SAKURA_SAPLING = BlockParty.BLOCKS.register("white_sakura_sapling", () -> new SaplingBlock(new WhiteSakuraTreeGrower(), Prop.PLANT.get()));
     public static final RegistryObject<Block> WIND_CHIMES = BlockParty.BLOCKS.register("wind_chimes", () -> new WindChimesBlock(Prop.STONE.get()));
     public static final RegistryObject<Block> WISTERIA_BINE = BlockParty.BLOCKS.register("wisteria_bine", () -> new RotatedPillarBlock(Prop.NONSOLID.get()));
-    public static final RegistryObject<Block> WISTERIA_LEAVES = BlockParty.BLOCKS.register("wisteria_leaves", () -> new WisteriaLeavesBlock(Prop.PLANT.get()));
+    public static final RegistryObject<Block> WISTERIA_LEAVES = BlockParty.BLOCKS.register("wisteria_leaves", () -> new WisteriaLeavesBlock(Prop.LEAVES.get()));
     public static final RegistryObject<Block> WISTERIA_SAPLING = BlockParty.BLOCKS.register("wisteria_sapling", () -> new SaplingBlock(new WisteriaTreeGrower(), Prop.PLANT.get()));
     public static final RegistryObject<Block> WISTERIA_VINE_BODY = BlockParty.BLOCKS.register("wisteria_vine_body", () -> new WisteriaVineBodyBlock(Prop.PLANT.get()));
     public static final RegistryObject<Block> WISTERIA_VINE_TIP = BlockParty.BLOCKS.register("wisteria_vine_tip", () -> new WisteriaVineTipBlock(Prop.PLANT.get()));
@@ -160,6 +160,7 @@ public class CustomBlocks {
         public static final Supplier<BlockBehaviour.Properties> STONE = () -> BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).sound(SoundType.STONE).strength(6.0F);
         public static final Supplier<BlockBehaviour.Properties> SHOJI = () -> BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_PINK).sound(SoundType.CROP).strength(0.5F).noOcclusion();
         public static final Supplier<BlockBehaviour.Properties> PLANT = () -> BlockBehaviour.Properties.of(Material.PLANT).sound(SoundType.CROP).strength(0.2F).randomTicks().noOcclusion();
+        public static final Supplier<BlockBehaviour.Properties> LEAVES = () -> BlockBehaviour.Properties.of(Material.LEAVES).sound(SoundType.CROP).strength(0.2F).randomTicks().noOcclusion();
         public static final Supplier<BlockBehaviour.Properties> NONSOLID = () -> SOLID.get().noOcclusion();
         public static final Supplier<BlockBehaviour.Properties> TRANSPARENT = () -> NONSOLID.get().isRedstoneConductor((state, reader, pos) -> false);
         public static final Supplier<BlockBehaviour.Properties> GINKGO = () -> BlockBehaviour.Properties.of(Material.STONE, MaterialColor.WOOD).sound(SoundType.WOOD).strength(36.0F);
