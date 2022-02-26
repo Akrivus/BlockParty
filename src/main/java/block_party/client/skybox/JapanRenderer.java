@@ -26,7 +26,7 @@ import java.util.Optional;
 
 @Mod.EventBusSubscriber
 public class JapanRenderer {
-    private static final ResourceLocation FUJI_TEXTURE = BlockParty.source("textures/fuji.png");
+    private static final ResourceLocation FUJI_TEXTURE = BlockParty.source("textures/misc/fuji.png");
     private static final int size = 288;
     private static int horizon = 0;
     private static float distance = Float.POSITIVE_INFINITY;
