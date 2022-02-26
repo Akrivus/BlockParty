@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "block_party:samurai_kabuto",
+    "block_party:samurai_cuirass",
+    "block_party:samurai_chausses",
+    "block_party:samurai_sabaton",
+    "block_party:samurai_katana"
+  ]
+}

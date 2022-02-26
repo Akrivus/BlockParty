@@ -5,6 +5,7 @@ import block_party.items.*;
 import block_party.utils.sorters.ISortableItem;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -67,6 +68,11 @@ public class CustomItems {
     public static final RegistryObject<Item> SAKURA_SLAB = BlockParty.ITEMS.register("sakura_slab", () -> new MoeBlockItem(CustomBlocks.SAKURA_SLAB, 20));
     public static final RegistryObject<Item> SAKURA_STAIRS = BlockParty.ITEMS.register("sakura_stairs", () -> new MoeBlockItem(CustomBlocks.SAKURA_STAIRS, 20));
     public static final RegistryObject<Item> SAKURA_WOOD = BlockParty.ITEMS.register("sakura_wood", () -> new MoeBlockItem(CustomBlocks.SAKURA_WOOD, 20));
+    public static final RegistryObject<Item> SAMURAI_KABUTO = BlockParty.ITEMS.register("samurai_kabuto", () -> new SamuraiArmorItem(EquipmentSlot.HEAD));
+    public static final RegistryObject<Item> SAMURAI_CUIRASS = BlockParty.ITEMS.register("samurai_cuirass", () -> new SamuraiArmorItem(EquipmentSlot.CHEST));
+    public static final RegistryObject<Item> SAMURAI_CHAUSSES = BlockParty.ITEMS.register("samurai_chausses", () -> new SamuraiArmorItem(EquipmentSlot.LEGS));
+    public static final RegistryObject<Item> SAMURAI_SABATON = BlockParty.ITEMS.register("samurai_sabaton", () -> new SamuraiArmorItem(EquipmentSlot.FEET));
+    public static final RegistryObject<Item> SAMURAI_KATANA = BlockParty.ITEMS.register("samurai_katana", () -> new SamuraiKatanaItem());
     public static final RegistryObject<Item> SHIMENAWA = BlockParty.ITEMS.register("shimenawa", () -> new MoeBlockItem(CustomBlocks.SHIMENAWA, 6));
     public static final RegistryObject<Item> SHOJI_BLOCK = BlockParty.ITEMS.register("shoji_block", () -> new MoeBlockItem(CustomBlocks.SHOJI_BLOCK, 20));
     public static final RegistryObject<Item> SHOJI_LANTERN = BlockParty.ITEMS.register("shoji_lantern", () -> new MoeBlockItem(CustomBlocks.SHOJI_LANTERN, 20));
@@ -85,6 +91,7 @@ public class CustomItems {
     public static final RegistryObject<Item> WISTERIA_LEAVES = BlockParty.ITEMS.register("wisteria_leaves", () -> new MoeBlockItem(CustomBlocks.WISTERIA_LEAVES, 20));
     public static final RegistryObject<Item> WISTERIA_SAPLING = BlockParty.ITEMS.register("wisteria_sapling", () -> new MoeBlockItem(CustomBlocks.WISTERIA_SAPLING, 20));
     public static final RegistryObject<Item> WISTERIA_VINES = BlockParty.ITEMS.register("wisteria_vines", () -> new MoeBlockItem(CustomBlocks.WISTERIA_VINE_TIP, 20));
+    public static final RegistryObject<Item> WOODEN_BOKKEN = BlockParty.ITEMS.register("wooden_bokken", () -> new BokkenItem());
     public static final RegistryObject<Item> WRITING_TABLE = BlockParty.ITEMS.register("writing_table", () -> new MoeBlockItem(CustomBlocks.WRITING_TABLE, 5));
     public static final RegistryObject<Item> YEARBOOK = BlockParty.ITEMS.register("yearbook", YearbookItem::new);
     public static final RegistryObject<Item> YEARBOOK_PAGE = BlockParty.ITEMS.register("yearbook_page", YearbookPageItem::new);

@@ -2,7 +2,9 @@ package block_party.registry;
 
 import block_party.BlockParty;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
 public class CustomTags {
@@ -15,6 +17,8 @@ public class CustomTags {
     public static final Tag.Named<Block> IGNORES_VOLUME = BlockTags.createOptional(BlockParty.source("moe/ignores_volume"));
 
     public static class Blocks {
+        public static final Tag.Named<Block> GINKGO_LOGS = BlockTags.createOptional(BlockParty.source("ginkgo_logs"));
+        public static final Tag.Named<Block> GINKGO_WOOD = BlockTags.createOptional(BlockParty.source("ginkgo_wood"));
         public static final Tag.Named<Block> SAKURA_LOGS = BlockTags.createOptional(BlockParty.source("sakura_logs"));
         public static final Tag.Named<Block> SAKURA_WOOD = BlockTags.createOptional(BlockParty.source("sakura_wood"));
         public static final Tag.Named<Block> SHRINE_BASE_BLOCKS = BlockTags.createOptional(BlockParty.source("shrine_base_blocks"));
@@ -24,6 +28,11 @@ public class CustomTags {
     }
 
     public static class Items {
-
+        public static final Tag.Named<Item> GINKGO_LOGS = ItemTags.createOptional(BlockParty.source("ginkgo_logs"));
+        public static final Tag.Named<Item> GINKGO_WOOD = ItemTags.createOptional(BlockParty.source("ginkgo_wood"));
+        public static final Tag.Named<Item> SAKURA_LOGS = ItemTags.createOptional(BlockParty.source("sakura_logs"));
+        public static final Tag.Named<Item> SAKURA_WOOD = ItemTags.createOptional(BlockParty.source("sakura_wood"));
+        public static final Tag.Named<Item> SAMURAI_ITEMS = ItemTags.createOptional(BlockParty.source("samurai_items"));
+        public static final Tag.Named<Item> WISTERIA = ItemTags.createOptional(BlockParty.source("wisteria"));
     }
 }
