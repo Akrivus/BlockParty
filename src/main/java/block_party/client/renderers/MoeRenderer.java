@@ -3,6 +3,7 @@ package block_party.client.renderers;
 import block_party.client.BlockPartyRenderers;
 import block_party.client.animation.Animation;
 import block_party.client.model.MoeModel;
+import block_party.client.model.SamuraiModel;
 import block_party.client.renderers.layers.EmoteLayer;
 import block_party.client.renderers.layers.GlowLayer;
 import block_party.client.renderers.layers.SpecialLayer;
@@ -29,6 +30,7 @@ public class MoeRenderer extends MobRenderer<Moe, MoeModel<Moe>> {
         this.addLayer(new GlowLayer(this));
         this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
         this.addLayer(new SpecialLayer(this));
+        SamuraiModel.setArmorModels(context);
     }
 
     @Override
