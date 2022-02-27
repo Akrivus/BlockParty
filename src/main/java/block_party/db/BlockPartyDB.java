@@ -41,7 +41,7 @@ public class BlockPartyDB extends SavedData {
     public static Garden.Schema Gardens = new Garden.Schema();
     public static Sapling.Schema Saplings = new Sapling.Schema();
     public static NPC.Schema NPCs = new NPC.Schema();
-    public static ShrineLocation ShrineLocation;
+    public static ShrineLocation ShrineLocation = new ShrineLocation();
     public final List<String> names = Lists.newArrayList();
     private final Map<UUID, List<Long>> byPlayer = Maps.newHashMap();
     private final List<Connection> connections = Lists.newArrayList();
