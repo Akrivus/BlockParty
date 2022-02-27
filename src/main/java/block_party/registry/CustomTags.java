@@ -30,6 +30,7 @@ public class CustomTags {
     public static class Items {
         public static final Tag.Named<Item> GINKGO_LOGS = ItemTags.createOptional(BlockParty.source("ginkgo_logs"));
         public static final Tag.Named<Item> GINKGO_WOOD = ItemTags.createOptional(BlockParty.source("ginkgo_wood"));
+        public static final Tag.Named<Item> PARRY_SWORDS = ItemTags.createOptional(BlockParty.source("parry_swords"));
         public static final Tag.Named<Item> SAKURA_LOGS = ItemTags.createOptional(BlockParty.source("sakura_logs"));
         public static final Tag.Named<Item> SAKURA_WOOD = ItemTags.createOptional(BlockParty.source("sakura_wood"));
         public static final Tag.Named<Item> SAMURAI_ITEMS = ItemTags.createOptional(BlockParty.source("samurai_items"));

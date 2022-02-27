@@ -21,6 +21,13 @@
       "block_party:block/shoji_screen/open3"
     ]
   },
+  "item.katana.parry": {
+    "subtitle": "subtitle.katana.parry",
+    "sounds": [
+      "block_party:item/katana/parry1",
+      "block_party:item/katana/parry2"
+    ]
+  },
   "moe.bell.step": {
     "subtitle": "subtitle.moe.bell.step",
     "sounds": [

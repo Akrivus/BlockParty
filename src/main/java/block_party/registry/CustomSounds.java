@@ -10,6 +10,7 @@ public class CustomSounds {
     public static final RegistryObject<SoundEvent> AMBIENT_JAPAN = BlockParty.SOUNDS.register("ambient.japan", () -> new SoundEvent(BlockParty.source("ambient.japan")));
     public static final RegistryObject<SoundEvent> BLOCK_SHOJI_SCREEN_CLOSE = BlockParty.SOUNDS.register("block.shoji_screen.close", () -> new SoundEvent(BlockParty.source("block.shoji_screen.close")));
     public static final RegistryObject<SoundEvent> BLOCK_SHOJI_SCREEN_OPEN = BlockParty.SOUNDS.register("block.shoji_screen.open", () -> new SoundEvent(BlockParty.source("block.shoji_screen.open")));
+    public static final RegistryObject<SoundEvent> KATANA_PARRY = BlockParty.SOUNDS.register("item.katana.parry", () -> new SoundEvent(BlockParty.source("item.katana.parry")));
     public static final RegistryObject<SoundEvent> MOE_BELL_STEP = BlockParty.SOUNDS.register("moe.bell.step", () -> new SoundEvent(BlockParty.source("moe.bell.step")));
     public static final RegistryObject<SoundEvent> MOE_ANGRY = BlockParty.SOUNDS.register("moe.angry", () -> new SoundEvent(BlockParty.source("moe.angry")));
     public static final RegistryObject<SoundEvent> MOE_ATTACK = BlockParty.SOUNDS.register("moe.attack", () -> new SoundEvent(BlockParty.source("moe.attack")));

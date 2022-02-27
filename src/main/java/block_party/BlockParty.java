@@ -79,6 +79,10 @@ public class BlockParty {
         return new ResourceLocation(ID, value);
     }
 
+    public static ResourceLocation source(String value, Object... args) {
+        return source(String.format(value, args));
+    }
+
     public static String getVersion() {
         return VERSION;
     }

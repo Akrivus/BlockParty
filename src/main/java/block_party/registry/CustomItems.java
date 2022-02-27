@@ -44,6 +44,7 @@ public class CustomItems {
     public static final RegistryObject<Item> LIGHT_GRAY_PAPER_LANTERN = BlockParty.ITEMS.register("light_gray_paper_lantern", () -> new MoeBlockItem(CustomBlocks.LIGHT_GRAY_PAPER_LANTERN));
     public static final RegistryObject<Item> LIME_PAPER_LANTERN = BlockParty.ITEMS.register("lime_paper_lantern", () -> new MoeBlockItem(CustomBlocks.LIME_PAPER_LANTERN));
     public static final RegistryObject<Item> MAGENTA_PAPER_LANTERN = BlockParty.ITEMS.register("magenta_paper_lantern", () -> new MoeBlockItem(CustomBlocks.MAGENTA_PAPER_LANTERN));
+    public static final RegistryObject<Item> MASKED_SAMURAI_KABUTO = BlockParty.ITEMS.register("masked_samurai_kabuto", () -> new MaskedSamuraiItem(EquipmentSlot.HEAD));
     public static final RegistryObject<Item> MIDNIGHT_HANGING_SCROLL = BlockParty.ITEMS.register("midnight_hanging_scroll", () -> new MoeBlockItem(CustomBlocks.MIDNIGHT_HANGING_SCROLL, 90));
     public static final RegistryObject<Item> MORNING_HANGING_SCROLL = BlockParty.ITEMS.register("morning_hanging_scroll", () -> new MoeBlockItem(CustomBlocks.MORNING_HANGING_SCROLL, 90));
     public static final RegistryObject<Item> MUSIC_DISC_ANTEATER_SANCTUARY = BlockParty.ITEMS.register("music_disc_anteater_sanctuary", () -> new MoeMusicItem(CustomSounds.MUSIC_DISC_ANTEATER_SANCTUARY));
