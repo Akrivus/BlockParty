@@ -1,6 +1,8 @@
 package block_party.blocks.grower;
 
 import block_party.registry.CustomBlocks;
+import block_party.registry.CustomWorldGen;
+import net.minecraft.core.Holder;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.level.block.grower.AbstractTreeGrower;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -15,11 +17,11 @@ import java.util.Random;
 
 public class SakuraTreeGrower extends AbstractTreeGrower {
     @Override
-    protected ConfiguredFeature<TreeConfiguration, ?> getConfiguredFeature(Random random, boolean hive) {
-        return SakuraTreeGrower.build();
+    protected Holder<ConfiguredFeature<TreeConfiguration, ?>> getConfiguredFeature(Random random, boolean hive) {
+        return CustomWorldGen.ConfiguredFeatures.SAKURA;
     }
 
-    public static ConfiguredFeature build() {
-        return Feature.TREE.configured(new TreeConfiguration.TreeConfigurationBuilder(BlockStateProvider.simple(CustomBlocks.SAKURA_LOG.get().defaultBlockState()), new ForkingTrunkPlacer(5, 2, 2), BlockStateProvider.simple(CustomBlocks.SAKURA_BLOSSOMS.get().defaultBlockState()), new BlobFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0), 2), new TwoLayersFeatureSize(1, 0, 1)).ignoreVines().build());
+    public static TreeConfiguration config() {
+        return new TreeConfiguration.TreeConfigurationBuilder(BlockStateProvider.simple(CustomBlocks.SAKURA_LOG.get().defaultBlockState()), new ForkingTrunkPlacer(5, 2, 2), BlockStateProvider.simple(CustomBlocks.SAKURA_BLOSSOMS.get().defaultBlockState()), new BlobFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0), 2), new TwoLayersFeatureSize(1, 0, 1)).ignoreVines().build();
     }
 }

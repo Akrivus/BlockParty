@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -136,7 +137,7 @@ public abstract class Layer2 extends Layer1 {
         return this.getVisibleBlockState().getBlock();
     }
 
-    public boolean is(Tag<Block> tag) {
+    public boolean is(TagKey<Block> tag) {
         return this.getVisibleBlockState().is(tag);
     }
 

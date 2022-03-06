@@ -25,9 +25,9 @@ public class HangingScrollBlockEntity extends LocativeBlockEntity {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compound) {
+    public void saveAdditional(CompoundTag compound) {
         compound.putString("Condition", this.condition.name());
-        return super.save(compound);
+        super.saveAdditional(compound);
     }
 
     @Override

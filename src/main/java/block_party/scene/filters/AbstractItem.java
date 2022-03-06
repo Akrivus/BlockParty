@@ -1,12 +1,14 @@
 package block_party.scene.filters;
 
 import block_party.entities.BlockPartyNPC;
+import block_party.registry.CustomTags;
 import block_party.scene.ISceneFilter;
 import block_party.utils.JsonUtils;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -18,7 +20,7 @@ public class AbstractItem implements ISceneFilter {
     private final AbstractInteger counter = new AbstractInteger((npc) -> this.getter.apply(npc).getCount());
     private boolean not = false;
     private Item item;
-    private Tag<Item> tag;
+    private TagKey<Item> tag;
 
     public AbstractItem(Function<BlockPartyNPC, ItemStack> function) {
         this.getter = function;
@@ -38,7 +40,7 @@ public class AbstractItem implements ISceneFilter {
         String name = GsonHelper.getAsString(json, "name");
         if (name.startsWith("#")) {
             ResourceLocation loc = new ResourceLocation(name.substring(1));
-            this.tag = ItemTags.createOptional(loc);
+            this.tag = CustomTags.bind(CustomTags.Type.ITEM, loc);
         } else {
             this.item = JsonUtils.getAs(JsonUtils.ITEM, name);
         }

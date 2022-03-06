@@ -125,8 +125,8 @@ public class SamuraiArmorItem extends ArmorItem {
     public void initializeClient(Consumer<IItemRenderProperties> renderer) {
         renderer.accept(new IItemRenderProperties() {
             @Override
-            public <A extends HumanoidModel<?>> A getArmorModel(LivingEntity entity, ItemStack stack, EquipmentSlot slot, A _default) {
-                return (A) SamuraiModel.getArmorModel(slot);
+            public HumanoidModel<?> getArmorModel(LivingEntity entity, ItemStack stack, EquipmentSlot slot, HumanoidModel<?> _default) {
+                return SamuraiModel.getArmorModel(slot);
             }
 
             @Override

@@ -1,39 +1,66 @@
 package block_party.registry;
 
 import block_party.BlockParty;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
 public class CustomTags {
-    public static final Tag.Named<Block> HAS_CAT_FEATURES = BlockTags.createOptional(BlockParty.source("moe/has_cat_features"));
-    public static final Tag.Named<Block> HAS_FESTIVE_TEXTURES = BlockTags.createOptional(BlockParty.source("moe/has_festive_textures"));
-    public static final Tag.Named<Block> HAS_GLOW = BlockTags.createOptional(BlockParty.source("moe/has_glow"));
-    public static final Tag.Named<Block> HAS_MALE_PRONOUNS = BlockTags.createOptional(BlockParty.source("moe/has_male_pronouns"));
-    public static final Tag.Named<Block> HAS_NONBINARY_PRONOUNS = BlockTags.createOptional(BlockParty.source("moe/has_nonbinary_pronouns"));
-    public static final Tag.Named<Block> HAS_WINGS = BlockTags.createOptional(BlockParty.source("moe/has_wings"));
-    public static final Tag.Named<Block> IGNORES_VOLUME = BlockTags.createOptional(BlockParty.source("moe/ignores_volume"));
+    public static final TagKey<Block> HAS_CAT_FEATURES = bind(Type.BLOCK, "moe/has_cat_features");
+    public static final TagKey<Block> HAS_FESTIVE_TEXTURES = bind(Type.BLOCK, "moe/has_festive_textures");
+    public static final TagKey<Block> HAS_GLOW = bind(Type.BLOCK, "moe/has_glow");
+    public static final TagKey<Block> HAS_MALE_PRONOUNS = bind(Type.BLOCK, "moe/has_male_pronouns");
+    public static final TagKey<Block> HAS_NONBINARY_PRONOUNS = bind(Type.BLOCK, "moe/has_nonbinary_pronouns");
+    public static final TagKey<Block> HAS_WINGS = bind(Type.BLOCK, "moe/has_wings");
+    public static final TagKey<Block> IGNORES_VOLUME = bind(Type.BLOCK, "moe/ignores_volume");
 
     public static class Blocks {
-        public static final Tag.Named<Block> GINKGO_LOGS = BlockTags.createOptional(BlockParty.source("ginkgo_logs"));
-        public static final Tag.Named<Block> GINKGO_WOOD = BlockTags.createOptional(BlockParty.source("ginkgo_wood"));
-        public static final Tag.Named<Block> SAKURA_LOGS = BlockTags.createOptional(BlockParty.source("sakura_logs"));
-        public static final Tag.Named<Block> SAKURA_WOOD = BlockTags.createOptional(BlockParty.source("sakura_wood"));
-        public static final Tag.Named<Block> SHRINE_BASE_BLOCKS = BlockTags.createOptional(BlockParty.source("shrine_base_blocks"));
-        public static final Tag.Named<Block> SPAWNS_MOES = BlockTags.createOptional(BlockParty.source("spawns_moes"));
-        public static final Tag.Named<Block> SPAWNS_FIREFLIES = BlockTags.createOptional(BlockParty.source("spawns_fireflies"));
-        public static final Tag.Named<Block> WISTERIA = BlockTags.createOptional(BlockParty.source("wisteria"));
+        public static final TagKey<Block> GINKGO_LOGS = bind(Type.BLOCK, "ginkgo_logs");
+        public static final TagKey<Block> GINKGO_WOOD = bind(Type.BLOCK, "ginkgo_wood");
+        public static final TagKey<Block> SAKURA_LOGS = bind(Type.BLOCK, "sakura_logs");
+        public static final TagKey<Block> SAKURA_WOOD = bind(Type.BLOCK, "sakura_wood");
+        public static final TagKey<Block> SHRINE_BASE_BLOCKS = bind(Type.BLOCK, "shrine_base_blocks");
+        public static final TagKey<Block> SPAWNS_MOES = bind(Type.BLOCK, "spawns_moes");
+        public static final TagKey<Block> SPAWNS_FIREFLIES = bind(Type.BLOCK, "spawns_fireflies");
+        public static final TagKey<Block> WISTERIA = bind(Type.BLOCK, "wisteria");
     }
 
     public static class Items {
-        public static final Tag.Named<Item> GINKGO_LOGS = ItemTags.createOptional(BlockParty.source("ginkgo_logs"));
-        public static final Tag.Named<Item> GINKGO_WOOD = ItemTags.createOptional(BlockParty.source("ginkgo_wood"));
-        public static final Tag.Named<Item> PARRY_SWORDS = ItemTags.createOptional(BlockParty.source("parry_swords"));
-        public static final Tag.Named<Item> SAKURA_LOGS = ItemTags.createOptional(BlockParty.source("sakura_logs"));
-        public static final Tag.Named<Item> SAKURA_WOOD = ItemTags.createOptional(BlockParty.source("sakura_wood"));
-        public static final Tag.Named<Item> SAMURAI_ITEMS = ItemTags.createOptional(BlockParty.source("samurai_items"));
-        public static final Tag.Named<Item> WISTERIA = ItemTags.createOptional(BlockParty.source("wisteria"));
+        public static final TagKey<Item> GINKGO_LOGS = bind(Type.ITEM, "ginkgo_logs");
+        public static final TagKey<Item> GINKGO_WOOD = bind(Type.ITEM, "ginkgo_wood");
+        public static final TagKey<Item> PARRY_SWORDS = bind(Type.ITEM, "parry_swords");
+        public static final TagKey<Item> SAKURA_LOGS = bind(Type.ITEM, "sakura_logs");
+        public static final TagKey<Item> SAKURA_WOOD = bind(Type.ITEM, "sakura_wood");
+        public static final TagKey<Item> SAMURAI_ITEMS = bind(Type.ITEM, "samurai_items");
+        public static final TagKey<Item> WISTERIA = bind(Type.ITEM, "wisteria");
+    }
+
+    public enum Type {
+        BLOCK(Registry.BLOCK_REGISTRY), ENTITY(Registry.ENTITY_TYPE_REGISTRY), ITEM(Registry.ITEM_REGISTRY);
+
+        final ResourceKey<? extends Registry<?>> registry;
+
+        Type(ResourceKey<? extends Registry<?>> registry) {
+            this.registry = registry;
+        }
+
+        public <T> ResourceKey<? extends Registry<T>> registry() {
+            return (ResourceKey<? extends Registry<T>>) this.registry;
+        }
+    }
+
+    public static <T> TagKey<T> bind(Type type, ResourceLocation location) {
+        return TagKey.<T>create(type.registry(), location);
+    }
+
+    public static <T> TagKey<T> bind(Type type, String domain, String name) {
+        return bind(type, new ResourceLocation(domain, name));
+    }
+
+    public static <T> TagKey<T> bind(Type type, String name) {
+        return bind(type, BlockParty.ID, name);
     }
 }

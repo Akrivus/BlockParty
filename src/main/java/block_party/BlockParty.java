@@ -27,7 +27,7 @@ import java.util.Calendar;
 
 @Mod(BlockParty.ID)
 public class BlockParty {
-    public static final String VERSION = "21.12.30";
+    public static final String VERSION = "22.3.6";
     public static final String ID = "block_party";
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITIES, BlockParty.ID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, BlockParty.ID);
@@ -72,7 +72,7 @@ public class BlockParty {
     }
 
     public void setup(FMLCommonSetupEvent e) {
-        e.enqueueWork(() -> CustomWorldGen.Features.setup());
+        //e.enqueueWork(() -> CustomWorldGen.Features.setup());
     }
 
     public static ResourceLocation source(String value) {

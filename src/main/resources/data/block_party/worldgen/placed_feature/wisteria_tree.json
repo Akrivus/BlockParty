@@ -3,10 +3,6 @@
   "placement":
   [
     {
-      "type": "block_party:biome",
-      "biome": "minecraft:flower_forest"
-    },
-    {
       "type": "minecraft:in_square"
     },
     {
