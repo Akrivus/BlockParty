@@ -16,6 +16,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.sql.ResultSet;
@@ -120,9 +121,22 @@ public class NPC extends Row<BlockPartyNPC> {
 
     public BlockPartyNPC getClientEntity(Minecraft client) {
         BlockPos pos = client.player.blockPosition();
-        BlockPartyNPC entity = CustomEntities.MOE.get().create(client.level);
-        this.load(entity);
+        BlockPartyNPC entity = this.getNewEntity(client.level);
         entity.setPos(pos.getX(), pos.getY(), pos.getZ());
+        return entity;
+    }
+
+    public BlockPartyNPC getNewEntity(Level level) {
+        BlockPartyNPC entity = CustomEntities.MOE.get().create(level);
+        this.load(entity);
+        return entity;
+    }
+
+    public BlockPartyNPC getOrCreateEntity(MinecraftServer server, ServerLevel level)
+    {
+        BlockPartyNPC entity = this.getServerEntity(server);
+        if (entity == null)
+            entity = this.getNewEntity(level);
         return entity;
     }
 
