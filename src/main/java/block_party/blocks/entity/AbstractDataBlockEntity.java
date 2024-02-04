@@ -95,14 +95,13 @@ public abstract class AbstractDataBlockEntity<M extends Row> extends BlockEntity
         super.setChanged();
     }
 
-    @Override
-    public void setRemoved() {
+    public void onDestroyed()
+    {
         if (this.hasRow()) {
             this.getRow().delete();
             this.afterDelete();
             this.afterChange();
         }
-        super.setRemoved();
     }
 
     public void afterChange() { }

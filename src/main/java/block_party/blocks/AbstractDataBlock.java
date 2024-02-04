@@ -28,6 +28,14 @@ public class AbstractDataBlock<T extends AbstractDataBlockEntity> extends Block 
         }
     }
 
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isPlayer) {
+        if (!state.is(newState.getBlock())) {
+            this.getTileEntity(level, pos).onDestroyed();
+        }
+        super.onRemove(state, level, pos, newState, isPlayer);
+    }
+
     public T getTileEntity(Level level, BlockPos pos) {
         return ((T) (level.getBlockEntity(pos)));
     }
