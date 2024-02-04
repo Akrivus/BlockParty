@@ -49,10 +49,12 @@ configurations {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.18.2-40.0.12'
-    integrate 'org.xerial:sqlite-jdbc:3.36.0.3'
+    integrate 'org.xerial:sqlite-jdbc:3.40.1.0'
 }
 
 shadowJar {
+    relocate 'org.sqlite', 'block_party.org.sqlite'
+
     archiveName("${archivesBaseName}-${project.version}.jar")
     configurations = [project.configurations.integrate]
 }
@@ -66,4 +68,8 @@ jar.finalizedBy('reobfShadowJar')
 
 artifacts {
     archives tasks.shadowJar
+}
+
+repositories {
+    mavenCentral()
 }
