@@ -22,7 +22,7 @@ public abstract class BlockPartyNPC extends Layer7 {
 
     @Override
     public Component getCustomName() {
-        return new TranslatableComponent("entity.block_party.generic", this.getGivenName(), this.getHonorific());
+        return new TranslatableComponent("entity.block_party.generic", this.getFamilyName(), this.getHonorific());
     }
 
     public String getHonorific() {
