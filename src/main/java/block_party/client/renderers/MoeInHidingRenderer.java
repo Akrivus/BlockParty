@@ -12,7 +12,7 @@ public class MoeInHidingRenderer extends EntityRenderer<MoeInHiding> {
     }
 
     @Override
-    public ResourceLocation getTextureLocation(MoeInHiding p_114482_) {
+    public ResourceLocation getTextureLocation(MoeInHiding moe) {
         return BlockParty.source("textures/moe/ghost.png");
     }
 }
