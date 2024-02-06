@@ -28,7 +28,18 @@ public class CustomTags {
     public static final TagKey<Block> YANDERE = bind(Type.BLOCK, "moe/traits/dere/yandere");
     public static final TagKey<Block> DEREDERE = bind(Type.BLOCK, "moe/traits/dere/deredere");
     public static final TagKey<Block> DANDERE = bind(Type.BLOCK, "moe/traits/dere/dandere");
-
+    public static final TagKey<Block> ARIES = bind(Type.BLOCK, "moe/traits/zodiac/aries");
+    public static final TagKey<Block> TAURUS = bind(Type.BLOCK, "moe/traits/zodiac/taurus");
+    public static final TagKey<Block> GEMINI = bind(Type.BLOCK, "moe/traits/zodiac/gemini");
+    public static final TagKey<Block> CANCER = bind(Type.BLOCK, "moe/traits/zodiac/cancer");
+    public static final TagKey<Block> LEO = bind(Type.BLOCK, "moe/traits/zodiac/leo");
+    public static final TagKey<Block> VIRGO = bind(Type.BLOCK, "moe/traits/zodiac/virgo");
+    public static final TagKey<Block> LIBRA = bind(Type.BLOCK, "moe/traits/zodiac/libra");
+    public static final TagKey<Block> SCORPIO = bind(Type.BLOCK, "moe/traits/zodiac/scorpio");
+    public static final TagKey<Block> SAGITTARIUS = bind(Type.BLOCK, "moe/traits/zodiac/sagittarius");
+    public static final TagKey<Block> CAPRICORN = bind(Type.BLOCK, "moe/traits/zodiac/capricorn");
+    public static final TagKey<Block> AQUARIUS = bind(Type.BLOCK, "moe/traits/zodiac/aquarius");
+    public static final TagKey<Block> PISCES = bind(Type.BLOCK, "moe/traits/zodiac/pisces");
 
     public static class Blocks {
         public static final TagKey<Block> GINKGO_LOGS = bind(Type.BLOCK, "ginkgo_logs");

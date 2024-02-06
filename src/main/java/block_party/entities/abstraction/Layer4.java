@@ -2,10 +2,7 @@ package block_party.entities.abstraction;
 
 import block_party.entities.BlockPartyNPC;
 import block_party.registry.CustomTags;
-import block_party.scene.filters.traits.BloodType;
-import block_party.scene.filters.traits.Dere;
-import block_party.scene.filters.traits.Emotion;
-import block_party.scene.filters.traits.Gender;
+import block_party.scene.filters.traits.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -24,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public abstract class Layer4 extends Layer3 {
     public static final EntityDataAccessor<String> BLOOD_TYPE = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.STRING);
     public static final EntityDataAccessor<String> DERE = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.STRING);
+    public static final EntityDataAccessor<String> ZODIAC = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.STRING);
     public static final EntityDataAccessor<String> EMOTION = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.STRING);
     public static final EntityDataAccessor<String> GENDER = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.STRING);
     public static final EntityDataAccessor<String> GIVEN_NAME = SynchedEntityData.defineId(Layer4.class, EntityDataSerializers.STRING);
@@ -46,6 +44,7 @@ public abstract class Layer4 extends Layer3 {
         this.entityData.define(BLOOD_TYPE, BloodType.O.getValue());
         this.entityData.define(DERE, Dere.NYANDERE.getValue());
         this.entityData.define(EMOTION, Emotion.NORMAL.getValue());
+        this.entityData.define(ZODIAC, Zodiac.ARIES.getValue());
         this.entityData.define(GENDER, Gender.FEMALE.getValue());
         this.entityData.define(GIVEN_NAME, "Tokumei");
         this.entityData.define(SLOUCH, 0.0F);
@@ -99,6 +98,31 @@ public abstract class Layer4 extends Layer3 {
             this.setDere(Dere.DEREDERE);
         else if (state.is(CustomTags.DANDERE))
             this.setDere(Dere.DANDERE);
+
+        if (state.is(CustomTags.ARIES))
+            this.setZodiac(Zodiac.ARIES);
+        else if (state.is(CustomTags.TAURUS))
+            this.setZodiac(Zodiac.TAURUS);
+        else if (state.is(CustomTags.GEMINI))
+            this.setZodiac(Zodiac.GEMINI);
+        else if (state.is(CustomTags.CANCER))
+            this.setZodiac(Zodiac.CANCER);
+        else if (state.is(CustomTags.LEO))
+            this.setZodiac(Zodiac.LEO);
+        else if (state.is(CustomTags.VIRGO))
+            this.setZodiac(Zodiac.VIRGO);
+        else if (state.is(CustomTags.LIBRA))
+            this.setZodiac(Zodiac.LIBRA);
+        else if (state.is(CustomTags.SCORPIO))
+            this.setZodiac(Zodiac.SCORPIO);
+        else if (state.is(CustomTags.SAGITTARIUS))
+            this.setZodiac(Zodiac.SAGITTARIUS);
+        else if (state.is(CustomTags.CAPRICORN))
+            this.setZodiac(Zodiac.CAPRICORN);
+        else if (state.is(CustomTags.AQUARIUS))
+            this.setZodiac(Zodiac.AQUARIUS);
+        else if (state.is(CustomTags.PISCES))
+            this.setZodiac(Zodiac.PISCES);
     }
 
     public BloodType getBloodType() {
@@ -115,6 +139,14 @@ public abstract class Layer4 extends Layer3 {
 
     public void setDere(Dere dere) {
         this.entityData.set(DERE, dere.getValue());
+    }
+
+    public Zodiac getZodiac() {
+        return Zodiac.ARIES.fromValue(this.entityData.get(ZODIAC));
+    }
+
+    public void setZodiac(Zodiac zodiac) {
+        this.entityData.set(ZODIAC, zodiac.getValue());
     }
 
     public Emotion getEmotion() {
