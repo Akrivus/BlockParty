@@ -91,11 +91,11 @@ public class BlockParty {
         return getCalendar().get(2) + 1 == 12 && getCalendar().get(5) >= 24 && getCalendar().get(5) <= 26;
     }
 
-    public static Calendar getCalendar() {
-        return Calendar.getInstance();
-    }
-
     public static boolean isHalloween() {
         return getCalendar().get(2) + 1 == 10 && getCalendar().get(5) == 31;
+    }
+
+    public static Calendar getCalendar() {
+        return Calendar.getInstance();
     }
 }

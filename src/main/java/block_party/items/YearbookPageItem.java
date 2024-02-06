@@ -12,7 +12,6 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 public class YearbookPageItem extends Item {
-
     public YearbookPageItem() {
         super(new Properties().stacksTo(1));
     }
