@@ -47,13 +47,6 @@ public class Moe extends BlockPartyNPC {
     }
 
     @Override
-    public Gender getGender() {
-        if (this.is(CustomTags.HAS_MALE_PRONOUNS)) { return Gender.MALE; }
-        if (this.is(CustomTags.HAS_NONBINARY_PRONOUNS)) { return Gender.NONBINARY; }
-        return Gender.FEMALE;
-    }
-
-    @Override
     public SoundEvent getAmbientSound() {
         return this.is(CustomTags.HAS_CAT_FEATURES) ? MoeSounds.get(this, MoeSounds.Sound.MEOW) : super.getAmbientSound();
     }

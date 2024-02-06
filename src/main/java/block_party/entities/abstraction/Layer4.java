@@ -1,6 +1,7 @@
 package block_party.entities.abstraction;
 
 import block_party.entities.BlockPartyNPC;
+import block_party.registry.CustomTags;
 import block_party.scene.filters.traits.BloodType;
 import block_party.scene.filters.traits.Dere;
 import block_party.scene.filters.traits.Emotion;
@@ -15,6 +16,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Abstraction layer 4: entity data and accessors.
@@ -63,6 +65,40 @@ public abstract class Layer4 extends Layer3 {
         this.setGivenName(this.getGender().getUniqueName(this.level));
         this.setBloodType(this.getBloodType().weigh(this.random));
         return super.finalizeSpawn(world, difficulty, reason, data, compound);
+    }
+
+    @Override
+    public void setAdditionalBlockStateData(BlockState state) {
+        if (state.is(CustomTags.HAS_MALE_PRONOUNS))
+            this.setGender(Gender.MALE);
+        else if (state.is(CustomTags.HAS_NONBINARY_PRONOUNS))
+            this.setGender(Gender.NONBINARY);
+        else if (state.is(CustomTags.HAS_FEMALE_PRONOUNS))
+            this.setGender(Gender.FEMALE);
+
+        if (state.is(CustomTags.BLOOD_TYPE_A))
+            this.setBloodType(BloodType.A);
+        else if (state.is(CustomTags.BLOOD_TYPE_AB))
+            this.setBloodType(BloodType.AB);
+        else if (state.is(CustomTags.BLOOD_TYPE_B))
+            this.setBloodType(BloodType.B);
+        else if (state.is(CustomTags.BLOOD_TYPE_O))
+            this.setBloodType(BloodType.O);
+
+        if (state.is(CustomTags.NYANDERE))
+            this.setDere(Dere.NYANDERE);
+        else if (state.is(CustomTags.HIMEDERE))
+            this.setDere(Dere.HIMEDERE);
+        else if (state.is(CustomTags.KUUDERE))
+            this.setDere(Dere.KUUDERE);
+        else if (state.is(CustomTags.TSUNDERE))
+            this.setDere(Dere.TSUNDERE);
+        else if (state.is(CustomTags.YANDERE))
+            this.setDere(Dere.YANDERE);
+        else if (state.is(CustomTags.DEREDERE))
+            this.setDere(Dere.DEREDERE);
+        else if (state.is(CustomTags.DANDERE))
+            this.setDere(Dere.DANDERE);
     }
 
     public BloodType getBloodType() {

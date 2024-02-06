@@ -112,6 +112,7 @@ public abstract class Layer2 extends Layer1 {
         this.entityData.set(BLOCK_STATE, Optional.of(BlockAliases.get(state)));
         this.actualBlockState = state;
         if (this.isLocal()) {
+            this.setAdditionalBlockStateData(state);
             this.setScale(state.is(CustomTags.IGNORES_VOLUME) ? 1.0F : this.getBlockVolume(state));
             this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, this.fireImmune() ? 0.0F : -1.0F);
             this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, this.fireImmune() ? 0.0F : -1.0F);
@@ -123,6 +124,10 @@ public abstract class Layer2 extends Layer1 {
                 ground.setCanOpenDoors(true);
             }
         }
+    }
+
+    public void setAdditionalBlockStateData(BlockState state) {
+
     }
 
     public BlockState getActualBlockState() {

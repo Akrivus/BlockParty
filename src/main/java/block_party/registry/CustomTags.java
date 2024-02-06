@@ -14,8 +14,21 @@ public class CustomTags {
     public static final TagKey<Block> HAS_GLOW = bind(Type.BLOCK, "moe/has_glow");
     public static final TagKey<Block> HAS_MALE_PRONOUNS = bind(Type.BLOCK, "moe/has_male_pronouns");
     public static final TagKey<Block> HAS_NONBINARY_PRONOUNS = bind(Type.BLOCK, "moe/has_nonbinary_pronouns");
+    public static final TagKey<Block> HAS_FEMALE_PRONOUNS = bind(Type.BLOCK, "moe/has_female_pronouns");
     public static final TagKey<Block> HAS_WINGS = bind(Type.BLOCK, "moe/has_wings");
     public static final TagKey<Block> IGNORES_VOLUME = bind(Type.BLOCK, "moe/ignores_volume");
+    public static final TagKey<Block> BLOOD_TYPE_A = bind(Type.BLOCK, "moe/traits/blood_type/a");
+    public static final TagKey<Block> BLOOD_TYPE_AB = bind(Type.BLOCK, "moe/traits/blood_type/ab");
+    public static final TagKey<Block> BLOOD_TYPE_B = bind(Type.BLOCK, "moe/traits/blood_type/b");
+    public static final TagKey<Block> BLOOD_TYPE_O = bind(Type.BLOCK, "moe/traits/blood_type/o");
+    public static final TagKey<Block> NYANDERE = bind(Type.BLOCK, "moe/traits/dere/nyandere");
+    public static final TagKey<Block> HIMEDERE = bind(Type.BLOCK, "moe/traits/dere/himedere");
+    public static final TagKey<Block> KUUDERE = bind(Type.BLOCK, "moe/traits/dere/kuudere");
+    public static final TagKey<Block> TSUNDERE = bind(Type.BLOCK, "moe/traits/dere/tsundere");
+    public static final TagKey<Block> YANDERE = bind(Type.BLOCK, "moe/traits/dere/yandere");
+    public static final TagKey<Block> DEREDERE = bind(Type.BLOCK, "moe/traits/dere/deredere");
+    public static final TagKey<Block> DANDERE = bind(Type.BLOCK, "moe/traits/dere/dandere");
+
 
     public static class Blocks {
         public static final TagKey<Block> GINKGO_LOGS = bind(Type.BLOCK, "ginkgo_logs");
