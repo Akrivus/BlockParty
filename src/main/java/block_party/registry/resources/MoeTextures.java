@@ -3,6 +3,7 @@ package block_party.registry.resources;
 import block_party.BlockParty;
 import block_party.entities.BlockPartyNPC;
 import block_party.registry.CustomResources;
+import block_party.registry.CustomTags;
 import block_party.utils.JsonUtils;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -63,7 +64,7 @@ public class MoeTextures extends SimpleJsonResourceReloadListener {
                 }
             }
 
-            BlockStatePattern pattern = new BlockStatePattern(block, builder.build());
+            BlockStatePattern pattern = new BlockStatePattern(state, builder.build());
             ResourceLocation texture = JsonUtils.getAsResourceLocation(json, "texture");
             map.computeIfAbsent(block, (b) -> ImmutableMap.builder()).put(pattern, texture);
         }
@@ -72,23 +73,27 @@ public class MoeTextures extends SimpleJsonResourceReloadListener {
     }
 
     public static ResourceLocation get(BlockPartyNPC npc) {
-        Block block = npc.getBlock();
-        Map<BlockStatePattern, ResourceLocation> textures = CustomResources.MOE_TEXTURES.map.getOrDefault(block, ImmutableMap.of(new BlockStatePattern(block, ImmutableMap.of()), getDefaultPathFor(block)));
+        BlockState state = npc.getVisibleBlockState();
+        Map<BlockStatePattern, ResourceLocation> textures = CustomResources.MOE_TEXTURES.map.getOrDefault(state, ImmutableMap.of(new BlockStatePattern(state, ImmutableMap.of()), getDefaultPathFor(state)));
         for (BlockStatePattern pattern : textures.keySet()) {
             if (pattern.matches(npc.getActualBlockState())) { return textures.get(pattern); }
         }
-        return getDefaultPathFor(block);
+        return getDefaultPathFor(state);
     }
 
-    private static ResourceLocation getDefaultPathFor(Block block) {
-        ResourceLocation location = block.getRegistryName();
-        String path = String.format("textures/moe/%s.png", location.getPath());
+    private static ResourceLocation getDefaultPathFor(BlockState state) {
+        ResourceLocation location = state.getBlock().getRegistryName();
+        String file = location.getPath();
+        if (state.is(CustomTags.HAS_FESTIVE_TEXTURES)) {
+            file += ".christmas";
+        }
+        String path = String.format("textures/moe/%s.png", file);
         return new ResourceLocation(location.getNamespace(), path);
     }
 
-    record BlockStatePattern(Block block, Map<Property<?>, Comparable<?>> props) {
+    record BlockStatePattern(BlockState state, Map<Property<?>, Comparable<?>> props) {
         public boolean matches(BlockState state) {
-            if (this.block != state.getBlock()) { return false; }
+            if (this.state.getBlock() != state.getBlock()) { return false; }
             for (Property<?> prop : this.props.keySet()) {
                 if (this.props.get(prop) != state.getValue(prop)) { return false; }
             }
