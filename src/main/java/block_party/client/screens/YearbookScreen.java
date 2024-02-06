@@ -56,7 +56,7 @@ public class YearbookScreen extends ControllerScreen {
         this.stats[3] = String.format("%.0f", this.entity.getStress());
         this.lines[0] = Trans.late(this.entity.getDere().getTranslationKey());
         this.lines[1] = Trans.late(this.entity.getBloodType().getTranslationKey());
-        this.lines[2] = String.format(Trans.late("trait.block_party.age"), this.entity.getAgeInYears());
+        this.lines[2] = Trans.late(this.entity.getZodiac().getTranslationKey());
         if (this.npc.isEstrangedFrom(this.getPlayer())) {
             this.lines[3] = Trans.late("trait.block_party.relationship.estranged");
         } else if (this.npc.isDead()) {
