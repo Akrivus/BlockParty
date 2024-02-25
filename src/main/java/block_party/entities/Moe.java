@@ -5,7 +5,6 @@ import block_party.entities.goals.HideUntil;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomTags;
 import block_party.registry.resources.MoeSounds;
-import block_party.scene.filters.traits.Gender;
 import block_party.utils.Trans;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;

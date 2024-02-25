@@ -1,34 +1,31 @@
-package block_party.scene.filters;
+package block_party.scene.observations;
 
 import block_party.entities.BlockPartyNPC;
 import block_party.registry.CustomTags;
-import block_party.scene.ISceneFilter;
+import block_party.scene.ISceneObservation;
 import block_party.utils.JsonUtils;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.function.Function;
 
-public class AbstractEntity implements ISceneFilter {
-    protected Function<BlockPartyNPC, Entity> getter;
+public class AbstractBlock implements ISceneObservation {
+    protected Function<BlockPartyNPC, BlockState> getter;
     private boolean not = false;
-    private EntityType type;
+    private Block block;
     private TagKey<Block> tag;
 
-    public AbstractEntity(Function<BlockPartyNPC, Entity> function) {
+    public AbstractBlock(Function<BlockPartyNPC, BlockState> function) {
         this.getter = function;
     }
 
-    public AbstractEntity() { }
-
     public boolean verify(BlockPartyNPC npc) {
-        EntityType entity = this.getter.apply(npc).getType();
-        boolean pass = this.tag == null ? entity.equals(this.type) : entity.is(this.tag);
+        BlockState state = this.getter.apply(npc);
+        boolean pass = this.tag == null ? state.is(this.block) : state.is(this.tag);
         return this.not ? !pass : pass;
     }
 
@@ -37,9 +34,9 @@ public class AbstractEntity implements ISceneFilter {
         String name = GsonHelper.getAsString(json, "name");
         if (name.startsWith("#")) {
             ResourceLocation loc = new ResourceLocation(name.substring(1));
-            this.tag = CustomTags.bind(CustomTags.Type.ENTITY, loc);
+            this.tag = CustomTags.bind(CustomTags.Type.BLOCK, loc);
         } else {
-            this.type = JsonUtils.getAs(JsonUtils.ENTITY_TYPE, name);
+            this.block = JsonUtils.getAs(JsonUtils.BLOCK, name);
         }
     }
 }

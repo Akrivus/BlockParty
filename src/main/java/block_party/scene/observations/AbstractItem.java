@@ -1,13 +1,11 @@
-package block_party.scene.filters;
+package block_party.scene.observations;
 
 import block_party.entities.BlockPartyNPC;
 import block_party.registry.CustomTags;
-import block_party.scene.ISceneFilter;
+import block_party.scene.ISceneObservation;
 import block_party.utils.JsonUtils;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
@@ -15,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Function;
 
-public class AbstractItem implements ISceneFilter {
+public class AbstractItem implements ISceneObservation {
     protected Function<BlockPartyNPC, ItemStack> getter;
     private final AbstractInteger counter = new AbstractInteger((npc) -> this.getter.apply(npc).getCount());
     private boolean not = false;

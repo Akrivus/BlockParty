@@ -8,7 +8,7 @@ import block_party.registry.CustomBlockEntities;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomMessenger;
 import block_party.registry.CustomSounds;
-import block_party.scene.filters.traits.Dere;
+import block_party.scene.traits.Dere;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;

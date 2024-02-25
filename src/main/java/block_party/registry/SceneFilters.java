@@ -2,13 +2,13 @@ package block_party.registry;
 
 import block_party.BlockParty;
 import block_party.entities.BlockPartyNPC;
-import block_party.scene.ISceneFilter;
-import block_party.scene.SceneFilter;
-import block_party.scene.filters.*;
-import block_party.scene.filters.traits.BloodType;
-import block_party.scene.filters.traits.Dere;
-import block_party.scene.filters.traits.Emotion;
-import block_party.scene.filters.traits.Gender;
+import block_party.scene.ISceneObservation;
+import block_party.scene.SceneObservation;
+import block_party.scene.observations.*;
+import block_party.scene.traits.BloodType;
+import block_party.scene.traits.Dere;
+import block_party.scene.traits.Emotion;
+import block_party.scene.traits.Gender;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistryEntry;
@@ -18,23 +18,23 @@ import net.minecraftforge.registries.RegistryObject;
 import java.util.function.Supplier;
 
 public class SceneFilters {
-    public static final RegistryObject<Builder> ALWAYS = BlockParty.SCENE_FILTERS.register("always", () -> f(() -> SceneFilter.ALWAYS));
-    public static final RegistryObject<Builder> NEVER = BlockParty.SCENE_FILTERS.register("never", () -> f(() -> SceneFilter.NEVER));
-    public static final RegistryObject<Builder> IS_CORPOREAL = BlockParty.SCENE_FILTERS.register("is_corporeal", () -> f(() -> SceneFilter.IS_CORPOREAL));
-    public static final RegistryObject<Builder> IS_ETHEREAL = BlockParty.SCENE_FILTERS.register("is_ethereal", () -> f(() -> SceneFilter.IS_ETHEREAL));
-    public static final RegistryObject<Builder> RAINING = BlockParty.SCENE_FILTERS.register("if_raining", () -> f(() -> SceneFilter.RAINING));
-    public static final RegistryObject<Builder> SUNNY = BlockParty.SCENE_FILTERS.register("if_sunny", () -> f(() -> SceneFilter.SUNNY));
-    public static final RegistryObject<Builder> FULL_MOON = BlockParty.SCENE_FILTERS.register("if_full_moon", () -> f(() -> SceneFilter.FULL_MOON));
-    public static final RegistryObject<Builder> GIBBOUS_MOON = BlockParty.SCENE_FILTERS.register("if_gibbous_moon", () -> f(() -> SceneFilter.GIBBOUS_MOON));
-    public static final RegistryObject<Builder> HALF_MOON = BlockParty.SCENE_FILTERS.register("if_half_moon", () -> f(() -> SceneFilter.HALF_MOON));
-    public static final RegistryObject<Builder> CRESCENT_MOON = BlockParty.SCENE_FILTERS.register("if_crescent_moon", () -> f(() -> SceneFilter.CRESCENT_MOON));
-    public static final RegistryObject<Builder> NEW_MOON = BlockParty.SCENE_FILTERS.register("if_new_moon", () -> f(() -> SceneFilter.NEW_MOON));
-    public static final RegistryObject<Builder> MORNING = BlockParty.SCENE_FILTERS.register("if_morning", () -> f(() -> SceneFilter.MORNING));
-    public static final RegistryObject<Builder> NOON = BlockParty.SCENE_FILTERS.register("if_noon", () -> f(() -> SceneFilter.NOON));
-    public static final RegistryObject<Builder> EVENING = BlockParty.SCENE_FILTERS.register("if_evening", () -> f(() -> SceneFilter.EVENING));
-    public static final RegistryObject<Builder> NIGHT = BlockParty.SCENE_FILTERS.register("if_night", () -> f(() -> SceneFilter.NIGHT));
-    public static final RegistryObject<Builder> MIDNIGHT = BlockParty.SCENE_FILTERS.register("if_midnight", () -> f(() -> SceneFilter.MIDNIGHT));
-    public static final RegistryObject<Builder> DAWN = BlockParty.SCENE_FILTERS.register("if_dawn", () -> f(() -> SceneFilter.DAWN));
+    public static final RegistryObject<Builder> ALWAYS = BlockParty.SCENE_FILTERS.register("always", () -> f(() -> SceneObservation.ALWAYS));
+    public static final RegistryObject<Builder> NEVER = BlockParty.SCENE_FILTERS.register("never", () -> f(() -> SceneObservation.NEVER));
+    public static final RegistryObject<Builder> IS_CORPOREAL = BlockParty.SCENE_FILTERS.register("is_corporeal", () -> f(() -> SceneObservation.IS_CORPOREAL));
+    public static final RegistryObject<Builder> IS_ETHEREAL = BlockParty.SCENE_FILTERS.register("is_ethereal", () -> f(() -> SceneObservation.IS_ETHEREAL));
+    public static final RegistryObject<Builder> RAINING = BlockParty.SCENE_FILTERS.register("if_raining", () -> f(() -> SceneObservation.RAINING));
+    public static final RegistryObject<Builder> SUNNY = BlockParty.SCENE_FILTERS.register("if_sunny", () -> f(() -> SceneObservation.SUNNY));
+    public static final RegistryObject<Builder> FULL_MOON = BlockParty.SCENE_FILTERS.register("if_full_moon", () -> f(() -> SceneObservation.FULL_MOON));
+    public static final RegistryObject<Builder> GIBBOUS_MOON = BlockParty.SCENE_FILTERS.register("if_gibbous_moon", () -> f(() -> SceneObservation.GIBBOUS_MOON));
+    public static final RegistryObject<Builder> HALF_MOON = BlockParty.SCENE_FILTERS.register("if_half_moon", () -> f(() -> SceneObservation.HALF_MOON));
+    public static final RegistryObject<Builder> CRESCENT_MOON = BlockParty.SCENE_FILTERS.register("if_crescent_moon", () -> f(() -> SceneObservation.CRESCENT_MOON));
+    public static final RegistryObject<Builder> NEW_MOON = BlockParty.SCENE_FILTERS.register("if_new_moon", () -> f(() -> SceneObservation.NEW_MOON));
+    public static final RegistryObject<Builder> MORNING = BlockParty.SCENE_FILTERS.register("if_morning", () -> f(() -> SceneObservation.MORNING));
+    public static final RegistryObject<Builder> NOON = BlockParty.SCENE_FILTERS.register("if_noon", () -> f(() -> SceneObservation.NOON));
+    public static final RegistryObject<Builder> EVENING = BlockParty.SCENE_FILTERS.register("if_evening", () -> f(() -> SceneObservation.EVENING));
+    public static final RegistryObject<Builder> NIGHT = BlockParty.SCENE_FILTERS.register("if_night", () -> f(() -> SceneObservation.NIGHT));
+    public static final RegistryObject<Builder> MIDNIGHT = BlockParty.SCENE_FILTERS.register("if_midnight", () -> f(() -> SceneObservation.MIDNIGHT));
+    public static final RegistryObject<Builder> DAWN = BlockParty.SCENE_FILTERS.register("if_dawn", () -> f(() -> SceneObservation.DAWN));
     public static final RegistryObject<Builder> TIME = BlockParty.SCENE_FILTERS.register("if_time", () -> f(() -> new AbstractInteger((npc) -> (int) npc.level.getDayTime())));
     public static final RegistryObject<Builder> BLOOD_TYPE_AB = BlockParty.SCENE_FILTERS.register("if_blood_type_ab", () -> f(() -> BloodType.AB));
     public static final RegistryObject<Builder> BLOOD_TYPE_B = BlockParty.SCENE_FILTERS.register("if_blood_type_b", () -> f(() -> BloodType.B));
@@ -84,22 +84,22 @@ public class SceneFilters {
         registry.register(bus);
     }
 
-    public static ISceneFilter build(RegistryObject<Builder> action) {
+    public static ISceneObservation build(RegistryObject<Builder> action) {
         return action.get().build();
     }
 
-    private static Builder f(Supplier<ISceneFilter> action) {
+    private static Builder f(Supplier<ISceneObservation> action) {
         return new Builder(action);
     }
 
     public static class Builder extends ForgeRegistryEntry<Builder> {
-        private final Supplier<ISceneFilter> builder;
+        private final Supplier<ISceneObservation> builder;
 
-        public Builder(Supplier<ISceneFilter> builder) {
+        public Builder(Supplier<ISceneObservation> builder) {
             this.builder = builder;
         }
 
-        public ISceneFilter build() {
+        public ISceneObservation build() {
             return this.builder.get();
         }
     }

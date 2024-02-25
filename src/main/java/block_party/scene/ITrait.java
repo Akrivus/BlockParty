@@ -5,7 +5,7 @@ import block_party.utils.Trans;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 
-public interface ITrait<T extends ITrait> extends ISceneFilter {
+public interface ITrait<T extends ITrait> extends ISceneObservation {
     default boolean verify(BlockPartyNPC npc) {
         return this.isSharedWith(npc);
     }

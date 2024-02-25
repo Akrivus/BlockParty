@@ -2,7 +2,7 @@ package block_party.entities.abstraction;
 
 import block_party.entities.BlockPartyNPC;
 import block_party.registry.CustomTags;
-import block_party.scene.filters.traits.*;
+import block_party.scene.traits.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;

@@ -1,4 +1,4 @@
-package block_party.scene.filters;
+package block_party.scene.observations;
 
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;

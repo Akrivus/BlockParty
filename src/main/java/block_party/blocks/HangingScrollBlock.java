@@ -1,7 +1,7 @@
 package block_party.blocks;
 
 import block_party.blocks.entity.HangingScrollBlockEntity;
-import block_party.scene.SceneFilter;
+import block_party.scene.SceneObservation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -24,9 +24,9 @@ public class HangingScrollBlock extends AbstractDataBlock<HangingScrollBlockEnti
     protected static final VoxelShape EAST_AABB = Block.box(14.0D, 1.0D, 1.0D, 16.0D, 15.0D, 15.0D);
     protected static final VoxelShape SOUTH_AABB = Block.box(1.0D, 1.0D, 14.0D, 15.0D, 15.0D, 16.0D);
     protected static final VoxelShape WEST_AABB = Block.box(0.0D, 1.0D, 1.0D, 2.0D, 15.0D, 15.0D);
-    protected final SceneFilter condition;
+    protected final SceneObservation condition;
 
-    public HangingScrollBlock(Properties properties, SceneFilter condition) {
+    public HangingScrollBlock(Properties properties, SceneObservation condition) {
         super(HangingScrollBlockEntity::new, properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
         this.condition = condition;

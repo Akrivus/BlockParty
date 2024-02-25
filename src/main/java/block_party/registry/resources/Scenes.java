@@ -3,7 +3,7 @@ package block_party.registry.resources;
 import block_party.BlockParty;
 import block_party.entities.BlockPartyNPC;
 import block_party.scene.ISceneAction;
-import block_party.scene.ISceneFilter;
+import block_party.scene.ISceneObservation;
 import block_party.scene.Scene;
 import block_party.scene.SceneTrigger;
 import block_party.utils.JsonUtils;
@@ -50,7 +50,7 @@ public class Scenes extends SimpleJsonResourceReloadListener {
 
             SceneTrigger trigger = SceneTrigger.NULL.fromValue(JsonUtils.getAsResourceLocation(json, "trigger"));
 
-            List<ISceneFilter> filters = ISceneFilter.parseArray(json.getAsJsonArray("filters"));
+            List<ISceneObservation> filters = ISceneObservation.parseArray(json.getAsJsonArray("filters"));
             List<ISceneAction> actions = ISceneAction.parseArray(json.getAsJsonArray("actions"));
 
             Scene scene = new Scene(filters, actions);

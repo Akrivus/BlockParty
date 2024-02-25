@@ -2,7 +2,7 @@ package block_party.registry.resources;
 
 import block_party.BlockParty;
 import block_party.registry.CustomResources;
-import block_party.scene.filters.traits.Gender;
+import block_party.scene.traits.Gender;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.*;

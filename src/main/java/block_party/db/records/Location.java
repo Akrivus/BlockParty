@@ -5,7 +5,7 @@ import block_party.db.BlockPartyDB;
 import block_party.db.sql.Column;
 import block_party.db.sql.Row;
 import block_party.db.sql.Table;
-import block_party.scene.SceneFilter;
+import block_party.scene.SceneObservation;
 import net.minecraft.nbt.CompoundTag;
 
 import java.sql.ResultSet;
@@ -46,7 +46,7 @@ public class Location extends Row<LocativeBlockEntity> {
     public static class Schema extends Table<Location> {
         public Schema() {
             super("Locations");
-            this.addColumn(new Column.AsEnum<>(this, "RequiredCondition", SceneFilter.ALWAYS, (value) -> SceneFilter.valueOf(value)));
+            this.addColumn(new Column.AsEnum<>(this, "RequiredCondition", SceneObservation.ALWAYS, (value) -> SceneObservation.valueOf(value)));
             this.addColumn(new Column.AsInteger(this, "Priority"));
         }
 

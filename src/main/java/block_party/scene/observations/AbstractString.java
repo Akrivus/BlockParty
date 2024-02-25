@@ -1,14 +1,14 @@
-package block_party.scene.filters;
+package block_party.scene.observations;
 
 import block_party.entities.BlockPartyNPC;
-import block_party.scene.ISceneFilter;
+import block_party.scene.ISceneObservation;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
 
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
-public class AbstractString implements ISceneFilter {
+public class AbstractString implements ISceneObservation {
     protected Function<BlockPartyNPC, String> function;
     private Operation operation;
     private String value;

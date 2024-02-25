@@ -1,4 +1,4 @@
-package block_party.scene.filters.traits;
+package block_party.scene.traits;
 
 import block_party.entities.BlockPartyNPC;
 import block_party.registry.resources.MoeSounds;

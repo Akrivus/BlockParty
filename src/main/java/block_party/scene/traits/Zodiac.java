@@ -1,11 +1,7 @@
-package block_party.scene.filters.traits;
+package block_party.scene.traits;
 
 import block_party.entities.BlockPartyNPC;
 import block_party.scene.ITrait;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
 
 public enum Zodiac implements ITrait<Zodiac> {
     ARIES, TAURUS, GEMINI, CANCER,

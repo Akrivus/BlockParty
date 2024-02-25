@@ -1,4 +1,4 @@
-package block_party.scene.filters.traits;
+package block_party.scene.traits;
 
 import block_party.db.BlockPartyDB;
 import block_party.entities.BlockPartyNPC;

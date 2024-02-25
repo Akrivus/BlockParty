@@ -4,7 +4,7 @@ import block_party.entities.BlockPartyNPC;
 
 import java.util.function.Predicate;
 
-public enum SceneFilter implements ISceneFilter {
+public enum SceneObservation implements ISceneObservation {
     ALWAYS((npc) -> true),
     NEVER((npc) -> false),
     IS_CORPOREAL((npc) -> npc.isCorporeal()),
@@ -25,7 +25,7 @@ public enum SceneFilter implements ISceneFilter {
 
     private final Predicate<BlockPartyNPC> condition;
 
-    SceneFilter(Predicate<BlockPartyNPC> condition) {
+    SceneObservation(Predicate<BlockPartyNPC> condition) {
         this.condition = condition;
     }
 

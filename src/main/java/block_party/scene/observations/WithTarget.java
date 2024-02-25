@@ -1,4 +1,4 @@
-package block_party.scene.filters;
+package block_party.scene.observations;
 
 import block_party.scene.SceneVariables;
 import com.google.gson.JsonObject;
