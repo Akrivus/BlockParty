@@ -6,7 +6,7 @@ import net.minecraft.world.item.Item;
 
 public class CalligraphyBrushItem extends Item implements ISortableItem {
     public CalligraphyBrushItem() {
-        super(new Properties().tab(BlockParty.CreativeModeTab).stacksTo(1).durability(64));
+        super(new Properties().stacksTo(1).durability(64));
     }
 
     @Override

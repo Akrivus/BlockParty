@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class LetterItem extends Item implements ISortableItem {
     public LetterItem() {
-        super(new Properties().tab(BlockParty.CreativeModeTab));
+        super(new Properties());
     }
 
     @Override

@@ -8,7 +8,7 @@ import block_party.scene.traits.BloodType;
 import block_party.scene.traits.Dere;
 import block_party.utils.sorters.ISortableItem;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class CustomSpawnEggItem extends Item implements ISortableItem {
     public CustomSpawnEggItem() {
-        super(new Properties().tab(BlockParty.CreativeModeTab));
+        super(new Properties());
     }
 
     @Override
@@ -35,7 +35,7 @@ public class CustomSpawnEggItem extends Item implements ISortableItem {
             moe.setDatabaseID(pos.asLong());
             moe.setBlockState(state);
             if (moe.getActualBlockState().hasBlockEntity())
-                moe.setTileEntityData(level.getBlockEntity(pos).getTileData());
+                moe.setTileEntityData(level.getBlockEntity(pos).getPersistentData());
             moe.setDere(Dere.random());
             moe.setBloodType(BloodType.O.weigh(moe.getRandom()));
             moe.setPlayer(player);
@@ -46,7 +46,7 @@ public class CustomSpawnEggItem extends Item implements ISortableItem {
             return InteractionResult.CONSUME;
         } else {
             String name = level.getBlockState(pos).getBlock().getName().getString();
-            player.displayClientMessage(new TranslatableComponent("item.block_party.moe_spawn_egg.error", name), true);
+            player.displayClientMessage(Component.translatable("item.block_party.moe_spawn_egg.error", name), true);
             return InteractionResult.FAIL;
         }
     }

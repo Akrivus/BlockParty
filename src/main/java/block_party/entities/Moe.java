@@ -6,6 +6,7 @@ import block_party.registry.CustomEntities;
 import block_party.registry.CustomTags;
 import block_party.registry.resources.MoeSounds;
 import block_party.utils.Trans;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -41,7 +42,7 @@ public class Moe extends BlockPartyNPC {
     }
 
     public String getFamilyName() {
-        ResourceLocation block = this.getBlock().getRegistryName();
+        ResourceLocation block = this.getTagName();
         return Trans.late(String.format("entity.block_party.%s.%s", block.getNamespace(), block.getPath()));
     }
 

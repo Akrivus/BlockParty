@@ -14,10 +14,10 @@ import net.minecraftforge.registries.DeferredRegister;
 
 public class CustomWorldGen {
     public static class ConfiguredFeatures {
-        public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> GINKGO = FeatureUtils.register("ginkgo", Feature.TREE, GinkgoTreeGrower.config());
-        public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> SAKURA = FeatureUtils.register("sakura", Feature.TREE, SakuraTreeGrower.config());
-        public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> WHITE_SAKURA = FeatureUtils.register("white_sakura", Feature.TREE, WhiteSakuraTreeGrower.config());
-        public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> WISTERIA = FeatureUtils.register("wisteria", Feature.TREE, WisteriaTreeGrower.config());
+        public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> GINKGO = null;//FeatureUtils.register("ginkgo", Feature.TREE, GinkgoTreeGrower.config());
+        public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> SAKURA = null;//FeatureUtils.register("sakura", Feature.TREE, SakuraTreeGrower.config());
+        public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> WHITE_SAKURA = null;//FeatureUtils.register("white_sakura", Feature.TREE, WhiteSakuraTreeGrower.config());
+        public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> WISTERIA = null;//FeatureUtils.register("wisteria", Feature.TREE, WisteriaTreeGrower.config());
     }
 
     public static class Features {

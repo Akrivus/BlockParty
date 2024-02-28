@@ -4,6 +4,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -42,8 +43,8 @@ public class SakuraParticle extends TextureSheetParticle {
         return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
     }
 
-    public static void add(RegistryObject<SimpleParticleType> particle, Level level, BlockPos pos, Random random) {
-        BlockPos spawn = pos.offset(random.nextDouble(), -1.0D, random.nextDouble());
+    public static void add(RegistryObject<SimpleParticleType> particle, Level level, BlockPos pos, RandomSource random) {
+        BlockPos spawn = pos.offset(random.nextInt(), -1, random.nextInt());
         if (random.nextInt(10) == 0 && level.isEmptyBlock(spawn)) {
             double direction = level.getDayTime() / 1000 * 15.0D;
             double x = Math.sin(0.0174444444D * direction) * (random.nextDouble() + random.nextInt(6));

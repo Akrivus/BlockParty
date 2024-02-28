@@ -3,6 +3,8 @@ package block_party.blocks.grower;
 import block_party.registry.CustomBlocks;
 import block_party.registry.CustomWorldGen;
 import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.level.block.grower.AbstractTreeGrower;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -17,8 +19,8 @@ import java.util.Random;
 
 public class WhiteSakuraTreeGrower extends AbstractTreeGrower {
     @Override
-    protected Holder<ConfiguredFeature<TreeConfiguration, ?>> getConfiguredFeature(Random random, boolean hive) {
-        return CustomWorldGen.ConfiguredFeatures.WHITE_SAKURA;
+    protected ResourceKey<ConfiguredFeature<?, ?>> getConfiguredFeature(RandomSource random, boolean hive) {
+        return (ResourceKey<ConfiguredFeature<?, ?>>) CustomWorldGen.ConfiguredFeatures.WHITE_SAKURA;
     }
 
     public static TreeConfiguration config() {

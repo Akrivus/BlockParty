@@ -2,6 +2,7 @@ package block_party.registry;
 
 import block_party.BlockParty;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -63,7 +64,7 @@ public class CustomTags {
     }
 
     public enum Type {
-        BLOCK(Registry.BLOCK_REGISTRY), ENTITY(Registry.ENTITY_TYPE_REGISTRY), ITEM(Registry.ITEM_REGISTRY);
+        BLOCK(Registries.BLOCK), ENTITY(Registries.ENTITY_TYPE), ITEM(Registries.ITEM);
 
         final ResourceKey<? extends Registry<?>> registry;
 

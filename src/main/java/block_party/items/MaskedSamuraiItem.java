@@ -7,8 +7,8 @@ import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber
 public class MaskedSamuraiItem extends SamuraiArmorItem {
-    public MaskedSamuraiItem(EquipmentSlot slot) {
-        super("samurai_mask", slot);
+    public MaskedSamuraiItem(EquipmentSlot slot, Type type) {
+        super("samurai_mask", slot, type);
     }
 
     @Override

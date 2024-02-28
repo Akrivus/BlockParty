@@ -1,5 +1,6 @@
 package block_party.scene;
 
+import block_party.BlockParty;
 import block_party.entities.BlockPartyNPC;
 import block_party.registry.SceneFilters;
 import block_party.registry.resources.Scenes;

@@ -10,23 +10,22 @@ import block_party.utils.Trans;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Quaternion;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Quaternionf;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class YearbookScreen extends ControllerScreen {
     public static final ResourceLocation YEARBOOK_TEXTURES = BlockParty.source("textures/gui/yearbook.png");
@@ -74,7 +73,7 @@ public class YearbookScreen extends ControllerScreen {
 
     private void updateButtons() {
         if (this.npcs.isEmpty()) {
-            this.getPlayer().displayClientMessage(new TranslatableComponent("gui.block_party.error.empty"), true);
+            this.getPlayer().displayClientMessage(Component.translatable("gui.block_party.error.empty"), true);
             this.onClose();
         } else {
             this.page = String.format(Trans.late("gui.block_party.label.page"), this.index + 1, this.count);
@@ -107,20 +106,20 @@ public class YearbookScreen extends ControllerScreen {
     public void renderTooltips(PoseStack stack, int mouseX, int mouseY) {
         List<Component> text = new ArrayList<>();
         if (this.buttonRemovePage.isHoveredOrFocused()) {
-            text.add(new TranslatableComponent("gui.block_party.button.remove"));
+            text.add(Component.translatable("gui.block_party.button.remove"));
         }
         if (102 < mouseY && mouseY < 112) {
             if (this.getAbsoluteCenter(50) < mouseX && mouseX < this.getAbsoluteCenter(24)) {
-                text.add(new TranslatableComponent("gui.block_party.label.health"));
+                text.add(Component.translatable("gui.block_party.label.health"));
             }
             if (this.getAbsoluteCenter(24) < mouseX && mouseX < this.getAbsoluteCenter(2)) {
-                text.add(new TranslatableComponent("gui.block_party.label.food_level"));
+                text.add(Component.translatable("gui.block_party.label.food_level"));
             }
             if (this.getAbsoluteCenter(2) < mouseX && mouseX < this.getAbsoluteCenter(-24)) {
-                text.add(new TranslatableComponent("gui.block_party.label.loyalty"));
+                text.add(Component.translatable("gui.block_party.label.loyalty"));
             }
             if (this.getAbsoluteCenter(-24) < mouseX && mouseX < this.getAbsoluteCenter(-50)) {
-                text.add(new TranslatableComponent("gui.block_party.label.stress"));
+                text.add(Component.translatable("gui.block_party.label.stress"));
             }
         }
         if (text.size() > 0) {
@@ -171,7 +170,7 @@ public class YearbookScreen extends ControllerScreen {
 
     @Override
     protected void init() {
-        this.addRenderableWidget(new Button(this.getCenter(136), 196, 136, 20, CommonComponents.GUI_DONE, (button) -> this.minecraft.setScreen(null)));
+        this.addRenderableWidget(new QuickWidgetButton(this));
         this.addRenderableWidget(this.buttonNextPage = new TurnPageButton(this.getCenter(146) + 122, 51, 1, (button) -> {
             if (this.index + 1 < this.count) { this.getNPC(this.index + 1); }
         }));
@@ -206,7 +205,14 @@ public class YearbookScreen extends ControllerScreen {
     protected void setEntityModelStack(PoseStack pose, float scale) {
         pose.translate(0.0D, 0.0D, 1000.0D);
         pose.scale(scale, scale, scale);
-        pose.mulPose(new Quaternion(0.0F, -1.0F, 0.0F, 0.0F));
+        pose.mulPose(new Quaternionf(0.0F, -1.0F, 0.0F, 0.0F));
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public class QuickWidgetButton extends Button {
+        public QuickWidgetButton(YearbookScreen screen) {
+            super(screen.getCenter(136), 196, 136, 20, CommonComponents.GUI_DONE, (button) -> screen.minecraft.setScreen(null), (n) -> Component.empty());
+        }
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -214,7 +220,7 @@ public class YearbookScreen extends ControllerScreen {
         private final int delta;
 
         public TurnPageButton(int x, int y, int delta, OnPress button) {
-            super(x, y, 7, 10, TextComponent.EMPTY, button);
+            super(x, y, 7, 10, Component.empty(), button, (n) -> Component.empty());
             this.delta = delta;
         }
 
@@ -224,20 +230,20 @@ public class YearbookScreen extends ControllerScreen {
         }
 
         @Override
-        public void renderButton(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
             int x = this.delta > 0 ? 226 : 147;
             int y = this.isHoveredOrFocused() ? 35 : 63;
-            this.blit(stack, this.x, this.y, x, y, 7, 10);
+            this.blit(stack, this.getX(), this.getY(), x, y, 7, 10);
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     public class RemovePageButton extends Button {
         public RemovePageButton(int x, int y, OnPress button) {
-            super(x, y, 18, 18, TextComponent.EMPTY, button);
+            super(x, y, 18, 18, Component.empty(), button, (n) -> Component.empty());
         }
 
         @Override
@@ -246,12 +252,12 @@ public class YearbookScreen extends ControllerScreen {
         }
 
         @Override
-        public void renderButton(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
             int x = this.isHoveredOrFocused() ? 164 : 146;
-            this.blit(stack, this.x, this.y, x, 7, 18, 18);
+            this.blit(stack, this.getX(), this.getY(), x, 7, 18, 18);
         }
     }
 }

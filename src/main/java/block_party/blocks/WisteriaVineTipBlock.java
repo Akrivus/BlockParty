@@ -4,6 +4,7 @@ import block_party.registry.CustomBlocks;
 import block_party.registry.CustomTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -29,7 +30,7 @@ public class WisteriaVineTipBlock extends GrowingPlantHeadBlock {
     }
 
     @Override
-    protected int getBlocksToGrowWhenBonemealed(Random rand) {
+    protected int getBlocksToGrowWhenBonemealed(RandomSource rand) {
         return NetherVines.getBlocksToGrowWhenBonemealed(rand);
     }
 

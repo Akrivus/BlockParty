@@ -4,9 +4,7 @@ import block_party.BlockParty;
 import block_party.entities.BlockPartyNPC;
 import block_party.scene.ISceneAction;
 import block_party.scene.actions.*;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -24,9 +22,10 @@ public class SceneActions {
     public static final RegistryObject<Builder> HIDE = BlockParty.SCENE_ACTIONS.register("hide", () -> f(Hide::new));
     public static final RegistryObject<Builder> END = BlockParty.SCENE_ACTIONS.register("end", () -> f(() -> new End()));
 
-    public static void add(DeferredRegister<Builder> registry, IEventBus bus) {
-        registry.makeRegistry("scene_action", () -> new RegistryBuilder<Builder>().setType(Builder.class));
-        registry.register(bus);
+    public static void setup(NewRegistryEvent e) {
+        e.create(new RegistryBuilder<Builder>()
+                .setName(BlockParty.source("actions"))
+                .setMaxID(Integer.MAX_VALUE - 1));
     }
 
     public static ISceneAction build(RegistryObject<Builder> action) {
@@ -37,7 +36,7 @@ public class SceneActions {
         return new Builder(action);
     }
 
-    public static class Builder extends ForgeRegistryEntry<Builder> {
+    public static class Builder {
         private final Supplier<ISceneAction> builder;
 
         public Builder(Supplier<ISceneAction> factory) {

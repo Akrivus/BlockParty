@@ -28,7 +28,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.client.IItemRenderProperties;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.player.PlayerXpEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -40,10 +40,10 @@ import java.util.function.Consumer;
 public class SamuraiArmorItem extends ArmorItem {
     private final String texture;
 
-    protected SamuraiArmorItem(String texture, EquipmentSlot slot) {
+    protected SamuraiArmorItem(String texture, EquipmentSlot slot, Type type) {
         super(new ArmorMaterial() {
             @Override
-            public int getDurabilityForSlot(EquipmentSlot slot) {
+            public int getDurabilityForType(Type type) {
                 switch (slot) {
                 case HEAD:
                     return 156;
@@ -59,15 +59,15 @@ public class SamuraiArmorItem extends ArmorItem {
             }
 
             @Override
-            public int getDefenseForSlot(EquipmentSlot slot) {
-                switch (slot) {
-                case HEAD:
+            public int getDefenseForType(Type type) {
+                switch (type) {
+                case HELMET:
                     return 3;
-                case CHEST:
+                case CHESTPLATE:
                     return 4;
-                case LEGS:
+                case LEGGINGS:
                     return 5;
-                case FEET:
+                case BOOTS:
                     return 2;
                 default:
                     return 0;
@@ -103,12 +103,12 @@ public class SamuraiArmorItem extends ArmorItem {
             public String getName() {
                 return BlockParty.source(texture).toString();
             }
-        }, slot, new Properties().tab(BlockParty.CreativeModeTab).stacksTo(1));
+        }, type, new Properties().stacksTo(1));
         this.texture = texture;
     }
 
-    public SamuraiArmorItem(EquipmentSlot slot) {
-        this("samurai", slot);
+    public SamuraiArmorItem(EquipmentSlot slot, Type type) {
+        this("samurai", slot, type);
     }
 
     @Override
@@ -122,10 +122,10 @@ public class SamuraiArmorItem extends ArmorItem {
     }
 
     @Override
-    public void initializeClient(Consumer<IItemRenderProperties> renderer) {
-        renderer.accept(new IItemRenderProperties() {
+    public void initializeClient(Consumer<IClientItemExtensions> renderer) {
+        renderer.accept(new IClientItemExtensions() {
             @Override
-            public HumanoidModel<?> getArmorModel(LivingEntity entity, ItemStack stack, EquipmentSlot slot, HumanoidModel<?> _default) {
+            public HumanoidModel<?> getHumanoidArmorModel(LivingEntity entity, ItemStack stack, EquipmentSlot slot, HumanoidModel<?> _default) {
                 return SamuraiModel.getArmorModel(slot);
             }
 
@@ -156,7 +156,7 @@ public class SamuraiArmorItem extends ArmorItem {
     @SubscribeEvent
     public static void onXP(PlayerXpEvent.PickupXp e) {
         ExperienceOrb orb = e.getOrb();
-        if (e.getPlayer() instanceof ServerPlayer player) {
+        if (e.getEntity() instanceof ServerPlayer player) {
             EquipmentSlot slot = EquipmentSlot.values()[orb.level.random.nextInt(5)];
             ItemStack stack = player.getItemBySlot(slot);
             if (stack.is(CustomTags.Items.SAMURAI_ITEMS)) {

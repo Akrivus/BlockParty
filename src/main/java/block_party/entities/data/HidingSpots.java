@@ -13,10 +13,10 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.event.world.PistonEvent;
+import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.level.PistonEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -100,24 +100,24 @@ public class HidingSpots extends SavedData {
 
     @SubscribeEvent
     public static void onBreakStart(PlayerInteractEvent.LeftClickBlock e) {
-        if (e.getWorld() instanceof ServerLevel level)
+        if (e.getLevel() instanceof ServerLevel level)
             spawn(level, new DimBlockPos(level.dimension(), e.getPos()));
     }
 
     @SubscribeEvent
     public static void onBreakEnd(BlockEvent.BreakEvent e) {
-        if (e.getWorld() instanceof ServerLevel level)
+        if (e.getLevel() instanceof ServerLevel level)
             spawn(level, new DimBlockPos(level.dimension(), e.getPos()));
     }
 
     @SubscribeEvent
     public static void onPistonPush(PistonEvent.Pre e) {
-        if (e.getWorld() instanceof ServerLevel level)
+        if (e.getLevel() instanceof ServerLevel level)
             spawn(level, new DimBlockPos(level.dimension(), e.getPos()));
     }
 
     @SubscribeEvent
-    public static void onFalling(EntityJoinWorldEvent e) {
+    public static void onFalling(EntityJoinLevelEvent e) {
         if (e.getEntity() instanceof FallingBlockEntity entity) {
             if (entity.level.isClientSide())
                 return;

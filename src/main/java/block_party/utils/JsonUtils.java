@@ -1,9 +1,12 @@
 package block_party.utils;
 
 import com.google.gson.JsonObject;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.RegistryManager;
 
 public class JsonUtils {
@@ -17,23 +20,20 @@ public class JsonUtils {
     public static final ResourceLocation SCENE_ACTION = new ResourceLocation("block_party:scene_action");
     public static final ResourceLocation SCENE_FILTER = new ResourceLocation("block_party:scene_filter");
 
-    public static <T extends IForgeRegistryEntry> T getAs(ResourceLocation registry, String location) {
-        return getAs(registry, new ResourceLocation(location));
-    }
-
-    public static <T extends IForgeRegistryEntry> T getAs(ResourceLocation registry, ResourceLocation location) {
-        return (T) RegistryManager.ACTIVE.getRegistry(registry).getValue(location);
-    }
-
-    public static <T extends IForgeRegistryEntry> T getAs(ResourceLocation registry, JsonObject json, String key) {
-        return getAs(registry, getAsResourceLocation(json, key));
-    }
-
     public static ResourceLocation getAsResourceLocation(JsonObject json, String key) {
         return new ResourceLocation(GsonHelper.getAsString(json, key));
     }
 
     public static ResourceLocation getAsResourceLocation(JsonObject json, String key, String def) {
         return new ResourceLocation(GsonHelper.getAsString(json, key, def));
+    }
+
+    public static <T> T getAs(ResourceLocation registry, ResourceLocation location) {
+        return (T) null;
+    }
+
+    public static <T> T getAs(ResourceLocation registry, String location)
+    {
+        return getAs(registry, new ResourceLocation(location));
     }
 }

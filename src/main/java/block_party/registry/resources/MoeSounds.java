@@ -72,7 +72,8 @@ public class MoeSounds extends SimpleJsonResourceReloadListener {
             for (Sound sound : Sound.values()) {
                 Supplier<SoundEvent> soundEvent = sound.getDefaultSoundSupplier();
                 if (json.has(sound.getName())) {
-                    soundEvent = () -> JsonUtils.getAs(JsonUtils.SOUND_EVENT, json, sound.getName());
+                    String name = json.get(sound.getName()).getAsString();
+                    soundEvent = () -> JsonUtils.getAs(JsonUtils.SOUND_EVENT, name);
                 }
                 sounds.put(sound, soundEvent);
             }

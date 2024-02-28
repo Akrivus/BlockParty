@@ -31,7 +31,7 @@ public class GlowLayer extends RenderLayer<Moe, MoeModel<Moe>> {
     }
 
     public ResourceLocation getTexture(Moe moe) {
-        ResourceLocation block = moe.getBlock().getRegistryName();
+        ResourceLocation block = moe.getTagName();
         String path = String.format("textures/moe/%s.glow.png", block.getPath());
         return new ResourceLocation(block.getNamespace(), path);
     }

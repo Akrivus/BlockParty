@@ -7,6 +7,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -48,7 +49,7 @@ public class SakuraBlossomsBlock extends LeavesBlock {
     }
 
     @Override
-    public void randomTick(BlockState state, ServerLevel level, BlockPos pos, Random random) {
+    public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         super.randomTick(state, level, pos, random);
         if (state.getValue(PERSISTENT)) { return; }
         this.bloomOrClose(state, pos, level);
@@ -60,7 +61,7 @@ public class SakuraBlossomsBlock extends LeavesBlock {
     }
 
     @Override
-    public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
+    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         super.animateTick(state, level, pos, random);
         if (state.getValue(BLOOMING)) {
             SakuraParticle.add(this.particle, level, pos, random);

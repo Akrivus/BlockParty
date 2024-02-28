@@ -3,7 +3,6 @@ package block_party.items;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -21,7 +20,7 @@ public class YearbookPageItem extends Item {
         if (stack.hasTag()) {
             CompoundTag tag = stack.getShareTag().getCompound("NPC");
             String name = String.format("%s %s", tag.getString("FamilyName"), tag.getString("GivenName"));
-            list.add(new TextComponent(name).withStyle(ChatFormatting.GRAY));
+            list.add(Component.literal(name).withStyle(ChatFormatting.GRAY));
         }
     }
 }

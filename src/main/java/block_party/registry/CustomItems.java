@@ -6,6 +6,7 @@ import block_party.utils.sorters.ISortableItem;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -44,11 +45,11 @@ public class CustomItems {
     public static final RegistryObject<Item> LIGHT_GRAY_PAPER_LANTERN = BlockParty.ITEMS.register("light_gray_paper_lantern", () -> new MoeBlockItem(CustomBlocks.LIGHT_GRAY_PAPER_LANTERN));
     public static final RegistryObject<Item> LIME_PAPER_LANTERN = BlockParty.ITEMS.register("lime_paper_lantern", () -> new MoeBlockItem(CustomBlocks.LIME_PAPER_LANTERN));
     public static final RegistryObject<Item> MAGENTA_PAPER_LANTERN = BlockParty.ITEMS.register("magenta_paper_lantern", () -> new MoeBlockItem(CustomBlocks.MAGENTA_PAPER_LANTERN));
-    public static final RegistryObject<Item> MASKED_SAMURAI_KABUTO = BlockParty.ITEMS.register("masked_samurai_kabuto", () -> new MaskedSamuraiItem(EquipmentSlot.HEAD));
+    public static final RegistryObject<Item> MASKED_SAMURAI_KABUTO = BlockParty.ITEMS.register("masked_samurai_kabuto", () -> new MaskedSamuraiItem(EquipmentSlot.HEAD, ArmorItem.Type.HELMET));
     public static final RegistryObject<Item> MIDNIGHT_HANGING_SCROLL = BlockParty.ITEMS.register("midnight_hanging_scroll", () -> new MoeBlockItem(CustomBlocks.MIDNIGHT_HANGING_SCROLL, 90));
     public static final RegistryObject<Item> MORNING_HANGING_SCROLL = BlockParty.ITEMS.register("morning_hanging_scroll", () -> new MoeBlockItem(CustomBlocks.MORNING_HANGING_SCROLL, 90));
-    public static final RegistryObject<Item> MUSIC_DISC_ANTEATER_SANCTUARY = BlockParty.ITEMS.register("music_disc_anteater_sanctuary", () -> new MoeMusicItem(CustomSounds.MUSIC_DISC_ANTEATER_SANCTUARY));
-    public static final RegistryObject<Item> MUSIC_DISC_SAKURA_SAKURA = BlockParty.ITEMS.register("music_disc_sakura_sakura", () -> new MoeMusicItem(CustomSounds.MUSIC_DISC_SAKURA_SAKURA));
+    public static final RegistryObject<Item> MUSIC_DISC_ANTEATER_SANCTUARY = BlockParty.ITEMS.register("music_disc_anteater_sanctuary", () -> new MoeMusicItem(CustomSounds.MUSIC_DISC_ANTEATER_SANCTUARY, 100));
+    public static final RegistryObject<Item> MUSIC_DISC_SAKURA_SAKURA = BlockParty.ITEMS.register("music_disc_sakura_sakura", () -> new MoeMusicItem(CustomSounds.MUSIC_DISC_SAKURA_SAKURA, 233));
     public static final RegistryObject<Item> NIGHT_HANGING_SCROLL = BlockParty.ITEMS.register("night_hanging_scroll", () -> new MoeBlockItem(CustomBlocks.NIGHT_HANGING_SCROLL, 90));
     public static final RegistryObject<Item> NOON_HANGING_SCROLL = BlockParty.ITEMS.register("noon_hanging_scroll", () -> new MoeBlockItem(CustomBlocks.NOON_HANGING_SCROLL, 90));
     public static final RegistryObject<Item> ONIGIRI = BlockParty.ITEMS.register("onigiri", OnigiriItem::new);
@@ -69,10 +70,10 @@ public class CustomItems {
     public static final RegistryObject<Item> SAKURA_SLAB = BlockParty.ITEMS.register("sakura_slab", () -> new MoeBlockItem(CustomBlocks.SAKURA_SLAB, 20));
     public static final RegistryObject<Item> SAKURA_STAIRS = BlockParty.ITEMS.register("sakura_stairs", () -> new MoeBlockItem(CustomBlocks.SAKURA_STAIRS, 20));
     public static final RegistryObject<Item> SAKURA_WOOD = BlockParty.ITEMS.register("sakura_wood", () -> new MoeBlockItem(CustomBlocks.SAKURA_WOOD, 20));
-    public static final RegistryObject<Item> SAMURAI_KABUTO = BlockParty.ITEMS.register("samurai_kabuto", () -> new SamuraiArmorItem(EquipmentSlot.HEAD));
-    public static final RegistryObject<Item> SAMURAI_CUIRASS = BlockParty.ITEMS.register("samurai_cuirass", () -> new SamuraiArmorItem(EquipmentSlot.CHEST));
-    public static final RegistryObject<Item> SAMURAI_CHAUSSES = BlockParty.ITEMS.register("samurai_chausses", () -> new SamuraiArmorItem(EquipmentSlot.LEGS));
-    public static final RegistryObject<Item> SAMURAI_SABATON = BlockParty.ITEMS.register("samurai_sabaton", () -> new SamuraiArmorItem(EquipmentSlot.FEET));
+    public static final RegistryObject<Item> SAMURAI_KABUTO = BlockParty.ITEMS.register("samurai_kabuto", () -> new SamuraiArmorItem(EquipmentSlot.HEAD, ArmorItem.Type.HELMET));
+    public static final RegistryObject<Item> SAMURAI_CUIRASS = BlockParty.ITEMS.register("samurai_cuirass", () -> new SamuraiArmorItem(EquipmentSlot.CHEST, ArmorItem.Type.CHESTPLATE));
+    public static final RegistryObject<Item> SAMURAI_CHAUSSES = BlockParty.ITEMS.register("samurai_chausses", () -> new SamuraiArmorItem(EquipmentSlot.LEGS, ArmorItem.Type.LEGGINGS));
+    public static final RegistryObject<Item> SAMURAI_SABATON = BlockParty.ITEMS.register("samurai_sabaton", () -> new SamuraiArmorItem(EquipmentSlot.FEET, ArmorItem.Type.BOOTS));
     public static final RegistryObject<Item> SAMURAI_KATANA = BlockParty.ITEMS.register("samurai_katana", () -> new SamuraiKatanaItem());
     public static final RegistryObject<Item> SHIMENAWA = BlockParty.ITEMS.register("shimenawa", () -> new MoeBlockItem(CustomBlocks.SHIMENAWA, 6));
     public static final RegistryObject<Item> SHOJI_BLOCK = BlockParty.ITEMS.register("shoji_block", () -> new MoeBlockItem(CustomBlocks.SHOJI_BLOCK, 20));
@@ -107,6 +108,7 @@ public class CustomItems {
         ItemProperties.register(CustomItems.LETTER.get(), new ResourceLocation("closed"), (stack, world, entity, damage) -> LetterItem.isClosed(stack));
     }
 
+    /*
     public static int compare(ItemStack one, ItemStack two) {
         Item item1 = one.getItem();
         Item item2 = two.getItem();
@@ -129,4 +131,5 @@ public class CustomItems {
             return name1.compareToIgnoreCase(name2);
         }
     }
+    */
 }

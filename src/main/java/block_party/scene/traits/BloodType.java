@@ -2,6 +2,7 @@ package block_party.scene.traits;
 
 import block_party.entities.BlockPartyNPC;
 import block_party.scene.ITrait;
+import net.minecraft.util.RandomSource;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +42,7 @@ public enum BloodType implements ITrait<BloodType> {
         return this == them || this.compatibilities.contains(them);
     }
 
-    public BloodType weigh(Random rand) {
+    public BloodType weigh(RandomSource rand) {
         int value = rand.nextInt(8);
         for (BloodType type : BloodType.values()) {
             if (value < type.getWeight()) { return type; }

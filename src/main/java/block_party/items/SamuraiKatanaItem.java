@@ -4,8 +4,15 @@ import block_party.BlockParty;
 import block_party.registry.CustomSounds;
 import block_party.registry.CustomTags;
 import block_party.utils.CustomDamageSource;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -19,7 +26,7 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber
 public class SamuraiKatanaItem extends SwordItem {
     protected SamuraiKatanaItem(Tier tier) {
-        super(tier, 4, -1.6F, new Properties().tab(BlockParty.CreativeModeTab).stacksTo(1));
+        super(tier, 4, -1.6F, new Properties().stacksTo(1));
     }
 
     public SamuraiKatanaItem() {
@@ -64,7 +71,7 @@ public class SamuraiKatanaItem extends SwordItem {
     @SubscribeEvent
     public static void onSwingAttack(LivingAttackEvent e) {
         DamageSource damage = e.getSource();
-        if (damage.isBypassArmor() || damage.isProjectile())
+        if (damage.is(DamageTypeTags.BYPASSES_ARMOR) || damage.is(DamageTypeTags.IS_PROJECTILE))
             return;
         LivingEntity attacker = (LivingEntity) damage.getEntity();
         if (e.getEntity() instanceof ServerPlayer victim && victim.getAttackStrengthScale(1.0F) < 1.0D) {
@@ -74,7 +81,8 @@ public class SamuraiKatanaItem extends SwordItem {
                 double x = victim.getX() - attacker.getX();
                 double z = victim.getZ() - attacker.getZ();
                 attacker.knockback(0.8F, x, z);
-                attacker.hurt(CustomDamageSource.PARRY, e.getAmount() * 2.0F);
+                Registry<DamageType> reg = attacker.level.registryAccess().registry(Registries.DAMAGE_TYPE).get();
+                attacker.hurt(new DamageSource(reg.getHolder(DamageTypes.GENERIC).get()), e.getAmount() * 2.0F);
                 victim.sweepAttack();
             }
         }

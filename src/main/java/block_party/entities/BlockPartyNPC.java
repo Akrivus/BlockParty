@@ -1,8 +1,9 @@
 package block_party.entities;
 
 import block_party.entities.abstraction.Layer7;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 
@@ -14,7 +15,7 @@ public abstract class BlockPartyNPC extends Layer7 {
 
     @Override
     public Component getTypeName() {
-        return new TranslatableComponent("entity.block_party.profession", this.getGivenName(), this.getFamilyName());
+        return Component.translatable("entity.block_party.profession", this.getGivenName(), this.getFamilyName());
     }
 
     @Override
@@ -22,10 +23,14 @@ public abstract class BlockPartyNPC extends Layer7 {
 
     @Override
     public Component getCustomName() {
-        return new TranslatableComponent("entity.block_party.generic", this.getFamilyName(), this.getHonorific());
+        return Component.translatable("entity.block_party.generic", this.getFamilyName(), this.getHonorific());
     }
 
     public String getHonorific() {
         return this.getGender().getHonorific();
+    }
+
+    public ResourceLocation getTagName() {
+        return this.level.registryAccess().registry(Registries.BLOCK).get().getKey(this.getBlock());
     }
 }

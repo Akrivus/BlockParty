@@ -3,6 +3,7 @@ package block_party.blocks;
 import block_party.client.particle.SakuraParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,7 +20,7 @@ public class GinkgoLeavesBlock extends LeavesBlock {
     }
 
     @Override
-    public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
+    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         super.animateTick(state, level, pos, random);
         SakuraParticle.add(this.particle, level, pos, random);
     }

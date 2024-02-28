@@ -7,8 +7,7 @@ import block_party.registry.CustomTags;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -16,11 +15,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.client.event.EntityViewRenderEvent;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.Optional;
 
@@ -37,15 +39,15 @@ public class JapanRenderer {
     private static float factor = 0.0F;
 
     @SubscribeEvent
-    public static void fuji(RenderLevelLastEvent e) {
+    public static void fuji(RenderLevelStageEvent e) {
         PoseStack stack = e.getPoseStack();
-        RenderSystem.enableTexture();
+        //RenderSystem.enableTexture();
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         stack.pushPose();
-        stack.mulPose(Vector3f.XP.rotationDegrees(-90.0F));
-        stack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
-        stack.mulPose(Vector3f.ZP.rotationDegrees(bearing - 90.0F));
+        stack.mulPose(Axis.XP.rotationDegrees(-90.0F));
+        stack.mulPose(Axis.YP.rotationDegrees(180.0F));
+        stack.mulPose(Axis.ZP.rotationDegrees(bearing - 90.0F));
         stack.translate(0, 0, -156);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(r, g, b, factor);
@@ -72,9 +74,10 @@ public class JapanRenderer {
             float x = level.random.nextInt(128) - 64;
             float z = level.random.nextInt(128) - 64;
             for (int y = 0; y > e.player.getY() - 255; --y) {
-                BlockPos pos = e.player.blockPosition().offset(x, y, z);
+                BlockPos pos = e.player.blockPosition().offset((int) x, y, (int) z);
+                Vector3f vec = e.player.position().add(new Vec3(x, y, z)).toVector3f();
                 if (level.getBlockState(pos).is(CustomTags.Blocks.SPAWNS_FIREFLIES)) {
-                    level.addParticle(CustomParticles.FIREFLY.get(), pos.getX(), pos.getY(), pos.getZ(), bearing, distance, factor);
+                    level.addParticle(CustomParticles.FIREFLY.get(), vec.x, pos.getY(), vec.z, bearing, distance, factor);
                     break;
                 }
             }
@@ -82,8 +85,8 @@ public class JapanRenderer {
     }
 
     @SubscribeEvent
-    public static void fogData(EntityViewRenderEvent.FogColors e) {
-        horizon = Minecraft.getInstance().options.renderDistance * 16;
+    public static void fogData(ViewportEvent.ComputeFogColor e) {
+        horizon = Minecraft.getInstance().options.renderDistance().get() * 16;
         Optional<BlockPos> shrine = BlockPartyDB.ShrineLocation.get(player().blockPosition());
         if (shrine.isPresent()) {
             BlockPos pos = shrine.get();

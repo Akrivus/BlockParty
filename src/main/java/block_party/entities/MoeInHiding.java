@@ -9,6 +9,7 @@ import block_party.scene.SceneTrigger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -99,7 +100,7 @@ public class MoeInHiding extends Entity {
         this.getRow().load(moe);
         moe.setBlockState(this.level.getBlockState(pos));
         if (moe.getActualBlockState().hasBlockEntity())
-            moe.setTileEntityData(this.level.getBlockEntity(pos).getTileData());
+            moe.setTileEntityData(this.level.getBlockEntity(pos).getPersistentData());
         this.level.destroyBlock(pos, false);
         boolean spawned = this.level.addFreshEntity(moe);
         if (spawned) { this.kill(); }
@@ -144,7 +145,7 @@ public class MoeInHiding extends Entity {
     }
 
     @Override
-    public Packet<?> getAddEntityPacket() {
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
         return new ClientboundAddEntityPacket(this);
     }
 

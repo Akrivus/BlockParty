@@ -3,8 +3,12 @@ package block_party;
 import block_party.client.BlockPartyRenderers;
 import block_party.registry.*;
 import com.google.gson.GsonBuilder;
+import com.mojang.serialization.Codec;
+import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
@@ -22,25 +26,39 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.RegistryBuilder;
+import net.minecraftforge.registries.tags.ITagManager;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Calendar;
+import java.util.*;
 
 @Mod(BlockParty.ID)
 public class BlockParty {
     public static final String VERSION = "22.3.6";
     public static final String ID = "block_party";
-    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITIES, BlockParty.ID);
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, BlockParty.ID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, BlockParty.ID);
-    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, BlockParty.ID);
+    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, BlockParty.ID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, BlockParty.ID);
     public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, BlockParty.ID);
     public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, BlockParty.ID);
     public static final DeferredRegister<Feature<?>> WORLDGEN_FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, BlockParty.ID);
-    public static final DeferredRegister<SceneActions.Builder> SCENE_ACTIONS = DeferredRegister.create(SceneActions.Builder.class, BlockParty.ID);
-    public static final DeferredRegister<SceneFilters.Builder> SCENE_FILTERS = DeferredRegister.create(SceneFilters.Builder.class, BlockParty.ID);
+    public static final DeferredRegister<SceneActions.Builder> SCENE_ACTIONS = DeferredRegister.create(BlockParty.ACTIONS.getDefault(), BlockParty.ID);
+    public static final DeferredRegister<SceneFilters.Builder> SCENE_FILTERS = DeferredRegister.create(BlockParty.FILTERS.getDefault(), BlockParty.ID);
     public static final SimpleChannel MESSENGER = CustomMessenger.create();
     public static final GsonBuilder GSON = new GsonBuilder();
 
+    public static final RegistryBuilder<SceneActions.Builder> ACTIONS = new RegistryBuilder<SceneActions.Builder>()
+            .setName(BlockParty.source("actions"))
+            .setMaxID(Integer.MAX_VALUE - 1);
+
+    public static final RegistryBuilder<SceneFilters.Builder> FILTERS = new RegistryBuilder<SceneFilters.Builder>()
+            .setName(BlockParty.source("filters"))
+            .setMaxID(Integer.MAX_VALUE - 1);
+
+    /* TODO: Refactor creative tabs.
     public static final CreativeModeTab CreativeModeTab = new CreativeModeTab(BlockParty.ID) {
         @Override
         public ItemStack makeIcon() {
@@ -53,6 +71,7 @@ public class BlockParty {
             items.sort(CustomItems::compare);
         }
     };
+     */
 
     public BlockParty() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -65,8 +84,6 @@ public class BlockParty {
         CustomSounds.add(SOUNDS, bus);
         CustomWorldGen.Features.add(WORLDGEN_FEATURES, MinecraftForge.EVENT_BUS, bus);
         CustomResources.register(MinecraftForge.EVENT_BUS);
-        SceneActions.add(SCENE_ACTIONS, bus);
-        SceneFilters.add(SCENE_FILTERS, bus);
         BlockPartyRenderers.register(bus);
         bus.addListener(this::setup);
     }

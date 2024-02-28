@@ -13,18 +13,18 @@ import block_party.scene.Response;
 import block_party.scene.Speaker;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Quaternion;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Quaternionf;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -102,17 +102,17 @@ public class DialogueScreen extends AbstractScreen {
         case LEFT:
             pose.translate( 0.0D, 0.0D, 1000.0D);
             pose.scale(scale, scale, scale);
-            pose.mulPose(new Quaternion(0.0F, 1.0F, 0.0F,  0.2F));
+            pose.mulPose(new Quaternionf(0.0F, 1.0F, 0.0F,  0.2F));
             return;
         case CENTER:
             pose.translate(25.0D, 0.0D, 1000.0D);
             pose.scale(scale, scale, scale);
-            pose.mulPose(new Quaternion(0.0F, 1.0F, 0.0F,  0.0F));
+            pose.mulPose(new Quaternionf(0.0F, 1.0F, 0.0F,  0.0F));
             return;
         case RIGHT:
             pose.translate(50.0D, 0.0D, 1000.0D);
             pose.scale(scale, scale, scale);
-            pose.mulPose(new Quaternion(0.0F, 1.0F, 0.0F, -0.2F));
+            pose.mulPose(new Quaternionf(0.0F, 1.0F, 0.0F, -0.2F));
             return;
         }
     }
@@ -121,7 +121,9 @@ public class DialogueScreen extends AbstractScreen {
         this.children().forEach((child) -> {
             if (!(child instanceof Button)) { return; }
             Button button = (Button) child;
-            if (button.isHoveredOrFocused()) { button.renderToolTip(stack, mouseX, mouseY); }
+            if (button.isHoveredOrFocused()) {
+                //button.setTooltip(stack, mouseX, mouseY); ???
+            }
         });
     }
 
@@ -157,7 +159,7 @@ public class DialogueScreen extends AbstractScreen {
         this.buttonSeeResponse = new SeeButton(this, false);
         this.buttonSeeDialogue = new SeeButton(this, true);
         this.dialogue.getResponses().forEach((icon, text) -> {
-            this.responses.add(RespondButton.create(this, ++this.role, this.npc, icon, new TextComponent(text), this.dialogue.isTooltip()));
+            this.responses.add(RespondButton.create(this, ++this.role, this.npc, icon, Component.literal(text), this.dialogue.isTooltip()));
         });
         updateButtons(true);
         if (this.speaker.speaks) {
@@ -210,10 +212,10 @@ public class DialogueScreen extends AbstractScreen {
         protected final String text;
         protected final Font font;
 
-        public RespondButton(int posX, int posY, int sizeX, int sizeY, DialogueScreen parent, NPC npc, Response icon, TextComponent text, boolean tooltip) {
-            super(posX, posY, sizeX, sizeY, text, (button) -> RespondButton.act(parent, npc, icon), tooltip ? (button, stack, x, y) -> parent.renderTooltip(stack, text, x, y) : NO_TOOLTIP);
+        public RespondButton(int posX, int posY, int sizeX, int sizeY, DialogueScreen parent, NPC npc, Response icon, Component text, boolean tooltip) {
+            super(posX, posY, sizeX, sizeY, text, (button) -> RespondButton.act(parent, npc, icon), (n) -> text.copy());
             this.icon = icon;
-            this.text = text.getText();
+            this.text = text.getString();
             this.font = parent.font;
         }
 
@@ -223,7 +225,7 @@ public class DialogueScreen extends AbstractScreen {
         }
 
         @Override
-        public void renderButton(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, DialogueScreen.DIALOGUE_TEXTURES);
@@ -233,7 +235,7 @@ public class DialogueScreen extends AbstractScreen {
             this.blit(stack, posX, posY, this.icon.ordinal() * 10, this.isHoveredOrFocused() ? 84 : 74, 10, 10);
         }
 
-        public static RespondButton create(DialogueScreen parent, int index, NPC npc, Response icon, TextComponent text, boolean tooltip) {
+        public static RespondButton create(DialogueScreen parent, int index, NPC npc, Response icon, Component text, boolean tooltip) {
             if (tooltip) {
                 return new RespondIconButton(parent, index, npc, icon, text);
             } else {
@@ -250,18 +252,18 @@ public class DialogueScreen extends AbstractScreen {
         private boolean backwards;
 
         public SeeButton(DialogueScreen parent, boolean toggle) {
-            super(parent.getRight(14), parent.getBottom(59), 10, 10, TextComponent.EMPTY, (button) -> parent.updateButtons(toggle), (button, stack, x, y) -> parent.renderTooltip(stack, new TranslatableComponent(String.format("gui.block_party.button.%s", toggle ? "see_dialogue" : "see_response")), x, y));
+            super(parent.getRight(14), parent.getBottom(59), 10, 10, Component.empty(), (button) -> parent.updateButtons(toggle), (n) -> Component.translatable(String.format("gui.block_party.button.%s", toggle ? "see_dialogue" : "see_response")));
             this.toggle = toggle;
         }
 
         @Override
-        public void renderButton(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, DIALOGUE_TEXTURES);
             int x = this.toggle ? 90 : 80;
             int y = this.isHoveredOrFocused() ? 84 : 74;
-            this.blit(stack, this.x + this.offset, this.y, x, y, 10, 10);
+            this.blit(stack, this.getX() + this.offset, this.getY(), x, y, 10, 10);
             this.ticks += this.backwards ? -partialTicks : partialTicks;
             if (this.ticks > 20.0F) {
                 this.ticks = 20.0F;

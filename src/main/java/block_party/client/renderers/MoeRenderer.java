@@ -10,7 +10,6 @@ import block_party.client.renderers.layers.SpecialLayer;
 import block_party.entities.Moe;
 import block_party.registry.resources.MoeTextures;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -20,15 +19,16 @@ import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4f;
 
 public class MoeRenderer extends MobRenderer<Moe, MoeModel<Moe>> {
 
     public MoeRenderer(EntityRendererProvider.Context context) {
         super(context, new MoeModel<>(context.bakeLayer(BlockPartyRenderers.MOE)), 0.25F);
-        this.addLayer(new ItemInHandLayer<>(this));
+        this.addLayer(new ItemInHandLayer<>(this, context.getItemInHandRenderer()));
         this.addLayer(new EmoteLayer(this));
         this.addLayer(new GlowLayer(this));
-        this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
+        this.addLayer(new CustomHeadLayer<>(this, context.getModelSet(), context.getItemInHandRenderer()));
         this.addLayer(new SpecialLayer(this));
         SamuraiModel.setArmorModels(context);
     }
@@ -59,7 +59,7 @@ public class MoeRenderer extends MobRenderer<Moe, MoeModel<Moe>> {
             int y = i * -10;
             Matrix4f matrix = stack.last().pose();
             int alpha = (int) (Minecraft.getInstance().options.getBackgroundOpacity(0.25F) * 255.0F) << 24;
-            font.drawInBatch(lines[i], x, y, 0xFFFFFFFF, false, matrix, buffer, false, alpha, packedLight);
+            font.drawInBatch(lines[i], x, y, 0xFFFFFFFF, false, matrix, buffer, Font.DisplayMode.NORMAL, alpha, packedLight);
         }
         stack.popPose();
     }

@@ -54,7 +54,7 @@ public class CustomMessenger {
 
     public static void send(Player player, AbstractMessage message) {
         if (player instanceof ServerPlayer server) {
-            Connection network = server.connection.getConnection();
+            Connection network = server.connection.connection;
             BlockParty.MESSENGER.sendTo(message, network, NetworkDirection.PLAY_TO_CLIENT);
         }
     }

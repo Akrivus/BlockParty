@@ -11,7 +11,6 @@ import block_party.scene.traits.Emotion;
 import block_party.scene.traits.Gender;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -79,11 +78,6 @@ public class SceneFilters {
     public static final RegistryObject<Builder> FAMILY = BlockParty.SCENE_FILTERS.register("family_name", () -> f(() -> new AbstractString(BlockPartyNPC::getFamilyName)));
     public static final RegistryObject<Builder> NAME = BlockParty.SCENE_FILTERS.register("name", () -> f(() -> new AbstractString(BlockPartyNPC::getGivenName)));
 
-    public static void add(DeferredRegister<Builder> registry, IEventBus bus) {
-        registry.makeRegistry("scene_filter", () -> new RegistryBuilder<Builder>().setType(Builder.class));
-        registry.register(bus);
-    }
-
     public static ISceneObservation build(RegistryObject<Builder> action) {
         return action.get().build();
     }
@@ -92,7 +86,7 @@ public class SceneFilters {
         return new Builder(action);
     }
 
-    public static class Builder extends ForgeRegistryEntry<Builder> {
+    public static class Builder {
         private final Supplier<ISceneObservation> builder;
 
         public Builder(Supplier<ISceneObservation> builder) {

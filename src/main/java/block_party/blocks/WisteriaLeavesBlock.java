@@ -3,6 +3,7 @@ package block_party.blocks;
 import block_party.registry.CustomBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -19,7 +20,7 @@ public class WisteriaLeavesBlock extends LeavesBlock {
     }
 
     @Override
-    public void randomTick(BlockState state, ServerLevel level, BlockPos pos, Random random) {
+    public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (super.isRandomlyTicking(state)) {
             super.randomTick(state, level, pos, random);
         } else if (level.isEmptyBlock(pos.below())) {

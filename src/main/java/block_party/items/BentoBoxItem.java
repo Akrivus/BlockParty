@@ -9,7 +9,7 @@ public class BentoBoxItem extends Item implements ISortableItem {
     private static final FoodProperties FOOD = new FoodProperties.Builder().nutrition(11).saturationMod(1.9F).build();
 
     public BentoBoxItem() {
-        super(new Properties().tab(BlockParty.CreativeModeTab).food(FOOD));
+        super(new Properties().food(FOOD));
     }
 
     @Override

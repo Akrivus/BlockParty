@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
+import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -35,13 +37,13 @@ public class CustomBlocks {
     public static final RegistryObject<Block> CYAN_PAPER_LANTERN = BlockParty.BLOCKS.register("cyan_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_CYAN));
     public static final RegistryObject<Block> GARDEN_LANTERN = BlockParty.BLOCKS.register("garden_lantern", () -> new GardenLanternBlock(Prop.STONE.get()));
     public static final RegistryObject<Block> GRAY_PAPER_LANTERN = BlockParty.BLOCKS.register("gray_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_GRAY));
-    public static final RegistryObject<Block> GINKGO_BUTTON = BlockParty.BLOCKS.register("ginkgo_button", () -> new WoodButtonBlock(Prop.NONSOLID_GINKGO.get()));
+    public static final RegistryObject<Block> GINKGO_BUTTON = BlockParty.BLOCKS.register("ginkgo_button", () -> new ButtonBlock(Prop.NONSOLID_GINKGO.get(), BlockSetType.OAK, 20, true));
     public static final RegistryObject<Block> GINKGO_FENCE = BlockParty.BLOCKS.register("ginkgo_fence", () -> new FenceBlock(Prop.NONSOLID_GINKGO.get()));
-    public static final RegistryObject<Block> GINKGO_FENCE_GATE = BlockParty.BLOCKS.register("ginkgo_fence_gate", () -> new FenceGateBlock(Prop.NONSOLID_GINKGO.get()));
+    public static final RegistryObject<Block> GINKGO_FENCE_GATE = BlockParty.BLOCKS.register("ginkgo_fence_gate", () -> new FenceGateBlock(Prop.NONSOLID_GINKGO.get(), WoodType.OAK));
     public static final RegistryObject<Block> GINKGO_LEAVES = BlockParty.BLOCKS.register("ginkgo_leaves", () -> new GinkgoLeavesBlock(CustomParticles.GINKGO, Prop.GINKGO_LEAVES.get()));
     public static final RegistryObject<Block> GINKGO_LOG = BlockParty.BLOCKS.register("ginkgo_log", () -> new RotatedPillarBlock(Prop.GINKGO.get()));
     public static final RegistryObject<Block> GINKGO_PLANKS = BlockParty.BLOCKS.register("ginkgo_planks", () -> new Block(Prop.GINKGO.get()));
-    public static final RegistryObject<Block> GINKGO_PRESSURE_PLATE = BlockParty.BLOCKS.register("ginkgo_pressure_plate", () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.EVERYTHING, Prop.NONSOLID_GINKGO.get()));
+    public static final RegistryObject<Block> GINKGO_PRESSURE_PLATE = BlockParty.BLOCKS.register("ginkgo_pressure_plate", () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.EVERYTHING, Prop.NONSOLID_GINKGO.get(), BlockSetType.OAK));
     public static final RegistryObject<Block> GINKGO_SAPLING = BlockParty.BLOCKS.register("ginkgo_sapling", () -> new SaplingBlock(new GinkgoTreeGrower(), Prop.GINKGO_LEAVES.get()));
     public static final RegistryObject<Block> GINKGO_SLAB = BlockParty.BLOCKS.register("ginkgo_slab", () -> new SlabBlock(Prop.NONSOLID_GINKGO.get()));
     public static final RegistryObject<Block> GINKGO_STAIRS = BlockParty.BLOCKS.register("ginkgo_stairs", () -> new StairBlock(() -> GINKGO_PLANKS.get().defaultBlockState(), Prop.NONSOLID_GINKGO.get()));
@@ -56,12 +58,12 @@ public class CustomBlocks {
     public static final RegistryObject<Block> PURPLE_PAPER_LANTERN = BlockParty.BLOCKS.register("purple_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_PURPLE));
     public static final RegistryObject<Block> RED_PAPER_LANTERN = BlockParty.BLOCKS.register("red_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_RED));
     public static final RegistryObject<Block> SAKURA_BLOSSOMS = BlockParty.BLOCKS.register("sakura_blossoms", () -> new SakuraBlossomsBlock(CustomParticles.SAKURA, Prop.LEAVES.get()));
-    public static final RegistryObject<Block> SAKURA_BUTTON = BlockParty.BLOCKS.register("sakura_button", () -> new WoodButtonBlock(Prop.NONSOLID.get()));
+    public static final RegistryObject<Block> SAKURA_BUTTON = BlockParty.BLOCKS.register("sakura_button", () -> new ButtonBlock(Prop.NONSOLID.get(), BlockSetType.OAK, 20, true));
     public static final RegistryObject<Block> SAKURA_FENCE = BlockParty.BLOCKS.register("sakura_fence", () -> new FenceBlock(Prop.NONSOLID.get()));
-    public static final RegistryObject<Block> SAKURA_FENCE_GATE = BlockParty.BLOCKS.register("sakura_fence_gate", () -> new FenceGateBlock(Prop.NONSOLID.get()));
+    public static final RegistryObject<Block> SAKURA_FENCE_GATE = BlockParty.BLOCKS.register("sakura_fence_gate", () -> new FenceGateBlock(Prop.NONSOLID.get(), WoodType.OAK));
     public static final RegistryObject<Block> SAKURA_LOG = BlockParty.BLOCKS.register("sakura_log", () -> new RotatedPillarBlock(Prop.SOLID.get()));
     public static final RegistryObject<Block> SAKURA_PLANKS = BlockParty.BLOCKS.register("sakura_planks", () -> new Block(Prop.SOLID.get()));
-    public static final RegistryObject<Block> SAKURA_PRESSURE_PLATE = BlockParty.BLOCKS.register("sakura_pressure_plate", () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.EVERYTHING, Prop.NONSOLID.get()));
+    public static final RegistryObject<Block> SAKURA_PRESSURE_PLATE = BlockParty.BLOCKS.register("sakura_pressure_plate", () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.EVERYTHING, Prop.NONSOLID.get(), BlockSetType.OAK));
     public static final RegistryObject<Block> SAKURA_SAPLING = BlockParty.BLOCKS.register("sakura_sapling", () -> new SaplingBlock(new SakuraTreeGrower(), Prop.PLANT.get()));
     public static final RegistryObject<Block> SAKURA_SLAB = BlockParty.BLOCKS.register("sakura_slab", () -> new SlabBlock(Prop.NONSOLID.get()));
     public static final RegistryObject<Block> SAKURA_STAIRS = BlockParty.BLOCKS.register("sakura_stairs", () -> new StairBlock(() -> SAKURA_PLANKS.get().defaultBlockState(), Prop.NONSOLID.get()));
@@ -69,7 +71,7 @@ public class CustomBlocks {
     public static final RegistryObject<Block> SHOJI_BLOCK = BlockParty.BLOCKS.register("shoji_block", () -> new Block(Prop.SHOJI.get()));
     public static final RegistryObject<Block> SHIMENAWA = BlockParty.BLOCKS.register("shimenawa", () -> new ShimenawaBlock(Prop.TRANSPARENT.get()));
     public static final RegistryObject<Block> SHOJI_LANTERN = BlockParty.BLOCKS.register("shoji_lantern", () -> new ShojiLanternBlock(Prop.SHOJI.get()));
-    public static final RegistryObject<Block> SHOJI_PANEL = BlockParty.BLOCKS.register("shoji_panel", () -> new TrapDoorBlock(Prop.SHOJI.get()));
+    public static final RegistryObject<Block> SHOJI_PANEL = BlockParty.BLOCKS.register("shoji_panel", () -> new TrapDoorBlock(Prop.SHOJI.get(), BlockSetType.OAK));
     public static final RegistryObject<Block> SHOJI_SCREEN = BlockParty.BLOCKS.register("shoji_screen", () -> new ShojiScreenBlock(Prop.SHOJI.get()));
     public static final RegistryObject<Block> STRIPPED_GINKGO_LOG = BlockParty.BLOCKS.register("stripped_ginkgo_log", () -> new RotatedPillarBlock(Prop.SOLID.get()));
     public static final RegistryObject<Block> STRIPPED_GINKGO_WOOD = BlockParty.BLOCKS.register("stripped_ginkgo_wood", () -> new RotatedPillarBlock(Prop.SOLID.get()));
@@ -100,6 +102,7 @@ public class CustomBlocks {
     }
 
     private static void registerRenderTypes(FMLClientSetupEvent e) {
+        /*
         ItemBlockRenderTypes.setRenderLayer(BLANK_HANGING_SCROLL.get(), RenderType.cutout());
         ItemBlockRenderTypes.setRenderLayer(BLACK_PAPER_LANTERN.get(), RenderType.cutout());
         ItemBlockRenderTypes.setRenderLayer(DAWN_HANGING_SCROLL.get(), RenderType.cutout());
@@ -142,6 +145,7 @@ public class CustomBlocks {
         ItemBlockRenderTypes.setRenderLayer(WISTERIA_VINE_BODY.get(), RenderType.cutout());
         ItemBlockRenderTypes.setRenderLayer(WISTERIA_VINE_TIP.get(), RenderType.cutout());
         ItemBlockRenderTypes.setRenderLayer(YELLOW_PAPER_LANTERN.get(), RenderType.cutout());
+        */
     }
 
     private static void registerPottedPlants(FMLCommonSetupEvent e) {

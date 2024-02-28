@@ -47,12 +47,6 @@ public abstract class Layer6 extends Layer5 implements ContainerListener, MenuPr
     }
 
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction facing) {
-        if (CapabilityItemHandler.ITEM_HANDLER_CAPABILITY == capability) { return this.itemHandler.cast(); }
-        return super.getCapability(capability, facing);
-    }
-
-    @Override
     public void invalidateCaps() {
         super.invalidateCaps();
         this.itemHandler.invalidate();

@@ -8,7 +8,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
@@ -33,7 +32,7 @@ import java.util.Optional;
  * Abstraction layer 2: block data and catch-all block behaviors.
  */
 public abstract class Layer2 extends Layer1 {
-    public static final EntityDataAccessor<Optional<BlockState>> BLOCK_STATE = SynchedEntityData.defineId(Layer2.class, EntityDataSerializers.BLOCK_STATE);
+    public static final EntityDataAccessor<BlockState> BLOCK_STATE = SynchedEntityData.defineId(Layer2.class, EntityDataSerializers.BLOCK_STATE);
     public static final EntityDataAccessor<Float> SCALE = SynchedEntityData.defineId(Layer2.class, EntityDataSerializers.FLOAT);
     public static final EntityDataAccessor<Boolean> CORPOREAL = SynchedEntityData.defineId(Layer2.class, EntityDataSerializers.BOOLEAN);
     private BlockState actualBlockState = Blocks.AIR.defaultBlockState();
@@ -45,7 +44,7 @@ public abstract class Layer2 extends Layer1 {
 
     @Override
     public void defineSynchedData() {
-        this.entityData.define(BLOCK_STATE, Optional.of(Blocks.AIR.defaultBlockState()));
+        this.entityData.define(BLOCK_STATE, Blocks.AIR.defaultBlockState());
         this.entityData.define(SCALE, 1.0F);
         this.entityData.define(CORPOREAL, true);
         super.defineSynchedData();
@@ -109,7 +108,7 @@ public abstract class Layer2 extends Layer1 {
     }
 
     public void setBlockState(BlockState state) {
-        this.entityData.set(BLOCK_STATE, Optional.of(BlockAliases.get(state)));
+        this.entityData.set(BLOCK_STATE, BlockAliases.get(state));
         this.actualBlockState = state;
         if (this.isLocal()) {
             this.setAdditionalBlockStateData(state);
@@ -135,7 +134,7 @@ public abstract class Layer2 extends Layer1 {
     }
 
     public BlockState getVisibleBlockState() {
-        return this.entityData.get(BLOCK_STATE).orElse(this.getActualBlockState());
+        return this.entityData.get(BLOCK_STATE);
     }
 
     public Block getBlock() {

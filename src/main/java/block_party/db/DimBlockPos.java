@@ -2,6 +2,7 @@ package block_party.db;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +18,7 @@ public class DimBlockPos extends BlockPos {
 
     public DimBlockPos(CompoundTag compound) {
         super(BlockPos.of(compound.getLong("Coordinates")));
-        this.dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(compound.getString("Dimension")));
+        this.dim = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(compound.getString("Dimension")));
         this.isEmpty = compound.getBoolean("IsEmpty");
     }
 

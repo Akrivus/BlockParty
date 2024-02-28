@@ -19,7 +19,7 @@ import java.util.List;
 
 public class YearbookItem extends Item implements ISortableItem {
     public YearbookItem() {
-        super(new Properties().tab(BlockParty.CreativeModeTab));
+        super(new Properties());
     }
 
     @Override

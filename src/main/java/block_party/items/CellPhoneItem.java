@@ -16,7 +16,7 @@ import java.util.List;
 
 public class CellPhoneItem extends Item implements ISortableItem {
     public CellPhoneItem() {
-        super(new Properties().tab(BlockParty.CreativeModeTab));
+        super(new Properties());
     }
 
     @Override

@@ -13,7 +13,7 @@ public class ShimenawaBlockEntity extends AbstractDataBlockEntity<NPC> {
 
     @Override
     public NPC getNewRow() {
-        return new NPC(this.getTileData());
+        return new NPC(this.getPersistentData());
     }
 
     @Override

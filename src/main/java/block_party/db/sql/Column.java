@@ -4,6 +4,7 @@ import block_party.db.DimBlockPos;
 import block_party.scene.ITrait;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -280,46 +281,6 @@ public abstract class Column<I> {
         }
     }
 
-    public static class AsItem extends Column<Item> {
-        public AsItem(Table table, String column) {
-            this(table, column, "NOT NULL DEFAULT 'minecraft:air'");
-        }
-
-        public AsItem(Table table, String column, String extra) {
-            super(table, "TEXT", column, extra);
-        }
-
-        @Override
-        public void forSet(int i, PreparedStatement statement) throws SQLException {
-            statement.setString(i, this.get().getRegistryName().toString());
-        }
-
-        @Override
-        public Item fromSet(int i, ResultSet set) throws SQLException {
-            return ForgeRegistries.ITEMS.getValue(new ResourceLocation(set.getString(i)));
-        }
-
-        @Override
-        public void read(CompoundTag compound) {
-            this.set(ForgeRegistries.ITEMS.getValue(new ResourceLocation(compound.getString(this.getColumn()))));
-        }
-
-        @Override
-        public void write(CompoundTag compound) {
-            compound.putString(this.getColumn(), this.get().getRegistryName().toString());
-        }
-
-        @Override
-        public void afterAdd(Table table) {
-
-        }
-
-        @Override
-        public Item getDefault() {
-            return Items.AIR;
-        }
-    }
-
     public static class AsString extends Column<String> {
         public AsString(Table table, String column) {
             this(table, column, "NOT NULL DEFAULT ''");
@@ -417,7 +378,7 @@ public abstract class Column<I> {
 
         @Override
         public DimBlockPos fromSet(int i, ResultSet set) throws SQLException {
-            return new DimBlockPos(ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(set.getString(i))), new BlockPos(set.getInt(i + 1), set.getInt(i + 2), set.getInt(i + 3)));
+            return new DimBlockPos(ResourceKey.create(Registries.DIMENSION, new ResourceLocation(set.getString(i))), new BlockPos(set.getInt(i + 1), set.getInt(i + 2), set.getInt(i + 3)));
         }
 
         @Override

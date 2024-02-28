@@ -2,6 +2,7 @@ package block_party.registry.resources;
 
 import block_party.BlockParty;
 import block_party.entities.BlockPartyNPC;
+import block_party.entities.Moe;
 import block_party.registry.CustomResources;
 import block_party.registry.CustomTags;
 import block_party.utils.JsonUtils;
@@ -74,17 +75,17 @@ public class MoeTextures extends SimpleJsonResourceReloadListener {
 
     public static ResourceLocation get(BlockPartyNPC npc) {
         BlockState state = npc.getVisibleBlockState();
-        Map<BlockStatePattern, ResourceLocation> textures = CustomResources.MOE_TEXTURES.map.getOrDefault(state, ImmutableMap.of(new BlockStatePattern(state, ImmutableMap.of()), getDefaultPathFor(state)));
+        Map<BlockStatePattern, ResourceLocation> textures = CustomResources.MOE_TEXTURES.map.getOrDefault(state, ImmutableMap.of(new BlockStatePattern(state, ImmutableMap.of()), getDefaultPathFor(npc, state)));
         for (BlockStatePattern pattern : textures.keySet()) {
             if (pattern.matches(npc.getActualBlockState())) { return textures.get(pattern); }
         }
-        return getDefaultPathFor(state);
+        return getDefaultPathFor(npc, state);
     }
 
-    private static ResourceLocation getDefaultPathFor(BlockState state) {
-        ResourceLocation location = state.getBlock().getRegistryName();
+    private static ResourceLocation getDefaultPathFor(BlockPartyNPC npc, BlockState state) {
+        ResourceLocation location = npc.getTagName();
         String file = location.getPath();
-        if (state.is(CustomTags.HAS_FESTIVE_TEXTURES)) {
+        if (BlockParty.isChristmas() && state.is(CustomTags.HAS_FESTIVE_TEXTURES)) {
             file += ".christmas";
         }
         String path = String.format("textures/moe/%s.png", file);

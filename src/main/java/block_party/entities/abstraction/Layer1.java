@@ -98,9 +98,6 @@ public abstract class Layer1 extends PathfinderMob {
     protected float getEquipmentDropChance(EquipmentSlot slot) { return 0.0F; }
 
     @Override
-    protected void populateDefaultEquipmentSlots(DifficultyInstance difficulty) { return; }
-
-    @Override
     public Component getTypeName() {
         return super.getTypeName();
     }

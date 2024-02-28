@@ -8,14 +8,14 @@ import block_party.registry.CustomSounds;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.NarratorStatus;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -50,14 +50,14 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
 
     private void updateButtons() {
         if (this.npcs.size() == this.total && this.contacts.isEmpty()) {
-            this.minecraft.player.displayClientMessage(new TranslatableComponent("gui.block_party.error.empty"), true);
+            this.minecraft.player.displayClientMessage(Component.translatable("gui.block_party.error.empty"), true);
             this.onClose();
         } else {
             this.contacts.forEach((contact) -> this.removeWidget(contact));
             for (int y = this.start; y < Math.min(this.start + 4, this.contacts.size()); ++y) {
                 Button button = this.contacts.get(y);
-                button.x = this.getAbsoluteCenter(45);
-                button.y = 32 + (y % 4) * 17;
+                button.setX(this.getAbsoluteCenter(45));
+                button.setY(32 + (y % 4) * 17);
                 this.addRenderableWidget(button);
             }
         }
@@ -105,7 +105,7 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
 
     @Override
     protected void init() {
-        this.addRenderableWidget(new Button(this.getAbsoluteCenter(54), 190, 108, 20, CommonComponents.GUI_DONE, (button) -> this.onClose()));
+        this.addRenderableWidget(new QuickWidgetButton(this));
         this.addRenderableWidget(this.buttonScrollUp = new ScrollButton(this, this.getAbsoluteCenter(-37), 32, -1));
         this.addRenderableWidget(this.buttonScrollDown = new ScrollButton(this, this.getAbsoluteCenter(-37), 91, 1));
         this.updateButtons();
@@ -132,24 +132,31 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
     }
 
     @OnlyIn(Dist.CLIENT)
+    public static class QuickWidgetButton extends Button {
+        public QuickWidgetButton(CellPhoneScreen screen) {
+            super(screen.getAbsoluteCenter(54), 190, 108, 20, CommonComponents.GUI_DONE, (button) -> screen.onClose(), (n) -> Component.empty());
+        }
+    }
+
+    @OnlyIn(Dist.CLIENT)
     public static class ContactButton extends Button {
         public ContactButton(CellPhoneScreen parent, NPC npc) {
-            super(0, 0, 81, 15, new TextComponent(npc.getName()), (button) -> {
+            super(0, 0, 81, 15, Component.literal(npc.getName()), (button) -> {
                 CustomMessenger.send(new CNPCTeleport(npc.getID()));
                 parent.onClose();
-            });
+            }, (n) -> Component.empty());
         }
 
         @Override
-        public void renderButton(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
             int color = this.isHoveredOrFocused() ? 0xffffff : 0xff7fb6;
             Minecraft minecraft = Minecraft.getInstance();
             Font font = minecraft.font;
-            this.blit(stack, this.x, this.y, 108, this.isHoveredOrFocused() ? 98 : 115, 81, 15);
-            font.draw(stack, this.getMessage().getString(), this.x + 10, this.y + 4, color);
+            this.blit(stack, this.getX(), this.getY(), 108, this.isHoveredOrFocused() ? 98 : 115, 81, 15);
+            font.draw(stack, this.getMessage().getString(), this.getX() + 10, this.getY() + 4, color);
         }
 
         @Override
@@ -161,19 +168,19 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
     @OnlyIn(Dist.CLIENT)
     public class ScrollButton extends Button {
         public ScrollButton(CellPhoneScreen parent, int x, int y, int delta) {
-            super(x, y, 7, 7, TextComponent.EMPTY, (button) -> parent.setScroll(delta));
+            super(x, y, 7, 7, Component.empty(), (button) -> parent.setScroll(delta), (n) -> Component.empty());
         }
 
         @Override
         public void playDownSound(SoundManager sound) { }
 
         @Override
-        public void renderButton(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
             int x = this.isHoveredOrFocused() ? 116 : 108;
-            this.blit(stack, this.x, this.y, x, 73, 7, 7);
+            this.blit(stack, this.getX(), this.getY(), x, 73, 7, 7);
         }
     }
 }

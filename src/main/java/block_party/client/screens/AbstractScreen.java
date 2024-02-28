@@ -3,10 +3,10 @@ package block_party.client.screens;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
@@ -17,7 +17,7 @@ public class AbstractScreen extends Screen {
     protected final int sizeY;
 
     protected AbstractScreen(int x, int y) {
-        super(NarratorChatListener.NO_TITLE);
+        super(Component.empty());
         this.sizeX = x;
         this.sizeY = y;
     }

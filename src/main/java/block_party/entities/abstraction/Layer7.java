@@ -9,7 +9,6 @@ import block_party.scene.*;
 import block_party.scene.actions.SendDialogue;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -137,11 +136,11 @@ public abstract class Layer7 extends Layer6 {
     }
 
     public void sayInChat(Player player, String key, Object... params) {
-        this.sayInChat(player, new TranslatableComponent(key, params));
+        this.sayInChat(player, Component.translatable(key, params));
     }
 
     public void sayInChat(Player player, Component component) {
-        player.sendMessage(component, player.getUUID());
+        player.sendSystemMessage(component);
     }
 
     public void setDialogue(SendDialogue action) {

@@ -8,7 +8,7 @@ import block_party.client.particle.WhiteSakuraParticle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
+import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
@@ -24,7 +24,7 @@ public class CustomParticles {
         registry.register(bus);
     }
 
-    private static void registerParticleFactories(final ParticleFactoryRegisterEvent e) {
+    private static void registerParticleFactories(final RegisterParticleProvidersEvent e) {
         Minecraft.getInstance().particleEngine.register(CustomParticles.FIREFLY.get(), FireflyParticle.Factory::new);
         Minecraft.getInstance().particleEngine.register(CustomParticles.GINKGO.get(), GinkgoParticle.Factory::new);
         Minecraft.getInstance().particleEngine.register(CustomParticles.SAKURA.get(), SakuraParticle.Factory::new);
