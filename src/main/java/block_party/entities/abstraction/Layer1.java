@@ -15,7 +15,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraftforge.common.util.ITeleporter;
+import net.neoforged.neoforge.common.util.ITeleporter;
 
 import java.util.UUID;
 
@@ -50,7 +50,7 @@ public abstract class Layer1 extends PathfinderMob {
     }
 
     public DimBlockPos getDimBlockPos() {
-        return new DimBlockPos(this.level.dimension(), this.blockPosition());
+        return new DimBlockPos(this.level().dimension(), this.blockPosition());
     }
 
     public boolean hasHome() {
@@ -121,7 +121,7 @@ public abstract class Layer1 extends PathfinderMob {
     }
 
     public boolean isRemote() {
-        return this.level.isClientSide();
+        return this.level().isClientSide();
     }
 
     public boolean isLocal() {
@@ -140,7 +140,7 @@ public abstract class Layer1 extends PathfinderMob {
     }
 
     public boolean isTimeBetween(int start, int end) {
-        long time = this.level.getDayTime();
+        long time = this.level().getDayTime();
         return start <= time && time <= end;
     }
 

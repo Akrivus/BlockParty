@@ -31,6 +31,6 @@ public abstract class BlockPartyNPC extends Layer7 {
     }
 
     public ResourceLocation getTagName() {
-        return this.level.registryAccess().registry(Registries.BLOCK).get().getKey(this.getBlock());
+        return this.level().registryAccess().registry(Registries.BLOCK).get().getKey(this.getBlock());
     }
 }

@@ -8,7 +8,7 @@ public class WithTarget extends AbstractEntity {
     protected String name;
 
     public WithTarget() {
-        this.getter = (npc) -> SceneVariables.getTargets(npc).getEntity(npc.level, this.name);
+        this.getter = (npc) -> SceneVariables.getTargets(npc).getEntity(npc.level(), this.name);
     }
 
     public void parse(JsonObject json) {
@@ -18,7 +18,7 @@ public class WithTarget extends AbstractEntity {
 
     public static class Player extends WithTarget {
         public Player() {
-            this.getter = (npc) -> SceneVariables.getTargets(npc.getServerPlayer()).getEntity(npc.level, this.name);
+            this.getter = (npc) -> SceneVariables.getTargets(npc.getServerPlayer()).getEntity(npc.level(), this.name);
         }
     }
 }

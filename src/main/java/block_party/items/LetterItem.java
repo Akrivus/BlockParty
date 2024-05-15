@@ -21,7 +21,7 @@ public class LetterItem extends Item implements ISortableItem {
     }
 
     public static float isClosed(ItemStack stack) {
-        CompoundTag tag = stack.getShareTag();
+        CompoundTag tag = stack.getTag();
         if (tag != null && tag.getBoolean("IsClosed")) { return 1.0F; }
         return 0.0F;
     }

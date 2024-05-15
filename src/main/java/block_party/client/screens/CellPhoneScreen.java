@@ -10,6 +10,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.NarratorStatus;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -17,8 +19,6 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -64,26 +64,20 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(stack);
-        this.renderPhone(stack);
-        this.renderScrollBar(stack);
-        super.render(stack, mouseX, mouseY, partialTicks);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        this.renderBackground(graphics, mouseX, mouseY, partialTicks);
+        this.renderPhone(graphics);
+        this.renderScrollBar(graphics);
+        super.render(graphics, mouseX, mouseY, partialTicks);
     }
 
-    public void renderPhone(PoseStack stack) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
-        this.blit(stack, this.getCenter(108), 2, 0, 0, 108, 182);
+    public void renderPhone(GuiGraphics graphics) {
+        graphics.blit(CELL_PHONE_TEXTURES, this.getCenter(108), 2, 0, 0, 108, 182);
     }
 
-    public void renderScrollBar(PoseStack stack) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
+    public void renderScrollBar(GuiGraphics graphics) {
         int y = (int) (Math.min((double) this.start / (this.contacts.size() - this.contacts.size() % 4), 1.0) * 35);
-        this.blit(stack, this.getAbsoluteCenter(-37), 40 + y, 108, 82, 7, 15);
+        graphics.blit(CELL_PHONE_TEXTURES, this.getAbsoluteCenter(-37), 40 + y, 108, 82, 7, 15);
     }
 
     @Override
@@ -117,10 +111,10 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        if (delta > 0) { this.buttonScrollUp.onPress(); }
-        if (delta < 0) { this.buttonScrollDown.onPress(); }
-        return delta != 0;
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (scrollY > 0) { this.buttonScrollUp.onPress(); }
+        if (scrollY < 0) { this.buttonScrollDown.onPress(); }
+        return scrollY != 0;
     }
 
     public void setScroll(int delta) {
@@ -131,14 +125,12 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
         this.updateButtons();
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static class QuickWidgetButton extends Button {
         public QuickWidgetButton(CellPhoneScreen screen) {
             super(screen.getAbsoluteCenter(54), 190, 108, 20, CommonComponents.GUI_DONE, (button) -> screen.onClose(), (n) -> Component.empty());
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static class ContactButton extends Button {
         public ContactButton(CellPhoneScreen parent, NPC npc) {
             super(0, 0, 81, 15, Component.literal(npc.getName()), (button) -> {
@@ -148,15 +140,12 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
         }
 
         @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
+        public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
             int color = this.isHoveredOrFocused() ? 0xffffff : 0xff7fb6;
             Minecraft minecraft = Minecraft.getInstance();
             Font font = minecraft.font;
-            this.blit(stack, this.getX(), this.getY(), 108, this.isHoveredOrFocused() ? 98 : 115, 81, 15);
-            font.draw(stack, this.getMessage().getString(), this.getX() + 10, this.getY() + 4, color);
+            graphics.blit(CELL_PHONE_TEXTURES, this.getX(), this.getY(), 108, this.isHoveredOrFocused() ? 98 : 115, 81, 15);
+            graphics.drawString(font, this.getMessage().getString(), this.getX() + 10, this.getY() + 4, color);
         }
 
         @Override
@@ -165,7 +154,6 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     public class ScrollButton extends Button {
         public ScrollButton(CellPhoneScreen parent, int x, int y, int delta) {
             super(x, y, 7, 7, Component.empty(), (button) -> parent.setScroll(delta), (n) -> Component.empty());
@@ -175,12 +163,9 @@ public class CellPhoneScreen extends ControllerScreen<NPC> {
         public void playDownSound(SoundManager sound) { }
 
         @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
+        public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
             int x = this.isHoveredOrFocused() ? 116 : 108;
-            this.blit(stack, this.getX(), this.getY(), x, 73, 7, 7);
+            graphics.blit(CELL_PHONE_TEXTURES, this.getX(), this.getY(), x, 73, 7, 7);
         }
     }
 }

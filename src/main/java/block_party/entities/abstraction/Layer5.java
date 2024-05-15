@@ -77,7 +77,7 @@ public abstract class Layer5 extends Layer4 implements Recordable<NPC> {
 
     @Override
     public Level getWorld() {
-        return this.level;
+        return this.level();
     }
 
     public long getDatabaseID() {

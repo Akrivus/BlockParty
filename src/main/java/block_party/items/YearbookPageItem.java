@@ -18,7 +18,7 @@ public class YearbookPageItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, Level level, List<Component> list, TooltipFlag flag) {
         if (stack.hasTag()) {
-            CompoundTag tag = stack.getShareTag().getCompound("NPC");
+            CompoundTag tag = stack.getTag().getCompound("NPC");
             String name = String.format("%s %s", tag.getString("FamilyName"), tag.getString("GivenName"));
             list.add(Component.literal(name).withStyle(ChatFormatting.GRAY));
         }

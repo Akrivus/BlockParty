@@ -32,7 +32,7 @@ public class MoeInHiding extends Entity {
     }
 
     public MoeInHiding(Moe moe) {
-        super(CustomEntities.MOE_IN_HIDING.get(), moe.level);
+        super(CustomEntities.MOE_IN_HIDING.get(), moe.level());
         this.setDatabaseID(moe.getDatabaseID());
         HidingSpots.add(moe);
         BlockPos pos = moe.blockPosition();
@@ -92,17 +92,17 @@ public class MoeInHiding extends Entity {
     }
 
     public boolean spawn() {
-        if (this.level.isClientSide()) { return false; }
+        if (this.level().isClientSide()) { return false; }
         BlockPos pos = this.getAttachPos();
-        Moe moe = new Moe(this.level);
+        Moe moe = new Moe(this.level());
         moe.absMoveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
         moe.sceneManager.trigger(SceneTrigger.HIDING_SPOT_DISCOVERED);
         this.getRow().load(moe);
-        moe.setBlockState(this.level.getBlockState(pos));
+        moe.setBlockState(this.level().getBlockState(pos));
         if (moe.getActualBlockState().hasBlockEntity())
-            moe.setTileEntityData(this.level.getBlockEntity(pos).getPersistentData());
-        this.level.destroyBlock(pos, false);
-        boolean spawned = this.level.addFreshEntity(moe);
+            moe.setTileEntityData(this.level().getBlockEntity(pos).getPersistentData());
+        this.level().destroyBlock(pos, false);
+        boolean spawned = this.level().addFreshEntity(moe);
         if (spawned) { this.kill(); }
         return spawned;
     }
@@ -150,7 +150,7 @@ public class MoeInHiding extends Entity {
     }
 
     public boolean isAir() {
-        return this.level.getBlockState(this.getAttachPos()).isAir();
+        return this.level().getBlockState(this.getAttachPos()).isAir();
     }
 
 }

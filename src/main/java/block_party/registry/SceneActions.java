@@ -4,23 +4,23 @@ import block_party.BlockParty;
 import block_party.entities.BlockPartyNPC;
 import block_party.scene.ISceneAction;
 import block_party.scene.actions.*;
-import net.minecraftforge.registries.NewRegistryEvent;
-import net.minecraftforge.registries.RegistryBuilder;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.NewRegistryEvent;
+import net.neoforged.neoforge.registries.RegistryBuilder;
 
 import java.util.function.Supplier;
 
 public class SceneActions {
-    public static final RegistryObject<Builder> SEND_DIALOGUE = BlockParty.SCENE_ACTIONS.register("send_dialogue", () -> f(() -> new SendDialogue()));
-    public static final RegistryObject<Builder> SEND_RESPONSE = BlockParty.SCENE_ACTIONS.register("send_response", () -> f(() -> new SendResponse()));
-    public static final RegistryObject<Builder> HEALTH = BlockParty.SCENE_ACTIONS.register("health", () -> f(() -> new AbstractFloat(BlockPartyNPC::getHealth, BlockPartyNPC::setHealth)));
-    public static final RegistryObject<Builder> FOOD_LEVEL = BlockParty.SCENE_ACTIONS.register("food_level", () -> f(() -> new AbstractFloat(BlockPartyNPC::getFoodLevel, BlockPartyNPC::setFoodLevel)));
-    public static final RegistryObject<Builder> LOYALTY = BlockParty.SCENE_ACTIONS.register("loyalty", () -> f(() -> new AbstractFloat(BlockPartyNPC::getLoyalty, BlockPartyNPC::setLoyalty)));
-    public static final RegistryObject<Builder> STRESS = BlockParty.SCENE_ACTIONS.register("stress", () -> f(() -> new AbstractFloat(BlockPartyNPC::getStress, BlockPartyNPC::setStress)));
-    public static final RegistryObject<Builder> COOKIE = BlockParty.SCENE_ACTIONS.register("cookie", () -> f(DoCookie::new));
-    public static final RegistryObject<Builder> COUNTER = BlockParty.SCENE_ACTIONS.register("counter", () -> f(DoCounter::new));
-    public static final RegistryObject<Builder> HIDE = BlockParty.SCENE_ACTIONS.register("hide", () -> f(Hide::new));
-    public static final RegistryObject<Builder> END = BlockParty.SCENE_ACTIONS.register("end", () -> f(() -> new End()));
+    public static final Supplier<Builder> SEND_DIALOGUE = BlockParty.SCENE_ACTIONS.register("send_dialogue", () -> f(() -> new SendDialogue()));
+    public static final Supplier<Builder> SEND_RESPONSE = BlockParty.SCENE_ACTIONS.register("send_response", () -> f(() -> new SendResponse()));
+    public static final Supplier<Builder> HEALTH = BlockParty.SCENE_ACTIONS.register("health", () -> f(() -> new AbstractFloat(BlockPartyNPC::getHealth, BlockPartyNPC::setHealth)));
+    public static final Supplier<Builder> FOOD_LEVEL = BlockParty.SCENE_ACTIONS.register("food_level", () -> f(() -> new AbstractFloat(BlockPartyNPC::getFoodLevel, BlockPartyNPC::setFoodLevel)));
+    public static final Supplier<Builder> LOYALTY = BlockParty.SCENE_ACTIONS.register("loyalty", () -> f(() -> new AbstractFloat(BlockPartyNPC::getLoyalty, BlockPartyNPC::setLoyalty)));
+    public static final Supplier<Builder> STRESS = BlockParty.SCENE_ACTIONS.register("stress", () -> f(() -> new AbstractFloat(BlockPartyNPC::getStress, BlockPartyNPC::setStress)));
+    public static final Supplier<Builder> COOKIE = BlockParty.SCENE_ACTIONS.register("cookie", () -> f(DoCookie::new));
+    public static final Supplier<Builder> COUNTER = BlockParty.SCENE_ACTIONS.register("counter", () -> f(DoCounter::new));
+    public static final Supplier<Builder> HIDE = BlockParty.SCENE_ACTIONS.register("hide", () -> f(Hide::new));
+    public static final Supplier<Builder> END = BlockParty.SCENE_ACTIONS.register("end", () -> f(() -> new End()));
 
     public static void setup(NewRegistryEvent e) {
         e.create(new RegistryBuilder<Builder>()
@@ -28,7 +28,7 @@ public class SceneActions {
                 .setMaxID(Integer.MAX_VALUE - 1));
     }
 
-    public static ISceneAction build(RegistryObject<Builder> action) {
+    public static ISceneAction build(Supplier<Builder> action) {
         return action.get().build();
     }
 

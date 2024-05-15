@@ -16,11 +16,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.event.TickEvent;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -66,7 +66,7 @@ public class JapanRenderer {
 
     @SubscribeEvent
     public static void fireflies(TickEvent.PlayerTickEvent e) {
-        Level level = e.player.level;
+        Level level = e.player.level();
         if (level instanceof ServerLevel || factor < 0.8F) { return; }
         long time = level.getDayTime() % 24000;
         if (21500 < time || time < 12500) { return; }

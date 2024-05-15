@@ -10,6 +10,7 @@ import block_party.utils.Trans;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -18,14 +19,11 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Quaternionf;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class YearbookScreen extends ControllerScreen {
     public static final ResourceLocation YEARBOOK_TEXTURES = BlockParty.source("textures/gui/yearbook.png");
@@ -84,26 +82,26 @@ public class YearbookScreen extends ControllerScreen {
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (this.npc == null) { return; }
-        this.renderBackground(stack);
-        this.renderPortrait(stack);
+        this.renderBackground(graphics, mouseX, mouseY, partialTicks);
+        this.renderPortrait(graphics);
         this.renderEntity(this.getAbsoluteCenter(-3), 90, 40.0F, this.entity);
-        if (this.npc.isDeadOrEstrangedFrom(this.getPlayer())) { this.renderOverlay(stack); }
-        this.renderBook(stack);
-        this.font.draw(stack, this.name, this.getCenter(this.font.width(this.name)) + 3, 91, 0);
-        this.font.draw(stack, this.page, this.getCenter(this.font.width(this.page)), 185, 0);
+        if (this.npc.isDeadOrEstrangedFrom(this.getPlayer())) { this.renderOverlay(graphics); }
+        this.renderBook(graphics);
+        graphics.drawString(this.font, this.name, this.getCenter(this.font.width(this.name)) + 3, 91, 0);
+        graphics.drawString(this.font, this.page, this.getCenter(this.font.width(this.page)), 185, 0);
         for (int x = 0; x < this.stats.length; ++x) {
-            this.font.draw(stack, this.stats[x], this.getAbsoluteCenter(38) + x * 25, 104, 0);
+            graphics.drawString(this.font, this.stats[x], this.getAbsoluteCenter(38) + x * 25, 104, 0);
         }
         for (int y = 0; y < this.lines.length; ++y) {
-            this.font.draw(stack, this.lines[y], this.getAbsoluteCenter(40) - (y > 0 ? 5 : y), 123 + 10 * y, 0);
+            graphics.drawString(this.font, this.lines[y], this.getAbsoluteCenter(40) - (y > 0 ? 5 : y), 123 + 10 * y, 0);
         }
-        super.render(stack, mouseX, mouseY, partialTicks);
-        this.renderTooltips(stack, mouseX, mouseY);
+        super.render(graphics, mouseX, mouseY, partialTicks);
+        this.renderTooltips(graphics, mouseX, mouseY);
     }
 
-    public void renderTooltips(PoseStack stack, int mouseX, int mouseY) {
+    public void renderTooltips(GuiGraphics graphics, int mouseX, int mouseY) {
         List<Component> text = new ArrayList<>();
         if (this.buttonRemovePage.isHoveredOrFocused()) {
             text.add(Component.translatable("gui.block_party.button.remove"));
@@ -123,32 +121,28 @@ public class YearbookScreen extends ControllerScreen {
             }
         }
         if (text.size() > 0) {
-            this.renderTooltip(stack, Lists.transform(text, Component::getVisualOrderText), mouseX, mouseY);
+            this.setTooltipForNextRenderPass(Lists.transform(text, Component::getVisualOrderText));
         }
     }
 
-    public void renderPortrait(PoseStack stack) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
-        this.blit(stack, this.getCenter(60) + 3, 27, 161, 25, 58, 58);
+    public void renderPortrait(GuiGraphics graphics) {
+        graphics.blit(YEARBOOK_TEXTURES, this.getCenter(60) + 3, 27, 161, 25, 58, 58);
     }
 
-    public void renderOverlay(PoseStack stack) {
+    public void renderOverlay(GuiGraphics graphics) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
-        if (this.npc.isDead()) { this.blit(stack, this.getCenter(60) + 2, 26, 160, 155, 60, 60); }
+        if (this.npc.isDead()) {
+            graphics.blit(YEARBOOK_TEXTURES, this.getCenter(60) + 2, 26, 160, 155, 60, 60);
+        }
         if (this.npc.isEstrangedFrom(this.getPlayer())) {
-            this.blit(stack, this.getCenter(60) + 2, 26, 160, 95, 60, 60);
+            graphics.blit(YEARBOOK_TEXTURES, this.getCenter(60) + 2, 26, 160, 95, 60, 60);
         }
     }
 
-    public void renderBook(PoseStack stack) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
-        this.blit(stack, this.getCenter(146), 2, 0, 0, 146, 187);
+    public void renderBook(GuiGraphics graphics) {
+        graphics.blit(YEARBOOK_TEXTURES, this.getCenter(146), 2, 0, 0, 146, 187);
     }
 
     @Override
@@ -208,14 +202,12 @@ public class YearbookScreen extends ControllerScreen {
         pose.mulPose(new Quaternionf(0.0F, -1.0F, 0.0F, 0.0F));
     }
 
-    @OnlyIn(Dist.CLIENT)
     public class QuickWidgetButton extends Button {
         public QuickWidgetButton(YearbookScreen screen) {
             super(screen.getCenter(136), 196, 136, 20, CommonComponents.GUI_DONE, (button) -> screen.minecraft.setScreen(null), (n) -> Component.empty());
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     public class TurnPageButton extends Button {
         private final int delta;
 
@@ -230,17 +222,13 @@ public class YearbookScreen extends ControllerScreen {
         }
 
         @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
+        public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
             int x = this.delta > 0 ? 226 : 147;
             int y = this.isHoveredOrFocused() ? 35 : 63;
-            this.blit(stack, this.getX(), this.getY(), x, y, 7, 10);
+            graphics.blit(YEARBOOK_TEXTURES, this.getX(), this.getY(), x, y, 7, 10);
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     public class RemovePageButton extends Button {
         public RemovePageButton(int x, int y, OnPress button) {
             super(x, y, 18, 18, Component.empty(), button, (n) -> Component.empty());
@@ -252,12 +240,9 @@ public class YearbookScreen extends ControllerScreen {
         }
 
         @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
+        public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
             int x = this.isHoveredOrFocused() ? 164 : 146;
-            this.blit(stack, this.getX(), this.getY(), x, 7, 18, 18);
+            graphics.blit(YEARBOOK_TEXTURES, this.getX(), this.getY(), x, 7, 18, 18);
         }
     }
 }

@@ -2,13 +2,12 @@ package block_party.messages;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public abstract class AbstractMessage {
+public abstract class AbstractMessage implements CustomPacketPayload {
     protected AbstractMessage(FriendlyByteBuf buffer) { }
 
     protected AbstractMessage() { }

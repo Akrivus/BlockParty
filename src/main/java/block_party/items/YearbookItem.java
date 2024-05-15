@@ -30,7 +30,7 @@ public class YearbookItem extends Item implements ISortableItem {
 
     @Override
     public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity entity, InteractionHand hand) {
-        if (player.level.isClientSide()) { return InteractionResult.PASS; }
+        if (player.level().isClientSide()) { return InteractionResult.PASS; }
         if (entity instanceof BlockPartyNPC) {
             BlockPartyNPC npc = (BlockPartyNPC) entity;
             if (npc.getPlayer().equals(player)) { return this.openGui(player, hand, npc.getDatabaseID()); }
@@ -40,7 +40,7 @@ public class YearbookItem extends Item implements ISortableItem {
     }
 
     private InteractionResult openGui(Player player, InteractionHand hand, long id) {
-        List<Long> npcs = BlockPartyDB.get(player.level).getFrom(player);
+        List<Long> npcs = BlockPartyDB.get(player.level()).getFrom(player);
         if (npcs.size() > 0) { CustomMessenger.send(player, new SOpenYearbook(npcs, id < 0 ? npcs.get(0) : id, hand)); }
         return InteractionResult.SUCCESS;
     }

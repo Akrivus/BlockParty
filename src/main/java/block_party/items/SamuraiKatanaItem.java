@@ -19,9 +19,9 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingAttackEvent;
 
 @Mod.EventBusSubscriber
 public class SamuraiKatanaItem extends SwordItem {
@@ -77,11 +77,11 @@ public class SamuraiKatanaItem extends SwordItem {
         if (e.getEntity() instanceof ServerPlayer victim && victim.getAttackStrengthScale(1.0F) < 1.0D) {
             e.setCanceled(victim.getMainHandItem().is(CustomTags.Items.PARRY_SWORDS));
             if (e.isCanceled()) {
-                attacker.playSound(CustomSounds.KATANA_PARRY.get(), 1.0F, 1.2F / (victim.level.random.nextFloat() * 0.2F + 0.9F));
+                attacker.playSound(CustomSounds.KATANA_PARRY.get(), 1.0F, 1.2F / (victim.level().random.nextFloat() * 0.2F + 0.9F));
                 double x = victim.getX() - attacker.getX();
                 double z = victim.getZ() - attacker.getZ();
                 attacker.knockback(0.8F, x, z);
-                Registry<DamageType> reg = attacker.level.registryAccess().registry(Registries.DAMAGE_TYPE).get();
+                Registry<DamageType> reg = attacker.level().registryAccess().registry(Registries.DAMAGE_TYPE).get();
                 attacker.hurt(new DamageSource(reg.getHolder(DamageTypes.GENERIC).get()), e.getAmount() * 2.0F);
                 victim.sweepAttack();
             }

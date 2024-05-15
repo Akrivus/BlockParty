@@ -14,16 +14,16 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
 import java.util.Random;
+import java.util.function.Supplier;
 
 public class SakuraBlossomsBlock extends LeavesBlock {
     public static final BooleanProperty BLOOMING = BooleanProperty.create("blooming");
-    private final RegistryObject<SimpleParticleType> particle;
+    private final Supplier<SimpleParticleType> particle;
 
-    public SakuraBlossomsBlock(RegistryObject<SimpleParticleType> particle, Properties properties) {
+    public SakuraBlossomsBlock(Supplier<SimpleParticleType> particle, Properties properties) {
         super(properties.isValidSpawn((state, reader, pos, entity) -> false).isSuffocating((state, reader, pos) -> false).isViewBlocking((state, reader, pos) -> false));
         this.registerDefaultState(this.stateDefinition.any().setValue(DISTANCE, 7).setValue(PERSISTENT, false).setValue(BLOOMING, true));
         this.particle = particle;

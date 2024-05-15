@@ -29,7 +29,7 @@ public class DoCounter extends Abstract1Shot {
         public void apply(BlockPartyNPC npc) {
             Counters counters = SceneVariables.getCounters(npc.getServerPlayer());
             this.operation.accept(counters, this.name, this.value);
-            SceneVariables.save(npc.getLevel());
+            SceneVariables.save(npc.level());
         }
     }
 

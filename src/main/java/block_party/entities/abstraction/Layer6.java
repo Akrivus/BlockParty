@@ -18,17 +18,13 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.wrapper.InvWrapper;
+import net.neoforged.neoforge.items.wrapper.InvWrapper;
 
 /**
  * Abstraction layer 6: inventory and menu handling.
  */
 public abstract class Layer6 extends Layer5 implements ContainerListener, MenuProvider {
     public final SimpleContainer inventory = new SimpleContainer(36);
-    public final LazyOptional<?> itemHandler = LazyOptional.of(() -> new InvWrapper(this.inventory));
 
     public Layer6(EntityType<? extends BlockPartyNPC> type, Level level) {
         super(type, level);
@@ -44,12 +40,6 @@ public abstract class Layer6 extends Layer5 implements ContainerListener, MenuPr
     public void readAdditionalSaveData(CompoundTag compound) {
         this.inventory.fromTag(compound.getList("Inventory", NBT.COMPOUND));
         super.readAdditionalSaveData(compound);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        this.itemHandler.invalidate();
     }
 
     @Override

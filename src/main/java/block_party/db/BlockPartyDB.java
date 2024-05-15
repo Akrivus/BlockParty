@@ -8,7 +8,6 @@ import block_party.utils.NBT;
 import com.google.common.collect.Maps;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
-import net.minecraft.client.telemetry.events.WorldLoadEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongTag;
@@ -16,14 +15,13 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelResource;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import org.apache.commons.compress.utils.Lists;
 
 import java.io.File;
@@ -153,7 +151,7 @@ public class BlockPartyDB extends SavedData {
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent e) {
         Player player = e.getEntity();
-        Level level = player.level;
+        Level level = player.level();
         if (level.isClientSide()) { return; }
         CustomMessenger.send(player, new SShrineList(player, level.dimension()));
     }

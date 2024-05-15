@@ -13,12 +13,12 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.level.PistonEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.PistonEvent;
 
 import java.util.List;
 import java.util.Map;
@@ -57,12 +57,12 @@ public class HidingSpots extends SavedData {
     }
 
     public static void remove(MoeInHiding moe) {
-        if (moe.level instanceof ServerLevel level)
+        if (moe.level() instanceof ServerLevel level)
             set(level, (spot) -> spot.list.remove(moe.blockPosition(), moe.getDatabaseID()));
     }
 
     public static void add(Moe moe) {
-        if (moe.level instanceof ServerLevel level)
+        if (moe.level() instanceof ServerLevel level)
             set(level, (spot) -> spot.list.put(moe.blockPosition(), moe.getDatabaseID()));
     }
 
@@ -119,9 +119,9 @@ public class HidingSpots extends SavedData {
     @SubscribeEvent
     public static void onFalling(EntityJoinLevelEvent e) {
         if (e.getEntity() instanceof FallingBlockEntity entity) {
-            if (entity.level.isClientSide())
+            if (entity.level().isClientSide())
                 return;
-            ServerLevel level = (ServerLevel) entity.level;
+            ServerLevel level = (ServerLevel) entity.level();
             BlockPos pos = entity.getStartPos();
             if (spawn(level, new DimBlockPos(level.dimension(), pos)))
                 e.setCanceled(true);

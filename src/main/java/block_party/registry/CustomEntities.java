@@ -7,14 +7,15 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
+import java.util.function.Supplier;
 
 public class CustomEntities {
-    public static final RegistryObject<EntityType<Moe>> MOE = BlockParty.ENTITIES.register("moe", () -> EntityType.Builder.<Moe>of(Moe::new, MobCategory.CREATURE).sized(0.60F, 1.35F).setTrackingRange(32).setUpdateInterval(2).build("moe"));
-    public static final RegistryObject<EntityType<MoeInHiding>> MOE_IN_HIDING = BlockParty.ENTITIES.register("moe_in_hiding", () -> EntityType.Builder.<MoeInHiding>of(MoeInHiding::new, MobCategory.MISC).sized(1.0F, 0.0F).build("moe_in_hiding"));
+    public static final Supplier<EntityType<Moe>> MOE = BlockParty.ENTITIES.register("moe", () -> EntityType.Builder.<Moe>of(Moe::new, MobCategory.CREATURE).sized(0.60F, 1.35F).setTrackingRange(32).setUpdateInterval(2).build("moe"));
+    public static final Supplier<EntityType<MoeInHiding>> MOE_IN_HIDING = BlockParty.ENTITIES.register("moe_in_hiding", () -> EntityType.Builder.<MoeInHiding>of(MoeInHiding::new, MobCategory.MISC).sized(1.0F, 0.0F).build("moe_in_hiding"));
 
     public static void add(DeferredRegister<EntityType<?>> registry, IEventBus bus) {
         bus.addListener(CustomEntities::registerAttributes);

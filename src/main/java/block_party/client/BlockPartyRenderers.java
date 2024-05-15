@@ -11,8 +11,8 @@ import block_party.registry.CustomEntities;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 public class BlockPartyRenderers {
     public static final ModelLayerLocation SAMURAI_INNER_ARMOR = new ModelLayerLocation(BlockParty.source("samurai_inner_armor"), "samurai_inner_armor");

@@ -7,14 +7,14 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.RegistryObject;
 
 import java.util.Random;
+import java.util.function.Supplier;
 
 public class GinkgoLeavesBlock extends LeavesBlock {
-    private final RegistryObject<SimpleParticleType> particle;
+    private final Supplier<SimpleParticleType> particle;
 
-    public GinkgoLeavesBlock(RegistryObject<SimpleParticleType> particle, Properties properties) {
+    public GinkgoLeavesBlock(Supplier<SimpleParticleType> particle, Properties properties) {
         super(properties.isValidSpawn((state, reader, pos, entity) -> false).isSuffocating((state, reader, pos) -> false).isViewBlocking((state, reader, pos) -> false));
         this.particle = particle;
     }

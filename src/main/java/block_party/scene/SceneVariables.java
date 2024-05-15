@@ -92,7 +92,7 @@ public class SceneVariables extends SavedData {
         try {
             ServerLevel server = level.getServer().getLevel(Level.OVERWORLD);
             DimensionDataStorage storage = server.getDataStorage();
-            return storage.computeIfAbsent(SceneVariables::new, SceneVariables::new, KEY);
+            return storage.computeIfAbsent(SceneVariables::new, KEY);
         } catch (NullPointerException e) {
             return new SceneVariables();
         }
@@ -107,14 +107,14 @@ public class SceneVariables extends SavedData {
     }
 
     public static Cookies getCookies(ServerPlayer player) {
-        Cookies cookies = cookies(player.getLevel(), player.getUUID().getMostSignificantBits() & Long.MAX_VALUE);
+        Cookies cookies = cookies(player.level(), player.getUUID().getMostSignificantBits() & Long.MAX_VALUE);
         cookies.set("name",        player.getGameProfile().getName());
         cookies.set("server",      player.getServer().name());
         return cookies;
     }
 
     public static Cookies getCookies(BlockPartyNPC npc) {
-        Cookies cookies = cookies(npc.getLevel(), npc.getDatabaseID());
+        Cookies cookies = cookies(npc.level(), npc.getDatabaseID());
         cookies.set("name",        npc.getGivenName());
         cookies.set("family_name", npc.getFamilyName());
         cookies.set("blood_type",  Trans.late(npc.getBloodType().getTranslationKey()));
@@ -133,7 +133,7 @@ public class SceneVariables extends SavedData {
     }
 
     public static Counters getCounters(ServerPlayer player) {
-        Counters counters = counters(player.getLevel(), player.getUUID().getMostSignificantBits() & Long.MAX_VALUE);
+        Counters counters = counters(player.level(), player.getUUID().getMostSignificantBits() & Long.MAX_VALUE);
         counters.set("health",     (int) player.getHealth());
         counters.set("exhaustion", (int) player.getFoodData().getExhaustionLevel());
         counters.set("saturation", (int) player.getFoodData().getSaturationLevel());
@@ -143,7 +143,7 @@ public class SceneVariables extends SavedData {
     }
 
     public static Counters getCounters(BlockPartyNPC npc) {
-        Counters counters = counters(npc.getLevel(), npc.getDatabaseID());
+        Counters counters = counters(npc.level(), npc.getDatabaseID());
         counters.set("health",     (int) npc.getHealth());
         counters.set("food_level", (int) npc.getFoodLevel());
         counters.set("exhaustion", (int) npc.getExhaustion());
@@ -167,11 +167,11 @@ public class SceneVariables extends SavedData {
     }
 
     public static Locations getLocations(ServerPlayer player) {
-        return locations(player.getLevel(), player.getUUID().getMostSignificantBits() & Long.MAX_VALUE);
+        return locations(player.level(), player.getUUID().getMostSignificantBits() & Long.MAX_VALUE);
     }
 
     public static Locations getLocations(BlockPartyNPC npc) {
-        return locations(npc.getLevel(), npc.getDatabaseID());
+        return locations(npc.level(), npc.getDatabaseID());
     }
 
     public static Targets targets(Level level, Long id) {
@@ -183,11 +183,11 @@ public class SceneVariables extends SavedData {
     }
 
     public static Targets getTargets(ServerPlayer player) {
-        return targets(player.getLevel(), player.getUUID().getMostSignificantBits() & Long.MAX_VALUE);
+        return targets(player.level(), player.getUUID().getMostSignificantBits() & Long.MAX_VALUE);
     }
 
     public static Targets getTargets(BlockPartyNPC npc) {
-        return targets(npc.getLevel(), npc.getDatabaseID());
+        return targets(npc.level(), npc.getDatabaseID());
     }
 
     public static void save(Level level) {

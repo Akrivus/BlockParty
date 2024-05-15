@@ -22,7 +22,7 @@ public class CellPhoneItem extends Item implements ISortableItem {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         if (level.isClientSide()) { return InteractionResultHolder.pass(player.getItemInHand(hand)); }
-        List<Long> npcs = BlockPartyDB.get(player.level).getFrom(player);
+        List<Long> npcs = BlockPartyDB.get(player.level()).getFrom(player);
         CustomMessenger.send(player, new SOpenCellPhone(npcs, hand));
         return InteractionResultHolder.success(player.getItemInHand(hand));
     }

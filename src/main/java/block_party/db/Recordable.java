@@ -10,7 +10,7 @@ public interface Recordable<M extends Row> {
     UUID BLANK_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     default boolean claim(Player player) {
-        if (player.level.isClientSide()) { return false; }
+        if (player.level().isClientSide()) { return false; }
         this.setPlayerUUID(player == null ? BLANK_UUID : player.getUUID());
         if (!this.hasRow()) {
             this.getNewRow().insert();

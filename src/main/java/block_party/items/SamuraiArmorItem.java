@@ -28,11 +28,11 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.player.PlayerXpEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
 
 import java.util.function.Consumer;
 
@@ -157,7 +157,7 @@ public class SamuraiArmorItem extends ArmorItem {
     public static void onXP(PlayerXpEvent.PickupXp e) {
         ExperienceOrb orb = e.getOrb();
         if (e.getEntity() instanceof ServerPlayer player) {
-            EquipmentSlot slot = EquipmentSlot.values()[orb.level.random.nextInt(5)];
+            EquipmentSlot slot = EquipmentSlot.values()[orb.level().random.nextInt(5)];
             ItemStack stack = player.getItemBySlot(slot);
             if (stack.is(CustomTags.Items.SAMURAI_ITEMS)) {
                 int repair = Math.min(orb.getValue(), stack.getDamageValue());

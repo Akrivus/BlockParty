@@ -14,6 +14,7 @@ import block_party.scene.Speaker;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.renderer.GameRenderer;
@@ -22,8 +23,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Quaternionf;
 import org.lwjgl.glfw.GLFW;
 
@@ -55,31 +54,28 @@ public class DialogueScreen extends AbstractScreen {
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(stack);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        this.renderBackground(graphics, mouseX, mouseY, partialTicks);
         this.setLines(this.text.substring(0, Math.min(this.cursor, this.text.length())), 0);
         this.renderEntity(this.getAbsoluteCenter(64), 200, 40.0F, this.entity);
-        this.renderDialogue(stack, mouseX, mouseY, partialTicks);
-        super.render(stack, mouseX, mouseY, partialTicks);
+        this.renderDialogue(graphics, mouseX, mouseY, partialTicks);
+        super.render(graphics, mouseX, mouseY, partialTicks);
         if (this.cursor < this.text.length()) {
             this.cursor = this.minecraft.player.tickCount - this.start;
             this.playSound(this.dialogue.getSound());
         }
-        this.renderTooltips(stack, mouseX, mouseY);
+        this.renderTooltips(graphics.pose(), mouseX, mouseY);
     }
 
-    public void renderDialogue(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, DIALOGUE_TEXTURES);
-        this.blit(stack, this.getLeft(), this.getBottom(48), this.zero, this.zero, this.sizeX, this.sizeY);
+    public void renderDialogue(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        graphics.blit(DIALOGUE_TEXTURES, this.getLeft(), this.getBottom(48), this.zero, this.zero, this.sizeX, this.sizeY);
         if (this.onDialogueScreen || this.dialogue.isTooltip()) {
-            this.font.drawShadow(stack, this.lines[0].trim(), this.getLeft(5), this.getBottom(43), this.white);
-            this.font.drawShadow(stack, this.lines[1].trim(), this.getLeft(5), this.getBottom(34), this.white);
-            this.font.drawShadow(stack, this.lines[2].trim(), this.getLeft(5), this.getBottom(25), this.white);
+            graphics.drawString(this.font, this.lines[0].trim(), this.getLeft(5), this.getBottom(43), this.white, true);
+            graphics.drawString(this.font, this.lines[1].trim(), this.getLeft(5), this.getBottom(34), this.white, true);
+            graphics.drawString(this.font, this.lines[2].trim(), this.getLeft(5), this.getBottom(25), this.white, true);
         }
         if (this.speaker.identity == Speaker.Identity.NARRATOR) { return; }
-        this.font.drawShadow(stack, this.name, this.getLeft(5), this.getBottom(57), this.white);
+        graphics.drawString(this.font, this.name, this.getLeft(5), this.getBottom(57), this.white, true);
     }
 
     @Override
@@ -206,7 +202,6 @@ public class DialogueScreen extends AbstractScreen {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     public abstract static class RespondButton extends Button {
         protected final Response icon;
         protected final String text;
@@ -224,15 +219,8 @@ public class DialogueScreen extends AbstractScreen {
             parent.onClose();
         }
 
-        @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShaderTexture(0, DialogueScreen.DIALOGUE_TEXTURES);
-        }
-
-        protected void renderIcon(PoseStack stack, int posX, int posY) {
-            this.blit(stack, posX, posY, this.icon.ordinal() * 10, this.isHoveredOrFocused() ? 84 : 74, 10, 10);
+        protected void renderIcon(GuiGraphics graphics, int posX, int posY) {
+            graphics.blit(DIALOGUE_TEXTURES, posX, posY, this.icon.ordinal() * 10, this.isHoveredOrFocused() ? 84 : 74, 10, 10);
         }
 
         public static RespondButton create(DialogueScreen parent, int index, NPC npc, Response icon, Component text, boolean tooltip) {
@@ -244,7 +232,6 @@ public class DialogueScreen extends AbstractScreen {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     public class SeeButton extends Button {
         private final boolean toggle;
         private int offset;
@@ -257,13 +244,10 @@ public class DialogueScreen extends AbstractScreen {
         }
 
         @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShaderTexture(0, DIALOGUE_TEXTURES);
+        public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
             int x = this.toggle ? 90 : 80;
             int y = this.isHoveredOrFocused() ? 84 : 74;
-            this.blit(stack, this.getX() + this.offset, this.getY(), x, y, 10, 10);
+            graphics.blit(DIALOGUE_TEXTURES, this.getX() + this.offset, this.getY(), x, y, 10, 10);
             this.ticks += this.backwards ? -partialTicks : partialTicks;
             if (this.ticks > 20.0F) {
                 this.ticks = 20.0F;

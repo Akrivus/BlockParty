@@ -1,13 +1,8 @@
 package block_party.utils;
 
 import com.google.gson.JsonObject;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.RegistryManager;
 
 public class JsonUtils {
     public static final ResourceLocation BIOME = new ResourceLocation("minecraft:worldgen/biome");

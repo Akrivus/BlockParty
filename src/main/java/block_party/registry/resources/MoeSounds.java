@@ -16,7 +16,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,7 +32,7 @@ public class MoeSounds extends SimpleJsonResourceReloadListener {
         private final String name;
         private final Supplier<SoundEvent> defaultSoundSupplier;
 
-        Sound(String name, RegistryObject<SoundEvent> defaultSoundSupplier) {
+        Sound(String name, Supplier<SoundEvent> defaultSoundSupplier) {
             this.name = name;
             this.defaultSoundSupplier = defaultSoundSupplier;
         }

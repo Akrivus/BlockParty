@@ -30,7 +30,7 @@ public class DoCookie extends Abstract1Shot {
             if (!npc.isPlayerOnline()) { return; }
             Cookies cookies = SceneVariables.getCookies(npc.getServerPlayer());
             this.operation.accept(cookies, this.name, this.value);
-            SceneVariables.save(npc.getLevel());
+            SceneVariables.save(npc.level());
         }
     }
 

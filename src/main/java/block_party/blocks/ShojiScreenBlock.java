@@ -18,7 +18,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ShojiScreenBlock extends DoorBlock {
     public ShojiScreenBlock(Properties properties) {
-        super(properties, BlockSetType.CHERRY);
+        super(BlockSetType.CHERRY, properties);
     }
 
     @Override

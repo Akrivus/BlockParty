@@ -21,12 +21,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.AABB;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Abstraction layer 2: block data and catch-all block behaviors.
@@ -77,7 +76,7 @@ public abstract class Layer2 extends Layer1 {
 
     @Override
     public boolean fireImmune() {
-        return !this.getActualBlockState().isFlammable(this.level, this.blockPosition(), this.getDirection());
+        return !this.getActualBlockState().isFlammable(this.level(), this.blockPosition(), this.getDirection());
     }
 
     @Override
@@ -117,7 +116,7 @@ public abstract class Layer2 extends Layer1 {
             this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, this.fireImmune() ? 0.0F : -1.0F);
             boolean flying = this.is(CustomTags.HAS_WINGS);
             this.moveControl = flying ? new FlyingMoveControl(this, 10, false) : new MoveControl(this);
-            this.navigation = flying ? new FlyingPathNavigation(this, this.level) : new GroundPathNavigation(this, this.level);
+            this.navigation = flying ? new FlyingPathNavigation(this, this.level()) : new GroundPathNavigation(this, this.level());
             if (this.navigation instanceof GroundPathNavigation) {
                 GroundPathNavigation ground = (GroundPathNavigation) this.navigation;
                 ground.setCanOpenDoors(true);
@@ -151,7 +150,7 @@ public abstract class Layer2 extends Layer1 {
 
     protected float getBlockVolume(BlockState state) {
         double volume = 0.0F;
-        List<AABB> aabbs = state.getOcclusionShape(this.level, this.blockPosition()).toAabbs();
+        List<AABB> aabbs = state.getOcclusionShape(this.level(), this.blockPosition()).toAabbs();
         for (AABB aabb : aabbs)
             volume += (aabb.maxX - aabb.minX) * (aabb.maxY - aabb.minY) * (aabb.maxZ - aabb.minZ);
         volume = Math.cbrt(volume);
@@ -161,7 +160,7 @@ public abstract class Layer2 extends Layer1 {
     }
 
     protected float getBlockBuffer() {
-        return 0.5F / (this.getActualBlockState().getDestroySpeed(this.level, this.blockPosition()) + 1);
+        return 0.5F / (this.getActualBlockState().getDestroySpeed(this.level(), this.blockPosition()) + 1);
     }
 
     @Override
@@ -182,8 +181,8 @@ public abstract class Layer2 extends Layer1 {
     }
 
     public int[] getAuraColor() {
-        MaterialColor block = this.getActualBlockState().getMaterial().getColor();
-        return new int[] { block.col, 0xffffff };
+        MapColor color = this.getActualBlockState().getBlock().defaultMapColor();
+        return new int[] { color.col, 0xffffff };
     }
 
     public int getBaseAge() {
@@ -191,7 +190,7 @@ public abstract class Layer2 extends Layer1 {
     }
 
     public void hide(HideUntil until) {
-        this.level.setBlock(this.blockPosition(), this.getActualBlockState(), 3);
+        this.level().setBlock(this.blockPosition(), this.getActualBlockState(), 3);
         this.remove(RemovalReason.DISCARDED);
     }
 

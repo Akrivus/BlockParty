@@ -28,7 +28,7 @@ public abstract class CNPCQuery extends AbstractMessage.Client {
 
     @Override
     public void handle(NetworkEvent.Context context, ServerPlayer player) {
-        this.list = BlockPartyDB.get(player.level).getFrom(player);
+        this.list = BlockPartyDB.get(player.level()).getFrom(player);
         this.npc = BlockPartyDB.NPCs.find(this.id);
         if (this.npc != null) {
             this.onFound(context, player);

@@ -61,7 +61,7 @@ public abstract class Layer4 extends Layer3 {
 
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType reason, SpawnGroupData data, CompoundTag compound) {
-        this.setGivenName(this.getGender().getUniqueName(this.level));
+        this.setGivenName(this.getGender().getUniqueName(this.level()));
         this.setBloodType(this.getBloodType().weigh(this.random));
         return super.finalizeSpawn(world, difficulty, reason, data, compound);
     }

@@ -1,9 +1,9 @@
 package block_party.registry;
 
 import block_party.registry.resources.*;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 
 public class CustomResources {
     public static final BlockAliases BLOCK_ALIASES = new BlockAliases();

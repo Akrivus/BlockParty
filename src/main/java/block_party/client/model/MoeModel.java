@@ -166,7 +166,7 @@ public class MoeModel<T extends BlockPartyNPC> extends HierarchicalModel<T> impl
         this.leftArm.xRot = Mth.cos(limbSwing * 0.6662F) * 2.0F * limbSwingAmount * 0.5F;
         this.leftArm.zRot = -0.7853981633974483F;
         this.rightWing.xRot = (this.leftWing.xRot = -0.23561947F);
-        this.rightWing.yRot = -(this.leftWing.yRot = entity.isOnGround() ? 0.0F : 0.47123894F + Mth.cos(entity.tickCount * partialTicks) * 3.14F * 0.05F);
+        this.rightWing.yRot = -(this.leftWing.yRot = entity.onGround() ? 0.0F : 0.47123894F + Mth.cos(entity.tickCount * partialTicks) * 3.14F * 0.05F);
         this.rightWing.zRot = -(this.leftWing.zRot = -0.23561947F);
         this.rightLeg.xRot = Mth.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
         this.rightLeg.yRot = this.rightLeg.zRot = 0.0F;

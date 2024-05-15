@@ -3,7 +3,7 @@ package block_party.client.particle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.fml.common.Mod;
 
 @Mod.EventBusSubscriber
 public class FireflyParticle extends TextureSheetParticle {

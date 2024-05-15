@@ -61,7 +61,7 @@ public abstract class Layer3 extends Layer2 {
     }
 
     public Player getPlayer() {
-        return this.level.getPlayerByUUID(this.getPlayerUUID());
+        return this.level().getPlayerByUUID(this.getPlayerUUID());
     }
 
     public ServerPlayer getServerPlayer() {

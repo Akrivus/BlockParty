@@ -6,9 +6,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.RegistryObject;
 
 import java.util.Random;
+import java.util.function.Supplier;
 
 public class SakuraParticle extends TextureSheetParticle {
     public SakuraParticle(SpriteSet sprite, ClientLevel level, double x, double y, double z, double mX, double mY, double mZ) {
@@ -43,7 +43,7 @@ public class SakuraParticle extends TextureSheetParticle {
         return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
     }
 
-    public static void add(RegistryObject<SimpleParticleType> particle, Level level, BlockPos pos, RandomSource random) {
+    public static void add(Supplier<SimpleParticleType> particle, Level level, BlockPos pos, RandomSource random) {
         BlockPos spawn = pos.offset(random.nextInt(), -1, random.nextInt());
         if (random.nextInt(10) == 0 && level.isEmptyBlock(spawn)) {
             double direction = level.getDayTime() / 1000 * 15.0D;

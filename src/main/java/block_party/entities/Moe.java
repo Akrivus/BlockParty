@@ -16,7 +16,7 @@ import net.minecraft.world.level.Level;
 public class Moe extends BlockPartyNPC {
     public Moe(EntityType<Moe> type, Level level) {
         super(type, level);
-        this.setGivenName(this.getGender().getUniqueName(this.level));
+        this.setGivenName(this.getGender().getUniqueName(this.level()));
         this.doSyncWithDatabase(true);
     }
 
@@ -30,7 +30,7 @@ public class Moe extends BlockPartyNPC {
         this.getRow().update(this, (row) -> row.get(NPC.HIDING).set(true));
         MoeInHiding ghost = new MoeInHiding(this);
         ghost.setHideUntil(until);
-        if (this.level.addFreshEntity(ghost))
+        if (this.level().addFreshEntity(ghost))
             super.hide(until);
     }
 

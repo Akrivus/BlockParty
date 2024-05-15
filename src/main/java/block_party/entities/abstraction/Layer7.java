@@ -130,7 +130,7 @@ public abstract class Layer7 extends Layer6 {
     }
 
     public void sayInChat(String key, Object... params) {
-        this.level.players().forEach((player) -> {
+        this.level().players().forEach((player) -> {
             if (player.distanceTo(this) < 8.0D) { this.sayInChat(player, key, params); }
         });
     }

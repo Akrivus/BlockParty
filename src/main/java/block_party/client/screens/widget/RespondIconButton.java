@@ -4,6 +4,7 @@ import block_party.client.screens.DialogueScreen;
 import block_party.db.records.NPC;
 import block_party.scene.Response;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
 public class RespondIconButton extends DialogueScreen.RespondButton {
@@ -12,8 +13,8 @@ public class RespondIconButton extends DialogueScreen.RespondButton {
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        super.render(stack, mouseX, mouseY, partialTicks);
-        this.renderIcon(stack, this.getX(), this.getY());
+    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.render(graphics, mouseX, mouseY, partialTicks);
+        this.renderIcon(graphics, this.getX(), this.getY());
     }
 }
