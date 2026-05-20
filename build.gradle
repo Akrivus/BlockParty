@@ -37,10 +37,19 @@ minecraft {
         data {
             args '--mod', 'block_party', '--all', '--output', file('src/generated/resources/')
         }
+        gameTestServer {
+            property 'forge.enableGameTest', 'true'
+            property 'forge.gameTestServer', 'true'
+            property 'forge.enabledGameTestNamespaces', 'block_party'
+            setForceExit false
+        }
     }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+sourceSets.test.compileClasspath += sourceSets.main.compileClasspath
+sourceSets.test.runtimeClasspath += sourceSets.main.runtimeClasspath
 
 configurations {
     integrate
@@ -51,6 +60,16 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.19.4-45.2.0'
     integrate 'org.xerial:sqlite-jdbc:3.40.1.0'
 }
+
+tasks.register('regressionTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs lightweight regression coverage without an external test framework.'
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'block_party.regression.RegressionTestSuite'
+}
+
+check.dependsOn regressionTest
 
 shadowJar {
     relocate 'org.sqlite', 'block_party.org.sqlite'

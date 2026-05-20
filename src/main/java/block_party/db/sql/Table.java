@@ -20,7 +20,7 @@ public abstract class Table<R extends Row> {
 
     public Table(String name, Column... columns) {
         this.name = name;
-        this.addColumn(new Column.AsLong(this, "DatabaseID", "PRIMARY_KEY"));
+        this.addColumn(new Column.AsLong(this, "DatabaseID", "PRIMARY KEY"));
         this.addColumn(new Column.AsPosition(this, "Pos"));
         this.addColumn(new Column.AsUUID(this, "PlayerUUID"));
         for (Column column : columns) {
@@ -34,6 +34,20 @@ public abstract class Table<R extends Row> {
     }
 
     public List<Column> getColumns() {
+        List<Column> copies = new ArrayList<>();
+        for (Column column : this.columns) {
+            copies.add(column.copy(this));
+        }
+        for (int i = 0; i < copies.size(); ++i) {
+            Column column = copies.get(i);
+            if (column instanceof Column.AsPosition && i + 3 < copies.size()) {
+                ((Column.AsPosition) column).bind(copies.get(i + 1), copies.get(i + 2), copies.get(i + 3));
+            }
+        }
+        return copies;
+    }
+
+    public List<Column> getSchemaColumns() {
         return new ArrayList<>(this.columns);
     }
 
@@ -114,16 +128,20 @@ public abstract class Table<R extends Row> {
     }
 
     public void create() {
-        String columns = "";
-        for (Column column : this.columns)
-            columns += String.format("%s %s %s,", column.getColumn(), column.getType(), column.getExtra());
-        columns = columns.substring(0, columns.length() - 1);
-        try (PreparedStatement sql = this.open(String.format("CREATE TABLE IF NOT EXISTS %s (%s);", this.name, columns))) {
+        try (PreparedStatement sql = this.open(this.getCreateTableSQL())) {
             System.out.println(sql);
             sql.execute();
             this.shut();
         } catch (SQLException e) {
             this.rescue(e);
         }
+    }
+
+    public String getCreateTableSQL() {
+        String columns = "";
+        for (Column column : this.columns)
+            columns += String.format("%s %s %s, ", column.getColumn(), column.getType(), column.getExtra());
+        columns = columns.substring(0, columns.length() - 2);
+        return String.format("CREATE TABLE IF NOT EXISTS %s (%s);", this.name, columns);
     }
 }

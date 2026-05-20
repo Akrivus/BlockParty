@@ -2,9 +2,9 @@ package block_party.scene;
 
 import block_party.utils.JsonUtils;
 import block_party.utils.NBT;
-import com.google.common.collect.Maps;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 
 import java.util.Map;
@@ -14,18 +14,20 @@ public class Dialogue {
     private final String text;
     private final boolean tooltip;
     private final Speaker speaker;
-    private final SoundEvent sound;
+    private SoundEvent sound;
+    private ResourceLocation soundID;
 
     public Dialogue(String text, boolean tooltip, Speaker speaker, SoundEvent sound) {
-        this.responses = Maps.newHashMap();
+        this.responses = new java.util.LinkedHashMap<>();
         this.text = text;
         this.tooltip = tooltip;
         this.speaker = speaker;
         this.sound = sound;
+        this.soundID = sound == null ? null : sound.getLocation();
     }
 
     public Dialogue(CompoundTag compound) {
-        Map<Response, String> responses = Maps.newHashMap();
+        Map<Response, String> responses = new java.util.LinkedHashMap<>();
         ListTag list = compound.getList("Responses", NBT.COMPOUND);
         for (int i = 0; i < list.size(); ++i) {
             CompoundTag response = list.getCompound(i);
@@ -38,7 +40,7 @@ public class Dialogue {
         this.text = compound.getString("Text");
         this.tooltip = compound.getBoolean("Tooltip");
         this.speaker = new Speaker(compound.getCompound("Speaker"));
-        this.sound = JsonUtils.getAs(JsonUtils.SOUND_EVENT, compound.getString("Sound"));
+        this.soundID = parseID(compound.getString("Sound"));
     }
 
     public CompoundTag write() {
@@ -57,7 +59,8 @@ public class Dialogue {
         compound.putString("Text", this.text);
         compound.putBoolean("Tooltip", this.tooltip);
         compound.put("Speaker", this.speaker.write(new CompoundTag()));
-        compound.putString("Sound", this.sound.getLocation().toString());
+        ResourceLocation soundID = this.getSoundID();
+        compound.putString("Sound", soundID == null ? "" : soundID.toString());
         return compound;
     }
 
@@ -74,7 +77,21 @@ public class Dialogue {
     }
 
     public SoundEvent getSound() {
+        if (this.sound == null && this.soundID != null) {
+            this.sound = JsonUtils.getAs(JsonUtils.SOUND_EVENT, this.soundID);
+        }
         return this.sound;
+    }
+
+    public ResourceLocation getSoundID() {
+        if (this.soundID == null && this.sound != null) {
+            this.soundID = this.sound.getLocation();
+        }
+        return this.soundID;
+    }
+
+    private static ResourceLocation parseID(String value) {
+        return value == null || value.isEmpty() ? null : ResourceLocation.tryParse(value);
     }
 
     public Map<Response, String> getResponses() {

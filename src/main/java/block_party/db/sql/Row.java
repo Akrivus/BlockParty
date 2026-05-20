@@ -81,7 +81,7 @@ public abstract class Row<E extends Recordable> {
     }
 
     public void insert() {
-        this.table.update(String.format("INSERT INTO %s(%s) VALUES (%s);", this.name, this.getColumnNames(), this.getQuestionMarks()), this.getColumns());
+        this.table.update(this.getInsertSQL(), this.getColumns());
     }
 
     private String getColumnNames() {
@@ -105,7 +105,7 @@ public abstract class Row<E extends Recordable> {
     }
 
     public void delete() {
-        this.table.update(String.format("DELETE FROM %s WHERE (DatabaseID = '%s');", this.name, this.getID()));
+        this.table.update(this.getDeleteSQL(), this.getColumns(DATABASE_ID));
     }
 
     public long getID() {
@@ -128,7 +128,23 @@ public abstract class Row<E extends Recordable> {
     }
 
     public void update() {
-        this.table.update(String.format("UPDATE %s SET %s WHERE (DatabaseID = '%s');", this.name, this.getDirtyColumnSetters(), this.getID()), this.getDirtyColumns());
+        List<Column> dirty = this.getDirtyColumns();
+        if (dirty.isEmpty()) { return; }
+        this.table.update(this.getUpdateSQL(), this.withID(dirty));
+    }
+
+    public String getInsertSQL() {
+        return String.format("INSERT INTO %s (%s) VALUES (%s);", this.name, this.getColumnNames(), this.getQuestionMarks());
+    }
+
+    public String getDeleteSQL() {
+        return String.format("DELETE FROM %s WHERE DatabaseID = ?;", this.name);
+    }
+
+    public String getUpdateSQL() {
+        List<Column> dirty = this.getDirtyColumns();
+        if (dirty.isEmpty()) { return null; }
+        return String.format("UPDATE %s SET %s WHERE DatabaseID = ?;", this.name, this.getColumnSetters(dirty));
     }
 
     private String getDirtyColumnSetters() {
@@ -147,6 +163,12 @@ public abstract class Row<E extends Recordable> {
         String names = "";
         for (Column column : columns) { names += String.format("%s = ?, ", column.getColumn()); }
         return names.substring(0, names.length() - 2);
+    }
+
+    private List<Column> withID(List<Column> columns) {
+        List<Column> bound = new ArrayList<>(columns);
+        bound.add(this.get(DATABASE_ID));
+        return bound;
     }
 
     public CompoundTag write() {

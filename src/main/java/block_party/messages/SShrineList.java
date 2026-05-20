@@ -1,7 +1,7 @@
 package block_party.messages;
 
-import block_party.client.ShrineLocation;
 import block_party.db.BlockPartyDB;
+import block_party.db.ShrineLocations;
 import block_party.db.sql.Row;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -44,6 +44,6 @@ public class SShrineList extends AbstractMessage.Server {
 
     @Override
     public void handle(NetworkEvent.Context context, Minecraft minecraft) {
-        BlockPartyDB.ShrineLocation = new ShrineLocation(this.shrines);
+        BlockPartyDB.ShrineLocation = new ShrineLocations(this.shrines);
     }
 }

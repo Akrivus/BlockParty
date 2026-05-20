@@ -3,9 +3,10 @@ package block_party.scene.actions;
 import block_party.entities.BlockPartyNPC;
 import block_party.scene.ISceneAction;
 import block_party.scene.Response;
-import block_party.utils.JsonUtils;
 import block_party.utils.Trans;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 
 import java.util.List;
@@ -22,9 +23,15 @@ public class SendResponse extends Abstract1Shot {
 
     @Override
     public void parse(JsonObject json) {
-        this.icon = Response.CLOSE_DIALOGUE.fromValue(JsonUtils.getAsResourceLocation(json, "icon"));
+        if (json.has("icon")) {
+            ResourceLocation icon = ResourceLocation.tryParse(GsonHelper.getAsString(json, "icon", ""));
+            this.icon = icon == null ? Response.CLOSE_DIALOGUE : Response.CLOSE_DIALOGUE.fromValue(icon);
+        } else {
+            this.icon = Response.CLOSE_DIALOGUE;
+        }
         this.text = GsonHelper.getAsString(json, "text", Trans.late(this.icon.getTranslationKey()));
-        this.actions = ISceneAction.parseArray(json.getAsJsonArray("actions"));
+        JsonArray actions = json.has("actions") && json.get("actions").isJsonArray() ? json.getAsJsonArray("actions") : new JsonArray();
+        this.actions = ISceneAction.parseArray(actions);
     }
 
     public Response getIcon() {

@@ -21,14 +21,17 @@ public interface ISceneAction {
 
     static List<ISceneAction> parseArray(JsonArray array) {
         ImmutableList.Builder<ISceneAction> actions = ImmutableList.builder();
+        if (array == null) { return actions.build(); }
         for (int i = 0; i < array.size(); ++i) {
             JsonElement member = array.get(i);
             ResourceLocation location = null;
-            if (member.isJsonObject()) { location = JsonUtils.getAsResourceLocation(member.getAsJsonObject(), "type"); }
-            if (member.isJsonPrimitive()) { location = new ResourceLocation(member.getAsString()); }
+            if (member.isJsonObject() && member.getAsJsonObject().has("type")) { location = ResourceLocation.tryParse(member.getAsJsonObject().get("type").getAsString()); }
+            if (member.isJsonPrimitive()) { location = ResourceLocation.tryParse(member.getAsString()); }
             if (location == null) { continue; }
-            ISceneAction action = JsonUtils.<SceneActions.Builder>getAs(JsonUtils.SCENE_ACTION, Scenes.own(location)).build();
-            if (member.isJsonObject()) { action.parse(member.getAsJsonObject().getAsJsonObject("action")); }
+            SceneActions.Builder builder = JsonUtils.getAs(JsonUtils.SCENE_ACTION, Scenes.own(location));
+            if (builder == null) { continue; }
+            ISceneAction action = builder.build();
+            if (member.isJsonObject() && member.getAsJsonObject().has("action")) { action.parse(member.getAsJsonObject().getAsJsonObject("action")); }
             actions.add(action);
         }
         return actions.build();

@@ -2,6 +2,7 @@ package block_party.entities.abstraction;
 
 import block_party.entities.BlockPartyNPC;
 import block_party.registry.CustomTags;
+import block_party.registry.resources.MoeSounds;
 import block_party.scene.traits.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -154,6 +155,9 @@ public abstract class Layer4 extends Layer3 {
     }
 
     public void setEmotion(Emotion emotion) {
+        if (this.getEmotion() != emotion) {
+            this.playSound(MoeSounds.get(this.cast(), MoeSounds.getEmotionSound(emotion)));
+        }
         this.entityData.set(EMOTION, emotion.getValue());
     }
 

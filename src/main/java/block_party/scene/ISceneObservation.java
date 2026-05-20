@@ -18,14 +18,17 @@ public interface ISceneObservation {
 
     static List<ISceneObservation> parseArray(JsonArray array) {
         ImmutableList.Builder<ISceneObservation> filters = ImmutableList.builder();
+        if (array == null) { return filters.build(); }
         for (int i = 0; i < array.size(); ++i) {
             JsonElement member = array.get(i);
             ResourceLocation location = null;
-            if (member.isJsonObject()) { location = JsonUtils.getAsResourceLocation(member.getAsJsonObject(), "type"); }
-            if (member.isJsonPrimitive()) { location = new ResourceLocation(member.getAsString()); }
+            if (member.isJsonObject() && member.getAsJsonObject().has("type")) { location = ResourceLocation.tryParse(member.getAsJsonObject().get("type").getAsString()); }
+            if (member.isJsonPrimitive()) { location = ResourceLocation.tryParse(member.getAsString()); }
             if (location == null) { continue; }
-            ISceneObservation filter = JsonUtils.<SceneFilters.Builder>getAs(JsonUtils.SCENE_FILTER, Scenes.own(location)).build();
-            if (member.isJsonObject()) { filter.parse(member.getAsJsonObject().getAsJsonObject("filter")); }
+            SceneFilters.Builder builder = JsonUtils.getAs(JsonUtils.SCENE_FILTER, Scenes.own(location));
+            if (builder == null) { continue; }
+            ISceneObservation filter = builder.build();
+            if (member.isJsonObject() && member.getAsJsonObject().has("filter")) { filter.parse(member.getAsJsonObject().getAsJsonObject("filter")); }
             filters.add(filter);
         }
         return filters.build();

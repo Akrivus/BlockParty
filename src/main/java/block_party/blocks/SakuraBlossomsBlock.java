@@ -25,7 +25,7 @@ public class SakuraBlossomsBlock extends LeavesBlock {
 
     public SakuraBlossomsBlock(RegistryObject<SimpleParticleType> particle, Properties properties) {
         super(properties.isValidSpawn((state, reader, pos, entity) -> false).isSuffocating((state, reader, pos) -> false).isViewBlocking((state, reader, pos) -> false));
-        this.registerDefaultState(this.stateDefinition.any().setValue(DISTANCE, 7).setValue(PERSISTENT, false).setValue(BLOOMING, true));
+        this.registerDefaultState(this.stateDefinition.any().setValue(DISTANCE, 7).setValue(PERSISTENT, false).setValue(WATERLOGGED, false).setValue(BLOOMING, true));
         this.particle = particle;
     }
 
@@ -70,6 +70,6 @@ public class SakuraBlossomsBlock extends LeavesBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(DISTANCE, PERSISTENT, BLOOMING);
+        builder.add(DISTANCE, PERSISTENT, WATERLOGGED, BLOOMING);
     }
 }

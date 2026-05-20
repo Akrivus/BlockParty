@@ -33,7 +33,7 @@ public class YearbookItem extends Item implements ISortableItem {
         if (player.level.isClientSide()) { return InteractionResult.PASS; }
         if (entity instanceof BlockPartyNPC) {
             BlockPartyNPC npc = (BlockPartyNPC) entity;
-            if (npc.getPlayer().equals(player)) { return this.openGui(player, hand, npc.getDatabaseID()); }
+            if (player.equals(npc.getPlayer())) { return this.openGui(player, hand, npc.getDatabaseID()); }
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.FAIL;

@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.event.TickEvent;
@@ -26,7 +27,7 @@ import org.joml.Vector3f;
 
 import java.util.Optional;
 
-@Mod.EventBusSubscriber
+@Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class JapanRenderer {
     private static final ResourceLocation FUJI_TEXTURE = BlockParty.source("textures/misc/fuji.png");
     private static final int size = 288;

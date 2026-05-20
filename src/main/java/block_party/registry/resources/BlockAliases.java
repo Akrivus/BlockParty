@@ -37,6 +37,10 @@ public class BlockAliases extends SimpleJsonResourceReloadListener {
             ResourceLocation location = entry.getKey();
             try {
                 Block alias = JsonUtils.getAs(JsonUtils.BLOCK, location);
+                if (alias == null) {
+                    LOGGER.error("Parsing error loading block alias: {}", location);
+                    continue;
+                }
                 JsonObject json = GsonHelper.convertToJsonObject(entry.getValue(), "aliases");
 
                 JsonArray array = json.getAsJsonArray("aliases");
@@ -45,7 +49,11 @@ public class BlockAliases extends SimpleJsonResourceReloadListener {
                     ResourceLocation name = new ResourceLocation(element.getAsString());
                     try {
                         Block block = JsonUtils.getAs(JsonUtils.BLOCK, name);
-                        builder.put(block, alias);
+                        if (block == null) {
+                            LOGGER.error("Parsing error loading block alias of {}: {}", location, name);
+                        } else {
+                            builder.put(block, alias);
+                        }
                     } catch (JsonSyntaxException e) {
                         LOGGER.error("Parsing error loading block alias of {}: {}", location, name);
                     }

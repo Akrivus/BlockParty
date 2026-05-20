@@ -6,6 +6,7 @@ import block_party.scene.traits.Emotion;
 import block_party.utils.JsonUtils;
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
 
@@ -15,6 +16,7 @@ public class Speaker {
     public Animation animation;
     public Emotion emotion;
     public SoundEvent voice;
+    public ResourceLocation voiceID;
     public boolean speaks;
     public float scale;
 
@@ -26,7 +28,7 @@ public class Speaker {
         this.scale = GsonHelper.getAsFloat(json, "scale", 1.0F);
         this.speaks = json.has("voice");
         if (this.speaks) {
-            this.voice = JsonUtils.getAs(JsonUtils.SOUND_EVENT, GsonHelper.getAsString(json, "voice"));
+            this.voiceID = parseID(GsonHelper.getAsString(json, "voice"));
         }
     }
 
@@ -38,7 +40,7 @@ public class Speaker {
         this.scale = tag.getFloat("Scale");
         this.speaks = tag.getBoolean("Speaks");
         if (this.speaks) {
-            this.voice = JsonUtils.getAs(JsonUtils.SOUND_EVENT, tag.getString("Voice"));
+            this.voiceID = parseID(tag.getString("Voice"));
         }
     }
 
@@ -49,15 +51,33 @@ public class Speaker {
         tag.putString("Emotion", this.emotion.name());
         tag.putFloat("Scale", this.scale);
         tag.putBoolean("Speaks", this.speaks);
-        if (this.speaks) {
-            tag.putString("Voice", this.voice.getLocation().toString());
+        if (this.speaks && this.getVoiceID() != null) {
+            tag.putString("Voice", this.getVoiceID().toString());
         }
         return tag;
+    }
+
+    public ResourceLocation getVoiceID() {
+        if (this.voiceID == null && this.voice != null) {
+            this.voiceID = this.voice.getLocation();
+        }
+        return this.voiceID;
+    }
+
+    public SoundEvent getVoice() {
+        if (this.voice == null && this.voiceID != null) {
+            this.voice = JsonUtils.getAs(JsonUtils.SOUND_EVENT, this.voiceID);
+        }
+        return this.voice;
     }
 
     public void stage(BlockPartyNPC npc) {
         npc.setAnimationKey(this.animation);
         npc.setEmotion(this.emotion);
+    }
+
+    private static ResourceLocation parseID(String value) {
+        return value == null || value.isEmpty() ? null : ResourceLocation.tryParse(value);
     }
 
     public enum Identity {

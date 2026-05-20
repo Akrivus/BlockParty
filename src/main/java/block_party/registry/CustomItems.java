@@ -3,14 +3,11 @@ package block_party.registry;
 import block_party.BlockParty;
 import block_party.items.*;
 import block_party.utils.sorters.ISortableItem;
-import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -100,12 +97,7 @@ public class CustomItems {
     public static final RegistryObject<Item> YELLOW_PAPER_LANTERN = BlockParty.ITEMS.register("yellow_paper_lantern", () -> new MoeBlockItem(CustomBlocks.YELLOW_PAPER_LANTERN));
 
     public static void add(DeferredRegister<Item> registry, IEventBus bus) {
-        bus.addListener(CustomItems::registerModelProperties);
         registry.register(bus);
-    }
-
-    private static void registerModelProperties(FMLCommonSetupEvent e) {
-        ItemProperties.register(CustomItems.LETTER.get(), new ResourceLocation("closed"), (stack, world, entity, damage) -> LetterItem.isClosed(stack));
     }
 
     /*

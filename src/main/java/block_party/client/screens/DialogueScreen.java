@@ -163,7 +163,7 @@ public class DialogueScreen extends AbstractScreen {
         });
         updateButtons(true);
         if (this.speaker.speaks) {
-            this.playSound(this.speaker.voice);
+            this.playSound(this.speaker.getVoice());
             this.cursor = this.text.length();
         }
     }

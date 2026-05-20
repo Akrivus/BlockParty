@@ -91,6 +91,8 @@ public abstract class Column<I> {
 
     public abstract void afterAdd(Table table);
 
+    public abstract Column<I> copy(Table table);
+
     public static class AsInteger extends Column<Integer> {
         public AsInteger(Table table, String column) {
             this(table, column, "NOT NULL DEFAULT 0");
@@ -122,6 +124,11 @@ public abstract class Column<I> {
 
         @Override
         public void afterAdd(Table table) { }
+
+        @Override
+        public Column<Integer> copy(Table table) {
+            return new AsInteger(table, this.column, this.extra);
+        }
 
         @Override
         public Integer getDefault() {
@@ -162,6 +169,11 @@ public abstract class Column<I> {
         public void afterAdd(Table table) { }
 
         @Override
+        public Column<Long> copy(Table table) {
+            return new AsLong(table, this.column, this.extra);
+        }
+
+        @Override
         public Long getDefault() {
             return 0L;
         }
@@ -198,6 +210,11 @@ public abstract class Column<I> {
 
         @Override
         public void afterAdd(Table table) { }
+
+        @Override
+        public Column<Boolean> copy(Table table) {
+            return new AsBoolean(table, this.column, this.extra);
+        }
 
         @Override
         public Boolean getDefault() {
@@ -238,6 +255,11 @@ public abstract class Column<I> {
         public void afterAdd(Table table) { }
 
         @Override
+        public Column<Float> copy(Table table) {
+            return new AsFloat(table, this.column, this.extra);
+        }
+
+        @Override
         public Float getDefault() {
             return 0.0F;
         }
@@ -274,6 +296,11 @@ public abstract class Column<I> {
 
         @Override
         public void afterAdd(Table table) { }
+
+        @Override
+        public Column<BlockState> copy(Table table) {
+            return new AsBlockState(table, this.column, this.extra);
+        }
 
         @Override
         public BlockState getDefault() {
@@ -314,6 +341,11 @@ public abstract class Column<I> {
         public void afterAdd(Table table) { }
 
         @Override
+        public Column<String> copy(Table table) {
+            return new AsString(table, this.column, this.extra);
+        }
+
+        @Override
         public String getDefault() {
             return "";
         }
@@ -350,6 +382,11 @@ public abstract class Column<I> {
 
         @Override
         public void afterAdd(Table table) { }
+
+        @Override
+        public Column<UUID> copy(Table table) {
+            return new AsUUID(table, this.column, this.extra);
+        }
 
         @Override
         public UUID getDefault() {
@@ -414,6 +451,17 @@ public abstract class Column<I> {
             table.addColumn(this.y = new AsInteger(table, String.format("%sY", this.prefix)));
             table.addColumn(this.z = new AsInteger(table, String.format("%sZ", this.prefix)));
         }
+
+        @Override
+        public Column<DimBlockPos> copy(Table table) {
+            return new AsPosition(table, this.prefix);
+        }
+
+        public void bind(Column x, Column y, Column z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
     }
 
     public static class AsTrait<T extends ITrait> extends Column<T> {
@@ -446,6 +494,11 @@ public abstract class Column<I> {
 
         @Override
         public void afterAdd(Table table) { }
+
+        @Override
+        public Column<T> copy(Table table) {
+            return new AsTrait<>(table, this.column, this.trait);
+        }
 
         @Override
         public T getDefault() {
@@ -481,6 +534,11 @@ public abstract class Column<I> {
 
         @Override
         public void afterAdd(Table table) { }
+
+        @Override
+        public Column<R> copy(Table table) {
+            return new AsReference<>(table, this.column, this.query);
+        }
 
         @Override
         public R getDefault() {
@@ -520,6 +578,11 @@ public abstract class Column<I> {
 
         @Override
         public void afterAdd(Table table) { }
+
+        @Override
+        public Column<E> copy(Table table) {
+            return new AsEnum<>(table, this.column, this.enumeration, this.getter);
+        }
 
         @Override
         public E getDefault() {

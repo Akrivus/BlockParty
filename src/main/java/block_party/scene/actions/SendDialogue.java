@@ -6,7 +6,6 @@ import block_party.scene.ISceneAction;
 import block_party.scene.Response;
 import block_party.scene.Speaker;
 import block_party.utils.Markdown;
-import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -40,13 +39,15 @@ public class SendDialogue implements ISceneAction {
     @Override
     public void parse(JsonObject json) {
         this.tooltip = GsonHelper.getAsBoolean(json, "tooltip", false);
-        this.text = GsonHelper.getAsString(json, "text");
-        this.speaker = new Speaker(json.getAsJsonObject("speaker"));
-        this.responses = Maps.newHashMap();
-        JsonArray responses = json.getAsJsonArray("responses");
+        this.text = GsonHelper.getAsString(json, "text", "");
+        JsonObject speaker = json.has("speaker") && json.get("speaker").isJsonObject() ? json.getAsJsonObject("speaker") : new JsonObject();
+        this.speaker = new Speaker(speaker);
+        this.responses = new java.util.LinkedHashMap<>();
+        JsonArray responses = json.has("responses") && json.get("responses").isJsonArray() ? json.getAsJsonArray("responses") : new JsonArray();
         for (int i = 0; i < responses.size(); ++i) {
-            SendResponse response = new SendResponse();
             JsonElement element = responses.get(i);
+            if (!element.isJsonObject()) { continue; }
+            SendResponse response = new SendResponse();
             response.parse(element.getAsJsonObject());
             this.responses.put(response.getIcon(), response);
         }

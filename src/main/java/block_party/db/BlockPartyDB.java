@@ -1,6 +1,5 @@
 package block_party.db;
 
-import block_party.client.ShrineLocation;
 import block_party.db.records.*;
 import block_party.messages.SShrineList;
 import block_party.registry.CustomMessenger;
@@ -43,7 +42,7 @@ public class BlockPartyDB extends SavedData {
     public static Garden.Schema Gardens = new Garden.Schema();
     public static Sapling.Schema Saplings = new Sapling.Schema();
     public static NPC.Schema NPCs = new NPC.Schema();
-    public static ShrineLocation ShrineLocation = new ShrineLocation();
+    public static ShrineLocations ShrineLocation = new ShrineLocations();
     public final List<String> names = Lists.newArrayList();
     private final Map<UUID, List<Long>> byPlayer = Maps.newHashMap();
     private final List<Connection> connections = Lists.newArrayList();

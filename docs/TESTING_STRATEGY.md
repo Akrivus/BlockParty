@@ -31,6 +31,14 @@ Avoid pure JUnit for behavior that needs a real registry, `Level`, `ServerLevel`
 
 GameTests should cover in-world server behavior. They should run with a real test level, real registries, real blocks, real entities, and ticks.
 
+Run the initial GameTest suite separately from regression tests:
+
+- `gradlew runGameTestServer`
+
+`regressionTest` remains the lightweight Java regression suite and should still be run with:
+
+- `gradlew regressionTest`
+
 Good candidates:
 
 - Moe spawn from `CustomSpawnEggItem`
