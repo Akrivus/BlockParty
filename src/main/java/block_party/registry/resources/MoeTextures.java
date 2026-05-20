@@ -9,6 +9,7 @@ import block_party.utils.JsonUtils;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -27,7 +28,7 @@ import java.util.Collection;
 import java.util.Map;
 
 public class MoeTextures extends SimpleJsonResourceReloadListener {
-    private static final Gson GSON = BlockParty.GSON.create();
+    private static final Gson GSON = new GsonBuilder().create();
     private static final Logger LOGGER = LogManager.getLogger();
 
     private Map<Block, Map<BlockStatePattern, ResourceLocation>> map = ImmutableMap.of();
@@ -75,11 +76,17 @@ public class MoeTextures extends SimpleJsonResourceReloadListener {
 
     public static ResourceLocation get(BlockPartyNPC npc) {
         BlockState state = npc.getVisibleBlockState();
-        Map<BlockStatePattern, ResourceLocation> textures = CustomResources.MOE_TEXTURES.map.getOrDefault(state, ImmutableMap.of(new BlockStatePattern(state, ImmutableMap.of()), getDefaultPathFor(npc, state)));
-        for (BlockStatePattern pattern : textures.keySet()) {
-            if (pattern.matches(npc.getActualBlockState())) { return textures.get(pattern); }
+        return getTextureFor(CustomResources.MOE_TEXTURES.map, state, npc.getActualBlockState(), getDefaultPathFor(npc, state));
+    }
+
+    static ResourceLocation getTextureFor(Map<Block, Map<BlockStatePattern, ResourceLocation>> texturesByBlock, BlockState visibleState, BlockState actualState, ResourceLocation fallback) {
+        Map<BlockStatePattern, ResourceLocation> textures = texturesByBlock.get(visibleState.getBlock());
+        if (textures == null) { return fallback; }
+
+        for (Map.Entry<BlockStatePattern, ResourceLocation> entry : textures.entrySet()) {
+            if (entry.getKey().matches(actualState)) { return entry.getValue(); }
         }
-        return getDefaultPathFor(npc, state);
+        return fallback;
     }
 
     private static ResourceLocation getDefaultPathFor(BlockPartyNPC npc, BlockState state) {

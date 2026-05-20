@@ -1,5 +1,6 @@
 package block_party.regression;
 
+import block_party.registry.resources.MoeTexturesRegressionTest;
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
 
@@ -24,7 +25,8 @@ public final class RegressionTestSuite {
                 new ViewModelRegressionTest(),
                 new NetworkRegressionTest(),
                 new RegistryContractRegressionTest(),
-                new PersistenceRegressionTest()
+                new PersistenceRegressionTest(),
+                new MoeTexturesRegressionTest()
         );
 
         for (RegressionTest test : tests) {
