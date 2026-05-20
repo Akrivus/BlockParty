@@ -89,7 +89,7 @@ public abstract class Layer1 extends PathfinderMob {
 
     @Override
     public boolean doHurtTarget(Entity target) {
-        boolean attacked = this.doHurtTarget(target);
+        boolean attacked = super.doHurtTarget(target);
         if (attacked) { this.playSound(this.getAttackSound()); }
         return attacked;
     }

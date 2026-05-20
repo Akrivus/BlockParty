@@ -58,7 +58,7 @@ public class MoeInHiding extends Entity {
     public void readAdditionalSaveData(CompoundTag compound) {
         this.setDatabaseID(compound.getLong("DatabaseID"));
         this.setAttachPos(BlockPos.of(compound.getLong("AttachPos")));
-        this.setHideUntil(HideUntil.EXPOSED.fromValue("HideUntil"));
+        this.setHideUntil(HideUntil.EXPOSED.fromValue(compound.getString("HideUntil")));
         this.ticksHidden = compound.getInt("TicksHidden");
     }
 

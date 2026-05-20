@@ -120,7 +120,7 @@ public abstract class Layer7 extends Layer6 {
 
     @Override
     public boolean doHurtTarget(Entity target) {
-        boolean attacked = this.doHurtTarget(target);
+        boolean attacked = super.doHurtTarget(target);
         if (attacked) { this.sceneManager.trigger(SceneTrigger.ATTACK); }
         return attacked;
     }
