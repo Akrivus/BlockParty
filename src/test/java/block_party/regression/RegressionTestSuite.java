@@ -1,6 +1,5 @@
 package block_party.regression;
 
-import block_party.registry.resources.MoeTexturesRegressionTest;
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
 

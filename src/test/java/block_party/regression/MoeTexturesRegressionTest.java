@@ -1,6 +1,6 @@
 package block_party.regression;
 
-import block_party.regression.RegressionTest;
+import block_party.registry.resources.MoeTextures;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CakeBlock;

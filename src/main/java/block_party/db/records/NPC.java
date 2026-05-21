@@ -18,6 +18,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -119,6 +121,7 @@ public class NPC extends Row<BlockPartyNPC> {
         return null;
     }
 
+    @OnlyIn(Dist.CLIENT)
     public BlockPartyNPC getClientEntity(Minecraft client) {
         BlockPos pos = client.player.blockPosition();
         BlockPartyNPC entity = this.getNewEntity(client.level);

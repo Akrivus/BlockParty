@@ -1,8 +1,8 @@
 package block_party.scene;
 
 import block_party.entities.BlockPartyNPC;
-import block_party.registry.SceneActions;
 import block_party.registry.resources.Scenes;
+import block_party.scene.actions.Hide;
 import block_party.utils.JsonUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
@@ -28,13 +28,19 @@ public interface ISceneAction {
             if (member.isJsonObject() && member.getAsJsonObject().has("type")) { location = ResourceLocation.tryParse(member.getAsJsonObject().get("type").getAsString()); }
             if (member.isJsonPrimitive()) { location = ResourceLocation.tryParse(member.getAsString()); }
             if (location == null) { continue; }
-            SceneActions.Builder builder = JsonUtils.getAs(JsonUtils.SCENE_ACTION, Scenes.own(location));
-            if (builder == null) { continue; }
-            ISceneAction action = builder.build();
+            ISceneAction action = buildKnownAction(Scenes.own(location));
+            if (action == null) { continue; }
             if (member.isJsonObject() && member.getAsJsonObject().has("action")) { action.parse(member.getAsJsonObject().getAsJsonObject("action")); }
             actions.add(action);
         }
         return actions.build();
+    }
+
+    static ISceneAction buildKnownAction(ResourceLocation location) {
+        if (JsonUtils.SCENE_HIDE.equals(location)) {
+            return new Hide();
+        }
+        return null;
     }
 
     default void parse(JsonObject json) { }

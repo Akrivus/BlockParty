@@ -5,7 +5,6 @@ import block_party.registry.CustomBlockEntities;
 import block_party.registry.CustomBlocks;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomItems;
-import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -15,28 +14,17 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 @GameTestHolder(BlockParty.ID)
 @PrefixGameTestTemplate(false)
-public final class BlockPartyGameTests {
-    private static final String EMPTY_TEMPLATE = "empty";
-
-    private BlockPartyGameTests() {
+public final class RegistryGameTests {
+    private RegistryGameTests() {
     }
 
-    @GameTest(template = EMPTY_TEMPLATE, timeoutTicks = 100)
+    @GameTest(template = GameTestSupport.EMPTY_TEMPLATE, timeoutTicks = 100)
     public static void requiredRegistriesLoad(GameTestHelper helper) {
         assertRegistered(helper, ForgeRegistries.BLOCKS.getKey(CustomBlocks.SHOJI_BLOCK.get()), "block_party:shoji_block");
         assertRegistered(helper, ForgeRegistries.ITEMS.getKey(CustomItems.MOE_SPAWN_EGG.get()), "block_party:moe_spawn_egg");
         assertRegistered(helper, ForgeRegistries.ENTITY_TYPES.getKey(CustomEntities.MOE.get()), "block_party:moe");
         assertRegistered(helper, ForgeRegistries.BLOCK_ENTITY_TYPES.getKey(CustomBlockEntities.PAPER_LANTERN.get()), "block_party:paper_lantern");
 
-        helper.succeed();
-    }
-
-    @GameTest(template = EMPTY_TEMPLATE, timeoutTicks = 100)
-    public static void shojiBlockCanBePlaced(GameTestHelper helper) {
-        BlockPos pos = new BlockPos(1, 1, 1);
-
-        helper.setBlock(pos, CustomBlocks.SHOJI_BLOCK.get());
-        helper.assertBlockPresent(CustomBlocks.SHOJI_BLOCK.get(), pos);
         helper.succeed();
     }
 

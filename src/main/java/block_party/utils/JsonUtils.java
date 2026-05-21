@@ -19,6 +19,8 @@ public class JsonUtils {
     public static final ResourceLocation SOUND_EVENT = new ResourceLocation("minecraft:sound_event");
     public static final ResourceLocation SCENE_ACTION = new ResourceLocation("block_party:scene_action");
     public static final ResourceLocation SCENE_FILTER = new ResourceLocation("block_party:scene_filter");
+    public static final ResourceLocation SCENE_ALWAYS = new ResourceLocation("block_party:always");
+    public static final ResourceLocation SCENE_HIDE = new ResourceLocation("block_party:hide");
 
     public static ResourceLocation getAsResourceLocation(JsonObject json, String key) {
         return new ResourceLocation(GsonHelper.getAsString(json, key));

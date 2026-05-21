@@ -79,7 +79,7 @@ public class MoeTextures extends SimpleJsonResourceReloadListener {
         return getTextureFor(CustomResources.MOE_TEXTURES.map, state, npc.getActualBlockState(), getDefaultPathFor(npc, state));
     }
 
-    static ResourceLocation getTextureFor(Map<Block, Map<BlockStatePattern, ResourceLocation>> texturesByBlock, BlockState visibleState, BlockState actualState, ResourceLocation fallback) {
+    public static ResourceLocation getTextureFor(Map<Block, Map<BlockStatePattern, ResourceLocation>> texturesByBlock, BlockState visibleState, BlockState actualState, ResourceLocation fallback) {
         Map<BlockStatePattern, ResourceLocation> textures = texturesByBlock.get(visibleState.getBlock());
         if (textures == null) { return fallback; }
 
@@ -99,7 +99,7 @@ public class MoeTextures extends SimpleJsonResourceReloadListener {
         return new ResourceLocation(location.getNamespace(), path);
     }
 
-    record BlockStatePattern(BlockState state, Map<Property<?>, Comparable<?>> props) {
+    public record BlockStatePattern(BlockState state, Map<Property<?>, Comparable<?>> props) {
         public boolean matches(BlockState state) {
             if (this.state.getBlock() != state.getBlock()) { return false; }
             for (Property<?> prop : this.props.keySet()) {

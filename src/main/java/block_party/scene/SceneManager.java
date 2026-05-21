@@ -2,7 +2,7 @@ package block_party.scene;
 
 import block_party.entities.BlockPartyNPC;
 import block_party.registry.CustomResources;
-import block_party.registry.SceneActions;
+import block_party.scene.actions.End;
 import com.google.common.collect.Lists;
 
 import java.util.LinkedList;
@@ -16,7 +16,7 @@ public class SceneManager {
 
     public SceneManager(BlockPartyNPC npc) {
         this.actions = Lists.newLinkedList();
-        this.action = SceneActions.build(SceneActions.END);
+        this.action = new End();
         this.npc = npc;
     }
 
