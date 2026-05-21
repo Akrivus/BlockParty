@@ -1,9 +1,8 @@
 package block_party.scene;
 
 import block_party.entities.BlockPartyNPC;
-import block_party.registry.resources.Scenes;
-import block_party.scene.actions.Hide;
-import block_party.utils.JsonUtils;
+import block_party.BlockParty;
+import block_party.registry.SceneActions;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -28,7 +27,7 @@ public interface ISceneAction {
             if (member.isJsonObject() && member.getAsJsonObject().has("type")) { location = ResourceLocation.tryParse(member.getAsJsonObject().get("type").getAsString()); }
             if (member.isJsonPrimitive()) { location = ResourceLocation.tryParse(member.getAsString()); }
             if (location == null) { continue; }
-            ISceneAction action = buildKnownAction(Scenes.own(location));
+            ISceneAction action = buildKnownAction(own(location));
             if (action == null) { continue; }
             if (member.isJsonObject() && member.getAsJsonObject().has("action")) { action.parse(member.getAsJsonObject().getAsJsonObject("action")); }
             actions.add(action);
@@ -37,13 +36,17 @@ public interface ISceneAction {
     }
 
     static ISceneAction buildKnownAction(ResourceLocation location) {
-        if (JsonUtils.SCENE_HIDE.equals(location)) {
-            return new Hide();
-        }
-        return null;
+        return SceneActions.build(location);
     }
 
     default void parse(JsonObject json) { }
 
     default ISceneAction copy() { return this; }
+
+    static ResourceLocation own(ResourceLocation location) {
+        if (location.getNamespace().equals("minecraft")) {
+            return new ResourceLocation(BlockParty.ID, location.getPath());
+        }
+        return location;
+    }
 }

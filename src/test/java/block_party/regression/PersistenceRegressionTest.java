@@ -45,6 +45,7 @@ final class PersistenceRegressionTest implements RegressionTest {
         testGeneratedSqlStringsAreSyntacticallyValidForSQLite();
         testUpdateSqlIncludesSetAndWhereClauses();
         testNoopRowUpdateDoesNotExecuteSql();
+        testLoadedRowNoopUpdateDoesNotTreatLoadedColumnsAsDirty();
         testDirtyRowUpdateBindsSetColumnsAndWhereId();
     }
 
@@ -180,6 +181,63 @@ final class PersistenceRegressionTest implements RegressionTest {
         assertEquals(null, row.getUpdateSQL(), "No-op Row.update has no SQL");
     }
 
+    private void testLoadedRowNoopUpdateDoesNotTreatLoadedColumnsAsDirty() {
+        CapturingTable table = new CapturingTable();
+        FakeRow inserted = new FakeRow(table);
+        inserted.get(Row.DATABASE_ID).set(42L);
+        inserted.get(Row.POS).set(new DimBlockPos(Level.OVERWORLD, new BlockPos(1, 2, 3)));
+        inserted.get(Row.PLAYER_UUID).set(new UUID(1L, 2L));
+        inserted.get(FakeRow.NAME).set("Loaded");
+
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:")) {
+            connection.prepareStatement(table.getCreateTableSQL()).execute();
+            try (java.sql.PreparedStatement statement = connection.prepareStatement(inserted.getInsertSQL())) {
+                for (int i = 1; i <= inserted.getColumns().size(); ++i) {
+                    inserted.getColumns().get(i - 1).forSet(i, statement);
+                }
+                statement.executeUpdate();
+            }
+
+            FakeRow loaded = loadFakeRow(connection, table);
+            assertEquals("Loaded", loaded.get(FakeRow.NAME).get(), "Loaded row preserves inserted text field");
+            assertEquals(0, loaded.getDirtyColumns().size(), "ResultSet-loaded columns establish a clean baseline");
+            assertEquals(null, loaded.getUpdateSQL(), "Loaded no-op update has no SQL");
+
+            loaded.update();
+
+            assertEquals(0, table.updateCalls, "No-op update on a loaded row does not execute SQL");
+            assertEquals(null, table.lastSQL, "No-op update on a loaded row generates no SQL");
+
+            table.reset();
+            FakeRow renamed = loadFakeRow(connection, table);
+            renamed.get(FakeRow.NAME).set("Changed");
+            renamed.update();
+
+            assertEquals(1, table.updateCalls, "Mutating a loaded row still executes an update");
+            assertEquals("UPDATE FakeRows SET Name = ? WHERE DatabaseID = ?;", table.lastSQL, "Loaded row mutation updates only the dirty column");
+            assertEquals(2, table.lastColumnCount, "Loaded row mutation binds the dirty column plus DatabaseID WHERE parameter");
+
+            table.reset();
+            FakeRow moved = loadFakeRow(connection, table);
+            moved.get(Row.POS).set(new DimBlockPos(Level.OVERWORLD, new BlockPos(1, 2, 3)));
+            moved.update();
+
+            assertEquals(1, table.updateCalls, "Mutating a loaded position still executes an update");
+            assertEquals("UPDATE FakeRows SET PosDim = ?, PosX = ?, PosY = ?, PosZ = ? WHERE DatabaseID = ?;", table.lastSQL, "Loaded position mutation updates the composite position columns together");
+            assertEquals(5, table.lastColumnCount, "Loaded position mutation binds the composite position plus DatabaseID WHERE parameter");
+        } catch (SQLException e) {
+            throw new AssertionError("Loaded row no-op updates should stay safe while later mutations remain dirty", e);
+        }
+    }
+
+    private FakeRow loadFakeRow(Connection connection, FakeTable table) throws SQLException {
+        try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT * FROM FakeRows WHERE DatabaseID = 42;");
+             ResultSet set = statement.executeQuery()) {
+            assertTrue(set.next(), "Inserted row can be loaded back through ResultSet");
+            return table.getRow(set);
+        }
+    }
+
     private void testDirtyRowUpdateBindsSetColumnsAndWhereId() {
         CapturingTable table = new CapturingTable();
         FakeRow row = new FakeRow(table);
@@ -257,7 +315,7 @@ final class PersistenceRegressionTest implements RegressionTest {
 
         @Override
         public FakeRow getRow(ResultSet set) throws SQLException {
-            return new FakeRow(this);
+            return new FakeRow(this, set);
         }
     }
 
@@ -272,6 +330,12 @@ final class PersistenceRegressionTest implements RegressionTest {
             this.lastSQL = SQL;
             this.lastColumnCount = columns.size();
         }
+
+        private void reset() {
+            this.updateCalls = 0;
+            this.lastSQL = null;
+            this.lastColumnCount = 0;
+        }
     }
 
     private static final class FakeRow extends Row<Recordable> {
@@ -279,6 +343,10 @@ final class PersistenceRegressionTest implements RegressionTest {
 
         private FakeRow(Table table) {
             super(table);
+        }
+
+        private FakeRow(Table table, ResultSet set) throws SQLException {
+            super(table, set);
         }
 
         @Override

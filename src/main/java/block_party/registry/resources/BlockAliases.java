@@ -1,6 +1,5 @@
 package block_party.registry.resources;
 
-import block_party.BlockParty;
 import block_party.registry.CustomResources;
 import block_party.utils.JsonUtils;
 import com.google.common.collect.ImmutableMap;
@@ -18,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Map;
 
 public class BlockAliases extends SimpleJsonResourceReloadListener {
-    private static final Gson GSON = BlockParty.GSON.create();
+    private static final Gson GSON = new GsonBuilder().create();
     private static final Logger LOGGER = LogManager.getLogger();
 
     private Map<Block, Block> map = ImmutableMap.of();

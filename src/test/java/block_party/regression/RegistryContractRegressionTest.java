@@ -25,7 +25,6 @@ final class RegistryContractRegressionTest implements RegressionTest {
         testDialogueKnownSoundIdRoundTripsWithoutResolution();
         testDialogueRenamedOrMissingSoundIdPreservesSerializedId();
         testDialogueMissingSoundFieldDoesNotCrashPureParsing();
-        testJsonUtilsKnownRegistryLookupReturnsNullKnownBug();
     }
 
     private void testKnownVanillaSoundRegistryKeyIsStable() {
@@ -86,7 +85,7 @@ final class RegistryContractRegressionTest implements RegressionTest {
         Dialogue restored = new Dialogue(dialogue.write());
 
         assertEquals(new ResourceLocation("minecraft:block.note_block.bell"), restored.getSoundID(), "Dialogue sound ID round trip");
-        assertNull(restored.getSound(), "Dialogue does not resolve sound during pure parsing");
+        assertEquals(SoundEvents.NOTE_BLOCK_BELL.value(), restored.getSound(), "Dialogue resolves valid sound registry ID");
     }
 
     private void testDialogueRenamedOrMissingSoundIdPreservesSerializedId() {
@@ -103,10 +102,6 @@ final class RegistryContractRegressionTest implements RegressionTest {
 
         assertNull(dialogue.getSoundID(), "Missing dialogue sound ID is null");
         assertEquals("", dialogue.write().getString("Sound"), "Missing dialogue sound serializes as empty ID");
-    }
-
-    private void testJsonUtilsKnownRegistryLookupReturnsNullKnownBug() {
-        assertNull(JsonUtils.getAs(JsonUtils.SOUND_EVENT, "minecraft:block.note_block.bell"), "JsonUtils known sound registry lookup currently returns null");
     }
 
     private CompoundTag speakerTag(String emotion, String voice) {

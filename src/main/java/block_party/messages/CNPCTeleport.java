@@ -18,9 +18,14 @@ public class CNPCTeleport extends CNPCQuery {
 
     @Override
     public void onFound(NetworkEvent.Context context, ServerPlayer player) {
+        if (this.npc.isDeadOrEstrangedFrom(player)) {
+            ForcedChunk.release(this.id);
+            return;
+        }
+
         CellPhone cellPhone = new CellPhone(this.npc, player);
         BlockPartyNPC npc = cellPhone.call();
         if (npc != null) { npc.teleport(player.getLevel(), cellPhone); }
-        ForcedChunk.get(this.id).despawn();
+        ForcedChunk.release(this.id);
     }
 }

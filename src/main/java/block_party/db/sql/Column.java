@@ -50,7 +50,8 @@ public abstract class Column<I> {
     }
 
     public void setFromSet(int i, ResultSet set) throws SQLException {
-        this.set(this.fromSet(i, set));
+        this.setValue(this.fromSet(i, set));
+        this.markClean();
     }
 
     public abstract I fromSet(int i, ResultSet set) throws SQLException;
@@ -67,8 +68,18 @@ public abstract class Column<I> {
         this.value = value;
     }
 
+    protected void setDirtyValue(I value) {
+        this.prev = this.time;
+        this.time = Math.max(System.nanoTime(), this.prev + 1);
+        this.setValue(value);
+    }
+
     public boolean isDirty() {
         return this.time > this.prev;
+    }
+
+    private void markClean() {
+        this.prev = this.time;
     }
 
     public String getType() {
@@ -429,9 +440,9 @@ public abstract class Column<I> {
                 return;
             super.set(value);
             if (this.isDirty()) {
-                this.x.set(value.getPos().getX());
-                this.y.set(value.getPos().getY());
-                this.z.set(value.getPos().getZ());
+                this.x.setDirtyValue(value.getPos().getX());
+                this.y.setDirtyValue(value.getPos().getY());
+                this.z.setDirtyValue(value.getPos().getZ());
             }
         }
 

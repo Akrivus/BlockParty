@@ -2,8 +2,7 @@ package block_party.scene;
 
 import block_party.BlockParty;
 import block_party.entities.BlockPartyNPC;
-import block_party.registry.resources.Scenes;
-import block_party.utils.JsonUtils;
+import block_party.registry.SceneFilters;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -24,7 +23,7 @@ public interface ISceneObservation {
             if (member.isJsonObject() && member.getAsJsonObject().has("type")) { location = ResourceLocation.tryParse(member.getAsJsonObject().get("type").getAsString()); }
             if (member.isJsonPrimitive()) { location = ResourceLocation.tryParse(member.getAsString()); }
             if (location == null) { continue; }
-            ISceneObservation filter = buildKnownFilter(Scenes.own(location));
+            ISceneObservation filter = buildKnownFilter(own(location));
             if (filter == null) { continue; }
             if (member.isJsonObject() && member.getAsJsonObject().has("filter")) { filter.parse(member.getAsJsonObject().getAsJsonObject("filter")); }
             filters.add(filter);
@@ -33,11 +32,15 @@ public interface ISceneObservation {
     }
 
     static ISceneObservation buildKnownFilter(ResourceLocation location) {
-        if (JsonUtils.SCENE_ALWAYS.equals(location)) {
-            return SceneObservation.ALWAYS;
-        }
-        return null;
+        return SceneFilters.build(location);
     }
 
     default void parse(JsonObject json) { }
+
+    static ResourceLocation own(ResourceLocation location) {
+        if (location.getNamespace().equals("minecraft")) {
+            return new ResourceLocation(BlockParty.ID, location.getPath());
+        }
+        return location;
+    }
 }

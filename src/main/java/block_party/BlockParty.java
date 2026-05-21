@@ -45,21 +45,15 @@ public class BlockParty {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, BlockParty.ID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, BlockParty.ID);
     public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, BlockParty.ID);
-    public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, BlockParty.ID);
     public static final DeferredRegister<Feature<?>> WORLDGEN_FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, BlockParty.ID);
+    
+    public static final DeferredRegister<SoundEvent> SOUNDS = CustomSounds.SOUNDS;
+    
     public static final SimpleChannel MESSENGER = CustomMessenger.create();
     public static final GsonBuilder GSON = new GsonBuilder();
 
-    public static final RegistryBuilder<SceneActions.Builder> ACTIONS = new RegistryBuilder<SceneActions.Builder>()
-            .setName(BlockParty.source("actions"))
-            .setMaxID(Integer.MAX_VALUE - 1);
-
-    public static final RegistryBuilder<SceneFilters.Builder> FILTERS = new RegistryBuilder<SceneFilters.Builder>()
-            .setName(BlockParty.source("filters"))
-            .setMaxID(Integer.MAX_VALUE - 1);
-
-    public static final DeferredRegister<SceneActions.Builder> SCENE_ACTIONS = DeferredRegister.create(BlockParty.ACTIONS.getDefault(), BlockParty.ID);
-    public static final DeferredRegister<SceneFilters.Builder> SCENE_FILTERS = DeferredRegister.create(BlockParty.FILTERS.getDefault(), BlockParty.ID);
+    public static final DeferredRegister<SceneActions.Builder> SCENE_ACTIONS = SceneActions.SCENE_ACTIONS;
+    public static final DeferredRegister<SceneFilters.Builder> SCENE_FILTERS = SceneFilters.SCENE_FILTERS;
 
     /* TODO: Refactor creative tabs.
     public static final CreativeModeTab CreativeModeTab = new CreativeModeTab(BlockParty.ID) {
@@ -85,6 +79,8 @@ public class BlockParty {
         CustomItems.add(ITEMS, bus);
         CustomParticles.add(PARTICLES, bus);
         CustomSounds.add(SOUNDS, bus);
+        SceneActions.register(bus);
+        SceneFilters.register(bus);
         CustomWorldGen.Features.add(WORLDGEN_FEATURES, MinecraftForge.EVENT_BUS, bus);
         CustomResources.register(MinecraftForge.EVENT_BUS);
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> BlockPartyClientEvents.register(bus));

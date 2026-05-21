@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
@@ -27,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Scenes extends SimpleJsonResourceReloadListener {
-    private static final Gson GSON = BlockParty.GSON.create();
+    private static final Gson GSON = new GsonBuilder().create();
     private static final Logger LOGGER = LogManager.getLogger();
 
     private Map<SceneTrigger, List<Scene>> scenes = ImmutableMap.of();

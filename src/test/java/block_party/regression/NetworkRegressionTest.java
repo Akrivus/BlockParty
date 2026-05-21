@@ -22,6 +22,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 
 import java.util.Arrays;
@@ -154,7 +155,7 @@ final class NetworkRegressionTest implements RegressionTest {
         assertEquals(new ResourceLocation("minecraft:block.note_block.bell"), dialogue.getSoundID(), "SOpenDialogue preserves sound registry ID");
         assertEquals(Speaker.Identity.NARRATOR, dialogue.getSpeaker().identity, "SOpenDialogue preserves speaker identity");
         assertEquals(new ResourceLocation("minecraft:entity.villager.ambient"), dialogue.getSpeaker().getVoiceID(), "SOpenDialogue preserves speaker voice registry ID");
-        assertNull(dialogue.getSound(), "SOpenDialogue does not resolve sound during pure decode");
+        assertEquals(SoundEvents.NOTE_BLOCK_BELL.value(), dialogue.getSound(), "SOpenDialogue resolves valid sound registry ID");
     }
 
     private void testBackwardsCompatibleDialogueCloseDecodeFromDialogueRespondPayload() {

@@ -22,6 +22,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalLong;
 import java.util.function.Consumer;
 
 @Mod.EventBusSubscriber
@@ -76,20 +77,24 @@ public class HidingSpots extends SavedData {
         spot.setDirty(true);
     }
 
-    private static long get(ServerLevel level, BlockPos pos) {
+    private static OptionalLong get(ServerLevel level, BlockPos pos) {
         HidingSpots spot = get(level);
-        return spot.list.get(pos);
+        Long databaseID = spot.list.get(pos);
+        return databaseID == null ? OptionalLong.empty() : OptionalLong.of(databaseID);
     }
 
     private static boolean isNormalBlock(ServerLevel level, BlockPos pos) {
         HidingSpots spot = get(level);
-        return spot.list.get(pos) == null;
+        return !spot.list.containsKey(pos);
     }
 
     public static boolean spawn(ServerLevel level, DimBlockPos pos) {
         if (isNormalBlock(level, pos.getPos()))
             return false;
-        NPC record = BlockPartyDB.NPCs.find(get(level, pos.getPos()));
+        OptionalLong databaseID = get(level, pos.getPos());
+        if (databaseID.isEmpty())
+            return false;
+        NPC record = BlockPartyDB.NPCs.find(databaseID.getAsLong());
         record.update((row) -> row.get(NPC.HIDING).set(false));
         List<MoeInHiding> moesInHiding = level.getEntitiesOfClass(MoeInHiding.class, pos.getAABB());
         if (moesInHiding.isEmpty())

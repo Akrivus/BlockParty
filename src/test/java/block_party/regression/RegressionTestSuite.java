@@ -20,10 +20,12 @@ public final class RegressionTestSuite {
         List<RegressionTest> tests = Arrays.asList(
                 new HideRegressionTest(),
                 new SceneContractRegressionTest(),
+                new SceneJsonParsingRegressionTest(),
                 new TraitRegressionTest(),
                 new ViewModelRegressionTest(),
                 new NetworkRegressionTest(),
                 new RegistryContractRegressionTest(),
+                new JsonUtilsRegistryLookupRegressionTest(),
                 new PersistenceRegressionTest(),
                 new MoeTexturesRegressionTest()
         );
