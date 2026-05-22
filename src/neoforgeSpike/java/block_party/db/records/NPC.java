@@ -1,6 +1,7 @@
 package block_party.db.records;
 
 import block_party.db.BlockPartyDB;
+import block_party.db.DimBlockPos;
 import block_party.entities.Moe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -18,6 +19,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public record NPC(
@@ -28,7 +31,26 @@ public record NPC(
         boolean dead,
         String name,
         String gender,
+        String bloodType,
+        String dere,
+        String zodiac,
+        String emotion,
         BlockState blockState,
+        BlockState visibleBlockState,
+        float scale,
+        boolean corporeal,
+        float foodLevel,
+        float exhaustion,
+        float saturation,
+        float stress,
+        float relaxation,
+        float loyalty,
+        float affection,
+        float slouch,
+        float age,
+        long lastSeenAt,
+        boolean hasHome,
+        DimBlockPos home,
         boolean hiding,
         BlockPos hiddenPos) {
     private static final UUID EMPTY_UUID = new UUID(0L, 0L);
@@ -47,16 +69,73 @@ public record NPC(
                         Dead INTEGER NOT NULL DEFAULT 0,
                         Name TEXT NOT NULL DEFAULT '',
                         BlockState INTEGER NOT NULL DEFAULT 0,
+                        VisibleBlockState INTEGER NOT NULL DEFAULT 0,
                         Hiding INTEGER NOT NULL DEFAULT 0,
-                        Gender TEXT NOT NULL DEFAULT 'female',
+                        Gender TEXT NOT NULL DEFAULT 'FEMALE',
+                        BloodType TEXT NOT NULL DEFAULT 'O',
+                        Dere TEXT NOT NULL DEFAULT 'NYANDERE',
+                        Zodiac TEXT NOT NULL DEFAULT 'ARIES',
+                        Emotion TEXT NOT NULL DEFAULT 'NORMAL',
+                        Scale REAL NOT NULL DEFAULT 1.0,
+                        IsCorporeal INTEGER NOT NULL DEFAULT 1,
+                        FoodLevel REAL NOT NULL DEFAULT 20.0,
+                        Exhaustion REAL NOT NULL DEFAULT 0.0,
+                        Saturation REAL NOT NULL DEFAULT 6.0,
+                        Stress REAL NOT NULL DEFAULT 0.0,
+                        Relaxation REAL NOT NULL DEFAULT 0.0,
+                        Loyalty REAL NOT NULL DEFAULT 6.0,
+                        Affection REAL NOT NULL DEFAULT 0.0,
+                        Slouch REAL NOT NULL DEFAULT 0.0,
+                        Age REAL NOT NULL DEFAULT 0.0,
+                        LastSeenAt INTEGER NOT NULL DEFAULT 0,
+                        HasHome INTEGER NOT NULL DEFAULT 0,
+                        HomePosDim TEXT NOT NULL DEFAULT 'minecraft:overworld',
+                        HomePosX INTEGER NOT NULL DEFAULT 0,
+                        HomePosY INTEGER NOT NULL DEFAULT 0,
+                        HomePosZ INTEGER NOT NULL DEFAULT 0,
                         HiddenPosDim TEXT NOT NULL DEFAULT 'minecraft:overworld',
                         HiddenPosX INTEGER NOT NULL DEFAULT 0,
                         HiddenPosY INTEGER NOT NULL DEFAULT 0,
                         HiddenPosZ INTEGER NOT NULL DEFAULT 0
                     );
                     """);
+            ensureColumn(statement, "VisibleBlockState", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "Gender", "TEXT NOT NULL DEFAULT 'FEMALE'");
+            ensureColumn(statement, "BloodType", "TEXT NOT NULL DEFAULT 'O'");
+            ensureColumn(statement, "Dere", "TEXT NOT NULL DEFAULT 'NYANDERE'");
+            ensureColumn(statement, "Zodiac", "TEXT NOT NULL DEFAULT 'ARIES'");
+            ensureColumn(statement, "Emotion", "TEXT NOT NULL DEFAULT 'NORMAL'");
+            ensureColumn(statement, "Scale", "REAL NOT NULL DEFAULT 1.0");
+            ensureColumn(statement, "IsCorporeal", "INTEGER NOT NULL DEFAULT 1");
+            ensureColumn(statement, "FoodLevel", "REAL NOT NULL DEFAULT 20.0");
+            ensureColumn(statement, "Exhaustion", "REAL NOT NULL DEFAULT 0.0");
+            ensureColumn(statement, "Saturation", "REAL NOT NULL DEFAULT 6.0");
+            ensureColumn(statement, "Stress", "REAL NOT NULL DEFAULT 0.0");
+            ensureColumn(statement, "Relaxation", "REAL NOT NULL DEFAULT 0.0");
+            ensureColumn(statement, "Loyalty", "REAL NOT NULL DEFAULT 6.0");
+            ensureColumn(statement, "Affection", "REAL NOT NULL DEFAULT 0.0");
+            ensureColumn(statement, "Slouch", "REAL NOT NULL DEFAULT 0.0");
+            ensureColumn(statement, "Age", "REAL NOT NULL DEFAULT 0.0");
+            ensureColumn(statement, "LastSeenAt", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "HasHome", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "HomePosDim", "TEXT NOT NULL DEFAULT 'minecraft:overworld'");
+            ensureColumn(statement, "HomePosX", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "HomePosY", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "HomePosZ", "INTEGER NOT NULL DEFAULT 0");
         } finally {
             db.free(connection);
+        }
+    }
+
+    private static void ensureColumn(Statement statement, String column, String definition) throws SQLException {
+        Set<String> columns = new HashSet<>();
+        try (ResultSet result = statement.executeQuery("PRAGMA table_info(NPCs);")) {
+            while (result.next()) {
+                columns.add(result.getString("name"));
+            }
+        }
+        if (!columns.contains(column)) {
+            statement.execute("ALTER TABLE NPCs ADD COLUMN " + column + " " + definition + ";");
         }
     }
 
@@ -64,16 +143,38 @@ public record NPC(
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
                 INSERT INTO NPCs (
-                    PosDim, PosX, PosY, PosZ, PlayerUUID, Dead, Name, BlockState, Hiding,
-                    Gender, HiddenPosDim, HiddenPosX, HiddenPosY, HiddenPosZ
-                ) VALUES (?, ?, ?, ?, ?, 0, ?, ?, 0, ?, ?, ?, ?, ?);
+                    PosDim, PosX, PosY, PosZ, PlayerUUID, Dead, Name, BlockState, VisibleBlockState, Hiding,
+                    Gender, BloodType, Dere, Zodiac, Emotion, Scale, IsCorporeal,
+                    FoodLevel, Exhaustion, Saturation, Stress, Relaxation, Loyalty, Affection, Slouch, Age,
+                    LastSeenAt, HasHome, HomePosDim, HomePosX, HomePosY, HomePosZ,
+                    HiddenPosDim, HiddenPosX, HiddenPosY, HiddenPosZ
+                ) VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """, Statement.RETURN_GENERATED_KEYS)) {
             bindPosition(statement, 1, level.dimension(), moe.blockPosition());
             statement.setString(5, moe.getOwnerUUID().toString());
             statement.setString(6, moe.getGivenName());
             statement.setInt(7, Block.getId(moe.getBlockState()));
-            statement.setString(8, moe.getGender());
-            bindPosition(statement, 9, level.dimension(), BlockPos.ZERO);
+            statement.setInt(8, Block.getId(moe.getVisibleBlockState()));
+            statement.setString(9, moe.getGender());
+            statement.setString(10, moe.getBloodType());
+            statement.setString(11, moe.getDere());
+            statement.setString(12, moe.getZodiac());
+            statement.setString(13, moe.getEmotion());
+            statement.setFloat(14, moe.getMoeScale());
+            statement.setBoolean(15, moe.isCorporeal());
+            statement.setFloat(16, moe.getFoodLevel());
+            statement.setFloat(17, moe.getExhaustion());
+            statement.setFloat(18, moe.getSaturation());
+            statement.setFloat(19, moe.getStress());
+            statement.setFloat(20, moe.getRelaxation());
+            statement.setFloat(21, moe.getLoyalty());
+            statement.setFloat(22, moe.getAffection());
+            statement.setFloat(23, moe.getSlouch());
+            statement.setFloat(24, moe.getAge());
+            statement.setLong(25, moe.getLastSeen());
+            statement.setBoolean(26, moe.hasHome());
+            bindPosition(statement, 27, moe.getHome().getDim(), moe.getHome().getPos());
+            bindPosition(statement, 31, level.dimension(), BlockPos.ZERO);
             statement.executeUpdate();
             try (ResultSet keys = statement.getGeneratedKeys()) {
                 if (!keys.next()) {
@@ -114,15 +215,40 @@ public record NPC(
         try (PreparedStatement statement = connection.prepareStatement("""
                 UPDATE NPCs
                 SET PosDim = ?, PosX = ?, PosY = ?, PosZ = ?,
-                    PlayerUUID = ?, Name = ?, BlockState = ?, Gender = ?
+                    PlayerUUID = ?, Name = ?, BlockState = ?, VisibleBlockState = ?,
+                    Gender = ?, BloodType = ?, Dere = ?, Zodiac = ?, Emotion = ?,
+                    Scale = ?, IsCorporeal = ?,
+                    FoodLevel = ?, Exhaustion = ?, Saturation = ?, Stress = ?, Relaxation = ?,
+                    Loyalty = ?, Affection = ?, Slouch = ?, Age = ?,
+                    LastSeenAt = ?, HasHome = ?,
+                    HomePosDim = ?, HomePosX = ?, HomePosY = ?, HomePosZ = ?
                 WHERE DatabaseID = ?;
                 """)) {
             bindPosition(statement, 1, level.dimension(), moe.blockPosition());
             statement.setString(5, moe.getOwnerUUID().toString());
             statement.setString(6, moe.getGivenName());
             statement.setInt(7, Block.getId(moe.getBlockState()));
-            statement.setString(8, moe.getGender());
-            statement.setLong(9, this.databaseId);
+            statement.setInt(8, Block.getId(moe.getVisibleBlockState()));
+            statement.setString(9, moe.getGender());
+            statement.setString(10, moe.getBloodType());
+            statement.setString(11, moe.getDere());
+            statement.setString(12, moe.getZodiac());
+            statement.setString(13, moe.getEmotion());
+            statement.setFloat(14, moe.getMoeScale());
+            statement.setBoolean(15, moe.isCorporeal());
+            statement.setFloat(16, moe.getFoodLevel());
+            statement.setFloat(17, moe.getExhaustion());
+            statement.setFloat(18, moe.getSaturation());
+            statement.setFloat(19, moe.getStress());
+            statement.setFloat(20, moe.getRelaxation());
+            statement.setFloat(21, moe.getLoyalty());
+            statement.setFloat(22, moe.getAffection());
+            statement.setFloat(23, moe.getSlouch());
+            statement.setFloat(24, moe.getAge());
+            statement.setLong(25, moe.getLastSeen());
+            statement.setBoolean(26, moe.hasHome());
+            bindPosition(statement, 27, moe.getHome().getDim(), moe.getHome().getPos());
+            statement.setLong(31, this.databaseId);
             statement.executeUpdate();
         } finally {
             db.free(connection);
@@ -133,13 +259,14 @@ public record NPC(
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
                 UPDATE NPCs
-                SET Hiding = 1, BlockState = ?,
+                SET Hiding = 1, BlockState = ?, VisibleBlockState = ?,
                     HiddenPosDim = ?, HiddenPosX = ?, HiddenPosY = ?, HiddenPosZ = ?
                 WHERE DatabaseID = ?;
                 """)) {
             statement.setInt(1, Block.getId(hiddenState));
-            bindPosition(statement, 2, level.dimension(), hiddenPos);
-            statement.setLong(6, this.databaseId);
+            statement.setInt(2, Block.getId(hiddenState));
+            bindPosition(statement, 3, level.dimension(), hiddenPos);
+            statement.setLong(7, this.databaseId);
             statement.executeUpdate();
         } finally {
             db.free(connection);
@@ -174,9 +301,28 @@ public record NPC(
     public void applyTo(Moe moe) {
         moe.setDatabaseID(this.databaseId);
         moe.setOwnerUUID(this.playerUuid);
-        moe.setBlockState(this.blockState);
+        moe.setBlockStateFromRow(this.blockState);
+        moe.setVisibleBlockState(this.visibleBlockState);
         moe.setGivenName(this.name);
         moe.setGender(this.gender);
+        moe.setBloodType(this.bloodType);
+        moe.setDere(this.dere);
+        moe.setZodiac(this.zodiac);
+        moe.setEmotion(this.emotion);
+        moe.setMoeScale(this.scale);
+        moe.setCorporeal(this.corporeal);
+        moe.setFoodLevel(this.foodLevel);
+        moe.setExhaustion(this.exhaustion);
+        moe.setSaturation(this.saturation);
+        moe.setStress(this.stress);
+        moe.setRelaxation(this.relaxation);
+        moe.setLoyalty(this.loyalty);
+        moe.setAffection(this.affection);
+        moe.setSlouch(this.slouch);
+        moe.setAge(this.age);
+        moe.setLastSeen(this.lastSeenAt);
+        moe.setHasHome(this.hasHome);
+        moe.setHome(this.home);
     }
 
     private static NPC read(ResultSet result) throws SQLException {
@@ -188,7 +334,27 @@ public record NPC(
                 result.getBoolean("Dead"),
                 result.getString("Name"),
                 result.getString("Gender"),
+                result.getString("BloodType"),
+                result.getString("Dere"),
+                result.getString("Zodiac"),
+                result.getString("Emotion"),
                 Block.stateById(result.getInt("BlockState")),
+                Block.stateById(result.getInt("VisibleBlockState")),
+                result.getFloat("Scale"),
+                result.getBoolean("IsCorporeal"),
+                result.getFloat("FoodLevel"),
+                result.getFloat("Exhaustion"),
+                result.getFloat("Saturation"),
+                result.getFloat("Stress"),
+                result.getFloat("Relaxation"),
+                result.getFloat("Loyalty"),
+                result.getFloat("Affection"),
+                result.getFloat("Slouch"),
+                result.getFloat("Age"),
+                result.getLong("LastSeenAt"),
+                result.getBoolean("HasHome"),
+                new DimBlockPos(parseDimension(result.getString("HomePosDim")),
+                        new BlockPos(result.getInt("HomePosX"), result.getInt("HomePosY"), result.getInt("HomePosZ"))),
                 result.getBoolean("Hiding"),
                 new BlockPos(result.getInt("HiddenPosX"), result.getInt("HiddenPosY"), result.getInt("HiddenPosZ")));
     }

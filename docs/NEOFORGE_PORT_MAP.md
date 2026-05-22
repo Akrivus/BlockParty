@@ -276,7 +276,7 @@ Existing regression/GameTests protecting behavior:
 
 Missing parity tests before migration:
 
-- Expand registry GameTests to cover particles, sounds, worldgen features, scene actions, and scene filters.
+- Expand registry GameTests to cover any remaining worldgen feature/placement registrations beyond Slice 5.3's configured-feature resource-key smoke, plus scene actions and scene filters not yet executed by GameTests.
 - Custom registry test that every scene JSON action/filter ID resolves after registry freeze.
 - Stable ID inventory for all public blocks/items/entities/sounds/particles to catch accidental renames.
 
@@ -286,12 +286,12 @@ Current Forge 1.19.4 implementation:
 
 - `CustomResources` listens on the Forge common bus.
 - Server reload listeners are registered through `AddReloadListenerEvent`: `BlockAliases`, `MoeSounds`, `Names`, and `Scenes`.
-- Client reload listener is registered through `RegisterClientReloadListenersEvent`: `MoeTextures`.
+- Client reload listener is registered through `AddClientReloadListenersEvent` in the NeoForge 1.21.4 spike: `MoeTextures`.
 - Resource classes extend vanilla `SimpleJsonResourceReloadListener`.
 
 Likely NeoForge replacement APIs:
 
-- For older NeoForge targets, replace imports with `net.neoforged.neoforge.event.AddReloadListenerEvent` and `net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent`.
+- For older NeoForge targets, verify event names before porting; the current spike uses `net.neoforged.neoforge.event.AddServerReloadListenersEvent` and `net.neoforged.neoforge.client.event.AddClientReloadListenersEvent`.
 - For newer 1.21.4+ targets, verify renamed events such as `AddServerReloadListenersEvent` and `AddClientReloadListenersEvent`.
 - Update `SimpleJsonResourceReloadListener` constructors and `apply` signatures for target-version `HolderLookup.Provider` / registry access changes if present.
 - Keep server data listeners and client texture listeners side-separated.
@@ -304,11 +304,11 @@ Existing regression/GameTests protecting behavior:
 - `MoeTexturesRegressionTest` covers texture override selection logic.
 - `RegistryContractRegressionTest` covers sound/voice ID behavior used by resource-loaded scenes.
 - GameTests indirectly rely on bundled resources for spawn/hide behavior.
+- NeoForge `SceneGameTests` now cover bundled scene execution for right-click dialogue, nested response actions, left-click hide, trigger priority, cookie/counter scene variables, and malformed scene roots.
 
 Missing parity tests before migration:
 
-- Resource reload integration test that all bundled listeners load expected counts without parse errors.
-- Data-pack override test for scenes, names, block aliases, Moe sounds, and Moe textures.
+- Live resource-pack reload test for scenes, names, block aliases, Moe sounds, and Moe textures. Current NeoForge GameTests cover override-shaped parser behavior for names, aliases, sounds, and textures, but do not stand up an additional pack stack.
 - Client-only reload smoke test for `MoeTextures` after resource pack reload.
 - Server dedicated startup check that client reload listener is not registered on the server.
 

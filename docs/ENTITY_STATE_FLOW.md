@@ -9,7 +9,7 @@ The spike has thin server-side entity shells for:
 - `block_party:moe` -> `block_party.entities.Moe`
 - `block_party:moe_in_hiding` -> `block_party.entities.MoeInHiding`
 
-These shells preserve identity and state data needed before broader networking is reintroduced. Minimal SQLite NPC row identity, server-side owner-list/query/remove services, typed NeoForge payload scaffolding for those service calls, and server-side Cell Phone-style call behavior are active for spawn, hide, reveal, Yearbook-like listing, and Cell Phone-like lookup. The spike still does not include AI, dialogue, scene execution, rendering, sounds, combat, inventory, chores, pranks, Cell Phone UI, client UI, or full Forge NPC row synchronization.
+These shells preserve identity and state data needed before broader networking is reintroduced. Minimal SQLite NPC row identity, server-side owner-list/query/remove services, typed NeoForge payload scaffolding for those service calls, server-side Cell Phone-style call behavior, Moe movement/combat attributes, safe vanilla combat delegation, 36-slot inventory NBT, block alias visible state, volume-derived scale, and profile/timer NBT parity are active for spawn, hide, reveal, Yearbook-like listing, Cell Phone-like lookup, and Phase 2 entity/profile parity. Phase 3.1 adds typed list/detail/remove/call/controller-open payloads over those same services, Phase 3.2 adds typed dialogue-open/respond/close contracts with minimal server-side Moe dialogue state, Phase 4.1 adds the first client renderer/model path for the active Moe shells, Phase 4.2 opens a client DialogueScreen from the typed dialogue-open payload, Phase 4.3 opens Yearbook/Cell Phone screens from controller-open payloads, Phase 4.4 registers client particle providers plus client/server resource reload hooks for Moe textures and sounds, and Phase 5.1 adds real server-side scene resource loading/execution for bundled dialogue, hide, cookie, counter, and end actions. The spike still does not include real follow AI/pathfinding, chores, pranks, full Yearbook profile parity, full Forge scene action/filter coverage, or full Forge NPC row synchronization.
 
 ## Moe Spawn Lifecycle
 
@@ -31,6 +31,8 @@ These shells preserve identity and state data needed before broader networking i
    - `DatabaseID` from the inserted row's generated `DatabaseID`
    - `OwnerUUID` from the player when available
    - row-backed `Name` and `Gender`
+   - block-alias-backed `VisibleBlockState`
+   - volume-derived `Scale`
 9. The `Moe` is added to the `ServerLevel`.
 10. The source block is destroyed without drops.
 11. The spawn egg stack is consumed in survival and left unchanged in creative.
@@ -59,12 +61,12 @@ Persistence locations:
 - SQLite `NPCs` row stores row-backed identity fields.
 - `BlockPartyDB` SavedData stores `NPCsByPlayer` owner lists when a row-backed Moe is spawned with an owner UUID.
 
-SQLite-backed identity starts at `BlockPartyDB` bootstrap, which opens the world-local `blockparty.db` and creates the minimal `NPCs` table. Spawn inserts rows and assigns generated IDs. Hide and reveal update the same row. SQLite does not yet own full profile/stat/home/shrine data.
+SQLite-backed identity starts at `BlockPartyDB` bootstrap, which opens the world-local `blockparty.db` and creates the minimal `NPCs` table. Spawn inserts rows and assigns generated IDs. Hide and reveal update the same row. SQLite does not yet own shrine/shimenawa references, inventory contents, or full health behavior.
 
 Minimal active `NPCs` columns:
 
 - baseline-compatible: `DatabaseID`, `PosDim`, `PosX`, `PosY`, `PosZ`, `PlayerUUID`, `Dead`, `Name`, `BlockState`, `Hiding`
-- spike-only temporary columns: `Gender`, `HiddenPosDim`, `HiddenPosX`, `HiddenPosY`, `HiddenPosZ`
+- additive spike/Phase 2 columns: `VisibleBlockState`, profile/stat scalar columns, `HasHome`, `HomePos*`, `LastSeenAt`, `HiddenPosDim`, `HiddenPosX`, `HiddenPosY`, `HiddenPosZ`
 
 ## Hidden-State Lifecycle
 
@@ -205,6 +207,30 @@ Current success path:
 
 Minimal forced chunk loading is active for row-backed lookup and cleanup parity. A row without a live Moe still fails safely, but it no longer leaks a forced chunk ticket. Full Forge Cell Phone behavior that can recover entities across unloaded chunks or dimensions remains incomplete until entity persistence and dimension teleport behavior are ported.
 
+## Movement, Combat, Inventory, And Follow Shells
+
+`Moe` is now a `PathfinderMob` shell so the server can register and exercise Forge-like movement/combat foundations without enabling real goals.
+
+Active foundations:
+
+- registered attributes: max health `20.0`, attack damage `2.0`, movement speed `0.4`, attack speed `2.0`, flying speed `1.6`, and follow range `256.0`
+- non-despawn behavior through `removeWhenFarAway(false)`
+- Forge-style path malus setup for doors and trapdoors
+- home helpers: `getDimBlockPos()`, `setHomeToCurrentPosition()`, persisted `HasHome`, and persisted `Home`
+- safe combat delegation through the vanilla mob `doHurtTarget(ServerLevel, Entity)` super path, preserving the old non-recursive Forge fix
+- 36-slot `SimpleContainer` inventory stored under the legacy `Inventory` NBT key
+- inventory changes recalculate `Slouch` with the Forge Layer6 slot weight
+- Cell Phone call service continues to set `following=true` after moving a loaded visible owned Moe
+
+Semantic drift / API note: Minecraft 1.21.4 has a final `LivingEntity#getScale()`. The spike still persists the Forge `Scale` field in NBT and SQLite, but code reads/writes it through `getMoeScale()` / `setMoeScale()`.
+
+Still intentionally absent:
+
+- custom goals, navigation behavior, or visible follow AI
+- owner left-click/right-click scene interaction around combat
+- client inventory menus/screens
+- chore, prank, sleep, hunger, stress, and action update implementations
+
 ## Networking Payload Scaffold
 
 `block_party.network.CustomMessenger` registers a small NeoForge 1.21.4 custom-payload surface through `RegisterPayloadHandlersEvent`.
@@ -214,21 +240,35 @@ Client-to-server payload IDs:
 - `block_party:npc_list_request`
 - `block_party:npc_detail_request`
 - `block_party:npc_remove_request`
+- `block_party:npc_call_request`
+- `block_party:dialogue_respond`
+- `block_party:dialogue_close`
+- `block_party:shrine_list_request`
 
 Server-to-client payload IDs:
 
 - `block_party:npc_list`
 - `block_party:npc_detail`
+- `block_party:npc_call`
+- `block_party:controller_open`
+- `block_party:dialogue_open`
+- `block_party:shrine_list`
 
 The active server handlers are intentionally thin:
 
 - list request -> `BlockPartyDB.listNpcIds(player UUID)` -> `NpcListPayload`
 - detail request -> `BlockPartyDB.loadOwnedNpc(player UUID, DatabaseID)` -> `NpcDetailPayload`
 - remove request -> `BlockPartyDB.removeOwnedNpc(player UUID, DatabaseID)` -> refreshed `NpcListPayload`
+- call request -> `BlockPartyDB.callOwnedNpc(...)` -> `NpcCallPayload`
+- dialogue response -> `BlockPartyDB.findOwnedLoadedMoe(...)` -> live Moe `setResponse`
+- dialogue close -> `BlockPartyDB.findOwnedLoadedMoe(...)` -> live Moe `clearDialogue`
+- shrine list request -> `BlockPartyDB.listShrines(player UUID, player dimension)` -> `ShrineListPayload`
 
 The packet layer does not duplicate ownership rules. Missing, corrupt, dead, and non-owned rows become safe failure responses through the same `BlockPartyDB` service methods used by the GameTests.
 
-Client-bound handlers are no-ops for now. They exist only so payload registration and codecs are valid before UI screens, Cell Phone behavior, dialogue, or client-side state stores are ported.
+Most client-bound handlers are still intentionally thin. `ControllerOpenPayload` is active: the client handler marshals to the render thread and opens the Cell Phone or Yearbook screen with owned NPC IDs, selected Yearbook NPC ID, and interaction hand. Controller screens then request NPC detail rows through `NpcDetailRequestPayload`; Yearbook can de-list through `NpcRemoveRequestPayload`, and Cell Phone can call through `NpcCallRequestPayload`. `DialogueOpenPayload` is active: the client handler marshals to the render thread and opens `DialogueScreen` with row-backed NPC detail plus Forge-shaped dialogue NBT data. `ShrineListPayload` preserves the Forge `SShrineList` shape as positions only; client shrine-location storage is deferred.
+
+NeoForge 1.21.4 does not allow the same custom payload ID in both directions, so the active `block_party:dialogue_close` registration is serverbound. Client-side close-screen behavior is implemented as DialogueScreen sending that serverbound close payload once when the screen closes.
 
 ## SynchedEntityData
 
@@ -236,10 +276,32 @@ Client-bound handlers are no-ops for now. They exist only so payload registratio
 
 - `DATABASE_ID`: string serializer, exposed as long
 - `OWNER_UUID`: string serializer, exposed as UUID
-- `BLOCK_STATE`: block state serializer
+- `BLOCK_STATE`: block state serializer for the actual/source block state
+- `VISIBLE_BLOCK_STATE`: block state serializer for the explicit visible/alias block state
+- `SCALE`: float serializer
+- `CORPOREAL`: boolean serializer
 - `FOLLOWING`: boolean serializer
 - `GIVEN_NAME`: string serializer
 - `GENDER`: string serializer
+- `BLOOD_TYPE`: string serializer
+- `DERE`: string serializer
+- `ZODIAC`: string serializer
+- `EMOTION`: string serializer
+- `FOOD_LEVEL`, `EXHAUSTION`, `SATURATION`, `STRESS`, `RELAXATION`, `LOYALTY`, `AFFECTION`, `SLOUCH`, and `AGE`: float serializers
+
+Non-synced local fields on `Moe`:
+
+- copied `TileEntity` persistent data
+- 36-slot inventory
+- `hasHome`
+- `home`
+- `lastSeen`
+- `timeUntilHungry`
+- `timeUntilLonely`
+- `timeUntilStress`
+- `timeSinceSleep`
+- current dialogue payload state
+- selected dialogue response
 
 `MoeInHiding` defines:
 
@@ -264,26 +326,56 @@ Current entity state authority:
 Current SavedData authority:
 
 - `HidingSpots` is authoritative for hidden position to database ID indexing.
-- `BlockPartyDB` SavedData is authoritative for owner UUID to NPC ID lists.
-- `SceneVariables` is separate persistence scaffolding and does not participate in Moe lifecycle yet.
+- `BlockPartyDB` SavedData is authoritative for owner UUID to NPC ID lists and resource-loaded Moe name claims.
+- `SceneVariables` is authoritative for Moe-scoped scene cookies and counters once scene actions run. Locations and targets remain persistence scaffolding only.
 
 Current SQLite authority:
 
 - SQLite is authoritative for minimal Moe row identity.
 - SQLite assigns `DatabaseID` on valid spawn.
-- SQLite stores row-backed owner UUID, name, gender, block state, hiding flag, and hidden position.
+- SQLite stores row-backed owner UUID, name, gender, profile strings, actual/visible block state, profile/stat scalars, home, last-seen time, hiding flag, and hidden position.
 - SQLite row ownership is checked before server-side list/query/remove services expose a row.
 - SQLite row ownership and `Hiding` state are checked before server-side call/teleport service queues a forced chunk or moves a Moe.
 - SQLite is authoritative for server-side data block rows in the minimal `Shrines`, `GardenLanterns`, `Locations`, and `SakuraSaplings` tables.
 - Data block entity NBT preserves `DatabaseID`, `HasRow`, `Claimed`, and `PlayerUUID`; locative rows additionally persist `RequiredCondition` and `Priority`.
-- Shrine list queries filter server-side SQLite rows by owner UUID and dimension.
-- SQLite does not yet own full Forge NPC profile/stat/home/shrine state.
+- Shrine list queries filter server-side SQLite rows by the frozen Forge `SShrineList` rule: include rows owned by the requester or rows in the requested dimension.
+- SQLite does not yet own Forge shrine/shimenawa references, inventory contents, or full health behavior.
 
-Future networking authority:
+Networking authority:
 
-- NeoForge custom payload transport is active only for NPC list/detail/remove scaffolding.
+- NeoForge custom payload transport is active for NPC list/detail/remove/call scaffolding, minimal dialogue state flow, controller-open state, and shrine list sync.
 - Payload handlers mirror server-authoritative state to clients. They are not the source of truth for database IDs, ownership, hidden positions, or block state.
-- Client-bound response handling is currently a no-op until UI/state presentation is intentionally ported.
+- Client-bound NPC list/detail/call responses are presentation data for the currently open controller screen only; `BlockPartyDB` remains authoritative for row ownership, removal, and call success.
+
+## Client Renderer State
+
+The first active client renderer path is intentionally one-way: live entity fields are copied into render state during extraction, and render state never mutates entity/database authority.
+
+Active renderer inputs:
+
+- visible block state -> fallback Moe texture path and special overlay selection
+- actual block state -> deterministic eye tint fallback
+- `Scale` -> model/shadow scale through `MoeRenderState.moeScale`
+- `Slouch`, wing/cat/glow tags, emotion, health, and max health -> model pose, layers, and nameplate text
+
+Known renderer gaps:
+
+- Moe texture override metadata is active for the bundled note-block/cake-style fixture path and parser-level property matching is GameTested. Client screenshot verification of those exact variants remains pending.
+- The Forge animation objects and armor model layers are not ported yet.
+- MoeInHiding has a registered placeholder renderer for client safety, but visible hidden-marker presentation is still deferred.
+- Screenshot matrix verification remains a manual/client follow-up once representative render fixtures are available.
+
+## Client Particles And Resource Hooks
+
+The Phase 4 client surface now registers:
+
+- `block_party:firefly` -> firefly sprite-set provider
+- `block_party:ginkgo` -> falling leaf sprite-set provider
+- `block_party:sakura` -> falling blossom sprite-set provider
+- `block_party:white_sakura` -> white falling blossom sprite-set provider
+- client reload listener `block_party:moe_textures` -> data-driven Moe texture overrides from `moes/textures` and bundled `textures/moe` metadata
+
+Server resource reload also includes `moes/sounds`, including the frozen Forge `data/minecraft/moes/sounds/bell.json` override. The spike resolves that legacy slash-form sound path to the active dotted sound event ID `block_party:moe.bell.step`.
 
 ## Data That Must Eventually Synchronize To Clients
 
@@ -295,7 +387,8 @@ At minimum, client-visible behavior will need:
 - owner UUID if client UI or ownership affordances depend on it
 - visible/source block state for rendering
 - following flag for UI/animation hints if retained
-- given name and profile fields used by nameplates/UI
+- given name, explicit visible block state, scale, corporeal flag, and profile fields used by nameplates/UI/renderers
+- block-derived profile flags such as wings, glow, cat features, festive texture eligibility, and volume ignoring when renderers/AI consume them
 - MoeInHiding attach position if hidden marker rendering or effects are client-visible
 - MoeInHiding hide state/timer if timed reveal or effects are visible
 - entity lifecycle transitions:
@@ -303,27 +396,30 @@ At minimum, client-visible behavior will need:
   - Moe -> hidden block + MoeInHiding
   - MoeInHiding -> Moe
 
-Vanilla entity data synchronization may cover fields stored in `SynchedEntityData`, but any UI, dialogue, Cell Phone, or database-driven interaction packets remain future work.
+Vanilla entity data synchronization may cover fields stored in `SynchedEntityData`. DialogueScreen now consumes typed dialogue-open data plus serverbound response/close payloads. Yearbook and Cell Phone consume controller-open plus NPC detail/call/list payloads. Other database-driven interaction screens remain future work.
 
 ## Stubbed Or Unimplemented Transitions
 
 Currently unimplemented:
 
-- full Forge NPC schema columns for traits, health, food, stress, home, shrine, and last-seen data
-- migration/backfill for existing spike `NPCs` tables if columns change later
+- Forge NPC schema columns for shrine/shimenawa references, inventory, and full health behavior
+- migration/backfill for existing spike `NPCs` tables if later columns change beyond the Phase 2.1 additive migration path
+- alias-driven visible block state calculation is active for bundled `moes/aliases`; future real custom block shapes may need revisiting when their full block classes return
 - complex block entity full metadata/component restore remains incomplete; persistent data capture and restore through spawn/hide/reveal is active
-- full Forge data block behavior remains incomplete; server-side block entity IDs, owner/location NBT, SQLite rows, locative condition/priority, and shrine list queries are active, while shrine tablet effects/packets and shimenawa NPC-row creation are deferred
+- SQLite inventory persistence is not active; Slice 2.3 only restores entity NBT inventory persistence and slouch recalculation
+- full Forge data block behavior remains incomplete; server-side block entity IDs, owner/location NBT, SQLite rows, locative condition/priority, shrine list queries, shrine list request/response packets, and login shrine-list sends are active, while shrine tablet effects, row-change broadcasts, and shimenawa NPC-row creation are deferred
 - client-side item-use feedback for spawn remains incomplete; server-side survival/creative consumption is active
-- server-to-client custom packets
-- client presentation/state storage for NPC list/detail responses
-- old Forge dialogue, page removal, shrine, and teleport packet families
-- client packet/request plumbing for Cell Phone call behavior
+- server-to-client custom packet consumers outside dialogue/controller-open, NPC controller responses, and shrine-list login sync
+- full Forge Yearbook presentation data, including dead/estranged relationship-specific rendering and complete stat labels
+- old Forge page-removal item creation behavior; current Yearbook removal is de-listing only through the active NPC remove request
+- audio content cleanup for pre-existing `silence`, generic `moe.step`, and `sounds/moe/yes6 .ogg` warnings
 - full unloaded-entity recovery after forced chunk loading
 - cross-dimension Cell Phone teleport
-- renderer/model/client screen integration
-- AI, goals, navigation, and timed hide goal execution
-- dialogue and scene triggers
-- full Cell Phone teleport behavior, including UI, packet request path, cross-dimension teleport, arrival effects, and follow AI
-- sounds, combat, inventory, chores, pranks, and profile trait generation
+- remaining client screen integration and screenshot-verified renderer/UI polish
+- AI goals, visible follow pathfinding, and timed hide goal execution
+- unported scene filters/actions beyond Slice 5.1's active `always`, `never`, `has_cookie`, `counter`, `send_dialogue`, `send_response`, `hide`, `cookie`, `counter`, and `end`
+- full decorative block interaction/render parity beyond Slice 5.3's active log/leaves/blossom/sapling/slab/door/vine property foundations
+- full Cell Phone teleport behavior, including cross-dimension teleport, arrival effects, and follow AI
+- sounds, chores, pranks, and richer companion behavior
 
-The current tested contract is intentionally small: valid tagged blocks create an SQLite `NPCs` row, add the row ID to the owner list, and produce a Moe shell with that row ID; invalid blocks no-op; owner lists expose only owned, readable, non-dead rows; non-owners cannot access, de-list, or call rows; a loaded visible owned Moe can be called near the requester and gets `following=true`; hidden, unloaded, missing, corrupt, and dead rows fail safely; a Moe can hide into a world block plus `MoeInHiding`; hide updates the same row and records the hidden position in `HidingSpots`; manual, timed, break-start, break-end, piston, and falling-block reveal restore a Moe shell from the same row identity; missing hidden spots, missing rows, corrupt rows, and dead rows fail safely; data block entities preserve owner/row NBT, claim/update/delete SQLite rows, and expose owner/dimension-filtered shrine list rows server-side.
+The current tested contract is intentionally small: valid tagged blocks create an SQLite `NPCs` row, add the row ID to the owner list, and produce a Moe shell with that row ID; invalid blocks no-op; owner lists expose only owned, readable, non-dead rows; non-owners cannot access, de-list, call, or update dialogue rows; a loaded visible owned Moe can be called near the requester and gets `following=true`; hidden, unloaded, missing, corrupt, and dead rows fail safely; typed payload codecs cover list/detail/remove/call/controller-open/dialogue/shrine-list state and route list/detail/remove/call/dialogue response/dialogue close/shrine list through `BlockPartyDB`; a Moe can hide into a world block plus `MoeInHiding`; hide updates the same row and records the hidden position in `HidingSpots`; manual, timed, break-start, break-end, piston, and falling-block reveal restore a Moe shell from the same row identity; missing hidden spots, missing rows, corrupt rows, and dead rows fail safely; data block entities preserve owner/row NBT, claim/update/delete SQLite rows, and expose Forge owner-or-dimension shrine list rows server-side; Moe Layer2-Layer5 fields round-trip through NBT and explicit SQLite row writes without automatic setter-triggered DB writes; resource-loaded names and populated Forge block trait tags can assign a random non-default name, weighted/default blood type, gender/profile flags, and safe trait fallback values; Moe attributes, non-recursive combat delegation, home helpers, inventory NBT, inventory slouch recalculation, block alias visible state, volume scale, Layer7 timer NBT, minimal dialogue state, data-driven right-click/left-click scene execution, scene cookie/counter mutation, migrated recipe/loot/worldgen resource availability, representative decorative block properties, wisteria vine survival, and Cell Phone following state are GameTested.

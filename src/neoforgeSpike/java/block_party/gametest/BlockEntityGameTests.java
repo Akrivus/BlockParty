@@ -173,7 +173,7 @@ public final class BlockEntityGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
-    public static void shrineListQueryReturnsOnlyOwnerAndDimension(GameTestHelper helper) {
+    public static void shrineListQueryUsesForgeOwnerOrDimensionRules(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPartyDB db = configuredDb(helper);
         try {
@@ -185,14 +185,15 @@ public final class BlockEntityGameTests {
 
         UUID owner = new UUID(1404L, 2404L);
         UUID other = new UUID(1405L, 2405L);
-        deleteShrinesFor(helper, db, owner, other);
+        deleteAllShrines(helper, db);
         ShrineTabletBlockEntity owned = claimShrine(helper, level, new BlockPos(1, 1, 1), owner);
-        claimShrine(helper, level, new BlockPos(2, 1, 1), other);
+        ShrineTabletBlockEntity sameDimension = claimShrine(helper, level, new BlockPos(2, 1, 1), other);
 
         try {
             List<BlockPartyDB.ShrineEntry> shrines = db.listShrines(owner, Level.OVERWORLD);
-            if (shrines.size() != 1 || shrines.getFirst().databaseId() != owned.getDatabaseID()) {
-                helper.fail("Expected shrine list query to return exactly the owner's shrine");
+            List<Long> ids = shrines.stream().map(BlockPartyDB.ShrineEntry::databaseId).toList();
+            if (shrines.size() != 2 || !ids.contains(owned.getDatabaseID()) || !ids.contains(sameDimension.getDatabaseID())) {
+                helper.fail("Expected shrine list query to return owner shrines or same-dimension shrines");
                 return;
             }
         } catch (SQLException exception) {
@@ -202,19 +203,16 @@ public final class BlockEntityGameTests {
         helper.succeed();
     }
 
-    private static void deleteShrinesFor(GameTestHelper helper, BlockPartyDB db, UUID... owners) {
+    private static void deleteAllShrines(GameTestHelper helper, BlockPartyDB db) {
         try {
             Connection connection = db.openConnection();
-            try (PreparedStatement statement = connection.prepareStatement("DELETE FROM Shrines WHERE PlayerUUID = ?;")) {
-                for (UUID owner : owners) {
-                    statement.setString(1, owner.toString());
-                    statement.executeUpdate();
-                }
+            try (PreparedStatement statement = connection.prepareStatement("DELETE FROM Shrines;")) {
+                statement.executeUpdate();
             } finally {
                 db.free(connection);
             }
         } catch (SQLException exception) {
-            helper.fail("Expected shrine cleanup to succeed: " + exception.getMessage());
+            helper.fail("Expected shrine table cleanup to succeed: " + exception.getMessage());
         }
     }
 

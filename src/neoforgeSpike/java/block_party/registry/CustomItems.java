@@ -1,7 +1,10 @@
 package block_party.registry;
 
 import block_party.BlockParty;
+import block_party.items.CellPhoneItem;
 import block_party.items.CustomSpawnEggItem;
+import block_party.items.YearbookItem;
+import block_party.items.YearbookPageItem;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import net.minecraft.world.item.BlockItem;
@@ -16,8 +19,8 @@ public final class CustomItems {
 
     public static final DeferredItem<BlockItem> SHOJI_BLOCK = registerBlockItem("shoji_block");
     public static final DeferredItem<Item> MOE_SPAWN_EGG = registerMoeSpawnEgg();
-    public static final DeferredItem<Item> CELL_PHONE = registerSimple("cell_phone");
-    public static final DeferredItem<Item> YEARBOOK = registerSimple("yearbook");
+    public static final DeferredItem<Item> CELL_PHONE = registerCellPhone();
+    public static final DeferredItem<Item> YEARBOOK = registerYearbook();
 
     static {
         for (String blockId : CustomBlocks.ENTRIES.keySet()) {
@@ -41,8 +44,10 @@ public final class CustomItems {
                 "samurai_sabaton",
                 "samurai_katana",
                 "wooden_bokken",
-                "yearbook_page",
                 "wisteria_vines");
+        if (!ENTRIES.containsKey("yearbook_page")) {
+            registerYearbookPage();
+        }
     }
 
     private CustomItems() {
@@ -63,6 +68,24 @@ public final class CustomItems {
     private static DeferredItem<Item> registerMoeSpawnEgg() {
         DeferredItem<Item> item = ITEMS.registerItem("moe_spawn_egg", CustomSpawnEggItem::new);
         ENTRIES.put("moe_spawn_egg", item);
+        return item;
+    }
+
+    private static DeferredItem<Item> registerCellPhone() {
+        DeferredItem<Item> item = ITEMS.registerItem("cell_phone", CellPhoneItem::new);
+        ENTRIES.put("cell_phone", item);
+        return item;
+    }
+
+    private static DeferredItem<Item> registerYearbook() {
+        DeferredItem<Item> item = ITEMS.registerItem("yearbook", YearbookItem::new);
+        ENTRIES.put("yearbook", item);
+        return item;
+    }
+
+    private static DeferredItem<Item> registerYearbookPage() {
+        DeferredItem<Item> item = ITEMS.registerItem("yearbook_page", YearbookPageItem::new);
+        ENTRIES.put("yearbook_page", item);
         return item;
     }
 

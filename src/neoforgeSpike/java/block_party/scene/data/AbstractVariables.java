@@ -47,7 +47,15 @@ public abstract class AbstractVariables<T> {
         this.map.put(key, value);
     }
 
+    public void delete(String key) {
+        this.map.remove(key);
+    }
+
     public T get(String key) {
         return this.map.get(key);
+    }
+
+    public boolean has(String key) {
+        return this.get(key) != null;
     }
 }

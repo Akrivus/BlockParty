@@ -233,11 +233,11 @@ Status labels:
 
 ### Creative tab refactor
 
-- Current status: **Open**. Old creative tab code is commented out in `BlockParty`.
-- Affected files/classes: `src/main/java/block_party/BlockParty.java`, `src/main/java/block_party/registry/CustomItems.java`.
+- Current status: **Addressed for NeoForge spike manual review**. The old Forge creative tab code is still commented out in `BlockParty`, but Slice 5.3.5 adds a NeoForge `block_party:block_party` creative tab populated from active spike item entries.
+- Affected files/classes: `src/main/java/block_party/BlockParty.java`, `src/main/java/block_party/registry/CustomItems.java`, `src/neoforgeSpike/java/block_party/registry/CustomCreativeTabs.java`.
 - Player-facing risk: medium for discoverability, low for core survival behavior.
-- Migration risk: medium because creative tab APIs changed after 1.19.
-- Recommended next prompt/task: "Defer until after core port unless release requires creative inventory polish; then add a manual checklist for item discoverability."
+- Migration risk: low after Slice 5.3.5 for basic discoverability; exact old sort-order parity still needs a normalization decision.
+- Recommended next prompt/task: "During Phase 5.4, verify the tab in a client run and decide whether the old `ISortableItem` ordering should be preserved or documented as unnecessary."
 
 ### Render type polish for decorative blocks
 

@@ -234,6 +234,18 @@ public final class BlockPartyDB extends SavedData {
         return this.callOwnedNpc(level, player.getUUID(), player.blockPosition(), id);
     }
 
+    public java.util.Optional<Moe> findOwnedLoadedMoe(ServerLevel level, UUID player, long id) {
+        java.util.Optional<NPC> row = this.loadOwnedNpc(player, id);
+        if (row.isEmpty() || row.get().hiding()) {
+            return java.util.Optional.empty();
+        }
+        ServerLevel npcLevel = level.getServer().getLevel(row.get().dimension());
+        if (npcLevel != level) {
+            return java.util.Optional.empty();
+        }
+        return this.findLoadedMoe(level, id);
+    }
+
     public java.util.Optional<Moe> callOwnedNpc(ServerLevel callerLevel, UUID player, BlockPos callerPos, long id) {
         java.util.Optional<NPC> row = this.loadOwnedNpc(player, id);
         if (row.isEmpty() || row.get().hiding()) {
@@ -430,7 +442,7 @@ public final class BlockPartyDB extends SavedData {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
                 SELECT DatabaseID, PosX, PosY, PosZ FROM Shrines
-                WHERE PlayerUUID = ? AND PosDim = ?
+                WHERE PlayerUUID = ? OR PosDim = ?
                 ORDER BY DatabaseID ASC;
                 """)) {
             statement.setString(1, player.toString());
