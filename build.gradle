@@ -1,94 +1,92 @@
-buildscript {
-    repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:5.1.+'
-    }
-}
-
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.0.0'
+    id 'java-library'
+    id 'net.neoforged.moddev' version '1.0.11'
 }
-
-apply plugin: 'net.minecraftforge.gradle'
 
 version = new Date().format('yy.MM.dd')
 group = 'block_party'
-archivesBaseName = 'BlockParty'
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
-minecraft {
-    mappings channel: 'official', version: '1.19.4'
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
-    runs {
-        server {}
-        client {}
-        all {
-            mods { block_party { source sourceSets.main } }
-            workingDirectory file('run')
-            lazyToken('minecraft_classpath') {
-                configurations.integrate.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
-            }
-        }
-        data {
-            args '--mod', 'block_party', '--all', '--output', file('src/generated/resources/')
-        }
-        gameTestServer {
-            property 'forge.enableGameTest', 'true'
-            property 'forge.gameTestServer', 'true'
-            property 'forge.enabledGameTestNamespaces', 'block_party'
-            setForceExit false
-        }
-    }
+base {
+    archivesName = 'BlockParty'
 }
 
-sourceSets.main.resources { srcDir 'src/generated/resources' }
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-sourceSets.test.compileClasspath += sourceSets.main.compileClasspath
-sourceSets.test.runtimeClasspath += sourceSets.main.runtimeClasspath
-
-configurations {
-    integrate
-    implementation.extendsFrom integrate
+repositories {
+    maven {
+        name = 'Mojang'
+        url = 'https://libraries.minecraft.net'
+    }
+    mavenCentral()
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.4-45.2.0'
-    integrate 'org.xerial:sqlite-jdbc:3.40.1.0'
+    implementation 'org.xerial:sqlite-jdbc:3.40.1.0'
+    jarJar 'org.xerial:sqlite-jdbc:[3.40.1.0,3.41)'
 }
 
-tasks.register('regressionTest', JavaExec) {
-    group = 'verification'
-    description = 'Runs lightweight regression coverage without an external test framework.'
-    dependsOn testClasses
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'block_party.regression.RegressionTestSuite'
+sourceSets {
+    main {
+        // NeoForge 1.21.4 build spike: compile only the minimal loader/test stub.
+        java.srcDirs = ['src/neoforgeSpike/java']
+        resources.srcDirs = ['src/neoforgeSpike/resources', layout.buildDirectory.dir('generated/neoforgeSpikeResources')]
+    }
+    test {
+        // Legacy Forge regression tests target 1.19.4 APIs and are disabled for this spike.
+        java.srcDirs = []
+        resources.srcDirs = []
+    }
 }
 
-check.dependsOn regressionTest
+tasks.register('syncNeoForgeSpikeResources', Sync) {
+    into layout.buildDirectory.dir('generated/neoforgeSpikeResources')
 
-shadowJar {
-    relocate 'org.sqlite', 'block_party.org.sqlite'
+    from('src/main/resources') {
+        include 'assets/block_party/**'
+        include 'data/block_party/moes/**'
+        include 'data/block_party/scenes/**'
+        exclude 'assets/block_party/textures/gui/**'
+    }
 
-    archiveName("${archivesBaseName}-${project.version}.jar")
-    configurations = [project.configurations.integrate]
+    from('src/main/resources/data/block_party/tags/blocks') {
+        into 'data/block_party/tags/block'
+    }
+
+    from('src/main/resources/data/block_party/tags/items') {
+        into 'data/block_party/tags/item'
+    }
 }
 
-reobf {
-    shadowJar {}
+tasks.named('processResources') {
+    dependsOn tasks.named('syncNeoForgeSpikeResources')
 }
 
-tasks.build.dependsOn shadowJar
-jar.finalizedBy('reobfShadowJar')
+neoForge {
+    version = '21.4.102-beta'
 
-artifacts {
-    archives tasks.shadowJar
-}
+    runs {
+        client {
+            client()
+            gameDirectory = project.file('run-neoforge-spike')
+        }
+        server {
+            server()
+            gameDirectory = project.file('run-neoforge-spike')
+        }
+        gameTestServer {
+            type = 'gameTestServer'
+            gameDirectory = project.file('run-neoforge-spike')
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'block_party'
+        }
+        data {
+            data()
+            gameDirectory = project.file('run-neoforge-spike')
+            programArguments.addAll '--mod', 'block_party', '--all', '--output', file('src/generated/resources/').absolutePath
+        }
+    }
 
-repositories {
-    mavenCentral()
+    mods {
+        block_party {
+            sourceSet sourceSets.main
+        }
+    }
 }
