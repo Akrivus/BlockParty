@@ -3,7 +3,9 @@ package block_party.db.records;
 import block_party.db.BlockPartyDB;
 import block_party.entities.Moe;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -180,7 +182,7 @@ public record NPC(
     private static NPC read(ResultSet result) throws SQLException {
         return new NPC(
                 result.getLong("DatabaseID"),
-                Level.OVERWORLD,
+                parseDimension(result.getString("PosDim")),
                 new BlockPos(result.getInt("PosX"), result.getInt("PosY"), result.getInt("PosZ")),
                 parseUuid(result.getString("PlayerUUID")),
                 result.getBoolean("Dead"),
@@ -193,6 +195,13 @@ public record NPC(
 
     private static UUID parseUuid(String value) {
         return value == null || value.isBlank() ? EMPTY_UUID : UUID.fromString(value);
+    }
+
+    private static ResourceKey<Level> parseDimension(String value) {
+        if (value == null || value.isBlank()) {
+            return Level.OVERWORLD;
+        }
+        return ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(value));
     }
 
     private static void bindPosition(PreparedStatement statement, int start, ResourceKey<Level> dimension, BlockPos pos) throws SQLException {

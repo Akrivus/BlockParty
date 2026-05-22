@@ -9,8 +9,13 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.PistonEvent;
 
 import java.util.List;
 import java.util.Map;
@@ -78,5 +83,37 @@ public final class HidingSpots extends SavedData {
             return null;
         }
         return hidden.getFirst().reveal();
+    }
+
+    public static boolean spawn(ServerLevel level, BlockPos pos) {
+        return reveal(level, pos) != null;
+    }
+
+    public static void onBreakStart(PlayerInteractEvent.LeftClickBlock event) {
+        if (event.getLevel() instanceof ServerLevel level
+                && event.getAction() == PlayerInteractEvent.LeftClickBlock.Action.START) {
+            reveal(level, event.getPos());
+        }
+    }
+
+    public static void onBreakEnd(BlockEvent.BreakEvent event) {
+        if (event.getLevel() instanceof ServerLevel level) {
+            reveal(level, event.getPos());
+        }
+    }
+
+    public static void onPistonPush(PistonEvent.Pre event) {
+        if (event.getLevel() instanceof ServerLevel level) {
+            reveal(level, event.getPos());
+            reveal(level, event.getFaceOffsetPos());
+        }
+    }
+
+    public static void onFalling(EntityJoinLevelEvent event) {
+        if (event.getEntity() instanceof FallingBlockEntity fallingBlock
+                && event.getLevel() instanceof ServerLevel level
+                && spawn(level, fallingBlock.getStartPos())) {
+            event.setCanceled(true);
+        }
     }
 }

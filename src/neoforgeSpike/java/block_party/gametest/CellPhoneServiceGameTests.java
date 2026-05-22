@@ -8,11 +8,13 @@ import block_party.entities.MoeInHiding;
 import block_party.entities.goals.HideUntil;
 import block_party.items.CustomSpawnEggItem;
 import block_party.registry.CustomBlocks;
+import block_party.world.chunk.ForcedChunk;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
@@ -132,6 +134,10 @@ public final class CellPhoneServiceGameTests {
             helper.fail("Expected row without a loaded live Moe to fail safely");
             return;
         }
+        if (ForcedChunk.get(unloadedId) != null) {
+            helper.fail("Expected failed unloaded call to release forced chunk");
+            return;
+        }
         helper.succeed();
     }
 
@@ -176,6 +182,64 @@ public final class CellPhoneServiceGameTests {
         }
         if (!called.isFollowing()) {
             helper.fail("Expected successful call to set following=true");
+            return;
+        }
+        helper.kill(called);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void farLoadedMoeCallQueuesAndReleasesForcedChunk(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = BlockPartyDB.get(level);
+        UUID owner = new UUID(1307L, 2307L);
+        Moe moe = spawnOwnedMoe(helper, level, owner, new BlockPos(12, 1, 1));
+        if (moe == null) {
+            return;
+        }
+        long id = moe.getDatabaseID();
+        BlockPos caller = helper.absolutePos(new BlockPos(4, 1, 1));
+
+        Moe called = db.callOwnedNpc(level, owner, caller, id).orElse(null);
+        if (called != moe) {
+            helper.fail("Expected far loaded Moe call to return the same live shell");
+            return;
+        }
+        if (!called.blockPosition().equals(caller.east())) {
+            helper.fail("Expected far loaded Moe to move near caller");
+            return;
+        }
+        if (ForcedChunk.get(id) != null) {
+            helper.fail("Expected successful far call to release forced chunk");
+            return;
+        }
+        helper.kill(called);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void successfulCallReleasesPreexistingForcedChunk(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = BlockPartyDB.get(level);
+        UUID owner = new UUID(1308L, 2308L);
+        Moe moe = spawnOwnedMoe(helper, level, owner, new BlockPos(1, 1, 1));
+        if (moe == null) {
+            return;
+        }
+        long id = moe.getDatabaseID();
+        ForcedChunk.queue(id, level, new ChunkPos(moe.blockPosition()));
+        if (ForcedChunk.get(id) == null) {
+            helper.fail("Expected forced chunk setup to be tracked");
+            return;
+        }
+
+        Moe called = db.callOwnedNpc(level, owner, helper.absolutePos(new BlockPos(4, 1, 1)), id).orElse(null);
+        if (called == null) {
+            helper.fail("Expected pre-forced call to succeed");
+            return;
+        }
+        if (ForcedChunk.get(id) != null) {
+            helper.fail("Expected successful call to release preexisting forced chunk");
             return;
         }
         helper.kill(called);

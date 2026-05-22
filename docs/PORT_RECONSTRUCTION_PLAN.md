@@ -14,10 +14,13 @@ The recommended rhythm for every slice is:
 
 ### Slice 1.1: Spawn From Block Parity
 
+Status: Implemented in the NeoForge spike for the active thin Moe shell.
+
 Player-facing behavior restored:
 
 - Using `moe_spawn_egg` on a valid tagged block consumes the source block, spawns a Moe, preserves block identity, assigns owner, creates the NPC row, and respects invalid-block failure behavior.
-- Survival/creative item consumption should match Forge 1.19.4 once player inventory behavior is intentionally enabled.
+- Survival spawn egg use consumes the item; creative spawn egg use preserves it. This is deliberate semantic drift from the frozen Forge 1.19.4 item source, which unconditionally shrinks the stack after a successful spawn.
+- Persistent block-entity data is captured from `BlockEntity#getPersistentData()` into the visible Moe's `TileEntity` NBT when the source block has a block entity.
 
 Forge 1.19.4 source files involved:
 
@@ -44,8 +47,8 @@ NeoForge spike files involved:
 Tests required before/after:
 
 - Before: preserve current valid/invalid spawn GameTests.
-- After: add block removal, item consumption mode, owner UUID, SQLite row, `NPCsByPlayer`, source `BlockState`, and block entity persistent data coverage.
-- After: add a regression that invalid blocks do not change the world or insert rows.
+- Done: block removal, item consumption mode, owner UUID, SQLite row, `NPCsByPlayer`, source `BlockState`, and block entity persistent data coverage.
+- Done: invalid blocks do not change the world, consume items, spawn Moes, or insert rows.
 
 Explicitly out of scope:
 
@@ -61,10 +64,14 @@ Focus only on NeoForge spike spawn-from-block parity. Restore Forge 1.19.4 `Cust
 
 ### Slice 1.2: Hide And Reveal Event Parity
 
+Status: Implemented in the NeoForge spike for the active thin Moe/MoeInHiding shells.
+
 Player-facing behavior restored:
 
 - Moe hides as its original block, records `HidingSpots`, and returns when exposed.
 - Timed reveal, break-start, break-complete, piston, and falling-block reveal hooks match Forge behavior where feasible.
+- Persistent block-entity data captured by Slice 1.1 is restored to the hidden block and copied back to the revealed Moe.
+- Semantic drift: NeoForge piston reveal checks the piston position and the block in front of the piston, while the frozen Forge 1.19.4 source checked the event position only.
 
 Forge 1.19.4 source files involved:
 
@@ -88,8 +95,8 @@ NeoForge spike files involved:
 Tests required before/after:
 
 - Before: current manual reveal, missing hidden spot, and hide record tests.
-- After: timed reveal, block break start/end, piston movement, falling block interaction, hidden NBT save/load, and same-row identity restoration.
-- After: multi-dimension hidden spot coverage if `HidingSpots` remains per-level and keyed by `BlockPos`.
+- Done: timed reveal, block break start/end, piston movement, falling block interaction, hidden NBT save/load, same-row identity restoration, and block-entity persistent data hide/reveal round-trip.
+- Deferred: multi-dimension hidden spot coverage remains a later persistence/world-scope test because `HidingSpots` is still per-level and keyed by `BlockPos`.
 
 Explicitly out of scope:
 
@@ -105,10 +112,14 @@ Focus only on hide/reveal event parity in the NeoForge spike. Port `HidingSpots`
 
 ### Slice 1.3: Cell Phone Server Call And Chunk Loading Parity
 
+Status: Implemented in the NeoForge spike for same-dimension loaded Moe shells and forced chunk cleanup.
+
 Player-facing behavior restored:
 
-- Calling a known owned Moe from the Cell Phone server flow can find distant or unloaded Moes, move them near the player, and set following mode.
-- Forced chunk or ticket lifecycle is cleaned up after success/failure.
+- Calling a known owned visible Moe from the server flow can find a distant loaded Moe from the row position, move it near the requester, and set following mode.
+- Forced chunk lifecycle is cleaned up after success/failure once a row-backed lookup queues a chunk.
+- Missing-live-entity rows still fail safely after cleanup; full unloaded entity recovery remains blocked on broader entity persistence/chunk-load behavior.
+- Cross-dimension calls fail safely until the NeoForge entity dimension-change/teleporter shell is intentionally ported.
 
 Forge 1.19.4 source files involved:
 
@@ -129,7 +140,8 @@ NeoForge spike files involved:
 Tests required before/after:
 
 - Before: current owner/non-owner/missing/dead/corrupt/hidden/unloaded call service tests.
-- After: same-dimension far call, cross-dimension call if preserved, forced chunk cleanup, failed lookup cleanup, final position near requester, and `following=true`.
+- Done: same-dimension far call, forced chunk cleanup, failed lookup cleanup, final position near requester, and `following=true`.
+- Deferred: cross-dimension call parity, because Forge `ITeleporter` behavior is not part of the active thin NeoForge entity shell.
 
 Explicitly out of scope:
 
@@ -145,10 +157,19 @@ Focus only on server-side Cell Phone call parity in the NeoForge spike. Extend `
 
 ### Slice 1.4: Shrine, Garden, Location, And Block Entity Server Parity
 
+Status: Implemented in the NeoForge spike for server-side data block shells and row/query persistence. Phase 1 is closed for the current thin server gameplay surface.
+
 Player-facing behavior restored:
 
-- Decorative/data blocks with block entities keep owner/location data.
-- Shrine tablet behavior, shrine lists, garden/location records, and locative blocks are available server-side.
+- Decorative/data blocks with block entities preserve owner/location row data server-side.
+- Garden lantern, hanging scroll, paper lantern, sakura sapling, shimenawa, shrine tablet, and wind chimes block entity registry IDs are active.
+- Shrine, garden, location, and sapling SQLite tables are created; claim/update/delete behavior is active for the data-block tables.
+- Shrine list queries are available server-side with owner and dimension filtering.
+
+Still stubbed in this slice:
+
+- Shrine tablet lightning, sound, Moe creation, and `SShrineList` packet broadcast are deferred to later entity/network/client slices.
+- Shimenawa is registered as a block entity shell, but its Forge NPC-row-from-persistent-data path is deferred until the fuller NPC/profile record port.
 
 Forge 1.19.4 source files involved:
 
@@ -173,8 +194,8 @@ NeoForge spike files involved:
 Tests required before/after:
 
 - Before: registry tests must keep current IDs stable.
-- After: block placement, block entity NBT round-trip, SQLite table creation for shrine/garden/location/sapling, and shrine list query behavior.
-- After: manual or GameTest coverage for shrine tablet Moe creation if that path remains active.
+- Done: block entity registry IDs, block placement shell creation, block entity NBT round-trip, SQLite table creation for shrine/garden/location/sapling, row insert/delete for claimed data blocks, locative condition/priority rows, and shrine list query behavior.
+- Deferred: shrine tablet Moe creation because that Forge path depends on real Moe profile/entity side effects and shrine packet broadcasts outside this slice.
 
 Explicitly out of scope:
 
@@ -846,4 +867,3 @@ Focus only on NeoForge release hardening. Run the full automated test suite and 
 4. Reintroduce Phase 4 rendering and screens on top of stable payloads/entity data.
 5. Fill Phase 5 resource/content parity, prioritizing scene/resources that unlock core gameplay.
 6. Treat Phase 6 as after-parity work. It should not be mixed with loader migration.
-

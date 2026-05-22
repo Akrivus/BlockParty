@@ -15,6 +15,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.sql.SQLException;
@@ -72,11 +73,29 @@ public class MoeInHiding extends Entity {
         this.absMoveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
         ++this.ticksHidden;
         super.tick();
+        if (!this.isRemoved() && this.getHideUntil().isOver(this)) {
+            this.reveal();
+        }
     }
 
     @Override
     public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
-        return false;
+        if (this.isAir()) {
+            BlockPartyDB db = BlockPartyDB.get(level);
+            try {
+                db.findNpc(this.getDatabaseID()).ifPresent(row -> {
+                    try {
+                        row.markDead(db);
+                    } catch (SQLException ignored) {
+                    }
+                });
+            } catch (SQLException ignored) {
+            }
+            HidingSpots.get(level).remove(this.getAttachPos());
+            this.discard();
+            return true;
+        }
+        return this.reveal() != null;
     }
 
     @Override
@@ -148,6 +167,11 @@ public class MoeInHiding extends Entity {
 
         Moe moe = new Moe(CustomEntities.MOE.get(), serverLevel);
         row.applyTo(moe);
+        moe.setBlockState(state);
+        BlockEntity blockEntity = serverLevel.getBlockEntity(pos);
+        if (blockEntity != null) {
+            moe.setTileEntityData(blockEntity.getPersistentData());
+        }
         moe.moveToBlock(pos);
         if (!serverLevel.addFreshEntity(moe)) {
             return null;
@@ -163,5 +187,9 @@ public class MoeInHiding extends Entity {
         HidingSpots.get(serverLevel).remove(pos);
         this.discard();
         return moe;
+    }
+
+    public boolean isAir() {
+        return this.level().getBlockState(this.getAttachPos()).isAir();
     }
 }

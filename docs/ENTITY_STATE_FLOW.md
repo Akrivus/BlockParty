@@ -22,16 +22,22 @@ These shells preserve identity and state data needed before broader networking i
    - the helper returns `null`.
    - no `Moe` is spawned.
 4. Valid blocks create a `Moe` shell adjacent to the clicked face.
-5. A row is inserted into the SQLite `NPCs` table.
-6. If an owner UUID is available, `BlockPartyDB` records the generated `DatabaseID` under `NPCsByPlayer`.
-7. The spawned `Moe` receives:
+5. Persistent block-entity data from the source block is copied from `BlockEntity#getPersistentData()` when a block entity is present.
+6. A row is inserted into the SQLite `NPCs` table.
+7. If an owner UUID is available, `BlockPartyDB` records the generated `DatabaseID` under `NPCsByPlayer`, without duplicating an existing entry for the same spawned NPC.
+8. The spawned `Moe` receives:
    - `BlockState` from the source block
+   - copied `TileEntity` NBT from the source block entity's persistent data, when present
    - `DatabaseID` from the inserted row's generated `DatabaseID`
    - `OwnerUUID` from the player when available
    - row-backed `Name` and `Gender`
-8. The `Moe` is added to the `ServerLevel`.
+9. The `Moe` is added to the `ServerLevel`.
+10. The source block is destroyed without drops.
+11. The spawn egg stack is consumed in survival and left unchanged in creative.
 
-Current spawn does not consume items, copy block entity data, play sounds, initialize full traits, or proactively notify clients through custom networking.
+Current spawn does not play sounds, initialize full traits, or proactively notify clients through custom networking.
+
+Semantic drift from the frozen Forge 1.19.4 source: Forge's `CustomSpawnEggItem` unconditionally shrinks the stack after a successful server-side spawn. The NeoForge spike now preserves the stack for creative-mode players and consumes it for survival players, matching the explicit Slice 1.1 test target.
 
 ## Database ID Boundaries
 
@@ -48,6 +54,7 @@ Persistence locations:
 
 - `Moe` NBT key: `DatabaseID`
 - `MoeInHiding` NBT key: `DatabaseID`
+- `Moe` NBT key: `TileEntity` for copied source block-entity persistent data
 - `HidingSpots` SavedData key: `DatabaseID`
 - SQLite `NPCs` row stores row-backed identity fields.
 - `BlockPartyDB` SavedData stores `NPCsByPlayer` owner lists when a row-backed Moe is spawned with an owner UUID.
@@ -66,19 +73,20 @@ Minimal active `NPCs` columns:
 1. It only runs on `ServerLevel`.
 2. It reads the Moe's current block position.
 3. It places the Moe's stored source `BlockState` into the world at that position.
-4. It requires an existing `NPCs` row for the Moe's `DatabaseID`.
-5. It updates that row with the current Moe identity fields, marks `Hiding = 1`, and stores hidden position columns.
-6. It creates a `MoeInHiding` shell.
-7. The hidden shell receives:
+4. If the placed block creates a block entity, copied `TileEntity` persistent data from the Moe is merged into that block entity.
+5. It requires an existing `NPCs` row for the Moe's `DatabaseID`.
+6. It updates that row with the current Moe identity fields, marks `Hiding = 1`, and stores hidden position columns.
+7. It creates a `MoeInHiding` shell.
+8. The hidden shell receives:
    - same `DatabaseID`
    - same `OwnerUUID`
    - `AttachPos` equal to the block position
    - requested `HideUntil`
-8. The hidden shell is added to the level.
-9. `HidingSpots` records `AttachPos -> DatabaseID`.
-10. The source Moe is discarded.
+9. The hidden shell is added to the level.
+10. `HidingSpots` records `AttachPos -> DatabaseID`.
+11. The source Moe is discarded.
 
-`MoeInHiding.tick()` currently keeps the marker centered on `AttachPos` and increments `ticksHidden`. It does not execute timed reveal behavior, scene triggers, sound, AI, or disturbance hooks.
+`MoeInHiding.tick()` keeps the marker centered on `AttachPos`, increments `ticksHidden`, and reveals when `HideUntil.ONE_SECOND_PASSES` has elapsed or the hiding block becomes air. It does not execute scene triggers, sound, AI, or hurt/exposure dialogue hooks.
 
 ## Reveal Lifecycle
 
@@ -96,15 +104,25 @@ Minimal active `NPCs` columns:
 8. The revealed Moe receives row-backed:
    - `DatabaseID`
    - `OwnerUUID`
-   - `BlockState`
    - `Name`
    - `Gender`
-9. The row is updated with `Hiding = 0` and the reveal position.
-10. The hidden block is destroyed without drops.
-11. The `HidingSpots` record is removed.
-12. The `MoeInHiding` marker is discarded.
+9. The revealed Moe then receives the current hidden block `BlockState` from the world.
+10. If the hidden block has a block entity, its persistent data is copied back into the Moe's `TileEntity` NBT.
+11. The row is updated with `Hiding = 0` and the reveal position.
+12. The hidden block is destroyed without drops.
+13. The `HidingSpots` record is removed.
+14. The `MoeInHiding` marker is discarded.
 
-This is manual reveal only. Timed reveal, break-start reveal, break-end reveal, piston reveal, and falling-block reveal are still unimplemented.
+Active reveal entry points:
+
+- manual service call: `HidingSpots.reveal(ServerLevel, BlockPos)`
+- timed reveal: `MoeInHiding.tick()` for `HideUntil.ONE_SECOND_PASSES`
+- break-start event: `PlayerInteractEvent.LeftClickBlock` with `START`
+- break-end event: `BlockEvent.BreakEvent`
+- piston pre-event: `PistonEvent.Pre`
+- falling-block join event: `EntityJoinLevelEvent` for `FallingBlockEntity`
+
+Semantic drift from the frozen Forge 1.19.4 source: the NeoForge piston handler checks both the piston position and the block in front of the piston. The old static handler checked the event position only; checking the front block preserves the player-facing contract that a piston disturbing the hidden block reveals the Moe.
 
 ## HidingSpots Interaction
 
@@ -122,6 +140,7 @@ Current authority:
 - It is authoritative for "which world block position is expected to have a hidden Moe marker".
 - It is not authoritative for full entity identity, owner UUID, profile data, or source block state.
 - Reveal requires `HidingSpots`, a matching live `MoeInHiding`, and a matching SQLite `NPCs` row; a SavedData record alone is not enough to reconstruct full state.
+- Event handlers are registered on the NeoForge event bus by the spike entrypoint.
 
 ## Owner UUID Semantics
 
@@ -174,13 +193,17 @@ Current success path:
 
 1. Load the NPC row through `loadOwnedNpc`, preserving the same owner, dead-row, corrupt-row, and missing-row rejection rules.
 2. Reject the call if the row is marked `Hiding = 1`.
-3. Search the loaded server level for a live `Moe` entity with the requested `DatabaseID`.
-4. Reject the call if no loaded live Moe shell is present.
-5. Move the Moe to the block east of the requester position.
-6. Set `Moe.FOLLOWING = true`.
-7. Update the SQLite row position/profile fields from the moved Moe shell.
+3. Resolve the row's stored dimension and position.
+4. Queue a forced chunk ticket for the row's stored chunk.
+5. Search the row dimension for a live `Moe` entity with the requested `DatabaseID`.
+6. Reject the call if no loaded live Moe shell is present.
+7. Reject cross-dimension live entities for now, because the spike has not ported Forge `ITeleporter`/dimension-change behavior.
+8. Move the Moe to the block east of the requester position.
+9. Set `Moe.FOLLOWING = true`.
+10. Update the SQLite row position/profile fields from the moved Moe shell.
+11. Release the forced chunk ticket in all success/failure outcomes after it is queued.
 
-No forced chunk loading is used in this spike. Unloaded NPCs fail safely instead of force-loading remote chunks. That keeps cleanup state unnecessary until the real teleport/follow system is ported.
+Minimal forced chunk loading is active for row-backed lookup and cleanup parity. A row without a live Moe still fails safely, but it no longer leaks a forced chunk ticket. Full Forge Cell Phone behavior that can recover entities across unloaded chunks or dimensions remains incomplete until entity persistence and dimension teleport behavior are ported.
 
 ## Networking Payload Scaffold
 
@@ -250,7 +273,10 @@ Current SQLite authority:
 - SQLite assigns `DatabaseID` on valid spawn.
 - SQLite stores row-backed owner UUID, name, gender, block state, hiding flag, and hidden position.
 - SQLite row ownership is checked before server-side list/query/remove services expose a row.
-- SQLite row ownership and `Hiding` state are checked before server-side call/teleport service moves a Moe.
+- SQLite row ownership and `Hiding` state are checked before server-side call/teleport service queues a forced chunk or moves a Moe.
+- SQLite is authoritative for server-side data block rows in the minimal `Shrines`, `GardenLanterns`, `Locations`, and `SakuraSaplings` tables.
+- Data block entity NBT preserves `DatabaseID`, `HasRow`, `Claimed`, and `PlayerUUID`; locative rows additionally persist `RequiredCondition` and `Priority`.
+- Shrine list queries filter server-side SQLite rows by owner UUID and dimension.
 - SQLite does not yet own full Forge NPC profile/stat/home/shrine state.
 
 Future networking authority:
@@ -285,21 +311,19 @@ Currently unimplemented:
 
 - full Forge NPC schema columns for traits, health, food, stress, home, shrine, and last-seen data
 - migration/backfill for existing spike `NPCs` tables if columns change later
-- block entity data capture and restore
-- spawn item consumption and survival/creative behavior
+- complex block entity full metadata/component restore remains incomplete; persistent data capture and restore through spawn/hide/reveal is active
+- full Forge data block behavior remains incomplete; server-side block entity IDs, owner/location NBT, SQLite rows, locative condition/priority, and shrine list queries are active, while shrine tablet effects/packets and shimenawa NPC-row creation are deferred
+- client-side item-use feedback for spawn remains incomplete; server-side survival/creative consumption is active
 - server-to-client custom packets
 - client presentation/state storage for NPC list/detail responses
 - old Forge dialogue, page removal, shrine, and teleport packet families
 - client packet/request plumbing for Cell Phone call behavior
-- forced chunk loading for remote or unloaded Moe calls
+- full unloaded-entity recovery after forced chunk loading
+- cross-dimension Cell Phone teleport
 - renderer/model/client screen integration
 - AI, goals, navigation, and timed hide goal execution
-- automatic reveal from `HideUntil.ONE_SECOND_PASSES`
-- reveal on block break start/end
-- reveal on piston movement
-- reveal on falling block interaction
 - dialogue and scene triggers
-- full Cell Phone teleport behavior, including UI, packet request path, chunk tickets, arrival effects, and follow AI
+- full Cell Phone teleport behavior, including UI, packet request path, cross-dimension teleport, arrival effects, and follow AI
 - sounds, combat, inventory, chores, pranks, and profile trait generation
 
-The current tested contract is intentionally small: valid tagged blocks create an SQLite `NPCs` row, add the row ID to the owner list, and produce a Moe shell with that row ID; invalid blocks no-op; owner lists expose only owned, readable, non-dead rows; non-owners cannot access, de-list, or call rows; a loaded visible owned Moe can be called near the requester and gets `following=true`; hidden, unloaded, missing, corrupt, and dead rows fail safely; a Moe can hide into a world block plus `MoeInHiding`; hide updates the same row and records the hidden position in `HidingSpots`; manual reveal restores a Moe shell from the same row identity; missing hidden spots, missing rows, corrupt rows, and dead rows fail safely.
+The current tested contract is intentionally small: valid tagged blocks create an SQLite `NPCs` row, add the row ID to the owner list, and produce a Moe shell with that row ID; invalid blocks no-op; owner lists expose only owned, readable, non-dead rows; non-owners cannot access, de-list, or call rows; a loaded visible owned Moe can be called near the requester and gets `following=true`; hidden, unloaded, missing, corrupt, and dead rows fail safely; a Moe can hide into a world block plus `MoeInHiding`; hide updates the same row and records the hidden position in `HidingSpots`; manual, timed, break-start, break-end, piston, and falling-block reveal restore a Moe shell from the same row identity; missing hidden spots, missing rows, corrupt rows, and dead rows fail safely; data block entities preserve owner/row NBT, claim/update/delete SQLite rows, and expose owner/dimension-filtered shrine list rows server-side.

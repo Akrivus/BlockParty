@@ -1,8 +1,10 @@
 package block_party.db;
 
+import block_party.blocks.entity.AbstractDataBlockEntity;
 import block_party.db.records.NPC;
 import block_party.entities.Moe;
 import block_party.utils.NBT;
+import block_party.world.chunk.ForcedChunk;
 import com.google.common.collect.Maps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -14,6 +16,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -24,7 +27,10 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.Driver;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -59,9 +65,46 @@ public final class BlockPartyDB extends SavedData {
             Connection connection = data.openConnection();
             data.free(connection);
             NPC.createTable(data);
+            createDataBlockTables(data);
         } catch (ReflectiveOperationException | SQLException exception) {
             throw new IllegalStateException("Block Party SQLite bootstrap failed", exception);
         }
+    }
+
+    public static void createDataBlockTables(BlockPartyDB data) throws SQLException {
+        Connection connection = data.openConnection();
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(dataBlockTableSql("Shrines"));
+            statement.execute(dataBlockTableSql("GardenLanterns"));
+            statement.execute(dataBlockTableSql("SakuraSaplings"));
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS Locations (
+                        DatabaseID INTEGER PRIMARY KEY,
+                        PosDim TEXT NOT NULL DEFAULT 'minecraft:overworld',
+                        PosX INTEGER NOT NULL DEFAULT 0,
+                        PosY INTEGER NOT NULL DEFAULT 0,
+                        PosZ INTEGER NOT NULL DEFAULT 0,
+                        PlayerUUID TEXT NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+                        RequiredCondition TEXT NOT NULL DEFAULT 'ALWAYS',
+                        Priority INTEGER NOT NULL DEFAULT 0
+                    );
+                    """);
+        } finally {
+            data.free(connection);
+        }
+    }
+
+    private static String dataBlockTableSql(String tableName) {
+        return """
+                CREATE TABLE IF NOT EXISTS %s (
+                    DatabaseID INTEGER PRIMARY KEY,
+                    PosDim TEXT NOT NULL DEFAULT 'minecraft:overworld',
+                    PosX INTEGER NOT NULL DEFAULT 0,
+                    PosY INTEGER NOT NULL DEFAULT 0,
+                    PosZ INTEGER NOT NULL DEFAULT 0,
+                    PlayerUUID TEXT NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'
+                );
+                """.formatted(tableName);
     }
 
     private static Driver loadSqliteDriver() throws ReflectiveOperationException {
@@ -191,32 +234,51 @@ public final class BlockPartyDB extends SavedData {
         return this.callOwnedNpc(level, player.getUUID(), player.blockPosition(), id);
     }
 
-    public java.util.Optional<Moe> callOwnedNpc(ServerLevel level, UUID player, BlockPos callerPos, long id) {
+    public java.util.Optional<Moe> callOwnedNpc(ServerLevel callerLevel, UUID player, BlockPos callerPos, long id) {
         java.util.Optional<NPC> row = this.loadOwnedNpc(player, id);
         if (row.isEmpty() || row.get().hiding()) {
             return java.util.Optional.empty();
         }
 
-        java.util.Optional<Moe> live = this.findLoadedMoe(level, id);
-        if (live.isEmpty()) {
+        NPC npc = row.get();
+        ServerLevel npcLevel = callerLevel.getServer().getLevel(npc.dimension());
+        if (npcLevel == null) {
             return java.util.Optional.empty();
         }
 
-        Moe moe = live.get();
-        moe.moveToBlock(callerPos.east());
-        moe.setFollowing(true);
+        ForcedChunk.queue(id, npcLevel, new ChunkPos(npc.pos()));
         try {
-            row.get().updateFromMoe(this, level, moe);
-        } catch (SQLException exception) {
-            return java.util.Optional.empty();
+            java.util.Optional<Moe> live = this.findLoadedMoe(npcLevel, id);
+            if (live.isEmpty()) {
+                return java.util.Optional.empty();
+            }
+
+            Moe moe = live.get();
+            if (moe.level() != callerLevel) {
+                return java.util.Optional.empty();
+            }
+            moe.moveToBlock(callerPos.east());
+            moe.setFollowing(true);
+            try {
+                npc.updateFromMoe(this, callerLevel, moe);
+            } catch (SQLException exception) {
+                return java.util.Optional.empty();
+            }
+            return java.util.Optional.of(moe);
+        } finally {
+            ForcedChunk.release(id);
         }
-        return java.util.Optional.of(moe);
     }
 
     private java.util.Optional<Moe> findLoadedMoe(ServerLevel level, long id) {
         for (Moe moe : level.getEntities(EntityTypeTest.forClass(Moe.class), moe ->
                 moe.isAlive() && !moe.isRemoved() && moe.getDatabaseID() == id)) {
             return java.util.Optional.of(moe);
+        }
+        for (net.minecraft.world.entity.Entity entity : level.getAllEntities()) {
+            if (entity instanceof Moe moe && moe.isAlive() && !moe.isRemoved() && moe.getDatabaseID() == id) {
+                return java.util.Optional.of(moe);
+            }
         }
         return java.util.Optional.empty();
     }
@@ -284,5 +346,109 @@ public final class BlockPartyDB extends SavedData {
 
     public void deleteNpc(long id) throws SQLException {
         NPC.delete(this, id);
+    }
+
+    public void upsertDataBlock(AbstractDataBlockEntity entity) throws SQLException {
+        String table = entity.getTableName();
+        if ("NPCs".equals(table)) {
+            return;
+        }
+
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement(upsertSql(table, "Locations".equals(table)))) {
+            statement.setLong(1, entity.getDatabaseID());
+            statement.setString(2, entity.getDimBlockPos().getDim().location().toString());
+            statement.setInt(3, entity.getBlockPos().getX());
+            statement.setInt(4, entity.getBlockPos().getY());
+            statement.setInt(5, entity.getBlockPos().getZ());
+            statement.setString(6, entity.getPlayerUUID().toString());
+            if ("Locations".equals(table)) {
+                statement.setString(7, entity.getRequiredCondition());
+                statement.setInt(8, entity.getPriority());
+            }
+            statement.executeUpdate();
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    private static String upsertSql(String table, boolean locative) {
+        if (locative) {
+            return """
+                    INSERT INTO Locations (
+                        DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, RequiredCondition, Priority
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(DatabaseID) DO UPDATE SET
+                        PosDim = excluded.PosDim,
+                        PosX = excluded.PosX,
+                        PosY = excluded.PosY,
+                        PosZ = excluded.PosZ,
+                        PlayerUUID = excluded.PlayerUUID,
+                        RequiredCondition = excluded.RequiredCondition,
+                        Priority = excluded.Priority;
+                    """;
+        }
+        return """
+                INSERT INTO %s (
+                    DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(DatabaseID) DO UPDATE SET
+                    PosDim = excluded.PosDim,
+                    PosX = excluded.PosX,
+                    PosY = excluded.PosY,
+                    PosZ = excluded.PosZ,
+                    PlayerUUID = excluded.PlayerUUID;
+                """.formatted(table);
+    }
+
+    public boolean dataBlockRowExists(String table, long id) throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("SELECT 1 FROM " + table + " WHERE DatabaseID = ? LIMIT 1;")) {
+            statement.setLong(1, id);
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next();
+            }
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    public void deleteDataBlock(String table, long id) throws SQLException {
+        if ("NPCs".equals(table)) {
+            return;
+        }
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + table + " WHERE DatabaseID = ?;")) {
+            statement.setLong(1, id);
+            statement.executeUpdate();
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    public List<ShrineEntry> listShrines(UUID player, net.minecraft.resources.ResourceKey<Level> dimension) throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT DatabaseID, PosX, PosY, PosZ FROM Shrines
+                WHERE PlayerUUID = ? AND PosDim = ?
+                ORDER BY DatabaseID ASC;
+                """)) {
+            statement.setString(1, player.toString());
+            statement.setString(2, dimension.location().toString());
+            List<ShrineEntry> shrines = new ArrayList<>();
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    shrines.add(new ShrineEntry(
+                            result.getLong("DatabaseID"),
+                            new BlockPos(result.getInt("PosX"), result.getInt("PosY"), result.getInt("PosZ"))));
+                }
+            }
+            return List.copyOf(shrines);
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    public record ShrineEntry(long databaseId, BlockPos pos) {
     }
 }

@@ -161,6 +161,7 @@ Risk scale:
 ### Sapling DB schema not created on world load
 
 - Evidence: `BlockPartyDB.Saplings` exists; `onWorldLoad` creates Shrines, Locations, Gardens, and NPCs, but not Saplings.
+- NeoForge spike note: Phase 1 Slice 1.4 intentionally creates the minimal `SakuraSaplings` table alongside `Shrines`, `GardenLanterns`, and `Locations` to keep the server-side block entity surface internally consistent. This is a documented migration choice from the frozen Forge 1.19.4 baseline.
 - Likely cause: missed schema during persistence expansion.
 - Migration risk: Medium if sapling block entities are exercised.
 - Gameplay importance: Medium for sakura sapling persistence/worldgen.

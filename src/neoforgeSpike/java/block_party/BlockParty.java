@@ -1,7 +1,9 @@
 package block_party;
 
 import block_party.db.BlockPartyDB;
+import block_party.entities.data.HidingSpots;
 import block_party.network.CustomMessenger;
+import block_party.registry.CustomBlockEntities;
 import block_party.registry.CustomBlocks;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomItems;
@@ -22,6 +24,7 @@ public final class BlockParty {
 
     public BlockParty(IEventBus modBus) {
         CustomBlocks.register(modBus);
+        CustomBlockEntities.register(modBus);
         CustomItems.register(modBus);
         CustomSounds.register(modBus);
         CustomParticles.register(modBus);
@@ -32,6 +35,10 @@ public final class BlockParty {
         NeoForge.EVENT_BUS.addListener(CustomResources::registerServerReloadListeners);
         NeoForge.EVENT_BUS.addListener(BlockPartyDB::onServerStarted);
         NeoForge.EVENT_BUS.addListener(BlockPartyDB::onServerStopped);
+        NeoForge.EVENT_BUS.addListener(HidingSpots::onBreakStart);
+        NeoForge.EVENT_BUS.addListener(HidingSpots::onBreakEnd);
+        NeoForge.EVENT_BUS.addListener(HidingSpots::onPistonPush);
+        NeoForge.EVENT_BUS.addListener(HidingSpots::onFalling);
     }
 
     public static String getVersion() {

@@ -15,6 +15,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,6 +38,8 @@ public class Moe extends Entity {
             SynchedEntityData.defineId(Moe.class, EntityDataSerializers.STRING);
     public static final EntityDataAccessor<String> GENDER =
             SynchedEntityData.defineId(Moe.class, EntityDataSerializers.STRING);
+
+    private CompoundTag tileEntityData = new CompoundTag();
 
     public Moe(EntityType<? extends Moe> entityType, Level level) {
         super(entityType, level);
@@ -66,6 +69,7 @@ public class Moe extends Entity {
         if (compound.contains("Gender")) {
             this.setGender(compound.getString("Gender"));
         }
+        this.setTileEntityData(compound.getCompound("TileEntity"));
     }
 
     @Override
@@ -76,6 +80,7 @@ public class Moe extends Entity {
         compound.putString("OwnerUUID", this.getOwnerUUID().toString());
         compound.putString("GivenName", this.getGivenName());
         compound.putString("Gender", this.getGender());
+        compound.put("TileEntity", this.getTileEntityData().copy());
     }
 
     @Override
@@ -131,6 +136,14 @@ public class Moe extends Entity {
         this.entityData.set(GENDER, gender);
     }
 
+    public CompoundTag getTileEntityData() {
+        return this.tileEntityData.copy();
+    }
+
+    public void setTileEntityData(CompoundTag tileEntityData) {
+        this.tileEntityData = tileEntityData == null ? new CompoundTag() : tileEntityData.copy();
+    }
+
     public void moveToBlock(BlockPos pos) {
         this.absMoveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
     }
@@ -153,6 +166,11 @@ public class Moe extends Entity {
 
         BlockPos pos = this.blockPosition();
         serverLevel.setBlock(pos, this.getBlockState(), 3);
+        BlockEntity blockEntity = serverLevel.getBlockEntity(pos);
+        if (blockEntity != null) {
+            blockEntity.getPersistentData().merge(this.getTileEntityData());
+            blockEntity.setChanged();
+        }
 
         MoeInHiding hiding = new MoeInHiding(CustomEntities.MOE_IN_HIDING.get(), serverLevel);
         hiding.setDatabaseID(this.getDatabaseID());

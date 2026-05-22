@@ -13,13 +13,31 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.item.FallingBlockEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.PistonEvent;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.util.List;
 import java.util.OptionalLong;
 import java.util.UUID;
@@ -38,12 +56,15 @@ public final class MoeLifecycleGameTests {
         UUID owner = new UUID(11L, 22L);
         BlockState sourceState = CustomBlocks.ENTRIES.get("sakura_log").get().defaultBlockState();
         level.setBlock(source, sourceState, 3);
+        int rowsBefore = countNpcRows(helper);
 
         Moe moe = CustomSpawnEggItem.spawnMoe(level, source, Direction.UP, owner);
         if (moe == null) {
             helper.fail("Expected valid tagged block to spawn Moe");
             return;
         }
+        assertEquals(helper, Blocks.AIR.defaultBlockState(), level.getBlockState(source), "removed source block");
+        assertEquals(helper, rowsBefore + 1, countNpcRows(helper), "NPC row count after valid spawn");
         NPC row = findNpc(helper, moe.getDatabaseID());
         if (row == null) {
             return;
@@ -54,6 +75,11 @@ public final class MoeLifecycleGameTests {
         assertEquals(helper, sourceState, moe.getBlockState(), "spawned Moe source block state");
         assertEquals(helper, sourceState, row.blockState(), "spawned row block state");
         assertEquals(helper, helper.absolutePos(new BlockPos(1, 2, 1)), moe.blockPosition(), "spawned Moe position");
+
+        Moe loaded = new Moe(block_party.registry.CustomEntities.MOE.get(), level);
+        loaded.load(moe.saveWithoutId(new CompoundTag()));
+        assertEquals(helper, owner, loaded.getOwnerUUID(), "spawned Moe persisted owner UUID");
+        assertEquals(helper, sourceState, loaded.getBlockState(), "spawned Moe persisted source block state");
         helper.kill(moe);
         helper.succeed();
     }
@@ -62,18 +88,125 @@ public final class MoeLifecycleGameTests {
     public static void invalidSpawnEggUseFailsSafely(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPos source = helper.absolutePos(new BlockPos(1, 1, 1));
-        level.setBlock(source, Blocks.AIR.defaultBlockState(), 3);
+        BlockState invalidState = Blocks.BEDROCK.defaultBlockState();
+        level.setBlock(source, invalidState, 3);
+        int rowsBefore = countNpcRows(helper);
 
         Moe moe = CustomSpawnEggItem.spawnMoe(level, source, Direction.UP, new UUID(33L, 44L));
         if (moe != null) {
             helper.fail("Expected invalid block to produce no Moe");
             return;
         }
+        assertEquals(helper, invalidState, level.getBlockState(source), "invalid source block state");
+        assertEquals(helper, rowsBefore, countNpcRows(helper), "NPC row count after invalid spawn helper");
         List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(source).inflate(3.0));
         if (!moes.isEmpty()) {
             helper.fail("Expected invalid spawn to leave no nearby Moe entities");
             return;
         }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void invalidSpawnEggUseChangesNoBlockConsumesNoItemAndInsertsNoRow(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos source = helper.absolutePos(new BlockPos(1, 1, 1));
+        BlockState invalidState = Blocks.BEDROCK.defaultBlockState();
+        level.setBlock(source, invalidState, 3);
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        ItemStack stack = new ItemStack(block_party.registry.CustomItems.MOE_SPAWN_EGG.get());
+        int rowsBefore = countNpcRows(helper);
+
+        InteractionResult result = useSpawnEgg(level, player, stack, source, Direction.UP);
+
+        assertEquals(helper, InteractionResult.FAIL, result, "invalid use result");
+        assertEquals(helper, invalidState, level.getBlockState(source), "invalid use source block");
+        assertEquals(helper, 1, stack.getCount(), "invalid use item count");
+        assertEquals(helper, rowsBefore, countNpcRows(helper), "NPC row count after invalid item use");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void survivalSpawnEggUseConsumesItem(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos source = helper.absolutePos(new BlockPos(1, 1, 1));
+        level.setBlock(source, CustomBlocks.SAKURA_PLANKS.get().defaultBlockState(), 3);
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        ItemStack stack = new ItemStack(block_party.registry.CustomItems.MOE_SPAWN_EGG.get());
+
+        InteractionResult result = useSpawnEgg(level, player, stack, source, Direction.UP);
+
+        assertEquals(helper, InteractionResult.CONSUME, result, "survival use result");
+        assertEquals(helper, 0, stack.getCount(), "survival spawn egg count");
+        killNearbyMoes(level, source);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void creativeSpawnEggUseDoesNotConsumeItem(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos source = helper.absolutePos(new BlockPos(1, 1, 1));
+        level.setBlock(source, CustomBlocks.GINKGO_PLANKS.get().defaultBlockState(), 3);
+        Player player = helper.makeMockPlayer(GameType.CREATIVE);
+        ItemStack stack = new ItemStack(block_party.registry.CustomItems.MOE_SPAWN_EGG.get());
+
+        InteractionResult result = useSpawnEgg(level, player, stack, source, Direction.UP);
+
+        assertEquals(helper, InteractionResult.CONSUME, result, "creative use result");
+        assertEquals(helper, 1, stack.getCount(), "creative spawn egg count");
+        killNearbyMoes(level, source);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void blockEntityPersistentDataIsCapturedOnSpawn(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos source = helper.absolutePos(new BlockPos(1, 1, 1));
+        level.setBlock(source, Blocks.CHEST.defaultBlockState(), 3);
+        BlockEntity blockEntity = level.getBlockEntity(source);
+        if (blockEntity == null) {
+            helper.fail("Expected chest block entity setup");
+            return;
+        }
+        blockEntity.getPersistentData().putString("BlockPartyTestValue", "captured");
+
+        Moe moe = CustomSpawnEggItem.spawnMoe(level, source, Direction.UP, new UUID(99L, 101L));
+        if (moe == null) {
+            helper.fail("Expected chest to spawn Moe from block tag");
+            return;
+        }
+
+        assertEquals(helper, "captured", moe.getTileEntityData().getString("BlockPartyTestValue"), "spawned Moe block entity data");
+        Moe loaded = new Moe(block_party.registry.CustomEntities.MOE.get(), level);
+        loaded.load(moe.saveWithoutId(new CompoundTag()));
+        assertEquals(helper, "captured", loaded.getTileEntityData().getString("BlockPartyTestValue"), "persisted Moe block entity data");
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void ownerListReceivesOneEntryAndDoesNotDuplicate(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = BlockPartyDB.get(level);
+        BlockPos source = helper.absolutePos(new BlockPos(1, 1, 1));
+        UUID owner = new UUID(202L, 303L);
+        level.setBlock(source, CustomBlocks.ENTRIES.get("sakura_log").get().defaultBlockState(), 3);
+
+        Moe moe = CustomSpawnEggItem.spawnMoe(level, source, Direction.UP, owner);
+        if (moe == null) {
+            helper.fail("Expected owned spawn to succeed");
+            return;
+        }
+        db.addTo(owner, moe.getDatabaseID());
+
+        int count = 0;
+        for (long id : db.listNpcIds(owner)) {
+            if (id == moe.getDatabaseID()) {
+                ++count;
+            }
+        }
+        assertEquals(helper, 1, count, "owner list entries for spawned NPC");
+        helper.kill(moe);
         helper.succeed();
     }
 
@@ -157,6 +290,144 @@ public final class MoeLifecycleGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = "empty", timeoutTicks = 80)
+    public static void timedRevealRestoresSameIdentityShell(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = helper.absolutePos(new BlockPos(2, 1, 2));
+        UUID owner = new UUID(771L, 881L);
+        BlockState sourceState = CustomBlocks.GINKGO_PLANKS.get().defaultBlockState();
+        Moe moe = createPersistedMoe(helper, level, pos, owner, sourceState);
+        if (moe == null) {
+            return;
+        }
+        MoeInHiding hidden = moe.hide(HideUntil.ONE_SECOND_PASSES);
+        if (hidden == null) {
+            helper.fail("Expected hidden shell before timed reveal");
+            return;
+        }
+        long databaseId = hidden.getDatabaseID();
+
+        helper.runAfterDelay(30, () -> {
+            if (!hidden.isRemoved()) {
+                helper.fail("Expected timed hidden marker to be removed after reveal");
+                return;
+            }
+            Moe revealed = findMoe(level, databaseId, pos);
+            if (revealed == null) {
+                helper.fail("Expected timed reveal to restore Moe shell");
+                return;
+            }
+            assertEquals(helper, owner, revealed.getOwnerUUID(), "timed revealed owner UUID");
+            assertEquals(helper, sourceState, revealed.getBlockState(), "timed revealed source block state");
+            assertEquals(helper, Blocks.AIR.defaultBlockState(), level.getBlockState(pos), "timed revealed source block removal");
+            helper.kill(revealed);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 40)
+    public static void breakStartEventRevealsHiddenMoe(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = helper.absolutePos(new BlockPos(2, 1, 2));
+        MoeInHiding hidden = createHiddenMoe(helper, level, pos, HideUntil.EXPOSED);
+        if (hidden == null) {
+            return;
+        }
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+
+        HidingSpots.onBreakStart(new PlayerInteractEvent.LeftClickBlock(
+                player, pos, Direction.UP, PlayerInteractEvent.LeftClickBlock.Action.START));
+
+        assertRevealedFromEvent(helper, level, pos, hidden.getDatabaseID(), "break start");
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 40)
+    public static void breakEndEventRevealsHiddenMoe(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = helper.absolutePos(new BlockPos(2, 1, 2));
+        MoeInHiding hidden = createHiddenMoe(helper, level, pos, HideUntil.EXPOSED);
+        if (hidden == null) {
+            return;
+        }
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+
+        HidingSpots.onBreakEnd(new BlockEvent.BreakEvent(level, pos, level.getBlockState(pos), player));
+
+        assertRevealedFromEvent(helper, level, pos, hidden.getDatabaseID(), "break end");
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 40)
+    public static void pistonPreEventRevealsHiddenMoeInFrontOfPiston(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos piston = helper.absolutePos(new BlockPos(1, 1, 2));
+        BlockPos pos = piston.east();
+        level.setBlock(piston, Blocks.PISTON.defaultBlockState().setValue(PistonBaseBlock.FACING, Direction.EAST), 3);
+        MoeInHiding hidden = createHiddenMoe(helper, level, pos, HideUntil.EXPOSED);
+        if (hidden == null) {
+            return;
+        }
+
+        HidingSpots.onPistonPush(new PistonEvent.Pre(level, piston, Direction.EAST, PistonEvent.PistonMoveType.EXTEND));
+
+        assertRevealedFromEvent(helper, level, pos, hidden.getDatabaseID(), "piston pre");
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 40)
+    public static void fallingBlockJoinEventRevealsAndCancelsHiddenMoeBlock(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = helper.absolutePos(new BlockPos(2, 1, 2));
+        MoeInHiding hidden = createHiddenMoe(helper, level, pos, HideUntil.EXPOSED);
+        if (hidden == null) {
+            return;
+        }
+        FallingBlockEntity falling = new FallingBlockEntity(EntityType.FALLING_BLOCK, level);
+        falling.setStartPos(pos);
+        EntityJoinLevelEvent event = new EntityJoinLevelEvent(falling, level);
+
+        HidingSpots.onFalling(event);
+
+        if (!event.isCanceled()) {
+            helper.fail("Expected falling block join event to be canceled after reveal");
+            return;
+        }
+        assertRevealedFromEvent(helper, level, pos, hidden.getDatabaseID(), "falling block");
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 40)
+    public static void blockEntityPersistentDataSurvivesHideReveal(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = helper.absolutePos(new BlockPos(2, 1, 2));
+        UUID owner = new UUID(909L, 1001L);
+        Moe moe = createPersistedMoe(helper, level, pos, owner, Blocks.CHEST.defaultBlockState());
+        if (moe == null) {
+            return;
+        }
+        CompoundTag tileEntity = new CompoundTag();
+        tileEntity.putString("BlockPartyHideRevealValue", "round-trip");
+        moe.setTileEntityData(tileEntity);
+
+        MoeInHiding hidden = moe.hide(HideUntil.EXPOSED);
+        if (hidden == null) {
+            helper.fail("Expected hide with block entity data to succeed");
+            return;
+        }
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity == null) {
+            helper.fail("Expected hidden chest block entity");
+            return;
+        }
+        assertEquals(helper, "round-trip", blockEntity.getPersistentData().getString("BlockPartyHideRevealValue"), "hidden block entity data");
+
+        Moe revealed = HidingSpots.reveal(level, pos);
+        if (revealed == null) {
+            helper.fail("Expected reveal with block entity data to succeed");
+            return;
+        }
+        assertEquals(helper, "round-trip", revealed.getTileEntityData().getString("BlockPartyHideRevealValue"), "revealed Moe block entity data");
+        helper.kill(revealed);
+        helper.succeed();
+    }
+
     @GameTest(template = "empty", timeoutTicks = 20)
     public static void missingRowRevealFailsSafely(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
@@ -207,6 +478,56 @@ public final class MoeLifecycleGameTests {
         }
     }
 
+    private static void assertRevealedFromEvent(GameTestHelper helper, ServerLevel level, BlockPos pos, long databaseId, String label) {
+        Moe revealed = findMoe(level, databaseId, pos);
+        if (revealed == null) {
+            helper.fail("Expected " + label + " event to reveal Moe " + databaseId);
+            return;
+        }
+        assertEquals(helper, Blocks.AIR.defaultBlockState(), level.getBlockState(pos), label + " revealed block state");
+        if (HidingSpots.get(level).find(pos).isPresent()) {
+            helper.fail("Expected " + label + " event to clear HidingSpots record");
+            return;
+        }
+        helper.kill(revealed);
+        helper.succeed();
+    }
+
+    private static MoeInHiding createHiddenMoe(GameTestHelper helper, ServerLevel level, BlockPos pos, HideUntil hideUntil) {
+        Moe moe = createPersistedMoe(helper, level, pos, new UUID(pos.asLong(), pos.asLong() + 1L),
+                CustomBlocks.SAKURA_PLANKS.get().defaultBlockState());
+        if (moe == null) {
+            return null;
+        }
+        MoeInHiding hidden = moe.hide(hideUntil);
+        if (hidden == null) {
+            helper.fail("Expected hidden Moe setup to succeed");
+        }
+        return hidden;
+    }
+
+    private static Moe createPersistedMoe(GameTestHelper helper, ServerLevel level, BlockPos pos, UUID owner, BlockState sourceState) {
+        Moe moe = new Moe(block_party.registry.CustomEntities.MOE.get(), level);
+        moe.moveToBlock(pos);
+        moe.setOwnerUUID(owner);
+        moe.setBlockState(sourceState);
+        NPC row = createNpc(helper, level, moe);
+        if (row == null) {
+            return null;
+        }
+        row.applyTo(moe);
+        if (!level.addFreshEntity(moe)) {
+            helper.fail("Expected persisted Moe setup entity to spawn");
+            return null;
+        }
+        return moe;
+    }
+
+    private static Moe findMoe(ServerLevel level, long databaseId, BlockPos pos) {
+        List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(pos).inflate(1.0), moe -> moe.getDatabaseID() == databaseId);
+        return moes.isEmpty() ? null : moes.getFirst();
+    }
+
     private static NPC createNpc(GameTestHelper helper, ServerLevel level, Moe moe) {
         try {
             return BlockPartyDB.get(level).createNpc(level, moe);
@@ -226,5 +547,32 @@ public final class MoeLifecycleGameTests {
             helper.fail("Expected NPC row lookup to succeed: " + exception.getMessage());
             return null;
         }
+    }
+
+    private static InteractionResult useSpawnEgg(ServerLevel level, Player player, ItemStack stack, BlockPos source, Direction face) {
+        Vec3 hitLocation = Vec3.atCenterOf(source);
+        BlockHitResult hit = new BlockHitResult(hitLocation, face, source, false);
+        return block_party.registry.CustomItems.MOE_SPAWN_EGG.get().useOn(
+                new net.minecraft.world.item.context.UseOnContext(level, player, InteractionHand.MAIN_HAND, stack, hit));
+    }
+
+    private static int countNpcRows(GameTestHelper helper) {
+        BlockPartyDB db = BlockPartyDB.get(helper.getLevel());
+        try {
+            Connection connection = db.openConnection();
+            try (ResultSet result = connection.createStatement().executeQuery("SELECT COUNT(*) FROM NPCs;")) {
+                return result.next() ? result.getInt(1) : 0;
+            } finally {
+                db.free(connection);
+            }
+        } catch (SQLException exception) {
+            helper.fail("Expected NPC row count to succeed: " + exception.getMessage());
+            return -1;
+        }
+    }
+
+    private static void killNearbyMoes(ServerLevel level, BlockPos source) {
+        List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(source).inflate(3.0));
+        moes.forEach(Moe::discard);
     }
 }

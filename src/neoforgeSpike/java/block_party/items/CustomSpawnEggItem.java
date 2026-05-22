@@ -7,16 +7,18 @@ import block_party.registry.CustomEntities;
 import block_party.registry.CustomTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.UUID;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public final class CustomSpawnEggItem extends Item {
     public CustomSpawnEggItem(Properties properties) {
@@ -36,7 +38,14 @@ public final class CustomSpawnEggItem extends Item {
         }
 
         Moe moe = spawnMoe(serverLevel, sourcePos, context.getClickedFace(), context.getPlayer());
-        return moe == null ? InteractionResult.FAIL : InteractionResult.SUCCESS;
+        if (moe == null) {
+            return InteractionResult.FAIL;
+        }
+        Player player = context.getPlayer();
+        if (player == null || !player.isCreative()) {
+            context.getItemInHand().shrink(1);
+        }
+        return InteractionResult.CONSUME;
     }
 
     public static Moe spawnMoe(ServerLevel level, BlockPos sourcePos, Direction face, Player player) {
@@ -49,16 +58,24 @@ public final class CustomSpawnEggItem extends Item {
             return null;
         }
 
+        CompoundTag tileEntityData = new CompoundTag();
+        BlockEntity blockEntity = level.getBlockEntity(sourcePos);
+        if (blockEntity != null) {
+            tileEntityData = blockEntity.getPersistentData().copy();
+        }
+
         BlockPos spawnPos = sourcePos.relative(face);
         Moe moe = new Moe(CustomEntities.MOE.get(), level);
         moe.moveToBlock(spawnPos);
         moe.setBlockState(sourceState);
+        moe.setTileEntityData(tileEntityData);
         if (owner != null) {
             moe.setOwnerUUID(owner);
         }
+        BlockPartyDB db = BlockPartyDB.get(level);
+        NPC row;
         try {
-            BlockPartyDB db = BlockPartyDB.get(level);
-            NPC row = db.createNpc(level, moe);
+            row = db.createNpc(level, moe);
             row.applyTo(moe);
             if (owner != null) {
                 db.addTo(owner, row.databaseId());
@@ -66,6 +83,15 @@ public final class CustomSpawnEggItem extends Item {
         } catch (SQLException exception) {
             return null;
         }
-        return level.addFreshEntity(moe) ? moe : null;
+        if (!level.addFreshEntity(moe)) {
+            try {
+                db.deleteNpc(row.databaseId());
+            } catch (SQLException ignored) {
+                // Best-effort cleanup; the spawn still fails safely from the player's perspective.
+            }
+            return null;
+        }
+        level.destroyBlock(sourcePos, false);
+        return moe;
     }
 }
