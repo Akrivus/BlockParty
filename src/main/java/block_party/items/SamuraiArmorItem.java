@@ -1,187 +1,101 @@
 package block_party.items;
 
-import block_party.BlockParty;
-import block_party.client.model.SamuraiModel;
 import block_party.registry.CustomTags;
-import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
+import java.util.EnumMap;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.EnderMan;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.player.PlayerXpEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
 
-import java.util.function.Consumer;
+public class SamuraiArmorItem extends ArmorItem implements SortableItem {
+    public static final ArmorMaterial MATERIAL = new ArmorMaterial(
+            12,
+            defense(),
+            7,
+            SoundEvents.ARMOR_EQUIP_CHAIN,
+            1.0F,
+            0.2F,
+            ItemTags.REPAIRS_IRON_ARMOR,
+            EquipmentAssets.CHAINMAIL);
 
-@Mod.EventBusSubscriber
-public class SamuraiArmorItem extends ArmorItem {
-    private final String texture;
-
-    protected SamuraiArmorItem(String texture, EquipmentSlot slot, Type type) {
-        super(new ArmorMaterial() {
-            @Override
-            public int getDurabilityForType(Type type) {
-                switch (slot) {
-                case HEAD:
-                    return 156;
-                case CHEST:
-                    return 180;
-                case LEGS:
-                    return 192;
-                case FEET:
-                    return 132;
-                default:
-                    return 0;
-                }
-            }
-
-            @Override
-            public int getDefenseForType(Type type) {
-                switch (type) {
-                case HELMET:
-                    return 3;
-                case CHESTPLATE:
-                    return 4;
-                case LEGGINGS:
-                    return 5;
-                case BOOTS:
-                    return 2;
-                default:
-                    return 0;
-                }
-            }
-
-            @Override
-            public float getToughness() {
-                return 1.0F;
-            }
-
-            @Override
-            public float getKnockbackResistance() {
-                return 0.2F;
-            }
-
-            @Override
-            public int getEnchantmentValue() {
-                return 7;
-            }
-
-            @Override
-            public SoundEvent getEquipSound() {
-                return SoundEvents.ARMOR_EQUIP_CHAIN;
-            }
-
-            @Override
-            public Ingredient getRepairIngredient() {
-                return Ingredient.EMPTY;
-            }
-
-            @Override
-            public String getName() {
-                return BlockParty.source(texture).toString();
-            }
-        }, type, new Properties().stacksTo(1));
-        this.texture = texture;
+    public SamuraiArmorItem(Properties properties, ArmorType type) {
+        this(properties, type, Rarity.RARE);
     }
 
-    public SamuraiArmorItem(EquipmentSlot slot, Type type) {
-        this("samurai", slot, type);
+    protected SamuraiArmorItem(Properties properties, ArmorType type, Rarity rarity) {
+        super(MATERIAL, type, properties.rarity(rarity));
     }
 
-    @Override
-    public Rarity getRarity(ItemStack stack) {
-        return Rarity.RARE;
+    public static int repairWithExperience(ItemStack stack, int xpValue) {
+        if (xpValue <= 0 || !stack.is(CustomTags.Items.SAMURAI_ITEMS) || !stack.isDamaged()) {
+            return xpValue;
+        }
+        int repair = Math.min(xpValue, stack.getDamageValue());
+        stack.setDamageValue(stack.getDamageValue() - repair);
+        return xpValue - repair;
     }
 
-    @Override
-    public boolean isEnderMask(ItemStack stack, Player player, EnderMan enderman) {
-        return true;
-    }
-
-    @Override
-    public void initializeClient(Consumer<IClientItemExtensions> renderer) {
-        renderer.accept(new IClientItemExtensions() {
-            @Override
-            public HumanoidModel<?> getHumanoidArmorModel(LivingEntity entity, ItemStack stack, EquipmentSlot slot, HumanoidModel<?> _default) {
-                return SamuraiModel.getArmorModel(slot);
+    public static double reduceArrowDamageForSamuraiItems(LivingEntity target, double baseDamage) {
+        double damage = baseDamage;
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            if (target.getItemBySlot(slot).is(CustomTags.Items.SAMURAI_ITEMS)) {
+                damage *= 0.5D;
             }
-
-            @Override
-            public void renderHelmetOverlay(ItemStack stack, Player player, int width, int height, float partialTicks) {
-                Window window = Minecraft.getInstance().getWindow();
-                RenderSystem.disableDepthTest();
-                RenderSystem.depthMask(false);
-                RenderSystem.defaultBlendFunc();
-                RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                RenderSystem.setShaderTexture(0, BlockParty.source("textures/misc/%s.png", SamuraiArmorItem.this.texture));
-                Tesselator tesselator = Tesselator.getInstance();
-                BufferBuilder bufferbuilder = tesselator.getBuilder();
-                bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-                bufferbuilder.vertex(0.0D, window.getGuiScaledHeight(), -90.0D).uv(0.0F, 1.0F).endVertex();
-                bufferbuilder.vertex(window.getGuiScaledWidth(), window.getGuiScaledHeight(), -90.0D).uv(1.0F, 1.0F).endVertex();
-                bufferbuilder.vertex(window.getGuiScaledWidth(), 0.0D, -90.0D).uv(1.0F, 0.0F).endVertex();
-                bufferbuilder.vertex(0.0D, 0.0D, -90.0D).uv(0.0F, 0.0F).endVertex();
-                tesselator.end();
-                RenderSystem.depthMask(true);
-                RenderSystem.enableDepthTest();
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            }
-        });
+        }
+        return damage;
     }
 
-    @SubscribeEvent
-    public static void onXP(PlayerXpEvent.PickupXp e) {
-        ExperienceOrb orb = e.getOrb();
-        if (e.getEntity() instanceof ServerPlayer player) {
-            EquipmentSlot slot = EquipmentSlot.values()[orb.level.random.nextInt(5)];
+    public static void onXpPickup(PlayerXpEvent.PickupXp event) {
+        ExperienceOrb orb = event.getOrb();
+        if (event.getEntity() instanceof ServerPlayer player) {
+            EquipmentSlot slot = EquipmentSlot.values()[orb.level().random.nextInt(5)];
             ItemStack stack = player.getItemBySlot(slot);
             if (stack.is(CustomTags.Items.SAMURAI_ITEMS)) {
-                int repair = Math.min(orb.getValue(), stack.getDamageValue());
-                stack.setDamageValue(stack.getDamageValue() - repair);
-                if (orb.getValue() > repair)
-                    player.giveExperiencePoints(orb.getValue() - repair);
-                orb.kill();
-                e.setCanceled(true);
+                int leftover = repairWithExperience(stack, orb.getValue());
+                if (leftover > 0) {
+                    player.giveExperiencePoints(leftover);
+                }
+                orb.discard();
+                event.setCanceled(true);
             }
         }
     }
 
-    @SubscribeEvent
-    public static void onArrowImpact(ProjectileImpactEvent e) {
-        HitResult result = e.getRayTraceResult();
-        if (result.getType() != HitResult.Type.ENTITY)
+    public static void onArrowImpact(ProjectileImpactEvent event) {
+        HitResult result = event.getRayTraceResult();
+        if (result.getType() != HitResult.Type.ENTITY) {
             return;
-        EntityHitResult r = (EntityHitResult) result;
-        if (e.getProjectile() instanceof AbstractArrow arrow && r.getEntity() instanceof LivingEntity entity) {
-            for (EquipmentSlot slot : EquipmentSlot.values()) {
-                ItemStack stack = entity.getItemBySlot(slot);
-                if (stack.is(CustomTags.Items.SAMURAI_ITEMS))
-                    arrow.setBaseDamage(arrow.getBaseDamage() * 0.5F);
-            }
         }
+        EntityHitResult entityHit = (EntityHitResult) result;
+        if (event.getProjectile() instanceof AbstractArrow arrow && entityHit.getEntity() instanceof LivingEntity target) {
+            arrow.setBaseDamage(reduceArrowDamageForSamuraiItems(target, arrow.getBaseDamage()));
+        }
+    }
+
+    @Override
+    public int getSortOrder() {
+        return 10;
+    }
+
+    private static EnumMap<ArmorType, Integer> defense() {
+        EnumMap<ArmorType, Integer> defense = new EnumMap<>(ArmorType.class);
+        defense.put(ArmorType.HELMET, 3);
+        defense.put(ArmorType.CHESTPLATE, 4);
+        defense.put(ArmorType.LEGGINGS, 5);
+        defense.put(ArmorType.BOOTS, 2);
+        return defense;
     }
 }

@@ -5,106 +5,102 @@ import block_party.db.records.NPC;
 import block_party.entities.data.HidingSpots;
 import block_party.entities.goals.HideUntil;
 import block_party.registry.CustomEntities;
-import block_party.scene.SceneTrigger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+
+import java.sql.SQLException;
+import java.util.UUID;
 
 public class MoeInHiding extends Entity {
-    public static final EntityDataAccessor<String> DATABASE_ID = SynchedEntityData.defineId(MoeInHiding.class, EntityDataSerializers.STRING);
-    public static final EntityDataAccessor<BlockPos> ATTACH_POS = SynchedEntityData.defineId(MoeInHiding.class, EntityDataSerializers.BLOCK_POS);
+    private static final String EMPTY_UUID = "00000000-0000-0000-0000-000000000000";
+
+    public static final EntityDataAccessor<String> DATABASE_ID =
+            SynchedEntityData.defineId(MoeInHiding.class, EntityDataSerializers.STRING);
+    public static final EntityDataAccessor<BlockPos> ATTACH_POS =
+            SynchedEntityData.defineId(MoeInHiding.class, EntityDataSerializers.BLOCK_POS);
+    public static final EntityDataAccessor<String> OWNER_UUID =
+            SynchedEntityData.defineId(MoeInHiding.class, EntityDataSerializers.STRING);
+
     private int ticksHidden;
     private HideUntil hideUntil = HideUntil.EXPOSED;
 
-    public MoeInHiding(EntityType<MoeInHiding> type, Level level) {
-        super(type, level);
+    public MoeInHiding(EntityType<? extends MoeInHiding> entityType, Level level) {
+        super(entityType, level);
         this.setNoGravity(true);
         this.noPhysics = true;
     }
 
-    public MoeInHiding(Moe moe) {
-        super(CustomEntities.MOE_IN_HIDING.get(), moe.level);
-        this.setDatabaseID(moe.getDatabaseID());
-        HidingSpots.add(moe);
-        BlockPos pos = moe.blockPosition();
-        this.setAttachPos(pos);
-        this.absMoveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(DATABASE_ID, "-1");
+        builder.define(ATTACH_POS, BlockPos.ZERO);
+        builder.define(OWNER_UUID, EMPTY_UUID);
     }
 
     @Override
-    public void defineSynchedData() {
-        this.entityData.define(DATABASE_ID, "-1");
-        this.entityData.define(ATTACH_POS, BlockPos.ZERO);
-    }
-
-    @Override
-    public void addAdditionalSaveData(CompoundTag compound) {
-        compound.putLong("DatabaseID", this.getDatabaseID());
-        compound.putLong("AttachPos", this.getAttachPos().asLong());
-        compound.putString("HideUntil", this.getHideUntil().getValue());
-        compound.putInt("TicksHidden", this.ticksHidden);
-    }
-
-    @Override
-    public void readAdditionalSaveData(CompoundTag compound) {
+    protected void readAdditionalSaveData(CompoundTag compound) {
         this.setDatabaseID(compound.getLong("DatabaseID"));
         this.setAttachPos(BlockPos.of(compound.getLong("AttachPos")));
-        this.setHideUntil(HideUntil.EXPOSED.fromValue(compound.getString("HideUntil")));
-        this.ticksHidden = compound.getInt("TicksHidden");
-    }
-
-    @Override
-    public void tick() {
-        this.absMoveTo(this.getAttachPos().getX() + 0.5, this.getAttachPos().getY(), this.getAttachPos().getZ() + 0.5);
-        super.tick();
-        if (this.isRemoved())
-            return;
-        ++this.ticksHidden;
-        if (this.getHideUntil().isOver(this))
-            this.spawn();
-    }
-
-    @Override
-    public boolean hurt(DamageSource cause, float amount) {
-        if (this.isAir()) {
-            this.getRow().update((row) -> row.get(NPC.DEAD).set(true));
-            this.kill();
-            return true;
-        } else {
-            this.spawn();
-            return false;
+        this.setHideUntil(HideUntil.fromValue(compound.getString("HideUntil")));
+        this.setTicksHidden(compound.getInt("TicksHidden"));
+        if (compound.contains("OwnerUUID")) {
+            this.setOwnerUUID(UUID.fromString(compound.getString("OwnerUUID")));
         }
     }
 
     @Override
-    public void kill() {
-        HidingSpots.remove(this);
-        super.kill();
+    protected void addAdditionalSaveData(CompoundTag compound) {
+        compound.putLong("DatabaseID", this.getDatabaseID());
+        compound.putLong("AttachPos", this.getAttachPos().asLong());
+        compound.putString("HideUntil", this.getHideUntil().getValue());
+        compound.putInt("TicksHidden", this.getTicksHidden());
+        compound.putString("OwnerUUID", this.getOwnerUUID().toString());
     }
 
-    public boolean spawn() {
-        if (this.level.isClientSide()) { return false; }
+    @Override
+    public void tick() {
         BlockPos pos = this.getAttachPos();
-        Moe moe = new Moe(this.level);
-        moe.absMoveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
-        moe.sceneManager.trigger(SceneTrigger.HIDING_SPOT_DISCOVERED);
-        this.getRow().load(moe);
-        moe.setBlockState(this.level.getBlockState(pos));
-        if (moe.getActualBlockState().hasBlockEntity())
-            moe.setTileEntityData(this.level.getBlockEntity(pos).getPersistentData());
-        this.level.destroyBlock(pos, false);
-        boolean spawned = this.level.addFreshEntity(moe);
-        if (spawned) { this.kill(); }
-        return spawned;
+        this.absMoveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+        ++this.ticksHidden;
+        super.tick();
+        if (!this.isRemoved() && this.getHideUntil().isOver(this)) {
+            this.reveal();
+        }
+    }
+
+    @Override
+    public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
+        if (this.isAir()) {
+            BlockPartyDB db = BlockPartyDB.get(level);
+            try {
+                db.findNpc(this.getDatabaseID()).ifPresent(row -> {
+                    try {
+                        row.markDead(db);
+                    } catch (SQLException ignored) {
+                    }
+                });
+            } catch (SQLException ignored) {
+            }
+            HidingSpots.get(level).remove(this.getAttachPos());
+            this.discard();
+            return true;
+        }
+        return this.reveal() != null;
+    }
+
+    @Override
+    public boolean canBeCollidedWith() {
+        return true;
     }
 
     public long getDatabaseID() {
@@ -131,26 +127,69 @@ public class MoeInHiding extends Entity {
         this.hideUntil = hideUntil;
     }
 
-    public NPC getRow() {
-        return BlockPartyDB.NPCs.find(this.getDatabaseID());
-    }
-
     public int getTicksHidden() {
-         return this.ticksHidden;
+        return this.ticksHidden;
     }
 
-    @Override
-    public boolean canBeCollidedWith() {
-        return true;
+    public void setTicksHidden(int ticksHidden) {
+        this.ticksHidden = ticksHidden;
     }
 
-    @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this);
+    public UUID getOwnerUUID() {
+        return UUID.fromString(this.entityData.get(OWNER_UUID));
+    }
+
+    public void setOwnerUUID(UUID ownerUUID) {
+        this.entityData.set(OWNER_UUID, ownerUUID.toString());
+    }
+
+    public Moe reveal() {
+        if (!(this.level() instanceof ServerLevel serverLevel)) {
+            return null;
+        }
+
+        BlockPos pos = this.getAttachPos();
+        BlockState state = serverLevel.getBlockState(pos);
+        if (state.isAir()) {
+            return null;
+        }
+
+        BlockPartyDB db = BlockPartyDB.get(serverLevel);
+        NPC row;
+        try {
+            row = db.findNpc(this.getDatabaseID()).orElse(null);
+            if (row == null) {
+                return null;
+            }
+        } catch (SQLException exception) {
+            return null;
+        }
+
+        Moe moe = new Moe(CustomEntities.MOE.get(), serverLevel);
+        row.applyTo(moe);
+        moe.setBlockState(state);
+        BlockEntity blockEntity = serverLevel.getBlockEntity(pos);
+        if (blockEntity != null) {
+            moe.setTileEntityData(blockEntity.getPersistentData());
+        }
+        moe.moveToBlock(pos);
+        if (!serverLevel.addFreshEntity(moe)) {
+            return null;
+        }
+
+        try {
+            row.markRevealed(db, serverLevel, pos);
+        } catch (SQLException exception) {
+            moe.discard();
+            return null;
+        }
+        serverLevel.destroyBlock(pos, false);
+        HidingSpots.get(serverLevel).remove(pos);
+        this.discard();
+        return moe;
     }
 
     public boolean isAir() {
-        return this.level.getBlockState(this.getAttachPos()).isAir();
+        return this.level().getBlockState(this.getAttachPos()).isAir();
     }
-
 }

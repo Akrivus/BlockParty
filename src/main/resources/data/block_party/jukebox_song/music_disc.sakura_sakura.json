@@ -1,0 +1,8 @@
+{
+  "comparator_output": 15,
+  "description": {
+    "translate": "item.block_party.music_disc_sakura_sakura.desc"
+  },
+  "length_in_seconds": 233.0,
+  "sound_event": "block_party:music_disc.sakura_sakura"
+}

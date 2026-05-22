@@ -1,5 +1,6 @@
 package block_party.scene;
 
+import java.util.Locale;
 import net.minecraft.resources.ResourceLocation;
 
 public enum SceneTrigger {
@@ -27,13 +28,13 @@ public enum SceneTrigger {
     }
 
     public SceneTrigger fromValue(ResourceLocation location) {
-        return fromValue(location.getPath());
+        return location == null ? this : this.fromValue(location.getPath());
     }
 
     public SceneTrigger fromValue(String key) {
         try {
-            return SceneTrigger.valueOf(key.toUpperCase());
-        } catch (IllegalArgumentException e) {
+            return SceneTrigger.valueOf(key.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException exception) {
             return this;
         }
     }

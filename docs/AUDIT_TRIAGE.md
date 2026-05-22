@@ -234,18 +234,18 @@ Status labels:
 ### Creative tab refactor
 
 - Current status: **Addressed for NeoForge spike manual review**. The old Forge creative tab code is still commented out in `BlockParty`, but Slice 5.3.5 adds a NeoForge `block_party:block_party` creative tab populated from active spike item entries.
-- Affected files/classes: `src/main/java/block_party/BlockParty.java`, `src/main/java/block_party/registry/CustomItems.java`, `src/neoforgeSpike/java/block_party/registry/CustomCreativeTabs.java`.
+- Affected files/classes: `src/main/java/block_party/BlockParty.java`, `src/main/java/block_party/registry/CustomItems.java`, `src/main/java/block_party/registry/CustomCreativeTabs.java`.
 - Player-facing risk: medium for discoverability, low for core survival behavior.
 - Migration risk: low after Slice 5.3.5 for basic discoverability; exact old sort-order parity still needs a normalization decision.
 - Recommended next prompt/task: "During Phase 5.4, verify the tab in a client run and decide whether the old `ISortableItem` ordering should be preserved or documented as unnecessary."
 
 ### Render type polish for decorative blocks
 
-- Current status: **Open/manual**. Earlier audit noted render type concerns; no automated coverage exists.
-- Affected files/classes: `src/main/java/block_party/client/BlockPartyRenderers.java`, decorative block/model/resource files under `src/main/resources/assets/block_party/**`.
-- Player-facing risk: visual glitches, transparency issues, or missing polish.
-- Migration risk: medium.
-- Recommended next prompt/task: "Manual golden-world visual pass after core rendering is ported."
+- Current status: **Addressed for NeoForge spike readiness; manual validation still required**. Slice 5.3.6 registers NeoForge client cutout/cutout-mipped render layers for the active transparent decorative/data blocks and adds classpath asset smoke coverage.
+- Affected files/classes: `src/main/java/block_party/client/BlockPartyRenderers.java`, `src/main/java/block_party/client/BlockPartyClientEvents.java`, decorative block/model/resource files under `src/main/resources/assets/block_party/**`.
+- Player-facing risk: reduced for missing icons and opaque transparent blocks; remaining risk is visual polish not covered by server GameTests.
+- Migration risk: low after client smoke confirms the registered layers in-game.
+- Recommended next prompt/task: "Before or during Phase 5.4, run a client visual pass for creative-tab item icons, cutout/translucent blocks, and the reported non-blocking UI blur."
 
 ### Generated SQL/debug console noise
 

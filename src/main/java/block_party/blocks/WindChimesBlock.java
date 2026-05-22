@@ -8,15 +8,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class WindChimesBlock extends AbstractDataBlock<WindChimesBlockEntity> {
+public class WindChimesBlock extends AbstractDataBlock {
     protected static final VoxelShape AABB = Block.box(3.0D, 0.0D, 3.0D, 13.0D, 16.0D, 13.0D);
 
     public WindChimesBlock(Properties properties) {
-        super(WindChimesBlockEntity::new, properties.lightLevel((state) -> 15));
+        super(WindChimesBlockEntity::new, properties.lightLevel(state -> 15));
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return AABB;
     }
 }

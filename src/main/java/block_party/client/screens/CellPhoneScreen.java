@@ -1,186 +1,204 @@
 package block_party.client.screens;
 
 import block_party.BlockParty;
-import block_party.db.records.NPC;
-import block_party.messages.CNPCTeleport;
-import block_party.registry.CustomMessenger;
-import block_party.registry.CustomSounds;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.NarratorStatus;
-import net.minecraft.client.gui.Font;
+import block_party.network.payload.NpcCallPayload;
+import block_party.network.payload.NpcCallRequestPayload;
+import block_party.network.payload.NpcDetailPayload;
+import block_party.network.payload.NpcDetailRequestPayload;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.sounds.SoundEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
-import java.util.List;
+public class CellPhoneScreen extends ControllerScreen {
+    public static final ResourceLocation CELL_PHONE_TEXTURE = BlockParty.source("textures/gui/cell_phone.png");
+    private static final int WIDTH = 108;
+    private static final int HEIGHT = 182;
 
-public class CellPhoneScreen extends ControllerScreen<NPC> {
-    public static final ResourceLocation CELL_PHONE_TEXTURES = BlockParty.source("textures/gui/cell_phone.png");
-    private final List<ContactButton> contacts = new ArrayList<>();
+    private final Map<Long, NpcDetailPayload> contacts = new LinkedHashMap<>();
+    private final List<Button> contactButtons = new ArrayList<>();
+    private int loaded;
     private int start;
-    private int total;
-    private Button buttonScrollUp;
-    private Button buttonScrollDown;
+    private Button scrollUp;
+    private Button scrollDown;
 
-    public CellPhoneScreen(List<Long> npcs) {
-        super(npcs, -1, 108, 182);
-        this.npcs.forEach(this::getNPC);
-    }
-
-    @Override
-    public void setNPC() {
-        if (this.npc.isDeadOrEstrangedFrom(this.getPlayer())) {
-            this.npcs.remove(this.npc);
-        } else {
-            this.contacts.add(new ContactButton(this, this.npc));
-        }
-        ++this.total;
-        this.updateButtons();
-    }
-
-    private void updateButtons() {
-        if (this.npcs.size() == this.total && this.contacts.isEmpty()) {
-            this.minecraft.player.displayClientMessage(Component.translatable("gui.block_party.error.empty"), true);
-            this.onClose();
-        } else {
-            this.contacts.forEach((contact) -> this.removeWidget(contact));
-            for (int y = this.start; y < Math.min(this.start + 4, this.contacts.size()); ++y) {
-                Button button = this.contacts.get(y);
-                button.setX(this.getAbsoluteCenter(45));
-                button.setY(32 + (y % 4) * 17);
-                this.addRenderableWidget(button);
-            }
-        }
-    }
-
-    @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(stack);
-        this.renderPhone(stack);
-        this.renderScrollBar(stack);
-        super.render(stack, mouseX, mouseY, partialTicks);
-    }
-
-    public void renderPhone(PoseStack stack) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
-        this.blit(stack, this.getCenter(108), 2, 0, 0, 108, 182);
-    }
-
-    public void renderScrollBar(PoseStack stack) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
-        int y = (int) (Math.min((double) this.start / (this.contacts.size() - this.contacts.size() % 4), 1.0) * 35);
-        this.blit(stack, this.getAbsoluteCenter(-37), 40 + y, 108, 82, 7, 15);
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers)) { return true; }
-        switch (keyCode) {
-        case GLFW.GLFW_KEY_UP:
-        case GLFW.GLFW_KEY_W:
-            this.buttonScrollUp.onPress();
-            return true;
-        case GLFW.GLFW_KEY_DOWN:
-        case GLFW.GLFW_KEY_S:
-            this.buttonScrollDown.onPress();
-            return true;
-        default:
-            return false;
-        }
+    public CellPhoneScreen(List<Long> databaseIds) {
+        super(databaseIds, -1L);
     }
 
     @Override
     protected void init() {
-        this.addRenderableWidget(new QuickWidgetButton(this));
-        this.addRenderableWidget(this.buttonScrollUp = new ScrollButton(this, this.getAbsoluteCenter(-37), 32, -1));
-        this.addRenderableWidget(this.buttonScrollDown = new ScrollButton(this, this.getAbsoluteCenter(-37), 91, 1));
-        this.updateButtons();
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose())
+                .bounds(this.absoluteCenter(54), 190, WIDTH, 20)
+                .build());
+        this.scrollUp = this.addRenderableWidget(new ScrollButton(this.absoluteCenter(-37), 32, -1, button -> this.scroll(-1)));
+        this.scrollDown = this.addRenderableWidget(new ScrollButton(this.absoluteCenter(-37), 91, 1, button -> this.scroll(1)));
+        this.requestContacts();
+        this.rebuildContacts();
     }
 
     @Override
-    public boolean isPauseScreen() {
+    public void handleNpcDetail(NpcDetailPayload payload) {
+        if (!this.databaseIds.contains(payload.databaseId())) {
+            return;
+        }
+        ++this.loaded;
+        if (payload.found() && !payload.hiding()) {
+            this.contacts.put(payload.databaseId(), payload);
+        }
+        if (this.loaded >= this.databaseIds.size() && this.contacts.isEmpty()) {
+            if (this.minecraft != null && this.minecraft.player != null) {
+                this.minecraft.player.displayClientMessage(Component.translatable("gui.block_party.error.empty"), true);
+            }
+            this.onClose();
+            return;
+        }
+        this.rebuildContacts();
+    }
+
+    @Override
+    public void handleNpcCall(NpcCallPayload payload) {
+        if (payload.success()) {
+            this.onClose();
+        }
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(graphics, mouseX, mouseY, partialTick);
+        graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, CELL_PHONE_TEXTURE, this.left(WIDTH), 2, 0.0F, 0.0F, WIDTH, HEIGHT, 256, 256);
+        this.renderScrollBar(graphics);
+        super.render(graphics, mouseX, mouseY, partialTick);
+    }
+
+    private void renderScrollBar(GuiGraphics graphics) {
+        int denominator = Math.max(1, this.contacts.size() - this.contacts.size() % 4);
+        int y = (int) (Math.min((double) this.start / denominator, 1.0D) * 35.0D);
+        graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, CELL_PHONE_TEXTURE, this.absoluteCenter(-37), 40 + y, 108, 82, 7, 15, 256, 256);
+    }
+
+    private void requestContacts() {
+        this.loaded = 0;
+        this.contacts.clear();
+        for (long id : this.databaseIds) {
+            PacketDistributor.sendToServer(new NpcDetailRequestPayload(id));
+        }
+        if (this.databaseIds.isEmpty()) {
+            if (this.minecraft != null && this.minecraft.player != null) {
+                this.minecraft.player.displayClientMessage(Component.translatable("gui.block_party.error.empty"), true);
+            }
+            this.onClose();
+        }
+    }
+
+    private void rebuildContacts() {
+        for (Button button : this.contactButtons) {
+            this.removeWidget(button);
+        }
+        this.contactButtons.clear();
+        List<NpcDetailPayload> values = List.copyOf(this.contacts.values());
+        for (int offset = 0; offset < 4 && this.start + offset < values.size(); ++offset) {
+            NpcDetailPayload npc = values.get(this.start + offset);
+            Button button = new ContactButton(this.absoluteCenter(45), 32 + offset * 17, npc, value -> this.call(npc.databaseId()));
+            this.contactButtons.add(this.addRenderableWidget(button));
+        }
+        if (this.scrollUp != null) {
+            this.scrollUp.visible = this.contacts.size() > 4;
+        }
+        if (this.scrollDown != null) {
+            this.scrollDown.visible = this.contacts.size() > 4;
+        }
+    }
+
+    private void scroll(int delta) {
+        if (this.contacts.isEmpty()) {
+            this.start = 0;
+            return;
+        }
+        this.start += 4 * delta;
+        int range = this.contacts.size() - 1;
+        if (this.start < 0) {
+            this.start = range - range % 4;
+        }
+        if (this.start > range) {
+            this.start = 0;
+        }
+        this.rebuildContacts();
+    }
+
+    private void call(long databaseId) {
+        this.play(BlockParty.source("item.cell_phone.button"));
+        PacketDistributor.sendToServer(new NpcCallRequestPayload(databaseId));
+    }
+
+    private void play(ResourceLocation soundId) {
+        if (this.minecraft == null) {
+            return;
+        }
+        SoundEvent sound = BuiltInRegistries.SOUND_EVENT.getValue(soundId);
+        if (sound != null) {
+            this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(sound, 1.0F));
+        }
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_UP || keyCode == GLFW.GLFW_KEY_W) {
+            this.scroll(-1);
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_DOWN || keyCode == GLFW.GLFW_KEY_S) {
+            this.scroll(1);
+            return true;
+        }
         return false;
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        if (delta > 0) { this.buttonScrollUp.onPress(); }
-        if (delta < 0) { this.buttonScrollDown.onPress(); }
-        return delta != 0;
-    }
-
-    public void setScroll(int delta) {
-        this.start += 4 * delta;
-        int range = this.contacts.size() - 1;
-        if (this.start < 0) { this.start = range - range % 4; }
-        if (this.start > range) { this.start = 0; }
-        this.updateButtons();
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public static class QuickWidgetButton extends Button {
-        public QuickWidgetButton(CellPhoneScreen screen) {
-            super(screen.getAbsoluteCenter(54), 190, 108, 20, CommonComponents.GUI_DONE, (button) -> screen.onClose(), (n) -> Component.empty());
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (scrollY > 0) {
+            this.scroll(-1);
+        } else if (scrollY < 0) {
+            this.scroll(1);
         }
+        return scrollY != 0.0D;
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public static class ContactButton extends Button {
-        public ContactButton(CellPhoneScreen parent, NPC npc) {
-            super(0, 0, 81, 15, Component.literal(npc.getName()), (button) -> {
-                CustomMessenger.send(new CNPCTeleport(npc.getID()));
-                parent.onClose();
-            }, (n) -> Component.empty());
+    private static class ContactButton extends Button {
+        ContactButton(int x, int y, NpcDetailPayload npc, OnPress onPress) {
+            super(x, y, 81, 15, Component.literal(npc.name().isBlank() ? String.valueOf(npc.databaseId()) : npc.name()), onPress, DEFAULT_NARRATION);
         }
 
         @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
-            int color = this.isHoveredOrFocused() ? 0xffffff : 0xff7fb6;
-            Minecraft minecraft = Minecraft.getInstance();
-            Font font = minecraft.font;
-            this.blit(stack, this.getX(), this.getY(), 108, this.isHoveredOrFocused() ? 98 : 115, 81, 15);
-            font.draw(stack, this.getMessage().getString(), this.getX() + 10, this.getY() + 4, color);
-        }
-
-        @Override
-        public void playDownSound(SoundManager sound) {
-            sound.play(SimpleSoundInstance.forUI(CustomSounds.ITEM_CELL_PHONE_BUTTON.get(), 1.0F));
+        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+            graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, CELL_PHONE_TEXTURE, this.getX(), this.getY(), 108, this.isHoveredOrFocused() ? 98 : 115, this.width, this.height, 256, 256);
+            int color = this.isHoveredOrFocused() ? 0xFFFFFF : 0xFF7FB6;
+            graphics.drawString(net.minecraft.client.Minecraft.getInstance().font, this.getMessage(), this.getX() + 10, this.getY() + 4, color, false);
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public class ScrollButton extends Button {
-        public ScrollButton(CellPhoneScreen parent, int x, int y, int delta) {
-            super(x, y, 7, 7, Component.empty(), (button) -> parent.setScroll(delta), (n) -> Component.empty());
+    private static class ScrollButton extends Button {
+        ScrollButton(int x, int y, int delta, OnPress onPress) {
+            super(x, y, 7, 7, Component.literal(String.valueOf(delta)), onPress, DEFAULT_NARRATION);
         }
 
         @Override
-        public void playDownSound(SoundManager sound) { }
-
-        @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShaderTexture(0, CELL_PHONE_TEXTURES);
-            int x = this.isHoveredOrFocused() ? 116 : 108;
-            this.blit(stack, this.getX(), this.getY(), x, 73, 7, 7);
+        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+            int textureX = this.isHoveredOrFocused() ? 116 : 108;
+            graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, CELL_PHONE_TEXTURE, this.getX(), this.getY(), textureX, 73, this.width, this.height, 256, 256);
         }
     }
 }

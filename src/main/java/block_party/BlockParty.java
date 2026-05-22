@@ -1,102 +1,62 @@
 package block_party;
 
+import block_party.client.BlockPartyRenderers;
 import block_party.client.BlockPartyClientEvents;
-import block_party.registry.*;
-import com.google.gson.GsonBuilder;
-import com.mojang.serialization.Codec;
-import net.minecraft.core.Holder;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleType;
-import net.minecraft.resources.ResourceKey;
+import block_party.db.BlockPartyDB;
+import block_party.entities.data.HidingSpots;
+import block_party.items.SamuraiArmorItem;
+import block_party.items.SamuraiKatanaItem;
+import block_party.network.CustomMessenger;
+import block_party.registry.CustomBlockEntities;
+import block_party.registry.CustomBlocks;
+import block_party.registry.CustomCreativeTabs;
+import block_party.registry.CustomEntities;
+import block_party.registry.CustomItems;
+import block_party.registry.CustomParticles;
+import block_party.registry.CustomResources;
+import block_party.registry.CustomSounds;
+import block_party.registry.SceneActions;
+import block_party.registry.SceneFilters;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.network.simple.SimpleChannel;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegistryBuilder;
-import net.minecraftforge.registries.tags.ITagManager;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.common.NeoForge;
 
-import java.util.*;
+import java.util.Calendar;
 
 @Mod(BlockParty.ID)
-public class BlockParty {
-    public static final String VERSION = "22.3.6";
+public final class BlockParty {
     public static final String ID = "block_party";
-    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, BlockParty.ID);
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, BlockParty.ID);
-    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, BlockParty.ID);
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, BlockParty.ID);
-    public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, BlockParty.ID);
-    public static final DeferredRegister<Feature<?>> WORLDGEN_FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, BlockParty.ID);
-    
-    public static final DeferredRegister<SoundEvent> SOUNDS = CustomSounds.SOUNDS;
-    
-    public static final SimpleChannel MESSENGER = CustomMessenger.create();
-    public static final GsonBuilder GSON = new GsonBuilder();
+    public static final String VERSION = "22.3.6";
 
-    public static final DeferredRegister<SceneActions.Builder> SCENE_ACTIONS = SceneActions.SCENE_ACTIONS;
-    public static final DeferredRegister<SceneFilters.Builder> SCENE_FILTERS = SceneFilters.SCENE_FILTERS;
-
-    /* TODO: Refactor creative tabs.
-    public static final CreativeModeTab CreativeModeTab = new CreativeModeTab(BlockParty.ID) {
-        @Override
-        public ItemStack makeIcon() {
-            return new ItemStack(CustomItems.CUPCAKE.get());
+    public BlockParty(IEventBus modBus) {
+        CustomBlocks.register(modBus);
+        CustomBlockEntities.register(modBus);
+        CustomItems.register(modBus);
+        CustomCreativeTabs.register(modBus);
+        CustomSounds.register(modBus);
+        CustomParticles.register(modBus);
+        CustomEntities.register(modBus);
+        SceneActions.register(modBus);
+        SceneFilters.register(modBus);
+        modBus.addListener(CustomMessenger::registerPayloads);
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            BlockPartyClientEvents.register(modBus);
+            BlockPartyRenderers.register(modBus);
         }
-
-        @Override
-        public void fillItemList(NonNullList<ItemStack> items) {
-            super.fillItemList(items);
-            items.sort(CustomItems::compare);
-        }
-    };
-     */
-
-    public BlockParty() {
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-        CustomMessenger.register(bus);
-        CustomBlockEntities.add(BLOCK_ENTITIES, bus);
-        CustomBlocks.add(BLOCKS, bus);
-        CustomEntities.add(ENTITIES, bus);
-        CustomItems.add(ITEMS, bus);
-        CustomParticles.add(PARTICLES, bus);
-        CustomSounds.add(SOUNDS, bus);
-        SceneActions.register(bus);
-        SceneFilters.register(bus);
-        CustomWorldGen.Features.add(WORLDGEN_FEATURES, MinecraftForge.EVENT_BUS, bus);
-        CustomResources.register(MinecraftForge.EVENT_BUS);
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> BlockPartyClientEvents.register(bus));
-        bus.addListener(this::setup);
-    }
-
-    public void setup(FMLCommonSetupEvent e) {
-        //e.enqueueWork(() -> CustomWorldGen.Features.setup());
-    }
-
-    public static ResourceLocation source(String value) {
-        return new ResourceLocation(ID, value);
-    }
-
-    public static ResourceLocation source(String value, Object... args) {
-        return source(String.format(value, args));
+        NeoForge.EVENT_BUS.addListener(CustomResources::registerServerReloadListeners);
+        NeoForge.EVENT_BUS.addListener(CustomMessenger::onPlayerLogin);
+        NeoForge.EVENT_BUS.addListener(BlockPartyDB::onServerStarted);
+        NeoForge.EVENT_BUS.addListener(BlockPartyDB::onServerStopped);
+        NeoForge.EVENT_BUS.addListener(HidingSpots::onBreakStart);
+        NeoForge.EVENT_BUS.addListener(HidingSpots::onBreakEnd);
+        NeoForge.EVENT_BUS.addListener(HidingSpots::onPistonPush);
+        NeoForge.EVENT_BUS.addListener(HidingSpots::onFalling);
+        NeoForge.EVENT_BUS.addListener(SamuraiArmorItem::onXpPickup);
+        NeoForge.EVENT_BUS.addListener(SamuraiArmorItem::onArrowImpact);
+        NeoForge.EVENT_BUS.addListener(SamuraiKatanaItem::onIncomingDamage);
     }
 
     public static String getVersion() {
@@ -104,14 +64,11 @@ public class BlockParty {
     }
 
     public static boolean isChristmas() {
-        return getCalendar().get(2) + 1 == 12 && getCalendar().get(5) >= 24 && getCalendar().get(5) <= 26;
+        Calendar calendar = Calendar.getInstance();
+        return calendar.get(Calendar.MONTH) + 1 == 12 && calendar.get(Calendar.DAY_OF_MONTH) >= 24 && calendar.get(Calendar.DAY_OF_MONTH) <= 26;
     }
 
-    public static boolean isHalloween() {
-        return getCalendar().get(2) + 1 == 10 && getCalendar().get(5) == 31;
-    }
-
-    public static Calendar getCalendar() {
-        return Calendar.getInstance();
+    public static ResourceLocation source(String path) {
+        return ResourceLocation.fromNamespaceAndPath(ID, path);
     }
 }

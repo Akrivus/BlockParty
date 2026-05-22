@@ -10,6 +10,13 @@ Risk scale:
 
 ## Recently Resolved
 
+### Active NeoForge texture metadata and hiding spot dirty churn
+
+- Status: Resolved in NeoForge Slice 6.6.
+- Previous evidence: malformed Moe texture metadata could silently ignore unknown/invalid block-state properties, making an override broader than intended; `HidingSpots` marked SavedData dirty for no-op removes and unchanged puts.
+- Resolution: `MoeTextureReloadListener` now fails those malformed property entries closed, and `HidingSpots` dirties persistence only when entries actually change.
+- Migration note: the old Forge SQL builder and Markov action debt remain listed below as frozen-reference issues, but those classes are not active in the normalized NeoForge source.
+
 ### Recursive combat overrides
 
 - Status: Resolved before NeoForge migration work.

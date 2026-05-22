@@ -3,7 +3,6 @@ package block_party.blocks;
 import block_party.registry.CustomSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
@@ -18,33 +17,30 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ShojiScreenBlock extends DoorBlock {
     public ShojiScreenBlock(Properties properties) {
-        super(properties, BlockSetType.CHERRY);
+        super(BlockSetType.CHERRY, properties);
     }
 
     @Override
-    public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
-        return state.getValue(OPEN) ? Shapes.empty() : this.getShape(state, world, pos, context);
+    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return state.getValue(OPEN) ? Shapes.empty() : this.getShape(state, level, pos, context);
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
-        switch (state.getValue(FACING)) {
-        default:
-        case NORTH:
-            return NORTH_AABB;
-        case EAST:
-            return EAST_AABB;
-        case SOUTH:
-            return SOUTH_AABB;
-        case WEST:
-            return WEST_AABB;
-        }
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return switch (state.getValue(FACING)) {
+            case EAST -> EAST_AABB;
+            case SOUTH -> SOUTH_AABB;
+            case WEST -> WEST_AABB;
+            default -> NORTH_AABB;
+        };
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        level.setBlock(pos, state = state.cycle(OPEN), 10);
-        level.playSound(player, pos, (state.getValue(OPEN) ? CustomSounds.BLOCK_SHOJI_SCREEN_OPEN : CustomSounds.BLOCK_SHOJI_SCREEN_CLOSE).get(), SoundSource.BLOCKS, 1.0F, 1.0F);
-        return InteractionResult.sidedSuccess(level.isClientSide);
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        BlockState next = state.cycle(OPEN);
+        level.setBlock(pos, next, 10);
+        String sound = next.getValue(OPEN) ? "block.shoji_screen.open" : "block.shoji_screen.close";
+        level.playSound(player, pos, CustomSounds.ENTRIES.get(sound).get(), SoundSource.BLOCKS, 1.0F, 1.0F);
+        return InteractionResult.SUCCESS;
     }
 }

@@ -1,19 +1,34 @@
 package block_party.registry;
 
 import block_party.BlockParty;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
-public class CustomParticles {
-    public static final RegistryObject<SimpleParticleType> FIREFLY = BlockParty.PARTICLES.register("firefly", () -> new SimpleParticleType(false));
-    public static final RegistryObject<SimpleParticleType> GINKGO = BlockParty.PARTICLES.register("ginkgo", () -> new SimpleParticleType(false));
-    public static final RegistryObject<SimpleParticleType> SAKURA = BlockParty.PARTICLES.register("sakura", () -> new SimpleParticleType(false));
-    public static final RegistryObject<SimpleParticleType> WHITE_SAKURA = BlockParty.PARTICLES.register("white_sakura", () -> new SimpleParticleType(false));
+public final class CustomParticles {
+    public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(BuiltInRegistries.PARTICLE_TYPE, BlockParty.ID);
+    public static final Map<String, DeferredHolder<ParticleType<?>, SimpleParticleType>> ENTRIES = new LinkedHashMap<>();
 
-    public static void add(DeferredRegister<ParticleType<?>> registry, IEventBus bus) {
-        registry.register(bus);
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> FIREFLY = register("firefly");
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> GINKGO = register("ginkgo");
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> SAKURA = register("sakura");
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> WHITE_SAKURA = register("white_sakura");
+
+    private CustomParticles() {
+    }
+
+    private static DeferredHolder<ParticleType<?>, SimpleParticleType> register(String id) {
+        DeferredHolder<ParticleType<?>, SimpleParticleType> particle = PARTICLES.register(id, () -> new SimpleParticleType(false));
+        ENTRIES.put(id, particle);
+        return particle;
+    }
+
+    public static void register(IEventBus modBus) {
+        PARTICLES.register(modBus);
     }
 }

@@ -1,18 +1,10 @@
 package block_party.items;
 
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.item.equipment.ArmorType;
 
-@Mod.EventBusSubscriber
 public class MaskedSamuraiItem extends SamuraiArmorItem {
-    public MaskedSamuraiItem(EquipmentSlot slot, Type type) {
-        super("samurai_mask", slot, type);
-    }
-
-    @Override
-    public Rarity getRarity(ItemStack stack) {
-        return Rarity.EPIC;
+    public MaskedSamuraiItem(Properties properties) {
+        super(properties, ArmorType.HELMET, Rarity.EPIC);
     }
 }

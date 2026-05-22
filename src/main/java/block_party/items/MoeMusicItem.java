@@ -1,16 +1,19 @@
 package block_party.items;
 
 import block_party.BlockParty;
-import block_party.utils.sorters.ISortableItem;
-import net.minecraft.sounds.SoundEvent;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.item.JukeboxSong;
+import net.minecraft.world.item.Rarity;
 
-import java.util.function.Supplier;
+public class MoeMusicItem extends Item implements SortableItem {
+    public MoeMusicItem(Properties properties, String songPath) {
+        super(properties.stacksTo(1).rarity(Rarity.RARE).jukeboxPlayable(song(songPath)));
+    }
 
-public class MoeMusicItem extends RecordItem implements ISortableItem {
-    public MoeMusicItem(Supplier<SoundEvent> sound, int duration) {
-        super(0, sound, new Item.Properties().stacksTo(1), duration);
+    private static ResourceKey<JukeboxSong> song(String path) {
+        return ResourceKey.create(Registries.JUKEBOX_SONG, BlockParty.source(path));
     }
 
     @Override

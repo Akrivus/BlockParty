@@ -175,6 +175,7 @@ Owner UUID now drives server-side owned row list/query/remove/call checks. It do
 - `loadOwnedNpc(UUID player, long id)`: returns an NPC row only if it exists, is readable, is not dead, and belongs to the player.
 - `removeOwnedNpc(UUID player, long id)`: de-lists an NPC ID from `NPCsByPlayer` only when the same ownership checks pass.
 - `callOwnedNpc(ServerLevel level, UUID player, BlockPos callerPos, long id)`: calls a loaded, visible, owned Moe shell near the requester and sets `following=true`.
+- `callOwnedNpc(ServerLevel level, UUID player, Vec3 callerPos, float callerYRot, long id)`: uses the Forge Cell Phone arrival offset, placing the Moe at `x - sin(yRot) * 1.44`, `z + cos(yRot) * 1.44`.
 - `findNpcSafe(long id)`: internal safe row lookup that catches missing/corrupt row failures.
 
 Access rejection rules:
@@ -200,7 +201,7 @@ Current success path:
 5. Search the row dimension for a live `Moe` entity with the requested `DatabaseID`.
 6. Reject the call if no loaded live Moe shell is present.
 7. Reject cross-dimension live entities for now, because the spike has not ported Forge `ITeleporter`/dimension-change behavior.
-8. Move the Moe to the block east of the requester position.
+8. Move the Moe to the Forge yaw-based arrival offset near the requester.
 9. Set `Moe.FOLLOWING = true`.
 10. Update the SQLite row position/profile fields from the moved Moe shell.
 11. Release the forced chunk ticket in all success/failure outcomes after it is queued.
@@ -218,15 +219,29 @@ Active foundations:
 - Forge-style path malus setup for doors and trapdoors
 - home helpers: `getDimBlockPos()`, `setHomeToCurrentPosition()`, persisted `HasHome`, and persisted `Home`
 - safe combat delegation through the vanilla mob `doHurtTarget(ServerLevel, Entity)` super path, preserving the old non-recursive Forge fix
+- successful delegated attacks play the Forge Moe attack sound
+- hurt, death, step, speak, and cat-feature ambient sounds resolve through `MoeSounds` and the active `moes/sounds` override reload data
+- source-block fire immunity and fire path malus are derived from the persisted actual block state
+- source-block buffer still contributes to Moe voice pitch alongside persisted Moe scale
 - 36-slot `SimpleContainer` inventory stored under the legacy `Inventory` NBT key
 - inventory changes recalculate `Slouch` with the Forge Layer6 slot weight
+- inventory contents drop through the vanilla death/drop path
+- server-side corporeal death runs vanilla death handling and then hides the Moe as its source block with `HideUntil.EXPOSED`
+- server-side ethereal death remains ordinary death and does not create a hiding spot
 - Cell Phone call service continues to set `following=true` after moving a loaded visible owned Moe
+- owner main-hand right-click routes to `RIGHT_CLICK`/`SHIFT_RIGHT_CLICK`; offhand passes without a scene trigger
+- owner left-click/attack interaction routes to `LEFT_CLICK`/`SHIFT_LEFT_CLICK` and does not damage the Moe
+- non-owner damage is scaled by source-block buffer and triggers `HURT` only after successful damage
+- successful Moe attacks trigger `ATTACK` after vanilla combat delegation
+- server AI hooks route random-tick and looked-at checks to `RANDOM_TICK` and `STARE`
+- winged source blocks switch to flying movement/navigation, while non-winged source blocks use ground navigation with door opening enabled
+- Cell Phone same-dimension calls use the Forge yaw-based arrival offset before setting `following=true`
 
 Semantic drift / API note: Minecraft 1.21.4 has a final `LivingEntity#getScale()`. The spike still persists the Forge `Scale` field in NBT and SQLite, but code reads/writes it through `getMoeScale()` / `setMoeScale()`.
 
 Still intentionally absent:
 
-- custom goals, navigation behavior, or visible follow AI
+- custom goals, visible follow AI, or arrival effects
 - owner left-click/right-click scene interaction around combat
 - client inventory menus/screens
 - chore, prank, sleep, hunger, stress, and action update implementations
@@ -402,7 +417,7 @@ Vanilla entity data synchronization may cover fields stored in `SynchedEntityDat
 
 Currently unimplemented:
 
-- Forge NPC schema columns for shrine/shimenawa references, inventory, and full health behavior
+- Forge NPC schema columns for shrine/shimenawa references, SQLite inventory storage, and full health behavior
 - migration/backfill for existing spike `NPCs` tables if later columns change beyond the Phase 2.1 additive migration path
 - alias-driven visible block state calculation is active for bundled `moes/aliases`; future real custom block shapes may need revisiting when their full block classes return
 - complex block entity full metadata/component restore remains incomplete; persistent data capture and restore through spawn/hide/reveal is active
@@ -413,6 +428,7 @@ Currently unimplemented:
 - full Forge Yearbook presentation data, including dead/estranged relationship-specific rendering and complete stat labels
 - old Forge page-removal item creation behavior; current Yearbook removal is de-listing only through the active NPC remove request
 - audio content cleanup for pre-existing `silence`, generic `moe.step`, and `sounds/moe/yes6 .ogg` warnings
+- manual audio playback validation for the now-wired Moe sound hooks
 - full unloaded-entity recovery after forced chunk loading
 - cross-dimension Cell Phone teleport
 - remaining client screen integration and screenshot-verified renderer/UI polish
@@ -420,6 +436,6 @@ Currently unimplemented:
 - unported scene filters/actions beyond Slice 5.1's active `always`, `never`, `has_cookie`, `counter`, `send_dialogue`, `send_response`, `hide`, `cookie`, `counter`, and `end`
 - full decorative block interaction/render parity beyond Slice 5.3's active log/leaves/blossom/sapling/slab/door/vine property foundations
 - full Cell Phone teleport behavior, including cross-dimension teleport, arrival effects, and follow AI
-- sounds, chores, pranks, and richer companion behavior
+- chores, pranks, adventure behavior, and richer companion behavior beyond confirmed Forge 1.19.4 shipped behavior
 
-The current tested contract is intentionally small: valid tagged blocks create an SQLite `NPCs` row, add the row ID to the owner list, and produce a Moe shell with that row ID; invalid blocks no-op; owner lists expose only owned, readable, non-dead rows; non-owners cannot access, de-list, call, or update dialogue rows; a loaded visible owned Moe can be called near the requester and gets `following=true`; hidden, unloaded, missing, corrupt, and dead rows fail safely; typed payload codecs cover list/detail/remove/call/controller-open/dialogue/shrine-list state and route list/detail/remove/call/dialogue response/dialogue close/shrine list through `BlockPartyDB`; a Moe can hide into a world block plus `MoeInHiding`; hide updates the same row and records the hidden position in `HidingSpots`; manual, timed, break-start, break-end, piston, and falling-block reveal restore a Moe shell from the same row identity; missing hidden spots, missing rows, corrupt rows, and dead rows fail safely; data block entities preserve owner/row NBT, claim/update/delete SQLite rows, and expose Forge owner-or-dimension shrine list rows server-side; Moe Layer2-Layer5 fields round-trip through NBT and explicit SQLite row writes without automatic setter-triggered DB writes; resource-loaded names and populated Forge block trait tags can assign a random non-default name, weighted/default blood type, gender/profile flags, and safe trait fallback values; Moe attributes, non-recursive combat delegation, home helpers, inventory NBT, inventory slouch recalculation, block alias visible state, volume scale, Layer7 timer NBT, minimal dialogue state, data-driven right-click/left-click scene execution, scene cookie/counter mutation, migrated recipe/loot/worldgen resource availability, representative decorative block properties, wisteria vine survival, and Cell Phone following state are GameTested.
+The current tested contract is intentionally small: valid tagged blocks create an SQLite `NPCs` row, add the row ID to the owner list, and produce a Moe shell with that row ID; invalid blocks no-op; owner lists expose only owned, readable, non-dead rows; non-owners cannot access, de-list, call, or update dialogue rows; a loaded visible owned Moe can be called near the requester at the Forge yaw-based Cell Phone offset and gets `following=true`; hidden, unloaded, missing, corrupt, and dead rows fail safely; typed payload codecs cover list/detail/remove/call/controller-open/dialogue/shrine-list state and route list/detail/remove/call/dialogue response/dialogue close/shrine list through `BlockPartyDB`; a Moe can hide into a world block plus `MoeInHiding`; hide updates the same row and records the hidden position in `HidingSpots`; manual, timed, break-start, break-end, piston, and falling-block reveal restore a Moe shell from the same row identity; missing hidden spots, missing rows, corrupt rows, and dead rows fail safely; data block entities preserve owner/row NBT, claim/update/delete SQLite rows, and expose Forge owner-or-dimension shrine list rows server-side; Moe Layer2-Layer5 fields round-trip through NBT and explicit SQLite row writes without automatic setter-triggered DB writes; resource-loaded names and populated Forge block trait tags can assign a random non-default name, weighted/default blood type, gender/profile flags, and safe trait fallback values; Moe attributes, winged/grounded navigation category, non-recursive combat delegation, home helpers, inventory NBT, inventory slouch recalculation, block alias visible state, volume scale, Layer7 timer NBT, minimal dialogue state, owner-aware right/left scene interaction routing, hurt/attack/random/stare trigger routing, data-driven right-click/left-click scene execution, scene cookie/counter mutation, migrated recipe/loot/worldgen resource availability, representative decorative block properties, wisteria vine survival, and Cell Phone following state are GameTested.

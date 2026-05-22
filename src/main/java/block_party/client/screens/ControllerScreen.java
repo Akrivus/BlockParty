@@ -1,40 +1,49 @@
 package block_party.client.screens;
 
-import block_party.db.records.NPC;
-import block_party.messages.CNPCRequest;
-import block_party.registry.CustomMessenger;
-
+import block_party.network.payload.NpcCallPayload;
+import block_party.network.payload.NpcDetailPayload;
+import block_party.network.payload.NpcListPayload;
+import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
-public abstract class ControllerScreen<M extends NPC> extends AbstractScreen {
-    protected List<Long> npcs;
-    protected M npc;
+public abstract class ControllerScreen extends Screen {
+    protected final List<Long> databaseIds;
     protected int index;
-    protected int count;
 
-    protected ControllerScreen(List<Long> npcs, long id, int x, int y) {
-        super(x, y);
-        this.npcs = npcs;
-        this.index = this.npcs.indexOf(id);
-        this.count = this.npcs.size();
+    protected ControllerScreen(List<Long> databaseIds, long selectedDatabaseId) {
+        super(Component.empty());
+        this.databaseIds = new ArrayList<>(databaseIds);
+        this.index = this.databaseIds.indexOf(selectedDatabaseId);
         if (this.index < 0) {
             this.index = 0;
         }
     }
 
-    public void getNPC(int index) {
-        this.getNPC(this.npcs.get(index));
+    public void handleNpcList(NpcListPayload payload) {
     }
 
-    public void getNPC(long id) {
-        CustomMessenger.send(new CNPCRequest(id));
+    public void handleNpcDetail(NpcDetailPayload payload) {
     }
 
-    public void setNPC(M npc) {
-        this.npc = npc;
-        this.index = this.npcs.indexOf(this.npc.getID());
-        this.setNPC();
+    public void handleNpcCall(NpcCallPayload payload) {
     }
 
-    public abstract void setNPC();
+    protected Long selectedId() {
+        return this.databaseIds.isEmpty() ? null : this.databaseIds.get(this.index);
+    }
+
+    protected int left(int width) {
+        return (this.width - width) / 2;
+    }
+
+    protected int absoluteCenter(int margin) {
+        return this.width / 2 - margin;
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
 }

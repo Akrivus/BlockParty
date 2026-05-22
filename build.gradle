@@ -26,8 +26,8 @@ dependencies {
 
 sourceSets {
     main {
-        // NeoForge 1.21.4 build spike: compile only the minimal loader/test stub.
-        java.srcDirs = ['src/neoforgeSpike/java']
+        // NeoForge 1.21.4 port source. Frozen Forge 1.19.4 Java is retained under src/forge1194/java.
+        java.srcDirs = ['src/main/java']
         resources.srcDirs = ['src/neoforgeSpike/resources', layout.buildDirectory.dir('generated/neoforgeSpikeResources')]
     }
     test {
@@ -177,6 +177,21 @@ tasks.register('syncNeoForgeSpikeResources', Sync) {
                         return update(node)
                     }
                 }
+            }
+        }
+        def legacyItemModelDir = new File(generated, 'assets/block_party/models/item')
+        def itemDefinitionDir = new File(generated, 'assets/block_party/items')
+        if (legacyItemModelDir.exists()) {
+            itemDefinitionDir.mkdirs()
+            legacyItemModelDir.eachFileMatch(~/.*\.json/) { file ->
+                def name = file.name.substring(0, file.name.length() - '.json'.length())
+                def definition = [
+                        model: [
+                                type : 'minecraft:model',
+                                model: "block_party:item/${name}"
+                        ]
+                ]
+                new File(itemDefinitionDir, file.name).text = jsonOutput.prettyPrint(jsonOutput.toJson(definition)) + System.lineSeparator()
             }
         }
     }

@@ -7,7 +7,7 @@ The recommended rhythm for every slice is:
 1. Add or port the narrow tests first when practical.
 2. Reintroduce the smallest production surface needed for that behavior in `src/neoforgeSpike`.
 3. Keep newly active code server-only unless the slice explicitly owns client behavior.
-4. Update `docs/NEOFORGE_SPIKE_NOTES.md` and any flow docs touched by the slice.
+4. Update `docs/NEOFORGE_PORT_NOTES.md` and any flow docs touched by the slice.
 5. Keep `compileJava` and `runGameTestServer` passing.
 
 ## Phase 1: Server Gameplay Parity
@@ -37,12 +37,12 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/items/CustomSpawnEggItem.java`
-- `src/neoforgeSpike/java/block_party/entities/Moe.java`
-- `src/neoforgeSpike/java/block_party/db/BlockPartyDB.java`
-- `src/neoforgeSpike/java/block_party/db/records/NPC.java`
-- `src/neoforgeSpike/java/block_party/registry/CustomTags.java`
-- `src/neoforgeSpike/java/block_party/gametest/MoeLifecycleGameTests.java`
+- `src/main/java/block_party/items/CustomSpawnEggItem.java`
+- `src/main/java/block_party/entities/Moe.java`
+- `src/main/java/block_party/db/BlockPartyDB.java`
+- `src/main/java/block_party/db/records/NPC.java`
+- `src/main/java/block_party/registry/CustomTags.java`
+- `src/main/java/block_party/gametest/MoeLifecycleGameTests.java`
 
 Tests required before/after:
 
@@ -85,12 +85,12 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/entities/Moe.java`
-- `src/neoforgeSpike/java/block_party/entities/MoeInHiding.java`
-- `src/neoforgeSpike/java/block_party/entities/data/HidingSpots.java`
-- `src/neoforgeSpike/java/block_party/entities/goals/HideUntil.java`
-- `src/neoforgeSpike/java/block_party/db/records/NPC.java`
-- `src/neoforgeSpike/java/block_party/gametest/MoeLifecycleGameTests.java`
+- `src/main/java/block_party/entities/Moe.java`
+- `src/main/java/block_party/entities/MoeInHiding.java`
+- `src/main/java/block_party/entities/data/HidingSpots.java`
+- `src/main/java/block_party/entities/goals/HideUntil.java`
+- `src/main/java/block_party/db/records/NPC.java`
+- `src/main/java/block_party/gametest/MoeLifecycleGameTests.java`
 
 Tests required before/after:
 
@@ -133,9 +133,9 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/db/BlockPartyDB.java`
-- `src/neoforgeSpike/java/block_party/entities/Moe.java`
-- `src/neoforgeSpike/java/block_party/gametest/CellPhoneServiceGameTests.java`
+- `src/main/java/block_party/db/BlockPartyDB.java`
+- `src/main/java/block_party/entities/Moe.java`
+- `src/main/java/block_party/gametest/CellPhoneServiceGameTests.java`
 
 Tests required before/after:
 
@@ -185,10 +185,10 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/registry/CustomBlocks.java`
-- `src/neoforgeSpike/java/block_party/registry/CustomItems.java`
-- `src/neoforgeSpike/java/block_party/db/BlockPartyDB.java`
-- `src/neoforgeSpike/java/block_party/db/records/NPC.java`
+- `src/main/java/block_party/registry/CustomBlocks.java`
+- `src/main/java/block_party/registry/CustomItems.java`
+- `src/main/java/block_party/db/BlockPartyDB.java`
+- `src/main/java/block_party/db/records/NPC.java`
 - new spike block entity registry and block entity shells.
 
 Tests required before/after:
@@ -241,10 +241,10 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/entities/Moe.java`
-- `src/neoforgeSpike/java/block_party/entities/MoeInHiding.java`
-- `src/neoforgeSpike/java/block_party/db/records/NPC.java`
-- `src/neoforgeSpike/java/block_party/gametest/EntityDataGameTests.java`
+- `src/main/java/block_party/entities/Moe.java`
+- `src/main/java/block_party/entities/MoeInHiding.java`
+- `src/main/java/block_party/db/records/NPC.java`
+- `src/main/java/block_party/gametest/EntityDataGameTests.java`
 
 Tests required before/after:
 
@@ -287,12 +287,12 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/entities/Moe.java`
-- `src/neoforgeSpike/java/block_party/db/records/NPC.java`
-- `src/neoforgeSpike/java/block_party/registry/CustomResources.java`
-- `src/neoforgeSpike/java/block_party/registry/CustomTags.java`
-- `src/neoforgeSpike/java/block_party/registry/resources/CountingJsonReloadListener.java`
-- `src/neoforgeSpike/java/block_party/registry/resources/MoeNamesReloadListener.java`
+- `src/main/java/block_party/entities/Moe.java`
+- `src/main/java/block_party/db/records/NPC.java`
+- `src/main/java/block_party/registry/CustomResources.java`
+- `src/main/java/block_party/registry/CustomTags.java`
+- `src/main/java/block_party/registry/resources/CountingJsonReloadListener.java`
+- `src/main/java/block_party/registry/resources/MoeNamesReloadListener.java`
 
 Tests required before/after:
 
@@ -336,10 +336,10 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/entities/Moe.java`
-- `src/neoforgeSpike/java/block_party/registry/CustomEntities.java`
-- `src/neoforgeSpike/java/block_party/gametest/EntityDataGameTests.java`
-- `src/neoforgeSpike/java/block_party/gametest/CellPhoneServiceGameTests.java`
+- `src/main/java/block_party/entities/Moe.java`
+- `src/main/java/block_party/registry/CustomEntities.java`
+- `src/main/java/block_party/gametest/EntityDataGameTests.java`
+- `src/main/java/block_party/gametest/CellPhoneServiceGameTests.java`
 
 Tests required before/after:
 
@@ -386,11 +386,11 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/entities/Moe.java`
-- `src/neoforgeSpike/java/block_party/registry/CustomResources.java`
-- `src/neoforgeSpike/java/block_party/registry/resources/BlockAliasesReloadListener.java`
-- `src/neoforgeSpike/java/block_party/gametest/EntityDataGameTests.java`
-- `src/neoforgeSpike/java/block_party/gametest/ResourceGameTests.java`
+- `src/main/java/block_party/entities/Moe.java`
+- `src/main/java/block_party/registry/CustomResources.java`
+- `src/main/java/block_party/registry/resources/BlockAliasesReloadListener.java`
+- `src/main/java/block_party/gametest/EntityDataGameTests.java`
+- `src/main/java/block_party/gametest/ResourceGameTests.java`
 
 Tests required before/after:
 
@@ -427,11 +427,11 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/network/CustomMessenger.java`
-- `src/neoforgeSpike/java/block_party/network/payload/**`
-- `src/neoforgeSpike/java/block_party/db/BlockPartyDB.java`
-- `src/neoforgeSpike/java/block_party/gametest/NetworkPayloadGameTests.java`
-- `src/neoforgeSpike/java/block_party/gametest/CellPhoneServiceGameTests.java`
+- `src/main/java/block_party/network/CustomMessenger.java`
+- `src/main/java/block_party/network/payload/**`
+- `src/main/java/block_party/db/BlockPartyDB.java`
+- `src/main/java/block_party/gametest/NetworkPayloadGameTests.java`
+- `src/main/java/block_party/gametest/CellPhoneServiceGameTests.java`
 
 Tests required before/after:
 
@@ -481,9 +481,9 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/network/CustomMessenger.java`
-- new dialogue payload files under `src/neoforgeSpike/java/block_party/network/payload`
-- future scene/dialogue spike files under `src/neoforgeSpike/java/block_party/scene`
+- `src/main/java/block_party/network/CustomMessenger.java`
+- new dialogue payload files under `src/main/java/block_party/network/payload`
+- future scene/dialogue spike files under `src/main/java/block_party/scene`
 
 Tests required before/after:
 
@@ -527,12 +527,12 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/network/CustomMessenger.java`
-- `src/neoforgeSpike/java/block_party/db/BlockPartyDB.java`
-- `src/neoforgeSpike/java/block_party/network/payload/ShrineListRequestPayload.java`
-- `src/neoforgeSpike/java/block_party/network/payload/ShrineListPayload.java`
-- `src/neoforgeSpike/java/block_party/gametest/NetworkPayloadGameTests.java`
-- `src/neoforgeSpike/java/block_party/gametest/BlockEntityGameTests.java`
+- `src/main/java/block_party/network/CustomMessenger.java`
+- `src/main/java/block_party/db/BlockPartyDB.java`
+- `src/main/java/block_party/network/payload/ShrineListRequestPayload.java`
+- `src/main/java/block_party/network/payload/ShrineListPayload.java`
+- `src/main/java/block_party/gametest/NetworkPayloadGameTests.java`
+- `src/main/java/block_party/gametest/BlockEntityGameTests.java`
 
 Tests required before/after:
 
@@ -588,16 +588,16 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/entities/Moe.java`
-- `src/neoforgeSpike/java/block_party/entities/MoeInHiding.java`
-- `src/neoforgeSpike/java/block_party/registry/CustomEntities.java`
-- `src/neoforgeSpike/java/block_party/client/BlockPartyRenderers.java`
-- `src/neoforgeSpike/java/block_party/client/model/MoeModel.java`
-- `src/neoforgeSpike/java/block_party/client/renderers/MoeRenderer.java`
-- `src/neoforgeSpike/java/block_party/client/renderers/MoeInHidingRenderer.java`
-- `src/neoforgeSpike/java/block_party/client/renderers/layers/**`
-- `src/neoforgeSpike/java/block_party/client/renderers/state/MoeRenderState.java`
-- `src/neoforgeSpike/java/block_party/registry/resources/MoeTextures.java`
+- `src/main/java/block_party/entities/Moe.java`
+- `src/main/java/block_party/entities/MoeInHiding.java`
+- `src/main/java/block_party/registry/CustomEntities.java`
+- `src/main/java/block_party/client/BlockPartyRenderers.java`
+- `src/main/java/block_party/client/model/MoeModel.java`
+- `src/main/java/block_party/client/renderers/MoeRenderer.java`
+- `src/main/java/block_party/client/renderers/MoeInHidingRenderer.java`
+- `src/main/java/block_party/client/renderers/layers/**`
+- `src/main/java/block_party/client/renderers/state/MoeRenderState.java`
+- `src/main/java/block_party/registry/resources/MoeTextures.java`
 
 Tests required before/after:
 
@@ -637,9 +637,9 @@ Forge 1.19.4 source files involved:
 NeoForge spike files involved:
 
 - dialogue payloads from Phase 3.2
-- `src/neoforgeSpike/java/block_party/client/screens/DialogueScreen.java`
-- `src/neoforgeSpike/java/block_party/client/ClientPayloadHandler.java`
-- `src/neoforgeSpike/java/block_party/network/CustomMessenger.java`
+- `src/main/java/block_party/client/screens/DialogueScreen.java`
+- `src/main/java/block_party/client/ClientPayloadHandler.java`
+- `src/main/java/block_party/network/CustomMessenger.java`
 - `build.gradle`
 
 Tests required before/after:
@@ -705,17 +705,17 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/network/CustomMessenger.java`
-- `src/neoforgeSpike/java/block_party/network/payload/**`
-- `src/neoforgeSpike/java/block_party/db/BlockPartyDB.java`
-- `src/neoforgeSpike/java/block_party/items/YearbookItem.java`
-- `src/neoforgeSpike/java/block_party/items/CellPhoneItem.java`
-- `src/neoforgeSpike/java/block_party/items/YearbookPageItem.java`
-- `src/neoforgeSpike/java/block_party/client/ClientPayloadHandler.java`
-- `src/neoforgeSpike/java/block_party/client/screens/ControllerScreen.java`
-- `src/neoforgeSpike/java/block_party/client/screens/YearbookScreen.java`
-- `src/neoforgeSpike/java/block_party/client/screens/CellPhoneScreen.java`
-- `src/neoforgeSpike/java/block_party/registry/CustomItems.java`
+- `src/main/java/block_party/network/CustomMessenger.java`
+- `src/main/java/block_party/network/payload/**`
+- `src/main/java/block_party/db/BlockPartyDB.java`
+- `src/main/java/block_party/items/YearbookItem.java`
+- `src/main/java/block_party/items/CellPhoneItem.java`
+- `src/main/java/block_party/items/YearbookPageItem.java`
+- `src/main/java/block_party/client/ClientPayloadHandler.java`
+- `src/main/java/block_party/client/screens/ControllerScreen.java`
+- `src/main/java/block_party/client/screens/YearbookScreen.java`
+- `src/main/java/block_party/client/screens/CellPhoneScreen.java`
+- `src/main/java/block_party/registry/CustomItems.java`
 - `build.gradle`
 
 Tests required before/after:
@@ -767,15 +767,15 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/registry/CustomParticles.java`
-- `src/neoforgeSpike/java/block_party/registry/CustomSounds.java`
-- `src/neoforgeSpike/java/block_party/registry/CustomResources.java`
-- `src/neoforgeSpike/java/block_party/client/BlockPartyClientEvents.java`
-- `src/neoforgeSpike/java/block_party/client/particle/**`
-- `src/neoforgeSpike/java/block_party/registry/resources/MoeTextureReloadListener.java`
-- `src/neoforgeSpike/java/block_party/registry/resources/MoeSoundsReloadListener.java`
-- `src/neoforgeSpike/java/block_party/registry/resources/MoeTextures.java`
-- `src/neoforgeSpike/java/block_party/gametest/ResourceGameTests.java`
+- `src/main/java/block_party/registry/CustomParticles.java`
+- `src/main/java/block_party/registry/CustomSounds.java`
+- `src/main/java/block_party/registry/CustomResources.java`
+- `src/main/java/block_party/client/BlockPartyClientEvents.java`
+- `src/main/java/block_party/client/particle/**`
+- `src/main/java/block_party/registry/resources/MoeTextureReloadListener.java`
+- `src/main/java/block_party/registry/resources/MoeSoundsReloadListener.java`
+- `src/main/java/block_party/registry/resources/MoeTextures.java`
+- `src/main/java/block_party/gametest/ResourceGameTests.java`
 - `build.gradle`
 
 Tests required before/after:
@@ -823,17 +823,17 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/registry/SceneActions.java`
-- `src/neoforgeSpike/java/block_party/registry/SceneFilters.java`
-- `src/neoforgeSpike/java/block_party/registry/CustomResources.java`
-- `src/neoforgeSpike/java/block_party/registry/resources/ScenesReloadListener.java`
-- `src/neoforgeSpike/java/block_party/scene/Scene.java`
-- `src/neoforgeSpike/java/block_party/scene/SceneManager.java`
-- `src/neoforgeSpike/java/block_party/scene/SceneTrigger.java`
-- `src/neoforgeSpike/java/block_party/scene/actions/**`
-- `src/neoforgeSpike/java/block_party/scene/SceneVariables.java`
-- `src/neoforgeSpike/java/block_party/scene/data/**`
-- `src/neoforgeSpike/java/block_party/registry/resources/CountingJsonReloadListener.java`
+- `src/main/java/block_party/registry/SceneActions.java`
+- `src/main/java/block_party/registry/SceneFilters.java`
+- `src/main/java/block_party/registry/CustomResources.java`
+- `src/main/java/block_party/registry/resources/ScenesReloadListener.java`
+- `src/main/java/block_party/scene/Scene.java`
+- `src/main/java/block_party/scene/SceneManager.java`
+- `src/main/java/block_party/scene/SceneTrigger.java`
+- `src/main/java/block_party/scene/actions/**`
+- `src/main/java/block_party/scene/SceneVariables.java`
+- `src/main/java/block_party/scene/data/**`
+- `src/main/java/block_party/registry/resources/CountingJsonReloadListener.java`
 
 Tests required before/after:
 
@@ -878,14 +878,14 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/registry/CustomResources.java`
-- `src/neoforgeSpike/java/block_party/registry/resources/CountingJsonReloadListener.java`
-- `src/neoforgeSpike/java/block_party/registry/resources/BlockAliasesReloadListener.java`
-- `src/neoforgeSpike/java/block_party/registry/resources/MoeNamesReloadListener.java`
-- `src/neoforgeSpike/java/block_party/registry/resources/MoeSoundsReloadListener.java`
-- `src/neoforgeSpike/java/block_party/registry/resources/MoeTextureReloadListener.java`
-- `src/neoforgeSpike/java/block_party/registry/resources/MoeTextures.java`
-- `src/neoforgeSpike/java/block_party/entities/Moe.java`
+- `src/main/java/block_party/registry/CustomResources.java`
+- `src/main/java/block_party/registry/resources/CountingJsonReloadListener.java`
+- `src/main/java/block_party/registry/resources/BlockAliasesReloadListener.java`
+- `src/main/java/block_party/registry/resources/MoeNamesReloadListener.java`
+- `src/main/java/block_party/registry/resources/MoeSoundsReloadListener.java`
+- `src/main/java/block_party/registry/resources/MoeTextureReloadListener.java`
+- `src/main/java/block_party/registry/resources/MoeTextures.java`
+- `src/main/java/block_party/entities/Moe.java`
 - `build.gradle` `syncNeoForgeSpikeResources`
 
 Tests required before/after:
@@ -931,13 +931,13 @@ Forge 1.19.4 source files involved:
 
 NeoForge spike files involved:
 
-- `src/neoforgeSpike/java/block_party/registry/CustomBlocks.java`
-- `src/neoforgeSpike/java/block_party/registry/CustomItems.java`
-- `src/neoforgeSpike/java/block_party/registry/CustomWorldGen.java`
-- `src/neoforgeSpike/java/block_party/blocks/SakuraBlossomsBlock.java`
-- `src/neoforgeSpike/java/block_party/blocks/DataSaplingBlock.java`
-- `src/neoforgeSpike/java/block_party/blocks/WisteriaVineBodyBlock.java`
-- `src/neoforgeSpike/java/block_party/blocks/WisteriaVineTipBlock.java`
+- `src/main/java/block_party/registry/CustomBlocks.java`
+- `src/main/java/block_party/registry/CustomItems.java`
+- `src/main/java/block_party/registry/CustomWorldGen.java`
+- `src/main/java/block_party/blocks/SakuraBlossomsBlock.java`
+- `src/main/java/block_party/blocks/DataSaplingBlock.java`
+- `src/main/java/block_party/blocks/WisteriaVineBodyBlock.java`
+- `src/main/java/block_party/blocks/WisteriaVineTipBlock.java`
 - `build.gradle` `syncNeoForgeSpikeResources`
 - generated spike resources under `build/generated/neoforgeSpikeResources`
 
@@ -984,6 +984,23 @@ Still out of scope:
 - New items or new gameplay behavior.
 - Manual client visual validation, which should happen before or during Phase 5.4 PR review checklist work.
 
+### Slice 5.3.6: Client Asset And Render-Type Readiness
+
+Goal:
+Fix the client rendering blockers exposed by the creative tab before the Phase 5.4 normalization pass.
+
+Implemented:
+
+- Generated Minecraft 1.21.4 item definition files under `assets/block_party/items/*.json` from the copied legacy `assets/block_party/models/item/*.json` files. This keeps the frozen legacy item models/textures as source of truth while making item icons resolve in the NeoForge target.
+- Restored client render-layer registration for transparent/cutout block IDs through the NeoForge client setup event.
+- Mirrored the frozen Forge cutout/cutout-mipped intent for paper lanterns, hanging scrolls, garden lanterns, leaves, saplings, blossoms, shimenawa, shoji panels/screens, shrine tablets, and wisteria vines.
+- Added GameTest coverage that representative generated item definitions, item models, item textures, blockstates, block models, and block textures are packaged on the mod classpath.
+
+Still out of scope:
+
+- The reported UI blur issue. Text and layout are usable, so this remains a non-blocking client polish/manual-review note.
+- Full screenshot-based client validation. Before merging the normalized PR, manually confirm the creative tab icons render, transparent blocks no longer occlude adjacent blocks, and the UI blur is acceptable or filed separately.
+
 ### Phase 5.4: Spike Normalization And PR Shaping
 
 Goal:
@@ -1013,90 +1030,161 @@ Rules:
 Deliverables:
 - Normalized source tree.
 - Removed or documented spike scaffolding.
-- Updated docs/NEOFORGE_SPIKE_NOTES.md renamed or replaced with docs/NEOFORGE_PORT_NOTES.md.
+- Updated docs/NEOFORGE_PORT_NOTES.md renamed or replaced with docs/NEOFORGE_PORT_NOTES.md.
 - docs/SEMANTIC_DRIFT_NOTES.md.
 - docs/PR_REVIEW_GUIDE.md.
 - All tests passing.
 - Manual golden-world checklist ready for review.
 
-## Phase 6: Post-Port Unfinished Systems
+## Phase 6: Gameplay Parity Closeout
 
-### Slice 6.1: Chores, Pranks, Needs, And Adventure Behavior Baseline
+Phase 6 turns the normalized port into a mergeable gameplay PR. It is still a parity phase: restore behavior that exists in the frozen Forge 1.19.4 branch, or document why it remains deferred. Chores, pranks, adventure loops, and other README-level ideas are treated as future feature work unless the old branch contains concrete shipped behavior.
 
-Player-facing behavior restored or clarified:
+### Slice 6.1: Moe Sound And Block-Physical Hooks
 
-- Distinguish implemented Forge behavior from README intent for chores, pranks, hunger/stress/sleep/action updates, gifts, adventuring, and follow behavior.
-- Either preserve existing absence or implement new behavior deliberately after the port is stable.
+Player-facing behavior restored:
+
+- Moe hurt, attack, death, step, speak, and cat ambient sounds resolve through the legacy `moes/sounds` resource overrides.
+- Moe attacks play the attack sound after successful delegated combat.
+- Moe step movement plays the configured step sound.
+- Moe block buffer, voice pitch, and source-block fire immunity remain derived from the persisted source block state.
 
 Forge 1.19.4 source files involved:
 
-- `src/main/java/block_party/entities/abstraction/Layer3.java`
-- `src/main/java/block_party/entities/abstraction/Layer4.java`
-- `src/main/java/block_party/entities/abstraction/Layer6.java`
-- `src/main/java/block_party/entities/abstraction/Layer7.java`
-- `src/main/java/block_party/items/BentoBoxItem.java`
-- `src/main/java/block_party/items/CupcakeItem.java`
-- `src/main/java/block_party/items/OnigiriItem.java`
-- `src/main/java/block_party/items/LetterItem.java`
-- `src/main/java/block_party/items/MoeMusicItem.java`
+- `src/forge1194/java/block_party/entities/Moe.java`
+- `src/forge1194/java/block_party/entities/abstraction/Layer1.java`
+- `src/forge1194/java/block_party/entities/abstraction/Layer2.java`
+- `src/forge1194/java/block_party/registry/resources/MoeSounds.java`
 
-NeoForge spike files involved:
+Tests required:
 
-- whichever entity/profile/inventory files are active after Phases 1-5.
+- Sound hook resolution covers default Moe sounds and the bundled bell step override.
+- Cat-feature blocks use the Moe meow ambient sound.
+- Source block flammability drives `fireImmune()`.
+- Existing delegated combat test remains green.
 
-Tests required before/after:
+Out of scope:
 
-- Before: document current Forge absence/presence manually.
-- After: for each implemented behavior, add a GameTest or manual golden-world note.
+- Dialogue UI audio playback.
+- Full animation state restoration.
+- AI goals, following, chores, pranks, and adventure behavior.
 
-Explicitly out of scope:
+### Slice 6.2: Corporeal Death, Hide, And Inventory Drop Parity
 
-- Loader/API migration. This is product work, not port work.
-- UI redesign.
+Player-facing behavior restored:
 
-Recommended Codex prompt:
+- A corporeal Moe that dies retreats into its source block where the Forge branch did.
+- Equipment drop chances remain suppressed.
+- Moe inventory contents drop through the server-side death/drop path, preserving existing active inventory persistence.
+- Implemented in active NeoForge code: `Moe.die(DamageSource)` delegates to vanilla death handling, then uses the existing row-backed `hide(HideUntil.EXPOSED)` path for corporeal Moes. Ethereal Moes do not create hiding spots.
 
-```text
-Focus only on post-port unfinished companion systems. Audit the now-ported NeoForge behavior against Forge/README expectations for chores, pranks, needs, gifts, sleep, and adventuring. Do not mix this with API migration. Produce tests or a scoped implementation plan for one behavior at a time.
-```
+Tests required:
 
-### Slice 6.2: Known Technical Debt Cleanup After Parity
+- Corporeal death produces a hiding/block state path rather than losing the NPC row.
+- Ethereal/non-corporeal death does not create a hiding spot.
+- Inventory contents drop when the death/drop path runs.
+- Active GameTests cover all three required cases.
+
+Out of scope:
+
+- Client death effects.
+- New recovery UI.
+
+### Slice 6.3: Interaction Scene And Dialogue Trigger Parity
+
+Player-facing behavior restored:
+
+- Right click, shift-right click, left click, shift-left click, hurt, attack, random tick, and stare/looked-at triggers match the old trigger semantics where active scene data exists.
+- Scene sound payloads continue to carry resolved `SoundEvent` IDs.
+- Implemented in active NeoForge code: owner main-hand right-click runs right/shift-right triggers, offhand passes, owner left-click/attack interactions run left/shift-left triggers without damage, non-owner damage is scaled by source-block buffer and triggers `HURT` only after successful damage, successful Moe attacks trigger `ATTACK`, and server AI hooks can trigger `RANDOM_TICK`/`STARE`.
+
+Tests required:
+
+- Scene trigger GameTests for every server-observable trigger.
+- Regression coverage for trigger priority/interruption where Forge behavior is known.
+- Active GameTests cover owner right-click, offhand pass-through, owner shift-left, non-owner hurt, successful attack, random/stare server hooks, existing trigger priority, right-click dialogue, and left-click hide.
+
+Out of scope:
+
+- New scene content.
+- Client UI redesign.
+
+### Slice 6.4: Follow, Navigation, And Cell Phone Arrival Parity
+
+Player-facing behavior restored:
+
+- Follow flag behavior, door/trapdoor path malus, winged navigation category, and Cell Phone arrival behavior match the old branch where observable.
+- Cross-dimension call behavior is restored only after confirming the 1.21.4 equivalent API path.
+- Implemented in active NeoForge code: source blocks tagged with wings now switch Moe to flying movement/navigation, non-winged source blocks switch back to ground navigation with door opening enabled, and Cell Phone calls place loaded same-dimension Moes at the Forge yaw-based arrival point `x - sin(yRot) * 1.44`, `z + cos(yRot) * 1.44` before setting `following=true`.
+- Cross-dimension calls remain the documented safe failure for this PR because Forge used `ITeleporter` and the active NeoForge entity shell does not yet own dimension-transfer semantics.
+
+Tests required:
+
+- Follow flag survives save/load and call flows.
+- Cell Phone service handles same-dimension and, if ported, cross-dimension calls.
+- Winged/source-block navigation setup is covered by server assertions where possible.
+- Active GameTests cover following save/load, following set after call, Forge yaw-based same-dimension arrival, forced chunk release, and winged vs grounded navigation category.
+
+Out of scope:
+
+- Inventing new follow AI.
+- Chores, pranks, or adventure systems.
+
+### Slice 6.5: Remaining Simple Item Families
+
+Status: Implemented for server-observable item-family parity.
+
+Player-facing behavior restored:
+
+- `MoeMusicItem` replaces the placeholder music discs with one-stack rare jukebox-playable discs using preserved sound IDs and Forge durations through 1.21.4 jukebox song data.
+- `LetterItem` replaces the placeholder letter and reads the legacy `IsClosed` custom data key for open/closed state.
+- Samurai katana and wooden bokken replace placeholders with Forge durability, rarity, attack profile, parry-sword tag membership, and the incoming-damage parry hook.
+- Samurai armor and masked samurai items replace placeholders with Forge defense/toughness/knockback/rarity shape plus server event hooks for XP repair and arrow damage reduction.
+- Armor model/overlay work is deferred to a client/manual slice if not safely testable server-side.
+
+Tests:
+
+- Done: music disc item/component assertions.
+- Done: letter `IsClosed` state assertions.
+- Done: samurai weapon durability/rarity/tag assertions.
+- Done: samurai armor rarity/tag helper coverage for XP repair and stacked arrow-damage halving.
+
+Out of scope:
+
+- New weapons or armor balancing.
+- Client model redesign.
+- Client samurai armor model/helmet overlay parity.
+
+### Slice 6.6: Known Technical Debt Cleanup After Parity
+
+Status: Implemented for the active NeoForge debt surface that is covered by automated tests.
 
 Player-facing behavior restored or improved:
 
-- Fix known risky behavior only after parity tests make regressions visible.
+- Moe texture metadata now fails closed when an override names an unknown block-state property or an invalid property value, avoiding broad accidental texture matches from malformed metadata.
+- `HidingSpots` now marks SavedData dirty only when entries actually change, reducing persistence churn without changing hide/reveal behavior.
+- The old custom SQL `Column`/`Row`/`Table` debt and `Markov` action debt were reviewed as frozen Forge reference-only in the normalized NeoForge source; they are not active code in this slice.
 
-Forge 1.19.4 source files involved:
+Candidate files:
 
-- `src/main/java/block_party/db/sql/Column.java`
-- `src/main/java/block_party/db/sql/Row.java`
 - `src/main/java/block_party/registry/resources/MoeTextures.java`
 - `src/main/java/block_party/entities/data/HidingSpots.java`
-- `src/main/java/block_party/scene/SceneManager.java`
-- `src/main/java/block_party/scene/actions/Markov.java`
 
-NeoForge spike files involved:
+Tests:
 
-- corresponding ported files after Phases 1-5.
+- Done: malformed Moe texture metadata fails closed for unknown properties and invalid values.
+- Done: `HidingSpots` no-op remove/unchanged put stay clean, while new put/existing remove mark data dirty.
+- Existing coverage already guards texture fallback, missing hidden spot no-op, event reveal paths, and scene interruption priority.
 
-Tests required before/after:
+Out of scope:
 
-- Before: capture current behavior for dirty tracking, no-op SQL update, texture lookup fallback, hidden spot null/multi-dimension behavior, scene interruption, and Markov weighting.
-- After: focused regression tests for each fixed behavior.
-
-Explicitly out of scope:
-
-- New content.
 - Broad refactors without tests.
 - Changing save formats without migration notes.
+- Cross-dimension hidden-spot persistence tests and client visual verification; those remain release-hardening work.
 
-Recommended Codex prompt:
+### Slice 6.7: Release Hardening And Golden-World Verification
 
-```text
-Focus only on one known technical-debt fix after NeoForge parity is established. Start by adding a regression test that captures the current behavior, then make the narrow fix and update docs. Do not combine multiple debt fixes or add new features.
-```
-
-### Slice 6.3: Release Hardening And Golden-World Verification
+Status: Phase 6 closeout complete for automated server-side verification. Manual client/golden-world review remains the final pre-merge gate.
 
 Player-facing behavior restored:
 
@@ -1112,9 +1200,16 @@ NeoForge spike files involved:
 
 Tests required before/after:
 
-- Full `compileJava`, `runGameTestServer`, client launch, server launch.
-- Golden world: spawn, talk, hide, reveal, Yearbook, Cell Phone call, persistence stop/start, resources reload, representative renders, sounds, shrine/location checks.
-- Compare SQLite schema and sample rows against baseline.
+- Done: `compileJava`.
+- Done: `runGameTestServer`; all 115 required GameTests passed.
+- Covered by automated tests: registry/resource smoke, spawn/hide/reveal, profile/state persistence, SQLite row/table behavior, data block records, network payload contracts, dialogue/controller server contracts, same-dimension Cell Phone call service, scene triggers, sound hooks, item families, and active tech-debt cleanup.
+- Still manual before merge: client launch, server launch outside GameTest, golden-world spawn/talk/hide/reveal, Yearbook, Cell Phone, persistence stop/start, representative renders, sounds, shrine/location checks, and SQLite sample-row inspection.
+
+Release-blocker evaluation:
+
+- No automated server-side release blockers found in Slice 6.7.
+- Manual client/golden-world review is still required because rendering, screen visuals, audio playback, and long-lived world persistence cannot be fully validated by the current dedicated-server GameTests.
+- Accepted deferred work remains documented in `docs/SEMANTIC_DRIFT_NOTES.md`: cross-dimension Cell Phone behavior, client shrine-location rendering, richer translated response labels, exact samurai armor client model/overlay parity, visual polish for reported UI blur/model issues, and future feature work beyond the frozen Forge branch.
 
 Explicitly out of scope:
 
@@ -1135,4 +1230,5 @@ Focus only on NeoForge release hardening. Run the full automated test suite and 
 3. Complete Phase 3 networking parity against server services before opening UI.
 4. Reintroduce Phase 4 rendering and screens on top of stable payloads/entity data.
 5. Fill Phase 5 resource/content parity, prioritizing scene/resources that unlock core gameplay.
-6. Treat Phase 6 as after-parity work. It should not be mixed with loader migration.
+6. Close remaining Forge gameplay parity through Phase 6 one slice at a time.
+7. Move chores, pranks, adventure loops, and feature additions beyond the current Forge branch into later feature PRs.

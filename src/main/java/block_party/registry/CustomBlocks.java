@@ -1,174 +1,315 @@
 package block_party.registry;
 
 import block_party.BlockParty;
-import block_party.blocks.*;
-import block_party.blocks.grower.GinkgoTreeGrower;
-import block_party.blocks.grower.SakuraTreeGrower;
-import block_party.blocks.grower.WhiteSakuraTreeGrower;
-import block_party.blocks.grower.WisteriaTreeGrower;
-import block_party.scene.SceneObservation;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.level.block.*;
+import block_party.blocks.AbstractDataBlock;
+import block_party.blocks.DataSaplingBlock;
+import block_party.blocks.GardenLanternBlock;
+import block_party.blocks.HangingScrollBlock;
+import block_party.blocks.PaperLanternBlock;
+import block_party.blocks.SakuraBlossomsBlock;
+import block_party.blocks.ShimenawaBlock;
+import block_party.blocks.ShojiLanternBlock;
+import block_party.blocks.ShojiScreenBlock;
+import block_party.blocks.ShrineTabletBlock;
+import block_party.blocks.WindChimesBlock;
+import block_party.blocks.WisteriaVineBodyBlock;
+import block_party.blocks.WisteriaVineTipBlock;
+import block_party.blocks.WritingTableBlock;
+import block_party.blocks.entity.GardenLanternBlockEntity;
+import block_party.blocks.entity.HangingScrollBlockEntity;
+import block_party.blocks.entity.PaperLanternBlockEntity;
+import block_party.blocks.entity.SakuraSaplingBlockEntity;
+import block_party.blocks.entity.ShimenawaBlockEntity;
+import block_party.blocks.entity.ShrineTabletBlockEntity;
+import block_party.blocks.entity.WindChimesBlockEntity;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.BiFunction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.grower.TreeGrower;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.state.properties.BlockSetType;
-import net.minecraft.world.level.block.state.properties.WoodType;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
-import java.util.function.Supplier;
+public final class CustomBlocks {
+    public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(BlockParty.ID);
+    public static final Map<String, DeferredBlock<Block>> ENTRIES = new LinkedHashMap<>();
 
-public class CustomBlocks {
-    public static final RegistryObject<Block> BLANK_HANGING_SCROLL = BlockParty.BLOCKS.register("blank_hanging_scroll", () -> new HangingScrollBlock(Prop.SHOJI.get(), SceneObservation.NEVER));
-    public static final RegistryObject<Block> BLACK_PAPER_LANTERN = BlockParty.BLOCKS.register("black_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.COLOR_BLACK));
-    public static final RegistryObject<Block> DAWN_HANGING_SCROLL = BlockParty.BLOCKS.register("dawn_hanging_scroll", () -> new HangingScrollBlock(Prop.SHOJI.get(), SceneObservation.DAWN));
-    public static final RegistryObject<Block> EVENING_HANGING_SCROLL = BlockParty.BLOCKS.register("evening_hanging_scroll", () -> new HangingScrollBlock(Prop.SHOJI.get(), SceneObservation.EVENING));
-    public static final RegistryObject<Block> MIDNIGHT_HANGING_SCROLL = BlockParty.BLOCKS.register("midnight_hanging_scroll", () -> new HangingScrollBlock(Prop.SHOJI.get(), SceneObservation.MIDNIGHT));
-    public static final RegistryObject<Block> MORNING_HANGING_SCROLL = BlockParty.BLOCKS.register("morning_hanging_scroll", () -> new HangingScrollBlock(Prop.SHOJI.get(), SceneObservation.MORNING));
-    public static final RegistryObject<Block> NIGHT_HANGING_SCROLL = BlockParty.BLOCKS.register("night_hanging_scroll", () -> new HangingScrollBlock(Prop.SHOJI.get(), SceneObservation.NIGHT));
-    public static final RegistryObject<Block> NOON_HANGING_SCROLL = BlockParty.BLOCKS.register("noon_hanging_scroll", () -> new HangingScrollBlock(Prop.SHOJI.get(), SceneObservation.NOON));
-    public static final RegistryObject<Block> BLUE_PAPER_LANTERN = BlockParty.BLOCKS.register("blue_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_BLUE));
-    public static final RegistryObject<Block> BROWN_PAPER_LANTERN = BlockParty.BLOCKS.register("brown_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_BROWN));
-    public static final RegistryObject<Block> CYAN_PAPER_LANTERN = BlockParty.BLOCKS.register("cyan_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_CYAN));
-    public static final RegistryObject<Block> GARDEN_LANTERN = BlockParty.BLOCKS.register("garden_lantern", () -> new GardenLanternBlock(Prop.STONE.get()));
-    public static final RegistryObject<Block> GRAY_PAPER_LANTERN = BlockParty.BLOCKS.register("gray_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_GRAY));
-    public static final RegistryObject<Block> GINKGO_BUTTON = BlockParty.BLOCKS.register("ginkgo_button", () -> new ButtonBlock(Prop.NONSOLID_GINKGO.get(), BlockSetType.OAK, 20, true));
-    public static final RegistryObject<Block> GINKGO_FENCE = BlockParty.BLOCKS.register("ginkgo_fence", () -> new FenceBlock(Prop.NONSOLID_GINKGO.get()));
-    public static final RegistryObject<Block> GINKGO_FENCE_GATE = BlockParty.BLOCKS.register("ginkgo_fence_gate", () -> new FenceGateBlock(Prop.NONSOLID_GINKGO.get(), WoodType.OAK));
-    public static final RegistryObject<Block> GINKGO_LEAVES = BlockParty.BLOCKS.register("ginkgo_leaves", () -> new GinkgoLeavesBlock(CustomParticles.GINKGO, Prop.GINKGO_LEAVES.get()));
-    public static final RegistryObject<Block> GINKGO_LOG = BlockParty.BLOCKS.register("ginkgo_log", () -> new RotatedPillarBlock(Prop.GINKGO.get()));
-    public static final RegistryObject<Block> GINKGO_PLANKS = BlockParty.BLOCKS.register("ginkgo_planks", () -> new Block(Prop.GINKGO.get()));
-    public static final RegistryObject<Block> GINKGO_PRESSURE_PLATE = BlockParty.BLOCKS.register("ginkgo_pressure_plate", () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.EVERYTHING, Prop.NONSOLID_GINKGO.get(), BlockSetType.OAK));
-    public static final RegistryObject<Block> GINKGO_SAPLING = BlockParty.BLOCKS.register("ginkgo_sapling", () -> new SaplingBlock(new GinkgoTreeGrower(), Prop.GINKGO_LEAVES.get()));
-    public static final RegistryObject<Block> GINKGO_SLAB = BlockParty.BLOCKS.register("ginkgo_slab", () -> new SlabBlock(Prop.NONSOLID_GINKGO.get()));
-    public static final RegistryObject<Block> GINKGO_STAIRS = BlockParty.BLOCKS.register("ginkgo_stairs", () -> new StairBlock(() -> GINKGO_PLANKS.get().defaultBlockState(), Prop.NONSOLID_GINKGO.get()));
-    public static final RegistryObject<Block> GINKGO_WOOD = BlockParty.BLOCKS.register("ginkgo_wood", () -> new RotatedPillarBlock(Prop.GINKGO.get()));
-    public static final RegistryObject<Block> GREEN_PAPER_LANTERN = BlockParty.BLOCKS.register("green_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_GREEN));
-    public static final RegistryObject<Block> LIGHT_BLUE_PAPER_LANTERN = BlockParty.BLOCKS.register("light_blue_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_LIGHT_BLUE));
-    public static final RegistryObject<Block> LIGHT_GRAY_PAPER_LANTERN = BlockParty.BLOCKS.register("light_gray_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_LIGHT_GRAY));
-    public static final RegistryObject<Block> LIME_PAPER_LANTERN = BlockParty.BLOCKS.register("lime_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_LIGHT_GREEN));
-    public static final RegistryObject<Block> MAGENTA_PAPER_LANTERN = BlockParty.BLOCKS.register("magenta_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_MAGENTA));
-    public static final RegistryObject<Block> ORANGE_PAPER_LANTERN = BlockParty.BLOCKS.register("orange_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_ORANGE));
-    public static final RegistryObject<Block> PINK_PAPER_LANTERN = BlockParty.BLOCKS.register("pink_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_PINK));
-    public static final RegistryObject<Block> PURPLE_PAPER_LANTERN = BlockParty.BLOCKS.register("purple_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_PURPLE));
-    public static final RegistryObject<Block> RED_PAPER_LANTERN = BlockParty.BLOCKS.register("red_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_RED));
-    public static final RegistryObject<Block> SAKURA_BLOSSOMS = BlockParty.BLOCKS.register("sakura_blossoms", () -> new SakuraBlossomsBlock(CustomParticles.SAKURA, Prop.LEAVES.get()));
-    public static final RegistryObject<Block> SAKURA_BUTTON = BlockParty.BLOCKS.register("sakura_button", () -> new ButtonBlock(Prop.NONSOLID.get(), BlockSetType.OAK, 20, true));
-    public static final RegistryObject<Block> SAKURA_FENCE = BlockParty.BLOCKS.register("sakura_fence", () -> new FenceBlock(Prop.NONSOLID.get()));
-    public static final RegistryObject<Block> SAKURA_FENCE_GATE = BlockParty.BLOCKS.register("sakura_fence_gate", () -> new FenceGateBlock(Prop.NONSOLID.get(), WoodType.OAK));
-    public static final RegistryObject<Block> SAKURA_LOG = BlockParty.BLOCKS.register("sakura_log", () -> new RotatedPillarBlock(Prop.SOLID.get()));
-    public static final RegistryObject<Block> SAKURA_PLANKS = BlockParty.BLOCKS.register("sakura_planks", () -> new Block(Prop.SOLID.get()));
-    public static final RegistryObject<Block> SAKURA_PRESSURE_PLATE = BlockParty.BLOCKS.register("sakura_pressure_plate", () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.EVERYTHING, Prop.NONSOLID.get(), BlockSetType.OAK));
-    public static final RegistryObject<Block> SAKURA_SAPLING = BlockParty.BLOCKS.register("sakura_sapling", () -> new SaplingBlock(new SakuraTreeGrower(), Prop.PLANT.get()));
-    public static final RegistryObject<Block> SAKURA_SLAB = BlockParty.BLOCKS.register("sakura_slab", () -> new SlabBlock(Prop.NONSOLID.get()));
-    public static final RegistryObject<Block> SAKURA_STAIRS = BlockParty.BLOCKS.register("sakura_stairs", () -> new StairBlock(() -> SAKURA_PLANKS.get().defaultBlockState(), Prop.NONSOLID.get()));
-    public static final RegistryObject<Block> SAKURA_WOOD = BlockParty.BLOCKS.register("sakura_wood", () -> new RotatedPillarBlock(Prop.SOLID.get()));
-    public static final RegistryObject<Block> SHOJI_BLOCK = BlockParty.BLOCKS.register("shoji_block", () -> new Block(Prop.SHOJI.get()));
-    public static final RegistryObject<Block> SHIMENAWA = BlockParty.BLOCKS.register("shimenawa", () -> new ShimenawaBlock(Prop.TRANSPARENT.get()));
-    public static final RegistryObject<Block> SHOJI_LANTERN = BlockParty.BLOCKS.register("shoji_lantern", () -> new ShojiLanternBlock(Prop.SHOJI.get()));
-    public static final RegistryObject<Block> SHOJI_PANEL = BlockParty.BLOCKS.register("shoji_panel", () -> new TrapDoorBlock(Prop.SHOJI.get(), BlockSetType.OAK));
-    public static final RegistryObject<Block> SHOJI_SCREEN = BlockParty.BLOCKS.register("shoji_screen", () -> new ShojiScreenBlock(Prop.SHOJI.get()));
-    public static final RegistryObject<Block> STRIPPED_GINKGO_LOG = BlockParty.BLOCKS.register("stripped_ginkgo_log", () -> new RotatedPillarBlock(Prop.SOLID.get()));
-    public static final RegistryObject<Block> STRIPPED_GINKGO_WOOD = BlockParty.BLOCKS.register("stripped_ginkgo_wood", () -> new RotatedPillarBlock(Prop.SOLID.get()));
-    public static final RegistryObject<Block> STRIPPED_SAKURA_LOG = BlockParty.BLOCKS.register("stripped_sakura_log", () -> new RotatedPillarBlock(Prop.SOLID.get()));
-    public static final RegistryObject<Block> STRIPPED_SAKURA_WOOD = BlockParty.BLOCKS.register("stripped_sakura_wood", () -> new RotatedPillarBlock(Prop.SOLID.get()));
-    public static final RegistryObject<Block> TATAMI_MAT = BlockParty.BLOCKS.register("tatami_mat", () -> new RotatedPillarBlock(Prop.SOLID.get()));
-    public static final RegistryObject<Block> SHRINE_TABLET = BlockParty.BLOCKS.register("shrine_tablet", () -> new ShrineTabletBlock(Prop.TRANSPARENT.get()));
-    public static final RegistryObject<Block> WHITE_PAPER_LANTERN = BlockParty.BLOCKS.register("white_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_WHITE));
-    public static final RegistryObject<Block> WHITE_SAKURA_BLOSSOMS = BlockParty.BLOCKS.register("white_sakura_blossoms", () -> new SakuraBlossomsBlock(CustomParticles.WHITE_SAKURA, Prop.LEAVES.get()));
-    public static final RegistryObject<Block> WHITE_SAKURA_SAPLING = BlockParty.BLOCKS.register("white_sakura_sapling", () -> new SaplingBlock(new WhiteSakuraTreeGrower(), Prop.PLANT.get()));
-    public static final RegistryObject<Block> WIND_CHIMES = BlockParty.BLOCKS.register("wind_chimes", () -> new WindChimesBlock(Prop.STONE.get()));
-    public static final RegistryObject<Block> WISTERIA_BINE = BlockParty.BLOCKS.register("wisteria_bine", () -> new RotatedPillarBlock(Prop.NONSOLID.get()));
-    public static final RegistryObject<Block> WISTERIA_LEAVES = BlockParty.BLOCKS.register("wisteria_leaves", () -> new WisteriaLeavesBlock(Prop.LEAVES.get()));
-    public static final RegistryObject<Block> WISTERIA_SAPLING = BlockParty.BLOCKS.register("wisteria_sapling", () -> new SaplingBlock(new WisteriaTreeGrower(), Prop.PLANT.get()));
-    public static final RegistryObject<Block> WISTERIA_VINE_BODY = BlockParty.BLOCKS.register("wisteria_vine_body", () -> new WisteriaVineBodyBlock(Prop.PLANT.get()));
-    public static final RegistryObject<Block> WISTERIA_VINE_TIP = BlockParty.BLOCKS.register("wisteria_vine_tip", () -> new WisteriaVineTipBlock(Prop.PLANT.get()));
-    public static final RegistryObject<Block> WRITING_TABLE = BlockParty.BLOCKS.register("writing_table", () -> new WritingTableBlock(Prop.SOLID.get()));
-    public static final RegistryObject<Block> YELLOW_PAPER_LANTERN = BlockParty.BLOCKS.register("yellow_paper_lantern", () -> new PaperLanternBlock(Prop.SHOJI.get(), MaterialColor.TERRACOTTA_YELLOW));
-    public static final RegistryObject<Block> POTTED_GINKGO_SAPLING = BlockParty.BLOCKS.register("potted_ginkgo_sapling", () -> new FlowerPotBlock(CustomBlocks::flowerPot, GINKGO_SAPLING, BlockBehaviour.Properties.copy(flowerPot())));
-    public static final RegistryObject<Block> POTTED_SAKURA_SAPLING = BlockParty.BLOCKS.register("potted_sakura_sapling", () -> new FlowerPotBlock(CustomBlocks::flowerPot, SAKURA_SAPLING, BlockBehaviour.Properties.copy(flowerPot())));
-    public static final RegistryObject<Block> POTTED_WHITE_SAKURA_SAPLING = BlockParty.BLOCKS.register("potted_white_sakura_sapling", () -> new FlowerPotBlock(CustomBlocks::flowerPot, WHITE_SAKURA_SAPLING, BlockBehaviour.Properties.copy(flowerPot())));
-    public static final RegistryObject<Block> POTTED_WISTERIA_SAPLING = BlockParty.BLOCKS.register("potted_wisteria_sapling", () -> new FlowerPotBlock(CustomBlocks::flowerPot, WISTERIA_SAPLING, BlockBehaviour.Properties.copy(flowerPot())));
+    public static final DeferredBlock<Block> SHOJI_BLOCK = register("shoji_block");
+    public static final DeferredBlock<Block> GINKGO_LEAVES = registerLeaves("ginkgo_leaves");
+    public static final DeferredBlock<Block> GINKGO_PLANKS = register("ginkgo_planks");
+    public static final DeferredBlock<Block> SAKURA_PLANKS = register("sakura_planks");
+    public static final DeferredBlock<Block> SAKURA_BLOSSOMS = registerSakuraBlossoms("sakura_blossoms");
+    public static final DeferredBlock<Block> WHITE_SAKURA_BLOSSOMS = registerSakuraBlossoms("white_sakura_blossoms");
+    public static final DeferredBlock<Block> SAKURA_SLAB = registerSlab("sakura_slab");
+    public static final DeferredBlock<Block> SHOJI_SCREEN = registerShojiScreen("shoji_screen");
+    public static final DeferredBlock<Block> WISTERIA_BINE = registerPillar("wisteria_bine");
+    public static final DeferredBlock<Block> WISTERIA_LEAVES = registerLeaves("wisteria_leaves");
+    public static final DeferredBlock<Block> WISTERIA_VINE_BODY = registerWisteriaVineBody("wisteria_vine_body");
+    public static final DeferredBlock<Block> WISTERIA_VINE_TIP = registerWisteriaVineTip("wisteria_vine_tip");
+    public static final DeferredBlock<Block> PAPER_LANTERN = registerPaperLantern("black_paper_lantern");
+    public static final DeferredBlock<Block> BLANK_HANGING_SCROLL = registerHangingScroll("blank_hanging_scroll");
+    public static final DeferredBlock<Block> BLUE_PAPER_LANTERN = registerPaperLantern("blue_paper_lantern");
+    public static final DeferredBlock<Block> BROWN_PAPER_LANTERN = registerPaperLantern("brown_paper_lantern");
+    public static final DeferredBlock<Block> CYAN_PAPER_LANTERN = registerPaperLantern("cyan_paper_lantern");
+    public static final DeferredBlock<Block> DAWN_HANGING_SCROLL = registerHangingScroll("dawn_hanging_scroll");
+    public static final DeferredBlock<Block> EVENING_HANGING_SCROLL = registerHangingScroll("evening_hanging_scroll");
+    public static final DeferredBlock<Block> GARDEN_LANTERN = registerGardenLantern("garden_lantern");
+    public static final DeferredBlock<Block> GRAY_PAPER_LANTERN = registerPaperLantern("gray_paper_lantern");
+    public static final DeferredBlock<Block> GREEN_PAPER_LANTERN = registerPaperLantern("green_paper_lantern");
+    public static final DeferredBlock<Block> LIGHT_BLUE_PAPER_LANTERN = registerPaperLantern("light_blue_paper_lantern");
+    public static final DeferredBlock<Block> LIGHT_GRAY_PAPER_LANTERN = registerPaperLantern("light_gray_paper_lantern");
+    public static final DeferredBlock<Block> LIME_PAPER_LANTERN = registerPaperLantern("lime_paper_lantern");
+    public static final DeferredBlock<Block> MAGENTA_PAPER_LANTERN = registerPaperLantern("magenta_paper_lantern");
+    public static final DeferredBlock<Block> MIDNIGHT_HANGING_SCROLL = registerHangingScroll("midnight_hanging_scroll");
+    public static final DeferredBlock<Block> MORNING_HANGING_SCROLL = registerHangingScroll("morning_hanging_scroll");
+    public static final DeferredBlock<Block> NIGHT_HANGING_SCROLL = registerHangingScroll("night_hanging_scroll");
+    public static final DeferredBlock<Block> NOON_HANGING_SCROLL = registerHangingScroll("noon_hanging_scroll");
+    public static final DeferredBlock<Block> ORANGE_PAPER_LANTERN = registerPaperLantern("orange_paper_lantern");
+    public static final DeferredBlock<Block> PINK_PAPER_LANTERN = registerPaperLantern("pink_paper_lantern");
+    public static final DeferredBlock<Block> PURPLE_PAPER_LANTERN = registerPaperLantern("purple_paper_lantern");
+    public static final DeferredBlock<Block> RED_PAPER_LANTERN = registerPaperLantern("red_paper_lantern");
+    public static final DeferredBlock<Block> SAKURA_SAPLING = registerDataSapling("sakura_sapling", CustomWorldGen.SAKURA_TREE, SakuraSaplingBlockEntity::new);
+    public static final DeferredBlock<Block> SHIMENAWA = registerShimenawa("shimenawa");
+    public static final DeferredBlock<Block> SHRINE_TABLET = registerShrineTablet("shrine_tablet");
+    public static final DeferredBlock<Block> SHOJI_LANTERN = registerShojiLantern("shoji_lantern");
+    public static final DeferredBlock<Block> WHITE_PAPER_LANTERN = registerPaperLantern("white_paper_lantern");
+    public static final DeferredBlock<Block> WHITE_SAKURA_SAPLING = registerDataSapling("white_sakura_sapling", CustomWorldGen.WHITE_SAKURA_TREE, SakuraSaplingBlockEntity::new);
+    public static final DeferredBlock<Block> WIND_CHIMES = registerWindChimes("wind_chimes");
+    public static final DeferredBlock<Block> WRITING_TABLE = registerWritingTable("writing_table");
+    public static final DeferredBlock<Block> YELLOW_PAPER_LANTERN = registerPaperLantern("yellow_paper_lantern");
 
-    public static void add(DeferredRegister<Block> registry, IEventBus bus) {
-        bus.addListener(CustomBlocks::registerRenderTypes);
-        bus.addListener(CustomBlocks::registerPottedPlants);
-        registry.register(bus);
+    static {
+        registerRemaining(
+                "ginkgo_button",
+                "ginkgo_fence",
+                "ginkgo_fence_gate",
+                "ginkgo_pressure_plate",
+                "ginkgo_slab",
+                "ginkgo_stairs",
+                "sakura_button",
+                "sakura_fence",
+                "sakura_fence_gate",
+                "sakura_pressure_plate",
+                "sakura_stairs",
+                "shoji_panel",
+                "tatami_mat");
+        registerPillar("ginkgo_log");
+        registerPillar("ginkgo_wood");
+        registerPillar("sakura_log");
+        registerPillar("sakura_wood");
+        registerPillar("stripped_ginkgo_log");
+        registerPillar("stripped_ginkgo_wood");
+        registerPillar("stripped_sakura_log");
+        registerPillar("stripped_sakura_wood");
+        registerSapling("ginkgo_sapling", CustomWorldGen.GINKGO_TREE);
+        registerSapling("wisteria_sapling", CustomWorldGen.WISTERIA_TREE);
+        registerPotted("potted_ginkgo_sapling", "ginkgo_sapling");
+        registerPotted("potted_sakura_sapling", "sakura_sapling");
+        registerPotted("potted_white_sakura_sapling", "white_sakura_sapling");
+        registerPotted("potted_wisteria_sapling", "wisteria_sapling");
     }
 
-    private static void registerRenderTypes(FMLClientSetupEvent e) {
-        /*
-        ItemBlockRenderTypes.setRenderLayer(BLANK_HANGING_SCROLL.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(BLACK_PAPER_LANTERN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(DAWN_HANGING_SCROLL.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(EVENING_HANGING_SCROLL.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(MIDNIGHT_HANGING_SCROLL.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(MORNING_HANGING_SCROLL.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(NIGHT_HANGING_SCROLL.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(NOON_HANGING_SCROLL.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(BLUE_PAPER_LANTERN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(BROWN_PAPER_LANTERN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(CYAN_PAPER_LANTERN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(GARDEN_LANTERN.get(), RenderType.cutoutMipped());
-        ItemBlockRenderTypes.setRenderLayer(GINKGO_LEAVES.get(), RenderType.cutoutMipped());
-        ItemBlockRenderTypes.setRenderLayer(GINKGO_SAPLING.get(), RenderType.cutoutMipped());
-        ItemBlockRenderTypes.setRenderLayer(GRAY_PAPER_LANTERN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(GREEN_PAPER_LANTERN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(LIGHT_BLUE_PAPER_LANTERN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(LIGHT_GRAY_PAPER_LANTERN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(LIME_PAPER_LANTERN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(MAGENTA_PAPER_LANTERN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ORANGE_PAPER_LANTERN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(PINK_PAPER_LANTERN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(SAKURA_BLOSSOMS.get(), RenderType.cutoutMipped());
-        ItemBlockRenderTypes.setRenderLayer(SAKURA_SAPLING.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(POTTED_GINKGO_SAPLING.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(POTTED_SAKURA_SAPLING.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(POTTED_WHITE_SAKURA_SAPLING.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(POTTED_WISTERIA_SAPLING.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(PURPLE_PAPER_LANTERN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(RED_PAPER_LANTERN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(SHIMENAWA.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(SHOJI_PANEL.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(SHOJI_SCREEN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(SHRINE_TABLET.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(WHITE_PAPER_LANTERN.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(WHITE_SAKURA_BLOSSOMS.get(), RenderType.cutoutMipped());
-        ItemBlockRenderTypes.setRenderLayer(WHITE_SAKURA_SAPLING.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(WISTERIA_LEAVES.get(), RenderType.cutoutMipped());
-        ItemBlockRenderTypes.setRenderLayer(WISTERIA_SAPLING.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(WISTERIA_VINE_BODY.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(WISTERIA_VINE_TIP.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(YELLOW_PAPER_LANTERN.get(), RenderType.cutout());
-        */
+    private CustomBlocks() {
     }
 
-    private static void registerPottedPlants(FMLCommonSetupEvent e) {
-        flowerPot().addPlant(BlockParty.source("ginkgo_sapling"), CustomBlocks.POTTED_GINKGO_SAPLING);
-        flowerPot().addPlant(BlockParty.source("sakura_sapling"), CustomBlocks.POTTED_SAKURA_SAPLING);
-        flowerPot().addPlant(BlockParty.source("white_sakura_sapling"), CustomBlocks.POTTED_WHITE_SAKURA_SAPLING);
-        flowerPot().addPlant(BlockParty.source("wisteria_sapling"), CustomBlocks.POTTED_WISTERIA_SAPLING);
+    private static DeferredBlock<Block> register(String id) {
+        if (ENTRIES.containsKey(id)) {
+            return ENTRIES.get(id);
+        }
+        DeferredBlock<Block> block = BLOCKS.registerSimpleBlock(id, BlockBehaviour.Properties.of().strength(1.0F).sound(SoundType.WOOD));
+        ENTRIES.put(id, block);
+        return block;
     }
 
-    private static FlowerPotBlock flowerPot() {
-        return ((FlowerPotBlock) Blocks.FLOWER_POT);
+    private static DeferredBlock<Block> registerPillar(String id) {
+        if (ENTRIES.containsKey(id)) {
+            return ENTRIES.get(id);
+        }
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, RotatedPillarBlock::new,
+                BlockBehaviour.Properties.of().strength(1.0F).sound(SoundType.WOOD));
+        ENTRIES.put(id, block);
+        return block;
     }
 
-    public class Prop {
-        public static final Supplier<BlockBehaviour.Properties> SOLID = () -> BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.WOOD).sound(SoundType.WOOD).strength(3.0F);
-        public static final Supplier<BlockBehaviour.Properties> STONE = () -> BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).sound(SoundType.STONE).strength(6.0F);
-        public static final Supplier<BlockBehaviour.Properties> SHOJI = () -> BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_PINK).sound(SoundType.CROP).strength(0.5F).noOcclusion();
-        public static final Supplier<BlockBehaviour.Properties> PLANT = () -> BlockBehaviour.Properties.of(Material.PLANT).sound(SoundType.CROP).strength(0.2F).randomTicks().noOcclusion();
-        public static final Supplier<BlockBehaviour.Properties> LEAVES = () -> BlockBehaviour.Properties.of(Material.LEAVES).sound(SoundType.CROP).strength(0.2F).randomTicks().noOcclusion();
-        public static final Supplier<BlockBehaviour.Properties> NONSOLID = () -> SOLID.get().noOcclusion();
-        public static final Supplier<BlockBehaviour.Properties> TRANSPARENT = () -> NONSOLID.get().isRedstoneConductor((state, reader, pos) -> false);
-        public static final Supplier<BlockBehaviour.Properties> GINKGO = () -> BlockBehaviour.Properties.of(Material.STONE, MaterialColor.WOOD).sound(SoundType.WOOD).strength(36.0F);
-        public static final Supplier<BlockBehaviour.Properties> GINKGO_LEAVES = () -> GINKGO.get().sound(SoundType.CROP).strength(18.0F).randomTicks().noOcclusion();
-        public static final Supplier<BlockBehaviour.Properties> NONSOLID_GINKGO = () -> GINKGO.get().noOcclusion();
+    private static DeferredBlock<Block> registerLeaves(String id) {
+        if (ENTRIES.containsKey(id)) {
+            return ENTRIES.get(id);
+        }
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, LeavesBlock::new,
+                BlockBehaviour.Properties.of().strength(0.2F).randomTicks().noOcclusion().sound(SoundType.GRASS));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerSakuraBlossoms(String id) {
+        if (ENTRIES.containsKey(id)) {
+            return ENTRIES.get(id);
+        }
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, SakuraBlossomsBlock::new,
+                BlockBehaviour.Properties.of().strength(0.2F).randomTicks().noOcclusion().sound(SoundType.GRASS));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerSapling(String id, ResourceKey<ConfiguredFeature<?, ?>> feature) {
+        if (ENTRIES.containsKey(id)) {
+            return ENTRIES.get(id);
+        }
+        TreeGrower grower = new TreeGrower(id, java.util.Optional.empty(), java.util.Optional.of(feature), java.util.Optional.empty());
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, properties -> new SaplingBlock(grower, properties),
+                BlockBehaviour.Properties.of().strength(0.0F).randomTicks().noCollission().sound(SoundType.GRASS));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerSlab(String id) {
+        if (ENTRIES.containsKey(id)) {
+            return ENTRIES.get(id);
+        }
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, SlabBlock::new,
+                BlockBehaviour.Properties.of().strength(1.0F).sound(SoundType.WOOD));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerShojiScreen(String id) {
+        if (ENTRIES.containsKey(id)) {
+            return ENTRIES.get(id);
+        }
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, ShojiScreenBlock::new,
+                BlockBehaviour.Properties.of().strength(1.0F).noOcclusion().sound(SoundType.WOOD));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerDataSapling(String id, ResourceKey<ConfiguredFeature<?, ?>> feature, BiFunction<BlockPos, BlockState, ? extends block_party.blocks.entity.AbstractDataBlockEntity> initializer) {
+        TreeGrower grower = new TreeGrower(id, java.util.Optional.empty(), java.util.Optional.of(feature), java.util.Optional.empty());
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, properties -> new DataSaplingBlock(grower, initializer, properties),
+                BlockBehaviour.Properties.of().strength(0.0F).randomTicks().noCollission().sound(SoundType.GRASS));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerWisteriaVineBody(String id) {
+        if (ENTRIES.containsKey(id)) {
+            return ENTRIES.get(id);
+        }
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, WisteriaVineBodyBlock::new,
+                BlockBehaviour.Properties.of().strength(0.2F).noCollission().noOcclusion().sound(SoundType.GRASS));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerWisteriaVineTip(String id) {
+        if (ENTRIES.containsKey(id)) {
+            return ENTRIES.get(id);
+        }
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, WisteriaVineTipBlock::new,
+                BlockBehaviour.Properties.of().strength(0.2F).noCollission().noOcclusion().sound(SoundType.GRASS));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerPaperLantern(String id) {
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, PaperLanternBlock::new,
+                BlockBehaviour.Properties.of().strength(1.0F).noOcclusion().sound(SoundType.WOOD));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerHangingScroll(String id) {
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, HangingScrollBlock::new,
+                BlockBehaviour.Properties.of().strength(1.0F).noOcclusion().sound(SoundType.WOOD));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerGardenLantern(String id) {
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, GardenLanternBlock::new,
+                BlockBehaviour.Properties.of().strength(1.0F).noOcclusion().sound(SoundType.WOOD));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerShimenawa(String id) {
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, ShimenawaBlock::new,
+                BlockBehaviour.Properties.of().strength(1.0F).noOcclusion().sound(SoundType.WOOD));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerShrineTablet(String id) {
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, ShrineTabletBlock::new,
+                BlockBehaviour.Properties.of().strength(1.0F).noOcclusion().sound(SoundType.WOOD));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerWindChimes(String id) {
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, WindChimesBlock::new,
+                BlockBehaviour.Properties.of().strength(1.0F).noOcclusion().sound(SoundType.WOOD));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerShojiLantern(String id) {
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, ShojiLanternBlock::new,
+                BlockBehaviour.Properties.of().strength(1.0F).noOcclusion().sound(SoundType.WOOD));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerWritingTable(String id) {
+        if (ENTRIES.containsKey(id)) {
+            return ENTRIES.get(id);
+        }
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, WritingTableBlock::new,
+                BlockBehaviour.Properties.of().strength(1.0F).sound(SoundType.WOOD));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerPotted(String id, String plantId) {
+        if (ENTRIES.containsKey(id)) {
+            return ENTRIES.get(id);
+        }
+        DeferredBlock<Block> plant = ENTRIES.get(plantId);
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id,
+                properties -> new FlowerPotBlock(() -> (FlowerPotBlock) Blocks.FLOWER_POT, plant, properties),
+                BlockBehaviour.Properties.of().strength(0.0F).noOcclusion().sound(SoundType.STONE));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static DeferredBlock<Block> registerData(String id, BiFunction<BlockPos, BlockState, ? extends block_party.blocks.entity.AbstractDataBlockEntity> initializer) {
+        DeferredBlock<Block> block = BLOCKS.registerBlock(id, properties -> new AbstractDataBlock(initializer, properties),
+                BlockBehaviour.Properties.of().strength(1.0F).sound(SoundType.WOOD));
+        ENTRIES.put(id, block);
+        return block;
+    }
+
+    private static void registerRemaining(String... ids) {
+        for (String id : ids) {
+            if (!ENTRIES.containsKey(id)) {
+                register(id);
+            }
+        }
+    }
+
+    public static void register(IEventBus modBus) {
+        BLOCKS.register(modBus);
     }
 }

@@ -1,175 +1,196 @@
 package block_party.client.screens;
 
 import block_party.BlockParty;
-import block_party.client.screens.widget.RespondIconButton;
-import block_party.client.screens.widget.RespondTextButton;
-import block_party.db.records.NPC;
-import block_party.entities.BlockPartyNPC;
-import block_party.messages.CDialogueClose;
-import block_party.messages.CDialogueRespond;
-import block_party.registry.CustomMessenger;
+import block_party.entities.Moe;
+import block_party.network.payload.DialogueClosePayload;
+import block_party.network.payload.DialogueOpenPayload;
+import block_party.network.payload.DialogueRespondPayload;
+import block_party.network.payload.NpcDetailPayload;
+import block_party.registry.CustomEntities;
 import block_party.scene.Dialogue;
 import block_party.scene.Response;
 import block_party.scene.Speaker;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.Font;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import org.joml.Quaternionf;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
-import java.util.List;
+public class DialogueScreen extends Screen {
+    public static final ResourceLocation DIALOGUE_TEXTURE = BlockParty.source("textures/gui/dialogue.png");
+    private static final int WIDTH = 242;
+    private static final int HEIGHT = 48;
 
-public class DialogueScreen extends AbstractScreen {
-    public static final ResourceLocation DIALOGUE_TEXTURES = BlockParty.source("textures/gui/dialogue.png");
-    private final List<RespondButton> responses = new ArrayList<>();
-    private final String[] lines = new String[] { "", "", "" };
+    private final NpcDetailPayload npc;
     private final Dialogue dialogue;
-    private final Speaker speaker;
-    private final NPC npc;
-    private BlockPartyNPC entity;
-    private String name;
-    private String text;
-    private int start;
+    private final List<Button> responses = new ArrayList<>();
+    private Moe preview;
+    private int startTick;
     private int cursor;
-    private int role;
-    private boolean onDialogueScreen = true;
-    private Button buttonSeeResponse;
-    private Button buttonSeeDialogue;
+    private boolean responseMode;
+    private boolean closeSent;
 
-    public DialogueScreen(Dialogue dialogue, NPC npc) {
-        super(242, 48);
-        this.dialogue = dialogue;
-        this.speaker = dialogue.getSpeaker();
-        this.npc = npc;
-    }
-
-    @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(stack);
-        this.setLines(this.text.substring(0, Math.min(this.cursor, this.text.length())), 0);
-        this.renderEntity(this.getAbsoluteCenter(64), 200, 40.0F, this.entity);
-        this.renderDialogue(stack, mouseX, mouseY, partialTicks);
-        super.render(stack, mouseX, mouseY, partialTicks);
-        if (this.cursor < this.text.length()) {
-            this.cursor = this.minecraft.player.tickCount - this.start;
-            this.playSound(this.dialogue.getSound());
-        }
-        this.renderTooltips(stack, mouseX, mouseY);
-    }
-
-    public void renderDialogue(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, DIALOGUE_TEXTURES);
-        this.blit(stack, this.getLeft(), this.getBottom(48), this.zero, this.zero, this.sizeX, this.sizeY);
-        if (this.onDialogueScreen || this.dialogue.isTooltip()) {
-            this.font.drawShadow(stack, this.lines[0].trim(), this.getLeft(5), this.getBottom(43), this.white);
-            this.font.drawShadow(stack, this.lines[1].trim(), this.getLeft(5), this.getBottom(34), this.white);
-            this.font.drawShadow(stack, this.lines[2].trim(), this.getLeft(5), this.getBottom(25), this.white);
-        }
-        if (this.speaker.identity == Speaker.Identity.NARRATOR) { return; }
-        this.font.drawShadow(stack, this.name, this.getLeft(5), this.getBottom(57), this.white);
-    }
-
-    @Override
-    protected void renderEntity(int posX, int posY, float scale, LivingEntity entity) {
-        if (this.speaker.identity == Speaker.Identity.NARRATOR) { return; }
-        super.renderEntity(posX, posY, scale, entity);
-        ++entity.tickCount;
-    }
-
-    @Override
-    protected void setEntityViewStack(PoseStack pose, int posX, int posY) {
-        pose.translate(posX, posY, 2050.0);
-        pose.scale(3.0F, -3.0F, -3.0F);
-    }
-
-    @Override
-    protected void setEntityModelStack(PoseStack pose, float scale) {
-        scale *= this.speaker.scale;
-        switch (this.speaker.position) {
-        case LEFT:
-            pose.translate( 0.0D, 0.0D, 1000.0D);
-            pose.scale(scale, scale, scale);
-            pose.mulPose(new Quaternionf(0.0F, 1.0F, 0.0F,  0.2F));
-            return;
-        case CENTER:
-            pose.translate(25.0D, 0.0D, 1000.0D);
-            pose.scale(scale, scale, scale);
-            pose.mulPose(new Quaternionf(0.0F, 1.0F, 0.0F,  0.0F));
-            return;
-        case RIGHT:
-            pose.translate(50.0D, 0.0D, 1000.0D);
-            pose.scale(scale, scale, scale);
-            pose.mulPose(new Quaternionf(0.0F, 1.0F, 0.0F, -0.2F));
-            return;
-        }
-    }
-
-    public void renderTooltips(PoseStack stack, int mouseX, int mouseY) {
-        this.children().forEach((child) -> {
-            if (!(child instanceof Button)) { return; }
-            Button button = (Button) child;
-            if (button.isHoveredOrFocused()) {
-                //button.setTooltip(stack, mouseX, mouseY); ???
-            }
-        });
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        switch (keyCode) {
-        case GLFW.GLFW_KEY_LEFT:
-        case GLFW.GLFW_KEY_A:
-            this.updateButtons(true);
-            return true;
-        case GLFW.GLFW_KEY_RIGHT:
-        case GLFW.GLFW_KEY_D:
-            this.updateButtons(false);
-            return true;
-        case GLFW.GLFW_KEY_ENTER:
-        case GLFW.GLFW_KEY_SPACE:
-            this.cursor = this.text.length();
-            return true;
-        case GLFW.GLFW_KEY_ESCAPE:
-            CustomMessenger.send(new CDialogueClose(this.npc.getID()));
-        default:
-            return super.keyPressed(keyCode, scanCode, modifiers);
-        }
+    public DialogueScreen(DialogueOpenPayload payload) {
+        super(Component.empty());
+        this.npc = payload.npc();
+        this.dialogue = payload.dialogue();
     }
 
     @Override
     protected void init() {
-        this.start = this.minecraft.player.tickCount;
-        this.text = this.dialogue.getText();
-        this.name = this.npc.getName();
-        this.entity = this.npc.getClientEntity(this.minecraft);
-        this.speaker.stage(this.entity);
-        this.buttonSeeResponse = new SeeButton(this, false);
-        this.buttonSeeDialogue = new SeeButton(this, true);
-        this.dialogue.getResponses().forEach((icon, text) -> {
-            this.responses.add(RespondButton.create(this, ++this.role, this.npc, icon, Component.literal(text), this.dialogue.isTooltip()));
-        });
-        updateButtons(true);
-        if (this.speaker.speaks) {
-            this.playSound(this.speaker.getVoice());
-            this.cursor = this.text.length();
+        this.startTick = this.minecraft.player == null ? 0 : this.minecraft.player.tickCount;
+        this.cursor = this.dialogue.speaker().speaks() ? this.dialogue.text().length() : 0;
+        this.responseMode = this.dialogue.tooltip();
+        this.closeSent = false;
+        this.preview = this.createPreview();
+        this.rebuildResponseButtons();
+        this.play(this.dialogue.speaker().speaks() ? this.dialogue.speaker().voice() : this.dialogue.sound());
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(graphics, mouseX, mouseY, partialTick);
+        this.renderPreview(graphics, mouseX, mouseY);
+        this.renderPanel(graphics, mouseX, mouseY, partialTick);
+        super.render(graphics, mouseX, mouseY, partialTick);
+    }
+
+    private void renderPanel(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        int left = this.left();
+        int top = this.bottom() - HEIGHT;
+        graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, DIALOGUE_TEXTURE, left, top, 0.0F, 0.0F, WIDTH, HEIGHT, 256, 256);
+
+        if (!this.responseMode || this.dialogue.tooltip()) {
+            String visible = this.visibleText();
+            List<net.minecraft.util.FormattedCharSequence> lines = this.font.split(Component.literal(visible), 232);
+            for (int index = 0; index < Math.min(3, lines.size()); ++index) {
+                graphics.drawString(this.font, lines.get(index), left + 5, top + 5 + index * 9, 0xFFFFFFFF, true);
+            }
+        }
+
+        if (this.dialogue.speaker().identity() != Speaker.Identity.NARRATOR && this.npc.found()) {
+            graphics.drawString(this.font, this.npc.name(), left + 5, top - 9, 0xFFFFFFFF, true);
+        }
+
+        if (this.cursor < this.dialogue.text().length() && this.minecraft.player != null) {
+            this.cursor = Math.min(this.dialogue.text().length(), this.minecraft.player.tickCount - this.startTick);
         }
     }
 
-    public void playSound(SoundEvent sound) {
-        this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(sound, 1.0F));
+    private void renderPreview(GuiGraphics graphics, int mouseX, int mouseY) {
+        if (this.dialogue.speaker().identity() == Speaker.Identity.NARRATOR || this.preview == null) {
+            return;
+        }
+        int x = switch (this.dialogue.speaker().position()) {
+            case LEFT -> this.width / 2 - 70;
+            case CENTER -> this.width / 2;
+            case RIGHT -> this.width / 2 + 70;
+        };
+        int y = this.bottom() - 50;
+        int scale = Math.max(20, (int) (40.0F * this.dialogue.speaker().scale()));
+        InventoryScreen.renderEntityInInventoryFollowsMouse(graphics, x - 35, y - 95, x + 35, y + 15, scale, 0.0F, mouseX, mouseY, this.preview);
+        ++this.preview.tickCount;
+    }
+
+    private String visibleText() {
+        return this.dialogue.text().substring(0, Math.min(this.cursor, this.dialogue.text().length()));
+    }
+
+    private void rebuildResponseButtons() {
+        this.clearWidgets();
+        this.responses.clear();
+        int index = 0;
+        for (Map.Entry<Response, String> entry : this.dialogue.responses().entrySet()) {
+            ++index;
+            Button button = this.dialogue.tooltip()
+                    ? this.iconButton(index, entry.getKey(), entry.getValue())
+                    : this.textButton(index, entry.getKey(), entry.getValue());
+            this.responses.add(button);
+            if (this.responseMode || this.dialogue.tooltip()) {
+                this.addRenderableWidget(button);
+            }
+        }
+        if (!this.dialogue.tooltip()) {
+            this.addRenderableWidget(this.toggleButton());
+        }
+    }
+
+    private Button toggleButton() {
+        int iconX = this.responseMode ? 90 : 80;
+        Component tooltip = Component.translatable("gui.block_party.button." + (this.responseMode ? "see_dialogue" : "see_response"));
+        Button button = new SpriteButton(this.right() - 14, this.bottom() - 59, 10, 10, iconX, 84, tooltip, value -> {
+            this.responseMode = !this.responseMode;
+            this.rebuildResponseButtons();
+        });
+        button.setTooltip(Tooltip.create(tooltip));
+        return button;
+    }
+
+    private Button iconButton(int index, Response response, String text) {
+        Component label = Component.literal(text == null ? response.name() : text);
+        Button button = new SpriteButton(this.left() + (index - 1) * 14 + 4, this.bottom() - 14, 10, 10, response.ordinal() * 10, 74, label, value -> this.respond(response));
+        button.setTooltip(Tooltip.create(label));
+        return button;
+    }
+
+    private Button textButton(int index, Response response, String text) {
+        return new ResponseTextButton(this.left() + 4, this.bottom() - 44 + (index - 1) * 14, 234, 13,
+                Component.literal(text == null ? response.name() : text), response, value -> this.respond(response));
+    }
+
+    private void respond(Response response) {
+        PacketDistributor.sendToServer(new DialogueRespondPayload(this.npc.databaseId(), response));
+        this.closeSent = true;
+        this.minecraft.setScreen(null);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_A) {
+            this.responseMode = false;
+            this.rebuildResponseButtons();
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_D) {
+            this.responseMode = true;
+            this.rebuildResponseButtons();
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_SPACE) {
+            this.cursor = this.dialogue.text().length();
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            this.sendClose();
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public void onClose() {
+        this.sendClose();
+        super.onClose();
+    }
+
+    private void sendClose() {
+        if (!this.closeSent) {
+            PacketDistributor.sendToServer(new DialogueClosePayload(this.npc.databaseId()));
+            this.closeSent = true;
+        }
     }
 
     @Override
@@ -177,103 +198,77 @@ public class DialogueScreen extends AbstractScreen {
         return false;
     }
 
-    private void updateButtons(boolean toggle) {
-        this.onDialogueScreen = toggle;
-        if (this.dialogue.isTooltip()) {
-            this.responses.forEach((button) -> this.addRenderableWidget(button));
-            this.removeWidget(this.buttonSeeDialogue);
-            this.removeWidget(this.buttonSeeResponse);
-        } else if (this.onDialogueScreen) {
-            this.responses.forEach((button) -> this.removeWidget(button));
-            this.removeWidget(this.buttonSeeDialogue);
-            this.addRenderableWidget(this.buttonSeeResponse);
-        } else {
-            this.responses.forEach((button) -> this.addRenderableWidget(button));
-            this.addRenderableWidget(this.buttonSeeDialogue);
-            this.removeWidget(this.buttonSeeResponse);
+    private Moe createPreview() {
+        if (this.minecraft == null || this.minecraft.level == null || !this.npc.found()) {
+            return null;
+        }
+        Moe moe = CustomEntities.MOE.get().create(this.minecraft.level, EntitySpawnReason.TRIGGERED);
+        if (moe == null) {
+            return null;
+        }
+        BlockState state = Block.stateById(this.npc.blockStateId());
+        moe.setDatabaseID(this.npc.databaseId());
+        moe.setOwnerUUID(this.npc.ownerUuid());
+        moe.setBlockStateFromRow(state);
+        moe.setGivenName(this.npc.name());
+        moe.setGender(this.npc.gender());
+        moe.setEmotion(this.dialogue.speaker().emotion());
+        return moe;
+    }
+
+    private void play(ResourceLocation soundId) {
+        if (soundId == null || this.minecraft == null) {
+            return;
+        }
+        SoundEvent sound = BuiltInRegistries.SOUND_EVENT.getValue(soundId);
+        if (sound != null) {
+            this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(sound, 1.0F));
         }
     }
 
-    private void setLines(String words, int i) {
-        this.lines[0] = this.lines[1] = this.lines[2] = "";
-        for (String word : words.split(" ")) {
-            String line = this.lines[i] + " " + word;
-            if (this.font.width(line) > 232) {
-                ++i;
-                line = word;
-            }
-            this.lines[i] = line;
-        }
+    private int left() {
+        return (this.width - WIDTH) / 2;
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public abstract static class RespondButton extends Button {
-        protected final Response icon;
-        protected final String text;
-        protected final Font font;
+    private int right() {
+        return this.left() + WIDTH;
+    }
 
-        public RespondButton(int posX, int posY, int sizeX, int sizeY, DialogueScreen parent, NPC npc, Response icon, Component text, boolean tooltip) {
-            super(posX, posY, sizeX, sizeY, text, (button) -> RespondButton.act(parent, npc, icon), (n) -> text.copy());
-            this.icon = icon;
-            this.text = text.getString();
-            this.font = parent.font;
-        }
+    private int bottom() {
+        return this.height - 24;
+    }
 
-        private static void act(DialogueScreen parent, NPC npc, Response icon) {
-            CustomMessenger.send(new CDialogueRespond(npc.getID(), icon));
-            parent.onClose();
+    private static class SpriteButton extends Button {
+        private final int textureX;
+        private final int textureY;
+
+        SpriteButton(int x, int y, int width, int height, int textureX, int textureY, Component message, OnPress onPress) {
+            super(x, y, width, height, message, onPress, DEFAULT_NARRATION);
+            this.textureX = textureX;
+            this.textureY = textureY;
         }
 
         @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShaderTexture(0, DialogueScreen.DIALOGUE_TEXTURES);
-        }
-
-        protected void renderIcon(PoseStack stack, int posX, int posY) {
-            this.blit(stack, posX, posY, this.icon.ordinal() * 10, this.isHoveredOrFocused() ? 84 : 74, 10, 10);
-        }
-
-        public static RespondButton create(DialogueScreen parent, int index, NPC npc, Response icon, Component text, boolean tooltip) {
-            if (tooltip) {
-                return new RespondIconButton(parent, index, npc, icon, text);
-            } else {
-                return new RespondTextButton(parent, index, npc, icon, text);
-            }
+        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+            int y = this.textureY + (this.isHoveredOrFocused() ? 10 : 0);
+            graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, DIALOGUE_TEXTURE, this.getX(), this.getY(), this.textureX, y, this.width, this.height, 256, 256);
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public class SeeButton extends Button {
-        private final boolean toggle;
-        private int offset;
-        private float ticks;
-        private boolean backwards;
+    private static class ResponseTextButton extends Button {
+        private final Response response;
 
-        public SeeButton(DialogueScreen parent, boolean toggle) {
-            super(parent.getRight(14), parent.getBottom(59), 10, 10, Component.empty(), (button) -> parent.updateButtons(toggle), (n) -> Component.translatable(String.format("gui.block_party.button.%s", toggle ? "see_dialogue" : "see_response")));
-            this.toggle = toggle;
+        ResponseTextButton(int x, int y, int width, int height, Component message, Response response, OnPress onPress) {
+            super(x, y, width, height, message, onPress, DEFAULT_NARRATION);
+            this.response = response;
         }
 
         @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShaderTexture(0, DIALOGUE_TEXTURES);
-            int x = this.toggle ? 90 : 80;
-            int y = this.isHoveredOrFocused() ? 84 : 74;
-            this.blit(stack, this.getX() + this.offset, this.getY(), x, y, 10, 10);
-            this.ticks += this.backwards ? -partialTicks : partialTicks;
-            if (this.ticks > 20.0F) {
-                this.ticks = 20.0F;
-                this.offset = this.toggle ? -1 : 1;
-                this.backwards = true;
-            } else if (this.ticks < 0.0F) {
-                this.ticks = 0.0F;
-                this.offset = 0;
-                this.backwards = false;
-            }
+        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+            int y = this.isHoveredOrFocused() ? 61 : 48;
+            graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, DIALOGUE_TEXTURE, this.getX(), this.getY(), 4.0F, y, this.width, this.height, 256, 256);
+            graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, DIALOGUE_TEXTURE, this.getX() + 2, this.getY() + 1, this.response.ordinal() * 10, 74.0F, 10, 10, 256, 256);
+            graphics.drawString(Minecraft.getInstance().font, this.getMessage(), this.getX() + 16, this.getY() + 2, 0xFFFFFFFF, true);
         }
     }
 }

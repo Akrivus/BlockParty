@@ -1,26 +1,27 @@
 package block_party.scene;
 
-import block_party.entities.BlockPartyNPC;
-
+import block_party.entities.Moe;
 import java.util.List;
 
-public class Scene {
-    private final List<ISceneObservation> filters;
-    private final List<ISceneAction> actions;
+public final class Scene {
+    private final List<SceneObservation> filters;
+    private final List<SceneAction> actions;
 
-    public Scene(List<ISceneObservation> filters, List<ISceneAction> actions) {
-        this.filters = filters;
-        this.actions = actions;
+    public Scene(List<SceneObservation> filters, List<SceneAction> actions) {
+        this.filters = List.copyOf(filters);
+        this.actions = List.copyOf(actions);
     }
 
-    public boolean fulfills(BlockPartyNPC npc) {
-        for (ISceneObservation filter : this.filters) {
-            if (!filter.verify(npc)) { return false; }
+    public boolean fulfills(Moe moe) {
+        for (SceneObservation filter : this.filters) {
+            if (!filter.verify(moe)) {
+                return false;
+            }
         }
         return true;
     }
 
-    public List<ISceneAction> getActions() {
+    public List<SceneAction> getActions() {
         return this.actions;
     }
 }

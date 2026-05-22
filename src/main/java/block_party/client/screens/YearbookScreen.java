@@ -1,263 +1,225 @@
 package block_party.client.screens;
 
 import block_party.BlockParty;
-import block_party.client.animation.Animation;
-import block_party.entities.BlockPartyNPC;
-import block_party.messages.CRemovePage;
-import block_party.registry.CustomMessenger;
-import block_party.registry.CustomSounds;
-import block_party.utils.Trans;
-import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import block_party.entities.Moe;
+import block_party.network.payload.NpcDetailPayload;
+import block_party.network.payload.NpcDetailRequestPayload;
+import block_party.network.payload.NpcRemoveRequestPayload;
+import block_party.registry.CustomEntities;
+import java.util.List;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import org.joml.Quaternionf;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
-
 public class YearbookScreen extends ControllerScreen {
-    public static final ResourceLocation YEARBOOK_TEXTURES = BlockParty.source("textures/gui/yearbook.png");
-    private final String[] stats = new String[4];
-    private final String[] lines = new String[4];
-    private BlockPartyNPC entity;
-    private String name;
-    private String page;
-    private Button buttonPreviousPage;
-    private Button buttonNextPage;
-    private Button buttonRemovePage;
+    public static final ResourceLocation YEARBOOK_TEXTURE = BlockParty.source("textures/gui/yearbook.png");
+    private static final int WIDTH = 146;
+    private static final int HEIGHT = 187;
 
-    public YearbookScreen(List<Long> npcs, long id) {
-        super(npcs, id, 146, 187);
-        this.getNPC(id);
-    }
+    private NpcDetailPayload npc;
+    private Moe preview;
+    private Button previousButton;
+    private Button nextButton;
+    private Button removeButton;
 
-    @Override
-    public void setNPC() {
-        this.entity = this.npc.getClientEntity(this.minecraft);
-        this.entity.setAnimation(Animation.YEARBOOK.get());
-        this.name = this.entity.getTypeName().getString();
-        this.updateButtons();
-        this.stats[0] = String.format("%.0f", this.entity.getHealth());
-        this.stats[1] = String.format("%.0f", this.entity.getFoodLevel());
-        this.stats[2] = String.format("%.0f", this.entity.getLoyalty());
-        this.stats[3] = String.format("%.0f", this.entity.getStress());
-        this.lines[0] = Trans.late(this.entity.getDere().getTranslationKey());
-        this.lines[1] = Trans.late(this.entity.getBloodType().getTranslationKey());
-        this.lines[2] = Trans.late(this.entity.getZodiac().getTranslationKey());
-        if (this.npc.isEstrangedFrom(this.getPlayer())) {
-            this.lines[3] = Trans.late("trait.block_party.relationship.estranged");
-        } else if (this.npc.isDead()) {
-            this.lines[3] = Trans.late("trait.block_party.relationship.dead");
-        } else if (this.entity.getLoyalty() > 18) {
-            this.lines[3] = Trans.late("trait.block_party.relationship.obsessed");
-        } else if (this.entity.getLoyalty() > 15) {
-            this.lines[3] = Trans.late("trait.block_party.relationship.close");
-        } else if (this.entity.getLoyalty() > 10) {
-            this.lines[3] = Trans.late("trait.block_party.relationship.friendly");
-        } else {
-            this.lines[3] = Trans.late("trait.block_party.relationship.acquainted");
-        }
-    }
-
-    private void updateButtons() {
-        if (this.npcs.isEmpty()) {
-            this.getPlayer().displayClientMessage(Component.translatable("gui.block_party.error.empty"), true);
-            this.onClose();
-        } else {
-            this.page = String.format(Trans.late("gui.block_party.label.page"), this.index + 1, this.count);
-            this.buttonNextPage.visible = this.index + 1 < this.count;
-            this.buttonPreviousPage.visible = this.index - 1 >= 0;
-            this.buttonRemovePage.visible = this.npc.isDeadOrEstrangedFrom(this.getPlayer());
-        }
-    }
-
-    @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        if (this.npc == null) { return; }
-        this.renderBackground(stack);
-        this.renderPortrait(stack);
-        this.renderEntity(this.getAbsoluteCenter(-3), 90, 40.0F, this.entity);
-        if (this.npc.isDeadOrEstrangedFrom(this.getPlayer())) { this.renderOverlay(stack); }
-        this.renderBook(stack);
-        this.font.draw(stack, this.name, this.getCenter(this.font.width(this.name)) + 3, 91, 0);
-        this.font.draw(stack, this.page, this.getCenter(this.font.width(this.page)), 185, 0);
-        for (int x = 0; x < this.stats.length; ++x) {
-            this.font.draw(stack, this.stats[x], this.getAbsoluteCenter(38) + x * 25, 104, 0);
-        }
-        for (int y = 0; y < this.lines.length; ++y) {
-            this.font.draw(stack, this.lines[y], this.getAbsoluteCenter(40) - (y > 0 ? 5 : y), 123 + 10 * y, 0);
-        }
-        super.render(stack, mouseX, mouseY, partialTicks);
-        this.renderTooltips(stack, mouseX, mouseY);
-    }
-
-    public void renderTooltips(PoseStack stack, int mouseX, int mouseY) {
-        List<Component> text = new ArrayList<>();
-        if (this.buttonRemovePage.isHoveredOrFocused()) {
-            text.add(Component.translatable("gui.block_party.button.remove"));
-        }
-        if (102 < mouseY && mouseY < 112) {
-            if (this.getAbsoluteCenter(50) < mouseX && mouseX < this.getAbsoluteCenter(24)) {
-                text.add(Component.translatable("gui.block_party.label.health"));
-            }
-            if (this.getAbsoluteCenter(24) < mouseX && mouseX < this.getAbsoluteCenter(2)) {
-                text.add(Component.translatable("gui.block_party.label.food_level"));
-            }
-            if (this.getAbsoluteCenter(2) < mouseX && mouseX < this.getAbsoluteCenter(-24)) {
-                text.add(Component.translatable("gui.block_party.label.loyalty"));
-            }
-            if (this.getAbsoluteCenter(-24) < mouseX && mouseX < this.getAbsoluteCenter(-50)) {
-                text.add(Component.translatable("gui.block_party.label.stress"));
-            }
-        }
-        if (text.size() > 0) {
-            this.renderTooltip(stack, Lists.transform(text, Component::getVisualOrderText), mouseX, mouseY);
-        }
-    }
-
-    public void renderPortrait(PoseStack stack) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
-        this.blit(stack, this.getCenter(60) + 3, 27, 161, 25, 58, 58);
-    }
-
-    public void renderOverlay(PoseStack stack) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
-        if (this.npc.isDead()) { this.blit(stack, this.getCenter(60) + 2, 26, 160, 155, 60, 60); }
-        if (this.npc.isEstrangedFrom(this.getPlayer())) {
-            this.blit(stack, this.getCenter(60) + 2, 26, 160, 95, 60, 60);
-        }
-    }
-
-    public void renderBook(PoseStack stack) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
-        this.blit(stack, this.getCenter(146), 2, 0, 0, 146, 187);
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers)) { return true; }
-        switch (keyCode) {
-        case GLFW.GLFW_KEY_RIGHT:
-        case GLFW.GLFW_KEY_D:
-            this.buttonNextPage.onPress();
-            return true;
-        case GLFW.GLFW_KEY_LEFT:
-        case GLFW.GLFW_KEY_A:
-            this.buttonPreviousPage.onPress();
-            return true;
-        default:
-            return false;
-        }
+    public YearbookScreen(List<Long> databaseIds, long selectedDatabaseId) {
+        super(databaseIds, selectedDatabaseId);
     }
 
     @Override
     protected void init() {
-        this.addRenderableWidget(new QuickWidgetButton(this));
-        this.addRenderableWidget(this.buttonNextPage = new TurnPageButton(this.getCenter(146) + 122, 51, 1, (button) -> {
-            if (this.index + 1 < this.count) { this.getNPC(this.index + 1); }
-        }));
-        this.addRenderableWidget(this.buttonPreviousPage = new TurnPageButton(this.getCenter(146) + 21, 51, -1, (button) -> {
-            if (this.index - 1 >= 0) { this.getNPC(this.index - 1); }
-        }));
-        this.addRenderableWidget(this.buttonRemovePage = new RemovePageButton(this.getCenter(146) + 115, 9, (button) -> {
-            CustomMessenger.send(new CRemovePage(this.npc.getID()));
-            this.npcs.remove(this.npc.getID());
-            if (++this.index >= this.count) { --this.index; }
-            if (this.index < 0) { this.index = 0; }
-            if (this.npcs.isEmpty()) {
-                this.onClose();
-            } else {
-                this.getNPC(this.index);
-            }
-        }));
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose())
+                .bounds(this.left(136), 196, 136, 20)
+                .build());
+        this.previousButton = this.addRenderableWidget(new PageButton(this.left(WIDTH) + 21, 51, false, button -> this.previousPage()));
+        this.nextButton = this.addRenderableWidget(new PageButton(this.left(WIDTH) + 122, 51, true, button -> this.nextPage()));
+        Component remove = Component.translatable("gui.block_party.button.remove");
+        this.removeButton = this.addRenderableWidget(new RemovePageButton(this.left(WIDTH) + 115, 9, button -> this.removeSelected()));
+        this.removeButton.setTooltip(Tooltip.create(remove));
+        this.requestSelected();
+        this.updateButtons();
     }
 
     @Override
-    public boolean isPauseScreen() {
+    public void handleNpcDetail(NpcDetailPayload payload) {
+        Long selected = this.selectedId();
+        if (selected == null || payload.databaseId() != selected) {
+            return;
+        }
+        this.npc = payload;
+        this.preview = this.createPreview(payload);
+        this.updateButtons();
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(graphics, mouseX, mouseY, partialTick);
+        this.renderBook(graphics);
+        if (this.npc != null && this.npc.found()) {
+            this.renderPreview(graphics, mouseX, mouseY);
+            this.renderDetails(graphics);
+        }
+        super.render(graphics, mouseX, mouseY, partialTick);
+    }
+
+    private void renderBook(GuiGraphics graphics) {
+        graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, YEARBOOK_TEXTURE, this.left(WIDTH), 2, 0.0F, 0.0F, WIDTH, HEIGHT, 256, 256);
+    }
+
+    private void renderPreview(GuiGraphics graphics, int mouseX, int mouseY) {
+        if (this.preview == null) {
+            return;
+        }
+        InventoryScreen.renderEntityInInventoryFollowsMouse(graphics, this.width / 2 - 33, 28, this.width / 2 + 27, 88, 34, 0.0F, mouseX, mouseY, this.preview);
+        ++this.preview.tickCount;
+    }
+
+    private void renderDetails(GuiGraphics graphics) {
+        String name = this.npc.name().isBlank() ? Component.translatable("entity.block_party.moe").getString() : this.npc.name();
+        graphics.drawString(this.font, name, this.width / 2 - this.font.width(name) / 2 + 3, 91, 0, false);
+        String page = this.databaseIds.isEmpty() ? "0/0" : String.format("%d/%d", this.index + 1, this.databaseIds.size());
+        graphics.drawString(this.font, page, this.width / 2 - this.font.width(page) / 2, 185, 0, false);
+        graphics.drawString(this.font, "ID " + this.npc.databaseId(), this.absoluteCenter(35), 104, 0, false);
+        graphics.drawString(this.font, this.npc.gender(), this.absoluteCenter(35), 123, 0, false);
+        graphics.drawString(this.font, Block.stateById(this.npc.blockStateId()).getBlock().getName(), this.absoluteCenter(35), 143, 0, false);
+        graphics.drawString(this.font, this.npc.hiding()
+                ? Component.translatable("gui.block_party.label.hidden")
+                : Component.translatable("gui.block_party.label.visible"), this.absoluteCenter(35), 163, 0, false);
+    }
+
+    private void requestSelected() {
+        Long selected = this.selectedId();
+        if (selected == null) {
+            this.onClose();
+            return;
+        }
+        PacketDistributor.sendToServer(new NpcDetailRequestPayload(selected));
+    }
+
+    private void nextPage() {
+        if (this.index + 1 < this.databaseIds.size()) {
+            ++this.index;
+            this.requestSelected();
+            this.updateButtons();
+            this.playPageTurn();
+        }
+    }
+
+    private void previousPage() {
+        if (this.index > 0) {
+            --this.index;
+            this.requestSelected();
+            this.updateButtons();
+            this.playPageTurn();
+        }
+    }
+
+    private void removeSelected() {
+        Long selected = this.selectedId();
+        if (selected == null) {
+            this.onClose();
+            return;
+        }
+        PacketDistributor.sendToServer(new NpcRemoveRequestPayload(selected));
+        this.databaseIds.remove(this.index);
+        if (this.index >= this.databaseIds.size()) {
+            --this.index;
+        }
+        if (this.index < 0) {
+            this.index = 0;
+        }
+        if (this.databaseIds.isEmpty()) {
+            this.onClose();
+        } else {
+            this.requestSelected();
+        }
+        this.updateButtons();
+    }
+
+    private void updateButtons() {
+        if (this.previousButton != null) {
+            this.previousButton.visible = this.index > 0;
+        }
+        if (this.nextButton != null) {
+            this.nextButton.visible = this.index + 1 < this.databaseIds.size();
+        }
+        if (this.removeButton != null) {
+            this.removeButton.visible = this.npc != null && this.npc.found();
+        }
+    }
+
+    private void playPageTurn() {
+        if (this.minecraft != null) {
+            this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0F));
+        }
+    }
+
+    private Moe createPreview(NpcDetailPayload payload) {
+        if (this.minecraft == null || this.minecraft.level == null || !payload.found()) {
+            return null;
+        }
+        Moe moe = CustomEntities.MOE.get().create(this.minecraft.level, EntitySpawnReason.TRIGGERED);
+        if (moe == null) {
+            return null;
+        }
+        moe.setDatabaseID(payload.databaseId());
+        moe.setOwnerUUID(payload.ownerUuid());
+        moe.setBlockStateFromRow(Block.stateById(payload.blockStateId()));
+        moe.setGivenName(payload.name());
+        moe.setGender(payload.gender());
+        return moe;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_D) {
+            this.nextPage();
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_A) {
+            this.previousPage();
+            return true;
+        }
         return false;
     }
 
-    @Override
-    protected void setEntityViewStack(PoseStack pose, int posX, int posY) {
-        pose.translate(posX, posY, 1050.0);
-        pose.scale(-1.0F, -1.0F, -1.0F);
-    }
+    private static class PageButton extends Button {
+        private final boolean next;
 
-    @Override
-    protected void setEntityModelStack(PoseStack pose, float scale) {
-        pose.translate(0.0D, 0.0D, 1000.0D);
-        pose.scale(scale, scale, scale);
-        pose.mulPose(new Quaternionf(0.0F, -1.0F, 0.0F, 0.0F));
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public class QuickWidgetButton extends Button {
-        public QuickWidgetButton(YearbookScreen screen) {
-            super(screen.getCenter(136), 196, 136, 20, CommonComponents.GUI_DONE, (button) -> screen.minecraft.setScreen(null), (n) -> Component.empty());
-        }
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public class TurnPageButton extends Button {
-        private final int delta;
-
-        public TurnPageButton(int x, int y, int delta, OnPress button) {
-            super(x, y, 7, 10, Component.empty(), button, (n) -> Component.empty());
-            this.delta = delta;
+        PageButton(int x, int y, boolean next, OnPress onPress) {
+            super(x, y, 7, 10, Component.empty(), onPress, DEFAULT_NARRATION);
+            this.next = next;
         }
 
         @Override
-        public void playDownSound(SoundManager sound) {
-            sound.play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0F));
-        }
-
-        @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
-            int x = this.delta > 0 ? 226 : 147;
-            int y = this.isHoveredOrFocused() ? 35 : 63;
-            this.blit(stack, this.getX(), this.getY(), x, y, 7, 10);
+        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+            int textureX = this.next ? 226 : 147;
+            int textureY = this.isHoveredOrFocused() ? 35 : 63;
+            graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, YEARBOOK_TEXTURE, this.getX(), this.getY(), textureX, textureY, this.width, this.height, 256, 256);
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public class RemovePageButton extends Button {
-        public RemovePageButton(int x, int y, OnPress button) {
-            super(x, y, 18, 18, Component.empty(), button, (n) -> Component.empty());
+    private static class RemovePageButton extends Button {
+        RemovePageButton(int x, int y, OnPress onPress) {
+            super(x, y, 18, 18, Component.empty(), onPress, DEFAULT_NARRATION);
         }
 
         @Override
-        public void playDownSound(SoundManager sound) {
-            sound.play(SimpleSoundInstance.forUI(CustomSounds.ITEM_YEARBOOK_REMOVE_PAGE.get(), 1.0F));
-        }
-
-        @Override
-        public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShaderTexture(0, YEARBOOK_TEXTURES);
-            int x = this.isHoveredOrFocused() ? 164 : 146;
-            this.blit(stack, this.getX(), this.getY(), x, 7, 18, 18);
+        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+            graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, YEARBOOK_TEXTURE, this.getX(), this.getY(), this.isHoveredOrFocused() ? 164 : 146, 7, this.width, this.height, 256, 256);
         }
     }
 }
