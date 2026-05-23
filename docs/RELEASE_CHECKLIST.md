@@ -1,6 +1,68 @@
 # Release Checklist
 
-Use this checklist before merging release-facing changes or cutting a build.
+Use this checklist to review the merge PR and before cutting a build.
+
+## PR Review Map
+
+The PR has a large file count because the source tree was consolidated for the
+NeoForge build instead of keeping a separate generated-resource bridge. Treat
+the diff as a few buckets:
+
+- Resource path normalization: `recipes` -> `recipe`, `loot_tables` ->
+  `loot_table`, `tags/blocks` -> `tags/block`, `tags/items` -> `tags/item`,
+  and `structures` -> `structure`.
+- Source-owned NeoForge resources: active metadata and target-format resources
+  now live directly under `src/main/resources`.
+- Promoted generated resources: item definition JSON, fallback block-backed item
+  models, and missing item translations were moved into source because they are
+  normal assets in the merged branch.
+- Documentation consolidation: port planning and spike/audit notes were removed
+  or folded into this checklist and `docs/COMPATIBILITY_NOTES.md`.
+- Actual code changes: GameTests/resource smoke coverage, SQLite compatibility
+  fixes, and small behavior-preserving cleanup around restored systems.
+
+Reviewers can skim pure path moves and generated-resource promotion once they
+confirm the files are in the expected Minecraft 1.21.4 locations. Spend focused
+review time on the smaller code diff and on `docs/COMPATIBILITY_NOTES.md`.
+
+## High-Signal Files
+
+- `build.gradle`: normal NeoForge build layout, no separate resource sync path.
+- `src/main/resources/META-INF/neoforge.mods.toml`: active mod metadata.
+- `src/main/resources/data/block_party/**`: normalized recipes, loot tables,
+  tags, worldgen, and structure paths.
+- `src/main/resources/assets/block_party/items/**`: source-owned item
+  definitions.
+- `src/main/resources/assets/block_party/models/item/**`: source-owned fallback
+  item models for block-backed items.
+- `src/main/resources/assets/block_party/lang/en_us.json`: appended item
+  translation coverage.
+- `src/main/java/block_party/db/BlockPartyDB.java`: restored sapling query table.
+- `src/main/java/block_party/entity/NPC.java`: compatibility migration for
+  hidden-position columns.
+- `src/main/java/block_party/gametest/**`: active server-side smoke coverage.
+- `docs/COMPATIBILITY_NOTES.md`: intentional behavior differences and deferred
+  compatibility work.
+
+## Low-Signal Diff Buckets
+
+These changes are expected noise from consolidating the branch and should not be
+reviewed as new gameplay:
+
+- `data/block_party/recipes/**` -> `data/block_party/recipe/**`.
+- `data/block_party/loot_tables/**` -> `data/block_party/loot_table/**`.
+- `data/block_party/tags/blocks/**` -> `data/block_party/tags/block/**`.
+- `data/block_party/tags/items/**` -> `data/block_party/tags/item/**`.
+- `data/minecraft/tags/blocks/**` -> `data/minecraft/tags/block/**`.
+- `data/minecraft/tags/items/**` -> `data/minecraft/tags/item/**`.
+- `data/block_party/structures/empty.nbt` ->
+  `data/block_party/structure/empty.nbt`.
+- Item definition JSON under `assets/block_party/items/**`.
+- Fallback item model JSON added under `assets/block_party/models/item/**` for
+  block-backed inventory rendering.
+
+Use GitHub's whitespace hiding and folder-by-folder review to keep these moves
+from obscuring the real code changes.
 
 ## Build Checks
 
