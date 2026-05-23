@@ -50,7 +50,7 @@ public class YearbookItem extends Item implements SortableItem {
             return;
         }
         BlockPartyDB db = BlockPartyDB.get(player.level());
-        List<Long> ids = db.listNpcIds(player.getUUID());
+        List<Long> ids = db.listYearbookNpcIds(player.getUUID());
         if (ids.isEmpty()) {
             return;
         }

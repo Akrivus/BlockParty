@@ -40,15 +40,15 @@ public record NpcDetailPayload(
     }
 
     public static NpcDetailPayload from(long requestedId, Optional<NPC> npc) {
-        return npc.map(value -> from(value, 0.0F)).orElseGet(() -> missing(requestedId));
+        return npc.map(NpcDetailPayload::from).orElseGet(() -> missing(requestedId));
     }
 
     public static NpcDetailPayload from(long requestedId, Optional<NPC> npc, Optional<Moe> live) {
-        return npc.map(value -> from(value, live.map(Moe::getHealth).orElse(0.0F))).orElseGet(() -> missing(requestedId));
+        return npc.map(value -> from(value, live.map(Moe::getHealth).orElse(value.health()))).orElseGet(() -> missing(requestedId));
     }
 
     public static NpcDetailPayload from(NPC npc) {
-        return from(npc, 0.0F);
+        return from(npc, npc.health());
     }
 
     public static NpcDetailPayload from(NPC npc, float health) {

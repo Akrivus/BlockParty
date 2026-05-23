@@ -13,9 +13,6 @@ import block_party.network.payload.DialogueRespondPayload;
 import block_party.network.payload.NpcCallPayload;
 import block_party.network.payload.NpcCallRequestPayload;
 import block_party.network.payload.NpcDetailPayload;
-import block_party.network.payload.NpcDetailRequestPayload;
-import block_party.network.payload.NpcListPayload;
-import block_party.network.payload.NpcListRequestPayload;
 import block_party.network.payload.NpcRemoveRequestPayload;
 import block_party.network.payload.ShrineListPayload;
 import block_party.network.payload.ShrineListRequestPayload;
@@ -60,37 +57,29 @@ public final class NetworkPayloadGameTests {
         UUID owner = new UUID(1201L, 2201L);
         BlockPos hiddenPos = new BlockPos(2, 3, 4);
 
-        if (roundTrip(NpcListRequestPayload.STREAM_CODEC, NpcListRequestPayload.INSTANCE) != NpcListRequestPayload.INSTANCE) {
-            helper.fail("Expected list request payload codec to preserve singleton instance");
-            return;
-        }
         if (roundTrip(ShrineListRequestPayload.STREAM_CODEC, ShrineListRequestPayload.INSTANCE) != ShrineListRequestPayload.INSTANCE) {
             helper.fail("Expected shrine list request payload codec to preserve singleton instance");
             return;
         }
-        assertEquals(helper, new NpcDetailRequestPayload(99L),
-                roundTrip(NpcDetailRequestPayload.STREAM_CODEC, new NpcDetailRequestPayload(99L)),
-                "detail request payload");
         assertEquals(helper, new NpcRemoveRequestPayload(100L),
                 roundTrip(NpcRemoveRequestPayload.STREAM_CODEC, new NpcRemoveRequestPayload(100L)),
                 "remove request payload");
         assertEquals(helper, new NpcCallRequestPayload(102L),
                 roundTrip(NpcCallRequestPayload.STREAM_CODEC, new NpcCallRequestPayload(102L)),
                 "call request payload");
-        assertEquals(helper, new NpcListPayload(List.of(1L, 2L, 3L)),
-                roundTrip(NpcListPayload.STREAM_CODEC, new NpcListPayload(List.of(1L, 2L, 3L))),
-                "list response payload");
         assertEquals(helper, new NpcDetailPayload(101L, true, owner, "Moe", "FEMALE", false, "AB", "KUUDERE", "PISCES", 20.0F, 18.0F, 12.0F, 3.0F, 5, true, hiddenPos),
                 roundTrip(NpcDetailPayload.STREAM_CODEC, new NpcDetailPayload(101L, true, owner, "Moe", "FEMALE", false, "AB", "KUUDERE", "PISCES", 20.0F, 18.0F, 12.0F, 3.0F, 5, true, hiddenPos)),
                 "detail response payload");
         assertEquals(helper, new NpcCallPayload(103L, true, true, hiddenPos),
                 roundTrip(NpcCallPayload.STREAM_CODEC, new NpcCallPayload(103L, true, true, hiddenPos)),
                 "call response payload");
-        assertEquals(helper, ControllerOpenPayload.cellPhone(List.of(1L, 2L), InteractionHand.MAIN_HAND),
-                roundTrip(ControllerOpenPayload.STREAM_CODEC, ControllerOpenPayload.cellPhone(List.of(1L, 2L), InteractionHand.MAIN_HAND)),
+        NpcDetailPayload contactOne = new NpcDetailPayload(1L, true, owner, "One", "FEMALE", false, "O", "NYANDERE", "ARIES", 20.0F, 20.0F, 6.0F, 0.0F, 5, false, BlockPos.ZERO);
+        NpcDetailPayload contactTwo = new NpcDetailPayload(2L, true, owner, "Two", "FEMALE", false, "A", "KUUDERE", "TAURUS", 18.0F, 19.0F, 7.0F, 1.0F, 6, false, BlockPos.ZERO);
+        assertEquals(helper, ControllerOpenPayload.cellPhone(List.of(contactOne, contactTwo), InteractionHand.MAIN_HAND),
+                roundTrip(ControllerOpenPayload.STREAM_CODEC, ControllerOpenPayload.cellPhone(List.of(contactOne, contactTwo), InteractionHand.MAIN_HAND)),
                 "cell phone open payload");
-        assertEquals(helper, ControllerOpenPayload.yearbook(List.of(3L, 4L), 4L, InteractionHand.OFF_HAND),
-                roundTrip(ControllerOpenPayload.STREAM_CODEC, ControllerOpenPayload.yearbook(List.of(3L, 4L), 4L, InteractionHand.OFF_HAND)),
+        assertEquals(helper, ControllerOpenPayload.yearbook(List.of(contactOne, contactTwo), 2L, InteractionHand.OFF_HAND),
+                roundTrip(ControllerOpenPayload.STREAM_CODEC, ControllerOpenPayload.yearbook(List.of(contactOne, contactTwo), 2L, InteractionHand.OFF_HAND)),
                 "yearbook open payload");
         Dialogue dialogue = sampleDialogue();
         NpcDetailPayload detail = new NpcDetailPayload(104L, true, owner, "Moe", "FEMALE", false, "O", "NYANDERE", "ARIES", 20.0F, 20.0F, 6.0F, 0.0F, 5, false, BlockPos.ZERO);
@@ -106,25 +95,6 @@ public final class NetworkPayloadGameTests {
         assertEquals(helper, new ShrineListPayload(List.of(new BlockPos(7, 8, 9), new BlockPos(-1, 64, 2))),
                 roundTrip(ShrineListPayload.STREAM_CODEC, new ShrineListPayload(List.of(new BlockPos(7, 8, 9), new BlockPos(-1, 64, 2)))),
                 "shrine list payload");
-        helper.succeed();
-    }
-
-    @GameTest(template = "empty", timeoutTicks = 20)
-    public static void ownedListRequestReturnsOwnedNpcIds(GameTestHelper helper) {
-        ServerLevel level = helper.getLevel();
-        BlockPartyDB db = BlockPartyDB.get(level);
-        UUID owner = new UUID(1202L, 2202L);
-        Moe moe = spawnOwnedMoe(helper, level, owner, new BlockPos(1, 1, 1));
-        if (moe == null) {
-            return;
-        }
-
-        NpcListPayload response = CustomMessenger.listResponse(db, owner);
-        if (!response.databaseIds().contains(moe.getDatabaseID())) {
-            helper.fail("Expected owned list response to include spawned NPC ID");
-            return;
-        }
-        helper.kill(moe);
         helper.succeed();
     }
 
@@ -150,11 +120,11 @@ public final class NetworkPayloadGameTests {
             helper.fail("Expected owned detail response to expose Yearbook trait fields");
             return;
         }
-        if (response.health() != 0.0F
+        if (response.health() != moe.getHealth()
                 || response.foodLevel() != moe.getFoodLevel()
                 || response.loyalty() != moe.getLoyalty()
                 || response.stress() != moe.getStress()) {
-            helper.fail("Expected owned detail response to expose Yearbook stat fields");
+            helper.fail("Expected owned detail response to expose persisted Yearbook stat fields");
             return;
         }
         moe.setHealth(7.0F);
@@ -214,8 +184,9 @@ public final class NetworkPayloadGameTests {
             helper.fail("Expected dead row setup to succeed: " + exception.getMessage());
             return;
         }
-        if (CustomMessenger.detailResponse(db, owner, id).found()) {
-            helper.fail("Expected dead row detail response to fail safely");
+        NpcDetailPayload deadResponse = CustomMessenger.detailResponse(db, owner, id);
+        if (!deadResponse.found() || !deadResponse.dead()) {
+            helper.fail("Expected dead row detail response to remain visible as a Yearbook page");
             return;
         }
 
@@ -244,19 +215,31 @@ public final class NetworkPayloadGameTests {
         }
 
         long id = moe.getDatabaseID();
-        NpcListPayload rejected = CustomMessenger.removeResponse(db, other, id);
-        if (rejected.databaseIds().contains(id)) {
-            helper.fail("Expected non-owner remove response to omit non-owned NPC ID");
-            return;
-        }
+        CustomMessenger.removeResponse(db, other, id);
         if (!db.listNpcIds(owner).contains(id)) {
             helper.fail("Expected rejected remove to leave owner list intact");
             return;
         }
 
-        NpcListPayload ownerResponse = CustomMessenger.removeResponse(db, owner, id);
-        if (ownerResponse.databaseIds().contains(id)) {
-            helper.fail("Expected owner remove response to omit removed NPC ID");
+        CustomMessenger.removeResponse(db, owner, id);
+        if (!db.listNpcIds(owner).contains(id)) {
+            helper.fail("Expected living owner remove to keep NPC ID");
+            return;
+        }
+        NPC row = db.findNpcSafe(id).orElse(null);
+        if (row == null) {
+            helper.fail("Expected spawned row before dead remove response test");
+            return;
+        }
+        try {
+            row.markDead(db);
+        } catch (SQLException exception) {
+            helper.fail("Expected dead row setup to succeed: " + exception.getMessage());
+            return;
+        }
+        CustomMessenger.removeResponse(db, owner, id);
+        if (db.listYearbookNpcIds(owner).contains(id)) {
+            helper.fail("Expected dead owner remove to omit removed NPC ID");
             return;
         }
         if (db.findNpcSafe(id).isEmpty()) {
@@ -327,15 +310,31 @@ public final class NetworkPayloadGameTests {
         }
 
         ControllerOpenPayload cellPhone = CustomMessenger.cellPhoneOpenPayload(db, owner, InteractionHand.MAIN_HAND);
-        if (cellPhone.controller() != ControllerOpenPayload.ControllerType.CELL_PHONE || !cellPhone.databaseIds().contains(moe.getDatabaseID())) {
-            helper.fail("Expected Cell Phone open payload to include owned NPC list");
+        if (cellPhone.controller() != ControllerOpenPayload.ControllerType.CELL_PHONE || !containsNpc(cellPhone.npcs(), moe.getDatabaseID())) {
+            helper.fail("Expected Cell Phone open payload to include owned NPC details");
+            return;
+        }
+        NPC row = db.findNpcSafe(moe.getDatabaseID()).orElse(null);
+        if (row == null) {
+            helper.fail("Expected spawned row before dead controller payload test");
+            return;
+        }
+        try {
+            row.markDead(db);
+        } catch (SQLException exception) {
+            helper.fail("Expected dead row setup to succeed: " + exception.getMessage());
+            return;
+        }
+        ControllerOpenPayload deadCellPhone = CustomMessenger.cellPhoneOpenPayload(db, owner, InteractionHand.MAIN_HAND);
+        if (!containsNpc(deadCellPhone.npcs(), moe.getDatabaseID())) {
+            helper.fail("Expected Cell Phone open payload to include dead Yearbook-visible contact details");
             return;
         }
         ControllerOpenPayload yearbook = CustomMessenger.yearbookOpenPayload(db, owner, moe.getDatabaseID(), InteractionHand.OFF_HAND);
         if (yearbook.controller() != ControllerOpenPayload.ControllerType.YEARBOOK
                 || yearbook.selectedDatabaseId() != moe.getDatabaseID()
-                || !yearbook.databaseIds().contains(moe.getDatabaseID())) {
-            helper.fail("Expected Yearbook open payload to include owned NPC list and selected ID");
+                || !containsNpc(yearbook.npcs(), moe.getDatabaseID())) {
+            helper.fail("Expected Yearbook open payload to include owned NPC details and selected ID");
             return;
         }
         helper.kill(moe);
@@ -571,6 +570,15 @@ public final class NetworkPayloadGameTests {
                         ResourceLocation.fromNamespaceAndPath("block_party", "moe.say"), 1.0F),
                 ResourceLocation.fromNamespaceAndPath("block_party", "moe.say"),
                 Map.of(Response.GREEN_CHECKMARK, "Yes", Response.RED_X, "No"));
+    }
+
+    private static boolean containsNpc(List<NpcDetailPayload> npcs, long databaseId) {
+        for (NpcDetailPayload npc : npcs) {
+            if (npc.databaseId() == databaseId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static <T> void assertEquals(GameTestHelper helper, T expected, T actual, String label) {

@@ -4,7 +4,6 @@ import block_party.BlockParty;
 import block_party.client.ClientTranslations;
 import block_party.entities.Moe;
 import block_party.network.payload.NpcDetailPayload;
-import block_party.network.payload.NpcDetailRequestPayload;
 import block_party.network.payload.NpcRemoveRequestPayload;
 import block_party.registry.CustomEntities;
 import java.util.List;
@@ -33,8 +32,8 @@ public class YearbookScreen extends ControllerScreen {
     private Button nextButton;
     private Button removeButton;
 
-    public YearbookScreen(List<Long> databaseIds, long selectedDatabaseId) {
-        super(databaseIds, selectedDatabaseId);
+    public YearbookScreen(List<NpcDetailPayload> npcs, long selectedDatabaseId) {
+        super(npcs, selectedDatabaseId);
     }
 
     @Override
@@ -47,18 +46,7 @@ public class YearbookScreen extends ControllerScreen {
         Component remove = Component.translatable("gui.block_party.button.remove");
         this.removeButton = this.addRenderableWidget(new RemovePageButton(this.left(WIDTH) + 115, 9, button -> this.removeSelected()));
         this.removeButton.setTooltip(Tooltip.create(remove));
-        this.requestSelected();
-        this.updateButtons();
-    }
-
-    @Override
-    public void handleNpcDetail(NpcDetailPayload payload) {
-        Long selected = this.selectedId();
-        if (selected == null || payload.databaseId() != selected) {
-            return;
-        }
-        this.npc = payload;
-        this.preview = this.createPreview(payload);
+        this.showSelected();
         this.updateButtons();
     }
 
@@ -70,7 +58,7 @@ public class YearbookScreen extends ControllerScreen {
             this.renderPreview(graphics, mouseX, mouseY);
             this.renderDetails(graphics);
         }
-        super.render(graphics, mouseX, mouseY, partialTick);
+        this.renderWidgets(graphics, mouseX, mouseY, partialTick);
     }
 
     private void renderBook(GuiGraphics graphics) {
@@ -88,9 +76,9 @@ public class YearbookScreen extends ControllerScreen {
     private void renderDetails(GuiGraphics graphics) {
         String name = ClientTranslations.displayName(this.npc).getString();
         graphics.drawString(this.font, name, this.width / 2 - this.font.width(name) / 2 + 3, 91, 0, false);
-        String page = this.databaseIds.isEmpty()
+        String page = this.npcs.isEmpty()
                 ? ClientTranslations.page(0, 0).getString()
-                : ClientTranslations.page(this.index + 1, this.databaseIds.size()).getString();
+                : ClientTranslations.page(this.index + 1, this.npcs.size()).getString();
         graphics.drawString(this.font, page, this.width / 2 - this.font.width(page) / 2, 185, 0, false);
         String[] stats = {
                 String.format("%.0f", this.npc.health()),
@@ -105,26 +93,27 @@ public class YearbookScreen extends ControllerScreen {
                 ClientTranslations.dere(this.npc.dere()),
                 ClientTranslations.bloodType(this.npc.bloodType()),
                 ClientTranslations.zodiac(this.npc.zodiac()),
-                ClientTranslations.relationship(this.npc.dead(), this.npc.loyalty())
+                ClientTranslations.relationship(this.npc, this.minecraft.player == null ? null : this.minecraft.player.getUUID())
         };
         for (int y = 0; y < lines.length; ++y) {
             graphics.drawString(this.font, lines[y], this.absoluteCenter(40) - (y > 0 ? 5 : y), 123 + 10 * y, 0, false);
         }
     }
 
-    private void requestSelected() {
-        Long selected = this.selectedId();
+    private void showSelected() {
+        NpcDetailPayload selected = this.selectedNpc();
         if (selected == null) {
             this.onClose();
             return;
         }
-        PacketDistributor.sendToServer(new NpcDetailRequestPayload(selected));
+        this.npc = selected;
+        this.preview = this.createPreview(selected);
     }
 
     private void nextPage() {
-        if (this.index + 1 < this.databaseIds.size()) {
+        if (this.index + 1 < this.npcs.size()) {
             ++this.index;
-            this.requestSelected();
+            this.showSelected();
             this.updateButtons();
             this.playPageTurn();
         }
@@ -133,30 +122,33 @@ public class YearbookScreen extends ControllerScreen {
     private void previousPage() {
         if (this.index > 0) {
             --this.index;
-            this.requestSelected();
+            this.showSelected();
             this.updateButtons();
             this.playPageTurn();
         }
     }
 
     private void removeSelected() {
+        if (!this.canRemoveSelected()) {
+            return;
+        }
         Long selected = this.selectedId();
         if (selected == null) {
             this.onClose();
             return;
         }
         PacketDistributor.sendToServer(new NpcRemoveRequestPayload(selected));
-        this.databaseIds.remove(this.index);
-        if (this.index >= this.databaseIds.size()) {
+        this.npcs.remove(this.index);
+        if (this.index >= this.npcs.size()) {
             --this.index;
         }
         if (this.index < 0) {
             this.index = 0;
         }
-        if (this.databaseIds.isEmpty()) {
+        if (this.npcs.isEmpty()) {
             this.onClose();
         } else {
-            this.requestSelected();
+            this.showSelected();
         }
         this.updateButtons();
     }
@@ -166,11 +158,18 @@ public class YearbookScreen extends ControllerScreen {
             this.previousButton.visible = this.index > 0;
         }
         if (this.nextButton != null) {
-            this.nextButton.visible = this.index + 1 < this.databaseIds.size();
+            this.nextButton.visible = this.index + 1 < this.npcs.size();
         }
         if (this.removeButton != null) {
-            this.removeButton.visible = this.npc != null && this.npc.found();
+            this.removeButton.visible = this.canRemoveSelected();
         }
+    }
+
+    private boolean canRemoveSelected() {
+        if (this.npc == null || !this.npc.found() || this.minecraft == null || this.minecraft.player == null) {
+            return false;
+        }
+        return this.npc.dead() || !this.minecraft.player.getUUID().equals(this.npc.ownerUuid());
     }
 
     private void playPageTurn() {
@@ -199,6 +198,7 @@ public class YearbookScreen extends ControllerScreen {
         moe.setLoyalty(payload.loyalty());
         moe.setStress(payload.stress());
         moe.setAnimationKey("YEARBOOK");
+        moe.setGuiPreview(true);
         return moe;
     }
 

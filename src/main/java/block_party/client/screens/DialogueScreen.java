@@ -16,6 +16,7 @@ import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -34,6 +35,10 @@ public class DialogueScreen extends Screen {
     public static final ResourceLocation DIALOGUE_TEXTURE = BlockParty.source("textures/gui/dialogue.png");
     private static final int WIDTH = 242;
     private static final int HEIGHT = 48;
+    private static final int SPEAKER_PREVIEW_HALF_WIDTH = 55;
+    private static final int SPEAKER_PREVIEW_TOP_OFFSET = 150;
+    private static final int SPEAKER_PREVIEW_BOTTOM_OFFSET = 18;
+    private static final float SPEAKER_PREVIEW_BASE_SCALE = 72.0F;
 
     private final NpcDetailPayload npc;
     private final Dialogue dialogue;
@@ -66,7 +71,7 @@ public class DialogueScreen extends Screen {
         this.renderBackground(graphics, mouseX, mouseY, partialTick);
         this.renderPreview(graphics, mouseX, mouseY);
         this.renderPanel(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
+        this.renderWidgets(graphics, mouseX, mouseY, partialTick);
     }
 
     private void renderPanel(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
@@ -91,6 +96,12 @@ public class DialogueScreen extends Screen {
         }
     }
 
+    private void renderWidgets(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        for (Renderable renderable : this.renderables) {
+            renderable.render(graphics, mouseX, mouseY, partialTick);
+        }
+    }
+
     private void renderPreview(GuiGraphics graphics, int mouseX, int mouseY) {
         if (this.dialogue.speaker().identity() == Speaker.Identity.NARRATOR || this.preview == null) {
             return;
@@ -101,8 +112,17 @@ public class DialogueScreen extends Screen {
             case RIGHT -> this.width / 2 + 70;
         };
         int y = this.bottom() - 50;
-        int scale = Math.max(20, (int) (40.0F * this.dialogue.speaker().scale()));
-        InventoryScreen.renderEntityInInventoryFollowsMouse(graphics, x - 35, y - 95, x + 35, y + 15, scale, 0.0F, mouseX, mouseY, this.preview);
+        int scale = Math.max(20, (int) (SPEAKER_PREVIEW_BASE_SCALE * this.dialogue.speaker().scale()));
+        InventoryScreen.renderEntityInInventoryFollowsMouse(graphics,
+                x - SPEAKER_PREVIEW_HALF_WIDTH,
+                y - SPEAKER_PREVIEW_TOP_OFFSET,
+                x + SPEAKER_PREVIEW_HALF_WIDTH,
+                y + SPEAKER_PREVIEW_BOTTOM_OFFSET,
+                scale,
+                0.0F,
+                mouseX,
+                mouseY,
+                this.preview);
         ++this.preview.tickCount;
     }
 
@@ -214,6 +234,7 @@ public class DialogueScreen extends Screen {
         moe.setGender(this.npc.gender());
         moe.setEmotion(this.dialogue.speaker().emotion());
         moe.setAnimationKey(this.dialogue.speaker().animation());
+        moe.setGuiPreview(true);
         return moe;
     }
 

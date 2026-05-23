@@ -203,6 +203,16 @@ public final class BlockPartyDB extends SavedData {
         return List.copyOf(visible);
     }
 
+    public List<Long> listYearbookNpcIds(UUID player) {
+        List<Long> visible = new ArrayList<>();
+        for (long id : this.byPlayer.getOrDefault(player, List.of())) {
+            if (this.loadYearbookNpc(player, id).isPresent()) {
+                visible.add(id);
+            }
+        }
+        return List.copyOf(visible);
+    }
+
     public java.util.Optional<NPC> loadOwnedNpc(UUID player, long id) {
         try {
             java.util.Optional<NPC> row = this.findNpc(id);
@@ -219,8 +229,21 @@ public final class BlockPartyDB extends SavedData {
         }
     }
 
+    public java.util.Optional<NPC> loadYearbookNpc(UUID player, long id) {
+        if (!this.byPlayer.getOrDefault(player, List.of()).contains(id)) {
+            return java.util.Optional.empty();
+        }
+        return this.findNpcSafe(id);
+    }
+
     public boolean removeOwnedNpc(UUID player, long id) {
-        if (this.loadOwnedNpc(player, id).isEmpty()) {
+        java.util.Optional<NPC> row;
+        try {
+            row = this.findNpc(id);
+        } catch (RuntimeException | SQLException exception) {
+            return false;
+        }
+        if (row.isEmpty() || !canRemoveYearbookPage(player, row.get())) {
             return false;
         }
         List<Long> ids = this.byPlayer.get(player);
@@ -232,6 +255,10 @@ public final class BlockPartyDB extends SavedData {
             this.setDirty();
         }
         return removed;
+    }
+
+    private static boolean canRemoveYearbookPage(UUID player, NPC npc) {
+        return npc.dead() || !player.equals(npc.playerUuid());
     }
 
     public java.util.Optional<Moe> callOwnedNpc(ServerPlayer player, long id) {

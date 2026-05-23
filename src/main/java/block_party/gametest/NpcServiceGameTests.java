@@ -105,12 +105,23 @@ public final class NpcServiceGameTests {
             helper.fail("Expected rejected remove to keep owner list entry");
             return;
         }
-        if (!db.removeOwnedNpc(owner, id)) {
-            helper.fail("Expected owner remove to de-list NPC");
+        if (db.removeOwnedNpc(owner, id)) {
+            helper.fail("Expected owner remove of living NPC to be rejected");
             return;
         }
-        if (db.listNpcIds(owner).contains(id)) {
-            helper.fail("Expected owner remove to remove list entry");
+        NPC row = db.findNpcSafe(id).orElse(null);
+        if (row == null) {
+            helper.fail("Expected spawned NPC row before dead remove test");
+            return;
+        }
+        try {
+            row.markDead(db);
+        } catch (SQLException exception) {
+            helper.fail("Expected dead row update to succeed: " + exception.getMessage());
+            return;
+        }
+        if (!db.removeOwnedNpc(owner, id)) {
+            helper.fail("Expected owner remove of dead NPC to de-list NPC");
             return;
         }
         if (db.findNpcSafe(id).isEmpty()) {
@@ -122,10 +133,51 @@ public final class NpcServiceGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
-    public static void deadCorruptAndMissingRowsFailSafely(GameTestHelper helper) {
+    public static void estrangedYearbookPagesRemainVisibleAndRemovable(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPartyDB db = BlockPartyDB.get(level);
         UUID owner = new UUID(1006L, 2006L);
+        UUID other = new UUID(1007L, 2007L);
+        Moe moe = spawnOwnedMoe(helper, level, owner, new BlockPos(1, 1, 1));
+        if (moe == null) {
+            return;
+        }
+
+        long id = moe.getDatabaseID();
+        db.addTo(other, id);
+        if (db.loadOwnedNpc(other, id).isPresent()) {
+            helper.fail("Expected estranged row to remain inaccessible as an owned living NPC");
+            return;
+        }
+        if (db.loadYearbookNpc(other, id).isEmpty()) {
+            helper.fail("Expected estranged row to remain readable as a Yearbook page");
+            return;
+        }
+        if (!db.listYearbookNpcIds(other).contains(id)) {
+            helper.fail("Expected estranged row to remain listed in Yearbook pages");
+            return;
+        }
+        if (!db.removeOwnedNpc(other, id)) {
+            helper.fail("Expected estranged Yearbook page remove to de-list NPC");
+            return;
+        }
+        if (db.listYearbookNpcIds(other).contains(id)) {
+            helper.fail("Expected removed estranged page to leave other player's Yearbook");
+            return;
+        }
+        if (db.findNpcSafe(id).isEmpty()) {
+            helper.fail("Expected estranged page remove to leave SQLite row intact");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void deadCorruptAndMissingRowsFailSafely(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = BlockPartyDB.get(level);
+        UUID owner = new UUID(1008L, 2008L);
         Moe moe = spawnOwnedMoe(helper, level, owner, new BlockPos(1, 1, 1));
         if (moe == null) {
             return;
@@ -145,6 +197,14 @@ public final class NpcServiceGameTests {
         }
         if (db.loadOwnedNpc(owner, id).isPresent()) {
             helper.fail("Expected dead NPC row access to be rejected");
+            return;
+        }
+        if (db.loadYearbookNpc(owner, id).isEmpty()) {
+            helper.fail("Expected dead NPC row to remain readable as a Yearbook page");
+            return;
+        }
+        if (!db.listYearbookNpcIds(owner).contains(id)) {
+            helper.fail("Expected dead NPC row to remain listed in Yearbook pages");
             return;
         }
         if (db.loadOwnedNpc(owner, Long.MAX_VALUE - 456L).isPresent()) {

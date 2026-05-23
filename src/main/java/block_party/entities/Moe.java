@@ -121,6 +121,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     private int timeSinceSleep;
     private Dialogue dialogue;
     private Response response;
+    private boolean guiPreview;
     private final SceneManager sceneManager = new SceneManager(this);
 
     public Moe(EntityType<? extends Moe> entityType, Level level) {
@@ -363,9 +364,19 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         }
         boolean hurt = super.hurtServer(level, damageSource, amount * this.getBlockBuffer());
         if (hurt) {
+            this.syncHealthToDb(level);
             this.triggerScene(SceneTrigger.HURT);
         }
         return hurt;
+    }
+
+    @Override
+    public void heal(float amount) {
+        float before = this.getHealth();
+        super.heal(amount);
+        if (this.getHealth() != before && this.level() instanceof ServerLevel level) {
+            this.syncHealthToDb(level);
+        }
     }
 
     @Override
@@ -425,6 +436,31 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     @Override
     public void containerChanged(net.minecraft.world.Container inventory) {
         this.setSlouch(this.recalcSlouch());
+    }
+
+    private void syncHealthToDb(ServerLevel level) {
+        long id = this.getDatabaseID();
+        if (id < 0L) {
+            return;
+        }
+        try {
+            NPC.updateHealth(BlockPartyDB.get(level), id, this.getHealth());
+        } catch (SQLException ignored) {
+        }
+    }
+
+    private void syncFoodToDb() {
+        if (!(this.level() instanceof ServerLevel level)) {
+            return;
+        }
+        long id = this.getDatabaseID();
+        if (id < 0L) {
+            return;
+        }
+        try {
+            NPC.updateFood(BlockPartyDB.get(level), id, this.getFoodLevel(), this.getExhaustion(), this.getSaturation());
+        } catch (SQLException ignored) {
+        }
     }
 
     public SimpleContainer getInventory() {
@@ -613,6 +649,14 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         this.entityData.set(ANIMATION, normalize(animation, "DEFAULT", "DEFAULT", "YEARBOOK", "WAVE"));
     }
 
+    public boolean isGuiPreview() {
+        return this.guiPreview;
+    }
+
+    public void setGuiPreview(boolean guiPreview) {
+        this.guiPreview = guiPreview;
+    }
+
     public float getFoodLevel() {
         return this.entityData.get(FOOD_LEVEL);
     }
@@ -623,6 +667,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     public void addFoodLevel(float foodLevel) {
         this.setFoodLevel(this.getFoodLevel() + foodLevel);
+        this.syncFoodToDb();
     }
 
     public float getExhaustion() {
@@ -635,6 +680,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     public void addExhaustion(float exhaustion) {
         this.setExhaustion(this.getExhaustion() + exhaustion);
+        this.syncFoodToDb();
     }
 
     public float getSaturation() {
@@ -647,6 +693,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     public void addSaturation(float saturation) {
         this.setSaturation(this.getSaturation() + saturation);
+        this.syncFoodToDb();
     }
 
     public float getStress() {

@@ -469,6 +469,7 @@
   "gui.block_party.dialogue.response.close_dialogue": "Close",
   "gui.block_party.dialogue.response.open_dialogue": "Open",
   "gui.block_party.error.empty": "No Moes?",
+  "gui.block_party.error.unreachable": "That contact is not reachable.",
   "gui.block_party.label.page": "Page %1$d of %2$d",
   "gui.block_party.label.health": "Health",
   "gui.block_party.label.fullness": "Fullness",

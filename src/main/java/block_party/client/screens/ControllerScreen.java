@@ -2,36 +2,45 @@ package block_party.client.screens;
 
 import block_party.network.payload.NpcCallPayload;
 import block_party.network.payload.NpcDetailPayload;
-import block_party.network.payload.NpcListPayload;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public abstract class ControllerScreen extends Screen {
-    protected final List<Long> databaseIds;
+    protected final List<NpcDetailPayload> npcs;
     protected int index;
 
-    protected ControllerScreen(List<Long> databaseIds, long selectedDatabaseId) {
+    protected ControllerScreen(List<NpcDetailPayload> npcs, long selectedDatabaseId) {
         super(Component.empty());
-        this.databaseIds = new ArrayList<>(databaseIds);
-        this.index = this.databaseIds.indexOf(selectedDatabaseId);
+        this.npcs = new ArrayList<>(npcs);
+        this.index = selectedIndex(selectedDatabaseId);
         if (this.index < 0) {
             this.index = 0;
         }
     }
 
-    public void handleNpcList(NpcListPayload payload) {
-    }
-
-    public void handleNpcDetail(NpcDetailPayload payload) {
-    }
-
     public void handleNpcCall(NpcCallPayload payload) {
     }
 
+    protected NpcDetailPayload selectedNpc() {
+        return this.npcs.isEmpty() ? null : this.npcs.get(this.index);
+    }
+
     protected Long selectedId() {
-        return this.databaseIds.isEmpty() ? null : this.databaseIds.get(this.index);
+        NpcDetailPayload selected = this.selectedNpc();
+        return selected == null ? null : selected.databaseId();
+    }
+
+    private int selectedIndex(long selectedDatabaseId) {
+        for (int index = 0; index < this.npcs.size(); ++index) {
+            if (this.npcs.get(index).databaseId() == selectedDatabaseId) {
+                return index;
+            }
+        }
+        return -1;
     }
 
     protected int left(int width) {
@@ -40,6 +49,12 @@ public abstract class ControllerScreen extends Screen {
 
     protected int absoluteCenter(int margin) {
         return this.width / 2 - margin;
+    }
+
+    protected void renderWidgets(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        for (Renderable renderable : this.renderables) {
+            renderable.render(graphics, mouseX, mouseY, partialTick);
+        }
     }
 
     @Override

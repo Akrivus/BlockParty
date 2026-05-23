@@ -17,7 +17,7 @@ public class EmoteLayer extends RenderLayer<MoeRenderState, MoeModel> {
 
     @Override
     public void render(PoseStack stack, MultiBufferSource buffer, int packedLight, MoeRenderState state, float yRot, float xRot) {
-        if (state.distanceToCameraSq >= 256.0D || state.isInvisible || state.eyeTexture == null || state.faceTexture == null) {
+        if ((!state.guiPreview && state.distanceToCameraSq >= 256.0D) || state.isInvisible || state.eyeTexture == null || state.faceTexture == null) {
             return;
         }
         int eyeColor = ARGB.colorFromFloat(1.0F, state.eyeColor[0], state.eyeColor[1], state.eyeColor[2]);

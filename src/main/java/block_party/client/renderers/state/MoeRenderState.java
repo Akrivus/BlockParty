@@ -13,6 +13,7 @@ public class MoeRenderState extends HumanoidRenderState {
     public boolean hasWings;
     public boolean hasCatFeatures;
     public boolean hasGlow;
+    public boolean guiPreview;
     public boolean onGround;
     public boolean isSitting;
     public String animation = "DEFAULT";

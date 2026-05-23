@@ -340,6 +340,7 @@ public final class EntityDataGameTests {
         moe.setEmotion("SNOOTY");
         moe.setMoeScale(1.25F);
         moe.setCorporeal(true);
+        moe.setHealth(13.0F);
         moe.setFoodLevel(18.0F);
         moe.setExhaustion(0.75F);
         moe.setSaturation(5.25F);
@@ -371,6 +372,7 @@ public final class EntityDataGameTests {
             assertEquals(helper, "SNOOTY", loaded.getEmotion(), "row emotion");
             assertFloat(helper, 1.25F, loaded.getMoeScale(), "row scale");
             assertEquals(helper, true, loaded.isCorporeal(), "row corporeal");
+            assertFloat(helper, 13.0F, loaded.getHealth(), "row health");
             assertFloat(helper, 18.0F, loaded.getFoodLevel(), "row food");
             assertFloat(helper, 0.75F, loaded.getExhaustion(), "row exhaustion");
             assertFloat(helper, 5.25F, loaded.getSaturation(), "row saturation");
@@ -385,6 +387,82 @@ public final class EntityDataGameTests {
             assertEquals(helper, moe.getHome().getPos(), loaded.getHome().getPos(), "row home position");
         } catch (SQLException exception) {
             helper.fail("Expected NPC row field persistence to succeed: " + exception.getMessage());
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void npcRowHealthUpdatesAfterDamage(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = BlockPartyDB.get(level);
+        db.configureDatabase(level.getServer());
+        try {
+            NPC.createTable(db);
+        } catch (SQLException exception) {
+            helper.fail("Expected NPC table setup to succeed: " + exception.getMessage());
+            return;
+        }
+
+        Moe moe = new Moe(CustomEntities.MOE.get(), level);
+        moe.moveToBlock(helper.absolutePos(new BlockPos(1, 1, 1)));
+        moe.setOwnerUUID(new UUID(224L, 335L));
+        moe.setBlockState(Blocks.OAK_LOG.defaultBlockState());
+        try {
+            NPC row = NPC.create(db, level, moe);
+            moe.setDatabaseID(row.databaseId());
+            level.addFreshEntity(moe);
+            float before = moe.getHealth();
+            if (!moe.hurtServer(level, level.damageSources().generic(), 2.0F)) {
+                helper.fail("Expected persisted Moe damage to be applied");
+                return;
+            }
+            NPC updated = db.findNpc(row.databaseId()).orElseThrow();
+            if (!(updated.health() < before)) {
+                helper.fail("Expected row health to update after damage, got " + updated.health() + " from " + before);
+                return;
+            }
+            helper.kill(moe);
+        } catch (SQLException exception) {
+            helper.fail("Expected NPC row health sync test to succeed: " + exception.getMessage());
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void npcRowFoodStatsUpdateAfterLiveMutation(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = BlockPartyDB.get(level);
+        db.configureDatabase(level.getServer());
+        try {
+            NPC.createTable(db);
+        } catch (SQLException exception) {
+            helper.fail("Expected NPC table setup to succeed: " + exception.getMessage());
+            return;
+        }
+
+        Moe moe = new Moe(CustomEntities.MOE.get(), level);
+        moe.moveToBlock(helper.absolutePos(new BlockPos(1, 1, 1)));
+        moe.setOwnerUUID(new UUID(225L, 336L));
+        moe.setBlockState(Blocks.OAK_LOG.defaultBlockState());
+        moe.setFoodLevel(10.0F);
+        moe.setExhaustion(1.0F);
+        moe.setSaturation(2.0F);
+        try {
+            NPC row = NPC.create(db, level, moe);
+            moe.setDatabaseID(row.databaseId());
+            level.addFreshEntity(moe);
+            moe.addFoodLevel(1.0F);
+            moe.addExhaustion(0.5F);
+            moe.addSaturation(0.25F);
+            NPC updated = db.findNpc(row.databaseId()).orElseThrow();
+            assertFloat(helper, 11.0F, updated.foodLevel(), "row food after add");
+            assertFloat(helper, 1.5F, updated.exhaustion(), "row exhaustion after add");
+            assertFloat(helper, 2.25F, updated.saturation(), "row saturation after add");
+            helper.kill(moe);
+        } catch (SQLException exception) {
+            helper.fail("Expected NPC row food sync test to succeed: " + exception.getMessage());
             return;
         }
         helper.succeed();

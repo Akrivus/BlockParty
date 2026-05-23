@@ -41,6 +41,7 @@ public record NPC(
         BlockState visibleBlockState,
         float scale,
         boolean corporeal,
+        float health,
         float foodLevel,
         float exhaustion,
         float saturation,
@@ -80,6 +81,7 @@ public record NPC(
                         Emotion TEXT NOT NULL DEFAULT 'NORMAL',
                         Scale REAL NOT NULL DEFAULT 1.0,
                         IsCorporeal INTEGER NOT NULL DEFAULT 1,
+                        Health REAL NOT NULL DEFAULT 20.0,
                         FoodLevel REAL NOT NULL DEFAULT 20.0,
                         Exhaustion REAL NOT NULL DEFAULT 0.0,
                         Saturation REAL NOT NULL DEFAULT 6.0,
@@ -109,6 +111,7 @@ public record NPC(
             ensureColumn(statement, "Emotion", "TEXT NOT NULL DEFAULT 'NORMAL'");
             ensureColumn(statement, "Scale", "REAL NOT NULL DEFAULT 1.0");
             ensureColumn(statement, "IsCorporeal", "INTEGER NOT NULL DEFAULT 1");
+            ensureColumn(statement, "Health", "REAL NOT NULL DEFAULT 20.0");
             ensureColumn(statement, "FoodLevel", "REAL NOT NULL DEFAULT 20.0");
             ensureColumn(statement, "Exhaustion", "REAL NOT NULL DEFAULT 0.0");
             ensureColumn(statement, "Saturation", "REAL NOT NULL DEFAULT 6.0");
@@ -155,11 +158,11 @@ public record NPC(
         String sql = explicitId ? """
                 INSERT INTO NPCs (
                     DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, Dead, Name, BlockState, VisibleBlockState, Hiding,
-                    Gender, BloodType, Dere, Zodiac, Emotion, Scale, IsCorporeal,
+                    Gender, BloodType, Dere, Zodiac, Emotion, Scale, IsCorporeal, Health,
                     FoodLevel, Exhaustion, Saturation, Stress, Relaxation, Loyalty, Affection, Slouch, Age,
                     LastSeenAt, HasHome, HomePosDim, HomePosX, HomePosY, HomePosZ,
                     HiddenPosDim, HiddenPosX, HiddenPosY, HiddenPosZ
-                ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(DatabaseID) DO UPDATE SET
                     PosDim = excluded.PosDim,
                     PosX = excluded.PosX,
@@ -177,6 +180,7 @@ public record NPC(
                     Emotion = excluded.Emotion,
                     Scale = excluded.Scale,
                     IsCorporeal = excluded.IsCorporeal,
+                    Health = excluded.Health,
                     FoodLevel = excluded.FoodLevel,
                     Exhaustion = excluded.Exhaustion,
                     Saturation = excluded.Saturation,
@@ -199,11 +203,11 @@ public record NPC(
                 """ : """
                 INSERT INTO NPCs (
                     PosDim, PosX, PosY, PosZ, PlayerUUID, Dead, Name, BlockState, VisibleBlockState, Hiding,
-                    Gender, BloodType, Dere, Zodiac, Emotion, Scale, IsCorporeal,
+                    Gender, BloodType, Dere, Zodiac, Emotion, Scale, IsCorporeal, Health,
                     FoodLevel, Exhaustion, Saturation, Stress, Relaxation, Loyalty, Affection, Slouch, Age,
                     LastSeenAt, HasHome, HomePosDim, HomePosX, HomePosY, HomePosZ,
                     HiddenPosDim, HiddenPosX, HiddenPosY, HiddenPosZ
-                ) VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                ) VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """;
         try (PreparedStatement statement = connection.prepareStatement(sql, explicitId ? Statement.NO_GENERATED_KEYS : Statement.RETURN_GENERATED_KEYS)) {
             int offset = explicitId ? 1 : 0;
@@ -223,19 +227,20 @@ public record NPC(
             statement.setString(14 + offset, moe.getEmotion());
             statement.setFloat(15 + offset, moe.getMoeScale());
             statement.setBoolean(16 + offset, moe.isCorporeal());
-            statement.setFloat(17 + offset, moe.getFoodLevel());
-            statement.setFloat(18 + offset, moe.getExhaustion());
-            statement.setFloat(19 + offset, moe.getSaturation());
-            statement.setFloat(20 + offset, moe.getStress());
-            statement.setFloat(21 + offset, moe.getRelaxation());
-            statement.setFloat(22 + offset, moe.getLoyalty());
-            statement.setFloat(23 + offset, moe.getAffection());
-            statement.setFloat(24 + offset, moe.getSlouch());
-            statement.setFloat(25 + offset, moe.getAge());
-            statement.setLong(26 + offset, moe.getLastSeen());
-            statement.setBoolean(27 + offset, moe.hasHome());
-            bindPosition(statement, 28 + offset, moe.getHome().getDim(), moe.getHome().getPos());
-            bindPosition(statement, 32 + offset, level.dimension(), hiddenPos);
+            statement.setFloat(17 + offset, moe.getHealth());
+            statement.setFloat(18 + offset, moe.getFoodLevel());
+            statement.setFloat(19 + offset, moe.getExhaustion());
+            statement.setFloat(20 + offset, moe.getSaturation());
+            statement.setFloat(21 + offset, moe.getStress());
+            statement.setFloat(22 + offset, moe.getRelaxation());
+            statement.setFloat(23 + offset, moe.getLoyalty());
+            statement.setFloat(24 + offset, moe.getAffection());
+            statement.setFloat(25 + offset, moe.getSlouch());
+            statement.setFloat(26 + offset, moe.getAge());
+            statement.setLong(27 + offset, moe.getLastSeen());
+            statement.setBoolean(28 + offset, moe.hasHome());
+            bindPosition(statement, 29 + offset, moe.getHome().getDim(), moe.getHome().getPos());
+            bindPosition(statement, 33 + offset, level.dimension(), hiddenPos);
             statement.executeUpdate();
             if (explicitId) {
                 return find(db, databaseId).orElseThrow(() -> new SQLException("Upserted NPC row " + databaseId + " was not readable"));
@@ -298,7 +303,7 @@ public record NPC(
                 SET PosDim = ?, PosX = ?, PosY = ?, PosZ = ?,
                     PlayerUUID = ?, Name = ?, BlockState = ?, VisibleBlockState = ?,
                     Gender = ?, BloodType = ?, Dere = ?, Zodiac = ?, Emotion = ?,
-                    Scale = ?, IsCorporeal = ?,
+                    Scale = ?, IsCorporeal = ?, Health = ?,
                     FoodLevel = ?, Exhaustion = ?, Saturation = ?, Stress = ?, Relaxation = ?,
                     Loyalty = ?, Affection = ?, Slouch = ?, Age = ?,
                     LastSeenAt = ?, HasHome = ?,
@@ -317,19 +322,20 @@ public record NPC(
             statement.setString(13, moe.getEmotion());
             statement.setFloat(14, moe.getMoeScale());
             statement.setBoolean(15, moe.isCorporeal());
-            statement.setFloat(16, moe.getFoodLevel());
-            statement.setFloat(17, moe.getExhaustion());
-            statement.setFloat(18, moe.getSaturation());
-            statement.setFloat(19, moe.getStress());
-            statement.setFloat(20, moe.getRelaxation());
-            statement.setFloat(21, moe.getLoyalty());
-            statement.setFloat(22, moe.getAffection());
-            statement.setFloat(23, moe.getSlouch());
-            statement.setFloat(24, moe.getAge());
-            statement.setLong(25, moe.getLastSeen());
-            statement.setBoolean(26, moe.hasHome());
-            bindPosition(statement, 27, moe.getHome().getDim(), moe.getHome().getPos());
-            statement.setLong(31, this.databaseId);
+            statement.setFloat(16, moe.getHealth());
+            statement.setFloat(17, moe.getFoodLevel());
+            statement.setFloat(18, moe.getExhaustion());
+            statement.setFloat(19, moe.getSaturation());
+            statement.setFloat(20, moe.getStress());
+            statement.setFloat(21, moe.getRelaxation());
+            statement.setFloat(22, moe.getLoyalty());
+            statement.setFloat(23, moe.getAffection());
+            statement.setFloat(24, moe.getSlouch());
+            statement.setFloat(25, moe.getAge());
+            statement.setLong(26, moe.getLastSeen());
+            statement.setBoolean(27, moe.hasHome());
+            bindPosition(statement, 28, moe.getHome().getDim(), moe.getHome().getPos());
+            statement.setLong(32, this.databaseId);
             statement.executeUpdate();
         } finally {
             db.free(connection);
@@ -379,6 +385,34 @@ public record NPC(
         }
     }
 
+    public static void updateHealth(BlockPartyDB db, long id, float health) throws SQLException {
+        Connection connection = db.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE NPCs SET Health = ? WHERE DatabaseID = ?;")) {
+            statement.setFloat(1, health);
+            statement.setLong(2, id);
+            statement.executeUpdate();
+        } finally {
+            db.free(connection);
+        }
+    }
+
+    public static void updateFood(BlockPartyDB db, long id, float foodLevel, float exhaustion, float saturation) throws SQLException {
+        Connection connection = db.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                UPDATE NPCs
+                SET FoodLevel = ?, Exhaustion = ?, Saturation = ?
+                WHERE DatabaseID = ?;
+                """)) {
+            statement.setFloat(1, foodLevel);
+            statement.setFloat(2, exhaustion);
+            statement.setFloat(3, saturation);
+            statement.setLong(4, id);
+            statement.executeUpdate();
+        } finally {
+            db.free(connection);
+        }
+    }
+
     public void applyTo(Moe moe) {
         moe.setDatabaseID(this.databaseId);
         moe.setOwnerUUID(this.playerUuid);
@@ -392,6 +426,7 @@ public record NPC(
         moe.setEmotion(this.emotion);
         moe.setMoeScale(this.scale);
         moe.setCorporeal(this.corporeal);
+        moe.setHealth(this.health);
         moe.setFoodLevel(this.foodLevel);
         moe.setExhaustion(this.exhaustion);
         moe.setSaturation(this.saturation);
@@ -423,6 +458,7 @@ public record NPC(
                 Block.stateById(result.getInt("VisibleBlockState")),
                 result.getFloat("Scale"),
                 result.getBoolean("IsCorporeal"),
+                result.getFloat("Health"),
                 result.getFloat("FoodLevel"),
                 result.getFloat("Exhaustion"),
                 result.getFloat("Saturation"),

@@ -10,9 +10,6 @@ import block_party.network.payload.DialogueRespondPayload;
 import block_party.network.payload.NpcCallPayload;
 import block_party.network.payload.NpcCallRequestPayload;
 import block_party.network.payload.NpcDetailPayload;
-import block_party.network.payload.NpcDetailRequestPayload;
-import block_party.network.payload.NpcListPayload;
-import block_party.network.payload.NpcListRequestPayload;
 import block_party.network.payload.NpcRemoveRequestPayload;
 import block_party.network.payload.ShrineListPayload;
 import block_party.network.payload.ShrineListRequestPayload;
@@ -40,37 +37,28 @@ public final class CustomMessenger {
 
     public static void registerPayloads(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar(BlockParty.ID).versioned(NETWORK_VERSION).optional();
-        registrar.playToServer(NpcListRequestPayload.TYPE, NpcListRequestPayload.STREAM_CODEC, CustomMessenger::handleListRequest);
-        registrar.playToServer(NpcDetailRequestPayload.TYPE, NpcDetailRequestPayload.STREAM_CODEC, CustomMessenger::handleDetailRequest);
         registrar.playToServer(NpcRemoveRequestPayload.TYPE, NpcRemoveRequestPayload.STREAM_CODEC, CustomMessenger::handleRemoveRequest);
         registrar.playToServer(NpcCallRequestPayload.TYPE, NpcCallRequestPayload.STREAM_CODEC, CustomMessenger::handleCallRequest);
         registrar.playToServer(DialogueRespondPayload.TYPE, DialogueRespondPayload.STREAM_CODEC, CustomMessenger::handleDialogueRespond);
         registrar.playToServer(DialogueClosePayload.TYPE, DialogueClosePayload.STREAM_CODEC, CustomMessenger::handleDialogueClose);
         registrar.playToServer(ShrineListRequestPayload.TYPE, ShrineListRequestPayload.STREAM_CODEC, CustomMessenger::handleShrineListRequest);
-        registrar.playToClient(NpcListPayload.TYPE, NpcListPayload.STREAM_CODEC, CustomMessenger::handleClientList);
-        registrar.playToClient(NpcDetailPayload.TYPE, NpcDetailPayload.STREAM_CODEC, CustomMessenger::handleClientDetail);
         registrar.playToClient(NpcCallPayload.TYPE, NpcCallPayload.STREAM_CODEC, CustomMessenger::handleClientCall);
         registrar.playToClient(ControllerOpenPayload.TYPE, ControllerOpenPayload.STREAM_CODEC, CustomMessenger::handleClientControllerOpen);
         registrar.playToClient(DialogueOpenPayload.TYPE, DialogueOpenPayload.STREAM_CODEC, CustomMessenger::handleClientDialogueOpen);
         registrar.playToClient(ShrineListPayload.TYPE, ShrineListPayload.STREAM_CODEC, CustomMessenger::handleClientShrineList);
     }
 
-    public static NpcListPayload listResponse(BlockPartyDB db, UUID owner) {
-        return new NpcListPayload(db.listNpcIds(owner));
-    }
-
     public static NpcDetailPayload detailResponse(BlockPartyDB db, UUID owner, long databaseId) {
-        return NpcDetailPayload.from(databaseId, db.loadOwnedNpc(owner, databaseId));
+        return NpcDetailPayload.from(databaseId, db.loadYearbookNpc(owner, databaseId));
     }
 
     public static NpcDetailPayload detailResponse(ServerLevel level, BlockPartyDB db, UUID owner, long databaseId) {
-        java.util.Optional<block_party.db.records.NPC> row = db.loadOwnedNpc(owner, databaseId);
+        java.util.Optional<block_party.db.records.NPC> row = db.loadYearbookNpc(owner, databaseId);
         return NpcDetailPayload.from(databaseId, row, db.findOwnedLoadedMoe(level, owner, databaseId));
     }
 
-    public static NpcListPayload removeResponse(BlockPartyDB db, UUID owner, long databaseId) {
+    public static void removeResponse(BlockPartyDB db, UUID owner, long databaseId) {
         db.removeOwnedNpc(owner, databaseId);
-        return listResponse(db, owner);
     }
 
     public static NpcCallPayload callResponse(ServerLevel level, BlockPartyDB db, UUID owner, BlockPos callerPos, long databaseId) {
@@ -78,15 +66,26 @@ public final class CustomMessenger {
     }
 
     public static ControllerOpenPayload cellPhoneOpenPayload(BlockPartyDB db, UUID owner, InteractionHand hand) {
-        return ControllerOpenPayload.cellPhone(db.listNpcIds(owner), hand);
+        return ControllerOpenPayload.cellPhone(controllerDetails(db, owner), hand);
     }
 
     public static ControllerOpenPayload yearbookOpenPayload(BlockPartyDB db, UUID owner, long selectedDatabaseId, InteractionHand hand) {
-        return ControllerOpenPayload.yearbook(db.listNpcIds(owner), selectedDatabaseId, hand);
+        return ControllerOpenPayload.yearbook(controllerDetails(db, owner), selectedDatabaseId, hand);
     }
 
     public static DialogueOpenPayload dialogueOpenPayload(BlockPartyDB db, UUID owner, long databaseId, Dialogue dialogue) {
         return new DialogueOpenPayload(detailResponse(db, owner, databaseId), dialogue);
+    }
+
+    private static java.util.List<NpcDetailPayload> controllerDetails(BlockPartyDB db, UUID owner) {
+        java.util.List<NpcDetailPayload> details = new java.util.ArrayList<>();
+        for (long databaseId : db.listYearbookNpcIds(owner)) {
+            NpcDetailPayload detail = detailResponse(db, owner, databaseId);
+            if (detail.found()) {
+                details.add(detail);
+            }
+        }
+        return java.util.List.copyOf(details);
     }
 
     public static boolean respondToDialogue(ServerLevel level, BlockPartyDB db, UUID owner, long databaseId, Response response) {
@@ -125,16 +124,8 @@ public final class CustomMessenger {
         PacketDistributor.sendToPlayer(player, shrineListResponse(player));
     }
 
-    private static void handleListRequest(NpcListRequestPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> context.reply(listResponse(context.player())));
-    }
-
-    private static void handleDetailRequest(NpcDetailRequestPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> context.reply(detailResponse(context.player(), payload.databaseId())));
-    }
-
     private static void handleRemoveRequest(NpcRemoveRequestPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> context.reply(removeResponse(context.player(), payload.databaseId())));
+        context.enqueueWork(() -> removeResponse(context.player(), payload.databaseId()));
     }
 
     private static void handleCallRequest(NpcCallRequestPayload payload, IPayloadContext context) {
@@ -153,14 +144,6 @@ public final class CustomMessenger {
         context.enqueueWork(() -> context.reply(shrineListResponse(context.player())));
     }
 
-    private static void handleClientList(NpcListPayload payload, IPayloadContext context) {
-        block_party.client.ClientPayloadHandler.handleNpcList(payload);
-    }
-
-    private static void handleClientDetail(NpcDetailPayload payload, IPayloadContext context) {
-        block_party.client.ClientPayloadHandler.handleNpcDetail(payload);
-    }
-
     private static void handleClientCall(NpcCallPayload payload, IPayloadContext context) {
         block_party.client.ClientPayloadHandler.handleNpcCall(payload);
     }
@@ -177,19 +160,8 @@ public final class CustomMessenger {
         block_party.client.ClientPayloadHandler.handleShrineList(payload);
     }
 
-    private static NpcListPayload listResponse(Player player) {
-        return listResponse(BlockPartyDB.get(player.level()), player.getUUID());
-    }
-
-    private static NpcDetailPayload detailResponse(Player player, long databaseId) {
-        if (player.level() instanceof ServerLevel level) {
-            return detailResponse(level, BlockPartyDB.get(level), player.getUUID(), databaseId);
-        }
-        return detailResponse(BlockPartyDB.get(player.level()), player.getUUID(), databaseId);
-    }
-
-    private static NpcListPayload removeResponse(Player player, long databaseId) {
-        return removeResponse(BlockPartyDB.get(player.level()), player.getUUID(), databaseId);
+    private static void removeResponse(Player player, long databaseId) {
+        removeResponse(BlockPartyDB.get(player.level()), player.getUUID(), databaseId);
     }
 
     private static NpcCallPayload callResponse(Player player, long databaseId) {

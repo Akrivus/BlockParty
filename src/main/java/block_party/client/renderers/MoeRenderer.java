@@ -52,6 +52,7 @@ public class MoeRenderer extends MobRenderer<Moe, MoeRenderState, MoeModel> {
         state.hasWings = moe.hasWings();
         state.hasCatFeatures = moe.hasCatFeatures();
         state.hasGlow = moe.hasGlow();
+        state.guiPreview = moe.isGuiPreview();
         state.onGround = moe.onGround();
         state.isSitting = moe.isSitting();
         state.animation = moe.getAnimationKey();
