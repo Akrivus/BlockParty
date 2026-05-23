@@ -9,7 +9,7 @@ import block_party.db.records.Sapling;
 import block_party.db.records.Shrine;
 import block_party.entities.Moe;
 import block_party.utils.NBT;
-import block_party.world.chunk.ForcedChunk;
+import block_party.world.CellPhone;
 import com.google.common.collect.Maps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -24,8 +24,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelResource;
@@ -252,7 +250,7 @@ public final class BlockPartyDB extends SavedData {
         if (npcLevel != level) {
             return java.util.Optional.empty();
         }
-        return this.findLoadedMoe(level, id);
+        return CellPhone.findLoadedMoe(level, id);
     }
 
     public java.util.Optional<Moe> callOwnedNpc(ServerLevel callerLevel, UUID player, BlockPos callerPos, long id) {
@@ -260,57 +258,7 @@ public final class BlockPartyDB extends SavedData {
     }
 
     public java.util.Optional<Moe> callOwnedNpc(ServerLevel callerLevel, UUID player, Vec3 callerPos, float callerYRot, long id) {
-        java.util.Optional<NPC> row = this.loadOwnedNpc(player, id);
-        if (row.isEmpty() || row.get().hiding()) {
-            return java.util.Optional.empty();
-        }
-
-        NPC npc = row.get();
-        ServerLevel npcLevel = callerLevel.getServer().getLevel(npc.dimension());
-        if (npcLevel == null) {
-            return java.util.Optional.empty();
-        }
-
-        ForcedChunk.queue(id, npcLevel, new ChunkPos(npc.pos()));
-        try {
-            java.util.Optional<Moe> live = this.findLoadedMoe(npcLevel, id);
-            if (live.isEmpty()) {
-                return java.util.Optional.empty();
-            }
-
-            Moe moe = live.get();
-            if (moe.level() != callerLevel) {
-                return java.util.Optional.empty();
-            }
-            moe.absMoveTo(
-                    callerPos.x - Math.sin(Math.toRadians(callerYRot)) * 1.44D,
-                    callerPos.y,
-                    callerPos.z + Math.cos(Math.toRadians(callerYRot)) * 1.44D,
-                    moe.getYRot(),
-                    moe.getXRot());
-            moe.setFollowing(true);
-            try {
-                npc.updateFromMoe(this, callerLevel, moe);
-            } catch (SQLException exception) {
-                return java.util.Optional.empty();
-            }
-            return java.util.Optional.of(moe);
-        } finally {
-            ForcedChunk.release(id);
-        }
-    }
-
-    private java.util.Optional<Moe> findLoadedMoe(ServerLevel level, long id) {
-        for (Moe moe : level.getEntities(EntityTypeTest.forClass(Moe.class), moe ->
-                moe.isAlive() && !moe.isRemoved() && moe.getDatabaseID() == id)) {
-            return java.util.Optional.of(moe);
-        }
-        for (net.minecraft.world.entity.Entity entity : level.getAllEntities()) {
-            if (entity instanceof Moe moe && moe.isAlive() && !moe.isRemoved() && moe.getDatabaseID() == id) {
-                return java.util.Optional.of(moe);
-            }
-        }
-        return java.util.Optional.empty();
+        return new CellPhone(this, callerLevel, player, callerPos, callerYRot, id).call();
     }
 
     public void configureDatabase(MinecraftServer server) {

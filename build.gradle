@@ -3,7 +3,7 @@ plugins {
     id 'net.neoforged.moddev' version '1.0.11'
 }
 
-version = new Date().format('yy.MM.dd')
+version = project.mod_version
 group = 'block_party'
 base {
     archivesName = 'BlockParty'

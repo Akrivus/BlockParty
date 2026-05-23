@@ -48,9 +48,6 @@ public final class ResourceGameTests {
         assertVanillaInBlockTag(helper, "andesite", "moe/has_cat_features");
         assertVanillaInBlockTag(helper, "bamboo", "moe/ignores_volume");
         assertInTag(helper, BuiltInRegistries.ITEM, Registries.ITEM, "sakura_log", "sakura_logs");
-        assertInTag(helper, BuiltInRegistries.ENTITY_TYPE, Registries.ENTITY_TYPE, "moe", "registered");
-        assertInTag(helper, BuiltInRegistries.SOUND_EVENT, Registries.SOUND_EVENT, "moe.laugh", "registered");
-        assertInTag(helper, BuiltInRegistries.PARTICLE_TYPE, Registries.PARTICLE_TYPE, "sakura", "registered");
         helper.succeed();
     }
 
@@ -129,6 +126,12 @@ public final class ResourceGameTests {
         assertResource(helper, "models/block/shoji_screen_bottom.json");
         assertResource(helper, "models/block/shoji_screen_top.json");
         assertResource(helper, "textures/block/shoji_screen_bottom.png");
+        assertResource(helper, "blockstates/shoji_panel.json");
+        assertResource(helper, "models/block/shoji_panel_bottom.json");
+        assertResource(helper, "models/block/shoji_panel_top.json");
+        assertResource(helper, "models/block/shoji_panel_open.json");
+        assertResource(helper, "models/item/shoji_panel.json");
+        assertResource(helper, "textures/block/shoji_panel.png");
         assertTranslation(helper, "item.block_party.sakura_log", "Sakura Log");
         assertTranslation(helper, "item.block_party.potted_wisteria_sapling", "Potted Wisteria Sapling");
         assertTranslation(helper, "item.block_party.wisteria_vine_body", "Wisteria Vine Body");

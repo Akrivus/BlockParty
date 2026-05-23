@@ -9,6 +9,7 @@ import block_party.items.SamuraiArmorItem;
 import block_party.items.SamuraiKatanaItem;
 import block_party.items.SortableItem;
 import block_party.registry.CustomCreativeTabs;
+import block_party.registry.CustomBlocks;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomItems;
 import block_party.registry.CustomTags;
@@ -25,6 +26,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -87,6 +96,91 @@ public final class RegistryGameTests {
         assertBefore(helper, stacks, "shimenawa", "sakura_sapling");
         assertBefore(helper, stacks, "sakura_log", "blank_hanging_scroll");
         assertBefore(helper, stacks, "blank_hanging_scroll", "black_paper_lantern");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void decorativeWoodBlocksUseInteractiveVanillaClasses(GameTestHelper helper) {
+        if (!(CustomBlocks.ENTRIES.get("ginkgo_button").get() instanceof ButtonBlock)) {
+            helper.fail("Expected ginkgo_button to behave as a button");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("sakura_button").get() instanceof ButtonBlock)) {
+            helper.fail("Expected sakura_button to behave as a button");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("wisteria_button").get() instanceof ButtonBlock)) {
+            helper.fail("Expected wisteria_button to behave as a button");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("ginkgo_fence").get() instanceof FenceBlock)) {
+            helper.fail("Expected ginkgo_fence to behave as a fence");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("sakura_fence").get() instanceof FenceBlock)) {
+            helper.fail("Expected sakura_fence to behave as a fence");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("wisteria_fence").get() instanceof FenceBlock)) {
+            helper.fail("Expected wisteria_fence to behave as a fence");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("shoji_panel").get() instanceof TrapDoorBlock)) {
+            helper.fail("Expected shoji_panel to behave as a trapdoor");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("ginkgo_fence_gate").get() instanceof FenceGateBlock)) {
+            helper.fail("Expected ginkgo_fence_gate to behave as a fence gate");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("sakura_fence_gate").get() instanceof FenceGateBlock)) {
+            helper.fail("Expected sakura_fence_gate to behave as a fence gate");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("wisteria_fence_gate").get() instanceof FenceGateBlock)) {
+            helper.fail("Expected wisteria_fence_gate to behave as a fence gate");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("ginkgo_pressure_plate").get() instanceof PressurePlateBlock)) {
+            helper.fail("Expected ginkgo_pressure_plate to behave as a pressure plate");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("sakura_pressure_plate").get() instanceof PressurePlateBlock)) {
+            helper.fail("Expected sakura_pressure_plate to behave as a pressure plate");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("wisteria_pressure_plate").get() instanceof PressurePlateBlock)) {
+            helper.fail("Expected wisteria_pressure_plate to behave as a pressure plate");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("ginkgo_slab").get() instanceof SlabBlock)) {
+            helper.fail("Expected ginkgo_slab to behave as a slab");
+            return;
+        }
+        if (!(CustomBlocks.SAKURA_SLAB.get() instanceof SlabBlock)) {
+            helper.fail("Expected sakura_slab to behave as a slab");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("wisteria_slab").get() instanceof SlabBlock)) {
+            helper.fail("Expected wisteria_slab to behave as a slab");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("ginkgo_stairs").get() instanceof StairBlock)) {
+            helper.fail("Expected ginkgo_stairs to behave as stairs");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("sakura_stairs").get() instanceof StairBlock)) {
+            helper.fail("Expected sakura_stairs to behave as stairs");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("wisteria_stairs").get() instanceof StairBlock)) {
+            helper.fail("Expected wisteria_stairs to behave as stairs");
+            return;
+        }
+        if (!(CustomBlocks.ENTRIES.get("tatami_mat").get() instanceof RotatedPillarBlock)) {
+            helper.fail("Expected tatami_mat to expose the axis property used by its blockstate");
+            return;
+        }
         helper.succeed();
     }
 

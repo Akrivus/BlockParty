@@ -108,7 +108,7 @@ These should not block a merge unless they hide gameplay-critical behavior. File
 
 - Automated server-side blocker status: clear when `compileJava` and `runGameTestServer` pass.
 - Manual blocker status: depends on this checklist. Treat crashes, invisible core items/entities, unusable Yearbook/Cell Phone/Dialogue screens, broken spawn/hide/reveal/call flows, or persistence loss after restart as merge blockers.
-- Non-blocking polish if gameplay remains usable: UI blur, minor model mismatch, missing client-only armor overlay polish, and documented cross-dimension Cell Phone failure state.
+- Non-blocking polish if gameplay remains usable: UI blur, minor model mismatch, missing client-only armor overlay polish, and full Cell Phone recovery for not-live entities after forced-chunk lookup.
 
 ## Compatibility Review
 

@@ -7,6 +7,7 @@ import block_party.scene.Response;
 import block_party.scene.Scene;
 import block_party.scene.SceneAction;
 import block_party.scene.SceneObservation;
+import block_party.scene.SceneObservationFactories;
 import block_party.scene.SceneObservations;
 import block_party.scene.SceneTrigger;
 import block_party.scene.Speaker;
@@ -129,7 +130,13 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         JsonObject source = new JsonObject();
         if (element.isJsonObject()) {
             source = element.getAsJsonObject();
-            type = own(resource(GsonHelper.getAsString(source, source.has("filter") ? "filter" : "type", "block_party:always")));
+            if (source.has("type")) {
+                type = own(resource(GsonHelper.getAsString(source, "type", "block_party:always")));
+            } else if (source.has("filter") && source.get("filter").isJsonPrimitive()) {
+                type = own(resource(GsonHelper.getAsString(source, "filter", "block_party:always")));
+            } else {
+                type = BlockParty.source("always");
+            }
             if (source.has("filter") && source.get("filter").isJsonObject()) {
                 source = source.getAsJsonObject("filter");
             }
@@ -137,28 +144,7 @@ public final class ScenesReloadListener implements PreparableReloadListener {
             type = own(resource(element.getAsString()));
         }
         JsonObject json = source;
-        return switch (type.getPath()) {
-            case "has_cookie" -> moe -> block_party.scene.SceneVariables.get(moe.level())
-                    .cookies(moe.getDatabaseID())
-                    .has(GsonHelper.getAsString(json, "name", ""));
-            case "counter" -> moe -> counterMatches(moe, json);
-            default -> SceneObservations.byPath(type.getPath()).orElse(SceneObservations.ALWAYS);
-        };
-    }
-
-    private static boolean counterMatches(Moe moe, JsonObject json) {
-        Integer value = block_party.scene.SceneVariables.get(moe.level())
-                .counters(moe.getDatabaseID())
-                .get(GsonHelper.getAsString(json, "name", ""));
-        int actual = value == null ? 0 : value;
-        int expected = GsonHelper.getAsInt(json, "value", 0);
-        return switch (GsonHelper.getAsString(json, "operation", "equals")) {
-            case "greater_than" -> actual > expected;
-            case "less_than" -> actual < expected;
-            case "at_least" -> actual >= expected;
-            case "at_most" -> actual <= expected;
-            default -> actual == expected;
-        };
+        return SceneObservationFactories.build(type, json);
     }
 
     private static List<SceneAction> parseActions(JsonArray array) {

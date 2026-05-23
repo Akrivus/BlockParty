@@ -144,7 +144,9 @@ public final class CustomItems {
                     "sakura_pressure_plate", "sakura_slab", "sakura_stairs", "sakura_wood",
                     "shoji_block", "shoji_lantern", "shoji_panel", "shoji_screen", "stripped_ginkgo_log",
                     "stripped_ginkgo_wood", "stripped_sakura_log", "stripped_sakura_wood", "tatami_mat",
-                    "wisteria_bine", "wisteria_leaves", "wisteria_sapling" -> 20;
+                    "wisteria_bine", "wisteria_button", "wisteria_fence", "wisteria_fence_gate",
+                    "wisteria_leaves", "wisteria_planks", "wisteria_pressure_plate", "wisteria_sapling",
+                    "wisteria_slab", "wisteria_stairs" -> 20;
             default -> 100;
         };
     }

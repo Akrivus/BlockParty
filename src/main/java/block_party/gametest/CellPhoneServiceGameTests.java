@@ -14,6 +14,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -76,6 +77,49 @@ public final class CellPhoneServiceGameTests {
         Vec3 expected = new Vec3(caller.x, caller.y, caller.z + 1.44D);
         if (called.position().distanceToSqr(expected) > 0.0001D) {
             helper.fail("Expected called Moe at " + expected + ", got " + called.position());
+            return;
+        }
+        helper.kill(called);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 60)
+    public static void crossDimensionCallTeleportsLoadedMoe(GameTestHelper helper) {
+        ServerLevel callerLevel = helper.getLevel();
+        ServerLevel nether = callerLevel.getServer().getLevel(Level.NETHER);
+        if (nether == null) {
+            helper.fail("Expected Nether level to be available for cross-dimension phone call test");
+            return;
+        }
+
+        BlockPartyDB db = BlockPartyDB.get(callerLevel);
+        UUID owner = new UUID(1310L, 2310L);
+        BlockPos source = new BlockPos(0, 80, 0);
+        nether.getChunk(source);
+        nether.setBlock(source, CustomBlocks.ENTRIES.get("sakura_log").get().defaultBlockState(), 3);
+        Moe moe = CustomSpawnEggItem.spawnMoe(nether, source, Direction.UP, owner);
+        if (moe == null) {
+            helper.fail("Expected Nether Moe spawn setup to succeed");
+            return;
+        }
+
+        BlockPos caller = helper.absolutePos(new BlockPos(4, 1, 1));
+        Moe called = db.callOwnedNpc(callerLevel, owner, caller, moe.getDatabaseID()).orElse(null);
+        if (called == null) {
+            helper.fail("Expected cross-dimension call to teleport loaded Moe");
+            return;
+        }
+
+        if (called.level() != callerLevel) {
+            helper.fail("Expected cross-dimension phone call to arrive in caller level");
+            return;
+        }
+        if (!called.blockPosition().equals(caller.east())) {
+            helper.fail("Expected cross-dimension called Moe to move near caller");
+            return;
+        }
+        if (!called.isFollowing()) {
+            helper.fail("Expected cross-dimension successful call to set following=true");
             return;
         }
         helper.kill(called);

@@ -8,7 +8,7 @@ version = "${file.jarVersion}"
 displayName = "Block Party"
 displayURL = "https://blocks.moe/"
 logoFile = "block_party.png"
-credits = "akrivus, Judacraz, dalfaria."
+credits = "akrivus, Jüdacraz, dalfaria."
 authors = "akrivus"
 description = '''
 In Block Party, your blocks to come to life to enjoy the world around them.

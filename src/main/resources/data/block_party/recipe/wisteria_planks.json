@@ -1,0 +1,11 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "group": "planks",
+    "ingredients": [
+        "#block_party:wisteria_logs"
+    ],
+    "result": {
+        "count": 4,
+        "id": "block_party:wisteria_planks"
+    }
+}

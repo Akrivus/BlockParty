@@ -200,13 +200,13 @@ Current success path:
 4. Queue a forced chunk ticket for the row's stored chunk.
 5. Search the row dimension for a live `Moe` entity with the requested `DatabaseID`.
 6. Reject the call if no loaded live Moe shell is present.
-7. Reject cross-dimension live entities for now, because Forge `ITeleporter`/dimension-change behavior has not been restored.
-8. Move the Moe to the Forge yaw-based arrival offset near the requester.
+7. If the live Moe is in another dimension, transfer it to the requester's level through the 1.21.4 `TeleportTransition` API.
+8. Place the Moe at the Forge yaw-based arrival offset near the requester.
 9. Set `Moe.FOLLOWING = true`.
 10. Update the SQLite row position/profile fields from the moved Moe shell.
 11. Release the forced chunk ticket in all success/failure outcomes after it is queued.
 
-Minimal forced chunk loading is active for row-backed lookup and cleanup parity. A row without a live Moe still fails safely, but it no longer leaks a forced chunk ticket. Full Forge Cell Phone behavior that can recover entities across unloaded chunks or dimensions remains incomplete until entity persistence and dimension teleport behavior are ported.
+Minimal forced chunk loading is active for row-backed lookup and cleanup parity. A row without a live Moe still fails safely, but it no longer leaks a forced chunk ticket. Loaded cross-dimension calls are restored through the Cell Phone service object; recovering entities that are not live after the forced-chunk lookup remains deferred until entity persistence behavior is deliberately broadened.
 
 ## Movement, Combat, Inventory, And Follow Shells
 
@@ -430,12 +430,11 @@ Currently unimplemented:
 - audio content cleanup for pre-existing `silence`, generic `moe.step`, and `sounds/moe/yes6 .ogg` warnings
 - manual audio playback validation for the now-wired Moe sound hooks
 - full unloaded-entity recovery after forced chunk loading
-- cross-dimension Cell Phone teleport
 - remaining client screen integration and screenshot-verified renderer/UI polish
 - AI goals, visible follow pathfinding, and timed hide goal execution
 - unported scene filters/actions beyond Slice 5.1's active `always`, `never`, `has_cookie`, `counter`, `send_dialogue`, `send_response`, `hide`, `cookie`, `counter`, and `end`
 - full decorative block interaction/render parity beyond Slice 5.3's active log/leaves/blossom/sapling/slab/door/vine property foundations
-- full Cell Phone teleport behavior, including cross-dimension teleport, arrival effects, and follow AI
+- full Cell Phone recovery for not-live entities, arrival effects, and follow AI
 - chores, pranks, adventure behavior, and richer companion behavior beyond confirmed Forge 1.19.4 shipped behavior
 
 The current tested contract is intentionally small: valid tagged blocks create an SQLite `NPCs` row, add the row ID to the owner list, and produce a Moe shell with that row ID; invalid blocks no-op; owner lists expose only owned, readable, non-dead rows; non-owners cannot access, de-list, call, or update dialogue rows; a loaded visible owned Moe can be called near the requester at the Forge yaw-based Cell Phone offset and gets `following=true`; hidden, unloaded, missing, corrupt, and dead rows fail safely; typed payload codecs cover list/detail/remove/call/controller-open/dialogue/shrine-list state and route list/detail/remove/call/dialogue response/dialogue close/shrine list through `BlockPartyDB`; a Moe can hide into a world block plus `MoeInHiding`; hide updates the same row and records the hidden position in `HidingSpots`; manual, timed, break-start, break-end, piston, and falling-block reveal restore a Moe shell from the same row identity; missing hidden spots, missing rows, corrupt rows, and dead rows fail safely; data block entities preserve owner/row NBT, claim/update/delete SQLite rows, and expose Forge owner-or-dimension shrine list rows server-side; Moe Layer2-Layer5 fields round-trip through NBT and explicit SQLite row writes without automatic setter-triggered DB writes; resource-loaded names and populated Forge block trait tags can assign a random non-default name, weighted/default blood type, gender/profile flags, and safe trait fallback values; Moe attributes, winged/grounded navigation category, non-recursive combat delegation, home helpers, inventory NBT, inventory slouch recalculation, block alias visible state, volume scale, Layer7 timer NBT, minimal dialogue state, owner-aware right/left scene interaction routing, hurt/attack/random/stare trigger routing, data-driven right-click/left-click scene execution, scene cookie/counter mutation, migrated recipe/loot/worldgen resource availability, representative decorative block properties, wisteria vine survival, and Cell Phone following state are GameTested.

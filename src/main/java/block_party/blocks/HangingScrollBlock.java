@@ -1,8 +1,12 @@
 package block_party.blocks;
 
 import block_party.blocks.entity.HangingScrollBlockEntity;
+import block_party.scene.SceneObservation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -24,10 +28,24 @@ public class HangingScrollBlock extends AbstractDataBlock {
     protected static final VoxelShape EAST_AABB = Block.box(14.0D, 1.0D, 1.0D, 16.0D, 15.0D, 15.0D);
     protected static final VoxelShape SOUTH_AABB = Block.box(1.0D, 1.0D, 14.0D, 15.0D, 15.0D, 16.0D);
     protected static final VoxelShape WEST_AABB = Block.box(0.0D, 1.0D, 1.0D, 2.0D, 15.0D, 15.0D);
+    private final SceneObservation condition;
 
-    public HangingScrollBlock(Properties properties) {
+    public HangingScrollBlock(Properties properties, SceneObservation condition) {
         super(HangingScrollBlockEntity::new, properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+        this.condition = condition;
+    }
+
+    public SceneObservation getCondition() {
+        return this.condition;
+    }
+
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        if (!level.isClientSide() && placer instanceof Player && level.getBlockEntity(pos) instanceof HangingScrollBlockEntity scroll) {
+            scroll.setRequiredCondition(this.condition.toString());
+        }
     }
 
     @Override

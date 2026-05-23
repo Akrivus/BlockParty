@@ -29,7 +29,7 @@ import java.util.Calendar;
 @Mod(BlockParty.ID)
 public final class BlockParty {
     public static final String ID = "block_party";
-    public static final String VERSION = "22.3.6";
+    public static final String VERSION = "26.6";
 
     public BlockParty(IEventBus modBus) {
         CustomBlocks.register(modBus);
@@ -65,8 +65,17 @@ public final class BlockParty {
     }
 
     public static boolean isChristmas() {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getCalendar();
         return calendar.get(Calendar.MONTH) + 1 == 12 && calendar.get(Calendar.DAY_OF_MONTH) >= 24 && calendar.get(Calendar.DAY_OF_MONTH) <= 26;
+    }
+
+    public static boolean isHalloween() {
+        Calendar calendar = getCalendar();
+        return calendar.get(Calendar.MONTH) + 1 == 10 && calendar.get(Calendar.DAY_OF_MONTH) == 31;
+    }
+
+    public static Calendar getCalendar() {
+        return Calendar.getInstance();
     }
 
     public static ResourceLocation source(String path) {

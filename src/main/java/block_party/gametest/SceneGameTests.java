@@ -106,6 +106,67 @@ public final class SceneGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void structuredSceneObservationFactoriesMatchActiveMoeState(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(512L, 12L));
+        moe.setHealth(12.0F);
+        moe.setFoodLevel(9.0F);
+        moe.setGivenName("Akemi");
+        SceneVariables variables = SceneVariables.get(moe.level());
+        variables.cookies(moe.getDatabaseID()).set("mood", "sunny");
+        variables.counters(moe.getDatabaseID()).set("score", 3);
+
+        ScenesReloadListener.ParsedScene accepts = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  {"type":"block_party:health","filter":{"operation":"at_least","value":10}},
+                  {"type":"block_party:food_level","filter":{"operation":"less_than","value":10}},
+                  {"type":"block_party:counter","filter":{"name":"score","operation":"equals","value":3}},
+                  {"type":"block_party:has_cookie","filter":{"name":"mood","operation":"equals","value":"sunny"}},
+                  {"type":"block_party:block","filter":{"name":"block_party:sakura_log"}},
+                  {"type":"block_party:name","filter":{"operation":"prefix","value":"Ake"}},
+                  {"type":"block_party:self","filter":{"name":"block_party:moe"}}
+                ],"actions":[]}
+                """);
+        ScenesReloadListener.ParsedScene rejects = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  {"type":"block_party:counter","filter":{"name":"score","operation":"greater_than","value":9}}
+                ],"actions":[]}
+                """);
+
+        if (!accepts.scene().fulfills(moe)) {
+            helper.fail("Expected structured scene filters to accept matching Moe state");
+            return;
+        }
+        if (rejects.scene().fulfills(moe)) {
+            helper.fail("Expected structured scene filters to reject mismatched Moe state");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void unimplementedSceneObservationIdsFailClosed(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(513L, 13L));
+        ScenesReloadListener.ParsedScene unknown = parseScene("""
+                {"trigger":"block_party:right_click","filters":["block_party:not_a_real_filter"],"actions":[]}
+                """);
+        ScenesReloadListener.ParsedScene deferred = parseScene("""
+                {"trigger":"block_party:right_click","filters":[{"type":"block_party:family_name","filter":{"value":"Minashigo"}}],"actions":[]}
+                """);
+
+        if (unknown.scene().fulfills(moe)) {
+            helper.fail("Expected unknown scene filters to fail closed");
+            return;
+        }
+        if (deferred.scene().fulfills(moe)) {
+            helper.fail("Expected deferred scene filters to fail closed");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void ownerRightClickInteractionTriggersScene(GameTestHelper helper) {
         Player owner = helper.makeMockPlayer(GameType.SURVIVAL);
         Moe moe = spawnMoe(helper, owner.getUUID());

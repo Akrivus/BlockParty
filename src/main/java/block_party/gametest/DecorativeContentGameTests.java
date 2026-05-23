@@ -23,14 +23,18 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.GrowingPlantBodyBlock;
 import net.minecraft.world.level.block.GrowingPlantHeadBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.SlabType;
@@ -50,6 +54,8 @@ public final class DecorativeContentGameTests {
     public static void legacyRecipesLoadAfterNeoForgePathMigration(GameTestHelper helper) {
         assertRecipeLoaded(helper, "sakura_planks");
         assertRecipeLoaded(helper, "shoji_lamp");
+        assertRecipeLoaded(helper, "wisteria_planks");
+        assertRecipeLoaded(helper, "wisteria_fence_gate");
         assertRecipeLoaded(helper, "yearbook");
         helper.succeed();
     }
@@ -58,6 +64,8 @@ public final class DecorativeContentGameTests {
     public static void legacyLootAndWorldgenResourcesAreAvailable(GameTestHelper helper) {
         assertResource(helper, "loot_table/blocks/sakura_log.json");
         assertResource(helper, "loot_table/blocks/sakura_slab.json");
+        assertResource(helper, "loot_table/blocks/wisteria_fence_gate.json");
+        assertResource(helper, "loot_table/blocks/wisteria_slab.json");
         assertResource(helper, "worldgen/configured_feature/sakura_tree.json");
         assertResource(helper, "worldgen/placed_feature/sakura_tree.json");
 
@@ -93,6 +101,13 @@ public final class DecorativeContentGameTests {
 
         assertEquals(helper, true, CustomBlocks.BLANK_HANGING_SCROLL.get() instanceof HangingScrollBlock, "hanging scroll block class");
         assertEquals(helper, Direction.NORTH, CustomBlocks.BLANK_HANGING_SCROLL.get().defaultBlockState().getValue(HangingScrollBlock.FACING), "hanging scroll default facing");
+        assertEquals(helper, block_party.scene.SceneObservations.ALWAYS, ((HangingScrollBlock) CustomBlocks.BLANK_HANGING_SCROLL.get()).getCondition(), "blank hanging scroll condition");
+        assertEquals(helper, block_party.scene.SceneObservations.MORNING, ((HangingScrollBlock) CustomBlocks.MORNING_HANGING_SCROLL.get()).getCondition(), "morning hanging scroll condition");
+        assertEquals(helper, block_party.scene.SceneObservations.NOON, ((HangingScrollBlock) CustomBlocks.NOON_HANGING_SCROLL.get()).getCondition(), "noon hanging scroll condition");
+        assertEquals(helper, block_party.scene.SceneObservations.EVENING, ((HangingScrollBlock) CustomBlocks.EVENING_HANGING_SCROLL.get()).getCondition(), "evening hanging scroll condition");
+        assertEquals(helper, block_party.scene.SceneObservations.NIGHT, ((HangingScrollBlock) CustomBlocks.NIGHT_HANGING_SCROLL.get()).getCondition(), "night hanging scroll condition");
+        assertEquals(helper, block_party.scene.SceneObservations.MIDNIGHT, ((HangingScrollBlock) CustomBlocks.MIDNIGHT_HANGING_SCROLL.get()).getCondition(), "midnight hanging scroll condition");
+        assertEquals(helper, block_party.scene.SceneObservations.DAWN, ((HangingScrollBlock) CustomBlocks.DAWN_HANGING_SCROLL.get()).getCondition(), "dawn hanging scroll condition");
 
         assertEquals(helper, true, CustomBlocks.SHIMENAWA.get() instanceof ShimenawaBlock, "shimenawa block class");
         BlockState shimenawa = CustomBlocks.SHIMENAWA.get().defaultBlockState();
@@ -104,6 +119,9 @@ public final class DecorativeContentGameTests {
 
         assertEquals(helper, true, CustomBlocks.SHOJI_SCREEN.get() instanceof ShojiScreenBlock, "shoji screen block class");
         assertEquals(helper, true, CustomBlocks.SHOJI_LANTERN.get() instanceof ShojiLanternBlock, "shoji lantern block class");
+        assertEquals(helper, true, CustomBlocks.ENTRIES.get("shoji_panel").get() instanceof TrapDoorBlock, "shoji panel trapdoor class");
+        assertEquals(helper, true, CustomBlocks.ENTRIES.get("ginkgo_fence_gate").get() instanceof FenceGateBlock, "ginkgo fence gate class");
+        assertEquals(helper, true, CustomBlocks.ENTRIES.get("sakura_fence_gate").get() instanceof FenceGateBlock, "sakura fence gate class");
         assertEquals(helper, true, CustomBlocks.WRITING_TABLE.get() instanceof WritingTableBlock, "writing table block class");
         assertEquals(helper, Direction.NORTH, CustomBlocks.WRITING_TABLE.get().defaultBlockState().getValue(WritingTableBlock.FACING), "writing table default facing");
         assertEquals(helper, true, CustomBlocks.GINKGO_LEAVES.get() instanceof GinkgoLeavesBlock, "ginkgo leaves block class");
@@ -112,6 +130,16 @@ public final class DecorativeContentGameTests {
         assertEquals(helper, true, CustomBlocks.WISTERIA_VINE_TIP.get() instanceof WisteriaVineTipBlock, "wisteria vine tip class");
         assertEquals(helper, true, CustomBlocks.WISTERIA_VINE_BODY.get() instanceof GrowingPlantBodyBlock, "wisteria vine body growing plant");
         assertEquals(helper, true, CustomBlocks.WISTERIA_VINE_TIP.get() instanceof GrowingPlantHeadBlock, "wisteria vine tip growing plant");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void ginkgoWoodFamilyKeepsFireResistantTrait(GameTestHelper helper) {
+        assertEquals(helper, false, CustomBlocks.ENTRIES.get("ginkgo_log").get().defaultBlockState().is(BlockTags.LOGS_THAT_BURN), "ginkgo log burnable tag");
+        assertEquals(helper, false, CustomBlocks.ENTRIES.get("ginkgo_wood").get().defaultBlockState().is(BlockTags.LOGS_THAT_BURN), "ginkgo wood burnable tag");
+        assertEquals(helper, true, CustomBlocks.ENTRIES.get("sakura_log").get().defaultBlockState().is(BlockTags.LOGS_THAT_BURN), "sakura log burnable tag");
+        assertEquals(helper, false, CustomBlocks.ENTRIES.get("ginkgo_log").get().asItem().getDefaultInstance().is(ItemTags.LOGS_THAT_BURN), "ginkgo log item burnable tag");
+        assertEquals(helper, true, CustomBlocks.ENTRIES.get("sakura_log").get().asItem().getDefaultInstance().is(ItemTags.LOGS_THAT_BURN), "sakura log item burnable tag");
         helper.succeed();
     }
 

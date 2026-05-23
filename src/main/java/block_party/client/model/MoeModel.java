@@ -27,6 +27,7 @@ public class MoeModel extends EntityModel<MoeRenderState> implements ArmedModel,
     private final ModelPart rightEar;
     private final ModelPart leftEar;
     private final ModelPart hatTop;
+    private final ModelPart hatBrim;
     private final ModelPart body;
     private final ModelPart bust;
     private final ModelPart skirt;
@@ -71,6 +72,7 @@ public class MoeModel extends EntityModel<MoeRenderState> implements ArmedModel,
         this.rightEar = this.head.getChild("right_ear");
         this.leftEar = this.head.getChild("left_ear");
         this.hatTop = this.head.getChild("hat_top");
+        this.hatBrim = this.hatTop.getChild("hat_brim");
         this.body = root.getChild("body");
         this.bust = this.body.getChild("bust");
         this.skirt = this.body.getChild("skirt");
@@ -191,7 +193,7 @@ public class MoeModel extends EntityModel<MoeRenderState> implements ArmedModel,
         ModelPart arm = this.getArmForSide(swingingArm);
         arm.xRot -= swingRotation * 1.2F + swingHeadings;
         arm.yRot += this.body.yRot * 2.0F;
-        arm.zRot += Mth.sin(state.attackTime * Mth.PI) * -0.4F;
+        arm.zRot += swingRotation * -0.4F;
     }
 
     private void copyOverlayParts() {
