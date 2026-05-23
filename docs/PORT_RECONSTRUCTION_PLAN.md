@@ -162,7 +162,7 @@ Status: Implemented in the NeoForge spike for server-side data block shells and 
 Player-facing behavior restored:
 
 - Decorative/data blocks with block entities preserve owner/location row data server-side.
-- Garden lantern, hanging scroll, paper lantern, sakura sapling, shimenawa, shrine tablet, and wind chimes block entity registry IDs are active.
+- Garden lantern, hanging scroll, paper lantern, sakura sapling, shimenawa, and shrine tablet block entity registry IDs are active. Wind chimes are intentionally disabled because the model asset is missing.
 - Shrine, garden, location, and sapling SQLite tables are created; claim/update/delete behavior is active for the data-block tables.
 - Shrine list queries are available server-side with Forge owner-or-dimension filtering.
 
@@ -1210,6 +1210,23 @@ Release-blocker evaluation:
 - No automated server-side release blockers found in Slice 6.7.
 - Manual client/golden-world review is still required because rendering, screen visuals, audio playback, and long-lived world persistence cannot be fully validated by the current dedicated-server GameTests.
 - Accepted deferred work remains documented in `docs/SEMANTIC_DRIFT_NOTES.md`: cross-dimension Cell Phone behavior, client shrine-location rendering, richer translated response labels, exact samurai armor client model/overlay parity, visual polish for reported UI blur/model issues, and future feature work beyond the frozen Forge branch.
+
+### Pre-Merge Botanical Cleanup
+
+Status: Implemented after Phase 6 automated closeout as a parity tightening pass.
+
+Player-facing behavior restored:
+
+- Ginkgo leaves use their Forge-style falling leaf particle hook.
+- Wisteria leaves can create vine tips below themselves.
+- Wisteria vine body and tip blocks use vanilla growing-plant body/head behavior again, including downward bonemeal growth and non-solid collision.
+
+Tests:
+
+- Done: ginkgo/wisteria concrete block class checks.
+- Done: wisteria leaves place vine tips below.
+- Done: wisteria vine tip bonemeal grows downward.
+- Existing coverage continues to assert non-solid survival behavior.
 
 Explicitly out of scope:
 

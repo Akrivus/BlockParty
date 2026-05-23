@@ -7,7 +7,6 @@ import block_party.blocks.entity.PaperLanternBlockEntity;
 import block_party.blocks.entity.SakuraSaplingBlockEntity;
 import block_party.blocks.entity.ShimenawaBlockEntity;
 import block_party.blocks.entity.ShrineTabletBlockEntity;
-import block_party.blocks.entity.WindChimesBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -64,11 +63,6 @@ public final class CustomBlockEntities {
             BLOCK_ENTITIES.register("shrine_tablet", () -> new BlockEntityType<>(
                     ShrineTabletBlockEntity::new,
                     CustomBlocks.SHRINE_TABLET.get()));
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WindChimesBlockEntity>> WIND_CHIME =
-            BLOCK_ENTITIES.register("wind_chimes", () -> new BlockEntityType<>(
-                    WindChimesBlockEntity::new,
-                    CustomBlocks.WIND_CHIMES.get()));
-
     private CustomBlockEntities() {
     }
 

@@ -180,6 +180,7 @@ tasks.register('syncNeoForgeSpikeResources', Sync) {
             }
         }
         def legacyItemModelDir = new File(generated, 'assets/block_party/models/item')
+        def blockStateDir = new File(generated, 'assets/block_party/blockstates')
         def itemDefinitionDir = new File(generated, 'assets/block_party/items')
         if (legacyItemModelDir.exists()) {
             itemDefinitionDir.mkdirs()
@@ -193,6 +194,48 @@ tasks.register('syncNeoForgeSpikeResources', Sync) {
                 ]
                 new File(itemDefinitionDir, file.name).text = jsonOutput.prettyPrint(jsonOutput.toJson(definition)) + System.lineSeparator()
             }
+        }
+        if (legacyItemModelDir.exists() && blockStateDir.exists()) {
+            blockStateDir.eachFileMatch(~/.*\.json/) { file ->
+                def name = file.name.substring(0, file.name.length() - '.json'.length())
+                def itemModel = new File(legacyItemModelDir, file.name)
+                if (!itemModel.exists()) {
+                    itemModel.text = jsonOutput.prettyPrint(jsonOutput.toJson([
+                            parent: "block_party:block/${name}"
+                    ])) + System.lineSeparator()
+                }
+                def itemDefinition = new File(itemDefinitionDir, file.name)
+                if (!itemDefinition.exists()) {
+                    itemDefinition.text = jsonOutput.prettyPrint(jsonOutput.toJson([
+                            model: [
+                                    type : 'minecraft:model',
+                                    model: "block_party:item/${name}"
+                            ]
+                    ])) + System.lineSeparator()
+                }
+            }
+        }
+        def langFile = new File(generated, 'assets/block_party/lang/en_us.json')
+        if (langFile.exists() && blockStateDir.exists()) {
+            def translations = jsonSlurper.parse(langFile)
+            def titleCase = { String id ->
+                id.split('_').collect { token -> token.length() <= 1 ? token.toUpperCase() : token.substring(0, 1).toUpperCase() + token.substring(1) }.join(' ')
+            }
+            blockStateDir.eachFileMatch(~/.*\.json/) { file ->
+                def name = file.name.substring(0, file.name.length() - '.json'.length())
+                def blockKey = "block.block_party.${name}"
+                if (!translations.containsKey(blockKey)) {
+                    translations[blockKey] = titleCase(name)
+                }
+                def itemKey = "item.block_party.${name}"
+                if (!translations.containsKey(itemKey)) {
+                    translations[itemKey] = translations[blockKey]
+                }
+            }
+            if (!translations.containsKey('item.block_party.wisteria_vines')) {
+                translations['item.block_party.wisteria_vines'] = 'Wisteria Vines'
+            }
+            langFile.text = jsonOutput.prettyPrint(jsonOutput.toJson(translations)) + System.lineSeparator()
         }
     }
 }

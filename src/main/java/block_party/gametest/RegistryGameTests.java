@@ -23,6 +23,8 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -141,6 +143,41 @@ public final class RegistryGameTests {
         }
         if (!katana.is(CustomTags.Items.PARRY_SWORDS) || !bokken.is(CustomTags.Items.PARRY_SWORDS)) {
             helper.fail("Expected katana and bokken to remain parry swords");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void samuraiParryHelperRequiresRaisedSwordAndReflectsDamage(GameTestHelper helper) {
+        Player victim = helper.makeMockPlayer(GameType.SURVIVAL);
+        ItemStack katana = new ItemStack(CustomItems.ENTRIES.get("samurai_katana").get());
+        victim.setItemSlot(EquipmentSlot.MAINHAND, katana);
+        if (SamuraiKatanaItem.canParry(victim)) {
+            helper.fail("Expected held but unraised parry sword not to parry");
+            return;
+        }
+        katana.use(helper.getLevel(), victim, net.minecraft.world.InteractionHand.MAIN_HAND);
+        if (!SamuraiKatanaItem.canParry(victim)) {
+            helper.fail("Expected right-click raised parry sword to be able to parry");
+            return;
+        }
+
+        Moe attacker = helper.spawn(CustomEntities.MOE.get(), 0, 1, 0);
+        float health = attacker.getHealth();
+        if (!SamuraiKatanaItem.tryParry(victim, attacker, 2.0F)) {
+            helper.fail("Expected tryParry to succeed with a raised tagged sword");
+            return;
+        }
+        if (attacker.getHealth() >= health) {
+            helper.fail("Expected parry to reflect damage to the attacker");
+            return;
+        }
+
+        victim.stopUsingItem();
+        victim.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+        if (SamuraiKatanaItem.canParry(victim)) {
+            helper.fail("Expected empty hand not to parry");
             return;
         }
         helper.succeed();

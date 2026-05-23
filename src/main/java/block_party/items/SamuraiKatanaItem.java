@@ -6,12 +6,18 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.ToolMaterial;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 public class SamuraiKatanaItem extends SwordItem implements SortableItem {
@@ -31,6 +37,22 @@ public class SamuraiKatanaItem extends SwordItem implements SortableItem {
         super(material, 4.0F, -1.6F, properties.stacksTo(1));
     }
 
+    @Override
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        player.startUsingItem(hand);
+        return InteractionResult.CONSUME;
+    }
+
+    @Override
+    public ItemUseAnimation getUseAnimation(ItemStack stack) {
+        return ItemUseAnimation.BLOCK;
+    }
+
+    @Override
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
+        return 72000;
+    }
+
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
         DamageSource source = event.getSource();
         if (source.is(DamageTypeTags.BYPASSES_ARMOR) || source.is(DamageTypeTags.IS_PROJECTILE)) {
@@ -43,17 +65,21 @@ public class SamuraiKatanaItem extends SwordItem implements SortableItem {
         }
     }
 
-    public static boolean tryParry(ServerPlayer victim, LivingEntity attacker, float amount) {
-        if (victim.getAttackStrengthScale(1.0F) >= 1.0F || !victim.getMainHandItem().is(CustomTags.Items.PARRY_SWORDS)) {
+    public static boolean tryParry(Player victim, LivingEntity attacker, float amount) {
+        if (!canParry(victim)) {
             return false;
         }
-        attacker.playSound(CustomSounds.ENTRIES.get("item.katana.parry").get(), 1.0F, 1.0F);
+        attacker.playSound(CustomSounds.ENTRIES.get("item.katana.parry").get(), 1.0F, 1.2F / (victim.level().random.nextFloat() * 0.2F + 0.9F));
         attacker.knockback(0.8F, victim.getX() - attacker.getX(), victim.getZ() - attacker.getZ());
         if (attacker.level() instanceof ServerLevel serverLevel) {
             attacker.hurtServer(serverLevel, attacker.damageSources().generic(), amount * 2.0F);
         }
         victim.sweepAttack();
         return true;
+    }
+
+    public static boolean canParry(Player victim) {
+        return victim.isUsingItem() && victim.getUseItem().is(CustomTags.Items.PARRY_SWORDS);
     }
 
     @Override

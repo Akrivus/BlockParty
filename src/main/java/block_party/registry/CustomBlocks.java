@@ -4,6 +4,7 @@ import block_party.BlockParty;
 import block_party.blocks.AbstractDataBlock;
 import block_party.blocks.DataSaplingBlock;
 import block_party.blocks.GardenLanternBlock;
+import block_party.blocks.GinkgoLeavesBlock;
 import block_party.blocks.HangingScrollBlock;
 import block_party.blocks.PaperLanternBlock;
 import block_party.blocks.SakuraBlossomsBlock;
@@ -11,7 +12,7 @@ import block_party.blocks.ShimenawaBlock;
 import block_party.blocks.ShojiLanternBlock;
 import block_party.blocks.ShojiScreenBlock;
 import block_party.blocks.ShrineTabletBlock;
-import block_party.blocks.WindChimesBlock;
+import block_party.blocks.WisteriaLeavesBlock;
 import block_party.blocks.WisteriaVineBodyBlock;
 import block_party.blocks.WisteriaVineTipBlock;
 import block_party.blocks.WritingTableBlock;
@@ -21,13 +22,11 @@ import block_party.blocks.entity.PaperLanternBlockEntity;
 import block_party.blocks.entity.SakuraSaplingBlockEntity;
 import block_party.blocks.entity.ShimenawaBlockEntity;
 import block_party.blocks.entity.ShrineTabletBlockEntity;
-import block_party.blocks.entity.WindChimesBlockEntity;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FlowerPotBlock;
@@ -87,7 +86,6 @@ public final class CustomBlocks {
     public static final DeferredBlock<Block> SHOJI_LANTERN = registerShojiLantern("shoji_lantern");
     public static final DeferredBlock<Block> WHITE_PAPER_LANTERN = registerPaperLantern("white_paper_lantern");
     public static final DeferredBlock<Block> WHITE_SAKURA_SAPLING = registerDataSapling("white_sakura_sapling", CustomWorldGen.WHITE_SAKURA_TREE, SakuraSaplingBlockEntity::new);
-    public static final DeferredBlock<Block> WIND_CHIMES = registerWindChimes("wind_chimes");
     public static final DeferredBlock<Block> WRITING_TABLE = registerWritingTable("writing_table");
     public static final DeferredBlock<Block> YELLOW_PAPER_LANTERN = registerPaperLantern("yellow_paper_lantern");
 
@@ -148,10 +146,17 @@ public final class CustomBlocks {
         if (ENTRIES.containsKey(id)) {
             return ENTRIES.get(id);
         }
-        DeferredBlock<Block> block = BLOCKS.registerBlock(id, LeavesBlock::new,
-                BlockBehaviour.Properties.of().strength(0.2F).randomTicks().noOcclusion().sound(SoundType.GRASS));
+        DeferredBlock<Block> block = switch (id) {
+            case "ginkgo_leaves" -> BLOCKS.registerBlock(id, GinkgoLeavesBlock::new, leavesProperties());
+            case "wisteria_leaves" -> BLOCKS.registerBlock(id, WisteriaLeavesBlock::new, leavesProperties());
+            default -> BLOCKS.registerBlock(id, net.minecraft.world.level.block.LeavesBlock::new, leavesProperties());
+        };
         ENTRIES.put(id, block);
         return block;
+    }
+
+    private static BlockBehaviour.Properties leavesProperties() {
+        return BlockBehaviour.Properties.of().strength(0.2F).randomTicks().noOcclusion().sound(SoundType.GRASS);
     }
 
     private static DeferredBlock<Block> registerSakuraBlossoms(String id) {
@@ -253,13 +258,6 @@ public final class CustomBlocks {
 
     private static DeferredBlock<Block> registerShrineTablet(String id) {
         DeferredBlock<Block> block = BLOCKS.registerBlock(id, ShrineTabletBlock::new,
-                BlockBehaviour.Properties.of().strength(1.0F).noOcclusion().sound(SoundType.WOOD));
-        ENTRIES.put(id, block);
-        return block;
-    }
-
-    private static DeferredBlock<Block> registerWindChimes(String id) {
-        DeferredBlock<Block> block = BLOCKS.registerBlock(id, WindChimesBlock::new,
                 BlockBehaviour.Properties.of().strength(1.0F).noOcclusion().sound(SoundType.WOOD));
         ENTRIES.put(id, block);
         return block;

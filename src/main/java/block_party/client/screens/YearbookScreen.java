@@ -1,6 +1,7 @@
 package block_party.client.screens;
 
 import block_party.BlockParty;
+import block_party.client.ClientTranslations;
 import block_party.entities.Moe;
 import block_party.network.payload.NpcDetailPayload;
 import block_party.network.payload.NpcDetailRequestPayload;
@@ -85,16 +86,30 @@ public class YearbookScreen extends ControllerScreen {
     }
 
     private void renderDetails(GuiGraphics graphics) {
-        String name = this.npc.name().isBlank() ? Component.translatable("entity.block_party.moe").getString() : this.npc.name();
+        String name = ClientTranslations.displayName(this.npc).getString();
         graphics.drawString(this.font, name, this.width / 2 - this.font.width(name) / 2 + 3, 91, 0, false);
-        String page = this.databaseIds.isEmpty() ? "0/0" : String.format("%d/%d", this.index + 1, this.databaseIds.size());
+        String page = this.databaseIds.isEmpty()
+                ? ClientTranslations.page(0, 0).getString()
+                : ClientTranslations.page(this.index + 1, this.databaseIds.size()).getString();
         graphics.drawString(this.font, page, this.width / 2 - this.font.width(page) / 2, 185, 0, false);
-        graphics.drawString(this.font, "ID " + this.npc.databaseId(), this.absoluteCenter(35), 104, 0, false);
-        graphics.drawString(this.font, this.npc.gender(), this.absoluteCenter(35), 123, 0, false);
-        graphics.drawString(this.font, Block.stateById(this.npc.blockStateId()).getBlock().getName(), this.absoluteCenter(35), 143, 0, false);
-        graphics.drawString(this.font, this.npc.hiding()
-                ? Component.translatable("gui.block_party.label.hidden")
-                : Component.translatable("gui.block_party.label.visible"), this.absoluteCenter(35), 163, 0, false);
+        String[] stats = {
+                String.format("%.0f", this.npc.health()),
+                String.format("%.0f", this.npc.foodLevel()),
+                String.format("%.0f", this.npc.loyalty()),
+                String.format("%.0f", this.npc.stress())
+        };
+        for (int x = 0; x < stats.length; ++x) {
+            graphics.drawString(this.font, stats[x], this.absoluteCenter(38) + x * 25, 104, 0, false);
+        }
+        Component[] lines = {
+                ClientTranslations.dere(this.npc.dere()),
+                ClientTranslations.bloodType(this.npc.bloodType()),
+                ClientTranslations.zodiac(this.npc.zodiac()),
+                ClientTranslations.relationship(this.npc.dead(), this.npc.loyalty())
+        };
+        for (int y = 0; y < lines.length; ++y) {
+            graphics.drawString(this.font, lines[y], this.absoluteCenter(40) - (y > 0 ? 5 : y), 123 + 10 * y, 0, false);
+        }
     }
 
     private void requestSelected() {
@@ -177,6 +192,13 @@ public class YearbookScreen extends ControllerScreen {
         moe.setBlockStateFromRow(Block.stateById(payload.blockStateId()));
         moe.setGivenName(payload.name());
         moe.setGender(payload.gender());
+        moe.setBloodType(payload.bloodType());
+        moe.setDere(payload.dere());
+        moe.setZodiac(payload.zodiac());
+        moe.setFoodLevel(payload.foodLevel());
+        moe.setLoyalty(payload.loyalty());
+        moe.setStress(payload.stress());
+        moe.setAnimationKey("YEARBOOK");
         return moe;
     }
 

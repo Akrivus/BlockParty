@@ -1,6 +1,7 @@
 package block_party.client.screens;
 
 import block_party.BlockParty;
+import block_party.client.ClientTranslations;
 import block_party.network.payload.NpcCallPayload;
 import block_party.network.payload.NpcCallRequestPayload;
 import block_party.network.payload.NpcDetailPayload;
@@ -53,7 +54,7 @@ public class CellPhoneScreen extends ControllerScreen {
             return;
         }
         ++this.loaded;
-        if (payload.found() && !payload.hiding()) {
+        if (payload.found() && !payload.dead() && !payload.hiding()) {
             this.contacts.put(payload.databaseId(), payload);
         }
         if (this.loaded >= this.databaseIds.size() && this.contacts.isEmpty()) {
@@ -179,7 +180,7 @@ public class CellPhoneScreen extends ControllerScreen {
 
     private static class ContactButton extends Button {
         ContactButton(int x, int y, NpcDetailPayload npc, OnPress onPress) {
-            super(x, y, 81, 15, Component.literal(npc.name().isBlank() ? String.valueOf(npc.databaseId()) : npc.name()), onPress, DEFAULT_NARRATION);
+            super(x, y, 81, 15, ClientTranslations.displayName(npc), onPress, DEFAULT_NARRATION);
         }
 
         @Override

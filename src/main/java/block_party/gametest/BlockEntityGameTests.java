@@ -7,9 +7,13 @@ import block_party.blocks.entity.PaperLanternBlockEntity;
 import block_party.blocks.entity.SakuraSaplingBlockEntity;
 import block_party.blocks.entity.ShimenawaBlockEntity;
 import block_party.blocks.entity.ShrineTabletBlockEntity;
-import block_party.blocks.entity.WindChimesBlockEntity;
 import block_party.db.BlockPartyDB;
+import block_party.db.DimBlockPos;
+import block_party.db.records.Garden;
+import block_party.db.records.Location;
 import block_party.db.records.NPC;
+import block_party.db.records.Sapling;
+import block_party.db.records.Shrine;
 import block_party.entities.Moe;
 import block_party.registry.CustomBlocks;
 import java.sql.Connection;
@@ -53,7 +57,6 @@ public final class BlockEntityGameTests {
         assertRegistered(helper, BuiltInRegistries.BLOCK_ENTITY_TYPE, "sakura_sapling");
         assertRegistered(helper, BuiltInRegistries.BLOCK_ENTITY_TYPE, "shimenawa");
         assertRegistered(helper, BuiltInRegistries.BLOCK_ENTITY_TYPE, "shrine_tablet");
-        assertRegistered(helper, BuiltInRegistries.BLOCK_ENTITY_TYPE, "wind_chimes");
         helper.succeed();
     }
 
@@ -67,7 +70,14 @@ public final class BlockEntityGameTests {
         assertBlockEntity(helper, new BlockPos(5, 1, 1), CustomBlocks.SHIMENAWA.get(), ShimenawaBlockEntity.class);
         placeSupport(helper, new BlockPos(6, 1, 2));
         assertBlockEntity(helper, new BlockPos(6, 1, 1), CustomBlocks.SHRINE_TABLET.get(), ShrineTabletBlockEntity.class);
-        assertBlockEntity(helper, new BlockPos(7, 1, 1), CustomBlocks.WIND_CHIMES.get(), WindChimesBlockEntity.class);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void windChimesRemainDisabledUntilModelReturns(GameTestHelper helper) {
+        assertNotRegistered(helper, BuiltInRegistries.BLOCK, "wind_chimes");
+        assertNotRegistered(helper, BuiltInRegistries.ITEM, "wind_chimes");
+        assertNotRegistered(helper, BuiltInRegistries.BLOCK_ENTITY_TYPE, "wind_chimes");
         helper.succeed();
     }
 
@@ -208,6 +218,64 @@ public final class BlockEntityGameTests {
             }
         } catch (SQLException exception) {
             helper.fail("Expected shrine list query to succeed: " + exception.getMessage());
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void typedDataBlockQueriesExposeWaypointRows(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = configuredDb(helper);
+        try {
+            BlockPartyDB.createDataBlockTables(db);
+        } catch (SQLException exception) {
+            helper.fail("Expected data block tables to be creatable: " + exception.getMessage());
+            return;
+        }
+
+        UUID owner = new UUID(1406L, 2406L);
+        GardenLanternBlockEntity garden = claimGarden(helper, level, new BlockPos(1, 1, 1), owner);
+        SakuraSaplingBlockEntity sapling = claimSapling(helper, level, new BlockPos(2, 1, 1), owner);
+        PaperLanternBlockEntity location = claimPaperLantern(helper, level, new BlockPos(3, 1, 1), owner);
+        ShrineTabletBlockEntity nearShrine = claimShrine(helper, level, new BlockPos(4, 1, 1), owner);
+        ShrineTabletBlockEntity farShrine = claimShrine(helper, level, new BlockPos(8, 1, 1), owner);
+
+        try {
+            Garden gardenRow = db.listGardens().stream()
+                    .filter(row -> row.databaseId() == garden.getDatabaseID())
+                    .findFirst()
+                    .orElse(null);
+            if (gardenRow == null || !owner.equals(gardenRow.playerUuid()) || !garden.getBlockPos().equals(gardenRow.dimPos().getPos())) {
+                helper.fail("Expected typed garden query to expose owner and position");
+                return;
+            }
+
+            Sapling saplingRow = db.listSaplings().stream()
+                    .filter(row -> row.databaseId() == sapling.getDatabaseID())
+                    .findFirst()
+                    .orElse(null);
+            if (saplingRow == null || !owner.equals(saplingRow.playerUuid()) || !sapling.getBlockPos().equals(saplingRow.dimPos().getPos())) {
+                helper.fail("Expected typed sapling query to expose owner and position, got " + saplingRow);
+                return;
+            }
+
+            Location locationRow = db.listLocations(owner).stream()
+                    .filter(row -> row.databaseId() == location.getDatabaseID())
+                    .findFirst()
+                    .orElse(null);
+            if (locationRow == null || !"ALWAYS".equals(locationRow.requiredCondition()) || locationRow.priority() != 1) {
+                helper.fail("Expected typed location query to expose condition and priority");
+                return;
+            }
+
+            Shrine closest = db.findClosestShrine(owner, new DimBlockPos(level.dimension(), nearShrine.getBlockPos().west())).orElse(null);
+            if (closest == null || closest.databaseId() != nearShrine.getDatabaseID() || closest.databaseId() == farShrine.getDatabaseID()) {
+                helper.fail("Expected typed shrine query to return the closest owner shrine");
+                return;
+            }
+        } catch (SQLException exception) {
+            helper.fail("Expected typed data block queries to succeed: " + exception.getMessage());
             return;
         }
         helper.succeed();
@@ -359,6 +427,31 @@ public final class BlockEntityGameTests {
         return shrine;
     }
 
+    private static GardenLanternBlockEntity claimGarden(GameTestHelper helper, ServerLevel level, BlockPos relative, UUID owner) {
+        BlockPos pos = helper.absolutePos(relative);
+        level.setBlock(pos, CustomBlocks.GARDEN_LANTERN.get().defaultBlockState(), 3);
+        GardenLanternBlockEntity garden = (GardenLanternBlockEntity) level.getBlockEntity(pos);
+        garden.claim(mockPlayer(helper, owner));
+        return garden;
+    }
+
+    private static SakuraSaplingBlockEntity claimSapling(GameTestHelper helper, ServerLevel level, BlockPos relative, UUID owner) {
+        BlockPos pos = helper.absolutePos(relative);
+        level.setBlock(pos.below(), Blocks.DIRT.defaultBlockState(), 3);
+        level.setBlock(pos, CustomBlocks.SAKURA_SAPLING.get().defaultBlockState(), 3);
+        SakuraSaplingBlockEntity sapling = (SakuraSaplingBlockEntity) level.getBlockEntity(pos);
+        sapling.claim(mockPlayer(helper, owner));
+        return sapling;
+    }
+
+    private static PaperLanternBlockEntity claimPaperLantern(GameTestHelper helper, ServerLevel level, BlockPos relative, UUID owner) {
+        BlockPos pos = helper.absolutePos(relative);
+        level.setBlock(pos, CustomBlocks.PAPER_LANTERN.get().defaultBlockState(), 3);
+        PaperLanternBlockEntity location = (PaperLanternBlockEntity) level.getBlockEntity(pos);
+        location.claim(mockPlayer(helper, owner));
+        return location;
+    }
+
     private static BlockPartyDB configuredDb(GameTestHelper helper) {
         BlockPartyDB db = BlockPartyDB.get(helper.getLevel());
         db.configureDatabase(helper.getLevel().getServer());
@@ -425,6 +518,13 @@ public final class BlockEntityGameTests {
         ResourceLocation id = BlockParty.source(path);
         if (!registry.containsKey(id)) {
             helper.fail("Expected registry ID " + id + " in " + registry.key().location());
+        }
+    }
+
+    private static void assertNotRegistered(GameTestHelper helper, Registry<?> registry, String path) {
+        ResourceLocation id = BlockParty.source(path);
+        if (registry.containsKey(id)) {
+            helper.fail("Expected registry ID " + id + " to remain disabled in " + registry.key().location());
         }
     }
 

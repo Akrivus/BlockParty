@@ -2,17 +2,24 @@ package block_party.db;
 
 import block_party.blocks.entity.AbstractDataBlockEntity;
 import block_party.blocks.entity.ShimenawaBlockEntity;
+import block_party.db.records.Garden;
+import block_party.db.records.Location;
 import block_party.db.records.NPC;
+import block_party.db.records.Sapling;
+import block_party.db.records.Shrine;
 import block_party.entities.Moe;
 import block_party.utils.NBT;
 import block_party.world.chunk.ForcedChunk;
 import com.google.common.collect.Maps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -444,6 +451,113 @@ public final class BlockPartyDB extends SavedData {
         }
     }
 
+    public List<Garden> listGardens() throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID FROM GardenLanterns
+                ORDER BY DatabaseID ASC;
+                """)) {
+            List<Garden> rows = new ArrayList<>();
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    rows.add(new Garden(
+                            result.getLong("DatabaseID"),
+                            readDimBlockPos(result),
+                            readUuid(result, "PlayerUUID")));
+                }
+            }
+            return List.copyOf(rows);
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    public List<Sapling> listSaplings() throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID FROM SakuraSaplings
+                ORDER BY DatabaseID ASC;
+                """)) {
+            List<Sapling> rows = new ArrayList<>();
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    rows.add(new Sapling(
+                            result.getLong("DatabaseID"),
+                            readDimBlockPos(result),
+                            readUuid(result, "PlayerUUID")));
+                }
+            }
+            return List.copyOf(rows);
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    public List<Location> listLocations() throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, RequiredCondition, Priority FROM Locations
+                ORDER BY Priority DESC, DatabaseID ASC;
+                """)) {
+            List<Location> rows = new ArrayList<>();
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    rows.add(readLocation(result));
+                }
+            }
+            return List.copyOf(rows);
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    public List<Location> listLocations(UUID player) throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, RequiredCondition, Priority FROM Locations
+                WHERE PlayerUUID = ?
+                ORDER BY Priority DESC, DatabaseID ASC;
+                """)) {
+            statement.setString(1, player.toString());
+            List<Location> rows = new ArrayList<>();
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    rows.add(readLocation(result));
+                }
+            }
+            return List.copyOf(rows);
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    public List<Shrine> listShrineRows(UUID player) throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID FROM Shrines
+                WHERE PlayerUUID = ?
+                ORDER BY DatabaseID ASC;
+                """)) {
+            statement.setString(1, player.toString());
+            List<Shrine> rows = new ArrayList<>();
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    rows.add(new Shrine(
+                            result.getLong("DatabaseID"),
+                            readDimBlockPos(result),
+                            readUuid(result, "PlayerUUID")));
+                }
+            }
+            return List.copyOf(rows);
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    public java.util.Optional<Shrine> findClosestShrine(UUID player, DimBlockPos origin) throws SQLException {
+        return Shrine.closest(this.listShrineRows(player), origin);
+    }
+
     public void deleteDataBlock(String table, long id) throws SQLException {
         if ("NPCs".equals(table)) {
             this.deleteNpc(id);
@@ -482,5 +596,32 @@ public final class BlockPartyDB extends SavedData {
     }
 
     public record ShrineEntry(long databaseId, BlockPos pos) {
+    }
+
+    private static Location readLocation(ResultSet result) throws SQLException {
+        return new Location(
+                result.getLong("DatabaseID"),
+                readDimBlockPos(result),
+                readUuid(result, "PlayerUUID"),
+                result.getString("RequiredCondition"),
+                result.getInt("Priority"));
+    }
+
+    private static DimBlockPos readDimBlockPos(ResultSet result) throws SQLException {
+        return new DimBlockPos(
+                parseDimension(result.getString("PosDim")),
+                new BlockPos(result.getInt("PosX"), result.getInt("PosY"), result.getInt("PosZ")));
+    }
+
+    private static UUID readUuid(ResultSet result, String column) throws SQLException {
+        String value = result.getString(column);
+        return value == null || value.isBlank() ? AbstractDataBlockEntity.BLANK_UUID : UUID.fromString(value);
+    }
+
+    private static ResourceKey<Level> parseDimension(String value) {
+        if (value == null || value.isBlank()) {
+            return Level.OVERWORLD;
+        }
+        return ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(value));
     }
 }

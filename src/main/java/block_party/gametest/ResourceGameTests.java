@@ -10,6 +10,9 @@ import block_party.registry.resources.MoeTextures;
 import block_party.registry.resources.ScenesReloadListener;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -105,9 +108,17 @@ public final class ResourceGameTests {
         assertResource(helper, "items/sakura_log.json");
         assertResource(helper, "items/sakura_blossoms.json");
         assertResource(helper, "items/wisteria_vines.json");
+        assertResource(helper, "items/potted_sakura_sapling.json");
+        assertResource(helper, "items/potted_wisteria_sapling.json");
+        assertResource(helper, "items/wisteria_vine_body.json");
+        assertResource(helper, "items/wisteria_vine_tip.json");
         assertResource(helper, "models/item/moe_spawn_egg.json");
         assertResource(helper, "models/item/cell_phone.json");
         assertResource(helper, "models/item/yearbook.json");
+        assertResource(helper, "models/item/potted_sakura_sapling.json");
+        assertResource(helper, "models/item/potted_wisteria_sapling.json");
+        assertResource(helper, "models/item/wisteria_vine_body.json");
+        assertResource(helper, "models/item/wisteria_vine_tip.json");
         assertResource(helper, "textures/item/moe_spawn_egg.png");
         assertResource(helper, "textures/item/cell_phone.png");
         assertResource(helper, "textures/item/yearbook.png");
@@ -118,6 +129,10 @@ public final class ResourceGameTests {
         assertResource(helper, "models/block/shoji_screen_bottom.json");
         assertResource(helper, "models/block/shoji_screen_top.json");
         assertResource(helper, "textures/block/shoji_screen_bottom.png");
+        assertTranslation(helper, "item.block_party.sakura_log", "Sakura Log");
+        assertTranslation(helper, "item.block_party.potted_wisteria_sapling", "Potted Wisteria Sapling");
+        assertTranslation(helper, "item.block_party.wisteria_vine_body", "Wisteria Vine Body");
+        assertTranslation(helper, "item.block_party.wisteria_vines", "Wisteria Vines");
         helper.succeed();
     }
 
@@ -248,6 +263,22 @@ public final class ResourceGameTests {
         String classpathPath = "assets/block_party/" + path;
         if (ResourceGameTests.class.getClassLoader().getResource(classpathPath) == null) {
             helper.fail("Expected bundled client resource " + BlockParty.source(path));
+        }
+    }
+
+    private static void assertTranslation(GameTestHelper helper, String key, String value) {
+        String classpathPath = "assets/block_party/lang/en_us.json";
+        try (InputStream stream = ResourceGameTests.class.getClassLoader().getResourceAsStream(classpathPath)) {
+            if (stream == null) {
+                helper.fail("Expected bundled language resource " + BlockParty.source("lang/en_us.json"));
+                return;
+            }
+            JsonObject translations = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8)).getAsJsonObject();
+            if (!translations.has(key) || !value.equals(translations.get(key).getAsString())) {
+                helper.fail("Expected translation " + key + " = " + value);
+            }
+        } catch (Exception ex) {
+            helper.fail("Could not parse bundled language resource: " + ex.getMessage());
         }
     }
 }

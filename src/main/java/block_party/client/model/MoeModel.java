@@ -1,6 +1,7 @@
 package block_party.client.model;
 
 import block_party.client.renderers.state.MoeRenderState;
+import block_party.client.animation.Animation;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HeadedModel;
@@ -122,6 +123,9 @@ public class MoeModel extends EntityModel<MoeRenderState> implements ArmedModel,
         this.skirt.yRot = -this.leftLeg.xRot * 0.25F;
         this.tailBase.xRot = Mth.cos(limbSwing * 0.6662F) * limbSwingAmount;
         this.tailBase.zRot = -this.tailBase.xRot * 0.5F - Mth.cos(ageInTicks * 0.09F) * 0.05F + 0.05F;
+        this.rightWing.xRot = this.leftWing.xRot = -0.23561947F;
+        this.rightWing.yRot = -(this.leftWing.yRot = state.onGround ? 0.0F : 0.47123894F + Mth.cos(ageInTicks) * Mth.PI * 0.05F);
+        this.rightWing.zRot = -(this.leftWing.zRot = -0.23561947F);
         this.rightWing.visible = state.hasWings;
         this.leftWing.visible = state.hasWings;
         this.rightEar.visible = state.hasCatFeatures;
@@ -137,6 +141,8 @@ public class MoeModel extends EntityModel<MoeRenderState> implements ArmedModel,
             this.head.y = 14.2F;
             this.body.y = 16.2F;
             this.body.xRot = 0.5F;
+            this.rightArm.xRot += 0.4F;
+            this.leftArm.xRot += 0.4F;
             this.rightArm.y = 15.2F;
             this.leftArm.y = 15.2F;
             this.rightLeg.y = 19.2F;
@@ -145,7 +151,47 @@ public class MoeModel extends EntityModel<MoeRenderState> implements ArmedModel,
             this.leftLeg.z = 1.0F;
         }
 
+        if (state.isPassenger) {
+            this.rightArm.xRot -= Mth.PI / 5.0F;
+            this.leftArm.xRot -= Mth.PI / 5.0F;
+            this.rightLeg.xRot = -1.4137167F;
+            this.rightLeg.yRot = Mth.PI / 10.0F;
+            this.rightLeg.zRot = 0.07853982F;
+            this.leftLeg.xRot = -1.4137167F;
+            this.leftLeg.yRot = -Mth.PI / 10.0F;
+            this.leftLeg.zRot = -0.07853982F;
+        }
+
+        if (state.attackTime > 0.0F) {
+            setSwingingArmRotations(state);
+        }
+
+        Animation.DEFAULT.fromValue(state.animation).setRotationAngles(state, this, limbSwing, limbSwingAmount, ageInTicks);
         copyOverlayParts();
+    }
+
+    private void setSwingingArmRotations(MoeRenderState state) {
+        HumanoidArm swingingArm = state.attackArm == null ? HumanoidArm.RIGHT : state.attackArm;
+        float bodySwing = Mth.sin(Mth.sqrt(state.attackTime) * Mth.TWO_PI) * 0.2F;
+        this.body.yRot = swingingArm == HumanoidArm.LEFT ? -bodySwing : bodySwing;
+        this.rightArm.x = -Mth.cos(this.body.yRot) * 4.0F;
+        this.rightArm.z = Mth.sin(this.body.yRot) * 4.0F;
+        this.leftArm.x = Mth.cos(this.body.yRot) * 4.0F;
+        this.leftArm.z = -Mth.sin(this.body.yRot) * 4.0F;
+        this.rightArm.yRot += this.body.yRot;
+        this.leftArm.yRot += this.body.yRot;
+        this.leftArm.xRot += this.body.yRot;
+
+        float easedSwing = 1.0F - state.attackTime;
+        easedSwing *= easedSwing;
+        easedSwing *= easedSwing;
+        easedSwing = 1.0F - easedSwing;
+        float swingRotation = Mth.sin(easedSwing * Mth.PI);
+        float swingHeadings = Mth.sin(state.attackTime * Mth.PI) * -(this.head.xRot - 0.7F) * 0.5F;
+        ModelPart arm = this.getArmForSide(swingingArm);
+        arm.xRot -= swingRotation * 1.2F + swingHeadings;
+        arm.yRot += this.body.yRot * 2.0F;
+        arm.zRot += Mth.sin(state.attackTime * Mth.PI) * -0.4F;
     }
 
     private void copyOverlayParts() {

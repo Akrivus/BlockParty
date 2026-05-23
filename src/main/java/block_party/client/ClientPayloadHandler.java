@@ -9,6 +9,7 @@ import block_party.network.payload.DialogueOpenPayload;
 import block_party.network.payload.NpcCallPayload;
 import block_party.network.payload.NpcDetailPayload;
 import block_party.network.payload.NpcListPayload;
+import block_party.network.payload.ShrineListPayload;
 import net.minecraft.client.Minecraft;
 
 public final class ClientPayloadHandler {
@@ -51,5 +52,9 @@ public final class ClientPayloadHandler {
                 screen.handleNpcCall(payload);
             }
         });
+    }
+
+    public static void handleShrineList(ShrineListPayload payload) {
+        Minecraft.getInstance().execute(() -> ShrineLocation.update(payload.positions()));
     }
 }

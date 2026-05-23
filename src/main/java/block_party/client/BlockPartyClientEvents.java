@@ -4,8 +4,10 @@ import block_party.client.particle.FireflyParticle;
 import block_party.client.particle.GinkgoParticle;
 import block_party.client.particle.SakuraParticle;
 import block_party.client.particle.WhiteSakuraParticle;
+import block_party.client.skybox.JapanRenderer;
 import block_party.BlockParty;
 import block_party.registry.CustomBlocks;
+import block_party.registry.CustomItems;
 import block_party.registry.CustomParticles;
 import block_party.registry.CustomResources;
 import block_party.registry.resources.MoeTextureReloadListener;
@@ -16,6 +18,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
 public final class BlockPartyClientEvents {
     private BlockPartyClientEvents() {
@@ -24,7 +27,14 @@ public final class BlockPartyClientEvents {
     public static void register(IEventBus modBus) {
         modBus.addListener(BlockPartyClientEvents::registerParticleProviders);
         modBus.addListener(BlockPartyClientEvents::registerClientReloadListeners);
+        modBus.addListener(BlockPartyClientEvents::registerClientExtensions);
         modBus.addListener(BlockPartyClientEvents::registerRenderTypes);
+    }
+
+    public static void registerGameEvents(IEventBus gameBus) {
+        gameBus.addListener(JapanRenderer::renderFuji);
+        gameBus.addListener(JapanRenderer::addFireflies);
+        gameBus.addListener(JapanRenderer::tintFog);
     }
 
     private static void registerParticleProviders(RegisterParticleProvidersEvent event) {
@@ -36,6 +46,14 @@ public final class BlockPartyClientEvents {
 
     private static void registerClientReloadListeners(AddClientReloadListenersEvent event) {
         event.addListener(BlockParty.source("moe_textures"), CustomResources.MOE_TEXTURES);
+    }
+
+    private static void registerClientExtensions(RegisterClientExtensionsEvent event) {
+        SamuraiArmorClientExtensions.register(event, CustomItems.ENTRIES.get("masked_samurai_kabuto").get());
+        SamuraiArmorClientExtensions.register(event, CustomItems.ENTRIES.get("samurai_kabuto").get());
+        SamuraiArmorClientExtensions.register(event, CustomItems.ENTRIES.get("samurai_cuirass").get());
+        SamuraiArmorClientExtensions.register(event, CustomItems.ENTRIES.get("samurai_chausses").get());
+        SamuraiArmorClientExtensions.register(event, CustomItems.ENTRIES.get("samurai_sabaton").get());
     }
 
     private static void registerRenderTypes(FMLClientSetupEvent event) {
