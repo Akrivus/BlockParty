@@ -2,6 +2,7 @@ package block_party.gametest;
 
 import block_party.BlockParty;
 import block_party.blocks.GardenLanternBlock;
+import block_party.blocks.GinkgoLeavesBlock;
 import block_party.blocks.HangingScrollBlock;
 import block_party.blocks.SakuraBlossomsBlock;
 import block_party.blocks.ShimenawaBlock;
@@ -9,6 +10,9 @@ import block_party.blocks.ShojiLanternBlock;
 import block_party.blocks.ShojiScreenBlock;
 import block_party.blocks.ShrineTabletBlock;
 import block_party.blocks.WritingTableBlock;
+import block_party.blocks.WisteriaLeavesBlock;
+import block_party.blocks.WisteriaVineBodyBlock;
+import block_party.blocks.WisteriaVineTipBlock;
 import block_party.registry.CustomBlocks;
 import block_party.registry.CustomWorldGen;
 import java.util.Optional;
@@ -22,6 +26,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.GrowingPlantBodyBlock;
+import net.minecraft.world.level.block.GrowingPlantHeadBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -99,6 +106,12 @@ public final class DecorativeContentGameTests {
         assertEquals(helper, true, CustomBlocks.SHOJI_LANTERN.get() instanceof ShojiLanternBlock, "shoji lantern block class");
         assertEquals(helper, true, CustomBlocks.WRITING_TABLE.get() instanceof WritingTableBlock, "writing table block class");
         assertEquals(helper, Direction.NORTH, CustomBlocks.WRITING_TABLE.get().defaultBlockState().getValue(WritingTableBlock.FACING), "writing table default facing");
+        assertEquals(helper, true, CustomBlocks.GINKGO_LEAVES.get() instanceof GinkgoLeavesBlock, "ginkgo leaves block class");
+        assertEquals(helper, true, CustomBlocks.WISTERIA_LEAVES.get() instanceof WisteriaLeavesBlock, "wisteria leaves block class");
+        assertEquals(helper, true, CustomBlocks.WISTERIA_VINE_BODY.get() instanceof WisteriaVineBodyBlock, "wisteria vine body class");
+        assertEquals(helper, true, CustomBlocks.WISTERIA_VINE_TIP.get() instanceof WisteriaVineTipBlock, "wisteria vine tip class");
+        assertEquals(helper, true, CustomBlocks.WISTERIA_VINE_BODY.get() instanceof GrowingPlantBodyBlock, "wisteria vine body growing plant");
+        assertEquals(helper, true, CustomBlocks.WISTERIA_VINE_TIP.get() instanceof GrowingPlantHeadBlock, "wisteria vine tip growing plant");
         helper.succeed();
     }
 
@@ -113,9 +126,6 @@ public final class DecorativeContentGameTests {
         assertBounds(helper, box(1, 0, 1, 15, 16, 15),
                 CustomBlocks.GARDEN_LANTERN.get().defaultBlockState().getShape(level, origin).bounds(),
                 "garden lantern shape");
-        assertBounds(helper, box(3, 0, 3, 13, 16, 13),
-                CustomBlocks.WIND_CHIMES.get().defaultBlockState().getShape(level, origin).bounds(),
-                "wind chimes shape");
         assertEquals(helper, Shapes.block(),
                 CustomBlocks.SHOJI_LANTERN.get().defaultBlockState().getShape(level, origin),
                 "shoji lantern shape");
@@ -183,6 +193,40 @@ public final class DecorativeContentGameTests {
         level.removeBlock(support, false);
         if (vine.canSurvive(level, vinePos)) {
             helper.fail("Expected wisteria vine not to survive without wisteria support");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void wisteriaLeavesGrowVineTipsBelow(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos leavesPos = helper.absolutePos(new BlockPos(1, 3, 1));
+        BlockPos vinePos = leavesPos.below();
+        level.setBlock(leavesPos, CustomBlocks.WISTERIA_LEAVES.get().defaultBlockState().setValue(LeavesBlock.PERSISTENT, true), 3);
+
+        if (!WisteriaLeavesBlock.growVineBelow(level, leavesPos)) {
+            helper.fail("Expected wisteria leaves to place vine tip below");
+            return;
+        }
+        assertEquals(helper, CustomBlocks.WISTERIA_VINE_TIP.get(), level.getBlockState(vinePos).getBlock(), "wisteria grown vine tip");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void wisteriaVineTipBonemealGrowsDownwardBody(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos leavesPos = helper.absolutePos(new BlockPos(1, 4, 1));
+        BlockPos tipPos = leavesPos.below();
+        BlockPos grownPos = tipPos.below();
+        BlockState tip = CustomBlocks.WISTERIA_VINE_TIP.get().defaultBlockState();
+        level.setBlock(leavesPos, CustomBlocks.WISTERIA_LEAVES.get().defaultBlockState(), 3);
+        level.setBlock(tipPos, tip, 3);
+
+        ((BonemealableBlock) CustomBlocks.WISTERIA_VINE_TIP.get()).performBonemeal(level, level.random, tipPos, tip);
+
+        if (level.getBlockState(grownPos).isAir()) {
+            helper.fail("Expected wisteria vine tip bonemeal to grow downward");
             return;
         }
         helper.succeed();

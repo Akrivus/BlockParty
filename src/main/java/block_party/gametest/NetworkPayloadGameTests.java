@@ -80,8 +80,8 @@ public final class NetworkPayloadGameTests {
         assertEquals(helper, new NpcListPayload(List.of(1L, 2L, 3L)),
                 roundTrip(NpcListPayload.STREAM_CODEC, new NpcListPayload(List.of(1L, 2L, 3L))),
                 "list response payload");
-        assertEquals(helper, new NpcDetailPayload(101L, true, owner, "Moe", "female", 5, true, hiddenPos),
-                roundTrip(NpcDetailPayload.STREAM_CODEC, new NpcDetailPayload(101L, true, owner, "Moe", "female", 5, true, hiddenPos)),
+        assertEquals(helper, new NpcDetailPayload(101L, true, owner, "Moe", "FEMALE", false, "AB", "KUUDERE", "PISCES", 20.0F, 18.0F, 12.0F, 3.0F, 5, true, hiddenPos),
+                roundTrip(NpcDetailPayload.STREAM_CODEC, new NpcDetailPayload(101L, true, owner, "Moe", "FEMALE", false, "AB", "KUUDERE", "PISCES", 20.0F, 18.0F, 12.0F, 3.0F, 5, true, hiddenPos)),
                 "detail response payload");
         assertEquals(helper, new NpcCallPayload(103L, true, true, hiddenPos),
                 roundTrip(NpcCallPayload.STREAM_CODEC, new NpcCallPayload(103L, true, true, hiddenPos)),
@@ -93,7 +93,7 @@ public final class NetworkPayloadGameTests {
                 roundTrip(ControllerOpenPayload.STREAM_CODEC, ControllerOpenPayload.yearbook(List.of(3L, 4L), 4L, InteractionHand.OFF_HAND)),
                 "yearbook open payload");
         Dialogue dialogue = sampleDialogue();
-        NpcDetailPayload detail = new NpcDetailPayload(104L, true, owner, "Moe", "FEMALE", 5, false, BlockPos.ZERO);
+        NpcDetailPayload detail = new NpcDetailPayload(104L, true, owner, "Moe", "FEMALE", false, "O", "NYANDERE", "ARIES", 20.0F, 20.0F, 6.0F, 0.0F, 5, false, BlockPos.ZERO);
         assertEquals(helper, new DialogueOpenPayload(detail, dialogue),
                 roundTrip(DialogueOpenPayload.STREAM_CODEC, new DialogueOpenPayload(detail, dialogue)),
                 "dialogue open payload");
@@ -141,6 +141,26 @@ public final class NetworkPayloadGameTests {
         NpcDetailPayload response = CustomMessenger.detailResponse(db, owner, moe.getDatabaseID());
         if (!response.found() || response.databaseId() != moe.getDatabaseID() || !owner.equals(response.ownerUuid())) {
             helper.fail("Expected owned detail response to expose row-backed identity");
+            return;
+        }
+        if (!moe.getGender().equals(response.gender())
+                || !moe.getBloodType().equals(response.bloodType())
+                || !moe.getDere().equals(response.dere())
+                || !moe.getZodiac().equals(response.zodiac())) {
+            helper.fail("Expected owned detail response to expose Yearbook trait fields");
+            return;
+        }
+        if (response.health() != 0.0F
+                || response.foodLevel() != moe.getFoodLevel()
+                || response.loyalty() != moe.getLoyalty()
+                || response.stress() != moe.getStress()) {
+            helper.fail("Expected owned detail response to expose Yearbook stat fields");
+            return;
+        }
+        moe.setHealth(7.0F);
+        NpcDetailPayload liveResponse = CustomMessenger.detailResponse(level, db, owner, moe.getDatabaseID());
+        if (liveResponse.health() != 7.0F) {
+            helper.fail("Expected live detail response to expose current Moe health, got " + liveResponse.health());
             return;
         }
         helper.kill(moe);
@@ -355,6 +375,7 @@ public final class NetworkPayloadGameTests {
             return;
         }
         moe.setDialogue(sampleDialogue());
+        moe.setAnimationKey("WAVE");
         moe.setResponse(Response.CHAT_BUBBLE);
 
         if (!CustomMessenger.closeDialogue(level, db, owner, moe.getDatabaseID())) {
@@ -363,6 +384,10 @@ public final class NetworkPayloadGameTests {
         }
         if (moe.hasDialogue() || moe.hasResponse()) {
             helper.fail("Expected dialogue close to clear live Moe dialogue state");
+            return;
+        }
+        if (!"DEFAULT".equals(moe.getAnimationKey())) {
+            helper.fail("Expected dialogue close to reset animation, got " + moe.getAnimationKey());
             return;
         }
         helper.kill(moe);

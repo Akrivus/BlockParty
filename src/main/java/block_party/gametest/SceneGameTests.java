@@ -55,6 +55,7 @@ public final class SceneGameTests {
             helper.fail("Expected bundled dialogue to expose NEXT_RESPONSE");
             return;
         }
+        assertEquals(helper, "WAVE", moe.getAnimationKey(), "right-click dialogue animation");
         helper.kill(moe);
         helper.succeed();
     }

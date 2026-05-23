@@ -44,6 +44,7 @@ public final class BlockParty {
         modBus.addListener(CustomMessenger::registerPayloads);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             BlockPartyClientEvents.register(modBus);
+            BlockPartyClientEvents.registerGameEvents(NeoForge.EVENT_BUS);
             BlockPartyRenderers.register(modBus);
         }
         NeoForge.EVENT_BUS.addListener(CustomResources::registerServerReloadListeners);

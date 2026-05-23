@@ -81,6 +81,8 @@ public class Moe extends PathfinderMob implements ContainerListener {
             SynchedEntityData.defineId(Moe.class, EntityDataSerializers.STRING);
     public static final EntityDataAccessor<String> EMOTION =
             SynchedEntityData.defineId(Moe.class, EntityDataSerializers.STRING);
+    public static final EntityDataAccessor<String> ANIMATION =
+            SynchedEntityData.defineId(Moe.class, EntityDataSerializers.STRING);
     public static final EntityDataAccessor<Float> FOOD_LEVEL =
             SynchedEntityData.defineId(Moe.class, EntityDataSerializers.FLOAT);
     public static final EntityDataAccessor<Float> EXHAUSTION =
@@ -140,6 +142,7 @@ public class Moe extends PathfinderMob implements ContainerListener {
         builder.define(DERE, "NYANDERE");
         builder.define(ZODIAC, "ARIES");
         builder.define(EMOTION, "NORMAL");
+        builder.define(ANIMATION, "DEFAULT");
         builder.define(FOOD_LEVEL, 20.0F);
         builder.define(EXHAUSTION, 0.0F);
         builder.define(SATURATION, 6.0F);
@@ -181,6 +184,9 @@ public class Moe extends PathfinderMob implements ContainerListener {
         }
         if (compound.contains("Emotion")) {
             this.setEmotion(compound.getString("Emotion"));
+        }
+        if (compound.contains("Animation")) {
+            this.setAnimationKey(compound.getString("Animation"));
         }
         if (compound.contains("FoodLevel")) {
             this.setFoodLevel(compound.getFloat("FoodLevel"));
@@ -239,6 +245,7 @@ public class Moe extends PathfinderMob implements ContainerListener {
         compound.putString("Dere", this.getDere());
         compound.putString("Zodiac", this.getZodiac());
         compound.putString("Emotion", this.getEmotion());
+        compound.putString("Animation", this.getAnimationKey());
         compound.putFloat("FoodLevel", this.getFoodLevel());
         compound.putFloat("Exhaustion", this.getExhaustion());
         compound.putFloat("Saturation", this.getSaturation());
@@ -548,6 +555,14 @@ public class Moe extends PathfinderMob implements ContainerListener {
         this.entityData.set(EMOTION, normalize(emotion, "NORMAL", "ANGRY", "BEGGING", "CONFUSED", "CRYING", "MISCHIEVOUS", "EMBARRASSED", "HAPPY", "NORMAL", "PAINED", "PSYCHOTIC", "SCARED", "SICK", "SNOOTY", "SMITTEN", "TIRED"));
     }
 
+    public String getAnimationKey() {
+        return this.entityData.get(ANIMATION);
+    }
+
+    public void setAnimationKey(String animation) {
+        this.entityData.set(ANIMATION, normalize(animation, "DEFAULT", "DEFAULT", "YEARBOOK", "WAVE"));
+    }
+
     public float getFoodLevel() {
         return this.entityData.get(FOOD_LEVEL);
     }
@@ -660,6 +675,7 @@ public class Moe extends PathfinderMob implements ContainerListener {
     public void setDialogue(Dialogue dialogue) {
         this.dialogue = dialogue;
         this.response = null;
+        this.setAnimationKey(dialogue == null ? "DEFAULT" : dialogue.speaker().animation());
     }
 
     public boolean hasDialogue() {
@@ -683,6 +699,7 @@ public class Moe extends PathfinderMob implements ContainerListener {
     public void clearDialogue() {
         this.dialogue = null;
         this.response = null;
+        this.setAnimationKey("DEFAULT");
     }
 
     public SceneManager sceneManager() {

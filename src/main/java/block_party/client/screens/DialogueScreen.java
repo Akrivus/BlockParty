@@ -213,6 +213,7 @@ public class DialogueScreen extends Screen {
         moe.setGivenName(this.npc.name());
         moe.setGender(this.npc.gender());
         moe.setEmotion(this.dialogue.speaker().emotion());
+        moe.setAnimationKey(this.dialogue.speaker().animation());
         return moe;
     }
 

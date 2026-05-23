@@ -2,6 +2,7 @@ package block_party.network.payload;
 
 import block_party.BlockParty;
 import block_party.db.records.NPC;
+import block_party.entities.Moe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -17,6 +18,14 @@ public record NpcDetailPayload(
         UUID ownerUuid,
         String name,
         String gender,
+        boolean dead,
+        String bloodType,
+        String dere,
+        String zodiac,
+        float health,
+        float foodLevel,
+        float loyalty,
+        float stress,
         int blockStateId,
         boolean hiding,
         BlockPos hiddenPos) implements CustomPacketPayload {
@@ -27,20 +36,36 @@ public record NpcDetailPayload(
             CustomPacketPayload.codec(NpcDetailPayload::write, NpcDetailPayload::read);
 
     public static NpcDetailPayload missing(long databaseId) {
-        return new NpcDetailPayload(databaseId, false, EMPTY_UUID, "", "", 0, false, BlockPos.ZERO);
+        return new NpcDetailPayload(databaseId, false, EMPTY_UUID, "", "", false, "", "", "", 0.0F, 0.0F, 0.0F, 0.0F, 0, false, BlockPos.ZERO);
     }
 
     public static NpcDetailPayload from(long requestedId, Optional<NPC> npc) {
-        return npc.map(NpcDetailPayload::from).orElseGet(() -> missing(requestedId));
+        return npc.map(value -> from(value, 0.0F)).orElseGet(() -> missing(requestedId));
+    }
+
+    public static NpcDetailPayload from(long requestedId, Optional<NPC> npc, Optional<Moe> live) {
+        return npc.map(value -> from(value, live.map(Moe::getHealth).orElse(0.0F))).orElseGet(() -> missing(requestedId));
     }
 
     public static NpcDetailPayload from(NPC npc) {
+        return from(npc, 0.0F);
+    }
+
+    public static NpcDetailPayload from(NPC npc, float health) {
         return new NpcDetailPayload(
                 npc.databaseId(),
                 true,
                 npc.playerUuid(),
                 npc.name(),
                 npc.gender(),
+                npc.dead(),
+                npc.bloodType(),
+                npc.dere(),
+                npc.zodiac(),
+                health,
+                npc.foodLevel(),
+                npc.loyalty(),
+                npc.stress(),
                 Block.getId(npc.blockState()),
                 npc.hiding(),
                 npc.hiddenPos());
@@ -52,6 +77,14 @@ public record NpcDetailPayload(
         buffer.writeUUID(this.ownerUuid);
         buffer.writeUtf(this.name);
         buffer.writeUtf(this.gender);
+        buffer.writeBoolean(this.dead);
+        buffer.writeUtf(this.bloodType);
+        buffer.writeUtf(this.dere);
+        buffer.writeUtf(this.zodiac);
+        buffer.writeFloat(this.health);
+        buffer.writeFloat(this.foodLevel);
+        buffer.writeFloat(this.loyalty);
+        buffer.writeFloat(this.stress);
         buffer.writeVarInt(this.blockStateId);
         buffer.writeBoolean(this.hiding);
         buffer.writeLong(this.hiddenPos.asLong());
@@ -64,6 +97,14 @@ public record NpcDetailPayload(
                 buffer.readUUID(),
                 buffer.readUtf(),
                 buffer.readUtf(),
+                buffer.readBoolean(),
+                buffer.readUtf(),
+                buffer.readUtf(),
+                buffer.readUtf(),
+                buffer.readFloat(),
+                buffer.readFloat(),
+                buffer.readFloat(),
+                buffer.readFloat(),
                 buffer.readVarInt(),
                 buffer.readBoolean(),
                 BlockPos.of(buffer.readLong()));

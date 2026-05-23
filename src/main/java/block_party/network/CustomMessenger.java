@@ -63,6 +63,11 @@ public final class CustomMessenger {
         return NpcDetailPayload.from(databaseId, db.loadOwnedNpc(owner, databaseId));
     }
 
+    public static NpcDetailPayload detailResponse(ServerLevel level, BlockPartyDB db, UUID owner, long databaseId) {
+        java.util.Optional<block_party.db.records.NPC> row = db.loadOwnedNpc(owner, databaseId);
+        return NpcDetailPayload.from(databaseId, row, db.findOwnedLoadedMoe(level, owner, databaseId));
+    }
+
     public static NpcListPayload removeResponse(BlockPartyDB db, UUID owner, long databaseId) {
         db.removeOwnedNpc(owner, databaseId);
         return listResponse(db, owner);
@@ -169,7 +174,7 @@ public final class CustomMessenger {
     }
 
     private static void handleClientShrineList(ShrineListPayload payload, IPayloadContext context) {
-        // Client-side shrine location storage/rendering is intentionally out of scope for the spike.
+        block_party.client.ClientPayloadHandler.handleShrineList(payload);
     }
 
     private static NpcListPayload listResponse(Player player) {
@@ -177,6 +182,9 @@ public final class CustomMessenger {
     }
 
     private static NpcDetailPayload detailResponse(Player player, long databaseId) {
+        if (player.level() instanceof ServerLevel level) {
+            return detailResponse(level, BlockPartyDB.get(level), player.getUUID(), databaseId);
+        }
         return detailResponse(BlockPartyDB.get(player.level()), player.getUUID(), databaseId);
     }
 
