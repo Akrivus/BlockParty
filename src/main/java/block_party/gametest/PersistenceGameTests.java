@@ -90,7 +90,7 @@ public final class PersistenceGameTests {
         try {
             Connection connection = data.openConnection();
             try (Statement statement = connection.createStatement()) {
-                statement.execute("CREATE TABLE IF NOT EXISTS block_party_spike_smoke (id INTEGER PRIMARY KEY)");
+                statement.execute("CREATE TABLE IF NOT EXISTS block_party_port_smoke (id INTEGER PRIMARY KEY)");
             }
             data.free(connection);
         } catch (SQLException exception) {

@@ -25,223 +25,11 @@ dependencies {
 }
 
 sourceSets {
-    main {
-        // NeoForge 1.21.4 port source. Frozen Forge 1.19.4 Java is retained under src/forge1194/java.
-        java.srcDirs = ['src/main/java']
-        resources.srcDirs = ['src/neoforgeSpike/resources', layout.buildDirectory.dir('generated/neoforgeSpikeResources')]
-    }
     test {
-        // Legacy Forge regression tests target 1.19.4 APIs and are disabled for this spike.
+        // Historical regression tests target the old Forge APIs; active coverage is in GameTests.
         java.srcDirs = []
         resources.srcDirs = []
     }
-}
-
-tasks.register('syncNeoForgeSpikeResources', Sync) {
-    into layout.buildDirectory.dir('generated/neoforgeSpikeResources')
-
-    from('src/main/resources') {
-        include 'assets/block_party/**'
-        include 'assets/minecraft/textures/moe/**'
-        include 'data/block_party/moes/**'
-        include 'data/minecraft/moes/**'
-        include 'data/block_party/scenes/**'
-        exclude 'assets/block_party/textures/gui/**'
-    }
-
-    from('src/main/resources/data/block_party/recipes') {
-        into 'data/block_party/recipe'
-    }
-
-    from('src/main/resources/data/block_party/loot_tables') {
-        into 'data/block_party/loot_table'
-    }
-
-    from('src/main/resources/data/block_party/worldgen') {
-        into 'data/block_party/worldgen'
-    }
-
-    from('src/main/resources/assets/block_party/textures/gui/dialogue.png') {
-        into 'assets/block_party/textures/gui'
-    }
-
-    from('src/main/resources/assets/block_party/textures/gui/yearbook.png') {
-        into 'assets/block_party/textures/gui'
-    }
-
-    from('src/main/resources/assets/block_party/textures/gui/cell_phone.png') {
-        into 'assets/block_party/textures/gui'
-    }
-
-    from('src/main/resources/data/block_party/tags/blocks') {
-        into 'data/block_party/tags/block'
-    }
-
-    from('src/main/resources/data/block_party/tags/items') {
-        into 'data/block_party/tags/item'
-    }
-
-    doLast {
-        def jsonSlurper = new groovy.json.JsonSlurper()
-        def jsonOutput = groovy.json.JsonOutput
-        def generated = layout.buildDirectory.dir('generated/neoforgeSpikeResources').get().asFile
-        def rewriteJson = { File file, Closure transform ->
-            def parsed = jsonSlurper.parse(file)
-            def transformed = transform(parsed)
-            file.text = jsonOutput.prettyPrint(jsonOutput.toJson(transformed)) + System.lineSeparator()
-        }
-        def ingredient = { value ->
-            if (value instanceof Map && value.item) {
-                return value.item
-            }
-            if (value instanceof Map && value.tag) {
-                return "#${value.tag}"
-            }
-            return value
-        }
-        def recipeDir = new File(generated, 'data/block_party/recipe')
-        if (recipeDir.exists()) {
-            recipeDir.eachFileMatch(~/.*\.json/) { file ->
-                rewriteJson(file) { recipe ->
-                    if (recipe.ingredients instanceof List) {
-                        recipe.ingredients = recipe.ingredients.collect { ingredient(it) }
-                    }
-                    if (recipe.key instanceof Map) {
-                        recipe.key = recipe.key.collectEntries { key, value -> [(key): ingredient(value)] }
-                    }
-                    if (recipe.result instanceof Map && recipe.result.item) {
-                        recipe.result.id = recipe.result.remove('item')
-                    }
-                    return recipe
-                }
-            }
-        }
-        def worldgenDir = new File(generated, 'data/block_party/worldgen')
-        if (worldgenDir.exists()) {
-            worldgenDir.eachFileRecurse(groovy.io.FileType.FILES) { file ->
-                if (file.name.endsWith('.json')) {
-                    rewriteJson(file) { node ->
-                        def rename
-                        rename = { value ->
-                            if (value instanceof Map) {
-                                if (value.containsKey('ignoreVines')) {
-                                    value.ignore_vines = value.remove('ignoreVines')
-                                }
-                                value.replaceAll { k, v -> rename(v) }
-                            } else if (value instanceof List) {
-                                for (int i = 0; i < value.size(); i++) {
-                                    value[i] = rename(value[i])
-                                }
-                            }
-                            return value
-                        }
-                        return rename(node)
-                    }
-                }
-            }
-        }
-        def lootDir = new File(generated, 'data/block_party/loot_table')
-        if (lootDir.exists()) {
-            lootDir.eachFileRecurse(groovy.io.FileType.FILES) { file ->
-                if (file.name.endsWith('.json')) {
-                    rewriteJson(file) { node ->
-                        def update
-                        update = { value ->
-                            if (value instanceof Map) {
-                                if (value.condition == 'minecraft:alternative') {
-                                    value.condition = 'minecraft:any_of'
-                                }
-                                if (value.predicate instanceof Map) {
-                                    if (value.predicate.item) {
-                                        value.predicate.items = value.predicate.remove('item')
-                                    }
-                                    if (value.predicate.enchantments) {
-                                        value.predicate.predicates = [
-                                                'minecraft:enchantments': value.predicate.remove('enchantments').collect { enchantment ->
-                                                    if (enchantment instanceof Map && enchantment.enchantment) {
-                                                        enchantment.enchantments = enchantment.remove('enchantment')
-                                                    }
-                                                    return enchantment
-                                                }
-                                        ]
-                                    }
-                                }
-                                value.replaceAll { k, v -> update(v) }
-                            } else if (value instanceof List) {
-                                for (int i = 0; i < value.size(); i++) {
-                                    value[i] = update(value[i])
-                                }
-                            }
-                            return value
-                        }
-                        return update(node)
-                    }
-                }
-            }
-        }
-        def legacyItemModelDir = new File(generated, 'assets/block_party/models/item')
-        def blockStateDir = new File(generated, 'assets/block_party/blockstates')
-        def itemDefinitionDir = new File(generated, 'assets/block_party/items')
-        if (legacyItemModelDir.exists()) {
-            itemDefinitionDir.mkdirs()
-            legacyItemModelDir.eachFileMatch(~/.*\.json/) { file ->
-                def name = file.name.substring(0, file.name.length() - '.json'.length())
-                def definition = [
-                        model: [
-                                type : 'minecraft:model',
-                                model: "block_party:item/${name}"
-                        ]
-                ]
-                new File(itemDefinitionDir, file.name).text = jsonOutput.prettyPrint(jsonOutput.toJson(definition)) + System.lineSeparator()
-            }
-        }
-        if (legacyItemModelDir.exists() && blockStateDir.exists()) {
-            blockStateDir.eachFileMatch(~/.*\.json/) { file ->
-                def name = file.name.substring(0, file.name.length() - '.json'.length())
-                def itemModel = new File(legacyItemModelDir, file.name)
-                if (!itemModel.exists()) {
-                    itemModel.text = jsonOutput.prettyPrint(jsonOutput.toJson([
-                            parent: "block_party:block/${name}"
-                    ])) + System.lineSeparator()
-                }
-                def itemDefinition = new File(itemDefinitionDir, file.name)
-                if (!itemDefinition.exists()) {
-                    itemDefinition.text = jsonOutput.prettyPrint(jsonOutput.toJson([
-                            model: [
-                                    type : 'minecraft:model',
-                                    model: "block_party:item/${name}"
-                            ]
-                    ])) + System.lineSeparator()
-                }
-            }
-        }
-        def langFile = new File(generated, 'assets/block_party/lang/en_us.json')
-        if (langFile.exists() && blockStateDir.exists()) {
-            def translations = jsonSlurper.parse(langFile)
-            def titleCase = { String id ->
-                id.split('_').collect { token -> token.length() <= 1 ? token.toUpperCase() : token.substring(0, 1).toUpperCase() + token.substring(1) }.join(' ')
-            }
-            blockStateDir.eachFileMatch(~/.*\.json/) { file ->
-                def name = file.name.substring(0, file.name.length() - '.json'.length())
-                def blockKey = "block.block_party.${name}"
-                if (!translations.containsKey(blockKey)) {
-                    translations[blockKey] = titleCase(name)
-                }
-                def itemKey = "item.block_party.${name}"
-                if (!translations.containsKey(itemKey)) {
-                    translations[itemKey] = translations[blockKey]
-                }
-            }
-            if (!translations.containsKey('item.block_party.wisteria_vines')) {
-                translations['item.block_party.wisteria_vines'] = 'Wisteria Vines'
-            }
-            langFile.text = jsonOutput.prettyPrint(jsonOutput.toJson(translations)) + System.lineSeparator()
-        }
-    }
-}
-
-tasks.named('processResources') {
-    dependsOn tasks.named('syncNeoForgeSpikeResources')
 }
 
 neoForge {
@@ -250,20 +38,20 @@ neoForge {
     runs {
         client {
             client()
-            gameDirectory = project.file('run-neoforge-spike')
+            gameDirectory = project.file('run')
         }
         server {
             server()
-            gameDirectory = project.file('run-neoforge-spike')
+            gameDirectory = project.file('run')
         }
         gameTestServer {
             type = 'gameTestServer'
-            gameDirectory = project.file('run-neoforge-spike')
+            gameDirectory = project.file('run')
             systemProperty 'neoforge.enabledGameTestNamespaces', 'block_party'
         }
         data {
             data()
-            gameDirectory = project.file('run-neoforge-spike')
+            gameDirectory = project.file('run')
             programArguments.addAll '--mod', 'block_party', '--all', '--output', file('src/generated/resources/').absolutePath
         }
     }

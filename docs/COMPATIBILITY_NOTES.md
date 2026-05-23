@@ -1,0 +1,29 @@
+# Compatibility Notes
+
+These differences from the old Forge 1.19.4 behavior are intentional or currently accepted in the NeoForge build.
+
+- Spawn egg creative-mode use preserves the stack. Forge shrank the stack after successful spawn; Slice 1.1 explicitly restored survival consumption plus creative preservation and covers it with GameTests.
+- Piston reveal checks both the piston event position and the block in front of the piston. Forge checked only the event position; the broader check preserves the player-facing disturbance contract.
+- Cell Phone cross-dimension calls fail safely. Forge used dimension teleport hooks that are not restored in the current build. Same-dimension Forge yaw-based arrival placement is active, and cross-dimension transfer remains deferred.
+- Far-call GameTests use in-template distant positions instead of the old 48-block fixture to avoid neighboring GameTest space while preserving forced-chunk behavior.
+- Shrine tablet side effects are restored server-side: gate-pattern-gated claims, shrine-list rebroadcasts, visual lightning, ambient sound, and a bell-based Moe spawned five blocks below the tablet. Client shrine-location storage/rendering remains deferred.
+- Shimenawa block entities now create/update/delete hidden `NPCs` rows and owner-list entries. The active implementation treats shimenawa as Moe hiding spots at the block position, using persistent block-entity strings for available profile fields.
+- Trait tags are supported, but several frozen bundled Forge tag JSON categories are empty. Tests cover populated baseline tags plus parser fallback behavior.
+- Shrine list filtering intentionally matches Forge: include rows owned by the requester OR rows in the requester's current dimension.
+- Absent response text is represented as an empty string in NeoForge dialogue payloads. Rich translated fallback text remains deferred.
+- Moe texture metadata is accepted from both `moes/textures` and `textures/moe` because the frozen shipped resources use the latter path for bundled metadata.
+- Moe texture metadata with unknown or invalid block-state properties now fails closed. The frozen parser silently ignored those entries, which could make a malformed override match more broadly than intended.
+- Recipes, loot tables, tags, worldgen fields, and item definitions are stored directly in the current NeoForge resource format.
+- Creative tab restoration is treated as release-review readiness. The old Forge code only had a commented tab shell; the active NeoForge tab now uses restored `ISortableItem`-style metadata through a local `SortableItem` interface.
+- Weapon, armor, and music-disc server gameplay is active as of Slice 6.5. Record discs are represented with 1.21.4 jukebox song components/data instead of the removed old `RecordItem` constructor shape. Samurai armor client models/helmet overlays remain deferred, and exact armor durability is constrained by the modern armor-material multiplier surface.
+- Samurai armor model layer definitions are restored against the 1.21.4 `HumanoidRenderState` model API. NeoForge client item extensions now hook the equipped Samurai model/texture path; first-person helmet overlay parity remains a manual client follow-up.
+- Block-backed item model definitions and `item.block_party.*` translations are generated in the NeoForge target resources when the frozen source only provides block models or `block.block_party.*` translations. Frozen source resources remain unchanged.
+- `wind_chimes` is intentionally disabled in active NeoForge registries because the model asset is missing.
+- Samurai sword parry now follows the intended classic-sword style interaction: right-click raises the sword with the block animation, then incoming melee damage is cancelled and reflected while the sword is raised. The old Forge source used attack-cooldown timing instead, but that did not match the intended two-step player behavior.
+- `ShimenawaBlock.neighborChanged` destroys only when support is missing. The old Forge source appears inverted and destroys when `canSurvive` is true; the NeoForge build keeps the player-facing support contract intact.
+- The observed UI blur remains non-blocking because text and layout are usable. Lantern, hanging-scroll, and potted-plant classes/shapes are now restored, but final model/texture visual parity is still tracked for release/manual review or polish.
+- The old dynamic SQL row/table helper layer remains retired, but typed data-block row helpers for Garden, Location, Sakura Sapling, Shrine, and ShrineLocations are restored on top of the active prepared SQLite access. This preserves the AI waypoint/query surface without reintroducing the frozen string-built SQL framework.
+- Yearbook translation/content parity is restored for row-backed dere, blood type, zodiac, loyalty relationship, fullness, loyalty, and stress. Server detail requests snapshot loaded Moe health for the Yearbook and fall back to `0` when the row exists but no live Moe is reachable. Estranged/dead Yearbook pages remain limited by the active owner-detail service rejecting dead rows and not yet modeling estrangement.
+- JapanRenderer is restored against NeoForge's modern render and viewport events. The visible behavior should match the Forge shrine-distance Fuji/fog/firefly effect, but it still needs manual screenshot validation because GameTests cannot inspect the client skybox.
+- `BlockPartyNPC` and `Senpai` remain planned-content follow-ups rather than active NeoForge gameplay classes. Moe currently owns the shared active NPC surface directly; restoring a base NPC hierarchy should be done with Senpai spawn/rules tests rather than as a mechanical rename.
+- Tree-grower configured/placed feature resources exist as data JSON in the active resource tree. The old code-defined grower classes remain unnecessary under the current Minecraft data-driven worldgen path.

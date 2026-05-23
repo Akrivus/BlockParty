@@ -475,7 +475,7 @@ public final class BlockPartyDB extends SavedData {
     public List<Sapling> listSaplings() throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID FROM SakuraSaplings
+                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID FROM Saplings
                 ORDER BY DatabaseID ASC;
                 """)) {
             List<Sapling> rows = new ArrayList<>();

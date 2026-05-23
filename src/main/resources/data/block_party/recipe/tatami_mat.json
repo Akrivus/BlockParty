@@ -1,0 +1,15 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "##",
+        "XX"
+    ],
+    "key": {
+        "#": "block_party:sakura_planks",
+        "X": "minecraft:hay_block"
+    },
+    "result": {
+        "count": 4,
+        "id": "block_party:tatami_mat"
+    }
+}

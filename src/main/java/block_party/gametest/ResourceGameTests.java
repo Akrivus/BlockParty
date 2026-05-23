@@ -48,9 +48,9 @@ public final class ResourceGameTests {
         assertVanillaInBlockTag(helper, "andesite", "moe/has_cat_features");
         assertVanillaInBlockTag(helper, "bamboo", "moe/ignores_volume");
         assertInTag(helper, BuiltInRegistries.ITEM, Registries.ITEM, "sakura_log", "sakura_logs");
-        assertInTag(helper, BuiltInRegistries.ENTITY_TYPE, Registries.ENTITY_TYPE, "moe", "spike_registered");
-        assertInTag(helper, BuiltInRegistries.SOUND_EVENT, Registries.SOUND_EVENT, "moe.laugh", "spike_registered");
-        assertInTag(helper, BuiltInRegistries.PARTICLE_TYPE, Registries.PARTICLE_TYPE, "sakura", "spike_registered");
+        assertInTag(helper, BuiltInRegistries.ENTITY_TYPE, Registries.ENTITY_TYPE, "moe", "registered");
+        assertInTag(helper, BuiltInRegistries.SOUND_EVENT, Registries.SOUND_EVENT, "moe.laugh", "registered");
+        assertInTag(helper, BuiltInRegistries.PARTICLE_TYPE, Registries.PARTICLE_TYPE, "sakura", "registered");
         helper.succeed();
     }
 

@@ -1,0 +1,16 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "###",
+        " X ",
+        " $ "
+    ],
+    "key": {
+        "#": "minecraft:pink_dye",
+        "X": "minecraft:book",
+        "$": "minecraft:gold_ingot"
+    },
+    "result": {
+        "id": "block_party:yearbook"
+    }
+}

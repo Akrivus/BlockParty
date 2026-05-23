@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "<_",
+        "##",
+        "##"
+    ],
+    "key": {
+        "#": "#minecraft:planks",
+        "<": "minecraft:feather",
+        "_": "minecraft:bowl"
+    },
+    "result": {
+        "count": 1,
+        "id": "block_party:writing_table"
+    }
+}

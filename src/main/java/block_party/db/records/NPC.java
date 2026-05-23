@@ -124,6 +124,10 @@ public record NPC(
             ensureColumn(statement, "HomePosX", "INTEGER NOT NULL DEFAULT 0");
             ensureColumn(statement, "HomePosY", "INTEGER NOT NULL DEFAULT 0");
             ensureColumn(statement, "HomePosZ", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "HiddenPosDim", "TEXT NOT NULL DEFAULT 'minecraft:overworld'");
+            ensureColumn(statement, "HiddenPosX", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "HiddenPosY", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "HiddenPosZ", "INTEGER NOT NULL DEFAULT 0");
         } finally {
             db.free(connection);
         }

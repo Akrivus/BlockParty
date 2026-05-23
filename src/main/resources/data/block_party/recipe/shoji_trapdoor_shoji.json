@@ -1,0 +1,15 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "group": "wooden_trapdoor",
+    "pattern": [
+        "###",
+        "###"
+    ],
+    "key": {
+        "#": "block_party:shoji_block"
+    },
+    "result": {
+        "count": 2,
+        "id": "block_party:shoji_panel"
+    }
+}

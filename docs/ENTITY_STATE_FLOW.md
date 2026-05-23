@@ -1,15 +1,15 @@
 # Entity State Flow
 
-This document describes the current NeoForge 1.21.4 spike runtime flow only. It is based on `src/neoforgeSpike` and intentionally does not describe the disabled Forge 1.19.4 production entity stack.
+This document describes the current NeoForge 1.21.4 runtime flow. It is based on `src/main/java`.
 
 ## Current Scope
 
-The spike has thin server-side entity shells for:
+The game has thin server-side entity shells for:
 
 - `block_party:moe` -> `block_party.entities.Moe`
 - `block_party:moe_in_hiding` -> `block_party.entities.MoeInHiding`
 
-These shells preserve identity and state data needed before broader networking is reintroduced. Minimal SQLite NPC row identity, server-side owner-list/query/remove services, typed data-block row queries for garden/location/sapling/shrine waypoint surfaces, typed NeoForge payload scaffolding for those service calls, server-side Cell Phone-style call behavior, Moe movement/combat attributes, safe vanilla combat delegation, 36-slot inventory NBT, block alias visible state, volume-derived scale, and profile/timer NBT parity are active for spawn, hide, reveal, Yearbook-like listing, Cell Phone-like lookup, and Phase 2 entity/profile parity. Phase 3.1 adds typed list/detail/remove/call/controller-open payloads over those same services, Phase 3.2 adds typed dialogue-open/respond/close contracts with minimal server-side Moe dialogue state, Phase 4.1 adds the first client renderer/model path for the active Moe shells, Phase 4.2 opens a client DialogueScreen from the typed dialogue-open payload, Phase 4.3 opens Yearbook/Cell Phone screens from controller-open payloads, Phase 4.4 registers client particle providers plus client/server resource reload hooks for Moe textures and sounds, and Phase 5.1 adds real server-side scene resource loading/execution for bundled dialogue, hide, cookie, counter, and end actions. The spike still does not include real follow AI/pathfinding, chores, pranks, full Yearbook profile parity, full Forge scene action/filter coverage, or full Forge NPC row synchronization.
+These shells preserve identity and state data needed before broader networking is reintroduced. Minimal SQLite NPC row identity, server-side owner-list/query/remove services, typed data-block row queries for garden/location/sapling/shrine waypoint surfaces, typed NeoForge payload scaffolding for those service calls, server-side Cell Phone-style call behavior, Moe movement/combat attributes, safe vanilla combat delegation, 36-slot inventory NBT, block alias visible state, volume-derived scale, and profile/timer NBT parity are active for spawn, hide, reveal, Yearbook-like listing, Cell Phone-like lookup, and entity/profile parity. The current implementation also includes typed list/detail/remove/call/controller-open payloads, dialogue-open/respond/close contracts, the first client renderer/model path for active Moe shells, Yearbook/Cell Phone screens, client particle providers, client/server reload hooks for Moe textures and sounds, and server-side scene resource loading/execution for bundled dialogue, hide, cookie, counter, and end actions. It still does not include real follow AI/pathfinding, chores, pranks, full Yearbook profile parity, full Forge scene action/filter coverage, or full Forge NPC row synchronization.
 
 ## Moe Spawn Lifecycle
 
@@ -39,7 +39,7 @@ These shells preserve identity and state data needed before broader networking i
 
 Current spawn does not play sounds, initialize full traits, or proactively notify clients through custom networking.
 
-Semantic drift from the frozen Forge 1.19.4 source: Forge's `CustomSpawnEggItem` unconditionally shrinks the stack after a successful server-side spawn. The NeoForge spike now preserves the stack for creative-mode players and consumes it for survival players, matching the explicit Slice 1.1 test target.
+Compatibility note: Forge's `CustomSpawnEggItem` unconditionally shrank the stack after a successful server-side spawn. The NeoForge build preserves the stack for creative-mode players and consumes it for survival players.
 
 ## Database ID Boundaries
 
@@ -66,7 +66,7 @@ SQLite-backed identity starts at `BlockPartyDB` bootstrap, which opens the world
 Minimal active `NPCs` columns:
 
 - baseline-compatible: `DatabaseID`, `PosDim`, `PosX`, `PosY`, `PosZ`, `PlayerUUID`, `Dead`, `Name`, `BlockState`, `Hiding`
-- additive spike/Phase 2 columns: `VisibleBlockState`, profile/stat scalar columns, `HasHome`, `HomePos*`, `LastSeenAt`, `HiddenPosDim`, `HiddenPosX`, `HiddenPosY`, `HiddenPosZ`
+- additive NeoForge columns: `VisibleBlockState`, profile/stat scalar columns, `HasHome`, `HomePos*`, `LastSeenAt`, `HiddenPosDim`, `HiddenPosX`, `HiddenPosY`, `HiddenPosZ`
 
 ## Hidden-State Lifecycle
 
@@ -124,7 +124,7 @@ Active reveal entry points:
 - piston pre-event: `PistonEvent.Pre`
 - falling-block join event: `EntityJoinLevelEvent` for `FallingBlockEntity`
 
-Semantic drift from the frozen Forge 1.19.4 source: the NeoForge piston handler checks both the piston position and the block in front of the piston. The old static handler checked the event position only; checking the front block preserves the player-facing contract that a piston disturbing the hidden block reveals the Moe.
+Compatibility note: the NeoForge piston handler checks both the piston position and the block in front of the piston. The old static handler checked the event position only; checking the front block preserves the player-facing contract that a piston disturbing the hidden block reveals the Moe.
 
 ## HidingSpots Interaction
 
@@ -142,7 +142,7 @@ Current authority:
 - It is authoritative for "which world block position is expected to have a hidden Moe marker".
 - It is not authoritative for full entity identity, owner UUID, profile data, or source block state.
 - Reveal requires `HidingSpots`, a matching live `MoeInHiding`, and a matching SQLite `NPCs` row; a SavedData record alone is not enough to reconstruct full state.
-- Event handlers are registered on the NeoForge event bus by the spike entrypoint.
+- Event handlers are registered on the NeoForge event bus by the mod entrypoint.
 
 ## Owner UUID Semantics
 
@@ -200,7 +200,7 @@ Current success path:
 4. Queue a forced chunk ticket for the row's stored chunk.
 5. Search the row dimension for a live `Moe` entity with the requested `DatabaseID`.
 6. Reject the call if no loaded live Moe shell is present.
-7. Reject cross-dimension live entities for now, because the spike has not ported Forge `ITeleporter`/dimension-change behavior.
+7. Reject cross-dimension live entities for now, because Forge `ITeleporter`/dimension-change behavior has not been restored.
 8. Move the Moe to the Forge yaw-based arrival offset near the requester.
 9. Set `Moe.FOLLOWING = true`.
 10. Update the SQLite row position/profile fields from the moved Moe shell.
@@ -237,7 +237,7 @@ Active foundations:
 - winged source blocks switch to flying movement/navigation, while non-winged source blocks use ground navigation with door opening enabled
 - Cell Phone same-dimension calls use the Forge yaw-based arrival offset before setting `following=true`
 
-Semantic drift / API note: Minecraft 1.21.4 has a final `LivingEntity#getScale()`. The spike still persists the Forge `Scale` field in NBT and SQLite, but code reads/writes it through `getMoeScale()` / `setMoeScale()`.
+Compatibility/API note: Minecraft 1.21.4 has a final `LivingEntity#getScale()`. The game still persists the Forge `Scale` field in NBT and SQLite, but code reads/writes it through `getMoeScale()` / `setMoeScale()`.
 
 Still intentionally absent:
 
@@ -351,9 +351,9 @@ Current SQLite authority:
 - SQLite stores row-backed owner UUID, name, gender, profile strings, actual/visible block state, profile/stat scalars, home, last-seen time, hiding flag, and hidden position.
 - SQLite row ownership is checked before server-side list/query/remove services expose a row.
 - SQLite row ownership and `Hiding` state are checked before server-side call/teleport service queues a forced chunk or moves a Moe.
-- SQLite is authoritative for server-side data block rows in the minimal `Shrines`, `GardenLanterns`, `Locations`, and `SakuraSaplings` tables.
+- SQLite is authoritative for server-side data block rows in the minimal `Shrines`, `GardenLanterns`, `Locations`, and `Saplings` tables.
 - Data block entity NBT preserves `DatabaseID`, `HasRow`, `Claimed`, and `PlayerUUID`; locative rows additionally persist `RequiredCondition` and `Priority`.
-- Shrine list queries filter server-side SQLite rows by the frozen Forge `SShrineList` rule: include rows owned by the requester or rows in the requested dimension.
+- Shrine list queries filter server-side SQLite rows by the old `SShrineList` rule: include rows owned by the requester or rows in the requested dimension.
 - SQLite does not yet own Forge shrine/shimenawa references, inventory contents, or full health behavior.
 
 Networking authority:
@@ -390,7 +390,7 @@ The Phase 4 client surface now registers:
 - `block_party:white_sakura` -> white falling blossom sprite-set provider
 - client reload listener `block_party:moe_textures` -> data-driven Moe texture overrides from `moes/textures` and bundled `textures/moe` metadata
 
-Server resource reload also includes `moes/sounds`, including the frozen Forge `data/minecraft/moes/sounds/bell.json` override. The spike resolves that legacy slash-form sound path to the active dotted sound event ID `block_party:moe.bell.step`.
+Server resource reload also includes `moes/sounds`, including the old Forge `data/minecraft/moes/sounds/bell.json` override. The game resolves that legacy slash-form sound path to the active dotted sound event ID `block_party:moe.bell.step`.
 
 ## Data That Must Eventually Synchronize To Clients
 
@@ -418,7 +418,7 @@ Vanilla entity data synchronization may cover fields stored in `SynchedEntityDat
 Currently unimplemented:
 
 - Forge NPC schema columns for shrine/shimenawa references, SQLite inventory storage, and full health behavior
-- migration/backfill for existing spike `NPCs` tables if later columns change beyond the Phase 2.1 additive migration path
+- migration/backfill for existing `NPCs` tables if later columns change beyond the current additive migration path
 - alias-driven visible block state calculation is active for bundled `moes/aliases`; future real custom block shapes may need revisiting when their full block classes return
 - complex block entity full metadata/component restore remains incomplete; persistent data capture and restore through spawn/hide/reveal is active
 - SQLite inventory persistence is not active; Slice 2.3 only restores entity NBT inventory persistence and slouch recalculation

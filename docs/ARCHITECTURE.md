@@ -403,7 +403,7 @@ Start with behavior-preserving tests and manual smoke tests in the current Forge
 4. Dialogue scene test
    - Use `test_dialogue.json` through right-click.
    - Verify `SceneManager.trigger`, `SOpenDialogue`, `DialogueScreen`, `CDialogueRespond`, chained responses, and `End` behavior.
-   - Add a scene with filters/counters/cookies before porting if this system is intended to survive.
+   - Add a scene with filters/counters/cookies before changing this system if it is intended to survive.
 
 5. Hide/reveal test
    - Use `test_hide.json` through left-click.
