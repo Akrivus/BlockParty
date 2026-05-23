@@ -85,7 +85,7 @@ public final class BlockPartyDB extends SavedData {
         try (Statement statement = connection.createStatement()) {
             statement.execute(dataBlockTableSql("Shrines"));
             statement.execute(dataBlockTableSql("GardenLanterns"));
-            statement.execute(dataBlockTableSql("SakuraSaplings"));
+            statement.execute(dataBlockTableSql("Saplings"));
             statement.execute("""
                     CREATE TABLE IF NOT EXISTS Locations (
                         DatabaseID INTEGER PRIMARY KEY,

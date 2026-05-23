@@ -111,7 +111,7 @@ public final class BlockEntityGameTests {
             assertTableExists(helper, db, "Shrines");
             assertTableExists(helper, db, "GardenLanterns");
             assertTableExists(helper, db, "Locations");
-            assertTableExists(helper, db, "SakuraSaplings");
+            assertTableExists(helper, db, "Saplings");
         } catch (SQLException exception) {
             helper.fail("Expected data block tables to be creatable: " + exception.getMessage());
             return;

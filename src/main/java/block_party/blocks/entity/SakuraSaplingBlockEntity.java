@@ -11,6 +11,6 @@ public class SakuraSaplingBlockEntity extends AbstractDataBlockEntity {
 
     @Override
     public String getTableName() {
-        return "SakuraSaplings";
+        return "Saplings";
     }
 }
