@@ -14,6 +14,7 @@ public class MoeRenderState extends HumanoidRenderState {
     public boolean hasCatFeatures;
     public boolean hasGlow;
     public boolean onGround;
+    public boolean isSitting;
     public String animation = "DEFAULT";
     public float moeScale = 1.0F;
     public float slouch;

@@ -17,14 +17,17 @@ import block_party.scene.SceneTrigger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.ContainerListener;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -37,7 +40,10 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.Block;
@@ -52,7 +58,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-public class Moe extends PathfinderMob implements ContainerListener {
+public class Moe extends PathfinderMob implements ContainerListener, MenuProvider {
     private static final String EMPTY_UUID = "00000000-0000-0000-0000-000000000000";
 
     public static final EntityDataAccessor<String> DATABASE_ID =
@@ -68,6 +74,8 @@ public class Moe extends PathfinderMob implements ContainerListener {
     public static final EntityDataAccessor<Boolean> CORPOREAL =
             SynchedEntityData.defineId(Moe.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<Boolean> FOLLOWING =
+            SynchedEntityData.defineId(Moe.class, EntityDataSerializers.BOOLEAN);
+    public static final EntityDataAccessor<Boolean> SITTING =
             SynchedEntityData.defineId(Moe.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<String> GIVEN_NAME =
             SynchedEntityData.defineId(Moe.class, EntityDataSerializers.STRING);
@@ -136,6 +144,7 @@ public class Moe extends PathfinderMob implements ContainerListener {
         builder.define(SCALE, 1.0F);
         builder.define(CORPOREAL, true);
         builder.define(FOLLOWING, false);
+        builder.define(SITTING, false);
         builder.define(GIVEN_NAME, "Tokumei");
         builder.define(GENDER, "FEMALE");
         builder.define(BLOOD_TYPE, "O");
@@ -164,6 +173,7 @@ public class Moe extends PathfinderMob implements ContainerListener {
         this.setMoeScale(compound.contains("Scale") ? compound.getFloat("Scale") : 1.0F);
         this.setCorporeal(!compound.contains("IsCorporeal") || compound.getBoolean("IsCorporeal"));
         this.setFollowing(compound.getBoolean("Following"));
+        this.setSitting(compound.getBoolean("Sitting"));
         if (compound.contains("OwnerUUID")) {
             this.setOwnerUUID(UUID.fromString(compound.getString("OwnerUUID")));
         }
@@ -238,6 +248,7 @@ public class Moe extends PathfinderMob implements ContainerListener {
         compound.putFloat("Scale", this.getMoeScale());
         compound.putBoolean("IsCorporeal", this.isCorporeal());
         compound.putBoolean("Following", this.isFollowing());
+        compound.putBoolean("Sitting", this.isSitting());
         compound.putString("OwnerUUID", this.getOwnerUUID().toString());
         compound.putString("GivenName", this.getGivenName());
         compound.putString("Gender", this.getGender());
@@ -271,6 +282,11 @@ public class Moe extends PathfinderMob implements ContainerListener {
         super.tick();
         if (!this.level().isClientSide) {
             this.sceneManager.tick();
+            this.updateHungerState();
+            this.updateLonelyState();
+            this.updateStressState();
+            this.updateActionState();
+            this.updateSleepState();
         }
     }
 
@@ -415,6 +431,32 @@ public class Moe extends PathfinderMob implements ContainerListener {
         return this.inventory;
     }
 
+    @Override
+    public Component getDisplayName() {
+        return this.getName();
+    }
+
+    @Override
+    public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
+        return ChestMenu.threeRows(id, inventory, this.inventory);
+    }
+
+    public boolean openChestFor(Player player) {
+        player.openMenu(this);
+        return true;
+    }
+
+    public boolean openSpecialMenuFor(Player player) {
+        return false;
+    }
+
+    public boolean isBeingLookedThrough() {
+        if (!this.isPlayerBusy()) {
+            return false;
+        }
+        return this.getPlayer().containerMenu instanceof ChestMenu menu && menu.getContainer().equals(this.inventory);
+    }
+
     public float recalcSlouch() {
         float size = 0.0F;
         for (int slot = 0; slot < this.inventory.getContainerSize(); ++slot) {
@@ -507,6 +549,14 @@ public class Moe extends PathfinderMob implements ContainerListener {
         this.entityData.set(FOLLOWING, following);
     }
 
+    public boolean isSitting() {
+        return this.entityData.get(SITTING);
+    }
+
+    public void setSitting(boolean sitting) {
+        this.entityData.set(SITTING, sitting);
+    }
+
     public String getGivenName() {
         return this.entityData.get(GIVEN_NAME);
     }
@@ -571,12 +621,20 @@ public class Moe extends PathfinderMob implements ContainerListener {
         this.entityData.set(FOOD_LEVEL, foodLevel);
     }
 
+    public void addFoodLevel(float foodLevel) {
+        this.setFoodLevel(this.getFoodLevel() + foodLevel);
+    }
+
     public float getExhaustion() {
         return this.entityData.get(EXHAUSTION);
     }
 
     public void setExhaustion(float exhaustion) {
         this.entityData.set(EXHAUSTION, exhaustion);
+    }
+
+    public void addExhaustion(float exhaustion) {
+        this.setExhaustion(this.getExhaustion() + exhaustion);
     }
 
     public float getSaturation() {
@@ -587,12 +645,20 @@ public class Moe extends PathfinderMob implements ContainerListener {
         this.entityData.set(SATURATION, saturation);
     }
 
+    public void addSaturation(float saturation) {
+        this.setSaturation(this.getSaturation() + saturation);
+    }
+
     public float getStress() {
         return this.entityData.get(STRESS);
     }
 
     public void setStress(float stress) {
         this.entityData.set(STRESS, stress);
+    }
+
+    public void addStress(float stress) {
+        this.setStress(this.getStress() + stress);
     }
 
     public float getRelaxation() {
@@ -603,6 +669,10 @@ public class Moe extends PathfinderMob implements ContainerListener {
         this.entityData.set(RELAXATION, relaxation);
     }
 
+    public void addRelaxation(float relaxation) {
+        this.setRelaxation(this.getRelaxation() + relaxation);
+    }
+
     public float getLoyalty() {
         return this.entityData.get(LOYALTY);
     }
@@ -611,12 +681,20 @@ public class Moe extends PathfinderMob implements ContainerListener {
         this.entityData.set(LOYALTY, loyalty);
     }
 
+    public void addLoyalty(float loyalty) {
+        this.setLoyalty(this.getLoyalty() + loyalty);
+    }
+
     public float getAffection() {
         return this.entityData.get(AFFECTION);
     }
 
     public void setAffection(float affection) {
         this.entityData.set(AFFECTION, affection);
+    }
+
+    public void addAffection(float affection) {
+        this.setAffection(this.getAffection() + affection);
     }
 
     public float getSlouch() {
@@ -633,6 +711,14 @@ public class Moe extends PathfinderMob implements ContainerListener {
 
     public void setAge(float age) {
         this.entityData.set(AGE, age);
+    }
+
+    public void addAge(float age) {
+        this.setAge(this.getAge() + age);
+    }
+
+    public String getFamilyName() {
+        return "Minashigo";
     }
 
     public boolean hasHome() {
@@ -658,6 +744,27 @@ public class Moe extends PathfinderMob implements ContainerListener {
     public void setHomeToCurrentPosition() {
         this.setHasHome(true);
         this.setHome(this.getDimBlockPos());
+    }
+
+    public Player getPlayer() {
+        return this.level().getPlayerByUUID(this.getOwnerUUID());
+    }
+
+    public ServerPlayer getServerPlayer() {
+        return this.getServer() == null ? null : this.getServer().getPlayerList().getPlayer(this.getOwnerUUID());
+    }
+
+    public void setPlayer(Player player) {
+        this.setOwnerUUID(player.getUUID());
+    }
+
+    public boolean isPlayerOnline() {
+        return this.getPlayer() != null;
+    }
+
+    public boolean isPlayerBusy() {
+        Player player = this.getPlayer();
+        return player != null && player.containerMenu != player.inventoryMenu;
     }
 
     public long getLastSeen() {
@@ -708,6 +815,38 @@ public class Moe extends PathfinderMob implements ContainerListener {
 
     public void triggerScene(SceneTrigger trigger) {
         this.sceneManager.trigger(trigger);
+    }
+
+    public void sayInChat(String key, Object... params) {
+        Component message = Component.translatable(key, params);
+        for (Player player : this.level().players()) {
+            if (player.distanceTo(this) < 8.0D) {
+                this.sayInChat(player, message);
+            }
+        }
+    }
+
+    public void sayInChat(Player player, String key, Object... params) {
+        this.sayInChat(player, Component.translatable(key, params));
+    }
+
+    public void sayInChat(Player player, Component component) {
+        player.displayClientMessage(component, false);
+    }
+
+    public void updateHungerState() {
+    }
+
+    public void updateLonelyState() {
+    }
+
+    public void updateStressState() {
+    }
+
+    public void updateActionState() {
+    }
+
+    public void updateSleepState() {
     }
 
     public int getTimeUntilHungry() {

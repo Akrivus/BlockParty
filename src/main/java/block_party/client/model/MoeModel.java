@@ -153,7 +153,7 @@ public class MoeModel extends EntityModel<MoeRenderState> implements ArmedModel,
             this.leftLeg.z = 1.0F;
         }
 
-        if (state.isPassenger) {
+        if (state.isSitting || state.isPassenger) {
             this.rightArm.xRot -= Mth.PI / 5.0F;
             this.leftArm.xRot -= Mth.PI / 5.0F;
             this.rightLeg.xRot = -1.4137167F;

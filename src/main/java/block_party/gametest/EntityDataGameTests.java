@@ -22,8 +22,12 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -58,6 +62,7 @@ public final class EntityDataGameTests {
         moe.setMoeScale(0.75F);
         moe.setCorporeal(false);
         moe.setFollowing(true);
+        moe.setSitting(true);
         moe.setGivenName("Moe");
         moe.setGender("NONBINARY");
         moe.setBloodType("AB");
@@ -93,6 +98,7 @@ public final class EntityDataGameTests {
         assertFloat(helper, 0.75F, loaded.getMoeScale(), "Moe scale");
         assertEquals(helper, false, loaded.isCorporeal(), "Moe corporeal flag");
         assertEquals(helper, true, loaded.isFollowing(), "Moe following flag");
+        assertEquals(helper, true, loaded.isSitting(), "Moe sitting flag");
         assertEquals(helper, "Moe", loaded.getGivenName(), "Moe given name");
         assertEquals(helper, "NONBINARY", loaded.getGender(), "Moe gender");
         assertEquals(helper, "AB", loaded.getBloodType(), "Moe blood type");
@@ -131,6 +137,7 @@ public final class EntityDataGameTests {
         assertHasKey(helper, tag, "IsCorporeal");
         assertHasKey(helper, tag, "TileEntity");
         assertHasKey(helper, tag, "Following");
+        assertHasKey(helper, tag, "Sitting");
         assertHasKey(helper, tag, "OwnerUUID");
         assertHasKey(helper, tag, "GivenName");
         assertHasKey(helper, tag, "Gender");
@@ -238,6 +245,59 @@ public final class EntityDataGameTests {
         assertFloat(helper, 0.0277777778F, moe.getSlouch(), "one occupied slot slouch");
         moe.getInventory().setItem(1, new ItemStack(Items.DIRT));
         assertFloat(helper, 0.0555555556F, moe.getSlouch(), "two occupied slots slouch");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void layerFourHumanizingHelpersRemainAvailable(GameTestHelper helper) {
+        Moe moe = new Moe(CustomEntities.MOE.get(), helper.getLevel());
+        moe.setMoeScale(0.8F);
+        moe.setFoodLevel(10.0F);
+        moe.setExhaustion(1.0F);
+        moe.setSaturation(2.0F);
+        moe.setStress(3.0F);
+        moe.setRelaxation(4.0F);
+        moe.setLoyalty(5.0F);
+        moe.setAffection(6.0F);
+        moe.setAge(7.0F);
+
+        moe.addFoodLevel(1.0F);
+        moe.addExhaustion(1.0F);
+        moe.addSaturation(1.0F);
+        moe.addStress(1.0F);
+        moe.addRelaxation(1.0F);
+        moe.addLoyalty(1.0F);
+        moe.addAffection(1.0F);
+        moe.addAge(1.0F);
+
+        assertFloat(helper, 11.0F, moe.getFoodLevel(), "add food");
+        assertFloat(helper, 2.0F, moe.getExhaustion(), "add exhaustion");
+        assertFloat(helper, 3.0F, moe.getSaturation(), "add saturation");
+        assertFloat(helper, 4.0F, moe.getStress(), "add stress");
+        assertFloat(helper, 5.0F, moe.getRelaxation(), "add relaxation");
+        assertFloat(helper, 6.0F, moe.getLoyalty(), "add loyalty");
+        assertFloat(helper, 7.0F, moe.getAffection(), "add affection");
+        assertFloat(helper, 8.0F, moe.getAge(), "add age");
+        assertEquals(helper, "Minashigo", moe.getFamilyName(), "family name");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void layerSixMenuHooksRemainAvailable(GameTestHelper helper) {
+        Moe moe = new Moe(CustomEntities.MOE.get(), helper.getLevel());
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        moe.setPlayer(player);
+
+        AbstractContainerMenu menu = moe.createMenu(1, player.getInventory(), player);
+        if (!(menu instanceof ChestMenu chest) || !chest.getContainer().equals(moe.getInventory())) {
+            helper.fail("Expected Moe chest menu hook to expose the Moe inventory");
+            return;
+        }
+        if (moe.openSpecialMenuFor(player)) {
+            helper.fail("Expected default special menu hook to remain false");
+            return;
+        }
+        assertEquals(helper, player.getUUID(), moe.getOwnerUUID(), "setPlayer owner UUID");
         helper.succeed();
     }
 
