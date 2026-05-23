@@ -61,6 +61,51 @@ public final class SceneGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void dialogueMarkdownAndVariableSubstitutionAreApplied(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(510L, 10L));
+        SceneVariables variables = SceneVariables.get(moe.level());
+        variables.cookies(moe.getDatabaseID()).set("mood", "bright");
+        variables.counters(moe.getDatabaseID()).set("score", 7);
+        SceneAction action = parseAction("""
+                {"type":"block_party:send_dialogue","action":{"text":"<color=cyan>Hello</color> @name @mood #score","responses":[{"icon":"block_party:next_response","text":"<b>Go</b>","actions":["block_party:end"]}]}}
+                """);
+
+        action.apply(moe);
+
+        assertEquals(helper, "\u00a7bHello\u00a7f " + moe.getGivenName() + " \u00a7b\u00a7lbright\u00a7r\u00a7f \u00a7e\u00a7l7\u00a7r\u00a7f", moe.getDialogue().text(), "markdown dialogue text");
+        assertEquals(helper, "\u00a7lGo\u00a7r", moe.getDialogue().responses().get(Response.NEXT_RESPONSE), "markdown response text");
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void forgeSceneObservationsFilterScenes(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(511L, 11L));
+        moe.setCorporeal(false);
+        moe.setDere("KUUDERE");
+        moe.setEmotion("HAPPY");
+        moe.setGender("NONBINARY");
+
+        block_party.registry.resources.ScenesReloadListener.ParsedScene accepts = parseScene("""
+                {"trigger":"block_party:right_click","filters":["block_party:is_ethereal","block_party:if_kuudere","block_party:if_happy","block_party:if_nonbinary"],"actions":[]}
+                """);
+        block_party.registry.resources.ScenesReloadListener.ParsedScene rejects = parseScene("""
+                {"trigger":"block_party:right_click","filters":["block_party:is_corporeal"],"actions":[]}
+                """);
+
+        if (!accepts.scene().fulfills(moe)) {
+            helper.fail("Expected restored Forge observations to accept matching Moe state");
+            return;
+        }
+        if (rejects.scene().fulfills(moe)) {
+            helper.fail("Expected restored Forge observations to reject mismatched Moe state");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void ownerRightClickInteractionTriggersScene(GameTestHelper helper) {
         Player owner = helper.makeMockPlayer(GameType.SURVIVAL);
         Moe moe = spawnMoe(helper, owner.getUUID());
@@ -265,6 +310,10 @@ public final class SceneGameTests {
 
     private static SceneAction parseAction(String json) {
         return ScenesReloadListener.parseActionForTests(JsonParser.parseString(json).getAsJsonObject());
+    }
+
+    private static ScenesReloadListener.ParsedScene parseScene(String json) {
+        return ScenesReloadListener.parseSceneForTests(BlockParty.source("test_scene"), JsonParser.parseString(json));
     }
 
     private static void tickScene(Moe moe, int count) {

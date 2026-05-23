@@ -7,6 +7,7 @@ import block_party.scene.Response;
 import block_party.scene.Scene;
 import block_party.scene.SceneAction;
 import block_party.scene.SceneObservation;
+import block_party.scene.SceneObservations;
 import block_party.scene.SceneTrigger;
 import block_party.scene.Speaker;
 import block_party.scene.actions.CookieAction;
@@ -137,12 +138,11 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         }
         JsonObject json = source;
         return switch (type.getPath()) {
-            case "never" -> moe -> false;
             case "has_cookie" -> moe -> block_party.scene.SceneVariables.get(moe.level())
                     .cookies(moe.getDatabaseID())
                     .has(GsonHelper.getAsString(json, "name", ""));
             case "counter" -> moe -> counterMatches(moe, json);
-            default -> moe -> true;
+            default -> SceneObservations.byPath(type.getPath()).orElse(SceneObservations.ALWAYS);
         };
     }
 
