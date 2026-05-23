@@ -7,6 +7,7 @@ import block_party.scene.Dialogue;
 import block_party.scene.Response;
 import block_party.scene.SceneAction;
 import block_party.scene.Speaker;
+import block_party.utils.Markdown;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
@@ -49,7 +50,7 @@ public final class SendDialogueAction implements SceneAction {
 
     private Map<Response, String> responseText() {
         Map<Response, String> texts = new LinkedHashMap<>();
-        this.responses.forEach((icon, response) -> texts.put(icon, response.text()));
+        this.responses.forEach((icon, response) -> texts.put(icon, Markdown.mark(response.text())));
         return texts;
     }
 
@@ -71,8 +72,9 @@ public final class SendDialogueAction implements SceneAction {
                 ownerName = player.getName().getString();
             }
         }
-        return this.text
+        String resolved = this.text
                 .replace("@.name", ownerName)
                 .replace("@name", moe.getGivenName());
+        return Markdown.markWithSubs(resolved, moe);
     }
 }
