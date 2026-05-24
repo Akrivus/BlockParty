@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 public enum SceneTrigger {
     CREATION(8),
     HIDING_SPOT_DISCOVERED(8),
+    PHONE_CALL(8),
     SHIFT_LEFT_CLICK(7),
     LEFT_CLICK(6),
     SHIFT_RIGHT_CLICK(6),

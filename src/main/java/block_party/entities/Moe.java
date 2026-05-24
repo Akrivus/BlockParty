@@ -860,8 +860,8 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         return this.sceneManager;
     }
 
-    public void triggerScene(SceneTrigger trigger) {
-        this.sceneManager.trigger(trigger);
+    public boolean triggerScene(SceneTrigger trigger) {
+        return this.sceneManager.trigger(trigger);
     }
 
     public void sayInChat(String key, Object... params) {

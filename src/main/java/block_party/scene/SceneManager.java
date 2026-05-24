@@ -33,17 +33,18 @@ public final class SceneManager {
         }
     }
 
-    public void trigger(SceneTrigger trigger) {
+    public boolean trigger(SceneTrigger trigger) {
         if (this.trigger.getPriority() >= trigger.getPriority()) {
-            return;
+            return false;
         }
-        this.trigger = trigger;
         Scene scene = CustomResources.SCENES.get(trigger, this.moe);
         if (scene == null) {
-            return;
+            return false;
         }
+        this.trigger = trigger;
         this.setAction(null);
         this.setActions(scene.getActions());
+        return true;
     }
 
     public void setAction(SceneAction action) {

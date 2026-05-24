@@ -4,11 +4,13 @@ import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
 import block_party.db.records.NPC;
 import block_party.entities.Moe;
+import block_party.network.CustomMessenger;
 import block_party.network.payload.DialogueOpenPayload;
 import block_party.network.payload.NpcCallPayload;
 import block_party.network.payload.NpcDetailPayload;
 import block_party.scene.Dialogue;
 import block_party.scene.Response;
+import block_party.scene.SceneTrigger;
 import block_party.scene.Speaker;
 import block_party.world.chunk.ForcedChunk;
 import java.sql.SQLException;
@@ -210,7 +212,24 @@ public final class CellPhone {
         } catch (SQLException exception) {
             return Optional.empty();
         }
+        this.triggerCallScene(called);
         return Optional.of(called);
+    }
+
+    private void triggerCallScene(Moe called) {
+        if (called.triggerScene(SceneTrigger.PHONE_CALL)) {
+            return;
+        }
+        Dialogue dialogue = new Dialogue(
+                Component.translatable("gui.block_party.call_scene.default").getString(),
+                true,
+                new Speaker(Speaker.Identity.CHARACTER, Speaker.Position.LEFT, "DEFAULT", "HAPPY", false, null, 1.0F),
+                null,
+                Map.of(Response.NEXT_RESPONSE, Component.translatable("gui.block_party.call_response.hang_up").getString()));
+        ServerPlayer player = this.callerLevel.getServer().getPlayerList().getPlayer(this.player);
+        if (player != null) {
+            PacketDistributor.sendToPlayer(player, CustomMessenger.dialogueOpenPayload(this.db, this.player, this.npcId, dialogue));
+        }
     }
 
     private Vec3 arrivalPosition() {

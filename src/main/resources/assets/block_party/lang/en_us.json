@@ -462,6 +462,7 @@
   "gui.block_party.call_result.hiding": "The call went to voicemail.",
   "gui.block_party.call_result.not_in_service": "The operator clicks in: This number is no longer in service.",
   "gui.block_party.call_result.unreachable": "The signal falls apart before anyone answers.",
+  "gui.block_party.call_scene.default": "Moshi moshi?",
   "gui.block_party.call_response.hang_up": "Hang up",
   "gui.block_party.dialogue.response.green_checkmark": "Yes",
   "gui.block_party.dialogue.response.red_x": "No",

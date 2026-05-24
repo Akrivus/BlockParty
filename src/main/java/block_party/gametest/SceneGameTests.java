@@ -106,6 +106,16 @@ public final class SceneGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void phoneCallSceneTriggerParses(GameTestHelper helper) {
+        ScenesReloadListener.ParsedScene parsed = parseScene("""
+                {"trigger":"block_party:phone_call","filters":["block_party:always"],"actions":[]}
+                """);
+
+        assertEquals(helper, SceneTrigger.PHONE_CALL, parsed.trigger(), "phone call scene trigger");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void structuredSceneObservationFactoriesMatchActiveMoeState(GameTestHelper helper) {
         Moe moe = spawnMoe(helper, new UUID(512L, 12L));
         moe.setHealth(12.0F);
