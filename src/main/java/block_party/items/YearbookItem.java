@@ -1,52 +1,60 @@
 package block_party.items;
 
-import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
-import block_party.entities.BlockPartyNPC;
-import block_party.messages.SOpenYearbook;
-import block_party.registry.CustomMessenger;
-import block_party.utils.sorters.ISortableItem;
+import block_party.entities.Moe;
+import block_party.network.CustomMessenger;
+import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.network.PacketDistributor;
 
-import java.util.List;
-
-public class YearbookItem extends Item implements ISortableItem {
-    public YearbookItem() {
-        super(new Properties());
-    }
-
-    @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-        if (level.isClientSide()) { return InteractionResultHolder.pass(player.getItemInHand(hand)); }
-        return new InteractionResultHolder(this.openGui(player, hand, -1), player.getItemInHand(hand));
-    }
-
-    @Override
-    public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity entity, InteractionHand hand) {
-        if (player.level.isClientSide()) { return InteractionResult.PASS; }
-        if (entity instanceof BlockPartyNPC) {
-            BlockPartyNPC npc = (BlockPartyNPC) entity;
-            if (player.equals(npc.getPlayer())) { return this.openGui(player, hand, npc.getDatabaseID()); }
-            return InteractionResult.SUCCESS;
-        }
-        return InteractionResult.FAIL;
-    }
-
-    private InteractionResult openGui(Player player, InteractionHand hand, long id) {
-        List<Long> npcs = BlockPartyDB.get(player.level).getFrom(player);
-        if (npcs.size() > 0) { CustomMessenger.send(player, new SOpenYearbook(npcs, id < 0 ? npcs.get(0) : id, hand)); }
-        return InteractionResult.SUCCESS;
+public class YearbookItem extends Item implements SortableItem {
+    public YearbookItem(Properties properties) {
+        super(properties);
     }
 
     @Override
     public int getSortOrder() {
         return 2;
+    }
+
+    @Override
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        if (level.isClientSide()) {
+            return InteractionResult.PASS;
+        }
+        this.open(player, hand, -1L);
+        return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity entity, InteractionHand hand) {
+        if (player.level().isClientSide()) {
+            return InteractionResult.PASS;
+        }
+        if (entity instanceof Moe moe && player.getUUID().equals(moe.getOwnerUUID())) {
+            this.open(player, hand, moe.getDatabaseID());
+            return InteractionResult.SUCCESS;
+        }
+        return entity instanceof Moe ? InteractionResult.SUCCESS : InteractionResult.FAIL;
+    }
+
+    private void open(Player player, InteractionHand hand, long selectedId) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        BlockPartyDB db = BlockPartyDB.get(player.level());
+        List<Long> ids = db.listYearbookNpcIds(player.getUUID());
+        if (ids.isEmpty()) {
+            return;
+        }
+        long id = selectedId < 0L ? ids.get(0) : selectedId;
+        PacketDistributor.sendToPlayer(serverPlayer, CustomMessenger.yearbookOpenPayload(db, player.getUUID(), id, hand));
     }
 }

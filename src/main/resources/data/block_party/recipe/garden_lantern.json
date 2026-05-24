@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "___",
+        "#i#",
+        "# #"
+    ],
+    "key": {
+        "_": "minecraft:stone_slab",
+        "#": "minecraft:stone",
+        "i": "minecraft:torch"
+    },
+    "result": {
+        "count": 1,
+        "id": "block_party:garden_lantern"
+    }
+}

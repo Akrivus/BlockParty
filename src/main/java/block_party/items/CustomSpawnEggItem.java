@@ -1,58 +1,102 @@
 package block_party.items;
 
-import block_party.BlockParty;
+import block_party.db.BlockPartyDB;
+import block_party.db.records.NPC;
 import block_party.entities.Moe;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomTags;
-import block_party.scene.traits.BloodType;
-import block_party.scene.traits.Dere;
-import block_party.utils.sorters.ISortableItem;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class CustomSpawnEggItem extends Item implements ISortableItem {
-    public CustomSpawnEggItem() {
-        super(new Properties());
-    }
+import java.sql.SQLException;
+import java.util.UUID;
 
-    @Override
-    public InteractionResult useOn(UseOnContext context) {
-        Level level = context.getLevel();
-        if (level.isClientSide()) { return InteractionResult.PASS; }
-        BlockPos pos = context.getClickedPos();
-        BlockState state = level.getBlockState(pos);
-        Player player = context.getPlayer();
-        if (state.is(CustomTags.Blocks.SPAWNS_MOES)) {
-            BlockPos spawn = pos.relative(context.getClickedFace());
-            Moe moe = CustomEntities.MOE.get().create(level);
-            moe.absMoveTo(spawn.getX() + 0.5D, spawn.getY(), spawn.getZ() + 0.5D, 0, 0);
-            moe.setDatabaseID(pos.asLong());
-            moe.setBlockState(state);
-            if (moe.getActualBlockState().hasBlockEntity())
-                moe.setTileEntityData(level.getBlockEntity(pos).getPersistentData());
-            moe.setDere(Dere.random());
-            moe.setBloodType(BloodType.O.weigh(moe.getRandom()));
-            moe.setPlayer(player);
-            moe.claim(player);
-            level.addFreshEntity(moe);
-            level.destroyBlock(pos, false);
-            context.getItemInHand().shrink(1);
-            return InteractionResult.CONSUME;
-        } else {
-            String name = level.getBlockState(pos).getBlock().getName().getString();
-            player.displayClientMessage(Component.translatable("item.block_party.moe_spawn_egg.error", name), true);
-            return InteractionResult.FAIL;
-        }
+public final class CustomSpawnEggItem extends Item implements SortableItem {
+    public CustomSpawnEggItem(Properties properties) {
+        super(properties);
     }
 
     @Override
     public int getSortOrder() {
         return 1;
+    }
+
+    @Override
+    public InteractionResult useOn(UseOnContext context) {
+        Level level = context.getLevel();
+        BlockPos sourcePos = context.getClickedPos();
+        BlockState sourceState = level.getBlockState(sourcePos);
+        if (!sourceState.is(CustomTags.SPAWNS_MOES)) {
+            return InteractionResult.FAIL;
+        }
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return InteractionResult.SUCCESS;
+        }
+
+        Moe moe = spawnMoe(serverLevel, sourcePos, context.getClickedFace(), context.getPlayer());
+        if (moe == null) {
+            return InteractionResult.FAIL;
+        }
+        Player player = context.getPlayer();
+        if (player == null || !player.isCreative()) {
+            context.getItemInHand().shrink(1);
+        }
+        return InteractionResult.CONSUME;
+    }
+
+    public static Moe spawnMoe(ServerLevel level, BlockPos sourcePos, Direction face, Player player) {
+        return spawnMoe(level, sourcePos, face, player == null ? null : player.getUUID());
+    }
+
+    public static Moe spawnMoe(ServerLevel level, BlockPos sourcePos, Direction face, UUID owner) {
+        BlockState sourceState = level.getBlockState(sourcePos);
+        if (!sourceState.is(CustomTags.SPAWNS_MOES)) {
+            return null;
+        }
+
+        CompoundTag tileEntityData = new CompoundTag();
+        BlockEntity blockEntity = level.getBlockEntity(sourcePos);
+        if (blockEntity != null) {
+            tileEntityData = blockEntity.getPersistentData().copy();
+        }
+
+        BlockPos spawnPos = sourcePos.relative(face);
+        Moe moe = new Moe(CustomEntities.MOE.get(), level);
+        moe.moveToBlock(spawnPos);
+        moe.setBlockState(sourceState);
+        moe.setTileEntityData(tileEntityData);
+        if (owner != null) {
+            moe.setOwnerUUID(owner);
+        }
+        BlockPartyDB db = BlockPartyDB.get(level);
+        NPC row;
+        try {
+            row = db.createNpc(level, moe);
+            row.applyTo(moe);
+            if (owner != null) {
+                db.addTo(owner, row.databaseId());
+            }
+        } catch (SQLException exception) {
+            return null;
+        }
+        if (!level.addFreshEntity(moe)) {
+            try {
+                db.deleteNpc(row.databaseId());
+            } catch (SQLException ignored) {
+                // Best-effort cleanup; the spawn still fails safely from the player's perspective.
+            }
+            return null;
+        }
+        level.destroyBlock(sourcePos, false);
+        return moe;
     }
 }

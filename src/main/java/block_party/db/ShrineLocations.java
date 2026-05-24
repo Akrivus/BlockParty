@@ -1,24 +1,27 @@
 package block_party.db;
 
-import net.minecraft.core.BlockPos;
-import org.apache.commons.compress.utils.Lists;
-
+import block_party.db.records.Shrine;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.BlockPos;
 
-public class ShrineLocations {
-    private final List<BlockPos> positions;
+public final class ShrineLocations {
+    private final List<Shrine> shrines;
 
-    public ShrineLocations(List<BlockPos> positions) {
-        this.positions = positions;
-    }
-
-    public ShrineLocations() {
-        this(Lists.newArrayList());
+    public ShrineLocations(List<Shrine> shrines) {
+        this.shrines = List.copyOf(shrines);
     }
 
     public Optional<BlockPos> get(BlockPos pos) {
-        return this.positions.stream()
-                .min((one, two) -> Double.compare(one.distSqr(pos), two.distSqr(pos)));
+        return Shrine.closest(this.shrines, new DimBlockPos(net.minecraft.world.level.Level.OVERWORLD, pos))
+                .map(shrine -> shrine.dimPos().getPos());
+    }
+
+    public Optional<Shrine> closest(DimBlockPos pos) {
+        return Shrine.closest(this.shrines, pos);
+    }
+
+    public List<Shrine> entries() {
+        return this.shrines;
     }
 }

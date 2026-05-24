@@ -1,10 +1,10 @@
 # Block Party Behavior Contract
 
-This document defines player-facing gameplay behavior that should not change during a port. It intentionally avoids implementation details except where needed to clarify what a player can observe. If current behavior is incomplete or uncertain, the contract says so explicitly.
+This document defines player-facing gameplay behavior that should not change during maintenance or feature work. It intentionally avoids implementation details except where needed to clarify what a player can observe. If current behavior is incomplete or uncertain, the contract says so explicitly.
 
 ## Scope
 
-The port should preserve the current observable behavior first. New features, balance changes, bug fixes, and redesigned interactions should happen after parity is established.
+Changes should preserve the current observable behavior first. New features, balance changes, bug fixes, and redesigned interactions should happen after the relevant behavior is covered.
 
 Status labels:
 
@@ -47,7 +47,7 @@ When a player successfully creates a Moe from a valid block:
 
 `Uncertain`
 
-The current behavior around blocks with complex block states should be preserved until tested. A port should not intentionally simplify all source blocks to default states unless parity tests show that was already what players saw.
+The current behavior around blocks with complex block states should be preserved until tested. Changes should not intentionally simplify all source blocks to default states unless tests show that was already what players saw.
 
 ## Ownership And Identity
 
@@ -118,7 +118,7 @@ A visible Moe should behave like a persistent companion entity:
 
 `Partially implemented`
 
-Needs such as hunger, loneliness, stress, action choice, and sleep have saved fields and update hooks, but current player-facing behavior is not fully implemented. A port should preserve the fields and any visible UI/stat behavior without inventing new needs behavior during migration.
+Needs such as hunger, loneliness, stress, action choice, and sleep have saved fields and update hooks, but current player-facing behavior is not fully implemented. Changes should preserve the fields and any visible UI/stat behavior without inventing new needs behavior incidentally.
 
 ## Dialogue Behavior
 
@@ -150,7 +150,7 @@ Data-pack behavior to preserve:
 
 `Uncertain`
 
-If a new high-priority scene interrupts an active scene, preserve current interruption behavior first, then review later. Do not silently change scene priority rules during porting.
+If a new high-priority scene interrupts an active scene, preserve current interruption behavior first, then review later. Do not silently change scene priority rules during unrelated work.
 
 ## Hiding And Retreat Behavior
 
@@ -187,7 +187,7 @@ If the hiding block is gone and the hidden Moe is hurt/exposed, current behavior
 
 `Uncertain`
 
-Hide timers across save/load need parity testing. If current behavior is buggy, the port should document the baseline before fixing it.
+Hide timers across save/load need parity testing. If current behavior is buggy, document the baseline before fixing it.
 
 ## Favorite Locations, Homes, Gardens, And Shrines
 
@@ -207,7 +207,7 @@ Player-facing contract:
 
 `Uncertain`
 
-I did not confirm a complete player-facing workflow where a Moe chooses, returns to, or respawns at a favorite location. During porting, treat location persistence as a contract to preserve, but do not add new return/respawn behavior until after parity.
+I did not confirm a complete player-facing workflow where a Moe chooses, returns to, or respawns at a favorite location. Treat location persistence as a contract to preserve, but do not add new return/respawn behavior without dedicated tests.
 
 ## Yearbook And Cell Phone
 
@@ -334,7 +334,7 @@ Current player-facing removal behavior is conservative:
 
 `Uncertain`
 
-The full hard-delete behavior for NPC records is not clearly visible. A port should not delete records more aggressively than current behavior.
+The full hard-delete behavior for NPC records is not clearly visible. Changes should not delete records more aggressively than current behavior.
 
 ## Rendering, Sounds, And Seasonal Behavior
 
@@ -356,7 +356,7 @@ Visual and audio identity are part of the gameplay contract:
 
 `Implemented`
 
-The port must preserve data-driven customization:
+The game must preserve data-driven customization:
 
 - block tags determine which blocks spawn Moes and which traits/features they get.
 - names load from data resources.
@@ -370,7 +370,7 @@ Existing worlds and data packs should not need renamed IDs unless a deliberate m
 
 ## Non-Goals During Port
 
-During the port, do not intentionally:
+When changing these systems, do not intentionally:
 
 - redesign Moe personalities
 - rebalance stats
@@ -383,4 +383,4 @@ During the port, do not intentionally:
 - change persistent database semantics
 - simplify hiding into ordinary block placement
 
-The first successful port should make existing Block Party gameplay feel the same, including the currently unfinished edges. Improvements can come afterward with their own tests and design notes.
+Block Party gameplay should continue to feel the same, including the currently unfinished edges. Improvements can come afterward with their own tests and design notes.

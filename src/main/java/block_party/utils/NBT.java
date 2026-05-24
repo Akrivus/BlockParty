@@ -1,6 +1,6 @@
 package block_party.utils;
 
-public class NBT {
+public final class NBT {
     public static final int END = 0;
     public static final int BYTE = 1;
     public static final int SHORT = 2;

@@ -3,12 +3,14 @@ package block_party.client.animation;
 import block_party.client.animation.state.DefaultAnimation;
 import block_party.client.animation.state.WaveAnimation;
 import block_party.client.animation.state.YearbookAnimation;
+import java.util.Locale;
+import java.util.function.Supplier;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.Supplier;
-
 public enum Animation {
-    DEFAULT(DefaultAnimation::new), YEARBOOK(YearbookAnimation::new), WAVE(WaveAnimation::new);
+    DEFAULT(DefaultAnimation::new),
+    YEARBOOK(YearbookAnimation::new),
+    WAVE(WaveAnimation::new);
 
     private final Supplier<AbstractAnimation> animation;
 
@@ -21,11 +23,7 @@ public enum Animation {
     }
 
     public AbstractAnimation fromValue(String key) {
-        try {
-            return Animation.valueOf(key.toUpperCase()).get();
-        } catch (IllegalArgumentException e) {
-            return this.get();
-        }
+        return fromKey(key).get();
     }
 
     public AbstractAnimation get() {
@@ -38,8 +36,8 @@ public enum Animation {
 
     public Animation fromKey(String key) {
         try {
-            return Animation.valueOf(key.toUpperCase());
-        } catch (IllegalArgumentException e) {
+            return Animation.valueOf(key.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException | NullPointerException exception) {
             return this;
         }
     }

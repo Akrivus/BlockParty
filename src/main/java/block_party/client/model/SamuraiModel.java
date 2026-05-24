@@ -4,13 +4,20 @@ import block_party.client.BlockPartyRenderers;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
 
-public class SamuraiModel<T extends LivingEntity> extends HumanoidModel<T> {
+public class SamuraiModel extends HumanoidModel<HumanoidRenderState> {
+    private static SamuraiModel innerArmorModel;
+    private static SamuraiModel outerArmorModel;
+
     private final ModelPart leftArmOverlay;
     private final ModelPart rightArmOverlay;
     private final ModelPart leftLegOverlay;
@@ -27,8 +34,8 @@ public class SamuraiModel<T extends LivingEntity> extends HumanoidModel<T> {
     }
 
     @Override
-    public void setupAnim(T p_103395_, float p_103396_, float p_103397_, float p_103398_, float p_103399_, float p_103400_) {
-        super.setupAnim(p_103395_, p_103396_, p_103397_, p_103398_, p_103399_, p_103400_);
+    public void setupAnim(HumanoidRenderState state) {
+        super.setupAnim(state);
         this.leftLegOverlay.copyFrom(this.leftLeg);
         this.rightLegOverlay.copyFrom(this.rightLeg);
         this.leftArmOverlay.copyFrom(this.leftArm);
@@ -47,15 +54,12 @@ public class SamuraiModel<T extends LivingEntity> extends HumanoidModel<T> {
         return LayerDefinition.create(parts, 64, 64);
     }
 
-    private static SamuraiModel INNER_ARMOR_MODEL;
-    private static SamuraiModel OUTER_ARMOR_MODEL;
-
     public static void setArmorModels(EntityRendererProvider.Context context) {
-        SamuraiModel.INNER_ARMOR_MODEL = new SamuraiModel(context.bakeLayer(BlockPartyRenderers.SAMURAI_INNER_ARMOR));
-        SamuraiModel.OUTER_ARMOR_MODEL = new SamuraiModel(context.bakeLayer(BlockPartyRenderers.SAMURAI_OUTER_ARMOR));
+        innerArmorModel = new SamuraiModel(context.bakeLayer(BlockPartyRenderers.SAMURAI_INNER_ARMOR));
+        outerArmorModel = new SamuraiModel(context.bakeLayer(BlockPartyRenderers.SAMURAI_OUTER_ARMOR));
     }
 
     public static SamuraiModel getArmorModel(EquipmentSlot slot) {
-        return slot == EquipmentSlot.LEGS ? SamuraiModel.INNER_ARMOR_MODEL : SamuraiModel.OUTER_ARMOR_MODEL;
+        return slot == EquipmentSlot.LEGS ? innerArmorModel : outerArmorModel;
     }
 }

@@ -1,0 +1,15 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "_",
+        "O"
+    ],
+    "key": {
+        "_": "minecraft:magenta_dye",
+        "O": "block_party:shoji_lantern"
+    },
+    "result": {
+        "count": 1,
+        "id": "block_party:magenta_paper_lantern"
+    }
+}

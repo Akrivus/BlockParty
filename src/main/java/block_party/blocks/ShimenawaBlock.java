@@ -15,12 +15,13 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class ShimenawaBlock extends AbstractDataBlock<ShimenawaBlockEntity> {
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+public class ShimenawaBlock extends AbstractDataBlock {
+    public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty HANGING = BooleanProperty.create("hanging");
     protected static final VoxelShape NORTH_AABB = Block.box(0.0D, 12.0D, 12.0D, 16.0D, 16.0D, 16.0D);
     protected static final VoxelShape EAST_AABB = Block.box(0.0D, 12.0D, 0.0D, 4.0D, 16.0D, 16.0D);
@@ -33,40 +34,35 @@ public class ShimenawaBlock extends AbstractDataBlock<ShimenawaBlockEntity> {
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos neighbor, boolean isMoving) {
-        if (this.canSurvive(state, level, pos)) {
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, Orientation orientation, boolean isMoving) {
+        if (!this.canSurvive(state, level, pos)) {
             level.destroyBlock(pos, true);
         }
     }
 
     @Override
-    public boolean canSurvive(BlockState state, LevelReader reader, BlockPos pos) {
+    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         BlockPos base = pos.relative(state.getValue(HANGING) ? Direction.UP : state.getValue(FACING).getOpposite());
-        return reader.getBlockState(base).is(CustomTags.Blocks.SPAWNS_MOES);
+        return level.getBlockState(base).is(CustomTags.SPAWNS_MOES);
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
-        switch (state.getValue(FACING)) {
-        default:
-        case NORTH:
-            return state.getValue(HANGING) ? NORTH_AABB.move(0.0, 0.0, -0.375) : NORTH_AABB;
-        case EAST:
-            return state.getValue(HANGING) ? EAST_AABB.move(0.375, 0.0, 0.0) : EAST_AABB;
-        case SOUTH:
-            return state.getValue(HANGING) ? SOUTH_AABB.move(0.0, 0.0, 0.375) : SOUTH_AABB;
-        case WEST:
-            return state.getValue(HANGING) ? WEST_AABB.move(-0.375, 0.0, 0.0) : WEST_AABB;
-        }
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return switch (state.getValue(FACING)) {
+            case EAST -> state.getValue(HANGING) ? EAST_AABB.move(0.375D, 0.0D, 0.0D) : EAST_AABB;
+            case SOUTH -> state.getValue(HANGING) ? SOUTH_AABB.move(0.0D, 0.0D, 0.375D) : SOUTH_AABB;
+            case WEST -> state.getValue(HANGING) ? WEST_AABB.move(-0.375D, 0.0D, 0.0D) : WEST_AABB;
+            default -> state.getValue(HANGING) ? NORTH_AABB.move(0.0D, 0.0D, -0.375D) : NORTH_AABB;
+        };
     }
 
     @Override
-    public BlockState rotate(BlockState state, Rotation rotation) {
+    protected BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 
     @Override
-    public BlockState mirror(BlockState state, Mirror mirror) {
+    protected BlockState mirror(BlockState state, Mirror mirror) {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
@@ -81,4 +77,3 @@ public class ShimenawaBlock extends AbstractDataBlock<ShimenawaBlockEntity> {
         builder.add(FACING, HANGING);
     }
 }
-

@@ -1,6 +1,6 @@
 # Testing Strategy
 
-This project needs tests that protect behavior before bug fixes or a NeoForge migration. The goal is not to test Minecraft itself; it is to capture Block Party's current contracts around Moes, block identity, dialogue, hiding, persistence, and companion tools.
+This project needs tests that protect behavior before bug fixes or feature work. The goal is not to test Minecraft itself; it is to capture Block Party's current contracts around Moes, block identity, dialogue, hiding, persistence, and companion tools.
 
 Use three layers:
 
@@ -8,7 +8,7 @@ Use three layers:
 2. GameTests for in-world behavior that needs blocks, entities, ticks, events, saved data, or server-side gameplay.
 3. Manual golden-world checks for rendering, UI, sound, screenshots, and complete interaction flows.
 
-Do not use a migration as the moment to decide what behavior should change. First capture the behavior, then port, then fix or improve.
+Do not use infrastructure work as the moment to decide what behavior should change. First capture the behavior, then fix or improve.
 
 ## Layer 1: Pure JUnit Tests
 
@@ -35,9 +35,7 @@ Run the initial GameTest suite separately from regression tests:
 
 - `gradlew runGameTestServer`
 
-`regressionTest` remains the lightweight Java regression suite and should still be run with:
-
-- `gradlew regressionTest`
+Historical Java regression tests target the old Forge API and are currently disabled in Gradle. Re-enable or rewrite them only when they cover active NeoForge code.
 
 Good candidates:
 
@@ -100,7 +98,7 @@ Manual:
 - Creative/inventory discoverability, because creative tab behavior is currently commented out.
 - Visible block item models and cutout/cutout-mipped render behavior for decorative blocks.
 
-Capture before fixes/migration:
+Capture before fixes:
 
 - Exact valid/invalid spawn behavior.
 - Current creative-tab absence or item discoverability.
@@ -139,7 +137,7 @@ Manual:
 - Physical feel of scale, step sounds, animation, and held/head/special layers.
 - Full hide/reveal loop with player perception.
 
-Capture before remaining fixes/migration:
+Capture before remaining fixes:
 
 - Current timed-hide behavior across save/load, especially the resolved `HideUntil` restore path.
 - Current combat behavior after the `doHurtTarget` recursion fix.

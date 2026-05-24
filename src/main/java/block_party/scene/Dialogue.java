@@ -1,104 +1,54 @@
 package block_party.scene;
 
-import block_party.utils.JsonUtils;
-import block_party.utils.NBT;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Dialogue {
-    private final Map<Response, String> responses;
-    private final String text;
-    private final boolean tooltip;
-    private final Speaker speaker;
-    private SoundEvent sound;
-    private ResourceLocation soundID;
-
-    public Dialogue(String text, boolean tooltip, Speaker speaker, SoundEvent sound) {
-        this.responses = new java.util.LinkedHashMap<>();
-        this.text = text;
-        this.tooltip = tooltip;
-        this.speaker = speaker;
-        this.sound = sound;
-        this.soundID = sound == null ? null : sound.getLocation();
+public record Dialogue(String text, boolean tooltip, Speaker speaker, ResourceLocation sound, Map<Response, String> responses) {
+    public Dialogue {
+        speaker = speaker == null ? Speaker.DEFAULT : speaker;
+        responses = Map.copyOf(new LinkedHashMap<>(responses));
     }
 
-    public Dialogue(CompoundTag compound) {
-        Map<Response, String> responses = new java.util.LinkedHashMap<>();
-        ListTag list = compound.getList("Responses", NBT.COMPOUND);
-        for (int i = 0; i < list.size(); ++i) {
-            CompoundTag response = list.getCompound(i);
+    public static Dialogue read(CompoundTag tag) {
+        Map<Response, String> responses = new LinkedHashMap<>();
+        ListTag list = tag.getList("Responses", 10);
+        for (int index = 0; index < list.size(); ++index) {
+            CompoundTag response = list.getCompound(index);
             Response icon = Response.CLOSE_DIALOGUE.fromValue(response.getString("Icon"));
-            String text = null;
-            if (response.contains("Text")) { text = response.getString("Text"); }
-            responses.put(icon, text);
+            responses.put(icon, response.contains("Text") ? response.getString("Text") : null);
         }
-        this.responses = responses;
-        this.text = compound.getString("Text");
-        this.tooltip = compound.getBoolean("Tooltip");
-        this.speaker = new Speaker(compound.getCompound("Speaker"));
-        this.soundID = parseID(compound.getString("Sound"));
+        return new Dialogue(
+                tag.getString("Text"),
+                tag.getBoolean("Tooltip"),
+                Speaker.read(tag.getCompound("Speaker")),
+                parseId(tag.getString("Sound")),
+                responses);
     }
 
     public CompoundTag write() {
-        return this.write(new CompoundTag());
-    }
-
-    public CompoundTag write(CompoundTag compound) {
+        CompoundTag tag = new CompoundTag();
         ListTag list = new ListTag();
-        for (Response icon : this.responses.keySet()) {
+        for (Map.Entry<Response, String> entry : this.responses.entrySet()) {
             CompoundTag response = new CompoundTag();
-            response.putString("Icon", icon.name());
-            response.putString("Text", this.responses.get(icon));
+            response.putString("Icon", entry.getKey().name());
+            if (entry.getValue() != null) {
+                response.putString("Text", entry.getValue());
+            }
             list.add(response);
         }
-        compound.put("Responses", list);
-        compound.putString("Text", this.text);
-        compound.putBoolean("Tooltip", this.tooltip);
-        compound.put("Speaker", this.speaker.write(new CompoundTag()));
-        ResourceLocation soundID = this.getSoundID();
-        compound.putString("Sound", soundID == null ? "" : soundID.toString());
-        return compound;
+        tag.put("Responses", list);
+        tag.putString("Text", this.text);
+        tag.putBoolean("Tooltip", this.tooltip);
+        tag.put("Speaker", this.speaker.write());
+        tag.putString("Sound", this.sound == null ? "" : this.sound.toString());
+        return tag;
     }
 
-    public String getText() {
-        return this.text;
-    }
-
-    public boolean isTooltip() {
-        return this.tooltip;
-    }
-
-    public Speaker getSpeaker() {
-        return this.speaker;
-    }
-
-    public SoundEvent getSound() {
-        if (this.sound == null && this.soundID != null) {
-            this.sound = JsonUtils.getAs(JsonUtils.SOUND_EVENT, this.soundID);
-        }
-        return this.sound;
-    }
-
-    public ResourceLocation getSoundID() {
-        if (this.soundID == null && this.sound != null) {
-            this.soundID = this.sound.getLocation();
-        }
-        return this.soundID;
-    }
-
-    private static ResourceLocation parseID(String value) {
-        return value == null || value.isEmpty() ? null : ResourceLocation.tryParse(value);
-    }
-
-    public Map<Response, String> getResponses() {
-        return this.responses;
-    }
-
-    public void add(Response icon, String text) {
-        this.responses.put(icon, text);
+    private static ResourceLocation parseId(String value) {
+        return value == null || value.isBlank() ? null : ResourceLocation.tryParse(value);
     }
 }

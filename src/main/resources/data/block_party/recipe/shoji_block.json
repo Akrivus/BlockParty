@@ -1,0 +1,15 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " # ",
+        "# #",
+        " # "
+    ],
+    "key": {
+        "#": "block_party:shoji_panel"
+    },
+    "result": {
+        "count": 24,
+        "id": "block_party:shoji_block"
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "group": "wooden_fence",
+    "pattern": [
+        "W#W",
+        "W#W"
+    ],
+    "key": {
+        "#": "minecraft:stick",
+        "W": "block_party:wisteria_planks"
+    },
+    "result": {
+        "count": 3,
+        "id": "block_party:wisteria_fence"
+    }
+}

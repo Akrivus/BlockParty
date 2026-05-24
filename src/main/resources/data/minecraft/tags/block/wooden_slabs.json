@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "block_party:ginkgo_slab",
+    "block_party:sakura_slab",
+    "block_party:wisteria_slab"
+  ]
+}

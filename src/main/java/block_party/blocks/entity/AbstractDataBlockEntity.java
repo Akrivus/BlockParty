@@ -1,112 +1,148 @@
 package block_party.blocks.entity;
 
+import block_party.db.BlockPartyDB;
 import block_party.db.DimBlockPos;
-import block_party.db.Recordable;
-import block_party.db.sql.Row;
+import java.sql.SQLException;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.UUID;
+public abstract class AbstractDataBlockEntity extends BlockEntity {
+    public static final UUID BLANK_UUID = new UUID(0L, 0L);
 
-public abstract class AbstractDataBlockEntity<M extends Row> extends BlockEntity implements Recordable<M> {
-    protected long id;
-    protected UUID playerUUID;
-    protected boolean claimed;
+    private long databaseId;
+    private UUID playerUuid = BLANK_UUID;
+    private boolean claimed;
 
     protected AbstractDataBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-        this.id = pos.asLong();
+        this.databaseId = pos.asLong();
     }
 
     @Override
-    public void load(CompoundTag compound) {
-        super.load(compound);
-        if (compound.hasUUID("DatabaseID")) {
-            this.id = compound.getLong("DatabaseID");
-            if (compound.getBoolean("HasRow")) {
-                this.getRow().load(this);
-            }
+    protected void loadAdditional(CompoundTag compound, HolderLookup.Provider provider) {
+        super.loadAdditional(compound, provider);
+        if (compound.contains("DatabaseID")) {
+            this.databaseId = compound.getLong("DatabaseID");
         }
+        if (compound.hasUUID("PlayerUUID")) {
+            this.playerUuid = compound.getUUID("PlayerUUID");
+        }
+        this.claimed = compound.getBoolean("HasRow") || compound.getBoolean("Claimed");
     }
 
     @Override
-    public void saveAdditional(CompoundTag compound) {
-        compound.putLong("DatabaseID", this.id);
-        compound.putBoolean("HasRow", this.hasRow());
-        super.saveAdditional(compound);
+    protected void saveAdditional(CompoundTag compound, HolderLookup.Provider provider) {
+        compound.putLong("DatabaseID", this.databaseId);
+        compound.putBoolean("HasRow", this.claimed);
+        compound.putBoolean("Claimed", this.claimed);
+        compound.putUUID("PlayerUUID", this.playerUuid);
+        super.saveAdditional(compound, provider);
     }
 
-    @Override
-    public boolean hasRow() {
-        return this.claimed && this.getRow() != null;
-    }
-
-    @Override
-    public Level getWorld() {
-        return this.level;
-    }
-
-    @Override
-    public DimBlockPos getDimBlockPos() {
-        return new DimBlockPos(this.level.dimension(), this.getBlockPos());
-    }
-
-    @Override
     public long getDatabaseID() {
-        return this.id;
+        return this.databaseId;
     }
 
-    @Override
-    public void setDatabaseID(long id) {
-        this.id = id;
+    public void setDatabaseID(long databaseId) {
+        this.databaseId = databaseId;
+        this.setChanged();
     }
 
-    @Override
     public UUID getPlayerUUID() {
-        return this.playerUUID;
+        return this.playerUuid;
     }
 
-    @Override
-    public void setPlayerUUID(UUID playerUUID) {
-        this.playerUUID = playerUUID;
+    public void setPlayerUUID(UUID playerUuid) {
+        this.playerUuid = playerUuid == null ? BLANK_UUID : playerUuid;
+        this.setChanged();
     }
 
-    @Override
-    public boolean claim(Player player) {
-        if (Recordable.super.claim(player)) {
-            this.claimed = true;
-            this.setChanged();
-        }
+    public boolean hasRow() {
         return this.claimed;
+    }
+
+    public void markClaimed(UUID playerUuid) {
+        this.playerUuid = playerUuid == null ? BLANK_UUID : playerUuid;
+        this.claimed = true;
+        this.setChanged();
+    }
+
+    public boolean claim(Player player) {
+        if (this.level == null || this.level.isClientSide()) {
+            return false;
+        }
+        UUID owner = player == null ? BLANK_UUID : player.getUUID();
+        this.playerUuid = owner;
+        this.claimed = true;
+        try {
+            BlockPartyDB.get(this.level).upsertDataBlock(this);
+        } catch (SQLException exception) {
+            throw new IllegalStateException("Failed to claim Block Party data block " + this.databaseId, exception);
+        }
+        this.afterUpdate();
+        this.afterChange();
+        this.setChanged();
+        return true;
+    }
+
+    public void onDestroyed() {
+        if (!this.claimed || this.level == null || this.level.isClientSide()) {
+            return;
+        }
+        try {
+            BlockPartyDB.get(this.level).deleteDataBlock(this.getTableName(), this.databaseId);
+        } catch (SQLException exception) {
+            throw new IllegalStateException("Failed to delete Block Party data block " + this.databaseId, exception);
+        }
+        this.claimed = false;
+        this.afterDelete();
+        this.afterChange();
     }
 
     @Override
     public void setChanged() {
-        if (this.hasRow()) {
-            this.getRow().update();
-            this.afterUpdate();
-            this.afterChange();
-        }
         super.setChanged();
-    }
-
-    public void onDestroyed()
-    {
-        if (this.hasRow()) {
-            this.getRow().delete();
-            this.afterDelete();
-            this.afterChange();
+        if (this.claimed && this.level != null && !this.level.isClientSide()) {
+            try {
+                BlockPartyDB.get(this.level).upsertDataBlock(this);
+            } catch (SQLException exception) {
+                throw new IllegalStateException("Failed to update Block Party data block " + this.databaseId, exception);
+            }
         }
     }
 
-    public void afterChange() { }
+    public DimBlockPos getDimBlockPos() {
+        Level level = this.getLevel();
+        if (level instanceof ServerLevel serverLevel) {
+            return new DimBlockPos(serverLevel.dimension(), this.getBlockPos());
+        }
+        return new DimBlockPos();
+    }
 
-    public void afterDelete() { }
+    public String getRequiredCondition() {
+        return "ALWAYS";
+    }
 
-    public void afterUpdate() { }
+    public int getPriority() {
+        return 0;
+    }
+
+    public abstract String getTableName();
+
+    public void afterChange() {
+    }
+
+    public void afterDelete() {
+    }
+
+    public void afterUpdate() {
+    }
 }

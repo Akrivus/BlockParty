@@ -5,6 +5,7 @@ import block_party.registry.CustomTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -13,18 +14,18 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class ShrineTabletBlock extends AbstractDataBlock<ShrineTabletBlockEntity> {
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+public class ShrineTabletBlock extends AbstractDataBlock {
+    public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
     protected static final VoxelShape NORTH_AABB = Block.box(2.0D, 0.0D, 10.0D, 14.0D, 14.0D, 16.0D);
     protected static final VoxelShape EAST_AABB = Block.box(0.0D, 0.0D, 2.0D, 6.0D, 14.0D, 14.0D);
     protected static final VoxelShape SOUTH_AABB = Block.box(2.0D, 0.0D, 0.0D, 14.0D, 14.0D, 6.0D);
@@ -36,7 +37,7 @@ public class ShrineTabletBlock extends AbstractDataBlock<ShrineTabletBlockEntity
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos neighbor, boolean isMoving) {
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, Orientation orientation, boolean isMoving) {
         BlockPos behind = pos.relative(state.getValue(FACING).getOpposite());
         if (level.isEmptyBlock(behind)) {
             level.destroyBlock(pos, true);
@@ -44,69 +45,59 @@ public class ShrineTabletBlock extends AbstractDataBlock<ShrineTabletBlockEntity
     }
 
     @Override
-    public BlockState rotate(BlockState state, Rotation rotation) {
+    protected BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 
     @Override
-    public BlockState mirror(BlockState state, Mirror mirror) {
+    protected BlockState mirror(BlockState state, Mirror mirror) {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
-        switch (state.getValue(FACING)) {
-        default:
-        case NORTH:
-            return NORTH_AABB;
-        case EAST:
-            return EAST_AABB;
-        case SOUTH:
-            return SOUTH_AABB;
-        case WEST:
-            return WEST_AABB;
-        }
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return switch (state.getValue(FACING)) {
+            case EAST -> EAST_AABB;
+            case SOUTH -> SOUTH_AABB;
+            case WEST -> WEST_AABB;
+            default -> NORTH_AABB;
+        };
     }
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
         BlockPos check = pos.relative(state.getValue(FACING).getOpposite());
-        BlockPattern.BlockPatternMatch match = this.getGatePattern().find(level, check);
-        if (match != null) { super.setPlacedBy(level, pos, state, placer, stack); }
+        if (this.getGatePattern().find(level, check) != null && placer instanceof Player player) {
+            super.setPlacedBy(level, pos, state, player, stack);
+        }
     }
 
     private BlockPattern getGatePattern() {
-        return BlockPatternBuilder.start(
-        ).where('#', BlockInWorld.hasState((state) -> state.is(CustomTags.Blocks.SAKURA_WOOD))
-        ).where('X', BlockInWorld.hasState((state) -> state.is(CustomTags.Blocks.SHRINE_BASE_BLOCKS))
-        ).where('~', BlockInWorld.hasState((state) -> state.isAir()) // state.is(CustomBlocks.SHIMENAWA.get())
-        ).where('.', BlockInWorld.hasState((state) ->!state.canOcclude())
-        ).where(' ', BlockInWorld.hasState((state) -> state.isAir())
-        ).aisle(
-                "#########",
-                " .#.#.#. ",
-                " ####### ",
-                "  #~~~#  ",
-                "  #   #  ",
-                "  #   #  ",
-                "  #   #  ",
-                "..X...X.."
-        ).build();
-    }
-
-    @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new ShrineTabletBlockEntity(pos, state);
+        return BlockPatternBuilder.start()
+                .where('#', BlockInWorld.hasState(state -> state.is(CustomTags.SAKURA_WOOD)))
+                .where('X', BlockInWorld.hasState(state -> state.is(CustomTags.SHRINE_BASE_BLOCKS)))
+                .where('~', BlockInWorld.hasState(BlockState::isAir))
+                .where('.', BlockInWorld.hasState(state -> !state.canOcclude()))
+                .where(' ', BlockInWorld.hasState(BlockState::isAir))
+                .aisle(
+                        "#########",
+                        " .#.#.#. ",
+                        " ####### ",
+                        "  #~~~#  ",
+                        "  #   #  ",
+                        "  #   #  ",
+                        "  #   #  ",
+                        "..X...X..")
+                .build();
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         Direction facing = context.getHorizontalDirection();
-        if (context.getLevel().getBlockState(context.getClickedPos().relative(facing)).is(CustomTags.Blocks.SAKURA_WOOD)) {
+        if (context.getLevel().getBlockState(context.getClickedPos().relative(facing)).is(CustomTags.SAKURA_WOOD)) {
             return this.defaultBlockState().setValue(FACING, facing.getOpposite());
-        } else {
-            return null;
         }
+        return null;
     }
 
     @Override

@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "block_party:ginkgo_stairs",
+    "block_party:sakura_stairs",
+    "block_party:wisteria_stairs"
+  ]
+}

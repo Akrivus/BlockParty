@@ -1,41 +1,30 @@
 package block_party.utils;
 
-import block_party.entities.BlockPartyNPC;
+import block_party.entities.Moe;
 import block_party.scene.SceneVariables;
-
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 
-public class Markdown {
-    private static final BiFunction<String, String, Pattern> HTML = (p, b) -> Pattern.compile(p+"(.+?)"+b);
+public final class Markdown {
     private static final Pattern COUNTER_PATTERN = Pattern.compile("#(\\w+)");
     private static final Pattern PLAYER_COUNTER_PATTERN = Pattern.compile("#\\.(\\w+)");
     private static final Pattern COOKIE_PATTERN = Pattern.compile("@(\\w+)");
     private static final Pattern PLAYER_COOKIE_PATTERN = Pattern.compile("@\\.(\\w+)");
 
-    public static String highlight(String line, Pattern pattern, String color, Function<String, String> mapper) {
-        return replace(line, pattern, "<color="+color+"><b>%s</b></color>", mapper);
+    private Markdown() {
     }
 
-    public static String replace(String line, Pattern pattern, String markdown, Function<String, String> mapper) {
-        Matcher matcher = pattern.matcher(line);
-        StringBuffer buffer = new StringBuffer();
-        while (matcher.find()) {
-            String group = matcher.group(1);
-            String replacement = String.format(markdown, mapper.apply(group));
-            matcher.appendReplacement(buffer, replacement);
+    public static String markWithSubs(String line, Moe moe) {
+        line = highlight(line, COUNTER_PATTERN, "yellow", name -> String.valueOf(counterValue(moe, name)));
+        line = highlight(line, COOKIE_PATTERN, "cyan", name -> SceneVariables.get(moe.level()).cookies(moe.getDatabaseID()).get(name));
+        ServerPlayer owner = owner(moe);
+        if (owner != null) {
+            line = highlight(line, PLAYER_COUNTER_PATTERN, "yellow", name -> String.valueOf(playerCounterValue(owner, name)));
+            line = highlight(line, PLAYER_COOKIE_PATTERN, "cyan", name -> SceneVariables.get(owner.level()).cookies(owner.getUUID().getMostSignificantBits()).get(name));
         }
-        matcher.appendTail(buffer);
-        return buffer.toString();
-    }
-
-    public static String markWithSubs(String line, BlockPartyNPC npc) {
-        line = highlight(line, COUNTER_PATTERN, "yellow", (match) -> String.valueOf(SceneVariables.getCounters(npc).get(match)));
-        line = highlight(line, PLAYER_COUNTER_PATTERN, "yellow", (match) -> String.valueOf(SceneVariables.getCounters(npc.getServerPlayer()).get(match)));
-        line = highlight(line, COOKIE_PATTERN, "cyan", (match) -> SceneVariables.getCookies(npc).get(match));
-        line = highlight(line, PLAYER_COOKIE_PATTERN, "cyan", (match) -> SceneVariables.getCookies(npc.getServerPlayer()).get(match));
         return mark(line);
     }
 
@@ -60,27 +49,60 @@ public class Markdown {
         line = parse(line, "<i>", "</i>", "o", "r");
         line = parse(line, "<u>", "</u>", "m", "r");
         line = parse(line, "<s>", "</s>", "n", "r");
-        line = parse(line, "\\*", "l"); // bold
-        line = parse(line,   "/", "o"); // italic
-        line = parse(line,   "_", "n"); // underline
-        line = parse(line,   "-", "m"); // strike
+        line = parse(line, "\\*", "l");
+        line = parse(line, "/", "o");
+        line = parse(line, "_", "n");
+        line = parse(line, "-", "m");
         return line;
     }
 
-    private static String parse(String line, String tag, String end, String code) {
-        return parse(line, tag, end, code, "f");
+    private static String highlight(String line, Pattern pattern, String color, Function<String, String> mapper) {
+        return replace(line, pattern, "<color=" + color + "><b>%s</b></color>", mapper);
+    }
+
+    private static String replace(String line, Pattern pattern, String markdown, Function<String, String> mapper) {
+        Matcher matcher = pattern.matcher(line);
+        StringBuffer buffer = new StringBuffer();
+        while (matcher.find()) {
+            String replacement = String.format(markdown, mapper.apply(matcher.group(1)));
+            matcher.appendReplacement(buffer, Matcher.quoteReplacement(replacement));
+        }
+        matcher.appendTail(buffer);
+        return buffer.toString();
     }
 
     private static String parse(String line, String tag, String code) {
         return parse(line, tag, tag, code, "r");
     }
 
+    private static String parse(String line, String tag, String end, String code) {
+        return parse(line, tag, end, code, "f");
+    }
+
     private static String parse(String line, String tag, String end, String code, String term) {
-        Matcher parser = HTML.apply(tag, end).matcher(line);
+        Pattern pattern = Pattern.compile(tag + "(.+?)" + end);
+        Matcher parser = pattern.matcher(line);
         while (parser.find()) {
-            line = parser.replaceFirst(String.format("\u00a7%s%s\u00a7%s", code, parser.group(1), term));
-            parser = HTML.apply(tag, end).matcher(line);
+            line = parser.replaceFirst(Matcher.quoteReplacement("\u00a7" + code + parser.group(1) + "\u00a7" + term));
+            parser = pattern.matcher(line);
         }
         return line;
+    }
+
+    private static ServerPlayer owner(Moe moe) {
+        if (!(moe.level() instanceof ServerLevel level)) {
+            return null;
+        }
+        return level.getServer().getPlayerList().getPlayer(moe.getOwnerUUID());
+    }
+
+    private static int counterValue(Moe moe, String name) {
+        Integer value = SceneVariables.get(moe.level()).counters(moe.getDatabaseID()).get(name);
+        return value == null ? 0 : value;
+    }
+
+    private static int playerCounterValue(ServerPlayer player, String name) {
+        Integer value = SceneVariables.get(player.level()).counters(player.getUUID().getMostSignificantBits()).get(name);
+        return value == null ? 0 : value;
     }
 }

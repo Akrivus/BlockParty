@@ -1,30 +1,36 @@
 package block_party.registry;
 
-import block_party.registry.resources.*;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
+import block_party.BlockParty;
+import block_party.registry.resources.BlockAliasesReloadListener;
+import block_party.registry.resources.CountingJsonReloadListener;
+import block_party.registry.resources.MoeNamesReloadListener;
+import block_party.registry.resources.MoeSoundsReloadListener;
+import block_party.registry.resources.MoeTextureReloadListener;
+import block_party.registry.resources.ScenesReloadListener;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 
-public class CustomResources {
-    public static final BlockAliases BLOCK_ALIASES = new BlockAliases();
-    public static final MoeSounds MOE_SOUNDS = new MoeSounds();
-    public static final MoeTextures MOE_TEXTURES = new MoeTextures();
-    public static final Names NAMES = new Names();
-    public static final Scenes SCENES = new Scenes();
+public final class CustomResources {
+    public static final CountingJsonReloadListener MOE_ALIASES = new CountingJsonReloadListener("moes/aliases");
+    public static final BlockAliasesReloadListener BLOCK_ALIASES = new BlockAliasesReloadListener();
+    public static final CountingJsonReloadListener MOE_NAMES = new CountingJsonReloadListener("moes/names");
+    public static final MoeNamesReloadListener MOE_NAME_VALUES = new MoeNamesReloadListener();
+    public static final CountingJsonReloadListener MOE_SOUND_RESOURCES = new CountingJsonReloadListener("moes/sounds");
+    public static final MoeSoundsReloadListener MOE_SOUNDS = new MoeSoundsReloadListener();
+    public static final MoeTextureReloadListener MOE_TEXTURES = new MoeTextureReloadListener();
+    public static final CountingJsonReloadListener SCENE_RESOURCES = new CountingJsonReloadListener("scenes");
+    public static final ScenesReloadListener SCENES = new ScenesReloadListener();
 
-    public static void register(IEventBus bus) {
-        bus.addListener(CustomResources::registerClientReloadListeners);
-        bus.addListener(CustomResources::registerServerReloadListeners);
+    private CustomResources() {
     }
 
-    private static void registerClientReloadListeners(RegisterClientReloadListenersEvent e) {
-        e.registerReloadListener(MOE_TEXTURES);
-    }
-
-    private static void registerServerReloadListeners(AddReloadListenerEvent e) {
-        e.addListener(BLOCK_ALIASES);
-        e.addListener(MOE_SOUNDS);
-        e.addListener(NAMES);
-        e.addListener(SCENES);
+    public static void registerServerReloadListeners(AddServerReloadListenersEvent event) {
+        event.addListener(BlockParty.source("moe_aliases"), MOE_ALIASES);
+        event.addListener(BlockParty.source("block_aliases"), BLOCK_ALIASES);
+        event.addListener(BlockParty.source("moe_names"), MOE_NAMES);
+        event.addListener(BlockParty.source("moe_name_values"), MOE_NAME_VALUES);
+        event.addListener(BlockParty.source("moe_sound_resources"), MOE_SOUND_RESOURCES);
+        event.addListener(BlockParty.source("moe_sounds"), MOE_SOUNDS);
+        event.addListener(BlockParty.source("scene_resources"), SCENE_RESOURCES);
+        event.addListener(BlockParty.source("scenes"), SCENES);
     }
 }

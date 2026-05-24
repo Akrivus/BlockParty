@@ -1,7 +1,7 @@
 package block_party.blocks;
 
 import block_party.registry.CustomBlocks;
-import block_party.registry.CustomTags;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -11,27 +11,32 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.GrowingPlantHeadBlock;
 import net.minecraft.world.level.block.NetherVines;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.Random;
-
-public class WisteriaVineTipBlock extends GrowingPlantHeadBlock {
+public final class WisteriaVineTipBlock extends GrowingPlantHeadBlock {
+    public static final MapCodec<WisteriaVineTipBlock> CODEC = simpleCodec(WisteriaVineTipBlock::new);
     public static final VoxelShape SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 16.0D, 15.0D);
 
-    public WisteriaVineTipBlock(Properties properties) {
-        super(properties.lightLevel((state) -> 2), Direction.DOWN, SHAPE, false, 0.1F);
+    public WisteriaVineTipBlock(BlockBehaviour.Properties properties) {
+        super(properties.lightLevel(state -> 2), Direction.DOWN, SHAPE, false, NetherVines.GROW_PER_TICK_PROBABILITY);
     }
 
     @Override
-    public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+    protected MapCodec<? extends GrowingPlantHeadBlock> codec() {
+        return CODEC;
+    }
+
+    @Override
+    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return Shapes.empty();
     }
 
     @Override
-    protected int getBlocksToGrowWhenBonemealed(RandomSource rand) {
-        return NetherVines.getBlocksToGrowWhenBonemealed(rand);
+    protected int getBlocksToGrowWhenBonemealed(RandomSource random) {
+        return NetherVines.getBlocksToGrowWhenBonemealed(random);
     }
 
     @Override
@@ -40,10 +45,12 @@ public class WisteriaVineTipBlock extends GrowingPlantHeadBlock {
     }
 
     @Override
-    public boolean canSurvive(BlockState state, LevelReader worldIn, BlockPos pos) {
-        BlockPos up = pos.above();
-        BlockState ceiling = worldIn.getBlockState(up);
-        return ceiling.is(CustomTags.Blocks.WISTERIA);
+    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+        BlockState above = level.getBlockState(pos.above());
+        return above.is(CustomBlocks.WISTERIA_BINE.get())
+                || above.is(CustomBlocks.WISTERIA_LEAVES.get())
+                || above.is(CustomBlocks.WISTERIA_VINE_BODY.get())
+                || above.is(CustomBlocks.WISTERIA_VINE_TIP.get());
     }
 
     @Override

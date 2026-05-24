@@ -1,25 +1,26 @@
 package block_party.client;
 
-import block_party.utils.sorters.BlockDistance;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import org.apache.commons.compress.utils.Lists;
-
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.BlockPos;
 
-public class ShrineLocation {
-    private final List<BlockPos> positions;
+public final class ShrineLocation {
+    private static List<BlockPos> positions = List.of();
 
-    public ShrineLocation(List<BlockPos> positions) {
-        this.positions = positions;
+    private ShrineLocation() {
     }
 
-    public ShrineLocation() {
-        this(Lists.newArrayList());
+    public static void update(List<BlockPos> shrines) {
+        positions = List.copyOf(shrines);
     }
 
-    public Optional<BlockPos> get(BlockPos pos) {
-        return this.positions.stream().sorted((one, two) -> new BlockDistance(Minecraft.getInstance().player).compare(one, two)).findFirst();
+    public static Optional<BlockPos> get(BlockPos pos) {
+        return positions.stream().min(Comparator.comparingDouble(shrine -> shrine.distSqr(pos)));
+    }
+
+    public static List<BlockPos> positions() {
+        return new ArrayList<>(positions);
     }
 }

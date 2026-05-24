@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "-S-",
+        " X ",
+        " X "
+    ],
+    "key": {
+        "-": "minecraft:stick",
+        "S": "block_party:sakura_planks",
+        "X": "minecraft:paper"
+    },
+    "result": {
+        "count": 1,
+        "id": "block_party:blank_hanging_scroll"
+    }
+}

@@ -1,7 +1,7 @@
 package block_party.blocks;
 
 import block_party.registry.CustomBlocks;
-import block_party.registry.CustomTags;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
@@ -15,22 +15,35 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class WisteriaVineBodyBlock extends GrowingPlantBodyBlock {
+    public static final MapCodec<WisteriaVineBodyBlock> CODEC = simpleCodec(WisteriaVineBodyBlock::new);
     public static final VoxelShape SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 16.0D, 15.0D);
 
     public WisteriaVineBodyBlock(Properties properties) {
-        super(properties.lightLevel((state) -> 2), Direction.DOWN, SHAPE, false);
+        super(properties.lightLevel(state -> 2), Direction.DOWN, SHAPE, false);
     }
 
     @Override
-    public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+    protected MapCodec<? extends GrowingPlantBodyBlock> codec() {
+        return CODEC;
+    }
+
+    @Override
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return SHAPE;
+    }
+
+    @Override
+    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return Shapes.empty();
     }
 
     @Override
-    public boolean canSurvive(BlockState state, LevelReader worldIn, BlockPos pos) {
-        BlockPos up = pos.above();
-        BlockState ceiling = worldIn.getBlockState(up);
-        return ceiling.is(CustomTags.Blocks.WISTERIA);
+    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+        BlockState above = level.getBlockState(pos.above());
+        return above.is(CustomBlocks.WISTERIA_BINE.get())
+                || above.is(CustomBlocks.WISTERIA_LEAVES.get())
+                || above.is(CustomBlocks.WISTERIA_VINE_BODY.get())
+                || above.is(CustomBlocks.WISTERIA_VINE_TIP.get());
     }
 
     @Override

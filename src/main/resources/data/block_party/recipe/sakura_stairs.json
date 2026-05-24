@@ -1,0 +1,16 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "group": "wooden_stairs",
+    "pattern": [
+        "#  ",
+        "## ",
+        "###"
+    ],
+    "key": {
+        "#": "block_party:sakura_planks"
+    },
+    "result": {
+        "count": 4,
+        "id": "block_party:sakura_stairs"
+    }
+}

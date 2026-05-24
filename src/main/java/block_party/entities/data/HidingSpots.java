@@ -1,53 +1,51 @@
 package block_party.entities.data;
 
-import block_party.db.BlockPartyDB;
-import block_party.db.DimBlockPos;
-import block_party.db.records.NPC;
 import block_party.entities.Moe;
 import block_party.entities.MoeInHiding;
 import block_party.utils.NBT;
 import com.google.common.collect.Maps;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.level.PistonEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.phys.AABB;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.PistonEvent;
 
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalLong;
-import java.util.function.Consumer;
 
-@Mod.EventBusSubscriber
-public class HidingSpots extends SavedData {
-    public static String KEY = "BlockParty_HidingSpots";
-    public Map<BlockPos, Long> list = Maps.newHashMap();
+public final class HidingSpots extends SavedData {
+    public static final String KEY = "BlockParty_HidingSpots";
+    public static final Factory<HidingSpots> FACTORY = new Factory<>(
+            HidingSpots::new,
+            HidingSpots::load);
 
-    public HidingSpots(CompoundTag compound) {
-        ListTag list = compound.getList("HidingSpots", NBT.COMPOUND);
-        list.forEach((element) -> {
-            CompoundTag member = (CompoundTag) element;
-            BlockPos pos = BlockPos.of(member.getLong("BlockPos"));
-            long id = member.getLong("DatabaseID");
-            this.list.put(pos, id);
-        });
+    private final Map<BlockPos, Long> spots = Maps.newHashMap();
+
+    public static HidingSpots get(ServerLevel level) {
+        return level.getDataStorage().computeIfAbsent(FACTORY, KEY);
     }
 
-    public HidingSpots() {
-        this(new CompoundTag());
+    public static HidingSpots load(CompoundTag compound, HolderLookup.Provider provider) {
+        HidingSpots data = new HidingSpots();
+        compound.getList("HidingSpots", NBT.COMPOUND).forEach(element -> {
+            CompoundTag member = (CompoundTag) element;
+            data.spots.put(BlockPos.of(member.getLong("BlockPos")), member.getLong("DatabaseID"));
+        });
+        return data;
     }
 
     @Override
-    public CompoundTag save(CompoundTag compound) {
+    public CompoundTag save(CompoundTag compound, HolderLookup.Provider provider) {
         ListTag list = new ListTag();
-        this.list.forEach((pos, id) -> {
+        this.spots.forEach((pos, id) -> {
             CompoundTag member = new CompoundTag();
             member.putLong("BlockPos", pos.asLong());
             member.putLong("DatabaseID", id);
@@ -57,79 +55,68 @@ public class HidingSpots extends SavedData {
         return compound;
     }
 
-    public static void remove(MoeInHiding moe) {
-        if (moe.level instanceof ServerLevel level)
-            set(level, (spot) -> spot.list.remove(moe.blockPosition(), moe.getDatabaseID()));
+    public void put(BlockPos pos, long databaseId) {
+        Long previous = this.spots.put(pos, databaseId);
+        if (previous == null || previous != databaseId) {
+            this.setDirty();
+        }
     }
 
-    public static void add(Moe moe) {
-        if (moe.level instanceof ServerLevel level)
-            set(level, (spot) -> spot.list.put(moe.blockPosition(), moe.getDatabaseID()));
+    public void remove(BlockPos pos) {
+        if (this.spots.remove(pos) != null) {
+            this.setDirty();
+        }
     }
 
-    private static HidingSpots get(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(HidingSpots::new, HidingSpots::new, KEY);
+    public OptionalLong find(BlockPos pos) {
+        Long id = this.spots.get(pos);
+        return id == null ? OptionalLong.empty() : OptionalLong.of(id);
     }
 
-    private static void set(ServerLevel level, Consumer<HidingSpots> action) {
-        HidingSpots spot = get(level);
-        action.accept(spot);
-        spot.setDirty(true);
+    public static Moe reveal(ServerLevel level, BlockPos pos) {
+        OptionalLong databaseId = get(level).find(pos);
+        if (databaseId.isEmpty()) {
+            return null;
+        }
+
+        AABB bounds = new AABB(pos).inflate(1.0);
+        List<MoeInHiding> hidden = level.getEntitiesOfClass(MoeInHiding.class, bounds, entity ->
+                entity.getAttachPos().equals(pos) && entity.getDatabaseID() == databaseId.getAsLong());
+        if (hidden.isEmpty()) {
+            return null;
+        }
+        return hidden.getFirst().reveal();
     }
 
-    private static OptionalLong get(ServerLevel level, BlockPos pos) {
-        HidingSpots spot = get(level);
-        Long databaseID = spot.list.get(pos);
-        return databaseID == null ? OptionalLong.empty() : OptionalLong.of(databaseID);
+    public static boolean spawn(ServerLevel level, BlockPos pos) {
+        return reveal(level, pos) != null;
     }
 
-    private static boolean isNormalBlock(ServerLevel level, BlockPos pos) {
-        HidingSpots spot = get(level);
-        return !spot.list.containsKey(pos);
+    public static void onBreakStart(PlayerInteractEvent.LeftClickBlock event) {
+        if (event.getLevel() instanceof ServerLevel level
+                && event.getAction() == PlayerInteractEvent.LeftClickBlock.Action.START) {
+            reveal(level, event.getPos());
+        }
     }
 
-    public static boolean spawn(ServerLevel level, DimBlockPos pos) {
-        if (isNormalBlock(level, pos.getPos()))
-            return false;
-        OptionalLong databaseID = get(level, pos.getPos());
-        if (databaseID.isEmpty())
-            return false;
-        NPC record = BlockPartyDB.NPCs.find(databaseID.getAsLong());
-        record.update((row) -> row.get(NPC.HIDING).set(false));
-        List<MoeInHiding> moesInHiding = level.getEntitiesOfClass(MoeInHiding.class, pos.getAABB());
-        if (moesInHiding.isEmpty())
-            return false;
-        MoeInHiding moeInHiding = moesInHiding.get(0);
-        return moeInHiding.spawn();
+    public static void onBreakEnd(BlockEvent.BreakEvent event) {
+        if (event.getLevel() instanceof ServerLevel level) {
+            reveal(level, event.getPos());
+        }
     }
 
-    @SubscribeEvent
-    public static void onBreakStart(PlayerInteractEvent.LeftClickBlock e) {
-        if (e.getLevel() instanceof ServerLevel level)
-            spawn(level, new DimBlockPos(level.dimension(), e.getPos()));
+    public static void onPistonPush(PistonEvent.Pre event) {
+        if (event.getLevel() instanceof ServerLevel level) {
+            reveal(level, event.getPos());
+            reveal(level, event.getFaceOffsetPos());
+        }
     }
 
-    @SubscribeEvent
-    public static void onBreakEnd(BlockEvent.BreakEvent e) {
-        if (e.getLevel() instanceof ServerLevel level)
-            spawn(level, new DimBlockPos(level.dimension(), e.getPos()));
-    }
-
-    @SubscribeEvent
-    public static void onPistonPush(PistonEvent.Pre e) {
-        if (e.getLevel() instanceof ServerLevel level)
-            spawn(level, new DimBlockPos(level.dimension(), e.getPos()));
-    }
-
-    @SubscribeEvent
-    public static void onFalling(EntityJoinLevelEvent e) {
-        if (e.getEntity() instanceof FallingBlockEntity entity) {
-            if (entity.level.isClientSide())
-                return;
-            ServerLevel level = (ServerLevel) entity.level;
-            BlockPos pos = entity.getStartPos();
-            if (spawn(level, new DimBlockPos(level.dimension(), pos)))
-                e.setCanceled(true);
+    public static void onFalling(EntityJoinLevelEvent event) {
+        if (event.getEntity() instanceof FallingBlockEntity fallingBlock
+                && event.getLevel() instanceof ServerLevel level
+                && spawn(level, fallingBlock.getStartPos())) {
+            event.setCanceled(true);
         }
     }
 }

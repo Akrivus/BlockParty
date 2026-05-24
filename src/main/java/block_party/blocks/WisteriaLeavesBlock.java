@@ -7,24 +7,31 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.Random;
-
 public class WisteriaLeavesBlock extends LeavesBlock {
     public WisteriaLeavesBlock(Properties properties) {
-        super(properties.lightLevel((state) -> 2).isValidSpawn((state, reader, pos, entity) -> false).isSuffocating((state, reader, pos) -> false).isViewBlocking((state, reader, pos) -> false));
+        super(properties.lightLevel(state -> 2));
     }
 
     @Override
-    public boolean isRandomlyTicking(BlockState state) {
+    protected boolean isRandomlyTicking(BlockState state) {
         return true;
     }
 
     @Override
-    public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+    protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (super.isRandomlyTicking(state)) {
             super.randomTick(state, level, pos, random);
-        } else if (level.isEmptyBlock(pos.below())) {
-            level.setBlockAndUpdate(pos.below(), CustomBlocks.WISTERIA_VINE_TIP.get().defaultBlockState());
+        } else {
+            growVineBelow(level, pos);
         }
+    }
+
+    public static boolean growVineBelow(ServerLevel level, BlockPos pos) {
+        BlockPos below = pos.below();
+        if (!level.isEmptyBlock(below)) {
+            return false;
+        }
+        level.setBlockAndUpdate(below, CustomBlocks.WISTERIA_VINE_TIP.get().defaultBlockState());
+        return true;
     }
 }
