@@ -2,6 +2,7 @@ package block_party.client.screens;
 
 import block_party.BlockParty;
 import block_party.client.ClientTranslations;
+import block_party.network.payload.DialogueOpenPayload;
 import block_party.network.payload.NpcCallPayload;
 import block_party.network.payload.NpcCallRequestPayload;
 import block_party.network.payload.NpcDetailPayload;
@@ -33,6 +34,7 @@ public class CellPhoneScreen extends ControllerScreen {
     private Button scrollUp;
     private Button scrollDown;
     private boolean forceClose;
+    private DialogueOpenPayload pendingDialogue;
 
     public CellPhoneScreen(List<NpcDetailPayload> npcs) {
         super(npcs, -1L);
@@ -41,6 +43,7 @@ public class CellPhoneScreen extends ControllerScreen {
     @Override
     protected void init() {
         this.forceClose = false;
+        this.pendingDialogue = null;
         this.doneButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.startClosing())
                 .bounds(this.absoluteCenter(54), 190, WIDTH, 20)
                 .build());
@@ -57,10 +60,12 @@ public class CellPhoneScreen extends ControllerScreen {
         } else if (this.contacts.containsKey(payload.databaseId())) {
             this.motion.start(PhoneMotion.State.HORIZONTAL_SWING);
             this.play(BlockParty.source("item.cell_phone.dial"));
-            if (this.minecraft != null && this.minecraft.player != null) {
-                this.minecraft.player.displayClientMessage(Component.translatable("gui.block_party.error.unreachable"), true);
-            }
         }
+    }
+
+    public void openDialogueAfterClosing(DialogueOpenPayload payload) {
+        this.pendingDialogue = payload;
+        this.startClosing();
     }
 
     @Override
@@ -170,7 +175,11 @@ public class CellPhoneScreen extends ControllerScreen {
         this.motion.tick();
         if (this.motion.doneClosing()) {
             this.forceClose = true;
-            this.onClose();
+            if (this.pendingDialogue != null && this.minecraft != null) {
+                this.minecraft.setScreen(new DialogueScreen(this.pendingDialogue));
+            } else {
+                this.onClose();
+            }
         }
     }
 

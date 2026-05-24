@@ -15,7 +15,13 @@ public final class ClientPayloadHandler {
     }
 
     public static void openDialogue(DialogueOpenPayload payload) {
-        Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(new DialogueScreen(payload)));
+        Minecraft.getInstance().execute(() -> {
+            if (Minecraft.getInstance().screen instanceof CellPhoneScreen screen) {
+                screen.openDialogueAfterClosing(payload);
+                return;
+            }
+            Minecraft.getInstance().setScreen(new DialogueScreen(payload));
+        });
     }
 
     public static void openController(ControllerOpenPayload payload) {

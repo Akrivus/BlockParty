@@ -1,26 +1,48 @@
 package block_party.world;
 
+import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
 import block_party.db.records.NPC;
 import block_party.entities.Moe;
+import block_party.network.payload.DialogueOpenPayload;
+import block_party.network.payload.NpcCallPayload;
+import block_party.network.payload.NpcDetailPayload;
+import block_party.scene.Dialogue;
+import block_party.scene.Response;
+import block_party.scene.Speaker;
 import block_party.world.chunk.ForcedChunk;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.network.chat.Component;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public final class CellPhone {
+    private static final int MAX_PENDING_TICKS = 20;
+    private static final List<PendingCall> PENDING_CALLS = new ArrayList<>();
+
     private final BlockPartyDB db;
     private final ServerLevel callerLevel;
     private final UUID player;
     private final Vec3 callerPos;
     private final float callerYRot;
     private final long npcId;
+    private NPC npc;
+    private ServerLevel npcLevel;
+    private CallFailure failure = CallFailure.UNREACHABLE;
 
     public CellPhone(BlockPartyDB db, ServerLevel callerLevel, UUID player, Vec3 callerPos, float callerYRot, long npcId) {
         this.db = db;
@@ -32,27 +54,135 @@ public final class CellPhone {
     }
 
     public Optional<Moe> call() {
-        Optional<NPC> row = this.db.loadOwnedNpc(this.player, this.npcId);
-        if (row.isEmpty() || row.get().hiding()) {
+        if (!this.begin()) {
             return Optional.empty();
         }
-
-        NPC npc = row.get();
-        ServerLevel npcLevel = this.callerLevel.getServer().getLevel(npc.dimension());
-        if (npcLevel == null) {
-            return Optional.empty();
-        }
-
-        ForcedChunk.queue(this.npcId, npcLevel, new ChunkPos(npc.pos()));
         try {
-            Optional<Moe> live = findLoadedMoe(npcLevel, this.npcId);
-            if (live.isEmpty()) {
-                return Optional.empty();
-            }
-            return this.teleport(npc, live.get());
+            return this.tryComplete();
         } finally {
-            ForcedChunk.release(this.npcId);
+            this.release();
         }
+    }
+
+    public static void queue(BlockPartyDB db, ServerPlayer player, long npcId) {
+        removePending(npcId);
+        CellPhone call = new CellPhone(db, player.serverLevel(), player.getUUID(), player.position(), player.getYRot(), npcId);
+        if (!call.begin()) {
+            sendFailure(db, player, npcId, call.failure);
+            return;
+        }
+
+        Optional<Moe> immediate = call.tryComplete();
+        if (immediate.isPresent()) {
+            call.release();
+            send(player, npcId, immediate);
+            return;
+        }
+
+        PENDING_CALLS.add(new PendingCall(player, call, MAX_PENDING_TICKS));
+    }
+
+    private static void removePending(long npcId) {
+        Iterator<PendingCall> iterator = PENDING_CALLS.iterator();
+        while (iterator.hasNext()) {
+            PendingCall pending = iterator.next();
+            if (pending.call().npcId == npcId) {
+                pending.call().release();
+                iterator.remove();
+            }
+        }
+    }
+
+    public static void onServerTick(ServerTickEvent.Post event) {
+        Iterator<PendingCall> iterator = PENDING_CALLS.iterator();
+        while (iterator.hasNext()) {
+            PendingCall pending = iterator.next();
+            if (pending.player().isRemoved() || pending.player().hasDisconnected()) {
+                pending.call().release();
+                iterator.remove();
+                continue;
+            }
+
+            Optional<Moe> called = pending.call().tryComplete();
+            if (called.isPresent()) {
+                pending.call().release();
+                send(pending.player(), pending.call().npcId, called);
+                iterator.remove();
+                continue;
+            }
+
+            if (pending.tick()) {
+                pending.call().release();
+                sendFailure(pending.call().db, pending.player(), pending.call().npcId, CallFailure.HIDING);
+                iterator.remove();
+            }
+        }
+    }
+
+    public static void onServerStopped(ServerStoppedEvent event) {
+        PENDING_CALLS.forEach(pending -> pending.call().release());
+        PENDING_CALLS.clear();
+    }
+
+    private static void send(ServerPlayer player, long npcId, Optional<Moe> moe) {
+        PacketDistributor.sendToPlayer(player, NpcCallPayload.from(npcId, moe));
+    }
+
+    private boolean begin() {
+        Optional<NPC> row = this.db.findNpcSafe(this.npcId);
+        if (row.isEmpty()) {
+            this.failure = CallFailure.NOT_IN_SERVICE;
+            return false;
+        }
+        if (!this.player.equals(row.get().playerUuid())) {
+            this.failure = CallFailure.ESTRANGED;
+            return false;
+        }
+        if (row.get().dead()) {
+            this.failure = CallFailure.DEAD;
+            return false;
+        }
+        if (row.get().hiding()) {
+            this.failure = CallFailure.HIDING;
+            return false;
+        }
+
+        this.npc = row.get();
+        this.npcLevel = this.callerLevel.getServer().getLevel(this.npc.dimension());
+        if (this.npcLevel == null) {
+            this.failure = CallFailure.NOT_IN_SERVICE;
+            return false;
+        }
+
+        ForcedChunk.queue(this.npcId, this.npcLevel, new ChunkPos(this.npc.pos()));
+        return true;
+    }
+
+    private Optional<Moe> tryComplete() {
+        if (this.npc == null || this.npcLevel == null) {
+            return Optional.empty();
+        }
+        Optional<Moe> live = findLoadedMoe(this.npcLevel, this.npcId);
+        if (live.isEmpty()) {
+            return Optional.empty();
+        }
+        return this.teleport(this.npc, live.get());
+    }
+
+    private void release() {
+        ForcedChunk.release(this.npcId);
+    }
+
+    private static void sendFailure(BlockPartyDB db, ServerPlayer player, long npcId, CallFailure failure) {
+        Optional<NPC> row = db.findNpcSafe(npcId);
+        Optional<NPC> visibleRow = row.filter(npc -> player.getUUID().equals(npc.playerUuid()));
+        Dialogue dialogue = new Dialogue(
+                Component.translatable(failure.translationKey()).getString(),
+                true,
+                failure.speaker(visibleRow.isPresent()),
+                BlockParty.source("item.cell_phone.dial"),
+                Map.of(Response.NEXT_RESPONSE, Component.translatable("gui.block_party.call_response.hang_up").getString()));
+        PacketDistributor.sendToPlayer(player, new DialogueOpenPayload(NpcDetailPayload.from(npcId, visibleRow), dialogue));
     }
 
     private Optional<Moe> teleport(NPC npc, Moe moe) {
@@ -101,5 +231,55 @@ public final class CellPhone {
             }
         }
         return Optional.empty();
+    }
+
+    private static final class PendingCall {
+        private final ServerPlayer player;
+        private final CellPhone call;
+        private int ticksRemaining;
+
+        private PendingCall(ServerPlayer player, CellPhone call, int ticksRemaining) {
+            this.player = player;
+            this.call = call;
+            this.ticksRemaining = ticksRemaining;
+        }
+
+        private ServerPlayer player() {
+            return this.player;
+        }
+
+        private CellPhone call() {
+            return this.call;
+        }
+
+        private boolean tick() {
+            this.ticksRemaining--;
+            return this.ticksRemaining <= 0;
+        }
+    }
+
+    private enum CallFailure {
+        NOT_IN_SERVICE("gui.block_party.call_result.not_in_service"),
+        DEAD("gui.block_party.call_result.dead"),
+        ESTRANGED("gui.block_party.call_result.estranged"),
+        HIDING("gui.block_party.call_result.hiding"),
+        UNREACHABLE("gui.block_party.call_result.unreachable");
+
+        private final String translationKey;
+
+        CallFailure(String translationKey) {
+            this.translationKey = translationKey;
+        }
+
+        private String translationKey() {
+            return this.translationKey;
+        }
+
+        private Speaker speaker(boolean hasContact) {
+            if (!hasContact || this == NOT_IN_SERVICE || this == UNREACHABLE) {
+                return new Speaker(Speaker.Identity.NARRATOR, Speaker.Position.CENTER, "DEFAULT", "NORMAL", false, null, 1.0F);
+            }
+            return new Speaker(Speaker.Identity.CHARACTER, Speaker.Position.LEFT, "DEFAULT", this == DEAD ? "SAD" : "NORMAL", false, null, 1.0F);
+        }
     }
 }

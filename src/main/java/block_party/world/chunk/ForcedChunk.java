@@ -2,11 +2,14 @@ package block_party.world.chunk;
 
 import com.google.common.collect.Maps;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.Map;
 
 public final class ForcedChunk {
+    private static final int FORCED_CHUNK_DISTANCE = 2;
+    private static final TicketType<Long> BLOCK_PARTY_TEMPORARY = TicketType.create("block_party:temporary", Long::compare);
     private static final Map<Long, ForcedChunk> CHUNKS = Maps.newLinkedHashMap();
 
     private final long id;
@@ -30,15 +33,15 @@ public final class ForcedChunk {
         release(id);
         ForcedChunk chunk = new ForcedChunk(id, level, pos);
         CHUNKS.put(id, chunk);
+        level.getChunkSource().addRegionTicket(BLOCK_PARTY_TEMPORARY, pos, FORCED_CHUNK_DISTANCE, id, true);
         level.getChunk(pos.x, pos.z);
-        level.getChunkSource().updateChunkForced(pos, true);
         return level;
     }
 
     public static void release(long id) {
         ForcedChunk chunk = CHUNKS.remove(id);
         if (chunk != null) {
-            chunk.level.getChunkSource().updateChunkForced(chunk.pos, false);
+            chunk.level.getChunkSource().removeRegionTicket(BLOCK_PARTY_TEMPORARY, chunk.pos, FORCED_CHUNK_DISTANCE, id, true);
         }
     }
 

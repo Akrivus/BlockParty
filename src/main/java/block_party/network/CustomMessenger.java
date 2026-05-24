@@ -13,6 +13,7 @@ import block_party.network.payload.NpcDetailPayload;
 import block_party.network.payload.NpcRemoveRequestPayload;
 import block_party.network.payload.ShrineListPayload;
 import block_party.network.payload.ShrineListRequestPayload;
+import block_party.world.CellPhone;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
@@ -129,7 +130,11 @@ public final class CustomMessenger {
     }
 
     private static void handleCallRequest(NpcCallRequestPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> context.reply(callResponse(context.player(), payload.databaseId())));
+        context.enqueueWork(() -> {
+            if (context.player() instanceof ServerPlayer player) {
+                CellPhone.queue(BlockPartyDB.get(player.level()), player, payload.databaseId());
+            }
+        });
     }
 
     private static void handleDialogueRespond(DialogueRespondPayload payload, IPayloadContext context) {
