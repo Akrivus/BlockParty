@@ -353,6 +353,10 @@ public final class BlockPartyDB extends SavedData {
         }
     }
 
+    public java.util.Optional<NPC> findUniquePersonality(net.minecraft.world.level.block.state.BlockState visibleBlockState) throws SQLException {
+        return NPC.findUniquePersonality(this, visibleBlockState);
+    }
+
     public void deleteNpc(long id) throws SQLException {
         NPC.delete(this, id);
     }

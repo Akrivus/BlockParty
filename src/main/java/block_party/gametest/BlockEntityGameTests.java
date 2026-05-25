@@ -393,7 +393,10 @@ public final class BlockEntityGameTests {
             return;
         }
         Moe moe = moes.getFirst();
-        assertEquals(helper, spawnPos.asLong(), moe.getDatabaseID(), "shrine spawned Moe database ID");
+        NPC row = findNpc(helper, moe.getDatabaseID());
+        if (row == null) {
+            return;
+        }
         assertEquals(helper, owner, moe.getOwnerUUID(), "shrine spawned Moe owner");
         assertEquals(helper, Blocks.BELL.defaultBlockState(), moe.getBlockState(), "shrine spawned Moe block state");
         assertEquals(helper, 1, countOwnerListEntries(db, owner, moe.getDatabaseID()), "shrine owner list entries");
@@ -402,6 +405,47 @@ public final class BlockEntityGameTests {
             return;
         }
         helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void shrineTabletBellMoeUsesUniquePersonalityRow(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = configuredDb(helper);
+        try {
+            BlockPartyDB.createDataBlockTables(db);
+        } catch (SQLException exception) {
+            helper.fail("Expected data block tables to be creatable: " + exception.getMessage());
+            return;
+        }
+
+        UUID owner = new UUID(1505L, 2505L);
+        BlockPos first = helper.absolutePos(new BlockPos(1, 6, 1));
+        BlockPos second = helper.absolutePos(new BlockPos(4, 6, 1));
+        level.setBlock(first.south(), CustomBlocks.ENTRIES.get("sakura_log").get().defaultBlockState(), 3);
+        level.setBlock(second.south(), CustomBlocks.ENTRIES.get("sakura_log").get().defaultBlockState(), 3);
+        level.setBlock(first, CustomBlocks.SHRINE_TABLET.get().defaultBlockState(), 3);
+        level.setBlock(second, CustomBlocks.SHRINE_TABLET.get().defaultBlockState(), 3);
+        ShrineTabletBlockEntity firstShrine = (ShrineTabletBlockEntity) level.getBlockEntity(first);
+        ShrineTabletBlockEntity secondShrine = (ShrineTabletBlockEntity) level.getBlockEntity(second);
+        int rowsBefore = countNpcRows(helper);
+
+        firstShrine.claim(mockPlayer(helper, owner));
+        secondShrine.claim(mockPlayer(helper, owner));
+
+        BlockPos firstSpawn = first.below(5);
+        BlockPos secondSpawn = second.below(5);
+        List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(firstSpawn).inflate(8.0),
+                moe -> moe.getVisibleBlockState().is(Blocks.BELL));
+        if (moes.size() != 1) {
+            helper.fail("Expected duplicate shrine claims to keep one unique Bell Moe, got " + moes.size());
+            return;
+        }
+        Moe bell = moes.getFirst();
+        assertEquals(helper, secondSpawn, bell.blockPosition(), "unique shrine Bell position");
+        assertEquals(helper, rowsBefore + 1, countNpcRows(helper), "NPC row count after duplicate shrine Bell claims");
+        assertEquals(helper, 1, countOwnerListEntries(db, owner, bell.getDatabaseID()), "unique shrine owner list entries");
+        helper.kill(bell);
         helper.succeed();
     }
 
@@ -497,6 +541,21 @@ public final class BlockEntityGameTests {
             }
         }
         return count;
+    }
+
+    private static int countNpcRows(GameTestHelper helper) {
+        BlockPartyDB db = BlockPartyDB.get(helper.getLevel());
+        try {
+            Connection connection = db.openConnection();
+            try (ResultSet result = connection.createStatement().executeQuery("SELECT COUNT(*) FROM NPCs;")) {
+                return result.next() ? result.getInt(1) : 0;
+            } finally {
+                db.free(connection);
+            }
+        } catch (SQLException exception) {
+            helper.fail("Expected NPC row count to succeed: " + exception.getMessage());
+            return -1;
+        }
     }
 
     private static void assertTableExists(GameTestHelper helper, BlockPartyDB db, String table) throws SQLException {

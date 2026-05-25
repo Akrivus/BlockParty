@@ -286,6 +286,23 @@ public record NPC(
         }
     }
 
+    public static Optional<NPC> findUniquePersonality(BlockPartyDB db, BlockState visibleBlockState) throws SQLException {
+        Connection connection = db.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT * FROM NPCs
+                WHERE VisibleBlockState = ? AND Dead = 0
+                ORDER BY DatabaseID ASC
+                LIMIT 1;
+                """)) {
+            statement.setInt(1, Block.getId(visibleBlockState));
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next() ? Optional.of(read(result)) : Optional.empty();
+            }
+        } finally {
+            db.free(connection);
+        }
+    }
+
     public static void delete(BlockPartyDB db, long id) throws SQLException {
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("DELETE FROM NPCs WHERE DatabaseID = ?;")) {

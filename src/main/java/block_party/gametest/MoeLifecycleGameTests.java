@@ -87,6 +87,63 @@ public final class MoeLifecycleGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void uniquePersonalitySpawnReusesExistingVisibleBlockMoe(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        UUID owner = new UUID(12L, 23L);
+        BlockPos firstSource = helper.absolutePos(new BlockPos(1, 1, 1));
+        BlockPos secondSource = helper.absolutePos(new BlockPos(3, 1, 1));
+        level.setBlock(firstSource, Blocks.BELL.defaultBlockState(), 3);
+        level.setBlock(secondSource, Blocks.BELL.defaultBlockState(), 3);
+        int rowsBefore = countNpcRows(helper);
+
+        Moe first = CustomSpawnEggItem.spawnMoe(level, firstSource, Direction.UP, owner);
+        Moe second = CustomSpawnEggItem.spawnMoe(level, secondSource, Direction.UP, owner);
+        if (first == null || second == null) {
+            helper.fail("Expected tagged unique bell personalities to spawn");
+            return;
+        }
+
+        assertEquals(helper, first.getDatabaseID(), second.getDatabaseID(), "unique personality database ID");
+        assertEquals(helper, rowsBefore + 1, countNpcRows(helper), "NPC row count after duplicate unique personality spawn");
+        assertEquals(helper, Blocks.AIR.defaultBlockState(), level.getBlockState(firstSource), "first unique source removed");
+        assertEquals(helper, Blocks.AIR.defaultBlockState(), level.getBlockState(secondSource), "second unique source removed");
+        assertEquals(helper, helper.absolutePos(new BlockPos(3, 2, 1)), second.blockPosition(), "unique Moe moved to second spawn position");
+        List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(firstSource).inflate(8.0),
+                moe -> moe.getDatabaseID() == first.getDatabaseID());
+        assertEquals(helper, 1, moes.size(), "loaded unique personality entity count");
+        helper.kill(second);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void individualPersonalitySpawnCreatesSeparateRows(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        UUID owner = new UUID(13L, 24L);
+        BlockPos firstSource = helper.absolutePos(new BlockPos(1, 1, 1));
+        BlockPos secondSource = helper.absolutePos(new BlockPos(3, 1, 1));
+        BlockState sourceState = CustomBlocks.SAKURA_PLANKS.get().defaultBlockState();
+        level.setBlock(firstSource, sourceState, 3);
+        level.setBlock(secondSource, sourceState, 3);
+        int rowsBefore = countNpcRows(helper);
+
+        Moe first = CustomSpawnEggItem.spawnMoe(level, firstSource, Direction.UP, owner);
+        Moe second = CustomSpawnEggItem.spawnMoe(level, secondSource, Direction.UP, owner);
+        if (first == null || second == null) {
+            helper.fail("Expected individual personalities to spawn");
+            return;
+        }
+
+        if (first.getDatabaseID() == second.getDatabaseID()) {
+            helper.fail("Expected individual personality spawns to create separate database IDs");
+            return;
+        }
+        assertEquals(helper, rowsBefore + 2, countNpcRows(helper), "NPC row count after individual personality spawn");
+        helper.kill(first);
+        helper.kill(second);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void invalidSpawnEggUseFailsSafely(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPos source = helper.absolutePos(new BlockPos(1, 1, 1));

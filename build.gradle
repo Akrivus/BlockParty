@@ -32,6 +32,16 @@ sourceSets {
     }
 }
 
+tasks.register('regressionTest') {
+    group = 'verification'
+    description = 'Runs the active GameTest regression suite.'
+    dependsOn tasks.named('runGameTestServer')
+}
+
+tasks.named('test') {
+    dependsOn tasks.named('regressionTest')
+}
+
 neoForge {
     version = '21.4.102-beta'
 
