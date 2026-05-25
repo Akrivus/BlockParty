@@ -3,6 +3,7 @@ package block_party.gametest;
 import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
 import block_party.db.records.NPC;
+import block_party.db.records.PlayerRelationship;
 import block_party.entities.Moe;
 import block_party.entities.MoeInHiding;
 import block_party.entities.data.HidingSpots;
@@ -56,6 +57,79 @@ public final class NpcServiceGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void spawnSeedsPlayerRelationship(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = BlockPartyDB.get(level);
+        UUID owner = new UUID(1101L, 2101L);
+        Moe moe = spawnOwnedMoe(helper, level, owner, new BlockPos(1, 1, 1));
+        if (moe == null) {
+            return;
+        }
+
+        PlayerRelationship relationship;
+        try {
+            relationship = db.findPlayerRelationship(moe.getDatabaseID(), owner).orElse(null);
+        } catch (SQLException exception) {
+            helper.fail("Expected relationship lookup to succeed: " + exception.getMessage());
+            return;
+        }
+        if (relationship == null) {
+            helper.fail("Expected spawned NPC to create a player relationship");
+            return;
+        }
+        if (!relationship.yearbookSigned()) {
+            helper.fail("Expected legacy owner relationship to include a Yearbook page");
+            return;
+        }
+        if (!relationship.phoneContact()) {
+            helper.fail("Expected legacy owner relationship to include a phone contact");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void relationshipFlagsControlYearbookAndPhoneLists(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = BlockPartyDB.get(level);
+        UUID owner = new UUID(1102L, 2102L);
+        Moe yearbookOnly = spawnOwnedMoe(helper, level, owner, new BlockPos(1, 1, 1));
+        Moe phoneOnly = spawnOwnedMoe(helper, level, owner, new BlockPos(3, 1, 1));
+        if (yearbookOnly == null || phoneOnly == null) {
+            return;
+        }
+
+        try {
+            db.setPhoneContact(yearbookOnly.getDatabaseID(), owner, false);
+            db.setYearbookSigned(phoneOnly.getDatabaseID(), owner, false);
+        } catch (SQLException exception) {
+            helper.fail("Expected relationship flag updates to succeed: " + exception.getMessage());
+            return;
+        }
+
+        if (!db.listYearbookNpcIds(owner).contains(yearbookOnly.getDatabaseID())) {
+            helper.fail("Expected Yearbook list to include NPC with Yearbook consent");
+            return;
+        }
+        if (db.listYearbookNpcIds(owner).contains(phoneOnly.getDatabaseID())) {
+            helper.fail("Expected Yearbook list to exclude phone-only contact");
+            return;
+        }
+        if (db.listPhoneContactNpcIds(owner).contains(yearbookOnly.getDatabaseID())) {
+            helper.fail("Expected phone list to exclude Yearbook-only NPC");
+            return;
+        }
+        if (!db.listPhoneContactNpcIds(owner).contains(phoneOnly.getDatabaseID())) {
+            helper.fail("Expected phone list to include NPC with phone contact consent");
+            return;
+        }
+        helper.kill(yearbookOnly);
+        helper.kill(phoneOnly);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void listReturnsOnlyOwnersNpcs(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPartyDB db = BlockPartyDB.get(level);
@@ -82,7 +156,7 @@ public final class NpcServiceGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
-    public static void otherPlayersCannotAccessOrRemoveOwnedNpc(GameTestHelper helper) {
+    public static void yearbookRemovalUsesRelationshipConsent(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPartyDB db = BlockPartyDB.get(level);
         UUID owner = new UUID(1004L, 2004L);
@@ -93,39 +167,37 @@ public final class NpcServiceGameTests {
         }
 
         long id = moe.getDatabaseID();
-        if (db.loadOwnedNpc(other, id).isPresent()) {
-            helper.fail("Expected non-owner access to be rejected");
+        if (db.loadPlayerNpc(other, id).isPresent()) {
+            helper.fail("Expected unrelated player access to be rejected");
             return;
         }
-        if (db.removeOwnedNpc(other, id)) {
-            helper.fail("Expected non-owner remove to be rejected");
+        if (db.removeYearbookPage(other, id)) {
+            helper.fail("Expected unrelated player remove to be rejected");
             return;
         }
-        if (!db.listNpcIds(owner).contains(id)) {
-            helper.fail("Expected rejected remove to keep owner list entry");
+        if (!db.listYearbookNpcIds(owner).contains(id)) {
+            helper.fail("Expected rejected remove to keep Yearbook page");
             return;
         }
-        if (db.removeOwnedNpc(owner, id)) {
-            helper.fail("Expected owner remove of living NPC to be rejected");
+        if (!db.removeYearbookPage(owner, id)) {
+            helper.fail("Expected related player remove to clear Yearbook page");
             return;
         }
-        NPC row = db.findNpcSafe(id).orElse(null);
-        if (row == null) {
-            helper.fail("Expected spawned NPC row before dead remove test");
-            return;
-        }
-        try {
-            row.markDead(db);
-        } catch (SQLException exception) {
-            helper.fail("Expected dead row update to succeed: " + exception.getMessage());
-            return;
-        }
-        if (!db.removeOwnedNpc(owner, id)) {
-            helper.fail("Expected owner remove of dead NPC to de-list NPC");
+        if (db.listYearbookNpcIds(owner).contains(id)) {
+            helper.fail("Expected removed page to leave Yearbook list");
             return;
         }
         if (db.findNpcSafe(id).isEmpty()) {
-            helper.fail("Expected de-list to leave SQLite row intact");
+            helper.fail("Expected Yearbook page remove to leave SQLite row intact");
+            return;
+        }
+        try {
+            if (db.findPlayerRelationship(id, owner).map(PlayerRelationship::yearbookSigned).orElse(true)) {
+                helper.fail("Expected Yearbook page remove to clear relationship consent");
+                return;
+            }
+        } catch (SQLException exception) {
+            helper.fail("Expected relationship lookup to succeed: " + exception.getMessage());
             return;
         }
         helper.kill(moe);

@@ -54,7 +54,10 @@ public class MoeInHiding extends Entity {
         this.setHideUntil(HideUntil.fromValue(compound.getString("HideUntil")));
         this.setTicksHidden(compound.getInt("TicksHidden"));
         if (compound.contains("OwnerUUID")) {
-            this.setOwnerUUID(UUID.fromString(compound.getString("OwnerUUID")));
+            this.setPlayerUUID(UUID.fromString(compound.getString("OwnerUUID")));
+        }
+        if (compound.contains("PlayerUUID")) {
+            this.setPlayerUUID(UUID.fromString(compound.getString("PlayerUUID")));
         }
     }
 
@@ -64,7 +67,8 @@ public class MoeInHiding extends Entity {
         compound.putLong("AttachPos", this.getAttachPos().asLong());
         compound.putString("HideUntil", this.getHideUntil().getValue());
         compound.putInt("TicksHidden", this.getTicksHidden());
-        compound.putString("OwnerUUID", this.getOwnerUUID().toString());
+        compound.putString("PlayerUUID", this.getPlayerUUID().toString());
+        compound.putString("OwnerUUID", this.getPlayerUUID().toString());
     }
 
     @Override
@@ -135,12 +139,22 @@ public class MoeInHiding extends Entity {
         this.ticksHidden = ticksHidden;
     }
 
-    public UUID getOwnerUUID() {
+    public UUID getPlayerUUID() {
         return UUID.fromString(this.entityData.get(OWNER_UUID));
     }
 
+    public void setPlayerUUID(UUID playerUUID) {
+        this.entityData.set(OWNER_UUID, playerUUID.toString());
+    }
+
+    @Deprecated
+    public UUID getOwnerUUID() {
+        return this.getPlayerUUID();
+    }
+
+    @Deprecated
     public void setOwnerUUID(UUID ownerUUID) {
-        this.entityData.set(OWNER_UUID, ownerUUID.toString());
+        this.setPlayerUUID(ownerUUID);
     }
 
     public Moe reveal() {

@@ -130,13 +130,9 @@ public final class CellPhone {
     }
 
     private boolean begin() {
-        Optional<NPC> row = this.db.findNpcSafe(this.npcId);
+        Optional<NPC> row = this.db.loadPhoneContactNpc(this.player, this.npcId);
         if (row.isEmpty()) {
-            this.failure = CallFailure.NOT_IN_SERVICE;
-            return false;
-        }
-        if (!this.player.equals(row.get().playerUuid())) {
-            this.failure = CallFailure.ESTRANGED;
+            this.failure = this.db.findNpcSafe(this.npcId).isPresent() ? CallFailure.ESTRANGED : CallFailure.NOT_IN_SERVICE;
             return false;
         }
         if (row.get().dead()) {
@@ -176,14 +172,14 @@ public final class CellPhone {
 
     private static void sendFailure(BlockPartyDB db, ServerPlayer player, long npcId, CallFailure failure) {
         Optional<NPC> row = db.findNpcSafe(npcId);
-        Optional<NPC> visibleRow = row.filter(npc -> player.getUUID().equals(npc.playerUuid()));
+        Optional<NPC> visibleRow = row.filter(npc -> db.hasPlayerRelationship(player.getUUID(), npc.databaseId()));
         Dialogue dialogue = new Dialogue(
                 Component.translatable(failure.translationKey()).getString(),
                 true,
                 failure.speaker(visibleRow.isPresent()),
                 BlockParty.source("item.cell_phone.dial"),
                 Map.of(Response.NEXT_RESPONSE, Component.translatable("gui.block_party.call_scene.hang_up").getString()));
-        PacketDistributor.sendToPlayer(player, new DialogueOpenPayload(NpcDetailPayload.from(npcId, visibleRow), dialogue));
+        PacketDistributor.sendToPlayer(player, new DialogueOpenPayload(NpcDetailPayload.from(db, player.getUUID(), npcId, visibleRow), dialogue));
     }
 
     private Optional<Moe> teleport(NPC npc, Moe moe) {
@@ -206,6 +202,7 @@ public final class CellPhone {
         }
 
         called.setFollowing(true);
+        called.setDialogueTarget(this.player);
         try {
             npc.updateFromMoe(this.db, this.callerLevel, called);
         } catch (SQLException exception) {

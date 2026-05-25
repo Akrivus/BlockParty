@@ -215,7 +215,7 @@ public record NPC(
                 statement.setLong(1, databaseId);
             }
             bindPosition(statement, 1 + offset, level.dimension(), moe.blockPosition());
-            statement.setString(5 + offset, moe.getOwnerUUID().toString());
+            statement.setString(5 + offset, moe.getPlayerUUID().toString());
             statement.setString(6 + offset, moe.getGivenName());
             statement.setInt(7 + offset, Block.getId(moe.getBlockState()));
             statement.setInt(8 + offset, Block.getId(moe.getVisibleBlockState()));
@@ -261,7 +261,7 @@ public record NPC(
         Moe moe = new Moe(block_party.registry.CustomEntities.MOE.get(), level);
         moe.setDatabaseID(entity.getDatabaseID());
         moe.moveToBlock(entity.getBlockPos());
-        moe.setOwnerUUID(entity.getPlayerUUID());
+        moe.setPlayerUUID(entity.getPlayerUUID());
         moe.setBlockState(entity.getBlockState());
         CompoundTag data = entity.getPersistentData();
         applyPersistentString(data, "Name", moe::setGivenName);
@@ -286,7 +286,7 @@ public record NPC(
         }
     }
 
-    public static Optional<NPC> findUniquePersonality(BlockPartyDB db, BlockState visibleBlockState) throws SQLException {
+    public static Optional<NPC> findCardinalNpc(BlockPartyDB db, BlockState visibleBlockState) throws SQLException {
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
                 SELECT * FROM NPCs
@@ -328,7 +328,7 @@ public record NPC(
                 WHERE DatabaseID = ?;
                 """)) {
             bindPosition(statement, 1, level.dimension(), moe.blockPosition());
-            statement.setString(5, moe.getOwnerUUID().toString());
+            statement.setString(5, moe.getPlayerUUID().toString());
             statement.setString(6, moe.getGivenName());
             statement.setInt(7, Block.getId(moe.getBlockState()));
             statement.setInt(8, Block.getId(moe.getVisibleBlockState()));
@@ -432,7 +432,7 @@ public record NPC(
 
     public void applyTo(Moe moe) {
         moe.setDatabaseID(this.databaseId);
-        moe.setOwnerUUID(this.playerUuid);
+        moe.setPlayerUUID(this.playerUuid);
         moe.setBlockStateFromRow(this.blockState);
         moe.setVisibleBlockState(this.visibleBlockState);
         moe.setGivenName(this.name);

@@ -5,6 +5,7 @@ import block_party.blocks.entity.ShimenawaBlockEntity;
 import block_party.db.records.Garden;
 import block_party.db.records.Location;
 import block_party.db.records.NPC;
+import block_party.db.records.PlayerRelationship;
 import block_party.db.records.Sapling;
 import block_party.db.records.Shrine;
 import block_party.entities.Moe;
@@ -72,7 +73,9 @@ public final class BlockPartyDB extends SavedData {
             Connection connection = data.openConnection();
             data.free(connection);
             NPC.createTable(data);
+            PlayerRelationship.createTable(data);
             createDataBlockTables(data);
+            data.seedRelationshipsFromOwnerList();
         } catch (ReflectiveOperationException | SQLException exception) {
             throw new IllegalStateException("Block Party SQLite bootstrap failed", exception);
         }
@@ -181,11 +184,17 @@ public final class BlockPartyDB extends SavedData {
         return List.copyOf(this.names);
     }
 
+    @Deprecated
     public void addTo(UUID player, long id) {
+        this.addPlayerNpc(player, id);
+    }
+
+    public void addPlayerNpc(UUID player, long id) {
         List<Long> ids = this.byPlayer.computeIfAbsent(player, ignored -> new ArrayList<>());
         if (!ids.contains(id)) {
             ids.add(id);
         }
+        this.seedLegacyRelationship(player, id);
         this.setDirty();
     }
 
@@ -194,9 +203,13 @@ public final class BlockPartyDB extends SavedData {
     }
 
     public List<Long> listNpcIds(UUID player) {
+        return this.listPlayerNpcIds(player);
+    }
+
+    public List<Long> listPlayerNpcIds(UUID player) {
         List<Long> visible = new ArrayList<>();
         for (long id : this.byPlayer.getOrDefault(player, List.of())) {
-            if (this.loadOwnedNpc(player, id).isPresent()) {
+            if (this.loadPlayerNpc(player, id).isPresent()) {
                 visible.add(id);
             }
         }
@@ -205,7 +218,7 @@ public final class BlockPartyDB extends SavedData {
 
     public List<Long> listYearbookNpcIds(UUID player) {
         List<Long> visible = new ArrayList<>();
-        for (long id : this.byPlayer.getOrDefault(player, List.of())) {
+        for (long id : this.relationshipNpcIds(player, PlayerRelationship::listYearbookNpcIds)) {
             if (this.loadYearbookNpc(player, id).isPresent()) {
                 visible.add(id);
             }
@@ -213,7 +226,22 @@ public final class BlockPartyDB extends SavedData {
         return List.copyOf(visible);
     }
 
+    public List<Long> listPhoneContactNpcIds(UUID player) {
+        List<Long> visible = new ArrayList<>();
+        for (long id : this.relationshipNpcIds(player, PlayerRelationship::listPhoneContactNpcIds)) {
+            if (this.loadPhoneContactNpc(player, id).isPresent()) {
+                visible.add(id);
+            }
+        }
+        return List.copyOf(visible);
+    }
+
+    @Deprecated
     public java.util.Optional<NPC> loadOwnedNpc(UUID player, long id) {
+        return this.loadPlayerNpc(player, id);
+    }
+
+    public java.util.Optional<NPC> loadPlayerNpc(UUID player, long id) {
         try {
             java.util.Optional<NPC> row = this.findNpc(id);
             if (row.isEmpty()) {
@@ -230,46 +258,63 @@ public final class BlockPartyDB extends SavedData {
     }
 
     public java.util.Optional<NPC> loadYearbookNpc(UUID player, long id) {
-        if (!this.byPlayer.getOrDefault(player, List.of()).contains(id)) {
+        if (!this.hasYearbookPage(player, id)) {
             return java.util.Optional.empty();
         }
         return this.findNpcSafe(id);
     }
 
-    public boolean removeOwnedNpc(UUID player, long id) {
-        java.util.Optional<NPC> row;
-        try {
-            row = this.findNpc(id);
-        } catch (RuntimeException | SQLException exception) {
-            return false;
+    public java.util.Optional<NPC> loadRelatedNpc(UUID player, long id) {
+        if (!this.hasPlayerRelationship(player, id)) {
+            return java.util.Optional.empty();
         }
-        if (row.isEmpty() || !canRemoveYearbookPage(player, row.get())) {
+        return this.findNpcSafe(id);
+    }
+
+    public java.util.Optional<NPC> loadPhoneContactNpc(UUID player, long id) {
+        if (!this.hasPhoneContact(player, id)) {
+            return java.util.Optional.empty();
+        }
+        return this.findNpcSafe(id);
+    }
+
+    @Deprecated
+    public boolean removeOwnedNpc(UUID player, long id) {
+        return this.removeYearbookPage(player, id);
+    }
+
+    public boolean removeYearbookPage(UUID player, long id) {
+        if (this.loadYearbookNpc(player, id).isEmpty()) {
             return false;
         }
         List<Long> ids = this.byPlayer.get(player);
-        if (ids == null) {
-            return false;
-        }
-        boolean removed = ids.remove(id);
-        if (removed) {
+        boolean removedLegacyEntry = ids != null && ids.remove(id);
+        this.setYearbookSignedSafe(player, id, false);
+        if (removedLegacyEntry) {
             this.setDirty();
         }
-        return removed;
+        return true;
     }
 
-    private static boolean canRemoveYearbookPage(UUID player, NPC npc) {
-        return npc.dead() || !player.equals(npc.playerUuid());
-    }
-
+    @Deprecated
     public java.util.Optional<Moe> callOwnedNpc(ServerPlayer player, long id) {
+        return this.callPhoneContactNpc(player, id);
+    }
+
+    public java.util.Optional<Moe> callPhoneContactNpc(ServerPlayer player, long id) {
         if (!(player.level() instanceof ServerLevel level)) {
             return java.util.Optional.empty();
         }
-        return this.callOwnedNpc(level, player.getUUID(), player.position(), player.getYRot(), id);
+        return this.callPhoneContactNpc(level, player.getUUID(), player.position(), player.getYRot(), id);
     }
 
+    @Deprecated
     public java.util.Optional<Moe> findOwnedLoadedMoe(ServerLevel level, UUID player, long id) {
-        java.util.Optional<NPC> row = this.loadOwnedNpc(player, id);
+        return this.findPlayerLoadedMoe(level, player, id);
+    }
+
+    public java.util.Optional<Moe> findPlayerLoadedMoe(ServerLevel level, UUID player, long id) {
+        java.util.Optional<NPC> row = this.loadPlayerNpc(player, id);
         if (row.isEmpty() || row.get().hiding()) {
             return java.util.Optional.empty();
         }
@@ -280,11 +325,33 @@ public final class BlockPartyDB extends SavedData {
         return CellPhone.findLoadedMoe(level, id);
     }
 
-    public java.util.Optional<Moe> callOwnedNpc(ServerLevel callerLevel, UUID player, BlockPos callerPos, long id) {
-        return this.callOwnedNpc(callerLevel, player, Vec3.atBottomCenterOf(callerPos), -90.0F, id);
+    public java.util.Optional<Moe> findRelatedLoadedMoe(ServerLevel level, UUID player, long id) {
+        java.util.Optional<NPC> row = this.loadRelatedNpc(player, id);
+        if (row.isEmpty() || row.get().hiding()) {
+            return java.util.Optional.empty();
+        }
+        ServerLevel npcLevel = level.getServer().getLevel(row.get().dimension());
+        if (npcLevel != level) {
+            return java.util.Optional.empty();
+        }
+        return CellPhone.findLoadedMoe(level, id);
     }
 
+    @Deprecated
+    public java.util.Optional<Moe> callOwnedNpc(ServerLevel callerLevel, UUID player, BlockPos callerPos, long id) {
+        return this.callPhoneContactNpc(callerLevel, player, callerPos, id);
+    }
+
+    @Deprecated
     public java.util.Optional<Moe> callOwnedNpc(ServerLevel callerLevel, UUID player, Vec3 callerPos, float callerYRot, long id) {
+        return this.callPhoneContactNpc(callerLevel, player, callerPos, callerYRot, id);
+    }
+
+    public java.util.Optional<Moe> callPhoneContactNpc(ServerLevel callerLevel, UUID player, BlockPos callerPos, long id) {
+        return this.callPhoneContactNpc(callerLevel, player, Vec3.atBottomCenterOf(callerPos), -90.0F, id);
+    }
+
+    public java.util.Optional<Moe> callPhoneContactNpc(ServerLevel callerLevel, UUID player, Vec3 callerPos, float callerYRot, long id) {
         return new CellPhone(this, callerLevel, player, callerPos, callerYRot, id).call();
     }
 
@@ -353,8 +420,44 @@ public final class BlockPartyDB extends SavedData {
         }
     }
 
-    public java.util.Optional<NPC> findUniquePersonality(net.minecraft.world.level.block.state.BlockState visibleBlockState) throws SQLException {
-        return NPC.findUniquePersonality(this, visibleBlockState);
+    public java.util.Optional<NPC> findCardinalNpc(net.minecraft.world.level.block.state.BlockState visibleBlockState) throws SQLException {
+        return NPC.findCardinalNpc(this, visibleBlockState);
+    }
+
+    public PlayerRelationship ensurePlayerRelationship(long npcId, UUID player) throws SQLException {
+        return PlayerRelationship.ensure(this, npcId, player);
+    }
+
+    public java.util.Optional<PlayerRelationship> findPlayerRelationship(long npcId, UUID player) throws SQLException {
+        return PlayerRelationship.find(this, npcId, player);
+    }
+
+    public java.util.Optional<PlayerRelationship> findPlayerRelationshipSafe(long npcId, UUID player) {
+        try {
+            return this.findPlayerRelationship(npcId, player);
+        } catch (RuntimeException | SQLException exception) {
+            return java.util.Optional.empty();
+        }
+    }
+
+    public boolean hasPlayerRelationship(UUID player, long npcId) {
+        try {
+            return PlayerRelationship.find(this, npcId, player).isPresent();
+        } catch (RuntimeException | SQLException exception) {
+            return this.byPlayer.getOrDefault(player, List.of()).contains(npcId);
+        }
+    }
+
+    public void setYearbookSigned(long npcId, UUID player, boolean signed) throws SQLException {
+        PlayerRelationship.setYearbookSigned(this, npcId, player, signed);
+    }
+
+    public void setPhoneContact(long npcId, UUID player, boolean contact) throws SQLException {
+        PlayerRelationship.setPhoneContact(this, npcId, player, contact);
+    }
+
+    public void setPlayerFeelings(long npcId, UUID player, float affection, float loyalty) throws SQLException {
+        PlayerRelationship.setFeelings(this, npcId, player, affection, loyalty);
     }
 
     public void deleteNpc(long id) throws SQLException {
@@ -366,7 +469,7 @@ public final class BlockPartyDB extends SavedData {
         if ("NPCs".equals(table)) {
             if (entity instanceof ShimenawaBlockEntity shimenawa && entity.getLevel() instanceof ServerLevel level) {
                 NPC row = NPC.createFromShimenawa(this, level, shimenawa);
-                this.addTo(row.playerUuid(), row.databaseId());
+                this.addPlayerNpc(row.playerUuid(), row.databaseId());
             }
             return;
         }
@@ -575,6 +678,66 @@ public final class BlockPartyDB extends SavedData {
     }
 
     public record ShrineEntry(long databaseId, BlockPos pos) {
+    }
+
+    private void seedRelationshipsFromOwnerList() throws SQLException {
+        for (Map.Entry<UUID, List<Long>> entry : this.byPlayer.entrySet()) {
+            for (long id : entry.getValue()) {
+                this.seedLegacyRelationshipOrThrow(entry.getKey(), id);
+            }
+        }
+    }
+
+    private void seedLegacyRelationship(UUID player, long id) {
+        try {
+            this.seedLegacyRelationshipOrThrow(player, id);
+        } catch (RuntimeException | SQLException ignored) {
+        }
+    }
+
+    private void seedLegacyRelationshipOrThrow(UUID player, long id) throws SQLException {
+        PlayerRelationship.setYearbookSigned(this, id, player, true);
+        PlayerRelationship.setPhoneContact(this, id, player, true);
+    }
+
+    private List<Long> relationshipNpcIds(UUID player, RelationshipListQuery query) {
+        try {
+            return query.list(this, player);
+        } catch (RuntimeException | SQLException exception) {
+            return this.byPlayer.getOrDefault(player, List.of());
+        }
+    }
+
+    private boolean hasYearbookPage(UUID player, long id) {
+        try {
+            return PlayerRelationship.find(this, id, player)
+                    .map(PlayerRelationship::yearbookSigned)
+                    .orElse(false);
+        } catch (RuntimeException | SQLException exception) {
+            return this.byPlayer.getOrDefault(player, List.of()).contains(id);
+        }
+    }
+
+    private boolean hasPhoneContact(UUID player, long id) {
+        try {
+            return PlayerRelationship.find(this, id, player)
+                    .map(PlayerRelationship::phoneContact)
+                    .orElse(false);
+        } catch (RuntimeException | SQLException exception) {
+            return this.byPlayer.getOrDefault(player, List.of()).contains(id);
+        }
+    }
+
+    private void setYearbookSignedSafe(UUID player, long id, boolean signed) {
+        try {
+            PlayerRelationship.setYearbookSigned(this, id, player, signed);
+        } catch (RuntimeException | SQLException ignored) {
+        }
+    }
+
+    @FunctionalInterface
+    private interface RelationshipListQuery {
+        List<Long> list(BlockPartyDB db, UUID player) throws SQLException;
     }
 
     private static Location readLocation(ResultSet result) throws SQLException {

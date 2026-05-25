@@ -87,7 +87,7 @@ public final class MoeLifecycleGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
-    public static void uniquePersonalitySpawnReusesExistingVisibleBlockMoe(GameTestHelper helper) {
+    public static void cardinalNpcSpawnReusesExistingVisibleBlockMoe(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         UUID owner = new UUID(12L, 23L);
         BlockPos firstSource = helper.absolutePos(new BlockPos(1, 1, 1));
@@ -99,19 +99,19 @@ public final class MoeLifecycleGameTests {
         Moe first = CustomSpawnEggItem.spawnMoe(level, firstSource, Direction.UP, owner);
         Moe second = CustomSpawnEggItem.spawnMoe(level, secondSource, Direction.UP, owner);
         if (first == null || second == null) {
-            helper.fail("Expected tagged unique bell personalities to spawn");
+            helper.fail("Expected tagged cardinal bell personalities to spawn");
             return;
         }
 
-        assertEquals(helper, first.getDatabaseID(), second.getDatabaseID(), "unique personality database ID");
-        assertUnchangedOrOneNewRow(helper, rowsBefore, countNpcRows(helper), "duplicate unique personality spawn");
-        assertEquals(helper, Blocks.AIR.defaultBlockState(), level.getBlockState(firstSource), "first unique source removed");
-        assertEquals(helper, Blocks.AIR.defaultBlockState(), level.getBlockState(secondSource), "second unique source removed");
-        assertEquals(helper, helper.absolutePos(new BlockPos(3, 2, 1)), second.blockPosition(), "unique Moe moved to second spawn position");
+        assertEquals(helper, first.getDatabaseID(), second.getDatabaseID(), "cardinal personality database ID");
+        assertUnchangedOrOneNewRow(helper, rowsBefore, countNpcRows(helper), "duplicate cardinal personality spawn");
+        assertEquals(helper, Blocks.AIR.defaultBlockState(), level.getBlockState(firstSource), "first cardinal source removed");
+        assertEquals(helper, Blocks.AIR.defaultBlockState(), level.getBlockState(secondSource), "second cardinal source removed");
+        assertEquals(helper, helper.absolutePos(new BlockPos(3, 2, 1)), second.blockPosition(), "cardinal Moe moved to second spawn position");
         List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(firstSource).inflate(8.0),
                 moe -> moe.getDatabaseID() == first.getDatabaseID());
-        assertEquals(helper, 1, moes.size(), "loaded unique personality entity count");
-        assertEquals(helper, 1, countOwnerListEntries(BlockPartyDB.get(level), owner, second.getDatabaseID()), "unique personality relationship entries");
+        assertEquals(helper, 1, moes.size(), "loaded cardinal personality entity count");
+        assertEquals(helper, 1, countOwnerListEntries(BlockPartyDB.get(level), owner, second.getDatabaseID()), "cardinal personality relationship entries");
         helper.kill(second);
         helper.succeed();
     }
@@ -317,7 +317,6 @@ public final class MoeLifecycleGameTests {
         if (moe == null) {
             return;
         }
-        moe.setCorporeal(true);
         long databaseId = moe.getDatabaseID();
 
         moe.hurtServer(level, level.damageSources().generic(), 1000.0F);
@@ -338,28 +337,27 @@ public final class MoeLifecycleGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 40)
-    public static void etherealDeathDoesNotCreateHiddenSpot(GameTestHelper helper) {
+    public static void cardinalDeathDoesNotCreateHiddenSpot(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPos pos = helper.absolutePos(new BlockPos(2, 1, 2));
-        Moe moe = createPersistedMoe(helper, level, pos, new UUID(552L, 662L), CustomBlocks.GINKGO_PLANKS.get().defaultBlockState());
+        Moe moe = createPersistedMoe(helper, level, pos, new UUID(552L, 662L), Blocks.BELL.defaultBlockState());
         if (moe == null) {
             return;
         }
-        moe.setCorporeal(false);
         long databaseId = moe.getDatabaseID();
 
         moe.hurtServer(level, level.damageSources().generic(), 1000.0F);
 
-        assertEquals(helper, Blocks.AIR.defaultBlockState(), level.getBlockState(pos), "ethereal death block state");
+        assertEquals(helper, Blocks.AIR.defaultBlockState(), level.getBlockState(pos), "cardinal death block state");
         if (HidingSpots.get(level).find(pos).isPresent()) {
-            helper.fail("Expected ethereal death not to record a hiding spot");
+            helper.fail("Expected cardinal death not to record a hiding spot");
             return;
         }
         NPC updated = findNpc(helper, databaseId);
         if (updated == null) {
             return;
         }
-        assertEquals(helper, false, updated.hiding(), "ethereal death row hiding flag");
+        assertEquals(helper, false, updated.hiding(), "cardinal death row hiding flag");
         helper.succeed();
     }
 
@@ -367,11 +365,10 @@ public final class MoeLifecycleGameTests {
     public static void deathDropsMoeInventoryContents(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPos pos = helper.absolutePos(new BlockPos(2, 1, 2));
-        Moe moe = createPersistedMoe(helper, level, pos, new UUID(553L, 663L), CustomBlocks.GINKGO_PLANKS.get().defaultBlockState());
+        Moe moe = createPersistedMoe(helper, level, pos, new UUID(553L, 663L), Blocks.BELL.defaultBlockState());
         if (moe == null) {
             return;
         }
-        moe.setCorporeal(false);
         moe.getInventory().setItem(0, new ItemStack(Items.DIAMOND, 3));
 
         moe.hurtServer(level, level.damageSources().generic(), 1000.0F);

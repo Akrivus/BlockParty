@@ -20,10 +20,10 @@ public final class Markdown {
     public static String markWithSubs(String line, Moe moe) {
         line = highlight(line, COUNTER_PATTERN, "yellow", name -> String.valueOf(counterValue(moe, name)));
         line = highlight(line, COOKIE_PATTERN, "cyan", name -> SceneVariables.get(moe.level()).cookies(moe.getDatabaseID()).get(name));
-        ServerPlayer owner = owner(moe);
-        if (owner != null) {
-            line = highlight(line, PLAYER_COUNTER_PATTERN, "yellow", name -> String.valueOf(playerCounterValue(owner, name)));
-            line = highlight(line, PLAYER_COOKIE_PATTERN, "cyan", name -> SceneVariables.get(owner.level()).cookies(owner.getUUID().getMostSignificantBits()).get(name));
+        ServerPlayer player = targetPlayer(moe);
+        if (player != null) {
+            line = highlight(line, PLAYER_COUNTER_PATTERN, "yellow", name -> String.valueOf(playerCounterValue(player, name)));
+            line = highlight(line, PLAYER_COOKIE_PATTERN, "cyan", name -> SceneVariables.get(player.level()).cookies(player.getUUID().getMostSignificantBits()).get(name));
         }
         return mark(line);
     }
@@ -89,11 +89,12 @@ public final class Markdown {
         return line;
     }
 
-    private static ServerPlayer owner(Moe moe) {
+    private static ServerPlayer targetPlayer(Moe moe) {
         if (!(moe.level() instanceof ServerLevel level)) {
             return null;
         }
-        return level.getServer().getPlayerList().getPlayer(moe.getOwnerUUID());
+        ServerPlayer target = level.getServer().getPlayerList().getPlayer(moe.getDialogueTarget());
+        return target == null ? level.getServer().getPlayerList().getPlayer(moe.getPlayerUUID()) : target;
     }
 
     private static int counterValue(Moe moe, String name) {

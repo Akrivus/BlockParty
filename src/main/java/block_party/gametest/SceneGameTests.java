@@ -1,6 +1,7 @@
 package block_party.gametest;
 
 import block_party.BlockParty;
+import block_party.db.BlockPartyDB;
 import block_party.entities.Moe;
 import block_party.entities.MoeInHiding;
 import block_party.entities.goals.HideUntil;
@@ -13,6 +14,7 @@ import block_party.scene.SceneTrigger;
 import block_party.scene.SceneVariables;
 import block_party.db.voicemail.Voicemails;
 import com.google.gson.JsonParser;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -82,13 +84,13 @@ public final class SceneGameTests {
     @GameTest(template = "empty", timeoutTicks = 20)
     public static void forgeSceneObservationsFilterScenes(GameTestHelper helper) {
         Moe moe = spawnMoe(helper, new UUID(511L, 11L));
-        moe.setCorporeal(false);
+        moe.setVisibleBlockState(Blocks.BELL.defaultBlockState());
         moe.setDere("KUUDERE");
         moe.setEmotion("HAPPY");
         moe.setGender("NONBINARY");
 
         block_party.registry.resources.ScenesReloadListener.ParsedScene accepts = parseScene("""
-                {"trigger":"block_party:right_click","filters":["block_party:is_ethereal","block_party:if_kuudere","block_party:if_happy","block_party:if_nonbinary"],"actions":[]}
+                {"trigger":"block_party:right_click","filters":["block_party:is_cardinal","block_party:if_kuudere","block_party:if_happy","block_party:if_nonbinary"],"actions":[]}
                 """);
         block_party.registry.resources.ScenesReloadListener.ParsedScene rejects = parseScene("""
                 {"trigger":"block_party:right_click","filters":["block_party:is_corporeal"],"actions":[]}
@@ -195,6 +197,34 @@ public final class SceneGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void nonOwnerRightClickCreatesRelationshipAndTargetsDialogue(GameTestHelper helper) {
+        UUID owner = new UUID(505L, 5L);
+        Player other = helper.makeMockPlayer(GameType.SURVIVAL);
+        Moe moe = spawnMoe(helper, owner);
+
+        InteractionResult result = moe.interactAt(other, Vec3.ZERO, InteractionHand.MAIN_HAND);
+        moe.tick();
+
+        assertEquals(helper, InteractionResult.SUCCESS, result, "non-owner right-click interaction result");
+        try {
+            if (BlockPartyDB.get(helper.getLevel()).findPlayerRelationship(moe.getDatabaseID(), other.getUUID()).isEmpty()) {
+                helper.fail("Expected non-owner right-click to create a player relationship");
+                return;
+            }
+        } catch (SQLException exception) {
+            helper.fail("Expected relationship lookup to succeed: " + exception.getMessage());
+            return;
+        }
+        assertEquals(helper, other.getUUID(), moe.getDialogueTarget(), "dialogue target");
+        if (!moe.hasDialogue()) {
+            helper.fail("Expected non-owner right-click interaction to open bundled dialogue");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void offhandRightClickPassesWithoutTriggeringScene(GameTestHelper helper) {
         Player owner = helper.makeMockPlayer(GameType.SURVIVAL);
         Moe moe = spawnMoe(helper, owner.getUUID());
@@ -226,7 +256,6 @@ public final class SceneGameTests {
     @GameTest(template = "empty", timeoutTicks = 20)
     public static void nonOwnerDamageTriggersHurtSceneAfterDamage(GameTestHelper helper) {
         Moe moe = spawnMoe(helper, new UUID(506L, 6L));
-        moe.setCorporeal(false);
         float health = moe.getHealth();
 
         boolean hurt = moe.hurtServer(helper.getLevel(), helper.getLevel().damageSources().generic(), 1.0F);

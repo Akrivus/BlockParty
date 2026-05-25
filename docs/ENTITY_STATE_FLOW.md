@@ -227,7 +227,7 @@ Active foundations:
 - inventory changes recalculate `Slouch` with the Forge Layer6 slot weight
 - inventory contents drop through the vanilla death/drop path
 - server-side corporeal death runs vanilla death handling and then hides the Moe as its source block with `HideUntil.EXPOSED`
-- server-side ethereal death remains ordinary death and does not create a hiding spot
+- server-side cardinal death remains ordinary death and does not create a hiding spot
 - Cell Phone call service continues to set `following=true` after moving a loaded visible owned Moe
 - owner main-hand right-click routes to `RIGHT_CLICK`/`SHIFT_RIGHT_CLICK`; offhand passes without a scene trigger
 - owner left-click/attack interaction routes to `LEFT_CLICK`/`SHIFT_LEFT_CLICK` and does not damage the Moe
@@ -294,7 +294,6 @@ NeoForge 1.21.4 does not allow the same custom payload ID in both directions, so
 - `BLOCK_STATE`: block state serializer for the actual/source block state
 - `VISIBLE_BLOCK_STATE`: block state serializer for the explicit visible/alias block state
 - `SCALE`: float serializer
-- `CORPOREAL`: boolean serializer
 - `FOLLOWING`: boolean serializer
 - `GIVEN_NAME`: string serializer
 - `GENDER`: string serializer

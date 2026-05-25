@@ -10,7 +10,7 @@ recognizable while only enabling filters whose backing state exists.
 
 These filters are implemented and should be treated as supported behavior:
 
-- Simple Moe state: `always`, `never`, `is_corporeal`, `is_ethereal`.
+- Simple Moe state: `always`, `never`, `is_corporeal`, `is_cardinal`.
 - World state: `if_raining`, `if_sunny`, moon phase filters, and time-of-day
   filters including `if_time`.
 - Moe profile state: blood type, dere, emotion, and gender filters.

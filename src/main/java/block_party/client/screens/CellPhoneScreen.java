@@ -320,7 +320,7 @@ public class CellPhoneScreen extends ControllerScreen {
             if (minecraft.player == null) {
                 return false;
             }
-            return !npc.dead() && !npc.hiding() && minecraft.player.getUUID().equals(npc.ownerUuid());
+            return !npc.dead() && !npc.hiding();
         }
     }
 

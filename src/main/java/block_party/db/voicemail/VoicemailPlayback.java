@@ -96,7 +96,7 @@ public final class VoicemailPlayback {
         Optional<NPC> row = db.loadYearbookNpc(player.getUUID(), entry.npcId());
         Dialogue dialogue = row.map(npc -> messageDialogue(player, npc, entry))
                 .orElseGet(VoicemailPlayback::missingMessageDialogue);
-        PacketDistributor.sendToPlayer(player, new DialogueOpenPayload(NpcDetailPayload.from(entry.npcId(), row), dialogue));
+        PacketDistributor.sendToPlayer(player, new DialogueOpenPayload(NpcDetailPayload.from(db, player.getUUID(), entry.npcId(), row), dialogue));
     }
 
     private static Dialogue messageDialogue(ServerPlayer player, NPC npc, Voicemails.Entry entry) {

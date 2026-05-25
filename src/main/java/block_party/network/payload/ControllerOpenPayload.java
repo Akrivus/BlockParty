@@ -31,22 +31,29 @@ public record ControllerOpenPayload(ControllerType controller, List<NpcDetailPay
         return new ControllerOpenPayload(ControllerType.YEARBOOK, npcs, selectedDatabaseId, hand);
     }
 
-    public static ControllerOpenPayload cellPhone(BlockPartyDB db, UUID owner, InteractionHand hand) {
-        return cellPhone(controllerDetails(db, owner), hand);
+    public static ControllerOpenPayload cellPhone(BlockPartyDB db, UUID player, InteractionHand hand) {
+        List<NpcDetailPayload> details = new ArrayList<>();
+        for (long databaseId : db.listPhoneContactNpcIds(player)) {
+            NpcDetailPayload detail = NpcDetailPayload.phoneResponse(db, player, databaseId);
+            if (detail.found()) {
+                details.add(detail);
+            }
+        }
+        return cellPhone(details, hand);
     }
 
-    public static ControllerOpenPayload yearbook(BlockPartyDB db, UUID owner, long selectedDatabaseId, InteractionHand hand) {
-        return yearbook(controllerDetails(db, owner), selectedDatabaseId, hand);
+    public static ControllerOpenPayload yearbook(BlockPartyDB db, UUID player, long selectedDatabaseId, InteractionHand hand) {
+        return yearbook(controllerDetails(db, player), selectedDatabaseId, hand);
     }
 
     public static void handle(ControllerOpenPayload payload, IPayloadContext context) {
         ClientPayloadBridge.handle("openController", ControllerOpenPayload.class, payload);
     }
 
-    private static List<NpcDetailPayload> controllerDetails(BlockPartyDB db, UUID owner) {
+    private static List<NpcDetailPayload> controllerDetails(BlockPartyDB db, UUID player) {
         List<NpcDetailPayload> details = new ArrayList<>();
-        for (long databaseId : db.listYearbookNpcIds(owner)) {
-            NpcDetailPayload detail = NpcDetailPayload.response(db, owner, databaseId);
+        for (long databaseId : db.listYearbookNpcIds(player)) {
+            NpcDetailPayload detail = NpcDetailPayload.response(db, player, databaseId);
             if (detail.found()) {
                 details.add(detail);
             }

@@ -71,8 +71,6 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
             SynchedEntityData.defineId(Moe.class, EntityDataSerializers.BLOCK_STATE);
     public static final EntityDataAccessor<Float> SCALE =
             SynchedEntityData.defineId(Moe.class, EntityDataSerializers.FLOAT);
-    public static final EntityDataAccessor<Boolean> CORPOREAL =
-            SynchedEntityData.defineId(Moe.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<Boolean> FOLLOWING =
             SynchedEntityData.defineId(Moe.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<Boolean> SITTING =
@@ -122,6 +120,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     private Dialogue dialogue;
     private Response response;
     private boolean guiPreview;
+    private UUID dialogueTarget = new UUID(0L, 0L);
     private final SceneManager sceneManager = new SceneManager(this);
 
     public Moe(EntityType<? extends Moe> entityType, Level level) {
@@ -143,7 +142,6 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         builder.define(BLOCK_STATE, Blocks.AIR.defaultBlockState());
         builder.define(VISIBLE_BLOCK_STATE, Blocks.AIR.defaultBlockState());
         builder.define(SCALE, 1.0F);
-        builder.define(CORPOREAL, true);
         builder.define(FOLLOWING, false);
         builder.define(SITTING, false);
         builder.define(GIVEN_NAME, "Tokumei");
@@ -172,11 +170,13 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
                 ? Block.stateById(compound.getInt("VisibleBlockState"))
                 : this.getBlockState());
         this.setMoeScale(compound.contains("Scale") ? compound.getFloat("Scale") : 1.0F);
-        this.setCorporeal(!compound.contains("IsCorporeal") || compound.getBoolean("IsCorporeal"));
         this.setFollowing(compound.getBoolean("Following"));
         this.setSitting(compound.getBoolean("Sitting"));
         if (compound.contains("OwnerUUID")) {
-            this.setOwnerUUID(UUID.fromString(compound.getString("OwnerUUID")));
+            this.setPlayerUUID(UUID.fromString(compound.getString("OwnerUUID")));
+        }
+        if (compound.contains("PlayerUUID")) {
+            this.setPlayerUUID(UUID.fromString(compound.getString("PlayerUUID")));
         }
         if (compound.contains("GivenName")) {
             this.setGivenName(compound.getString("GivenName"));
@@ -247,10 +247,10 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         compound.putInt("BlockState", Block.getId(this.getBlockState()));
         compound.putInt("VisibleBlockState", Block.getId(this.getVisibleBlockState()));
         compound.putFloat("Scale", this.getMoeScale());
-        compound.putBoolean("IsCorporeal", this.isCorporeal());
         compound.putBoolean("Following", this.isFollowing());
         compound.putBoolean("Sitting", this.isSitting());
-        compound.putString("OwnerUUID", this.getOwnerUUID().toString());
+        compound.putString("PlayerUUID", this.getPlayerUUID().toString());
+        compound.putString("OwnerUUID", this.getPlayerUUID().toString());
         compound.putString("GivenName", this.getGivenName());
         compound.putString("Gender", this.getGender());
         compound.putString("BloodType", this.getBloodType());
@@ -339,7 +339,8 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
             return InteractionResult.PASS;
         }
         if (!this.level().isClientSide) {
-            if (this.isOwner(player)) {
+            if (this.canDialogueWith(player)) {
+                this.setDialogueTarget(player.getUUID());
                 this.triggerScene(player.isShiftKeyDown() ? SceneTrigger.SHIFT_RIGHT_CLICK : SceneTrigger.RIGHT_CLICK);
             }
         }
@@ -348,7 +349,8 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     @Override
     public boolean skipAttackInteraction(Entity attacker) {
-        if (attacker instanceof Player player && !this.level().isClientSide && this.isOwner(player)) {
+        if (attacker instanceof Player player && !this.level().isClientSide && this.canDialogueWith(player, false)) {
+            this.setDialogueTarget(player.getUUID());
             this.triggerScene(player.isShiftKeyDown() ? SceneTrigger.SHIFT_LEFT_CLICK : SceneTrigger.LEFT_CLICK);
             return true;
         }
@@ -358,7 +360,8 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     @Override
     public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
         Entity attacker = damageSource.getDirectEntity();
-        if (attacker instanceof Player player && this.isOwner(player)) {
+        if (attacker instanceof Player player && this.canDialogueWith(player, false)) {
+            this.setDialogueTarget(player.getUUID());
             this.triggerScene(player.isShiftKeyDown() ? SceneTrigger.SHIFT_LEFT_CLICK : SceneTrigger.LEFT_CLICK);
             return false;
         }
@@ -515,12 +518,22 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         this.entityData.set(DATABASE_ID, Long.toString(id));
     }
 
-    public UUID getOwnerUUID() {
+    public UUID getPlayerUUID() {
         return UUID.fromString(this.entityData.get(OWNER_UUID));
     }
 
+    public void setPlayerUUID(UUID playerUUID) {
+        this.entityData.set(OWNER_UUID, playerUUID.toString());
+    }
+
+    @Deprecated
+    public UUID getOwnerUUID() {
+        return this.getPlayerUUID();
+    }
+
+    @Deprecated
     public void setOwnerUUID(UUID ownerUUID) {
-        this.entityData.set(OWNER_UUID, ownerUUID.toString());
+        this.setPlayerUUID(ownerUUID);
     }
 
     public BlockState getBlockState() {
@@ -566,11 +579,15 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     }
 
     public boolean isCorporeal() {
-        return this.entityData.get(CORPOREAL);
+        return !this.isCardinal();
+    }
+
+    public boolean isCardinal() {
+        return this.getVisibleBlockState().is(CustomTags.CARDINAL);
     }
 
     public void setCorporeal(boolean corporeal) {
-        this.entityData.set(CORPOREAL, corporeal);
+        // Corporeality is now derived from the visible block's cardinal trait tag.
     }
 
     public void setIsCorporeal(boolean corporeal) {
@@ -794,15 +811,15 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     }
 
     public Player getPlayer() {
-        return this.level().getPlayerByUUID(this.getOwnerUUID());
+        return this.level().getPlayerByUUID(this.getPlayerUUID());
     }
 
     public ServerPlayer getServerPlayer() {
-        return this.getServer() == null ? null : this.getServer().getPlayerList().getPlayer(this.getOwnerUUID());
+        return this.getServer() == null ? null : this.getServer().getPlayerList().getPlayer(this.getPlayerUUID());
     }
 
     public void setPlayer(Player player) {
-        this.setOwnerUUID(player.getUUID());
+        this.setPlayerUUID(player.getUUID());
     }
 
     public boolean isPlayerOnline() {
@@ -862,6 +879,14 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     public boolean triggerScene(SceneTrigger trigger) {
         return this.sceneManager.trigger(trigger);
+    }
+
+    public UUID getDialogueTarget() {
+        return this.dialogueTarget;
+    }
+
+    public void setDialogueTarget(UUID player) {
+        this.dialogueTarget = player == null ? new UUID(0L, 0L) : player;
     }
 
     public void sayInChat(String key, Object... params) {
@@ -956,12 +981,43 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         return this.getVisibleBlockState().is(CustomTags.IGNORES_VOLUME);
     }
 
+    public boolean isAssociatedPlayer(Entity entity) {
+        return entity != null && this.getPlayerUUID().equals(entity.getUUID());
+    }
+
+    @Deprecated
     public boolean isOwner(Entity entity) {
-        return entity != null && this.getOwnerUUID().equals(entity.getUUID());
+        return this.isAssociatedPlayer(entity);
+    }
+
+    public boolean canDialogueWith(Player player) {
+        return this.canDialogueWith(player, true);
+    }
+
+    private boolean canDialogueWith(Player player, boolean createRelationship) {
+        if (player == null) {
+            return false;
+        }
+        if (this.isAssociatedPlayer(player)) {
+            return true;
+        }
+        if (!(this.level() instanceof ServerLevel level)) {
+            return false;
+        }
+        try {
+            BlockPartyDB db = BlockPartyDB.get(level);
+            if (createRelationship) {
+                db.ensurePlayerRelationship(this.getDatabaseID(), player.getUUID());
+                return true;
+            }
+            return db.hasPlayerRelationship(player.getUUID(), this.getDatabaseID());
+        } catch (RuntimeException | SQLException exception) {
+            return false;
+        }
     }
 
     public boolean isBeingLookedAt() {
-        Player player = this.level().getPlayerByUUID(this.getOwnerUUID());
+        Player player = this.level().getPlayerByUUID(this.getPlayerUUID());
         if (player == null) {
             return false;
         }
@@ -1054,7 +1110,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         if (state.is(CustomTags.IGNORES_VOLUME)) {
             this.setMoeScale(1.0F);
         }
-        this.assignUniqueNameIfDefault();
+        if (!this.isCardinal()) {
+            this.assignUniqueNameIfDefault();
+        }
     }
 
     private void applyBlockPhysicalState(BlockState state) {
@@ -1149,7 +1207,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
         MoeInHiding hiding = new MoeInHiding(CustomEntities.MOE_IN_HIDING.get(), serverLevel);
         hiding.setDatabaseID(this.getDatabaseID());
-        hiding.setOwnerUUID(this.getOwnerUUID());
+        hiding.setPlayerUUID(this.getPlayerUUID());
         hiding.setAttachPos(pos);
         hiding.setHideUntil(until);
         hiding.absMoveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);

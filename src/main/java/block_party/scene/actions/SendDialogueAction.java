@@ -34,7 +34,7 @@ public final class SendDialogueAction implements SceneAction {
     public void apply(Moe moe) {
         Dialogue dialogue = new Dialogue(this.resolveText(moe), this.tooltip, this.speaker, this.sound, this.responseText());
         moe.setDialogue(dialogue);
-        this.sendToOwner(moe, dialogue);
+        this.sendToTargetPlayer(moe, dialogue);
     }
 
     @Override
@@ -54,20 +54,20 @@ public final class SendDialogueAction implements SceneAction {
         return texts;
     }
 
-    private void sendToOwner(Moe moe, Dialogue dialogue) {
+    private void sendToTargetPlayer(Moe moe, Dialogue dialogue) {
         if (!(moe.level() instanceof ServerLevel level)) {
             return;
         }
-        ServerPlayer player = level.getServer().getPlayerList().getPlayer(moe.getOwnerUUID());
+        ServerPlayer player = level.getServer().getPlayerList().getPlayer(moe.getDialogueTarget());
         if (player != null) {
-            PacketDistributor.sendToPlayer(player, DialogueOpenPayload.response(BlockPartyDB.get(level), moe.getOwnerUUID(), moe.getDatabaseID(), dialogue));
+            PacketDistributor.sendToPlayer(player, DialogueOpenPayload.response(BlockPartyDB.get(level), player.getUUID(), moe.getDatabaseID(), dialogue));
         }
     }
 
     private String resolveText(Moe moe) {
         String ownerName = "";
         if (moe.level() instanceof ServerLevel level) {
-            ServerPlayer player = level.getServer().getPlayerList().getPlayer(moe.getOwnerUUID());
+            ServerPlayer player = level.getServer().getPlayerList().getPlayer(moe.getDialogueTarget());
             if (player != null) {
                 ownerName = player.getName().getString();
             }

@@ -19,8 +19,8 @@ public record NpcRemoveRequestPayload(long databaseId) implements CustomPacketPa
         context.enqueueWork(() -> NpcRemoveRequestPayload.removeResponse(context.player(), payload.databaseId()));
     }
 
-    public static void removeResponse(BlockPartyDB db, UUID owner, long databaseId) {
-        db.removeOwnedNpc(owner, databaseId);
+    public static void removeResponse(BlockPartyDB db, UUID player, long databaseId) {
+        db.removeYearbookPage(player, databaseId);
     }
 
     public static void removeResponse(Player player, long databaseId) {

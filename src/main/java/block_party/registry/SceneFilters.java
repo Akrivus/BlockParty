@@ -17,7 +17,7 @@ public final class SceneFilters {
 
     static {
         registerAll(
-                "always", "never", "is_corporeal", "is_ethereal", "if_raining", "if_sunny",
+                "always", "never", "is_corporeal", "is_cardinal", "if_raining", "if_sunny",
                 "if_full_moon", "if_gibbous_moon", "if_half_moon", "if_crescent_moon", "if_new_moon",
                 "if_morning", "if_noon", "if_evening", "if_night", "if_midnight", "if_dawn", "if_time",
                 "if_blood_type_ab", "if_blood_type_b", "if_blood_type_a", "if_blood_type_o",

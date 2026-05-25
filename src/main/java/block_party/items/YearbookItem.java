@@ -38,11 +38,14 @@ public class YearbookItem extends Item implements SortableItem {
         if (player.level().isClientSide()) {
             return InteractionResult.PASS;
         }
-        if (entity instanceof Moe moe && player.getUUID().equals(moe.getOwnerUUID())) {
-            this.open(player, hand, moe.getDatabaseID());
+        if (entity instanceof Moe moe) {
+            BlockPartyDB db = BlockPartyDB.get(player.level());
+            if (db.listYearbookNpcIds(player.getUUID()).contains(moe.getDatabaseID())) {
+                this.open(player, hand, moe.getDatabaseID());
+            }
             return InteractionResult.SUCCESS;
         }
-        return entity instanceof Moe ? InteractionResult.SUCCESS : InteractionResult.FAIL;
+        return InteractionResult.FAIL;
     }
 
     private void open(Player player, InteractionHand hand, long selectedId) {

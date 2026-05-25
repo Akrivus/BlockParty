@@ -58,9 +58,8 @@ public final class EntityDataGameTests {
         moe.setDatabaseID(42L);
         moe.setOwnerUUID(owner);
         moe.setBlockState(Blocks.STONE.defaultBlockState());
-        moe.setVisibleBlockState(Blocks.GLASS.defaultBlockState());
+        moe.setVisibleBlockState(Blocks.BELL.defaultBlockState());
         moe.setMoeScale(0.75F);
-        moe.setCorporeal(false);
         moe.setFollowing(true);
         moe.setSitting(true);
         moe.setGivenName("Moe");
@@ -94,9 +93,10 @@ public final class EntityDataGameTests {
         assertEquals(helper, owner, loaded.getOwnerUUID(), "Moe owner UUID");
         assertEquals(helper, Blocks.STONE.defaultBlockState(), loaded.getBlockState(), "Moe block state");
         assertEquals(helper, Blocks.STONE.defaultBlockState(), loaded.getActualBlockState(), "Moe actual block state");
-        assertEquals(helper, Blocks.GLASS.defaultBlockState(), loaded.getVisibleBlockState(), "Moe visible block state");
+        assertEquals(helper, Blocks.BELL.defaultBlockState(), loaded.getVisibleBlockState(), "Moe visible block state");
         assertFloat(helper, 0.75F, loaded.getMoeScale(), "Moe scale");
-        assertEquals(helper, false, loaded.isCorporeal(), "Moe corporeal flag");
+        assertEquals(helper, false, loaded.isCorporeal(), "Moe corporeal trait");
+        assertEquals(helper, true, loaded.isCardinal(), "Moe cardinal trait");
         assertEquals(helper, true, loaded.isFollowing(), "Moe following flag");
         assertEquals(helper, true, loaded.isSitting(), "Moe sitting flag");
         assertEquals(helper, "Moe", loaded.getGivenName(), "Moe given name");
@@ -134,7 +134,6 @@ public final class EntityDataGameTests {
         assertHasKey(helper, tag, "DatabaseID");
         assertHasKey(helper, tag, "BlockState");
         assertHasKey(helper, tag, "Scale");
-        assertHasKey(helper, tag, "IsCorporeal");
         assertHasKey(helper, tag, "TileEntity");
         assertHasKey(helper, tag, "Following");
         assertHasKey(helper, tag, "Sitting");
@@ -339,7 +338,6 @@ public final class EntityDataGameTests {
         moe.setZodiac("LEO");
         moe.setEmotion("SNOOTY");
         moe.setMoeScale(1.25F);
-        moe.setCorporeal(true);
         moe.setHealth(13.0F);
         moe.setFoodLevel(18.0F);
         moe.setExhaustion(0.75F);
@@ -479,7 +477,6 @@ public final class EntityDataGameTests {
         moe.setBlockState(Blocks.COBBLESTONE.defaultBlockState());
         moe.setVisibleBlockState(Blocks.MOSSY_COBBLESTONE.defaultBlockState());
         moe.setMoeScale(0.9F);
-        moe.setCorporeal(false);
         moe.setFollowing(true);
         moe.setBloodType("B");
         moe.setDere("DANDERE");

@@ -40,7 +40,7 @@ public final class SceneObservationFactories {
             case "counter" -> moe -> counterMatches(moe, json);
             case "has_cookie" -> moe -> cookieMatches(moe, json);
             case "held_item" -> moe -> itemMatches(moe.getItemInHand(hand(json)), json);
-            case "player_held_item" -> moe -> owner(moe) != null && itemMatches(owner(moe).getItemInHand(hand(json)), json);
+            case "player_held_item" -> moe -> targetPlayer(moe) != null && itemMatches(targetPlayer(moe).getItemInHand(hand(json)), json);
             case "block" -> moe -> blockMatches(moe.getVisibleBlockState(), json);
             case "name" -> moe -> stringMatches(moe.getGivenName(), json);
             case "player_counter", "player_has_cookie", "family_name" -> FAIL_CLOSED;
@@ -151,10 +151,12 @@ public final class SceneObservationFactories {
         return InteractionHand.valueOf(value);
     }
 
-    private static ServerPlayer owner(Moe moe) {
-        return moe.level() instanceof net.minecraft.server.level.ServerLevel level
-                ? level.getServer().getPlayerList().getPlayer(moe.getOwnerUUID())
-                : null;
+    private static ServerPlayer targetPlayer(Moe moe) {
+        if (!(moe.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+            return null;
+        }
+        ServerPlayer target = level.getServer().getPlayerList().getPlayer(moe.getDialogueTarget());
+        return target == null ? level.getServer().getPlayerList().getPlayer(moe.getPlayerUUID()) : target;
     }
 
     private static boolean maybeNegate(boolean pass, JsonObject json) {

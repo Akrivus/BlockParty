@@ -228,7 +228,7 @@ public class DialogueScreen extends Screen {
         }
         BlockState state = Block.stateById(this.npc.blockStateId());
         moe.setDatabaseID(this.npc.databaseId());
-        moe.setOwnerUUID(this.npc.ownerUuid());
+        moe.setPlayerUUID(this.npc.playerUuid());
         moe.setBlockStateFromRow(state);
         moe.setGivenName(this.npc.name());
         moe.setGender(this.npc.gender());

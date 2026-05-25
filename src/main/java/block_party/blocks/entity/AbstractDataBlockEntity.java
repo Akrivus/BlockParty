@@ -79,8 +79,8 @@ public abstract class AbstractDataBlockEntity extends BlockEntity {
         if (this.level == null || this.level.isClientSide()) {
             return false;
         }
-        UUID owner = player == null ? BLANK_UUID : player.getUUID();
-        this.playerUuid = owner;
+        UUID playerUuid = player == null ? BLANK_UUID : player.getUUID();
+        this.playerUuid = playerUuid;
         this.claimed = true;
         try {
             BlockPartyDB.get(this.level).upsertDataBlock(this);

@@ -24,8 +24,8 @@ public record NpcCallPayload(long databaseId, boolean success, boolean following
                 .orElseGet(() -> new NpcCallPayload(databaseId, false, false, BlockPos.ZERO));
     }
 
-    public static NpcCallPayload response(ServerLevel level, BlockPartyDB db, UUID owner, BlockPos callerPos, long databaseId) {
-        return from(databaseId, db.callOwnedNpc(level, owner, callerPos, databaseId));
+    public static NpcCallPayload response(ServerLevel level, BlockPartyDB db, UUID player, BlockPos callerPos, long databaseId) {
+        return from(databaseId, db.callPhoneContactNpc(level, player, callerPos, databaseId));
     }
 
     public static void handle(NpcCallPayload payload, IPayloadContext context) {

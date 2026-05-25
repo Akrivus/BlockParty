@@ -169,7 +169,7 @@ public class YearbookScreen extends ControllerScreen {
         if (this.npc == null || !this.npc.found() || this.minecraft == null || this.minecraft.player == null) {
             return false;
         }
-        return this.npc.dead() || !this.minecraft.player.getUUID().equals(this.npc.ownerUuid());
+        return true;
     }
 
     private void playPageTurn() {
@@ -187,7 +187,7 @@ public class YearbookScreen extends ControllerScreen {
             return null;
         }
         moe.setDatabaseID(payload.databaseId());
-        moe.setOwnerUUID(payload.ownerUuid());
+        moe.setPlayerUUID(payload.playerUuid());
         moe.setBlockStateFromRow(Block.stateById(payload.blockStateId()));
         moe.setGivenName(payload.name());
         moe.setGender(payload.gender());

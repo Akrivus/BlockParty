@@ -37,17 +37,29 @@ public record NpcDetailPayload(
     public static final StreamCodec<RegistryFriendlyByteBuf, NpcDetailPayload> STREAM_CODEC =
             CustomPacketPayload.codec(NpcDetailPayload::write, NpcDetailPayload::read);
 
+    public UUID playerUuid() {
+        return this.ownerUuid;
+    }
+
     public static NpcDetailPayload missing(long databaseId) {
         return new NpcDetailPayload(databaseId, false, EMPTY_UUID, "", "", false, "", "", "", 0.0F, 0.0F, 0.0F, 0.0F, 0, false, BlockPos.ZERO);
     }
 
-    public static NpcDetailPayload response(BlockPartyDB db, UUID owner, long databaseId) {
-        return from(databaseId, db.loadYearbookNpc(owner, databaseId));
+    public static NpcDetailPayload response(BlockPartyDB db, UUID player, long databaseId) {
+        return from(db, player, databaseId, db.loadYearbookNpc(player, databaseId));
     }
 
-    public static NpcDetailPayload response(ServerLevel level, BlockPartyDB db, UUID owner, long databaseId) {
-        Optional<NPC> row = db.loadYearbookNpc(owner, databaseId);
-        return from(databaseId, row, db.findOwnedLoadedMoe(level, owner, databaseId));
+    public static NpcDetailPayload relationshipResponse(BlockPartyDB db, UUID player, long databaseId) {
+        return from(db, player, databaseId, db.loadRelatedNpc(player, databaseId));
+    }
+
+    public static NpcDetailPayload phoneResponse(BlockPartyDB db, UUID player, long databaseId) {
+        return from(db, player, databaseId, db.loadPhoneContactNpc(player, databaseId));
+    }
+
+    public static NpcDetailPayload response(ServerLevel level, BlockPartyDB db, UUID player, long databaseId) {
+        Optional<NPC> row = db.loadYearbookNpc(player, databaseId);
+        return from(db, player, databaseId, row, db.findRelatedLoadedMoe(level, player, databaseId));
     }
 
     public static NpcDetailPayload from(long requestedId, Optional<NPC> npc) {
@@ -58,11 +70,24 @@ public record NpcDetailPayload(
         return npc.map(value -> from(value, live.map(Moe::getHealth).orElse(value.health()))).orElseGet(() -> missing(requestedId));
     }
 
+    public static NpcDetailPayload from(BlockPartyDB db, UUID player, long requestedId, Optional<NPC> npc) {
+        return npc.map(value -> from(value, feelings(db, player, value), value.health())).orElseGet(() -> missing(requestedId));
+    }
+
+    public static NpcDetailPayload from(BlockPartyDB db, UUID player, long requestedId, Optional<NPC> npc, Optional<Moe> live) {
+        return npc.map(value -> from(value, feelings(db, player, value), live.map(Moe::getHealth).orElse(value.health())))
+                .orElseGet(() -> missing(requestedId));
+    }
+
     public static NpcDetailPayload from(NPC npc) {
         return from(npc, npc.health());
     }
 
     public static NpcDetailPayload from(NPC npc, float health) {
+        return from(npc, new Feelings(npc.affection(), npc.loyalty()), health);
+    }
+
+    public static NpcDetailPayload from(NPC npc, Feelings feelings, float health) {
         return new NpcDetailPayload(
                 npc.databaseId(),
                 true,
@@ -75,11 +100,17 @@ public record NpcDetailPayload(
                 npc.zodiac(),
                 health,
                 npc.foodLevel(),
-                npc.loyalty(),
+                feelings.loyalty(),
                 npc.stress(),
                 Block.getId(npc.blockState()),
                 npc.hiding(),
                 npc.hiddenPos());
+    }
+
+    private static Feelings feelings(BlockPartyDB db, UUID player, NPC npc) {
+        return db.findPlayerRelationshipSafe(npc.databaseId(), player)
+                .map(relationship -> new Feelings(relationship.affection(), relationship.loyalty()))
+                .orElseGet(() -> new Feelings(npc.affection(), npc.loyalty()));
     }
 
     private void write(RegistryFriendlyByteBuf buffer) {
@@ -124,5 +155,8 @@ public record NpcDetailPayload(
     @Override
     public Type<NpcDetailPayload> type() {
         return TYPE;
+    }
+
+    public record Feelings(float affection, float loyalty) {
     }
 }

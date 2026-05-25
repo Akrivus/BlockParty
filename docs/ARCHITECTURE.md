@@ -44,7 +44,7 @@ There is another spawn-like path in `src/main/java/block_party/blocks/entity/Shr
 Most Moe behavior is inherited from `BlockPartyNPC`, which extends the stacked abstraction classes in `src/main/java/block_party/entities/abstraction/`.
 
 - `Layer1`: pathfinding malus setup, home position, teleport helper, sound hooks, distance persistence.
-- `Layer2`: block state identity, visible alias block state, scale, corporeal/ethereal state, block-derived navigation changes, hide-as-block behavior.
+- `Layer2`: block state identity, visible alias block state, scale, corporeal/cardinal state, block-derived navigation changes, hide-as-block behavior.
 - `Layer3`: player ownership and following state.
 - `Layer4`: synchronized profile stats and traits such as `BloodType`, `Dere`, `Zodiac`, `Emotion`, `Gender`, name, food, stress, loyalty, affection, age.
 - `Layer5`: SQLite row sync.

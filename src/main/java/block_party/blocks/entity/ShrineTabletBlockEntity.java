@@ -1,10 +1,11 @@
 package block_party.blocks.entity;
 
 import block_party.entities.Moe;
-import block_party.items.CustomSpawnEggItem;
+import block_party.entities.MoeSpawner;
 import block_party.network.CustomMessenger;
 import block_party.registry.CustomBlockEntities;
 import block_party.registry.CustomSounds;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -38,19 +39,15 @@ public class ShrineTabletBlockEntity extends AbstractDataBlockEntity {
             level.addFreshEntity(lightning);
         }
 
-        Moe moe = CustomSpawnEggItem.createMoe(level, spawnPos, Blocks.BELL.defaultBlockState(), this.getPlayerUUID(),
+        Moe moe = MoeSpawner.spawn(level, spawnPos, Blocks.BELL.defaultBlockState(), this.getPlayerUUID(),
+                new CompoundTag(),
                 bell -> bell.setDere(randomDere(level.random.nextInt(7))));
         if (moe == null) {
             return;
         }
 
-        if (CustomSpawnEggItem.isLoaded(level, moe)) {
-            moe.moveToBlock(spawnPos);
-        }
-        if (CustomSpawnEggItem.isLoaded(level, moe) || level.addFreshEntity(moe)) {
-            moe.finalizeSpawn(level, level.getCurrentDifficultyAt(spawnPos), EntitySpawnReason.TRIGGERED, null);
-            moe.playSound(CustomSounds.AMBIENT_JAPAN.get(), 1.0F, 1.0F);
-        }
+        moe.finalizeSpawn(level, level.getCurrentDifficultyAt(spawnPos), EntitySpawnReason.TRIGGERED, null);
+        moe.playSound(CustomSounds.AMBIENT_JAPAN.get(), 1.0F, 1.0F);
     }
 
     @Override

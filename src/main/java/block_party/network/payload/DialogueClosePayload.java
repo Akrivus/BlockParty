@@ -22,8 +22,8 @@ public record DialogueClosePayload(long databaseId) implements CustomPacketPaylo
         context.enqueueWork(() -> DialogueClosePayload.closeDialogue(context.player(), payload.databaseId()));
     }
 
-    public static boolean closeDialogue(ServerLevel level, BlockPartyDB db, UUID owner, long databaseId) {
-        java.util.Optional<Moe> moe = db.findOwnedLoadedMoe(level, owner, databaseId);
+    public static boolean closeDialogue(ServerLevel level, BlockPartyDB db, UUID player, long databaseId) {
+        java.util.Optional<Moe> moe = db.findRelatedLoadedMoe(level, player, databaseId);
         if (moe.isEmpty()) {
             return false;
         }

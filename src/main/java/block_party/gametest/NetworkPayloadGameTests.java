@@ -98,12 +98,18 @@ public final class NetworkPayloadGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
-    public static void ownedDetailRequestReturnsRow(GameTestHelper helper) {
+    public static void detailRequestReturnsPlayerRelationshipFeelings(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPartyDB db = BlockPartyDB.get(level);
         UUID owner = new UUID(1203L, 2203L);
         Moe moe = spawnOwnedMoe(helper, level, owner, new BlockPos(1, 1, 1));
         if (moe == null) {
+            return;
+        }
+        try {
+            db.setPlayerFeelings(moe.getDatabaseID(), owner, 4.5F, 13.5F);
+        } catch (SQLException exception) {
+            helper.fail("Expected relationship feeling setup to succeed: " + exception.getMessage());
             return;
         }
 
@@ -121,9 +127,9 @@ public final class NetworkPayloadGameTests {
         }
         if (response.health() != moe.getHealth()
                 || response.foodLevel() != moe.getFoodLevel()
-                || response.loyalty() != moe.getLoyalty()
+                || response.loyalty() != 13.5F
                 || response.stress() != moe.getStress()) {
-            helper.fail("Expected owned detail response to expose persisted Yearbook stat fields");
+            helper.fail("Expected detail response to expose player-specific loyalty and global wellbeing");
             return;
         }
         moe.setHealth(7.0F);
@@ -221,27 +227,12 @@ public final class NetworkPayloadGameTests {
         }
 
         NpcRemoveRequestPayload.removeResponse(db, owner, id);
-        if (!db.listNpcIds(owner).contains(id)) {
-            helper.fail("Expected living owner remove to keep NPC ID");
+        if (db.listYearbookNpcIds(owner).contains(id)) {
+            helper.fail("Expected remove request to clear the Yearbook page");
             return;
         }
         NPC row = db.findNpcSafe(id).orElse(null);
         if (row == null) {
-            helper.fail("Expected spawned row before dead remove response test");
-            return;
-        }
-        try {
-            row.markDead(db);
-        } catch (SQLException exception) {
-            helper.fail("Expected dead row setup to succeed: " + exception.getMessage());
-            return;
-        }
-        NpcRemoveRequestPayload.removeResponse(db, owner, id);
-        if (db.listYearbookNpcIds(owner).contains(id)) {
-            helper.fail("Expected dead owner remove to omit removed NPC ID");
-            return;
-        }
-        if (db.findNpcSafe(id).isEmpty()) {
             helper.fail("Expected remove request to de-list only, not delete SQLite row");
             return;
         }
@@ -357,6 +348,40 @@ public final class NetworkPayloadGameTests {
         }
         if (moe.getResponse() != Response.GREEN_CHECKMARK) {
             helper.fail("Expected owned dialogue response to update live Moe state");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void dialogueResponseAcceptsRelatedNonOwner(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = BlockPartyDB.get(level);
+        UUID owner = new UUID(1231L, 2231L);
+        UUID other = new UUID(1232L, 2232L);
+        Moe moe = spawnOwnedMoe(helper, level, owner, new BlockPos(1, 1, 1));
+        if (moe == null) {
+            return;
+        }
+        try {
+            db.ensurePlayerRelationship(moe.getDatabaseID(), other);
+        } catch (SQLException exception) {
+            helper.fail("Expected related player setup to succeed: " + exception.getMessage());
+            return;
+        }
+        moe.setDialogue(sampleDialogue());
+
+        if (!DialogueRespondPayload.respondToDialogue(level, db, other, moe.getDatabaseID(), Response.GREEN_CHECKMARK)) {
+            helper.fail("Expected related non-owner dialogue response to be accepted");
+            return;
+        }
+        if (moe.getResponse() != Response.GREEN_CHECKMARK) {
+            helper.fail("Expected related non-owner response to update live Moe state");
+            return;
+        }
+        if (!DialogueClosePayload.closeDialogue(level, db, other, moe.getDatabaseID())) {
+            helper.fail("Expected related non-owner dialogue close to be accepted");
             return;
         }
         helper.kill(moe);

@@ -16,8 +16,8 @@ public record DialogueOpenPayload(NpcDetailPayload npc, Dialogue dialogue) imple
     public static final StreamCodec<RegistryFriendlyByteBuf, DialogueOpenPayload> STREAM_CODEC =
             CustomPacketPayload.codec(DialogueOpenPayload::write, DialogueOpenPayload::read);
 
-    public static DialogueOpenPayload response(BlockPartyDB db, UUID owner, long databaseId, Dialogue dialogue) {
-        return new DialogueOpenPayload(NpcDetailPayload.response(db, owner, databaseId), dialogue);
+    public static DialogueOpenPayload response(BlockPartyDB db, UUID player, long databaseId, Dialogue dialogue) {
+        return new DialogueOpenPayload(NpcDetailPayload.relationshipResponse(db, player, databaseId), dialogue);
     }
 
     public static void handle(DialogueOpenPayload payload, IPayloadContext context) {

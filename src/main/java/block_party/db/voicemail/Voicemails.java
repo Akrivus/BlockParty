@@ -43,17 +43,17 @@ public final class Voicemails extends SavedData {
         return compound;
     }
 
-    public void add(UUID owner, long npcId, String text, boolean tooltip, Speaker speaker, ResourceLocation sound, long delayMillis) {
+    public void add(UUID player, long npcId, String text, boolean tooltip, Speaker speaker, ResourceLocation sound, long delayMillis) {
         long createdAt = System.currentTimeMillis();
-        this.entries.add(new Entry(owner, npcId, text, tooltip, speaker, sound, createdAt, createdAt + Math.max(0L, delayMillis), false, false));
+        this.entries.add(new Entry(player, npcId, text, tooltip, speaker, sound, createdAt, createdAt + Math.max(0L, delayMillis), false, false));
         this.setDirty();
     }
 
-    public int reveal(UUID owner, long now) {
+    public int reveal(UUID player, long now) {
         int revealed = 0;
         for (int index = 0; index < this.entries.size(); ++index) {
             Entry entry = this.entries.get(index);
-            if (entry.deleted() || entry.revealed() || !owner.equals(entry.owner()) || now < entry.availableAt()) {
+            if (entry.deleted() || entry.revealed() || !player.equals(entry.player()) || now < entry.availableAt()) {
                 continue;
             }
             this.entries.set(index, entry.reveal());
@@ -65,9 +65,9 @@ public final class Voicemails extends SavedData {
         return revealed;
     }
 
-    public List<Entry> revealed(UUID owner) {
+    public List<Entry> revealed(UUID player) {
         return this.entries.stream()
-                .filter(entry -> !entry.deleted() && entry.revealed() && owner.equals(entry.owner()))
+                .filter(entry -> !entry.deleted() && entry.revealed() && player.equals(entry.player()))
                 .toList();
     }
 
@@ -92,10 +92,10 @@ public final class Voicemails extends SavedData {
         }
     }
 
-    public record Entry(UUID owner, long npcId, String text, boolean tooltip, Speaker speaker, ResourceLocation sound, long createdAt, long availableAt, boolean revealed, boolean deleted) {
+    public record Entry(UUID player, long npcId, String text, boolean tooltip, Speaker speaker, ResourceLocation sound, long createdAt, long availableAt, boolean revealed, boolean deleted) {
         private CompoundTag save() {
             CompoundTag tag = new CompoundTag();
-            tag.putUUID("Owner", this.owner);
+            tag.putUUID("Owner", this.player);
             tag.putLong("NpcId", this.npcId);
             tag.putString("Text", this.text);
             tag.putBoolean("Tooltip", this.tooltip);
@@ -109,11 +109,16 @@ public final class Voicemails extends SavedData {
         }
 
         private Entry reveal() {
-            return new Entry(this.owner, this.npcId, this.text, this.tooltip, this.speaker, this.sound, this.createdAt, this.availableAt, true, this.deleted);
+            return new Entry(this.player, this.npcId, this.text, this.tooltip, this.speaker, this.sound, this.createdAt, this.availableAt, true, this.deleted);
         }
 
         private Entry delete() {
-            return new Entry(this.owner, this.npcId, this.text, this.tooltip, this.speaker, this.sound, this.createdAt, this.availableAt, this.revealed, true);
+            return new Entry(this.player, this.npcId, this.text, this.tooltip, this.speaker, this.sound, this.createdAt, this.availableAt, this.revealed, true);
+        }
+
+        @Deprecated
+        public UUID owner() {
+            return this.player;
         }
 
         private static Entry load(CompoundTag tag) {

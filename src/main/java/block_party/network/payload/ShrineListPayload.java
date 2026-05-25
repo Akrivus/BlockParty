@@ -28,9 +28,9 @@ public record ShrineListPayload(List<BlockPos> positions) implements CustomPacke
         return new ShrineListPayload(shrines.stream().map(BlockPartyDB.ShrineEntry::pos).toList());
     }
 
-    public static ShrineListPayload response(BlockPartyDB db, UUID owner, net.minecraft.resources.ResourceKey<Level> dimension) {
+    public static ShrineListPayload response(BlockPartyDB db, UUID player, net.minecraft.resources.ResourceKey<Level> dimension) {
         try {
-            return from(db.listShrines(owner, dimension));
+            return from(db.listShrines(player, dimension));
         } catch (java.sql.SQLException exception) {
             return new ShrineListPayload(List.of());
         }

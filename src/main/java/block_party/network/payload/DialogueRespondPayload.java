@@ -23,8 +23,8 @@ public record DialogueRespondPayload(long databaseId, Response response) impleme
         context.enqueueWork(() -> DialogueRespondPayload.respondToDialogue(context.player(), payload.databaseId(), payload.response()));
     }
 
-    public static boolean respondToDialogue(ServerLevel level, BlockPartyDB db, UUID owner, long databaseId, Response response) {
-        java.util.Optional<Moe> moe = db.findOwnedLoadedMoe(level, owner, databaseId);
+    public static boolean respondToDialogue(ServerLevel level, BlockPartyDB db, UUID player, long databaseId, Response response) {
+        java.util.Optional<Moe> moe = db.findRelatedLoadedMoe(level, player, databaseId);
         if (moe.isEmpty()) {
             return false;
         }

@@ -151,6 +151,36 @@ public final class CellPhoneServiceGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void phoneContactCanCallNonOwnedMoe(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = BlockPartyDB.get(level);
+        UUID owner = new UUID(1311L, 2311L);
+        UUID contact = new UUID(1312L, 2312L);
+        Moe moe = spawnOwnedMoe(helper, level, owner, new BlockPos(1, 1, 1));
+        if (moe == null) {
+            return;
+        }
+        try {
+            db.setPhoneContact(moe.getDatabaseID(), contact, true);
+        } catch (SQLException exception) {
+            helper.fail("Expected phone contact setup to succeed: " + exception.getMessage());
+            return;
+        }
+
+        Moe called = db.callPhoneContactNpc(level, contact, helper.absolutePos(new BlockPos(4, 1, 1)), moe.getDatabaseID()).orElse(null);
+        if (called == null) {
+            helper.fail("Expected phone contact call to succeed");
+            return;
+        }
+        if (!contact.equals(called.getDialogueTarget())) {
+            helper.fail("Expected phone call scene target to be the contact player");
+            return;
+        }
+        helper.kill(called);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void missingDeadCorruptAndUnloadedRowsFailSafely(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPartyDB db = BlockPartyDB.get(level);
