@@ -635,6 +635,7 @@ public final class SceneGameTests {
         Moe target = spawnMoeAt(helper, owner, new BlockPos(3, 1, 1));
         target.setGivenName("Hotaru");
         observer.setBloodType("O");
+        observer.setDere("NYANDERE");
         target.setBloodType("AB");
         target.setDere("DANDERE");
 

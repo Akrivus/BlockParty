@@ -1,0 +1,12 @@
+{
+  "rules": [
+    { "observer": { "dere": "NYANDERE" }, "target": { "emotion": "HAPPY" }, "affinity": 0.24, "interest": 0.22 },
+    { "observer": { "dere": "NYANDERE" }, "target": { "emotion": "MISCHIEVOUS" }, "affinity": 0.22, "interest": 0.35 },
+    { "observer": { "dere": "NYANDERE" }, "target": { "emotion": "EMBARRASSED" }, "affinity": 0.12, "interest": 0.28 },
+    { "observer": { "dere": "NYANDERE" }, "target": { "emotion": "SMITTEN" }, "affinity": 0.14, "interest": 0.3 },
+    { "observer": { "dere": "NYANDERE" }, "target": { "emotion": "ANGRY" }, "tension": 0.18, "interest": 0.26 },
+    { "observer": { "dere": "NYANDERE" }, "target": { "emotion": "CRYING" }, "affinity": 0.08, "interest": 0.28 },
+    { "observer": { "dere": "NYANDERE" }, "target": { "emotion": "SCARED" }, "affinity": 0.08, "interest": 0.26 },
+    { "observer": { "dere": "NYANDERE" }, "target": { "emotion": "SNOOTY" }, "tension": 0.12, "interest": 0.28 }
+  ]
+}

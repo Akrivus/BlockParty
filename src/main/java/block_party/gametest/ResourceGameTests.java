@@ -50,6 +50,8 @@ public final class ResourceGameTests {
         assertVanillaInBlockTag(helper, "redstone_lamp", "moe/has_glow");
         assertVanillaInBlockTag(helper, "andesite", "moe/has_cat_features");
         assertVanillaInBlockTag(helper, "bamboo", "moe/ignores_volume");
+        assertVanillaInBlockTag(helper, "glass", "moe/traits/destructible_by_explosion");
+        assertVanillaInBlockTag(helper, "oak_log", "moe/traits/flammable");
         assertInTag(helper, BuiltInRegistries.ITEM, Registries.ITEM, "sakura_log", "sakura_logs");
         helper.succeed();
     }
@@ -235,12 +237,84 @@ public final class ResourceGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void bundledSocialAffinitiesUseVanillaInfiniburnTag(GameTestHelper helper) {
+        MoeSocialRules.SocialSignal infiniburn = SocialAffinities.signal(
+                new SocialAffinities.Profile(Blocks.OAK_LOG.defaultBlockState(), "O", "KUUDERE", "ARIES", "FEMALE", "NORMAL"),
+                new SocialAffinities.Profile(Blocks.MAGMA_BLOCK.defaultBlockState(), "A", "DANDERE", "PISCES", "FEMALE", "NORMAL"));
+        if (infiniburn.tension() <= 0.0F || infiniburn.interest() <= 0.0F) {
+            helper.fail("Expected bundled flammable-to-infiniburn affinity to use vanilla infiniburn_overworld tag");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void bundledSocialAffinitiesAffectTraitSignals(GameTestHelper helper) {
         MoeSocialRules.SocialSignal signal = SocialAffinities.signal(
                 new SocialAffinities.Profile(Blocks.STONE.defaultBlockState(), "O", "DEREDERE", "ARIES", "FEMALE", "HAPPY"),
                 new SocialAffinities.Profile(Blocks.DIRT.defaultBlockState(), "A", "DANDERE", "PISCES", "FEMALE", "NORMAL"));
         if (signal.affinity() <= 0.0F || signal.interest() <= 0.0F) {
             helper.fail("Expected bundled deredere-to-dandere trait affinity to add affinity and interest");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void bundledSocialAffinitiesIncludeDereEmotionInterpretation(GameTestHelper helper) {
+        MoeSocialRules.SocialSignal yandereSmitten = SocialAffinities.signal(
+                new SocialAffinities.Profile(Blocks.STONE.defaultBlockState(), "O", "YANDERE", "ARIES", "FEMALE", "NORMAL"),
+                new SocialAffinities.Profile(Blocks.DIRT.defaultBlockState(), "A", "DANDERE", "PISCES", "FEMALE", "SMITTEN"));
+        if (yandereSmitten.affinity() <= 0.0F || yandereSmitten.interest() <= 0.0F) {
+            helper.fail("Expected nested yandere emotional interpretation affinity to add affinity and interest");
+            return;
+        }
+
+        MoeSocialRules.SocialSignal kuudereAngry = SocialAffinities.signal(
+                new SocialAffinities.Profile(Blocks.STONE.defaultBlockState(), "O", "KUUDERE", "ARIES", "FEMALE", "NORMAL"),
+                new SocialAffinities.Profile(Blocks.DIRT.defaultBlockState(), "A", "DANDERE", "PISCES", "FEMALE", "ANGRY"));
+        if (kuudereAngry.tension() <= 0.0F || kuudereAngry.interest() > 0.1F) {
+            helper.fail("Expected kuudere emotional interpretation to register mild tension for anger");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void bundledSocialAffinitiesIncludeZodiacAspects(GameTestHelper helper) {
+        MoeSocialRules.SocialSignal trine = SocialAffinities.signal(
+                new SocialAffinities.Profile(Blocks.STONE.defaultBlockState(), "O", "KUUDERE", "ARIES", "FEMALE", "NORMAL"),
+                new SocialAffinities.Profile(Blocks.DIRT.defaultBlockState(), "A", "DANDERE", "LEO", "FEMALE", "NORMAL"));
+        if (trine.affinity() <= 0.0F || trine.interest() <= 0.0F) {
+            helper.fail("Expected bundled zodiac trine affinity to add affinity and interest");
+            return;
+        }
+
+        MoeSocialRules.SocialSignal square = SocialAffinities.signal(
+                new SocialAffinities.Profile(Blocks.STONE.defaultBlockState(), "O", "KUUDERE", "ARIES", "FEMALE", "NORMAL"),
+                new SocialAffinities.Profile(Blocks.DIRT.defaultBlockState(), "A", "DANDERE", "CANCER", "FEMALE", "NORMAL"));
+        if (square.tension() <= 0.0F || square.interest() <= 0.0F) {
+            helper.fail("Expected bundled zodiac square affinity to add tension and interest");
+            return;
+        }
+
+        MoeSocialRules.SocialSignal polarity = SocialAffinities.signal(
+                new SocialAffinities.Profile(Blocks.STONE.defaultBlockState(), "O", "KUUDERE", "ARIES", "FEMALE", "NORMAL"),
+                new SocialAffinities.Profile(Blocks.DIRT.defaultBlockState(), "A", "DANDERE", "LIBRA", "FEMALE", "NORMAL"));
+        if (polarity.tension() <= 0.0F || polarity.interest() <= 0.0F || polarity.affinity() <= 0.0F) {
+            helper.fail("Expected bundled zodiac polarity affinity to feel mixed and high-interest");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void bundledSocialAffinitiesIncludeTntFragility(GameTestHelper helper) {
+        MoeSocialRules.SocialSignal signal = SocialAffinities.signal(
+                new SocialAffinities.Profile(Blocks.GLASS.defaultBlockState(), "O", "KUUDERE", "ARIES", "FEMALE", "NORMAL"),
+                new SocialAffinities.Profile(Blocks.TNT.defaultBlockState(), "A", "DANDERE", "PISCES", "FEMALE", "NORMAL"));
+        if (signal.tension() <= 0.0F || signal.interest() <= 0.0F) {
+            helper.fail("Expected bundled TNT fragility block affinity to add tension and interest");
             return;
         }
         helper.succeed();

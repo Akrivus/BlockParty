@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:logs_that_burn",
+    "#minecraft:planks",
+    "#minecraft:leaves",
+    "#minecraft:wool",
+    "minecraft:glass",
+    "minecraft:glass_pane",
+    "minecraft:bookshelf",
+    "minecraft:chest",
+    "minecraft:barrel",
+    "minecraft:flower_pot",
+    "minecraft:torch"
+  ]
+}

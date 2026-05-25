@@ -1,0 +1,14 @@
+{
+  "rules": [
+    { "observer": { "dere": "DEREDERE" }, "target": { "emotion": "HAPPY" }, "affinity": 0.3, "interest": 0.2 },
+    { "observer": { "dere": "DEREDERE" }, "target": { "emotion": "ANGRY" }, "tension": 0.16, "interest": 0.24 },
+    { "observer": { "dere": "DEREDERE" }, "target": { "emotion": "CRYING" }, "affinity": 0.12, "interest": 0.36 },
+    { "observer": { "dere": "DEREDERE" }, "target": { "emotion": "SCARED" }, "affinity": 0.1, "interest": 0.32 },
+    { "observer": { "dere": "DEREDERE" }, "target": { "emotion": "SICK" }, "affinity": 0.08, "interest": 0.3 },
+    { "observer": { "dere": "DEREDERE" }, "target": { "emotion": "PAINED" }, "affinity": 0.08, "interest": 0.3 },
+    { "observer": { "dere": "DEREDERE" }, "target": { "emotion": "EMBARRASSED" }, "affinity": 0.22, "interest": 0.25 },
+    { "observer": { "dere": "DEREDERE" }, "target": { "emotion": "SMITTEN" }, "affinity": 0.25, "interest": 0.3 },
+    { "observer": { "dere": "DEREDERE" }, "target": { "emotion": "MISCHIEVOUS" }, "affinity": 0.16, "interest": 0.3 },
+    { "observer": { "dere": "DEREDERE" }, "target": { "emotion": "SNOOTY" }, "interest": 0.2 }
+  ]
+}

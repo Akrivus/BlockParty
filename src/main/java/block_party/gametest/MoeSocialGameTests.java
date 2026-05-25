@@ -55,6 +55,7 @@ public final class MoeSocialGameTests {
         assertGreater(helper, (float) MoeSocialRules.socialStepDistance("YANDERE"), (float) MoeSocialRules.socialStepDistance("DANDERE"), "active dere step distance");
         assertGreater(helper, (float) MoeSocialRules.socialMoveSpeed("DEREDERE"), (float) MoeSocialRules.socialMoveSpeed("KUUDERE"), "active dere move speed");
         assertGreater(helper, MoeSocialRules.socialTickDelay("DANDERE", 0), MoeSocialRules.socialTickDelay("YANDERE", 0), "quiet dere social delay");
+        assertGreater(helper, MoeSocialRules.socialMovementDuration("DANDERE"), MoeSocialRules.socialMovementDuration("YANDERE"), "active dere movement duration");
         assertEquals(helper, "SMITTEN", MoeSocialRules.compatibleEmotion("YANDERE"), "yandere compatible emotion");
         assertEquals(helper, "EMBARRASSED", MoeSocialRules.compatibleEmotion("DANDERE"), "dandere compatible emotion");
         assertEquals(helper, "PSYCHOTIC", MoeSocialRules.tenseEmotion("YANDERE"), "yandere tense emotion");
@@ -119,6 +120,22 @@ public final class MoeSocialGameTests {
         assertEquals(helper, MoeSocialRules.DereReaction.SHY_RETREAT, MoeSocialRules.dereReaction("DANDERE", tension, aToB, 9.0D), "dandere tension reaction");
         assertEquals(helper, "SMITTEN", MoeSocialRules.reactionEmotion("YANDERE", MoeSocialRules.DereReaction.CLING, false), "yandere cling emotion");
         assertEquals(helper, "ANGRY", MoeSocialRules.reactionEmotion("TSUNDERE", MoeSocialRules.DereReaction.FLUSTER_RETREAT, true), "tsundere tense retreat emotion");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void socialSignalsResolveVariedResponseEmotions(GameTestHelper helper) {
+        MoeSocialRules.SocialSignal friendly = new MoeSocialRules.SocialSignal(0.7F, 0.0F, 0.35F);
+        MoeSocialRules.SocialSignal interesting = new MoeSocialRules.SocialSignal(0.15F, 0.0F, 0.65F);
+        MoeSocialRules.SocialSignal mixed = new MoeSocialRules.SocialSignal(0.45F, 0.45F, 0.65F);
+        MoeSocialRules.SocialSignal tense = new MoeSocialRules.SocialSignal(0.1F, 0.7F, 0.65F);
+
+        assertEquals(helper, "HAPPY", MoeSocialRules.responseEmotion("DEREDERE", friendly, MoeSocialRules.DereReaction.CELEBRATE, "NORMAL"), "deredere friendly response");
+        assertEquals(helper, "NORMAL", MoeSocialRules.responseEmotion("KUUDERE", friendly, MoeSocialRules.DereReaction.OBSERVE, "HAPPY"), "kuudere friendly response");
+        assertEquals(helper, "SMITTEN", MoeSocialRules.responseEmotion("YANDERE", friendly, MoeSocialRules.DereReaction.CLING, "SMITTEN"), "yandere smitten response");
+        assertEquals(helper, "EMBARRASSED", MoeSocialRules.responseEmotion("DANDERE", interesting, MoeSocialRules.DereReaction.OBSERVE, "NORMAL"), "dandere interest response");
+        assertEquals(helper, "EMBARRASSED", MoeSocialRules.responseEmotion("TSUNDERE", mixed, MoeSocialRules.DereReaction.FLUSTER_RETREAT, "NORMAL"), "tsundere mixed response");
+        assertEquals(helper, "PSYCHOTIC", MoeSocialRules.responseEmotion("YANDERE", tense, MoeSocialRules.DereReaction.CLING, "ANGRY"), "yandere tense response");
         helper.succeed();
     }
 

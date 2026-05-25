@@ -69,6 +69,10 @@ public final class MoeSocialRules {
         return 0.85D + dereActivity(dereType) * 0.2D;
     }
 
+    public static int socialMovementDuration(String dereType) {
+        return Math.max(14, Math.round(28.0F / dereActivity(dereType)));
+    }
+
     public static String compatibleEmotion(String dereType) {
         return switch (normalizeDere(dereType)) {
             case "DANDERE", "TSUNDERE" -> "EMBARRASSED";
@@ -142,6 +146,60 @@ public final class MoeSocialRules {
         };
     }
 
+    public static String responseEmotion(String dereType, SocialSignal signal, DereReaction reaction, String targetEmotion) {
+        String dere = normalizeDere(dereType);
+        String observed = normalizeEmotion(targetEmotion);
+        boolean highAffinity = signal.affinity() >= 0.6F;
+        boolean highTension = signal.tension() >= 0.45F || signal.tension() > signal.affinity();
+        boolean highInterest = signal.interest() >= 0.5F;
+        boolean mixed = signal.affinity() >= 0.35F && signal.tension() >= 0.35F && highInterest;
+
+        if ("KUUDERE".equals(dere)) {
+            return highTension && highInterest ? "CONFUSED" : "NORMAL";
+        }
+        if ("YANDERE".equals(dere)) {
+            if ("SMITTEN".equals(observed) || highAffinity && highInterest) {
+                return highTension ? "PSYCHOTIC" : "SMITTEN";
+            }
+            if (highTension) {
+                return highInterest ? "PSYCHOTIC" : "ANGRY";
+            }
+        }
+        if ("DANDERE".equals(dere) && (highTension || mixed || highInterest && !highAffinity)) {
+            return highTension ? "SCARED" : "EMBARRASSED";
+        }
+        if ("TSUNDERE".equals(dere) && (mixed || highTension)) {
+            return mixed || highAffinity ? "EMBARRASSED" : "ANGRY";
+        }
+        if ("HIMEDERE".equals(dere) && highInterest) {
+            return highTension && !highAffinity ? "ANGRY" : "SNOOTY";
+        }
+        if ("NYANDERE".equals(dere) && highAffinity) {
+            return "HAPPY";
+        }
+
+        if (highTension && highInterest) {
+            return "CONFUSED";
+        }
+        if (highTension) {
+            return tenseEmotion(dere);
+        }
+        if (highAffinity && highInterest) {
+            return "SMITTEN";
+        }
+        if (highAffinity) {
+            return compatibleEmotion(dere);
+        }
+        if (highInterest) {
+            return switch (reaction) {
+                case SHOW_OFF -> "SNOOTY";
+                case FLUSTER_RETREAT, SHY_RETREAT -> "EMBARRASSED";
+                default -> "CONFUSED";
+            };
+        }
+        return "NORMAL";
+    }
+
     public static boolean canDonateTo(String donorBloodType, String receiverBloodType) {
         String donor = normalizeBloodType(donorBloodType);
         String receiver = normalizeBloodType(receiverBloodType);
@@ -173,6 +231,18 @@ public final class MoeSocialRules {
         return switch (normalized) {
             case "NYANDERE", "HIMEDERE", "KUUDERE", "TSUNDERE", "YANDERE", "DEREDERE", "DANDERE" -> normalized;
             default -> "NYANDERE";
+        };
+    }
+
+    public static String normalizeEmotion(String value) {
+        if (value == null || value.isBlank()) {
+            return "NORMAL";
+        }
+        String normalized = value.toUpperCase(Locale.ROOT);
+        return switch (normalized) {
+            case "ANGRY", "BEGGING", "CONFUSED", "CRYING", "MISCHIEVOUS", "EMBARRASSED", "HAPPY",
+                    "NORMAL", "PAINED", "PSYCHOTIC", "SCARED", "SICK", "SNOOTY", "SMITTEN", "TIRED" -> normalized;
+            default -> "NORMAL";
         };
     }
 

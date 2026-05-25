@@ -1,0 +1,14 @@
+{
+  "rules": [
+    {
+      "observer": {
+        "block_tag": "block_party:moe/traits/flammable"
+      },
+      "target": {
+        "block_tag": "minecraft:infiniburn_overworld"
+      },
+      "tension": 1.0,
+      "interest": 0.55
+    }
+  ]
+}

@@ -133,6 +133,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     private int timeUntilStress;
     private int timeSinceSleep;
     private int socialTickDelay;
+    private int socialMovementTicks;
+    private Vec3 socialMovementDestination;
+    private double socialMovementSpeed;
     private Dialogue dialogue;
     private Response response;
     private boolean guiPreview;
@@ -1047,10 +1050,12 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
             return;
         }
         if (this.updateFollowSessionMovement()) {
+            this.clearSocialMovementIntent();
             return;
         }
         if (this.socialTickDelay > 0) {
             --this.socialTickDelay;
+            this.updateSocialMovementIntent();
             return;
         }
         this.socialTickDelay = MoeSocialRules.socialTickDelay(this.getDere(), this.random.nextInt());
@@ -1280,14 +1285,16 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         MoeSocialRules.DereReaction reaction = context.reaction();
         boolean moved = this.updateBloodTypeSocialMovement(socialTarget, strongest);
         moved = this.updateDereSocialReaction(socialTarget, reaction) || moved;
-        this.spawnBloodTypeSocialParticles(socialTarget, visual);
-        this.spawnDereSocialParticles(reaction);
+        // Prevent particle spam, use animations instead.
+        // this.spawnBloodTypeSocialParticles(socialTarget, visual);
+        // this.spawnDereSocialParticles(reaction);
         boolean tense = strongest.tension() > strongest.affinity();
+        if (strongest.affinity() >= 0.6F || strongest.tension() >= 0.35F || strongest.interest() >= 0.5F) {
+            this.setEmotion(MoeSocialRules.responseEmotion(this.getDere(), strongest, reaction, socialTarget.getEmotion()));
+        }
         if (strongest.affinity() >= 0.6F) {
-            this.setEmotion(MoeSocialRules.reactionEmotion(this.getDere(), reaction, false));
             this.addRelaxation(0.05F);
         } else if (tense) {
-            this.setEmotion(MoeSocialRules.reactionEmotion(this.getDere(), reaction, true));
             this.addStress(0.05F);
         }
         this.applyDereSocialFeeling(reaction);
@@ -1296,6 +1303,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     private boolean updateBloodTypeSocialMovement(Moe socialTarget, MoeSocialRules.SocialSignal signal) {
         if (this.isFollowing() || this.isSitting() || this.isPassenger()) {
+            this.clearSocialMovementIntent();
             return false;
         }
         double distanceSqr = this.distanceToSqr(socialTarget);
@@ -1307,8 +1315,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
                 double distance = toward.length();
                 if (distance > 0.0001D) {
                     Vec3 destination = this.position().add(toward.normalize().scale(Math.min(stepDistance, distance - 1.5D)));
-                    this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, speed);
-                    return true;
+                    return this.setSocialMovementDestination(destination, speed);
                 }
             }
             case AVOID -> {
@@ -1317,8 +1324,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
                     away = new Vec3(this.random.nextDouble() - 0.5D, 0.0D, this.random.nextDouble() - 0.5D);
                 }
                 Vec3 destination = this.position().add(away.normalize().scale(stepDistance));
-                this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, speed);
-                return true;
+                return this.setSocialMovementDestination(destination, speed);
             }
             case IDLE -> {
             }
@@ -1341,8 +1347,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
                 }
                 Vec3 side = new Vec3(-around.z, 0.0D, around.x).normalize().scale(2.0D);
                 Vec3 destination = this.position().add(side);
-                this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, MoeSocialRules.socialMoveSpeed(this.getDere()));
-                yield true;
+                yield this.setSocialMovementDestination(destination, MoeSocialRules.socialMoveSpeed(this.getDere()));
             }
             case CELEBRATE, OBSERVE, NONE -> false;
         };
@@ -1353,8 +1358,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         double distance = toward.length();
         if (distance > personalSpace && distance > 0.0001D) {
             Vec3 destination = this.position().add(toward.normalize().scale(Math.min(stepDistance, distance - personalSpace)));
-            this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, speed);
-            return true;
+            return this.setSocialMovementDestination(destination, speed);
         }
         return false;
     }
@@ -1365,8 +1369,48 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
             away = new Vec3(this.random.nextDouble() - 0.5D, 0.0D, this.random.nextDouble() - 0.5D);
         }
         Vec3 destination = this.position().add(away.normalize().scale(stepDistance));
-        this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, speed);
+        return this.setSocialMovementDestination(destination, speed);
+    }
+
+    private boolean setSocialMovementDestination(Vec3 destination, double speed) {
+        this.socialMovementDestination = destination;
+        this.socialMovementSpeed = speed;
+        this.socialMovementTicks = MoeSocialRules.socialMovementDuration(this.getDere());
+        return this.moveToSocialDestination(destination, speed);
+    }
+
+    private boolean updateSocialMovementIntent() {
+        if (this.socialMovementTicks <= 0 || this.socialMovementDestination == null) {
+            return false;
+        }
+        if (this.isFollowing() || this.isSitting() || this.isPassenger() || this.hasDialogue()) {
+            this.clearSocialMovementIntent();
+            return false;
+        }
+        if (this.position().distanceToSqr(this.socialMovementDestination) <= 1.0D) {
+            this.clearSocialMovementIntent();
+            return false;
+        }
+        --this.socialMovementTicks;
+        boolean moving = this.moveToSocialDestination(this.socialMovementDestination, this.socialMovementSpeed);
+        if (!moving) {
+            this.clearSocialMovementIntent();
+        }
+        return moving;
+    }
+
+    private boolean moveToSocialDestination(Vec3 destination, double speed) {
+        boolean navigating = this.getNavigation().moveTo(destination.x, destination.y, destination.z, speed);
+        if (!navigating) {
+            this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, speed);
+        }
         return true;
+    }
+
+    private void clearSocialMovementIntent() {
+        this.socialMovementTicks = 0;
+        this.socialMovementDestination = null;
+        this.socialMovementSpeed = 0.0D;
     }
 
     private void applyDereSocialFeeling(MoeSocialRules.DereReaction reaction) {

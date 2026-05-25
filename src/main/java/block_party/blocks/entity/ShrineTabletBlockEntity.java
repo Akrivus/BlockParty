@@ -41,7 +41,7 @@ public class ShrineTabletBlockEntity extends AbstractDataBlockEntity {
 
         Moe moe = MoeSpawner.spawn(level, spawnPos, Blocks.BELL.defaultBlockState(), this.getPlayerUUID(),
                 new CompoundTag(),
-                bell -> bell.setDere(randomDere(level.random.nextInt(7))));
+                bell -> bell.setDere(MoeSpawner.randomDere(level.random)));
         if (moe == null) {
             return;
         }
@@ -60,15 +60,4 @@ public class ShrineTabletBlockEntity extends AbstractDataBlockEntity {
         }
     }
 
-    private static String randomDere(int index) {
-        return switch (index) {
-            case 1 -> "HIMEDERE";
-            case 2 -> "KUUDERE";
-            case 3 -> "TSUNDERE";
-            case 4 -> "YANDERE";
-            case 5 -> "DEREDERE";
-            case 6 -> "DANDERE";
-            default -> "NYANDERE";
-        };
-    }
 }

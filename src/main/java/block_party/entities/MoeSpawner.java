@@ -14,12 +14,36 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public final class MoeSpawner {
+    private static final String[] DERE_TYPES = {
+            "NYANDERE",
+            "HIMEDERE",
+            "KUUDERE",
+            "TSUNDERE",
+            "YANDERE",
+            "DEREDERE",
+            "DANDERE"
+    };
+    private static final String[] ZODIAC_SIGNS = {
+            "ARIES",
+            "TAURUS",
+            "GEMINI",
+            "CANCER",
+            "LEO",
+            "VIRGO",
+            "LIBRA",
+            "SCORPIO",
+            "SAGITTARIUS",
+            "CAPRICORN",
+            "AQUARIUS",
+            "PISCES"
+    };
     private static final Map<Long, Moe> RECENTLY_SPAWNED = new HashMap<>();
 
     private MoeSpawner() {
@@ -38,6 +62,7 @@ public final class MoeSpawner {
                              CompoundTag tileEntityData, Consumer<Moe> configure) {
         Moe moe = new Moe(CustomEntities.MOE.get(), level);
         moe.moveToBlock(spawnPos);
+        applyRandomPersonality(moe, level.random);
         moe.setBlockState(sourceState);
         moe.setTileEntityData(tileEntityData);
         if (player != null) {
@@ -80,6 +105,7 @@ public final class MoeSpawner {
                                                CompoundTag tileEntityData, Consumer<Moe> configure) {
         Moe moe = new Moe(CustomEntities.MOE.get(), level);
         moe.moveToBlock(spawnPos);
+        applyRandomPersonality(moe, level.random);
         moe.setBlockState(sourceState);
         moe.setTileEntityData(tileEntityData);
         if (player != null) {
@@ -91,6 +117,33 @@ public final class MoeSpawner {
             moe.setHome(new block_party.db.DimBlockPos(level.dimension(), spawnPos));
         }
         return resolve(level, moe, player);
+    }
+
+    public static void applyRandomPersonality(Moe moe, RandomSource random) {
+        moe.setBloodType(weightedBloodType(random.nextInt(8)));
+        moe.setDere(randomDere(random));
+        moe.setZodiac(randomZodiac(random));
+    }
+
+    public static String randomDere(RandomSource random) {
+        return DERE_TYPES[random.nextInt(DERE_TYPES.length)];
+    }
+
+    private static String randomZodiac(RandomSource random) {
+        return ZODIAC_SIGNS[random.nextInt(ZODIAC_SIGNS.length)];
+    }
+
+    private static String weightedBloodType(int value) {
+        if (value < 1) {
+            return "AB";
+        }
+        if (value < 3) {
+            return "B";
+        }
+        if (value < 5) {
+            return "A";
+        }
+        return "O";
     }
 
     private static Resolution resolve(ServerLevel level, Moe moe, UUID player) {

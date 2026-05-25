@@ -77,6 +77,12 @@ public final class MoeLifecycleGameTests {
         assertEquals(helper, sourceState, moe.getBlockState(), "spawned Moe source block state");
         assertEquals(helper, sourceState, row.blockState(), "spawned row block state");
         assertEquals(helper, helper.absolutePos(new BlockPos(1, 2, 1)), moe.blockPosition(), "spawned Moe position");
+        assertEquals(helper, moe.getBloodType(), row.bloodType(), "spawned row blood type");
+        assertEquals(helper, moe.getDere(), row.dere(), "spawned row dere type");
+        assertEquals(helper, moe.getZodiac(), row.zodiac(), "spawned row zodiac sign");
+        assertValidBloodType(helper, moe.getBloodType(), "spawned Moe blood type");
+        assertValidDere(helper, moe.getDere(), "spawned Moe dere type");
+        assertValidZodiac(helper, moe.getZodiac(), "spawned Moe zodiac sign");
 
         Moe loaded = new Moe(block_party.registry.CustomEntities.MOE.get(), level);
         loaded.load(moe.saveWithoutId(new CompoundTag()));
@@ -611,6 +617,29 @@ public final class MoeLifecycleGameTests {
     private static void assertEquals(GameTestHelper helper, Object expected, Object actual, String label) {
         if (!expected.equals(actual)) {
             helper.fail("Expected " + label + " to be " + expected + ", got " + actual);
+        }
+    }
+
+    private static void assertValidBloodType(GameTestHelper helper, String value, String label) {
+        if (!"A".equals(value) && !"AB".equals(value) && !"B".equals(value) && !"O".equals(value)) {
+            helper.fail("Expected valid " + label + ", got " + value);
+        }
+    }
+
+    private static void assertValidDere(GameTestHelper helper, String value, String label) {
+        switch (value) {
+            case "NYANDERE", "HIMEDERE", "KUUDERE", "TSUNDERE", "YANDERE", "DEREDERE", "DANDERE" -> {
+            }
+            default -> helper.fail("Expected valid " + label + ", got " + value);
+        }
+    }
+
+    private static void assertValidZodiac(GameTestHelper helper, String value, String label) {
+        switch (value) {
+            case "ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO",
+                    "SAGITTARIUS", "CAPRICORN", "AQUARIUS", "PISCES" -> {
+            }
+            default -> helper.fail("Expected valid " + label + ", got " + value);
         }
     }
 

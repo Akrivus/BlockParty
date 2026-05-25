@@ -1,0 +1,12 @@
+{
+  "rules": [
+    { "observer": { "dere": "HIMEDERE" }, "target": { "emotion": "HAPPY" }, "affinity": 0.12, "interest": 0.24 },
+    { "observer": { "dere": "HIMEDERE" }, "target": { "emotion": "SMITTEN" }, "affinity": 0.22, "interest": 0.36 },
+    { "observer": { "dere": "HIMEDERE" }, "target": { "emotion": "SNOOTY" }, "tension": 0.32, "interest": 0.34 },
+    { "observer": { "dere": "HIMEDERE" }, "target": { "emotion": "ANGRY" }, "tension": 0.28, "interest": 0.22 },
+    { "observer": { "dere": "HIMEDERE" }, "target": { "emotion": "EMBARRASSED" }, "affinity": 0.08, "interest": 0.26 },
+    { "observer": { "dere": "HIMEDERE" }, "target": { "emotion": "CRYING" }, "tension": 0.08, "interest": 0.2 },
+    { "observer": { "dere": "HIMEDERE" }, "target": { "emotion": "SCARED" }, "tension": 0.08, "interest": 0.2 },
+    { "observer": { "dere": "HIMEDERE" }, "target": { "emotion": "MISCHIEVOUS" }, "tension": 0.16, "interest": 0.3 }
+  ]
+}

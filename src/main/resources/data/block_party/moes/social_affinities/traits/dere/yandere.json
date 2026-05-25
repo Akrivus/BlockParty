@@ -1,0 +1,13 @@
+{
+  "rules": [
+    { "observer": { "dere": "YANDERE" }, "target": { "emotion": "SMITTEN" }, "affinity": 0.35, "interest": 0.55 },
+    { "observer": { "dere": "YANDERE" }, "target": { "emotion": "HAPPY" }, "affinity": 0.2, "interest": 0.35 },
+    { "observer": { "dere": "YANDERE" }, "target": { "emotion": "EMBARRASSED" }, "affinity": 0.12, "interest": 0.38 },
+    { "observer": { "dere": "YANDERE" }, "target": { "emotion": "CRYING" }, "affinity": 0.08, "tension": 0.1, "interest": 0.42 },
+    { "observer": { "dere": "YANDERE" }, "target": { "emotion": "SCARED" }, "affinity": 0.08, "tension": 0.12, "interest": 0.42 },
+    { "observer": { "dere": "YANDERE" }, "target": { "emotion": "ANGRY" }, "tension": 0.32, "interest": 0.45 },
+    { "observer": { "dere": "YANDERE" }, "target": { "emotion": "PSYCHOTIC" }, "affinity": 0.08, "tension": 0.45, "interest": 0.5 },
+    { "observer": { "dere": "YANDERE" }, "target": { "emotion": "SNOOTY" }, "tension": 0.28, "interest": 0.32 },
+    { "observer": { "dere": "YANDERE" }, "target": { "emotion": "MISCHIEVOUS" }, "tension": 0.25, "interest": 0.34 }
+  ]
+}

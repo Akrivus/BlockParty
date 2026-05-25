@@ -1,0 +1,14 @@
+{
+  "rules": [
+    {
+      "observer": {
+        "block_tag": "block_party:moe/traits/destructible_by_explosion"
+      },
+      "target": {
+        "block": "minecraft:tnt"
+      },
+      "tension": 0.8,
+      "interest": 0.65
+    }
+  ]
+}
