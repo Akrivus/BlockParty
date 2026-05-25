@@ -11,6 +11,7 @@ import block_party.scene.Response;
 import block_party.scene.SceneAction;
 import block_party.scene.SceneTrigger;
 import block_party.scene.SceneVariables;
+import block_party.db.voicemail.Voicemails;
 import com.google.gson.JsonParser;
 import java.util.List;
 import java.util.UUID;
@@ -343,6 +344,27 @@ public final class SceneGameTests {
         SceneVariables variables = SceneVariables.get(moe.level());
         assertEquals(helper, "yes", variables.cookies(moe.getDatabaseID()).get("phase5_cookie"), "scene cookie value");
         assertEquals(helper, 3, variables.counters(moe.getDatabaseID()).get("phase5_counter"), "scene counter value");
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void createVoicemailActionStoresDelayedMessage(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(506L, 6L));
+        SceneAction action = parseAction("{\"type\":\"block_party:create_voicemail\",\"action\":{\"text\":\"Call me back, @name.\",\"speaker\":{\"emotion\":\"happy\"},\"sound\":\"block_party:item.cell_phone.dial\",\"delay_minutes\":90}}");
+
+        action.apply(moe);
+
+        Voicemails.Entry entry = Voicemails.get(moe.level()).allForTests().getFirst();
+        assertEquals(helper, moe.getOwnerUUID(), entry.owner(), "voicemail owner");
+        assertEquals(helper, moe.getDatabaseID(), entry.npcId(), "voicemail NPC id");
+        assertEquals(helper, "Call me back, @name.", entry.text(), "voicemail text");
+        assertEquals(helper, "HAPPY", entry.speaker().emotion(), "voicemail speaker emotion");
+        assertEquals(helper, BlockParty.source("item.cell_phone.dial"), entry.sound(), "voicemail sound");
+        if (entry.availableAt() - entry.createdAt() != 90L * 60L * 1000L) {
+            helper.fail("Expected voicemail delay to be 90 minutes");
+            return;
+        }
         helper.kill(moe);
         helper.succeed();
     }

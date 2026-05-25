@@ -5,6 +5,7 @@ import java.util.UUID;
 import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
 import block_party.entities.Moe;
+import block_party.db.voicemail.VoicemailPlayback;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -33,6 +34,9 @@ public record DialogueClosePayload(long databaseId) implements CustomPacketPaylo
     public static boolean closeDialogue(Player player, long databaseId) {
         if (!(player.level() instanceof ServerLevel level)) {
             return false;
+        }
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer && VoicemailPlayback.close(serverPlayer)) {
+            return true;
         }
         return closeDialogue(level, BlockPartyDB.get(level), player.getUUID(), databaseId);
     }

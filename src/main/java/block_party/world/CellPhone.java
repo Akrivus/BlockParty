@@ -182,7 +182,7 @@ public final class CellPhone {
                 true,
                 failure.speaker(visibleRow.isPresent()),
                 BlockParty.source("item.cell_phone.dial"),
-                Map.of(Response.NEXT_RESPONSE, Component.translatable("gui.block_party.call_response.hang_up").getString()));
+                Map.of(Response.NEXT_RESPONSE, Component.translatable("gui.block_party.call_scene.hang_up").getString()));
         PacketDistributor.sendToPlayer(player, new DialogueOpenPayload(NpcDetailPayload.from(npcId, visibleRow), dialogue));
     }
 
@@ -224,7 +224,7 @@ public final class CellPhone {
                 true,
                 new Speaker(Speaker.Identity.CHARACTER, Speaker.Position.LEFT, "DEFAULT", "HAPPY", false, null, 1.0F),
                 null,
-                Map.of(Response.NEXT_RESPONSE, Component.translatable("gui.block_party.call_response.hang_up").getString()));
+                Map.of(Response.NEXT_RESPONSE, Component.translatable("gui.block_party.call_scene.hang_up").getString()));
         ServerPlayer player = this.callerLevel.getServer().getPlayerList().getPlayer(this.player);
         if (player != null) {
             PacketDistributor.sendToPlayer(player, DialogueOpenPayload.response(this.db, this.player, this.npcId, dialogue));

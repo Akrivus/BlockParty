@@ -16,7 +16,7 @@ public final class SceneActions {
     public static final Map<String, DeferredHolder<Builder, Builder>> ENTRIES = new LinkedHashMap<>();
 
     static {
-        registerAll("send_dialogue", "send_response", "health", "food_level", "loyalty", "stress", "cookie", "counter", "hide", "end");
+        registerAll("send_dialogue", "send_response", "health", "food_level", "loyalty", "stress", "cookie", "counter", "hide", "create_voicemail", "end");
     }
 
     private SceneActions() {

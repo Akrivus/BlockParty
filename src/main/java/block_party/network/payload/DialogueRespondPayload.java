@@ -6,6 +6,7 @@ import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
 import block_party.entities.Moe;
 import block_party.scene.Response;
+import block_party.db.voicemail.VoicemailPlayback;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -34,6 +35,9 @@ public record DialogueRespondPayload(long databaseId, Response response) impleme
     public static boolean respondToDialogue(Player player, long databaseId, Response response) {
         if (!(player.level() instanceof ServerLevel level)) {
             return false;
+        }
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer && VoicemailPlayback.respond(serverPlayer, databaseId, response)) {
+            return true;
         }
         return respondToDialogue(level, BlockPartyDB.get(level), player.getUUID(), databaseId, response);
     }

@@ -6,6 +6,8 @@ import block_party.db.DimBlockPos;
 import block_party.entities.data.HidingSpots;
 import block_party.scene.SceneVariables;
 import block_party.scene.data.Locations;
+import block_party.scene.Speaker;
+import block_party.db.voicemail.Voicemails;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.gametest.framework.GameTest;
@@ -50,6 +52,13 @@ public final class PersistenceGameTests {
         SceneVariables variables = makeSceneVariables();
         SceneVariables loadedVariables = SceneVariables.load(variables.save(new CompoundTag(), provider), provider);
         assertSceneVariables(helper, loadedVariables);
+
+        Voicemails voicemails = new Voicemails();
+        voicemails.add(playerId, 99L, "Call me back, @.name.", true, Speaker.DEFAULT, BlockParty.source("message"), 60L * 60L * 1000L);
+        Voicemails loadedVoicemails = Voicemails.load(voicemails.save(new CompoundTag(), provider), provider);
+        assertEquals(helper, 1, loadedVoicemails.allForTests().size(), "voicemail count");
+        assertEquals(helper, "Call me back, @.name.", loadedVoicemails.allForTests().getFirst().text(), "voicemail text");
+        assertEquals(helper, BlockParty.source("message"), loadedVoicemails.allForTests().getFirst().sound(), "voicemail sound");
         helper.succeed();
     }
 
@@ -120,6 +129,24 @@ public final class PersistenceGameTests {
             helper.fail("Expected DimensionDataStorage to cache SceneVariables");
             return;
         }
+        if (Voicemails.get(level) != Voicemails.get(level)) {
+            helper.fail("Expected DimensionDataStorage to cache Voicemails");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void voicemailsRevealAfterDelay(GameTestHelper helper) {
+        UUID playerId = new UUID(0x9999L, 0x1111L);
+        Voicemails voicemails = new Voicemails();
+        voicemails.add(playerId, 12L, "Late message", true, Speaker.DEFAULT, null, 1000L);
+        Voicemails.Entry entry = voicemails.allForTests().getFirst();
+
+        assertEquals(helper, 0, voicemails.reveal(playerId, entry.createdAt() + 999L), "early voicemail reveal count");
+        assertEquals(helper, 0, voicemails.revealed(playerId).size(), "early revealed voicemail count");
+        assertEquals(helper, 1, voicemails.reveal(playerId, entry.availableAt()), "ready voicemail reveal count");
+        assertEquals(helper, 1, voicemails.revealed(playerId).size(), "ready revealed voicemail count");
         helper.succeed();
     }
 

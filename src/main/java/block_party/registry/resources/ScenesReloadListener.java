@@ -13,6 +13,7 @@ import block_party.scene.SceneTrigger;
 import block_party.scene.Speaker;
 import block_party.scene.actions.CookieAction;
 import block_party.scene.actions.CounterAction;
+import block_party.scene.actions.CreateVoicemailAction;
 import block_party.scene.actions.EndAction;
 import block_party.scene.actions.HideAction;
 import block_party.scene.actions.SendDialogueAction;
@@ -178,8 +179,21 @@ public final class ScenesReloadListener implements PreparableReloadListener {
                     CounterAction.Operation.fromValue(GsonHelper.getAsString(payload, "operation", "add")),
                     GsonHelper.getAsString(payload, "name", ""),
                     GsonHelper.getAsInt(payload, "value", 1));
+            case "create_voicemail" -> new CreateVoicemailAction(
+                    GsonHelper.getAsString(payload, "text", ""),
+                    GsonHelper.getAsBoolean(payload, "tooltip", true),
+                    parseSpeaker(payload.has("speaker") && payload.get("speaker").isJsonObject() ? payload.getAsJsonObject("speaker") : new JsonObject()),
+                    payload.has("sound") ? resource(GsonHelper.getAsString(payload, "sound", "")) : null,
+                    voicemailDelayMillis(payload));
             default -> EndAction.INSTANCE;
         };
+    }
+
+    private static long voicemailDelayMillis(JsonObject json) {
+        if (json.has("delay_seconds")) {
+            return Math.max(0L, GsonHelper.getAsLong(json, "delay_seconds", 0L)) * 1000L;
+        }
+        return Math.max(0L, GsonHelper.getAsLong(json, "delay_minutes", 60L)) * 60L * 1000L;
     }
 
     private static ResourceLocation actionType(JsonObject json) {

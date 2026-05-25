@@ -18,6 +18,7 @@ import block_party.registry.CustomSounds;
 import block_party.registry.SceneActions;
 import block_party.registry.SceneFilters;
 import block_party.world.CellPhone;
+import block_party.db.voicemail.Voicemails;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -50,6 +51,7 @@ public final class BlockParty {
         }
         NeoForge.EVENT_BUS.addListener(CustomResources::registerServerReloadListeners);
         NeoForge.EVENT_BUS.addListener(CustomMessenger::onPlayerLogin);
+        NeoForge.EVENT_BUS.addListener(Voicemails::onPlayerLogin);
         NeoForge.EVENT_BUS.addListener(BlockPartyDB::onServerStarted);
         NeoForge.EVENT_BUS.addListener(BlockPartyDB::onServerStopped);
         NeoForge.EVENT_BUS.addListener(CellPhone::onServerTick);
