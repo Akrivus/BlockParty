@@ -5,8 +5,16 @@ import block_party.db.DimBlockPos;
 import block_party.db.records.NPC;
 import block_party.entities.data.HidingSpots;
 import block_party.entities.goals.HideUntil;
+import block_party.entities.movement.MoeAnchor;
+import block_party.entities.movement.MoeAnchorType;
+import block_party.entities.movement.MoeAnchorResolver;
+import block_party.entities.movement.FollowSession;
+import block_party.entities.movement.PartyInvites;
+import block_party.entities.movement.PlayerMovementIntent;
+import block_party.entities.movement.RoutineIntent;
 import block_party.entities.social.MoeSocialRules;
 import block_party.entities.social.MoeSocialContext;
+import block_party.items.InviteItem;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomTags;
 import block_party.registry.resources.BlockAliasesReloadListener;
@@ -64,6 +72,9 @@ import java.util.UUID;
 
 public class Moe extends PathfinderMob implements ContainerListener, MenuProvider {
     private static final String EMPTY_UUID = "00000000-0000-0000-0000-000000000000";
+    private static final int COMPATIBILITY_FOLLOW_TICKS = 20 * 60 * 5;
+    private static final double IDLE_ANCHOR_RADIUS = 24.0D;
+    private static final double IDLE_SOCIAL_RADIUS = 10.0D;
 
     public static final EntityDataAccessor<String> DATABASE_ID =
             SynchedEntityData.defineId(Moe.class, EntityDataSerializers.STRING);
@@ -126,6 +137,8 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     private Response response;
     private boolean guiPreview;
     private UUID dialogueTarget = new UUID(0L, 0L);
+    private FollowSession followSession = FollowSession.none();
+    private RoutineIntent routineIntent = RoutineIntent.IDLE;
     private final SceneManager sceneManager = new SceneManager(this);
 
     public Moe(EntityType<? extends Moe> entityType, Level level) {
@@ -175,13 +188,17 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
                 ? Block.stateById(compound.getInt("VisibleBlockState"))
                 : this.getBlockState());
         this.setMoeScale(compound.contains("Scale") ? compound.getFloat("Scale") : 1.0F);
-        this.setFollowing(compound.getBoolean("Following"));
         this.setSitting(compound.getBoolean("Sitting"));
         if (compound.contains("OwnerUUID")) {
             this.setPlayerUUID(UUID.fromString(compound.getString("OwnerUUID")));
         }
         if (compound.contains("PlayerUUID")) {
             this.setPlayerUUID(UUID.fromString(compound.getString("PlayerUUID")));
+        }
+        if (compound.contains("FollowSession")) {
+            this.readFollowSession(compound.getCompound("FollowSession"));
+        } else {
+            this.setFollowing(compound.getBoolean("Following"));
         }
         if (compound.contains("GivenName")) {
             this.setGivenName(compound.getString("GivenName"));
@@ -232,6 +249,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         if (compound.contains("Home")) {
             this.setHome(new DimBlockPos(compound.getCompound("Home")));
         }
+        if (compound.contains("RoutineIntent")) {
+            this.setRoutineIntent(RoutineIntent.fromValue(compound.getString("RoutineIntent")));
+        }
         if (compound.contains("LastSeenAt")) {
             this.setLastSeen(compound.getLong("LastSeenAt"));
         }
@@ -253,6 +273,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         compound.putInt("VisibleBlockState", Block.getId(this.getVisibleBlockState()));
         compound.putFloat("Scale", this.getMoeScale());
         compound.putBoolean("Following", this.isFollowing());
+        if (this.isFollowing()) {
+            compound.put("FollowSession", this.writeFollowSession());
+        }
         compound.putBoolean("Sitting", this.isSitting());
         compound.putString("PlayerUUID", this.getPlayerUUID().toString());
         compound.putString("OwnerUUID", this.getPlayerUUID().toString());
@@ -274,6 +297,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         compound.putFloat("Age", this.getAge());
         compound.putBoolean("HasHome", this.hasHome());
         compound.put("Home", this.getHome().write());
+        compound.putString("RoutineIntent", this.getRoutineIntent().name());
         compound.putLong("LastSeenAt", this.getLastSeen());
         compound.putInt("TimeUntilHungry", this.getTimeUntilHungry());
         compound.putInt("TimeUntilLonely", this.getTimeUntilLonely());
@@ -283,11 +307,38 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         compound.put("TileEntity", this.getTileEntityData().copy());
     }
 
+    private void readFollowSession(CompoundTag compound) {
+        UUID playerUuid = compound.contains("PlayerUUID") ? UUID.fromString(compound.getString("PlayerUUID")) : this.getPlayerUUID();
+        PlayerMovementIntent intent = PlayerMovementIntent.FOLLOW_REQUEST;
+        if (compound.contains("Intent")) {
+            try {
+                intent = PlayerMovementIntent.valueOf(compound.getString("Intent"));
+            } catch (IllegalArgumentException ignored) {
+                intent = PlayerMovementIntent.FOLLOW_REQUEST;
+            }
+        }
+        this.startFollowSession(
+                playerUuid,
+                intent,
+                compound.getInt("TicksRemaining"),
+                compound.getBoolean("CanChangeDimension"));
+    }
+
+    private CompoundTag writeFollowSession() {
+        CompoundTag compound = new CompoundTag();
+        compound.putString("PlayerUUID", this.followSession.playerUuid().toString());
+        compound.putString("Intent", this.followSession.intent().name());
+        compound.putInt("TicksRemaining", this.followSession.ticksRemaining());
+        compound.putBoolean("CanChangeDimension", this.followSession.canChangeDimension());
+        return compound;
+    }
+
     @Override
     public void tick() {
         super.tick();
         if (!this.level().isClientSide) {
             this.sceneManager.tick();
+            this.tickFollowSession();
             this.updateHungerState();
             this.updateLonelyState();
             this.updateStressState();
@@ -344,6 +395,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
             return InteractionResult.PASS;
         }
         if (!this.level().isClientSide) {
+            if (player.getItemInHand(hand).getItem() instanceof InviteItem) {
+                return PartyInvites.request(player, this);
+            }
             if (this.canDialogueWith(player)) {
                 this.setDialogueTarget(player.getUUID());
                 this.triggerScene(player.isShiftKeyDown() ? SceneTrigger.SHIFT_RIGHT_CLICK : SceneTrigger.RIGHT_CLICK);
@@ -604,7 +658,75 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     }
 
     public void setFollowing(boolean following) {
-        this.entityData.set(FOLLOWING, following);
+        if (following) {
+            UUID playerUuid = this.dialogueTarget.equals(new UUID(0L, 0L)) ? this.getPlayerUUID() : this.dialogueTarget;
+            this.startFollowSession(playerUuid, PlayerMovementIntent.FOLLOW_REQUEST, COMPATIBILITY_FOLLOW_TICKS, false);
+        } else {
+            this.clearFollowSession();
+        }
+    }
+
+    public FollowSession getFollowSession() {
+        return this.followSession;
+    }
+
+    public UUID getFollowPlayerUUID() {
+        return this.followSession.playerUuid();
+    }
+
+    public PlayerMovementIntent getFollowIntent() {
+        return this.followSession.intent();
+    }
+
+    public int getFollowTicksRemaining() {
+        return this.followSession.ticksRemaining();
+    }
+
+    public boolean canFollowAcrossDimensions() {
+        return this.followSession.canChangeDimension();
+    }
+
+    public void startFollowSession(UUID playerUuid, PlayerMovementIntent intent, int ticksRemaining, boolean canChangeDimension) {
+        this.startFollowSession(playerUuid, intent, ticksRemaining, canChangeDimension, true);
+    }
+
+    public void startFollowSession(UUID playerUuid, PlayerMovementIntent intent, int ticksRemaining, boolean canChangeDimension, boolean triggerScene) {
+        boolean wasFollowing = this.isFollowing();
+        FollowSession session = new FollowSession(playerUuid, intent, ticksRemaining, canChangeDimension);
+        if (session.active()) {
+            this.followSession = session;
+            this.entityData.set(FOLLOWING, true);
+            if (!wasFollowing && triggerScene) {
+                this.triggerScene(SceneTrigger.FOLLOW_STARTED);
+            }
+        } else {
+            this.clearFollowSession();
+        }
+    }
+
+    public void clearFollowSession() {
+        this.clearFollowSession(true);
+    }
+
+    public void clearFollowSession(boolean triggerScene) {
+        boolean wasFollowing = this.isFollowing();
+        this.followSession = FollowSession.none();
+        this.entityData.set(FOLLOWING, false);
+        if (wasFollowing && triggerScene) {
+            this.triggerScene(SceneTrigger.FOLLOW_ENDED);
+        }
+    }
+
+    public void tickFollowSession() {
+        if (!this.isFollowing()) {
+            return;
+        }
+        this.followSession = this.followSession.tick();
+        if (this.followSession.active()) {
+            this.entityData.set(FOLLOWING, true);
+        } else {
+            this.clearFollowSession();
+        }
     }
 
     public boolean isSitting() {
@@ -924,29 +1046,240 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         if (this.level().isClientSide || this.hasDialogue()) {
             return;
         }
+        if (this.updateFollowSessionMovement()) {
+            return;
+        }
         if (this.socialTickDelay > 0) {
             --this.socialTickDelay;
             return;
         }
         this.socialTickDelay = MoeSocialRules.socialTickDelay(this.getDere(), this.random.nextInt());
-        this.updateBloodTypeSocialState();
+        if (!this.updateBloodTypeSocialState()) {
+            this.updateIdleRoutineMovement();
+        }
+    }
+
+    private boolean updateFollowSessionMovement() {
+        if (!this.isFollowing()) {
+            return false;
+        }
+        Player target = this.followTargetPlayer();
+        Vec3 destination = this.routineAwareFollowDestination(target);
+        if (destination == null) {
+            return true;
+        }
+        double stopDistance = target == null || this.isRoutineDriftDestination(destination) ? 2.0D : 3.0D;
+        if (this.position().distanceToSqr(destination) > stopDistance * stopDistance) {
+            this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, this.followMoveSpeed());
+        }
+        return true;
+    }
+
+    public Vec3 routineAwareFollowDestination(Player target) {
+        Vec3 routine = this.followRoutinePosition();
+        if (target == null || target.level() != this.level()) {
+            return routine;
+        }
+        Vec3 playerPosition = target.position();
+        double distanceToPlayerSqr = this.distanceToSqr(target);
+        if (distanceToPlayerSqr > 16.0D * 16.0D) {
+            return playerPosition;
+        }
+        if (routine == null) {
+            return playerPosition;
+        }
+        if (distanceToPlayerSqr <= 8.0D * 8.0D && this.followRoutineDriftWeight() >= 0.35F) {
+            return routine;
+        }
+        return playerPosition;
+    }
+
+    public float followRoutineDriftWeight() {
+        if (!this.isFollowing() || this.currentRoutineAnchor().isEmpty()) {
+            return 0.0F;
+        }
+        float stressPull = Math.min(0.45F, Math.max(0.0F, this.getStress()) / 40.0F);
+        float timePull = this.getFollowTicksRemaining() <= 20 * 45 ? 0.35F : 0.0F;
+        float intentPull = this.getFollowIntent() == PlayerMovementIntent.PARTY_INVITE ? 0.15F : 0.05F;
+        return Math.min(1.0F, stressPull + timePull + intentPull);
+    }
+
+    private Player followTargetPlayer() {
+        if (this.getServer() == null) {
+            return null;
+        }
+        return this.getServer().getPlayerList().getPlayer(this.getFollowPlayerUUID());
+    }
+
+    private Vec3 followRoutinePosition() {
+        return this.currentRoutineAnchor()
+                .map(anchor -> Vec3.atBottomCenterOf(anchor.dimPos().getPos()))
+                .orElse(null);
+    }
+
+    public java.util.Optional<MoeAnchor> currentRoutineAnchor() {
+        return MoeAnchorResolver.bestRoutineAnchor(this);
+    }
+
+    public RoutineIntent getRoutineIntent() {
+        return this.routineIntent;
+    }
+
+    public void setRoutineIntent(RoutineIntent routineIntent) {
+        this.routineIntent = routineIntent == null ? RoutineIntent.IDLE : routineIntent;
+    }
+
+    public RoutineIntent getEffectiveRoutineIntent() {
+        if (this.routineIntent != RoutineIntent.IDLE) {
+            return this.routineIntent;
+        }
+        if (this.getStress() >= 10.0F && this.getRelaxation() < this.getStress()) {
+            return RoutineIntent.RELAX;
+        }
+        if (this.getFoodLevel() <= 6.0F) {
+            return RoutineIntent.GATHER;
+        }
+        return RoutineIntent.IDLE;
+    }
+
+    public boolean moveTowardCurrentRoutineAnchor(double speed) {
+        java.util.Optional<MoeAnchor> anchor = this.currentRoutineAnchor();
+        if (anchor.isEmpty() || anchor.get().dimPos().getDim() != this.level().dimension()) {
+            return false;
+        }
+        Vec3 destination = Vec3.atBottomCenterOf(anchor.get().dimPos().getPos());
+        this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, speed);
+        return true;
+    }
+
+    public boolean sleepAtHome(HideUntil until) {
+        if (!this.canSleepAtHome()) {
+            return false;
+        }
+        this.setTimeSinceSleep(0);
+        this.addRelaxation(0.5F);
+        this.setStress(Math.max(0.0F, this.getStress() - 0.5F));
+        return this.hide(until) != null;
+    }
+
+    public boolean canSleepAtHome() {
+        if (!(this.level() instanceof ServerLevel level) || !this.hasHome() || this.getHome().isEmpty()) {
+            return false;
+        }
+        BlockPos homePos = this.getHome().getPos();
+        return this.getHome().getDim() == level.dimension()
+                && this.blockPosition().equals(homePos)
+                && level.isEmptyBlock(homePos);
+    }
+
+    public Vec3 idleRoutineDestination() {
+        if (this.isFollowing() || this.isSitting() || this.isPassenger()) {
+            return null;
+        }
+        Vec3 socialDestination = this.idleSocialOrbitDestination();
+        if (socialDestination != null) {
+            return socialDestination;
+        }
+        return this.idleAnchorDestination();
+    }
+
+    private boolean updateIdleRoutineMovement() {
+        if (this.getEffectiveRoutineIntent() == RoutineIntent.SLEEP && this.sleepAtHome(HideUntil.EXPOSED)) {
+            return true;
+        }
+        Vec3 destination = this.idleRoutineDestination();
+        if (destination == null || this.position().distanceToSqr(destination) <= 1.44D) {
+            return false;
+        }
+        this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, this.idleRoutineMoveSpeed());
+        this.applyIdleRoutineWellbeing();
+        return true;
+    }
+
+    private Vec3 idleSocialOrbitDestination() {
+        List<Moe> nearby = MoeSocialContext.nearby(this, IDLE_SOCIAL_RADIUS).stream()
+                .filter(other -> !other.isFollowing() && !other.isSitting() && !other.isPassenger())
+                .toList();
+        if (nearby.isEmpty()) {
+            return null;
+        }
+        Vec3 center = this.position();
+        for (Moe other : nearby) {
+            center = center.add(other.position());
+        }
+        center = center.scale(1.0D / (nearby.size() + 1));
+        double radius = Math.min(4.5D, 2.25D + nearby.size() * 0.35D);
+        return this.orbitDestination(center, radius, 1.75D);
+    }
+
+    private Vec3 idleAnchorDestination() {
+        return MoeAnchorResolver.nearbyRoutineAnchor(this, IDLE_ANCHOR_RADIUS)
+                .map(anchor -> {
+                    Vec3 center = Vec3.atBottomCenterOf(anchor.dimPos().getPos());
+                    double distanceSqr = this.position().distanceToSqr(center);
+                    if (distanceSqr > 6.0D * 6.0D) {
+                        return center;
+                    }
+                    return this.orbitDestination(center, 2.75D, 1.25D);
+                })
+                .orElse(null);
+    }
+
+    private Vec3 orbitDestination(Vec3 center, double radius, double tangentStep) {
+        Vec3 flat = new Vec3(this.getX() - center.x, 0.0D, this.getZ() - center.z);
+        if (flat.lengthSqr() < 0.0001D) {
+            double angle = Math.floorMod(this.getUUID().getLeastSignificantBits(), 6283L) / 1000.0D;
+            flat = new Vec3(Math.cos(angle), 0.0D, Math.sin(angle));
+        }
+        Vec3 radial = flat.normalize();
+        Vec3 tangent = new Vec3(-radial.z, 0.0D, radial.x);
+        return new Vec3(center.x, this.getY(), center.z)
+                .add(radial.scale(radius))
+                .add(tangent.scale(tangentStep));
+    }
+
+    private double idleRoutineMoveSpeed() {
+        return 0.55D + Math.min(0.35D, MoeSocialRules.socialMoveSpeed(this.getDere()) * 0.2D);
+    }
+
+    private void applyIdleRoutineWellbeing() {
+        if (this.getEffectiveRoutineIntent() == RoutineIntent.RELAX
+                && this.currentRoutineAnchor().map(anchor -> anchor.type() == MoeAnchorType.GARDEN).orElse(false)) {
+            this.addRelaxation(0.02F);
+            if (this.getRelaxation() >= 1.0F && this.getStress() > 0.0F) {
+                this.addStress(-0.01F);
+            }
+        }
+    }
+
+    private boolean isRoutineDriftDestination(Vec3 destination) {
+        Vec3 routine = this.followRoutinePosition();
+        return routine != null && routine.distanceToSqr(destination) < 0.0001D;
+    }
+
+    private double followMoveSpeed() {
+        double speed = this.getFollowIntent() == PlayerMovementIntent.PARTY_INVITE ? 1.05D : 1.2D;
+        if (this.getStress() >= 16.0F) {
+            speed *= 0.75D;
+        }
+        return speed;
     }
 
     public void updateSleepState() {
     }
 
-    private void updateBloodTypeSocialState() {
+    private boolean updateBloodTypeSocialState() {
         MoeSocialContext context = MoeSocialContext.find(this, 8.0D).orElse(null);
         if (context == null) {
-            return;
+            return false;
         }
         Moe socialTarget = context.target();
         MoeSocialRules.SocialSignal strongest = context.signal();
         this.getLookControl().setLookAt(socialTarget, 30.0F, 30.0F);
         MoeSocialRules.SocialVisual visual = context.visual();
         MoeSocialRules.DereReaction reaction = context.reaction();
-        this.updateBloodTypeSocialMovement(socialTarget, strongest);
-        this.updateDereSocialReaction(socialTarget, reaction);
+        boolean moved = this.updateBloodTypeSocialMovement(socialTarget, strongest);
+        moved = this.updateDereSocialReaction(socialTarget, reaction) || moved;
         this.spawnBloodTypeSocialParticles(socialTarget, visual);
         this.spawnDereSocialParticles(reaction);
         boolean tense = strongest.tension() > strongest.affinity();
@@ -958,11 +1291,12 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
             this.addStress(0.05F);
         }
         this.applyDereSocialFeeling(reaction);
+        return moved;
     }
 
-    private void updateBloodTypeSocialMovement(Moe socialTarget, MoeSocialRules.SocialSignal signal) {
+    private boolean updateBloodTypeSocialMovement(Moe socialTarget, MoeSocialRules.SocialSignal signal) {
         if (this.isFollowing() || this.isSitting() || this.isPassenger()) {
-            return;
+            return false;
         }
         double distanceSqr = this.distanceToSqr(socialTarget);
         double stepDistance = MoeSocialRules.socialStepDistance(this.getDere());
@@ -974,6 +1308,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
                 if (distance > 0.0001D) {
                     Vec3 destination = this.position().add(toward.normalize().scale(Math.min(stepDistance, distance - 1.5D)));
                     this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, speed);
+                    return true;
                 }
             }
             case AVOID -> {
@@ -983,17 +1318,19 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
                 }
                 Vec3 destination = this.position().add(away.normalize().scale(stepDistance));
                 this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, speed);
+                return true;
             }
             case IDLE -> {
             }
         }
+        return false;
     }
 
-    private void updateDereSocialReaction(Moe socialTarget, MoeSocialRules.DereReaction reaction) {
+    private boolean updateDereSocialReaction(Moe socialTarget, MoeSocialRules.DereReaction reaction) {
         if (this.isFollowing() || this.isSitting() || this.isPassenger()) {
-            return;
+            return false;
         }
-        switch (reaction) {
+        return switch (reaction) {
             case CLING -> moveToward(socialTarget, MoeSocialRules.socialStepDistance(this.getDere()) * 1.25D, 1.25D, 0.75D);
             case FLUSTER_RETREAT -> moveAwayFrom(socialTarget, 3.0D, MoeSocialRules.socialMoveSpeed(this.getDere()));
             case SHY_RETREAT -> moveAwayFrom(socialTarget, 2.5D, 0.8D);
@@ -1005,28 +1342,31 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
                 Vec3 side = new Vec3(-around.z, 0.0D, around.x).normalize().scale(2.0D);
                 Vec3 destination = this.position().add(side);
                 this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, MoeSocialRules.socialMoveSpeed(this.getDere()));
+                yield true;
             }
-            case CELEBRATE, OBSERVE, NONE -> {
-            }
-        }
+            case CELEBRATE, OBSERVE, NONE -> false;
+        };
     }
 
-    private void moveToward(Moe socialTarget, double stepDistance, double speed, double personalSpace) {
+    private boolean moveToward(Moe socialTarget, double stepDistance, double speed, double personalSpace) {
         Vec3 toward = socialTarget.position().subtract(this.position());
         double distance = toward.length();
         if (distance > personalSpace && distance > 0.0001D) {
             Vec3 destination = this.position().add(toward.normalize().scale(Math.min(stepDistance, distance - personalSpace)));
             this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, speed);
+            return true;
         }
+        return false;
     }
 
-    private void moveAwayFrom(Moe socialTarget, double stepDistance, double speed) {
+    private boolean moveAwayFrom(Moe socialTarget, double stepDistance, double speed) {
         Vec3 away = this.position().subtract(socialTarget.position());
         if (away.lengthSqr() < 0.0001D) {
             away = new Vec3(this.random.nextDouble() - 0.5D, 0.0D, this.random.nextDouble() - 0.5D);
         }
         Vec3 destination = this.position().add(away.normalize().scale(stepDistance));
         this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, speed);
+        return true;
     }
 
     private void applyDereSocialFeeling(MoeSocialRules.DereReaction reaction) {

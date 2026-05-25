@@ -4,6 +4,7 @@ import block_party.BlockParty;
 import block_party.items.CellPhoneItem;
 import block_party.items.CustomSpawnEggItem;
 import block_party.items.BokkenItem;
+import block_party.items.InviteItem;
 import block_party.items.LetterItem;
 import block_party.items.MaskedSamuraiItem;
 import block_party.items.MoeBlockItem;
@@ -42,6 +43,7 @@ public final class CustomItems {
                 "bento_box",
                 "calligraphy_brush",
                 "cupcake",
+                "invite",
                 "letter",
                 "masked_samurai_kabuto",
                 "music_disc_anteater_sanctuary",
@@ -75,6 +77,7 @@ public final class CustomItems {
             case "bento_box" -> ITEMS.registerItem(id, properties -> new SimpleSortableItem(properties.food(food(11, 1.9F)), 10));
             case "calligraphy_brush" -> ITEMS.registerItem(id, properties -> new SimpleSortableItem(properties.stacksTo(1).durability(64), 5));
             case "cupcake" -> ITEMS.registerItem(id, properties -> new SimpleSortableItem(properties.food(food(2, 0.1F)), 10));
+            case "invite" -> ITEMS.registerItem(id, InviteItem::new);
             case "letter" -> ITEMS.registerItem(id, LetterItem::new);
             case "onigiri" -> ITEMS.registerItem(id, properties -> new SimpleSortableItem(properties.food(food(2, 0.5F)), 10));
             case "pink_bow" -> ITEMS.registerItem(id, properties -> new SimpleSortableItem(properties, 10));

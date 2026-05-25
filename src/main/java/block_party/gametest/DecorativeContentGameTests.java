@@ -14,6 +14,7 @@ import block_party.blocks.WisteriaLeavesBlock;
 import block_party.blocks.WisteriaVineBodyBlock;
 import block_party.blocks.WisteriaVineTipBlock;
 import block_party.registry.CustomBlocks;
+import block_party.registry.CustomItems;
 import block_party.registry.CustomWorldGen;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -25,7 +26,13 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.BonemealableBlock;
@@ -130,6 +137,26 @@ public final class DecorativeContentGameTests {
         assertEquals(helper, true, CustomBlocks.WISTERIA_VINE_TIP.get() instanceof WisteriaVineTipBlock, "wisteria vine tip class");
         assertEquals(helper, true, CustomBlocks.WISTERIA_VINE_BODY.get() instanceof GrowingPlantBodyBlock, "wisteria vine body growing plant");
         assertEquals(helper, true, CustomBlocks.WISTERIA_VINE_TIP.get() instanceof GrowingPlantHeadBlock, "wisteria vine tip growing plant");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void writingTableTurnsPaperIntoInvite(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = helper.absolutePos(new BlockPos(1, 1, 1));
+        level.setBlock(pos, CustomBlocks.WRITING_TABLE.get().defaultBlockState(), 3);
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        ItemStack paper = new ItemStack(Items.PAPER, 2);
+        player.setItemInHand(InteractionHand.MAIN_HAND, paper);
+
+        InteractionResult result = WritingTableBlock.writeInvite(paper, level, player);
+
+        assertEquals(helper, InteractionResult.SUCCESS, result, "writing table paper interaction");
+        assertEquals(helper, 1, paper.getCount(), "remaining paper count");
+        if (!player.getInventory().contains(new ItemStack(CustomItems.ENTRIES.get("invite").get()))) {
+            helper.fail("Expected writing table to add an invite to the player inventory");
+            return;
+        }
         helper.succeed();
     }
 

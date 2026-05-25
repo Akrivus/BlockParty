@@ -13,6 +13,7 @@ public final class CustomTags {
     public static final TagKey<Block> SAKURA_WOOD = block("sakura_wood");
     public static final TagKey<Block> SHRINE_BASE_BLOCKS = block("shrine_base_blocks");
     public static final TagKey<Block> SPAWNS_FIREFLIES = block("spawns_fireflies");
+    public static final TagKey<Block> TSUKUMOGAMI_CANDIDATES = block("tsukumogami_candidates");
     public static final TagKey<Block> WISTERIA = block("wisteria");
     public static final TagKey<Block> HAS_CAT_FEATURES = block("moe/has_cat_features");
     public static final TagKey<Block> HAS_FESTIVE_TEXTURES = block("moe/has_festive_textures");

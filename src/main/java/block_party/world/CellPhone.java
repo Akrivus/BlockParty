@@ -3,7 +3,13 @@ package block_party.world;
 import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
 import block_party.db.records.NPC;
+import block_party.db.records.PlayerRelationship;
 import block_party.entities.Moe;
+import block_party.entities.movement.PlayerMovementIntent;
+import block_party.entities.movement.PlayerMovementContext;
+import block_party.entities.movement.PlayerMovementDecision;
+import block_party.entities.movement.PlayerMovementDecisions;
+import block_party.entities.movement.PlayerMovementRequest;
 import block_party.network.payload.DialogueOpenPayload;
 import block_party.network.payload.NpcCallPayload;
 import block_party.network.payload.NpcDetailPayload;
@@ -42,8 +48,11 @@ public final class CellPhone {
     private final float callerYRot;
     private final long npcId;
     private NPC npc;
+    private PlayerRelationship relationship;
+    private PlayerMovementDecision decision;
     private ServerLevel npcLevel;
     private CallFailure failure = CallFailure.UNREACHABLE;
+    private boolean terminalFailure;
 
     public CellPhone(BlockPartyDB db, ServerLevel callerLevel, UUID player, Vec3 callerPos, float callerYRot, long npcId) {
         this.db = db;
@@ -79,6 +88,11 @@ public final class CellPhone {
             send(player, npcId, immediate);
             return;
         }
+        if (call.failed()) {
+            call.release();
+            sendFailure(db, player, npcId, call.failure);
+            return;
+        }
 
         PENDING_CALLS.add(new PendingCall(player, call, MAX_PENDING_TICKS));
     }
@@ -111,6 +125,12 @@ public final class CellPhone {
                 iterator.remove();
                 continue;
             }
+            if (pending.call().failed()) {
+                pending.call().release();
+                sendFailure(pending.call().db, pending.player(), pending.call().npcId, pending.call().failure);
+                iterator.remove();
+                continue;
+            }
 
             if (pending.tick()) {
                 pending.call().release();
@@ -130,26 +150,39 @@ public final class CellPhone {
     }
 
     private boolean begin() {
-        Optional<NPC> row = this.db.loadPhoneContactNpc(this.player, this.npcId);
+        Optional<NPC> row = this.db.findNpcSafe(this.npcId);
         if (row.isEmpty()) {
-            this.failure = this.db.findNpcSafe(this.npcId).isPresent() ? CallFailure.ESTRANGED : CallFailure.NOT_IN_SERVICE;
+            this.fail(CallFailure.NOT_IN_SERVICE);
+            return false;
+        }
+        Optional<PlayerRelationship> foundRelationship = this.db.findPlayerRelationshipSafe(this.npcId, this.player);
+        if (foundRelationship.isEmpty() || !foundRelationship.get().phoneContact()) {
+            this.fail(CallFailure.ESTRANGED);
             return false;
         }
         if (row.get().dead()) {
-            this.failure = CallFailure.DEAD;
+            this.fail(CallFailure.DEAD);
             return false;
         }
         if (row.get().hiding()) {
-            this.failure = CallFailure.HIDING;
+            this.fail(CallFailure.HIDING);
             return false;
         }
 
         this.npc = row.get();
+        this.relationship = foundRelationship.get();
         this.npcLevel = this.callerLevel.getServer().getLevel(this.npc.dimension());
         if (this.npcLevel == null) {
-            this.failure = CallFailure.NOT_IN_SERVICE;
+            this.fail(CallFailure.NOT_IN_SERVICE);
             return false;
         }
+
+        PlayerMovementDecision movementDecision = this.decide(null);
+        if (movementDecision.outcome() != PlayerMovementDecision.Outcome.ACCEPTED) {
+            this.fail(CallFailure.from(movementDecision));
+            return false;
+        }
+        this.decision = movementDecision;
 
         ForcedChunk.queue(this.npcId, this.npcLevel, new ChunkPos(this.npc.pos()));
         return true;
@@ -163,11 +196,36 @@ public final class CellPhone {
         if (live.isEmpty()) {
             return Optional.empty();
         }
+        PlayerMovementDecision movementDecision = this.decide(live.get());
+        if (movementDecision.outcome() != PlayerMovementDecision.Outcome.ACCEPTED) {
+            this.fail(CallFailure.from(movementDecision));
+            return Optional.empty();
+        }
+        this.decision = movementDecision;
         return this.teleport(this.npc, live.get());
     }
 
     private void release() {
         ForcedChunk.release(this.npcId);
+    }
+
+    private PlayerMovementDecision decide(Moe loaded) {
+        PlayerMovementRequest request = PlayerMovementRequest.phoneCall(
+                this.player,
+                this.npcId,
+                this.callerLevel.dimension(),
+                this.callerPos,
+                this.callerYRot);
+        return PlayerMovementDecisions.decide(PlayerMovementContext.from(request, this.npc, this.relationship, loaded));
+    }
+
+    private void fail(CallFailure failure) {
+        this.failure = failure;
+        this.terminalFailure = true;
+    }
+
+    private boolean failed() {
+        return this.terminalFailure;
     }
 
     private static void sendFailure(BlockPartyDB db, ServerPlayer player, long npcId, CallFailure failure) {
@@ -201,8 +259,12 @@ public final class CellPhone {
             called = changed;
         }
 
-        called.setFollowing(true);
         called.setDialogueTarget(this.player);
+        called.startFollowSession(
+                this.player,
+                PlayerMovementIntent.PHONE_CALL,
+                this.decision.followTicks(),
+                this.decision.canChangeDimension());
         try {
             npc.updateFromMoe(this.db, this.callerLevel, called);
         } catch (SQLException exception) {
@@ -278,6 +340,8 @@ public final class CellPhone {
         DEAD("gui.block_party.call_result.dead"),
         ESTRANGED("gui.block_party.call_result.estranged"),
         HIDING("gui.block_party.call_result.hiding"),
+        VOICEMAIL("gui.block_party.call_result.voicemail"),
+        BUSY("gui.block_party.call_result.busy"),
         UNREACHABLE("gui.block_party.call_result.unreachable");
 
         private final String translationKey;
@@ -295,6 +359,16 @@ public final class CellPhone {
                 return new Speaker(Speaker.Identity.NARRATOR, Speaker.Position.CENTER, "DEFAULT", "NORMAL", false, null, 1.0F);
             }
             return new Speaker(Speaker.Identity.CHARACTER, Speaker.Position.LEFT, "DEFAULT", this == DEAD ? "SAD" : "NORMAL", false, null, 1.0F);
+        }
+
+        private static CallFailure from(PlayerMovementDecision decision) {
+            if (decision.reason() == PlayerMovementDecision.Reason.BUSY) {
+                return BUSY;
+            }
+            if (decision.outcome() == PlayerMovementDecision.Outcome.VOICEMAIL) {
+                return VOICEMAIL;
+            }
+            return UNREACHABLE;
         }
     }
 }

@@ -4,6 +4,7 @@ import block_party.BlockParty;
 import block_party.entities.Moe;
 import block_party.entities.MoeInHiding;
 import block_party.entities.goals.HideUntil;
+import block_party.entities.movement.RoutineIntent;
 import block_party.registry.CustomBlocks;
 import block_party.registry.CustomEntities;
 import block_party.db.BlockPartyDB;
@@ -85,6 +86,7 @@ public final class EntityDataGameTests {
         moe.setTimeSinceSleep(14);
         moe.setHasHome(true);
         moe.setHome(new DimBlockPos(Level.OVERWORLD, new BlockPos(9, 10, 11)));
+        moe.setRoutineIntent(RoutineIntent.CHORE);
 
         Moe loaded = new Moe(CustomEntities.MOE.get(), helper.getLevel());
         loaded.load(moe.saveWithoutId(new CompoundTag()));
@@ -121,6 +123,7 @@ public final class EntityDataGameTests {
         assertEquals(helper, 14, loaded.getTimeSinceSleep(), "Moe time since sleep");
         assertEquals(helper, true, loaded.hasHome(), "Moe has home");
         assertEquals(helper, new BlockPos(9, 10, 11), loaded.getHome().getPos(), "Moe home pos");
+        assertEquals(helper, RoutineIntent.CHORE, loaded.getRoutineIntent(), "Moe routine intent");
         assertEquals(helper, Items.DIAMOND, loaded.getInventory().getItem(0).getItem(), "Moe inventory item");
         assertEquals(helper, 3, loaded.getInventory().getItem(0).getCount(), "Moe inventory count");
         helper.succeed();
@@ -155,6 +158,7 @@ public final class EntityDataGameTests {
         assertHasKey(helper, tag, "Age");
         assertHasKey(helper, tag, "HasHome");
         assertHasKey(helper, tag, "Home");
+        assertHasKey(helper, tag, "RoutineIntent");
         assertHasKey(helper, tag, "TimeUntilHungry");
         assertHasKey(helper, tag, "TimeUntilLonely");
         assertHasKey(helper, tag, "TimeUntilStress");

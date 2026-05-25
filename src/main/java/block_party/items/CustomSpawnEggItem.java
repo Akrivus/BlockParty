@@ -2,6 +2,7 @@ package block_party.items;
 
 import block_party.entities.Moe;
 import block_party.entities.MoeSpawner;
+import block_party.db.DimBlockPos;
 import block_party.registry.CustomTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -68,6 +69,8 @@ public final class CustomSpawnEggItem extends Item implements SortableItem {
 
         BlockPos spawnPos = sourcePos.relative(face);
         Moe moe = MoeSpawner.spawn(level, spawnPos, sourceState, player, tileEntityData, created -> {
+            created.setHasHome(true);
+            created.setHome(new DimBlockPos(level.dimension(), sourcePos));
         });
         if (moe == null) {
             return null;

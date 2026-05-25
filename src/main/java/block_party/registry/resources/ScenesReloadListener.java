@@ -14,10 +14,19 @@ import block_party.scene.Speaker;
 import block_party.scene.actions.CookieAction;
 import block_party.scene.actions.CounterAction;
 import block_party.scene.actions.CreateVoicemailAction;
+import block_party.scene.actions.ClearRoutineIntentAction;
+import block_party.scene.actions.ClearFollowSessionAction;
 import block_party.scene.actions.EndAction;
+import block_party.scene.actions.GoToAnchorAction;
 import block_party.scene.actions.HideAction;
 import block_party.scene.actions.SendDialogueAction;
 import block_party.scene.actions.SendResponseAction;
+import block_party.scene.actions.SetHomeToAnchorAction;
+import block_party.scene.actions.SetRoutineIntentAction;
+import block_party.scene.actions.SleepAtHomeAction;
+import block_party.scene.actions.StartFollowSessionAction;
+import block_party.entities.movement.PlayerMovementIntent;
+import block_party.entities.movement.RoutineIntent;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -185,8 +194,27 @@ public final class ScenesReloadListener implements PreparableReloadListener {
                     parseSpeaker(payload.has("speaker") && payload.get("speaker").isJsonObject() ? payload.getAsJsonObject("speaker") : new JsonObject()),
                     payload.has("sound") ? resource(GsonHelper.getAsString(payload, "sound", "")) : null,
                     voicemailDelayMillis(payload));
+            case "start_follow_session" -> new StartFollowSessionAction(
+                    parseMovementIntent(GsonHelper.getAsString(payload, "intent", "follow_request")),
+                    Math.max(0, GsonHelper.getAsInt(payload, "ticks", 20 * 60)),
+                    GsonHelper.getAsBoolean(payload, "can_change_dimension", false),
+                    GsonHelper.getAsBoolean(payload, "trigger_scene", false));
+            case "go_to_anchor" -> new GoToAnchorAction(GsonHelper.getAsDouble(payload, "speed", 1.0D));
+            case "set_home_to_anchor" -> SetHomeToAnchorAction.INSTANCE;
+            case "set_routine_intent" -> new SetRoutineIntentAction(RoutineIntent.fromValue(GsonHelper.getAsString(payload, "intent", "idle")));
+            case "clear_routine_intent" -> ClearRoutineIntentAction.INSTANCE;
+            case "sleep_at_home" -> new SleepAtHomeAction(HideUntil.EXPOSED.fromValue(GsonHelper.getAsString(payload, "until", "exposed")));
+            case "clear_follow_session", "wait", "dismiss" -> ClearFollowSessionAction.INSTANCE;
             default -> EndAction.INSTANCE;
         };
+    }
+
+    private static PlayerMovementIntent parseMovementIntent(String value) {
+        try {
+            return PlayerMovementIntent.valueOf(value.toUpperCase(java.util.Locale.ROOT));
+        } catch (IllegalArgumentException exception) {
+            return PlayerMovementIntent.FOLLOW_REQUEST;
+        }
     }
 
     private static long voicemailDelayMillis(JsonObject json) {

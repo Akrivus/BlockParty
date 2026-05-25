@@ -102,6 +102,12 @@ public final class CellPhoneServiceGameTests {
             helper.fail("Expected Nether Moe spawn setup to succeed");
             return;
         }
+        try {
+            db.setPlayerFeelings(moe.getDatabaseID(), owner, 0.0F, 18.0F);
+        } catch (SQLException exception) {
+            helper.fail("Expected cross-dimension loyalty setup to succeed: " + exception.getMessage());
+            return;
+        }
 
         BlockPos caller = helper.absolutePos(new BlockPos(4, 1, 1));
         Moe called = db.callOwnedNpc(callerLevel, owner, caller, moe.getDatabaseID()).orElse(null);
@@ -162,6 +168,7 @@ public final class CellPhoneServiceGameTests {
         }
         try {
             db.setPhoneContact(moe.getDatabaseID(), contact, true);
+            db.setPlayerFeelings(moe.getDatabaseID(), contact, 0.0F, 8.0F);
         } catch (SQLException exception) {
             helper.fail("Expected phone contact setup to succeed: " + exception.getMessage());
             return;
@@ -177,6 +184,34 @@ public final class CellPhoneServiceGameTests {
             return;
         }
         helper.kill(called);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void lowLoyaltyPhoneContactDoesNotAnswer(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = BlockPartyDB.get(level);
+        UUID owner = new UUID(1313L, 2313L);
+        UUID contact = new UUID(1314L, 2314L);
+        Moe moe = spawnOwnedMoe(helper, level, owner, new BlockPos(1, 1, 1));
+        if (moe == null) {
+            return;
+        }
+        try {
+            db.setPhoneContact(moe.getDatabaseID(), contact, true);
+            db.setPlayerFeelings(moe.getDatabaseID(), contact, 0.0F, 2.0F);
+        } catch (SQLException exception) {
+            helper.fail("Expected low-loyalty contact setup to succeed: " + exception.getMessage());
+            return;
+        }
+
+        BlockPos original = moe.blockPosition();
+        Moe called = db.callPhoneContactNpc(level, contact, helper.absolutePos(new BlockPos(4, 1, 1)), moe.getDatabaseID()).orElse(null);
+        if (called != null || moe.isFollowing() || !moe.blockPosition().equals(original)) {
+            helper.fail("Expected low-loyalty phone contact to go unanswered without moving Moe");
+            return;
+        }
+        helper.kill(moe);
         helper.succeed();
     }
 

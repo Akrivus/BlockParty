@@ -8,12 +8,16 @@ import block_party.entities.goals.HideUntil;
 import block_party.items.CustomSpawnEggItem;
 import block_party.registry.CustomBlocks;
 import block_party.registry.resources.ScenesReloadListener;
+import block_party.entities.movement.PlayerMovementIntent;
+import block_party.entities.movement.RoutineIntent;
 import block_party.scene.Response;
 import block_party.scene.SceneAction;
 import block_party.scene.SceneTrigger;
 import block_party.scene.SceneVariables;
 import block_party.db.voicemail.Voicemails;
 import com.google.gson.JsonParser;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
@@ -119,6 +123,26 @@ public final class SceneGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void movementSceneTriggersParse(GameTestHelper helper) {
+        assertEquals(helper, SceneTrigger.FOLLOW_STARTED, parseScene("""
+                {"trigger":"block_party:follow_started","filters":["block_party:always"],"actions":[]}
+                """).trigger(), "follow started scene trigger");
+        assertEquals(helper, SceneTrigger.FOLLOW_ENDED, parseScene("""
+                {"trigger":"block_party:follow_ended","filters":["block_party:always"],"actions":[]}
+                """).trigger(), "follow ended scene trigger");
+        assertEquals(helper, SceneTrigger.PARTY_INVITE, parseScene("""
+                {"trigger":"block_party:party_invite","filters":["block_party:always"],"actions":[]}
+                """).trigger(), "party invite scene trigger");
+        assertEquals(helper, SceneTrigger.WAIT, parseScene("""
+                {"trigger":"block_party:wait","filters":["block_party:always"],"actions":[]}
+                """).trigger(), "wait scene trigger");
+        assertEquals(helper, SceneTrigger.DISMISS, parseScene("""
+                {"trigger":"block_party:dismiss","filters":["block_party:always"],"actions":[]}
+                """).trigger(), "dismiss scene trigger");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void structuredSceneObservationFactoriesMatchActiveMoeState(GameTestHelper helper) {
         Moe moe = spawnMoe(helper, new UUID(512L, 12L));
         moe.setHealth(12.0F);
@@ -190,6 +214,54 @@ public final class SceneGameTests {
         assertEquals(helper, InteractionResult.SUCCESS, result, "owner right-click interaction result");
         if (!moe.hasDialogue()) {
             helper.fail("Expected owner right-click interaction to open bundled dialogue");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void movementSceneFiltersMatchFollowSessionAndTargetRelationship(GameTestHelper helper) {
+        UUID owner = new UUID(514L, 14L);
+        UUID target = new UUID(515L, 15L);
+        Moe moe = spawnMoe(helper, owner);
+        moe.setDialogueTarget(target);
+        moe.startFollowSession(target, PlayerMovementIntent.PHONE_CALL, 120, true, false);
+        try {
+            BlockPartyDB db = BlockPartyDB.get(helper.getLevel());
+            db.setPhoneContact(moe.getDatabaseID(), target, true);
+            db.setYearbookSigned(moe.getDatabaseID(), target, true);
+            db.setPlayerFeelings(moe.getDatabaseID(), target, 4.0F, 9.0F);
+        } catch (SQLException exception) {
+            helper.fail("Expected relationship setup to succeed: " + exception.getMessage());
+            return;
+        }
+
+        ScenesReloadListener.ParsedScene accepts = parseScene("""
+                {"trigger":"block_party:phone_call","filters":[
+                  "block_party:is_following",
+                  "block_party:can_follow_across_dimensions",
+                  {"type":"block_party:follow_intent","filter":{"value":"phone_call"}},
+                  {"type":"block_party:follow_ticks_remaining","filter":{"operation":"at_least","value":100}},
+                  {"type":"block_party:follow_player_is_target"},
+                  {"type":"block_party:target_phone_contact"},
+                  {"type":"block_party:target_yearbook_signed"},
+                  {"type":"block_party:target_affection","filter":{"operation":"at_least","value":4}},
+                  {"type":"block_party:target_loyalty","filter":{"operation":"at_least","value":9}}
+                ],"actions":[]}
+                """);
+        ScenesReloadListener.ParsedScene rejects = parseScene("""
+                {"trigger":"block_party:phone_call","filters":[
+                  {"type":"block_party:target_loyalty","filter":{"operation":"less_than","value":3}}
+                ],"actions":[]}
+                """);
+
+        if (!accepts.scene().fulfills(moe)) {
+            helper.fail("Expected movement scene filters to accept follow session and target relationship state");
+            return;
+        }
+        if (rejects.scene().fulfills(moe)) {
+            helper.fail("Expected movement scene filters to reject mismatched target relationship state");
             return;
         }
         helper.kill(moe);
@@ -399,6 +471,164 @@ public final class SceneGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void movementSceneActionsStartAndClearFollowSession(GameTestHelper helper) {
+        UUID owner = new UUID(516L, 16L);
+        UUID target = new UUID(517L, 17L);
+        Moe moe = spawnMoe(helper, owner);
+        moe.setDialogueTarget(target);
+        SceneAction start = parseAction("""
+                {"type":"block_party:start_follow_session","action":{"intent":"party_invite","ticks":80,"can_change_dimension":true}}
+                """);
+        SceneAction clear = parseAction("""
+                {"type":"block_party:clear_follow_session"}
+                """);
+
+        start.apply(moe);
+        if (!moe.isFollowing()
+                || !target.equals(moe.getFollowPlayerUUID())
+                || moe.getFollowIntent() != PlayerMovementIntent.PARTY_INVITE
+                || moe.getFollowTicksRemaining() != 80
+                || !moe.canFollowAcrossDimensions()) {
+            helper.fail("Expected start_follow_session action to create a target-bound party invite session");
+            return;
+        }
+        clear.apply(moe);
+        if (moe.isFollowing()) {
+            helper.fail("Expected clear_follow_session action to dismiss the active session");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void anchorSceneFiltersMatchCurrentRoutineAnchor(GameTestHelper helper) {
+        UUID owner = new UUID(518L, 18L);
+        Moe moe = spawnMoe(helper, owner);
+        ServerLevel level = helper.getLevel();
+        try {
+            insertSimpleDataBlock(BlockPartyDB.get(level), "GardenLanterns", owner, level, helper.absolutePos(new BlockPos(5, 1, 1)));
+        } catch (SQLException exception) {
+            helper.fail("Expected anchor filter setup to succeed: " + exception.getMessage());
+            return;
+        }
+
+        ScenesReloadListener.ParsedScene accepts = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                    {"type":"block_party:has_anchor","filter":{"type":"garden"}},
+                    {"type":"block_party:anchor_type","filter":{"value":"garden"}},
+                    {"type":"block_party:anchor_distance","filter":{"operation":"at_most","value":8}},
+                    {"type":"block_party:anchor_priority","filter":{"operation":"at_least","value":70}},
+                    {"type":"block_party:anchor_player_owned"}
+                ],"actions":[]}
+                """);
+        ScenesReloadListener.ParsedScene rejects = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                    {"type":"block_party:anchor_type","filter":{"value":"shrine"}}
+                ],"actions":[]}
+                """);
+
+        if (!accepts.scene().fulfills(moe)) {
+            helper.fail("Expected anchor scene filters to accept current garden anchor");
+            return;
+        }
+        if (rejects.scene().fulfills(moe)) {
+            helper.fail("Expected anchor scene filters to reject mismatched anchor type");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void anchorSceneActionsMoveAndSetHomeToAnchor(GameTestHelper helper) {
+        UUID owner = new UUID(519L, 19L);
+        Moe moe = spawnMoe(helper, owner);
+        ServerLevel level = helper.getLevel();
+        BlockPos anchorPos = helper.absolutePos(new BlockPos(6, 1, 1));
+        try {
+            insertSimpleDataBlock(BlockPartyDB.get(level), "GardenLanterns", owner, level, anchorPos);
+        } catch (SQLException exception) {
+            helper.fail("Expected anchor action setup to succeed: " + exception.getMessage());
+            return;
+        }
+
+        SceneAction goToAnchor = parseAction("{\"type\":\"block_party:go_to_anchor\",\"action\":{\"speed\":1.25}}");
+        SceneAction setHomeToAnchor = parseAction("{\"type\":\"block_party:set_home_to_anchor\"}");
+
+        goToAnchor.apply(moe);
+        if (!moe.moveTowardCurrentRoutineAnchor(1.0D)) {
+            helper.fail("Expected Moe to have a routine anchor movement target");
+            return;
+        }
+        setHomeToAnchor.apply(moe);
+        if (!moe.hasHome() || !moe.getHome().getPos().equals(anchorPos)) {
+            helper.fail("Expected set_home_to_anchor to promote current anchor into home");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void routineIntentSceneFiltersAndActionsPrepareCommands(GameTestHelper helper) {
+        UUID owner = new UUID(520L, 20L);
+        Moe moe = spawnMoe(helper, owner);
+        moe.setStress(14.0F);
+        moe.setRelaxation(0.0F);
+
+        ScenesReloadListener.ParsedScene inferred = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                    {"type":"block_party:routine_intent","filter":{"value":"relax"}},
+                    {"type":"block_party:explicit_routine_intent","filter":{"value":"idle"}}
+                ],"actions":[]}
+                """);
+        if (!inferred.scene().fulfills(moe)) {
+            helper.fail("Expected routine_intent filter to see inferred relaxation intent");
+            return;
+        }
+
+        SceneAction setGather = parseAction("{\"type\":\"block_party:set_routine_intent\",\"action\":{\"intent\":\"gather\"}}");
+        SceneAction clear = parseAction("{\"type\":\"block_party:clear_routine_intent\"}");
+        setGather.apply(moe);
+        if (moe.getRoutineIntent() != RoutineIntent.GATHER || moe.getEffectiveRoutineIntent() != RoutineIntent.GATHER) {
+            helper.fail("Expected set_routine_intent action to make gather explicit");
+            return;
+        }
+        clear.apply(moe);
+        if (moe.getRoutineIntent() != RoutineIntent.IDLE || moe.getEffectiveRoutineIntent() != RoutineIntent.RELAX) {
+            helper.fail("Expected clear_routine_intent action to restore inferred routine intent");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void sleepAtHomeSceneActionHidesMoeAtHomePosition(GameTestHelper helper) {
+        UUID owner = new UUID(521L, 21L);
+        Moe moe = spawnMoe(helper, owner);
+        ServerLevel level = helper.getLevel();
+        BlockPos home = moe.getHome().getPos();
+        moe.moveToBlock(home);
+        moe.setRoutineIntent(RoutineIntent.SLEEP);
+        moe.setStress(3.0F);
+        moe.setRelaxation(0.0F);
+
+        SceneAction sleep = parseAction("{\"type\":\"block_party:sleep_at_home\",\"action\":{\"until\":\"one_second_passes\"}}");
+        sleep.apply(moe);
+
+        List<MoeInHiding> hidden = level.getEntitiesOfClass(MoeInHiding.class, new AABB(home).inflate(1.0D));
+        if (hidden.size() != 1) {
+            helper.fail("Expected sleep_at_home to hide Moe at home position, got " + hidden.size());
+            return;
+        }
+        assertEquals(helper, home, hidden.getFirst().getAttachPos(), "sleep home attach position");
+        assertEquals(helper, HideUntil.ONE_SECOND_PASSES, hidden.getFirst().getHideUntil(), "sleep hide until");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void socialSceneFiltersMatchNearbyTarget(GameTestHelper helper) {
         UUID owner = new UUID(507L, 7L);
         Moe observer = spawnMoeAt(helper, owner, new BlockPos(1, 1, 1));
@@ -493,6 +723,23 @@ public final class SceneGameTests {
     private static void tickScene(Moe moe, int count) {
         for (int index = 0; index < count; ++index) {
             moe.sceneManager().tick();
+        }
+    }
+
+    private static void insertSimpleDataBlock(BlockPartyDB db, String table, UUID owner, ServerLevel level, BlockPos pos) throws SQLException {
+        Connection connection = db.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                INSERT INTO %s (PosDim, PosX, PosY, PosZ, PlayerUUID)
+                VALUES (?, ?, ?, ?, ?);
+                """.formatted(table))) {
+            statement.setString(1, level.dimension().location().toString());
+            statement.setInt(2, pos.getX());
+            statement.setInt(3, pos.getY());
+            statement.setInt(4, pos.getZ());
+            statement.setString(5, owner.toString());
+            statement.executeUpdate();
+        } finally {
+            db.free(connection);
         }
     }
 

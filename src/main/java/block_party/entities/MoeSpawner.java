@@ -44,6 +44,10 @@ public final class MoeSpawner {
             moe.setPlayerUUID(player);
         }
         configure.accept(moe);
+        if (!moe.hasHome()) {
+            moe.setHasHome(true);
+            moe.setHome(new block_party.db.DimBlockPos(level.dimension(), spawnPos));
+        }
         Resolution resolution = resolve(level, moe, player);
         return resolution == null ? null : resolution.moe();
     }
@@ -82,6 +86,10 @@ public final class MoeSpawner {
             moe.setPlayerUUID(player);
         }
         configure.accept(moe);
+        if (!moe.hasHome()) {
+            moe.setHasHome(true);
+            moe.setHome(new block_party.db.DimBlockPos(level.dimension(), spawnPos));
+        }
         return resolve(level, moe, player);
     }
 

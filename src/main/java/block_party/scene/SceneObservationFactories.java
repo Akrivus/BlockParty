@@ -1,10 +1,15 @@
 package block_party.scene;
 
 import block_party.BlockParty;
+import block_party.db.BlockPartyDB;
+import block_party.db.records.PlayerRelationship;
 import block_party.entities.Moe;
+import block_party.entities.movement.MoeAnchor;
 import block_party.entities.social.MoeSocialContext;
 import com.google.gson.JsonObject;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -39,6 +44,24 @@ public final class SceneObservationFactories {
             case "food_level" -> moe -> compare(moe.getFoodLevel(), json);
             case "loyalty" -> moe -> compare(moe.getLoyalty(), json);
             case "stress" -> moe -> compare(moe.getStress(), json);
+            case "target_affection" -> moe -> targetRelationship(moe).map(relationship -> compare(relationship.affection(), json)).orElse(false);
+            case "target_loyalty" -> moe -> targetRelationship(moe).map(relationship -> compare(relationship.loyalty(), json)).orElse(false);
+            case "target_trust" -> moe -> targetRelationship(moe).map(relationship -> compare(relationship.trust(), json)).orElse(false);
+            case "target_relationship_stress" -> moe -> targetRelationship(moe).map(relationship -> compare(relationship.stress(), json)).orElse(false);
+            case "target_yearbook_signed" -> moe -> targetRelationship(moe).map(PlayerRelationship::yearbookSigned).map(pass -> maybeNegate(pass, json)).orElse(false);
+            case "target_phone_contact" -> moe -> targetRelationship(moe).map(PlayerRelationship::phoneContact).map(pass -> maybeNegate(pass, json)).orElse(false);
+            case "follow_intent" -> moe -> enumMatches(moe.getFollowIntent(), json);
+            case "follow_ticks_remaining" -> moe -> compare(moe.getFollowTicksRemaining(), json);
+            case "follow_player_is_target" -> moe -> maybeNegate(moe.getFollowPlayerUUID().equals(targetPlayerUuid(moe)), json);
+            case "has_anchor" -> moe -> maybeNegate(anchorMatches(moe, json), json);
+            case "anchor_type" -> moe -> currentAnchor(moe).map(anchor -> enumMatches(anchor.type(), json)).orElse(false);
+            case "anchor_distance" -> moe -> currentAnchor(moe).map(anchor -> compare(anchorDistance(moe, anchor), json)).orElse(false);
+            case "anchor_priority" -> moe -> currentAnchor(moe).map(anchor -> compare(anchor.priority(), json)).orElse(false);
+            case "anchor_player_owned" -> moe -> currentAnchor(moe)
+                    .map(anchor -> maybeNegate(anchor.playerUuid() != null && anchor.playerUuid().equals(moe.getPlayerUUID()), json))
+                    .orElse(false);
+            case "routine_intent" -> moe -> enumMatches(moe.getEffectiveRoutineIntent(), json);
+            case "explicit_routine_intent" -> moe -> enumMatches(moe.getRoutineIntent(), json);
             case "counter" -> moe -> counterMatches(moe, json);
             case "has_cookie" -> moe -> cookieMatches(moe, json);
             case "held_item" -> moe -> itemMatches(moe.getItemInHand(hand(json)), json);
@@ -60,6 +83,27 @@ public final class SceneObservationFactories {
             case "player_counter", "player_has_cookie", "family_name" -> FAIL_CLOSED;
             default -> FAIL_CLOSED;
         };
+    }
+
+    private static Optional<MoeAnchor> currentAnchor(Moe moe) {
+        return moe.currentRoutineAnchor();
+    }
+
+    private static boolean anchorMatches(Moe moe, JsonObject json) {
+        Optional<MoeAnchor> anchor = currentAnchor(moe);
+        if (anchor.isEmpty()) {
+            return false;
+        }
+        if (!json.has("type")) {
+            return true;
+        }
+        String expected = GsonHelper.getAsString(json, "type", "");
+        return anchor.get().type().name().equalsIgnoreCase(expected)
+                || anchor.get().type().name().equalsIgnoreCase(expected.substring(expected.indexOf(':') + 1).replace('/', '_').toUpperCase(Locale.ROOT));
+    }
+
+    private static float anchorDistance(Moe moe, MoeAnchor anchor) {
+        return (float) Math.sqrt(anchor.dimPos().getPos().distSqr(moe.blockPosition()));
     }
 
     private static Optional<MoeSocialContext> socialContext(Moe moe, JsonObject json) {
@@ -189,6 +233,18 @@ public final class SceneObservationFactories {
         }
         ServerPlayer target = level.getServer().getPlayerList().getPlayer(moe.getDialogueTarget());
         return target == null ? level.getServer().getPlayerList().getPlayer(moe.getPlayerUUID()) : target;
+    }
+
+    private static Optional<PlayerRelationship> targetRelationship(Moe moe) {
+        if (!(moe.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+            return Optional.empty();
+        }
+        return BlockPartyDB.get(level).findPlayerRelationshipSafe(moe.getDatabaseID(), targetPlayerUuid(moe));
+    }
+
+    private static UUID targetPlayerUuid(Moe moe) {
+        UUID target = moe.getDialogueTarget();
+        return target.getMostSignificantBits() == 0L && target.getLeastSignificantBits() == 0L ? moe.getPlayerUUID() : target;
     }
 
     private static boolean maybeNegate(boolean pass, JsonObject json) {

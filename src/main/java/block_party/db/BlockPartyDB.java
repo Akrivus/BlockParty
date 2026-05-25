@@ -8,6 +8,7 @@ import block_party.db.records.NPC;
 import block_party.db.records.PlayerRelationship;
 import block_party.db.records.Sapling;
 import block_party.db.records.Shrine;
+import block_party.db.records.TsukumogamiCandidate;
 import block_party.entities.Moe;
 import block_party.utils.NBT;
 import block_party.world.CellPhone;
@@ -25,6 +26,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelResource;
@@ -87,6 +90,22 @@ public final class BlockPartyDB extends SavedData {
             statement.execute(dataBlockTableSql("Shrines"));
             statement.execute(dataBlockTableSql("GardenLanterns"));
             statement.execute(dataBlockTableSql("Saplings"));
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS TsukumogamiCandidates (
+                        DatabaseID INTEGER PRIMARY KEY AUTOINCREMENT,
+                        PosDim TEXT NOT NULL DEFAULT 'minecraft:overworld',
+                        PosX INTEGER NOT NULL DEFAULT 0,
+                        PosY INTEGER NOT NULL DEFAULT 0,
+                        PosZ INTEGER NOT NULL DEFAULT 0,
+                        PlayerUUID TEXT NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+                        BlockState INTEGER NOT NULL DEFAULT 0,
+                        TileEntityData TEXT NOT NULL DEFAULT '{}',
+                        CreatedGameTime INTEGER NOT NULL DEFAULT 0,
+                        MatureAtGameTime INTEGER NOT NULL DEFAULT 0,
+                        ShrineDatabaseID INTEGER NOT NULL DEFAULT 0,
+                        UNIQUE(PosDim, PosX, PosY, PosZ)
+                    );
+                    """);
             statement.execute("""
                     CREATE TABLE IF NOT EXISTS Locations (
                         DatabaseID INTEGER PRIMARY KEY,
@@ -680,6 +699,131 @@ public final class BlockPartyDB extends SavedData {
     public record ShrineEntry(long databaseId, BlockPos pos) {
     }
 
+    public List<Shrine> listShrineRows(ResourceKey<Level> dimension) throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID FROM Shrines
+                WHERE PosDim = ?
+                ORDER BY DatabaseID ASC;
+                """)) {
+            statement.setString(1, dimension.location().toString());
+            List<Shrine> rows = new ArrayList<>();
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    rows.add(new Shrine(
+                            result.getLong("DatabaseID"),
+                            readDimBlockPos(result),
+                            readUuid(result, "PlayerUUID")));
+                }
+            }
+            return List.copyOf(rows);
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    public void upsertTsukumogamiCandidate(ServerLevel level, BlockPos pos, UUID player, BlockState state,
+                                           CompoundTag tileEntityData, long createdGameTime, long matureAtGameTime,
+                                           long shrineDatabaseId) throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                INSERT INTO TsukumogamiCandidates (
+                    PosDim, PosX, PosY, PosZ, PlayerUUID, BlockState, TileEntityData,
+                    CreatedGameTime, MatureAtGameTime, ShrineDatabaseID
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(PosDim, PosX, PosY, PosZ) DO UPDATE SET
+                    PlayerUUID = excluded.PlayerUUID,
+                    BlockState = excluded.BlockState,
+                    TileEntityData = excluded.TileEntityData,
+                    CreatedGameTime = excluded.CreatedGameTime,
+                    MatureAtGameTime = excluded.MatureAtGameTime,
+                    ShrineDatabaseID = excluded.ShrineDatabaseID;
+                """)) {
+            statement.setString(1, level.dimension().location().toString());
+            statement.setInt(2, pos.getX());
+            statement.setInt(3, pos.getY());
+            statement.setInt(4, pos.getZ());
+            statement.setString(5, player.toString());
+            statement.setInt(6, Block.getId(state));
+            statement.setString(7, tileEntityData == null ? "{}" : tileEntityData.toString());
+            statement.setLong(8, createdGameTime);
+            statement.setLong(9, matureAtGameTime);
+            statement.setLong(10, shrineDatabaseId);
+            statement.executeUpdate();
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    public List<TsukumogamiCandidate> listMatureTsukumogamiCandidates(long gameTime) throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, BlockState, TileEntityData,
+                       CreatedGameTime, MatureAtGameTime, ShrineDatabaseID
+                FROM TsukumogamiCandidates
+                WHERE MatureAtGameTime <= ?
+                ORDER BY MatureAtGameTime ASC, DatabaseID ASC;
+                """)) {
+            statement.setLong(1, gameTime);
+            List<TsukumogamiCandidate> rows = new ArrayList<>();
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    rows.add(readTsukumogamiCandidate(result));
+                }
+            }
+            return List.copyOf(rows);
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    public java.util.Optional<TsukumogamiCandidate> findTsukumogamiCandidate(ServerLevel level, BlockPos pos) throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, BlockState, TileEntityData,
+                       CreatedGameTime, MatureAtGameTime, ShrineDatabaseID
+                FROM TsukumogamiCandidates
+                WHERE PosDim = ? AND PosX = ? AND PosY = ? AND PosZ = ?
+                LIMIT 1;
+                """)) {
+            statement.setString(1, level.dimension().location().toString());
+            statement.setInt(2, pos.getX());
+            statement.setInt(3, pos.getY());
+            statement.setInt(4, pos.getZ());
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next() ? java.util.Optional.of(readTsukumogamiCandidate(result)) : java.util.Optional.empty();
+            }
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    public void deleteTsukumogamiCandidate(long id) throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM TsukumogamiCandidates WHERE DatabaseID = ?;")) {
+            statement.setLong(1, id);
+            statement.executeUpdate();
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    public void deleteTsukumogamiCandidate(ServerLevel level, BlockPos pos) throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                DELETE FROM TsukumogamiCandidates
+                WHERE PosDim = ? AND PosX = ? AND PosY = ? AND PosZ = ?;
+                """)) {
+            statement.setString(1, level.dimension().location().toString());
+            statement.setInt(2, pos.getX());
+            statement.setInt(3, pos.getY());
+            statement.setInt(4, pos.getZ());
+            statement.executeUpdate();
+        } finally {
+            this.free(connection);
+        }
+    }
+
     private void seedRelationshipsFromOwnerList() throws SQLException {
         for (Map.Entry<UUID, List<Long>> entry : this.byPlayer.entrySet()) {
             for (long id : entry.getValue()) {
@@ -696,8 +840,16 @@ public final class BlockPartyDB extends SavedData {
     }
 
     private void seedLegacyRelationshipOrThrow(UUID player, long id) throws SQLException {
+        java.util.Optional<PlayerRelationship> existing = PlayerRelationship.find(this, id, player);
         PlayerRelationship.setYearbookSigned(this, id, player, true);
         PlayerRelationship.setPhoneContact(this, id, player, true);
+        PlayerRelationship relationship = existing.orElseGet(() -> this.findPlayerRelationshipSafe(id, player).orElse(null));
+        if (relationship == null || (relationship.affection() == 0.0F && relationship.loyalty() == 0.0F)) {
+            java.util.Optional<NPC> row = this.findNpc(id);
+            if (row.isPresent()) {
+                PlayerRelationship.setFeelings(this, id, player, row.get().affection(), row.get().loyalty());
+            }
+        }
     }
 
     private List<Long> relationshipNpcIds(UUID player, RelationshipListQuery query) {
@@ -747,6 +899,23 @@ public final class BlockPartyDB extends SavedData {
                 readUuid(result, "PlayerUUID"),
                 result.getString("RequiredCondition"),
                 result.getInt("Priority"));
+    }
+
+    private static TsukumogamiCandidate readTsukumogamiCandidate(ResultSet result) throws SQLException {
+        CompoundTag tileEntityData = new CompoundTag();
+        try {
+            tileEntityData = net.minecraft.nbt.TagParser.parseTag(result.getString("TileEntityData"));
+        } catch (Exception ignored) {
+        }
+        return new TsukumogamiCandidate(
+                result.getLong("DatabaseID"),
+                readDimBlockPos(result),
+                readUuid(result, "PlayerUUID"),
+                Block.stateById(result.getInt("BlockState")),
+                tileEntityData,
+                result.getLong("CreatedGameTime"),
+                result.getLong("MatureAtGameTime"),
+                result.getLong("ShrineDatabaseID"));
     }
 
     private static DimBlockPos readDimBlockPos(ResultSet result) throws SQLException {
