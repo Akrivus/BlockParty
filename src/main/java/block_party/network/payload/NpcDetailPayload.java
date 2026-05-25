@@ -1,12 +1,14 @@
 package block_party.network.payload;
 
 import block_party.BlockParty;
+import block_party.db.BlockPartyDB;
 import block_party.db.records.NPC;
 import block_party.entities.Moe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 
 import java.util.Optional;
@@ -37,6 +39,15 @@ public record NpcDetailPayload(
 
     public static NpcDetailPayload missing(long databaseId) {
         return new NpcDetailPayload(databaseId, false, EMPTY_UUID, "", "", false, "", "", "", 0.0F, 0.0F, 0.0F, 0.0F, 0, false, BlockPos.ZERO);
+    }
+
+    public static NpcDetailPayload response(BlockPartyDB db, UUID owner, long databaseId) {
+        return from(databaseId, db.loadYearbookNpc(owner, databaseId));
+    }
+
+    public static NpcDetailPayload response(ServerLevel level, BlockPartyDB db, UUID owner, long databaseId) {
+        Optional<NPC> row = db.loadYearbookNpc(owner, databaseId);
+        return from(databaseId, row, db.findOwnedLoadedMoe(level, owner, databaseId));
     }
 
     public static NpcDetailPayload from(long requestedId, Optional<NPC> npc) {

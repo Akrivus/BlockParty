@@ -2,7 +2,7 @@ package block_party.items;
 
 import block_party.db.BlockPartyDB;
 import block_party.entities.Moe;
-import block_party.network.CustomMessenger;
+import block_party.network.payload.ControllerOpenPayload;
 import java.util.List;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -55,6 +55,6 @@ public class YearbookItem extends Item implements SortableItem {
             return;
         }
         long id = selectedId < 0L ? ids.get(0) : selectedId;
-        PacketDistributor.sendToPlayer(serverPlayer, CustomMessenger.yearbookOpenPayload(db, player.getUUID(), id, hand));
+        PacketDistributor.sendToPlayer(serverPlayer, ControllerOpenPayload.yearbook(db, player.getUUID(), id, hand));
     }
 }

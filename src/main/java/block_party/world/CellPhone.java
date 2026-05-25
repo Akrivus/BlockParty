@@ -4,7 +4,6 @@ import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
 import block_party.db.records.NPC;
 import block_party.entities.Moe;
-import block_party.network.CustomMessenger;
 import block_party.network.payload.DialogueOpenPayload;
 import block_party.network.payload.NpcCallPayload;
 import block_party.network.payload.NpcDetailPayload;
@@ -228,7 +227,7 @@ public final class CellPhone {
                 Map.of(Response.NEXT_RESPONSE, Component.translatable("gui.block_party.call_response.hang_up").getString()));
         ServerPlayer player = this.callerLevel.getServer().getPlayerList().getPlayer(this.player);
         if (player != null) {
-            PacketDistributor.sendToPlayer(player, CustomMessenger.dialogueOpenPayload(this.db, this.player, this.npcId, dialogue));
+            PacketDistributor.sendToPlayer(player, DialogueOpenPayload.response(this.db, this.player, this.npcId, dialogue));
         }
     }
 

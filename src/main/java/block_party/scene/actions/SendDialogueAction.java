@@ -2,7 +2,7 @@ package block_party.scene.actions;
 
 import block_party.db.BlockPartyDB;
 import block_party.entities.Moe;
-import block_party.network.CustomMessenger;
+import block_party.network.payload.DialogueOpenPayload;
 import block_party.scene.Dialogue;
 import block_party.scene.Response;
 import block_party.scene.SceneAction;
@@ -60,7 +60,7 @@ public final class SendDialogueAction implements SceneAction {
         }
         ServerPlayer player = level.getServer().getPlayerList().getPlayer(moe.getOwnerUUID());
         if (player != null) {
-            PacketDistributor.sendToPlayer(player, CustomMessenger.dialogueOpenPayload(BlockPartyDB.get(level), moe.getOwnerUUID(), moe.getDatabaseID(), dialogue));
+            PacketDistributor.sendToPlayer(player, DialogueOpenPayload.response(BlockPartyDB.get(level), moe.getOwnerUUID(), moe.getDatabaseID(), dialogue));
         }
     }
 

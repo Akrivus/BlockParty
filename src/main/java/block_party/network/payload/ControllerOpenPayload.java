@@ -1,11 +1,15 @@
 package block_party.network.payload;
 
 import block_party.BlockParty;
+import block_party.db.BlockPartyDB;
+import block_party.network.ClientPayloadBridge;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.InteractionHand;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
+import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +29,29 @@ public record ControllerOpenPayload(ControllerType controller, List<NpcDetailPay
 
     public static ControllerOpenPayload yearbook(List<NpcDetailPayload> npcs, long selectedDatabaseId, InteractionHand hand) {
         return new ControllerOpenPayload(ControllerType.YEARBOOK, npcs, selectedDatabaseId, hand);
+    }
+
+    public static ControllerOpenPayload cellPhone(BlockPartyDB db, UUID owner, InteractionHand hand) {
+        return cellPhone(controllerDetails(db, owner), hand);
+    }
+
+    public static ControllerOpenPayload yearbook(BlockPartyDB db, UUID owner, long selectedDatabaseId, InteractionHand hand) {
+        return yearbook(controllerDetails(db, owner), selectedDatabaseId, hand);
+    }
+
+    public static void handle(ControllerOpenPayload payload, IPayloadContext context) {
+        ClientPayloadBridge.handle("openController", ControllerOpenPayload.class, payload);
+    }
+
+    private static List<NpcDetailPayload> controllerDetails(BlockPartyDB db, UUID owner) {
+        List<NpcDetailPayload> details = new ArrayList<>();
+        for (long databaseId : db.listYearbookNpcIds(owner)) {
+            NpcDetailPayload detail = NpcDetailPayload.response(db, owner, databaseId);
+            if (detail.found()) {
+                details.add(detail);
+            }
+        }
+        return List.copyOf(details);
     }
 
     private void write(RegistryFriendlyByteBuf buffer) {

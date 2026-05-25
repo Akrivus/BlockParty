@@ -10,8 +10,8 @@ import block_party.network.payload.NpcCallPayload;
 import block_party.network.payload.ShrineListPayload;
 import net.minecraft.client.Minecraft;
 
-public final class ClientPayloadHandler {
-    private ClientPayloadHandler() {
+public final class ClientPayloadActions {
+    private ClientPayloadActions() {
     }
 
     public static void openDialogue(DialogueOpenPayload payload) {

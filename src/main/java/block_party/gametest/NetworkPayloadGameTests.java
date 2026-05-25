@@ -5,7 +5,6 @@ import block_party.db.BlockPartyDB;
 import block_party.db.records.NPC;
 import block_party.entities.Moe;
 import block_party.items.CustomSpawnEggItem;
-import block_party.network.CustomMessenger;
 import block_party.network.payload.ControllerOpenPayload;
 import block_party.network.payload.DialogueClosePayload;
 import block_party.network.payload.DialogueOpenPayload;
@@ -108,7 +107,7 @@ public final class NetworkPayloadGameTests {
             return;
         }
 
-        NpcDetailPayload response = CustomMessenger.detailResponse(db, owner, moe.getDatabaseID());
+        NpcDetailPayload response = NpcDetailPayload.response(db, owner, moe.getDatabaseID());
         if (!response.found() || response.databaseId() != moe.getDatabaseID() || !owner.equals(response.ownerUuid())) {
             helper.fail("Expected owned detail response to expose row-backed identity");
             return;
@@ -128,7 +127,7 @@ public final class NetworkPayloadGameTests {
             return;
         }
         moe.setHealth(7.0F);
-        NpcDetailPayload liveResponse = CustomMessenger.detailResponse(level, db, owner, moe.getDatabaseID());
+        NpcDetailPayload liveResponse = NpcDetailPayload.response(level, db, owner, moe.getDatabaseID());
         if (liveResponse.health() != 7.0F) {
             helper.fail("Expected live detail response to expose current Moe health, got " + liveResponse.health());
             return;
@@ -148,7 +147,7 @@ public final class NetworkPayloadGameTests {
             return;
         }
 
-        NpcDetailPayload response = CustomMessenger.detailResponse(db, other, moe.getDatabaseID());
+        NpcDetailPayload response = NpcDetailPayload.response(db, other, moe.getDatabaseID());
         if (response.found()) {
             helper.fail("Expected non-owner detail response to fail safely");
             return;
@@ -167,7 +166,7 @@ public final class NetworkPayloadGameTests {
             return;
         }
 
-        if (CustomMessenger.detailResponse(db, owner, Long.MAX_VALUE - 789L).found()) {
+        if (NpcDetailPayload.response(db, owner, Long.MAX_VALUE - 789L).found()) {
             helper.fail("Expected missing row detail response to fail safely");
             return;
         }
@@ -184,7 +183,7 @@ public final class NetworkPayloadGameTests {
             helper.fail("Expected dead row setup to succeed: " + exception.getMessage());
             return;
         }
-        NpcDetailPayload deadResponse = CustomMessenger.detailResponse(db, owner, id);
+        NpcDetailPayload deadResponse = NpcDetailPayload.response(db, owner, id);
         if (!deadResponse.found() || !deadResponse.dead()) {
             helper.fail("Expected dead row detail response to remain visible as a Yearbook page");
             return;
@@ -195,7 +194,7 @@ public final class NetworkPayloadGameTests {
             return;
         }
         db.addTo(owner, corruptId);
-        if (CustomMessenger.detailResponse(db, owner, corruptId).found()) {
+        if (NpcDetailPayload.response(db, owner, corruptId).found()) {
             helper.fail("Expected corrupt row detail response to fail safely");
             return;
         }
@@ -215,13 +214,13 @@ public final class NetworkPayloadGameTests {
         }
 
         long id = moe.getDatabaseID();
-        CustomMessenger.removeResponse(db, other, id);
+        NpcRemoveRequestPayload.removeResponse(db, other, id);
         if (!db.listNpcIds(owner).contains(id)) {
             helper.fail("Expected rejected remove to leave owner list intact");
             return;
         }
 
-        CustomMessenger.removeResponse(db, owner, id);
+        NpcRemoveRequestPayload.removeResponse(db, owner, id);
         if (!db.listNpcIds(owner).contains(id)) {
             helper.fail("Expected living owner remove to keep NPC ID");
             return;
@@ -237,7 +236,7 @@ public final class NetworkPayloadGameTests {
             helper.fail("Expected dead row setup to succeed: " + exception.getMessage());
             return;
         }
-        CustomMessenger.removeResponse(db, owner, id);
+        NpcRemoveRequestPayload.removeResponse(db, owner, id);
         if (db.listYearbookNpcIds(owner).contains(id)) {
             helper.fail("Expected dead owner remove to omit removed NPC ID");
             return;
@@ -262,7 +261,7 @@ public final class NetworkPayloadGameTests {
         moe.setFollowing(false);
         BlockPos caller = helper.absolutePos(new BlockPos(4, 1, 1));
 
-        NpcCallPayload response = CustomMessenger.callResponse(level, db, owner, caller, moe.getDatabaseID());
+        NpcCallPayload response = NpcCallPayload.response(level, db, owner, caller, moe.getDatabaseID());
         if (!response.success()) {
             helper.fail("Expected owned call response to report success");
             return;
@@ -290,10 +289,10 @@ public final class NetworkPayloadGameTests {
             return;
         }
 
-        NpcCallPayload missing = CustomMessenger.callResponse(level, db, owner, helper.absolutePos(new BlockPos(4, 1, 1)), Long.MAX_VALUE - 1210L);
+        NpcCallPayload missing = NpcCallPayload.response(level, db, owner, helper.absolutePos(new BlockPos(4, 1, 1)), Long.MAX_VALUE - 1210L);
         assertEquals(helper, new NpcCallPayload(Long.MAX_VALUE - 1210L, false, false, BlockPos.ZERO), missing, "missing call response");
 
-        NpcCallPayload nonOwner = CustomMessenger.callResponse(level, db, other, helper.absolutePos(new BlockPos(4, 1, 1)), moe.getDatabaseID());
+        NpcCallPayload nonOwner = NpcCallPayload.response(level, db, other, helper.absolutePos(new BlockPos(4, 1, 1)), moe.getDatabaseID());
         assertEquals(helper, new NpcCallPayload(moe.getDatabaseID(), false, false, BlockPos.ZERO), nonOwner, "non-owner call response");
         helper.kill(moe);
         helper.succeed();
@@ -309,7 +308,7 @@ public final class NetworkPayloadGameTests {
             return;
         }
 
-        ControllerOpenPayload cellPhone = CustomMessenger.cellPhoneOpenPayload(db, owner, InteractionHand.MAIN_HAND);
+        ControllerOpenPayload cellPhone = ControllerOpenPayload.cellPhone(db, owner, InteractionHand.MAIN_HAND);
         if (cellPhone.controller() != ControllerOpenPayload.ControllerType.CELL_PHONE || !containsNpc(cellPhone.npcs(), moe.getDatabaseID())) {
             helper.fail("Expected Cell Phone open payload to include owned NPC details");
             return;
@@ -325,12 +324,12 @@ public final class NetworkPayloadGameTests {
             helper.fail("Expected dead row setup to succeed: " + exception.getMessage());
             return;
         }
-        ControllerOpenPayload deadCellPhone = CustomMessenger.cellPhoneOpenPayload(db, owner, InteractionHand.MAIN_HAND);
+        ControllerOpenPayload deadCellPhone = ControllerOpenPayload.cellPhone(db, owner, InteractionHand.MAIN_HAND);
         if (!containsNpc(deadCellPhone.npcs(), moe.getDatabaseID())) {
             helper.fail("Expected Cell Phone open payload to include dead Yearbook-visible contact details");
             return;
         }
-        ControllerOpenPayload yearbook = CustomMessenger.yearbookOpenPayload(db, owner, moe.getDatabaseID(), InteractionHand.OFF_HAND);
+        ControllerOpenPayload yearbook = ControllerOpenPayload.yearbook(db, owner, moe.getDatabaseID(), InteractionHand.OFF_HAND);
         if (yearbook.controller() != ControllerOpenPayload.ControllerType.YEARBOOK
                 || yearbook.selectedDatabaseId() != moe.getDatabaseID()
                 || !containsNpc(yearbook.npcs(), moe.getDatabaseID())) {
@@ -352,7 +351,7 @@ public final class NetworkPayloadGameTests {
         }
         moe.setDialogue(sampleDialogue());
 
-        if (!CustomMessenger.respondToDialogue(level, db, owner, moe.getDatabaseID(), Response.GREEN_CHECKMARK)) {
+        if (!DialogueRespondPayload.respondToDialogue(level, db, owner, moe.getDatabaseID(), Response.GREEN_CHECKMARK)) {
             helper.fail("Expected owned dialogue response to be accepted");
             return;
         }
@@ -377,7 +376,7 @@ public final class NetworkPayloadGameTests {
         moe.setAnimationKey("WAVE");
         moe.setResponse(Response.CHAT_BUBBLE);
 
-        if (!CustomMessenger.closeDialogue(level, db, owner, moe.getDatabaseID())) {
+        if (!DialogueClosePayload.closeDialogue(level, db, owner, moe.getDatabaseID())) {
             helper.fail("Expected owned dialogue close to be accepted");
             return;
         }
@@ -405,7 +404,7 @@ public final class NetworkPayloadGameTests {
         }
         moe.setDialogue(sampleDialogue());
 
-        if (CustomMessenger.respondToDialogue(level, db, other, moe.getDatabaseID(), Response.RED_X)) {
+        if (DialogueRespondPayload.respondToDialogue(level, db, other, moe.getDatabaseID(), Response.RED_X)) {
             helper.fail("Expected non-owner dialogue response to be rejected");
             return;
         }
@@ -413,7 +412,7 @@ public final class NetworkPayloadGameTests {
             helper.fail("Expected rejected response not to update live Moe state");
             return;
         }
-        if (CustomMessenger.closeDialogue(level, db, owner, Long.MAX_VALUE - 1215L)) {
+        if (DialogueClosePayload.closeDialogue(level, db, owner, Long.MAX_VALUE - 1215L)) {
             helper.fail("Expected missing dialogue close to be rejected");
             return;
         }
@@ -427,7 +426,7 @@ public final class NetworkPayloadGameTests {
         UUID owner = new UUID(1217L, 2217L);
         deleteAllShrines(helper, db);
 
-        ShrineListPayload response = CustomMessenger.shrineListResponse(db, owner, Level.NETHER);
+        ShrineListPayload response = ShrineListPayload.response(db, owner, Level.NETHER);
         if (!response.positions().isEmpty()) {
             helper.fail("Expected empty shrine list response when no shrine rows match");
             return;
@@ -451,7 +450,7 @@ public final class NetworkPayloadGameTests {
             return;
         }
 
-        ShrineListPayload response = CustomMessenger.shrineListResponse(db, owner, Level.OVERWORLD);
+        ShrineListPayload response = ShrineListPayload.response(db, owner, Level.OVERWORLD);
         if (!response.positions().contains(ownedNether)) {
             helper.fail("Expected shrine list response to include owner shrine from another dimension");
             return;

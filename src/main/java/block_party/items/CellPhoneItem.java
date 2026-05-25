@@ -1,7 +1,7 @@
 package block_party.items;
 
 import block_party.db.BlockPartyDB;
-import block_party.network.CustomMessenger;
+import block_party.network.payload.ControllerOpenPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -28,7 +28,7 @@ public class CellPhoneItem extends Item implements SortableItem {
         }
         if (player instanceof ServerPlayer serverPlayer) {
             PacketDistributor.sendToPlayer(serverPlayer,
-                    CustomMessenger.cellPhoneOpenPayload(BlockPartyDB.get(level), player.getUUID(), hand));
+                    ControllerOpenPayload.cellPhone(BlockPartyDB.get(level), player.getUUID(), hand));
         }
         return InteractionResult.SUCCESS;
     }
