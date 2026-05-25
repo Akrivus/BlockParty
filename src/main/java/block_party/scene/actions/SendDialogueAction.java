@@ -2,6 +2,7 @@ package block_party.scene.actions;
 
 import block_party.db.BlockPartyDB;
 import block_party.entities.Moe;
+import block_party.entities.social.MoeSocialContext;
 import block_party.network.payload.DialogueOpenPayload;
 import block_party.scene.Dialogue;
 import block_party.scene.Response;
@@ -9,7 +10,9 @@ import block_party.scene.SceneAction;
 import block_party.scene.Speaker;
 import block_party.utils.Markdown;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -74,7 +77,28 @@ public final class SendDialogueAction implements SceneAction {
         }
         String resolved = this.text
                 .replace("@.name", ownerName)
+                .replace("@social.name", socialTargetName(moe))
+                .replace("@nearby.names", nearbyNames(moe))
+                .replace("@nearby.name", nearbyName(moe))
                 .replace("@name", moe.getGivenName());
         return Markdown.markWithSubs(resolved, moe);
+    }
+
+    private static String socialTargetName(Moe moe) {
+        return MoeSocialContext.find(moe, 8.0D)
+                .map(context -> context.target().getGivenName())
+                .orElse("");
+    }
+
+    private static String nearbyName(Moe moe) {
+        List<Moe> nearby = MoeSocialContext.nearby(moe, 8.0D);
+        return nearby.isEmpty() ? "" : nearby.getFirst().getGivenName();
+    }
+
+    private static String nearbyNames(Moe moe) {
+        return MoeSocialContext.nearby(moe, 8.0D).stream()
+                .limit(3)
+                .map(Moe::getGivenName)
+                .collect(Collectors.joining(", "));
     }
 }

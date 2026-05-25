@@ -1,6 +1,8 @@
 package block_party.gametest;
 
 import block_party.BlockParty;
+import block_party.entities.social.MoeSocialRules;
+import block_party.entities.social.SocialAffinities;
 import block_party.registry.resources.BlockAliasesReloadListener;
 import block_party.registry.resources.CountingJsonReloadListener;
 import block_party.registry.resources.MoeNamesReloadListener;
@@ -8,6 +10,7 @@ import block_party.registry.resources.MoeSoundsReloadListener;
 import block_party.registry.resources.MoeTextureReloadListener;
 import block_party.registry.resources.MoeTextures;
 import block_party.registry.resources.ScenesReloadListener;
+import block_party.registry.resources.SocialAffinityReloadListener;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.InputStream;
@@ -87,6 +90,11 @@ public final class ResourceGameTests {
         ResourceLocation bellStepId = BuiltInRegistries.SOUND_EVENT.getKey(bellStep);
         if (!BlockParty.source("moe.bell.step").equals(bellStepId)) {
             helper.fail("Expected bell Moe step sound override to resolve to block_party:moe.bell.step, got " + bellStepId);
+            return;
+        }
+        assertLoaded(helper, "moes/social_affinities");
+        if (SocialAffinities.ruleCount() <= 0) {
+            helper.fail("Expected social affinity reload listener to build at least one rule");
             return;
         }
         assertLoaded(helper, "scenes");
@@ -199,6 +207,40 @@ public final class ResourceGameTests {
         ResourceLocation soundId = BuiltInRegistries.SOUND_EVENT.getKey(sounds.get("step"));
         if (!BlockParty.source("moe.bell.step").equals(soundId)) {
             helper.fail("Expected slash-form Moe sound override to resolve to dotted registered ID, got " + soundId);
+            return;
+        }
+
+        List<SocialAffinities.Rule> socialRules = SocialAffinityReloadListener.safeParseRules(JsonParser.parseString("""
+                {"rules":[{"observer":{"block_tag":"minecraft:logs","dere":"dandere"},"target":{"block":"minecraft:netherrack","zodiac":"pisces"},"tension":0.5,"interest":0.4}]}
+                """).getAsJsonObject());
+        if (socialRules.size() != 1 || !socialRules.getFirst().matches(
+                new SocialAffinities.Profile(Blocks.OAK_LOG.defaultBlockState(), "O", "DANDERE", "ARIES", "FEMALE", "HAPPY"),
+                new SocialAffinities.Profile(Blocks.NETHERRACK.defaultBlockState(), "A", "KUUDERE", "PISCES", "MALE", "NORMAL"))) {
+            helper.fail("Expected unified social affinity rule to parse and match block plus traits");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void bundledSocialAffinitiesAffectBlockSignals(GameTestHelper helper) {
+        MoeSocialRules.SocialSignal signal = SocialAffinities.signal(
+                new SocialAffinities.Profile(Blocks.OAK_LOG.defaultBlockState(), "O", "KUUDERE", "ARIES", "FEMALE", "NORMAL"),
+                new SocialAffinities.Profile(Blocks.NETHERRACK.defaultBlockState(), "A", "DANDERE", "PISCES", "FEMALE", "NORMAL"));
+        if (signal.tension() <= 0.0F || signal.interest() <= 0.0F) {
+            helper.fail("Expected bundled log-to-netherrack block affinity to add tension and interest");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void bundledSocialAffinitiesAffectTraitSignals(GameTestHelper helper) {
+        MoeSocialRules.SocialSignal signal = SocialAffinities.signal(
+                new SocialAffinities.Profile(Blocks.STONE.defaultBlockState(), "O", "DEREDERE", "ARIES", "FEMALE", "HAPPY"),
+                new SocialAffinities.Profile(Blocks.DIRT.defaultBlockState(), "A", "DANDERE", "PISCES", "FEMALE", "NORMAL"));
+        if (signal.affinity() <= 0.0F || signal.interest() <= 0.0F) {
+            helper.fail("Expected bundled deredere-to-dandere trait affinity to add affinity and interest");
             return;
         }
         helper.succeed();

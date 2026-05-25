@@ -2,7 +2,9 @@ package block_party.scene;
 
 import block_party.BlockParty;
 import block_party.entities.Moe;
+import block_party.entities.social.MoeSocialContext;
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -43,9 +45,29 @@ public final class SceneObservationFactories {
             case "player_held_item" -> moe -> targetPlayer(moe) != null && itemMatches(targetPlayer(moe).getItemInHand(hand(json)), json);
             case "block" -> moe -> blockMatches(moe.getVisibleBlockState(), json);
             case "name" -> moe -> stringMatches(moe.getGivenName(), json);
+            case "has_social_target" -> moe -> MoeSocialContext.find(moe, socialRadius(json)).isPresent();
+            case "social_affinity" -> moe -> socialContext(moe, json).map(context -> compare(context.signal().affinity(), json)).orElse(false);
+            case "social_tension" -> moe -> socialContext(moe, json).map(context -> compare(context.signal().tension(), json)).orElse(false);
+            case "social_interest" -> moe -> socialContext(moe, json).map(context -> compare(context.signal().interest(), json)).orElse(false);
+            case "social_visual" -> moe -> socialContext(moe, json).map(context -> enumMatches(context.visual(), json)).orElse(false);
+            case "social_reaction" -> moe -> socialContext(moe, json).map(context -> enumMatches(context.reaction(), json)).orElse(false);
+            case "social_target_name" -> moe -> socialContext(moe, json).map(context -> stringMatches(context.target().getGivenName(), json)).orElse(false);
+            case "social_target_block" -> moe -> socialContext(moe, json).map(context -> blockMatches(context.target().getVisibleBlockState(), json)).orElse(false);
+            case "social_target_blood_type" -> moe -> socialContext(moe, json).map(context -> traitMatches(context.target().getBloodType(), json)).orElse(false);
+            case "social_target_dere" -> moe -> socialContext(moe, json).map(context -> traitMatches(context.target().getDere(), json)).orElse(false);
+            case "social_target_zodiac" -> moe -> socialContext(moe, json).map(context -> traitMatches(context.target().getZodiac(), json)).orElse(false);
+            case "social_target_emotion" -> moe -> socialContext(moe, json).map(context -> traitMatches(context.target().getEmotion(), json)).orElse(false);
             case "player_counter", "player_has_cookie", "family_name" -> FAIL_CLOSED;
             default -> FAIL_CLOSED;
         };
+    }
+
+    private static Optional<MoeSocialContext> socialContext(Moe moe, JsonObject json) {
+        return MoeSocialContext.find(moe, socialRadius(json));
+    }
+
+    private static double socialRadius(JsonObject json) {
+        return GsonHelper.getAsDouble(json, "radius", 8.0D);
     }
 
     private static boolean counterMatches(Moe moe, JsonObject json) {
@@ -131,6 +153,16 @@ public final class SceneObservationFactories {
             case "not_equals" -> !actual.equals(expected);
             default -> actual.equals(expected);
         };
+        return maybeNegate(pass, json);
+    }
+
+    private static boolean traitMatches(String actual, JsonObject json) {
+        return stringMatches(actual, json);
+    }
+
+    private static boolean enumMatches(Enum<?> actual, JsonObject json) {
+        String expected = GsonHelper.getAsString(json, "value", "");
+        boolean pass = actual.name().equalsIgnoreCase(expected);
         return maybeNegate(pass, json);
     }
 

@@ -399,6 +399,58 @@ public final class SceneGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void socialSceneFiltersMatchNearbyTarget(GameTestHelper helper) {
+        UUID owner = new UUID(507L, 7L);
+        Moe observer = spawnMoeAt(helper, owner, new BlockPos(1, 1, 1));
+        Moe target = spawnMoeAt(helper, owner, new BlockPos(3, 1, 1));
+        target.setGivenName("Hotaru");
+        observer.setBloodType("O");
+        target.setBloodType("AB");
+        target.setDere("DANDERE");
+
+        ScenesReloadListener.ParsedScene accepts = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  {"type":"block_party:has_social_target","filter":{"radius":8}},
+                  {"type":"block_party:social_affinity","filter":{"operation":"at_least","value":0.6}},
+                  {"type":"block_party:social_visual","filter":{"value":"fame"}},
+                  {"type":"block_party:social_reaction","filter":{"value":"celebrate"}},
+                  {"type":"block_party:social_target_name","filter":{"operation":"contains","value":"Hot"}},
+                  {"type":"block_party:social_target_blood_type","filter":{"value":"AB"}},
+                  {"type":"block_party:social_target_dere","filter":{"value":"DANDERE"}}
+                ],"actions":[]}
+                """);
+
+        if (!accepts.scene().fulfills(observer)) {
+            helper.fail("Expected social scene filters to match nearby AB DANDERE target");
+            return;
+        }
+        helper.kill(observer);
+        helper.kill(target);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void dialogueSubstitutesSocialAndNearbyNames(GameTestHelper helper) {
+        UUID owner = new UUID(508L, 8L);
+        Moe observer = spawnMoeAt(helper, owner, new BlockPos(1, 1, 1));
+        Moe target = spawnMoeAt(helper, owner, new BlockPos(3, 1, 1));
+        observer.setGivenName("Akemi");
+        target.setGivenName("Hotaru");
+        observer.setBloodType("O");
+        target.setBloodType("AB");
+        SceneAction action = parseAction("""
+                {"type":"block_party:send_dialogue","action":{"text":"@name spotted @social.name near @nearby.name: @nearby.names","responses":[]}}
+                """);
+
+        action.apply(observer);
+
+        assertEquals(helper, "Akemi spotted Hotaru near Hotaru: Hotaru", observer.getDialogue().text(), "social dialogue substitution");
+        helper.kill(observer);
+        helper.kill(target);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void malformedSceneParseFailsClosed(GameTestHelper helper) {
         try {
             ScenesReloadListener.parseSceneForTests(BlockParty.source("bad"), JsonParser.parseString("[]"));

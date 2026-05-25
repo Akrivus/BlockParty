@@ -5,6 +5,8 @@ import block_party.db.DimBlockPos;
 import block_party.db.records.NPC;
 import block_party.entities.data.HidingSpots;
 import block_party.entities.goals.HideUntil;
+import block_party.entities.social.MoeSocialRules;
+import block_party.entities.social.MoeSocialContext;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomTags;
 import block_party.registry.resources.BlockAliasesReloadListener;
@@ -15,6 +17,8 @@ import block_party.scene.Response;
 import block_party.scene.SceneManager;
 import block_party.scene.SceneTrigger;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -117,6 +121,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     private int timeUntilLonely;
     private int timeUntilStress;
     private int timeSinceSleep;
+    private int socialTickDelay;
     private Dialogue dialogue;
     private Response response;
     private boolean guiPreview;
@@ -916,9 +921,179 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     }
 
     public void updateActionState() {
+        if (this.level().isClientSide || this.hasDialogue()) {
+            return;
+        }
+        if (this.socialTickDelay > 0) {
+            --this.socialTickDelay;
+            return;
+        }
+        this.socialTickDelay = MoeSocialRules.socialTickDelay(this.getDere(), this.random.nextInt());
+        this.updateBloodTypeSocialState();
     }
 
     public void updateSleepState() {
+    }
+
+    private void updateBloodTypeSocialState() {
+        MoeSocialContext context = MoeSocialContext.find(this, 8.0D).orElse(null);
+        if (context == null) {
+            return;
+        }
+        Moe socialTarget = context.target();
+        MoeSocialRules.SocialSignal strongest = context.signal();
+        this.getLookControl().setLookAt(socialTarget, 30.0F, 30.0F);
+        MoeSocialRules.SocialVisual visual = context.visual();
+        MoeSocialRules.DereReaction reaction = context.reaction();
+        this.updateBloodTypeSocialMovement(socialTarget, strongest);
+        this.updateDereSocialReaction(socialTarget, reaction);
+        this.spawnBloodTypeSocialParticles(socialTarget, visual);
+        this.spawnDereSocialParticles(reaction);
+        boolean tense = strongest.tension() > strongest.affinity();
+        if (strongest.affinity() >= 0.6F) {
+            this.setEmotion(MoeSocialRules.reactionEmotion(this.getDere(), reaction, false));
+            this.addRelaxation(0.05F);
+        } else if (tense) {
+            this.setEmotion(MoeSocialRules.reactionEmotion(this.getDere(), reaction, true));
+            this.addStress(0.05F);
+        }
+        this.applyDereSocialFeeling(reaction);
+    }
+
+    private void updateBloodTypeSocialMovement(Moe socialTarget, MoeSocialRules.SocialSignal signal) {
+        if (this.isFollowing() || this.isSitting() || this.isPassenger()) {
+            return;
+        }
+        double distanceSqr = this.distanceToSqr(socialTarget);
+        double stepDistance = MoeSocialRules.socialStepDistance(this.getDere());
+        double speed = MoeSocialRules.socialMoveSpeed(this.getDere());
+        switch (MoeSocialRules.movementFor(signal, distanceSqr)) {
+            case APPROACH -> {
+                Vec3 toward = socialTarget.position().subtract(this.position());
+                double distance = toward.length();
+                if (distance > 0.0001D) {
+                    Vec3 destination = this.position().add(toward.normalize().scale(Math.min(stepDistance, distance - 1.5D)));
+                    this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, speed);
+                }
+            }
+            case AVOID -> {
+                Vec3 away = this.position().subtract(socialTarget.position());
+                if (away.lengthSqr() < 0.0001D) {
+                    away = new Vec3(this.random.nextDouble() - 0.5D, 0.0D, this.random.nextDouble() - 0.5D);
+                }
+                Vec3 destination = this.position().add(away.normalize().scale(stepDistance));
+                this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, speed);
+            }
+            case IDLE -> {
+            }
+        }
+    }
+
+    private void updateDereSocialReaction(Moe socialTarget, MoeSocialRules.DereReaction reaction) {
+        if (this.isFollowing() || this.isSitting() || this.isPassenger()) {
+            return;
+        }
+        switch (reaction) {
+            case CLING -> moveToward(socialTarget, MoeSocialRules.socialStepDistance(this.getDere()) * 1.25D, 1.25D, 0.75D);
+            case FLUSTER_RETREAT -> moveAwayFrom(socialTarget, 3.0D, MoeSocialRules.socialMoveSpeed(this.getDere()));
+            case SHY_RETREAT -> moveAwayFrom(socialTarget, 2.5D, 0.8D);
+            case SHOW_OFF -> {
+                Vec3 around = this.position().subtract(socialTarget.position());
+                if (around.lengthSqr() < 0.0001D) {
+                    around = new Vec3(1.0D, 0.0D, 0.0D);
+                }
+                Vec3 side = new Vec3(-around.z, 0.0D, around.x).normalize().scale(2.0D);
+                Vec3 destination = this.position().add(side);
+                this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, MoeSocialRules.socialMoveSpeed(this.getDere()));
+            }
+            case CELEBRATE, OBSERVE, NONE -> {
+            }
+        }
+    }
+
+    private void moveToward(Moe socialTarget, double stepDistance, double speed, double personalSpace) {
+        Vec3 toward = socialTarget.position().subtract(this.position());
+        double distance = toward.length();
+        if (distance > personalSpace && distance > 0.0001D) {
+            Vec3 destination = this.position().add(toward.normalize().scale(Math.min(stepDistance, distance - personalSpace)));
+            this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, speed);
+        }
+    }
+
+    private void moveAwayFrom(Moe socialTarget, double stepDistance, double speed) {
+        Vec3 away = this.position().subtract(socialTarget.position());
+        if (away.lengthSqr() < 0.0001D) {
+            away = new Vec3(this.random.nextDouble() - 0.5D, 0.0D, this.random.nextDouble() - 0.5D);
+        }
+        Vec3 destination = this.position().add(away.normalize().scale(stepDistance));
+        this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, speed);
+    }
+
+    private void applyDereSocialFeeling(MoeSocialRules.DereReaction reaction) {
+        switch (reaction) {
+            case CELEBRATE -> this.addRelaxation(0.04F);
+            case CLING, FLUSTER_RETREAT, SHY_RETREAT, SHOW_OFF -> this.addStress(0.03F);
+            case OBSERVE, NONE -> {
+            }
+        }
+    }
+
+    private void spawnBloodTypeSocialParticles(Moe socialTarget, MoeSocialRules.SocialVisual visual) {
+        if (!(this.level() instanceof ServerLevel serverLevel)) {
+            return;
+        }
+        if (visual == MoeSocialRules.SocialVisual.NONE) {
+            return;
+        }
+        Entity focus = visual == MoeSocialRules.SocialVisual.FAME ? socialTarget : this;
+        serverLevel.sendParticles(
+                particleFor(visual),
+                focus.getX(),
+                focus.getY() + focus.getBbHeight() + 0.15D,
+                focus.getZ(),
+                visual == MoeSocialRules.SocialVisual.FAME ? 4 : 2,
+                0.25D,
+                0.2D,
+                0.25D,
+                0.02D);
+    }
+
+    private void spawnDereSocialParticles(MoeSocialRules.DereReaction reaction) {
+        if (!(this.level() instanceof ServerLevel serverLevel) || reaction == MoeSocialRules.DereReaction.NONE) {
+            return;
+        }
+        serverLevel.sendParticles(
+                particleFor(reaction),
+                this.getX(),
+                this.getY() + this.getBbHeight() + 0.35D,
+                this.getZ(),
+                reaction == MoeSocialRules.DereReaction.OBSERVE ? 1 : 2,
+                0.2D,
+                0.15D,
+                0.2D,
+                0.01D);
+    }
+
+    private static ParticleOptions particleFor(MoeSocialRules.SocialVisual visual) {
+        return switch (visual) {
+            case AFFINITY -> ParticleTypes.HEART;
+            case FAME -> ParticleTypes.NOTE;
+            case INTEREST -> ParticleTypes.HAPPY_VILLAGER;
+            case TENSION -> ParticleTypes.ANGRY_VILLAGER;
+            case NONE -> ParticleTypes.POOF;
+        };
+    }
+
+    private static ParticleOptions particleFor(MoeSocialRules.DereReaction reaction) {
+        return switch (reaction) {
+            case CELEBRATE -> ParticleTypes.HEART;
+            case CLING -> ParticleTypes.CRIMSON_SPORE;
+            case FLUSTER_RETREAT -> ParticleTypes.SMOKE;
+            case SHY_RETREAT -> ParticleTypes.POOF;
+            case SHOW_OFF -> ParticleTypes.NOTE;
+            case OBSERVE -> ParticleTypes.HAPPY_VILLAGER;
+            case NONE -> ParticleTypes.POOF;
+        };
     }
 
     public int getTimeUntilHungry() {

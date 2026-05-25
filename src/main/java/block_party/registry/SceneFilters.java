@@ -27,7 +27,10 @@ public final class SceneFilters {
                 "if_snooty", "if_smitten", "if_tired", "if_male", "if_female", "if_nonbinary",
                 "self", "health", "food_level", "loyalty", "stress", "player_counter",
                 "player_has_cookie", "player_held_item", "counter", "has_cookie", "held_item", "block",
-                "family_name", "name");
+                "family_name", "name", "has_social_target", "social_affinity", "social_tension",
+                "social_interest", "social_visual", "social_reaction", "social_target_name",
+                "social_target_block", "social_target_blood_type", "social_target_dere",
+                "social_target_zodiac", "social_target_emotion");
     }
 
     private SceneFilters() {
