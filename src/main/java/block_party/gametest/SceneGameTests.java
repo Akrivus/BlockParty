@@ -411,7 +411,7 @@ public final class SceneGameTests {
 
     private static void tickScene(Moe moe, int count) {
         for (int index = 0; index < count; ++index) {
-            moe.tick();
+            moe.sceneManager().tick();
         }
     }
 

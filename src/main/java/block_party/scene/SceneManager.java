@@ -48,9 +48,6 @@ public final class SceneManager {
     }
 
     public void setAction(SceneAction action) {
-        if (this.action != null) {
-            this.action.onComplete(this.moe);
-        }
         this.action = action;
     }
 

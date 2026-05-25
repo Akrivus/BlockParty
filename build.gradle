@@ -56,7 +56,7 @@ neoForge {
         }
         gameTestServer {
             type = 'gameTestServer'
-            gameDirectory = project.file('run')
+            gameDirectory = layout.buildDirectory.dir('gametest-run').get().asFile
             systemProperty 'neoforge.enabledGameTestNamespaces', 'block_party'
         }
         data {
@@ -70,5 +70,11 @@ neoForge {
         block_party {
             sourceSet sourceSets.main
         }
+    }
+}
+
+tasks.named('runGameTestServer') {
+    doFirst {
+        delete layout.buildDirectory.dir('gametest-run/world')
     }
 }

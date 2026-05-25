@@ -1,0 +1,7 @@
+{
+  "trigger": "block_party:stare",
+  "filters": [
+    "block_party:always"
+  ],
+  "actions": []
+}

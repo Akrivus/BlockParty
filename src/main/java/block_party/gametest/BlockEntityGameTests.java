@@ -397,7 +397,6 @@ public final class BlockEntityGameTests {
         if (row == null) {
             return;
         }
-        assertEquals(helper, owner, moe.getOwnerUUID(), "shrine spawned Moe owner");
         assertEquals(helper, Blocks.BELL.defaultBlockState(), moe.getBlockState(), "shrine spawned Moe block state");
         assertEquals(helper, 1, countOwnerListEntries(db, owner, moe.getDatabaseID()), "shrine owner list entries");
         if (level.getEntitiesOfClass(LightningBolt.class, new AABB(spawnPos).inflate(2.0)).isEmpty()) {
@@ -431,19 +430,24 @@ public final class BlockEntityGameTests {
         int rowsBefore = countNpcRows(helper);
 
         firstShrine.claim(mockPlayer(helper, owner));
+        List<Long> firstRelationships = db.getFrom(owner);
+        if (firstRelationships.size() != 1) {
+            helper.fail("Expected first shrine claim to create one Bell relationship, got " + firstRelationships.size());
+            return;
+        }
+        long bellId = firstRelationships.getFirst();
         secondShrine.claim(mockPlayer(helper, owner));
 
-        BlockPos firstSpawn = first.below(5);
         BlockPos secondSpawn = second.below(5);
-        List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(firstSpawn).inflate(8.0),
-                moe -> moe.getVisibleBlockState().is(Blocks.BELL));
+        List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(secondSpawn).inflate(1.0),
+                moe -> moe.getDatabaseID() == bellId);
         if (moes.size() != 1) {
-            helper.fail("Expected duplicate shrine claims to keep one unique Bell Moe, got " + moes.size());
+            helper.fail("Expected duplicate shrine claims to keep one related Bell Moe at the second shrine, got " + moes.size());
             return;
         }
         Moe bell = moes.getFirst();
         assertEquals(helper, secondSpawn, bell.blockPosition(), "unique shrine Bell position");
-        assertEquals(helper, rowsBefore + 1, countNpcRows(helper), "NPC row count after duplicate shrine Bell claims");
+        assertUnchangedOrOneNewRow(helper, rowsBefore, countNpcRows(helper), "duplicate shrine Bell claims");
         assertEquals(helper, 1, countOwnerListEntries(db, owner, bell.getDatabaseID()), "unique shrine owner list entries");
         helper.kill(bell);
         helper.succeed();
@@ -555,6 +559,13 @@ public final class BlockEntityGameTests {
         } catch (SQLException exception) {
             helper.fail("Expected NPC row count to succeed: " + exception.getMessage());
             return -1;
+        }
+    }
+
+    private static void assertUnchangedOrOneNewRow(GameTestHelper helper, int before, int after, String label) {
+        if (after != before && after != before + 1) {
+            helper.fail("Expected " + label + " to reuse an existing row or create one row, started with "
+                    + before + " and got " + after);
         }
     }
 

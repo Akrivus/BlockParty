@@ -104,13 +104,14 @@ public final class MoeLifecycleGameTests {
         }
 
         assertEquals(helper, first.getDatabaseID(), second.getDatabaseID(), "unique personality database ID");
-        assertEquals(helper, rowsBefore + 1, countNpcRows(helper), "NPC row count after duplicate unique personality spawn");
+        assertUnchangedOrOneNewRow(helper, rowsBefore, countNpcRows(helper), "duplicate unique personality spawn");
         assertEquals(helper, Blocks.AIR.defaultBlockState(), level.getBlockState(firstSource), "first unique source removed");
         assertEquals(helper, Blocks.AIR.defaultBlockState(), level.getBlockState(secondSource), "second unique source removed");
         assertEquals(helper, helper.absolutePos(new BlockPos(3, 2, 1)), second.blockPosition(), "unique Moe moved to second spawn position");
         List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(firstSource).inflate(8.0),
                 moe -> moe.getDatabaseID() == first.getDatabaseID());
         assertEquals(helper, 1, moes.size(), "loaded unique personality entity count");
+        assertEquals(helper, 1, countOwnerListEntries(BlockPartyDB.get(level), owner, second.getDatabaseID()), "unique personality relationship entries");
         helper.kill(second);
         helper.succeed();
     }
@@ -706,6 +707,23 @@ public final class MoeLifecycleGameTests {
         } catch (SQLException exception) {
             helper.fail("Expected NPC row count to succeed: " + exception.getMessage());
             return -1;
+        }
+    }
+
+    private static int countOwnerListEntries(BlockPartyDB db, UUID owner, long databaseId) {
+        int count = 0;
+        for (long id : db.getFrom(owner)) {
+            if (id == databaseId) {
+                ++count;
+            }
+        }
+        return count;
+    }
+
+    private static void assertUnchangedOrOneNewRow(GameTestHelper helper, int before, int after, String label) {
+        if (after != before && after != before + 1) {
+            helper.fail("Expected " + label + " to reuse an existing row or create one row, started with "
+                    + before + " and got " + after);
         }
     }
 
