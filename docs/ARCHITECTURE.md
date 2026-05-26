@@ -1,10 +1,10 @@
 # Block Party Architecture
 
-This document is a developer orientation for the current Block Party codebase. It is based on static reading only. Where behavior is unclear, unfinished, or contradicted by code, this document flags that uncertainty instead of filling in intent.
+This document is a developer orientation for the current Block Party codebase. It describes the active NeoForge 21.4 / Minecraft 1.21.4 implementation and calls out old Forge 1.19.4 behavior only when it matters for compatibility or parity.
 
 ## What The Mod Is
 
-Block Party is a Forge 1.19.4 Minecraft mod that personifies blocks as small NPC companions called Moes. In gameplay terms, the player can use `CustomSpawnEggItem` on a block tagged as `block_party:spawns_moes`; the block is destroyed, a `Moe` entity appears nearby, and the Moe keeps the original block's identity, block entity NBT, texture, scale, traits, sounds, owner, and database record.
+Block Party is a NeoForge Minecraft mod that personifies blocks as small NPC companions called Moes. The active build targets Minecraft `1.21.4`, NeoForge `21.4.102-beta`, Java 21, and moddev Gradle tooling. In gameplay terms, the player can use `CustomSpawnEggItem` on a block tagged as `block_party:spawns_moes`; the block is destroyed, a `Moe` entity appears nearby, and the Moe keeps the original block's identity, block entity NBT, texture, scale, traits, sounds, owner, and database record.
 
 The README describes Moes as affectionate block people who can bring food, pull pranks, perform chores, and adventure with players. In the code currently present, the strongest implemented gameplay loop is:
 
@@ -24,46 +24,38 @@ I did not find concrete chores, prank, or adventure AI implementations beyond da
 The concrete block-to-Moe path lives in `src/main/java/block_party/items/CustomSpawnEggItem.java`.
 
 1. `CustomSpawnEggItem.useOn(UseOnContext)` runs only server-side.
-2. It checks whether the clicked block state is in `CustomTags.Blocks.SPAWNS_MOES`, backed by `src/main/resources/data/block_party/tags/blocks/spawns_moes.json`.
+2. It checks whether the clicked block state is in `CustomTags.Blocks.SPAWNS_MOES`, backed by `src/main/resources/data/block_party/tags/block/spawns_moes.json`.
 3. It creates `CustomEntities.MOE`, registered in `src/main/java/block_party/registry/CustomEntities.java` as `EntityType<Moe>`.
-4. It moves the Moe to the adjacent face, sets a preliminary database ID to `pos.asLong()`, and calls `moe.setBlockState(state)`.
+4. It moves the Moe to the adjacent face and calls `moe.setBlockState(state)`.
 5. If the original block has a block entity, it copies `level.getBlockEntity(pos).getPersistentData()` into `moe.setTileEntityData(...)`.
-6. It randomizes `Dere`, weighs `BloodType`, assigns the player, calls `moe.claim(player)`, adds the entity, destroys the source block without drops, and consumes the spawn egg.
+6. It assigns the player, inserts the SQLite-backed NPC row, stores the generated database ID on the Moe, adds the entity, destroys the source block without drops, and consumes the spawn egg in survival only.
 
-The DB claim path is split across `Recordable`, `Layer5`, `NPC`, and `BlockPartyDB`:
+The DB claim path is centered on `Moe`, `NPC`, and `BlockPartyDB`, with `Recordable` retained as old-baseline context:
 
-- `block_party.db.Recordable.claim(Player)` assigns player UUID and inserts a row if needed.
-- `block_party.entities.abstraction.Layer5.claim(Player)` only calls `Recordable.super.claim` if `syncWithDB` is true.
-- `block_party.entities.Moe` enables DB sync in its constructor with `doSyncWithDatabase(true)`.
-- `block_party.db.records.NPC.sync(BlockPartyNPC)` copies entity fields into SQL columns.
+- `block_party.db.Recordable.claim(Player)` is the old Forge baseline for assigning player UUIDs and inserting rows.
+- the active `Moe` shell owns DB identity directly and stores the generated row ID as `DatabaseID`.
+- `block_party.db.records.NPC` remains the row model for owner, identity, profile, hiding, and position columns.
 
-There is another spawn-like path in `src/main/java/block_party/blocks/entity/ShrineTabletBlockEntity.java`, where a shrine/tablet effect creates a `Moe`, sets its block state to `Blocks.BELL`, claims it, and spawns it. I did not fully verify shrine gameplay from placement through use, so treat that as a secondary lifecycle path.
+There is another spawn-like path in `src/main/java/block_party/blocks/entity/ShrineTabletBlockEntity.java`, where shrine/tablet behavior can participate in Moe creation and row/state updates. Treat the normal spawn egg path as the primary supported lifecycle.
 
 ### Normal Behavior
 
-Most Moe behavior is inherited from `BlockPartyNPC`, which extends the stacked abstraction classes in `src/main/java/block_party/entities/abstraction/`.
+The old Forge source used a `BlockPartyNPC` plus `Layer1`-through-`Layer7` inheritance stack. The active NeoForge build has normalized the live entity around `block_party.entities.Moe`, a `PathfinderMob` shell with migrated state for:
 
-- `Layer1`: pathfinding malus setup, home position, teleport helper, sound hooks, distance persistence.
-- `Layer2`: block state identity, visible alias block state, scale, corporeal/cardinal state, block-derived navigation changes, hide-as-block behavior.
-- `Layer3`: player ownership and following state.
-- `Layer4`: synchronized profile stats and traits such as `BloodType`, `Dere`, `Zodiac`, `Emotion`, `Gender`, name, food, stress, loyalty, affection, age.
-- `Layer5`: SQLite row sync.
-- `Layer6`: 36-slot inventory and chest menu behavior.
-- `Layer7`: scene manager, dialogue state, client animation, interaction triggers, and placeholder needs/action/sleep update methods.
+- movement/combat attributes, navigation category, home position, teleport helpers, and sound hooks
+- source block identity, visible alias block state, scale, block-derived flags, and hide-as-block behavior
+- player ownership and following state
+- row-backed profile stats and traits such as `BloodType`, `Dere`, `Zodiac`, `Emotion`, `Gender`, name, food, stress, loyalty, affection, and age
+- SQLite row identity and explicit row updates
+- 36-slot inventory and chest menu behavior
+- scene manager, dialogue state, client animation state, and interaction triggers
 
-The main per-tick behavior is in `Layer7.aiStep()`:
+The current per-tick behavior is intentionally narrower than the old layer stack:
 
-- client side: ticks the current `AbstractAnimation`
-- server side: ticks `SceneManager`, then calls `updateHungerState`, `updateLonelyState`, `updateStressState`, `updateActionState`, and `updateSleepState`
+- server side: preserves identity, hidden-state, home/follow flags, inventory/slouch, scene/dialogue state, combat attributes, and row-backed profile fields
+- client side: extracts the active state into `MoeRenderState` for model, layer, nameplate, scale, and animation rendering
 
-Those five update methods are empty in `Layer7`, so hunger/loneliness/stress/action/sleep systems are currently scaffolding, not implemented behavior.
-
-Additional server AI triggers are in `Layer7.customServerAiStep()`:
-
-- random 1-in-20 tick chance triggers `SceneTrigger.RANDOM_TICK`
-- if the owner is looking at the Moe, triggers `SceneTrigger.STARE`
-
-Player interactions are converted into scene triggers in `Layer7`:
+Player interactions are converted into scene triggers on the active Moe surface:
 
 - owner right-click: `RIGHT_CLICK`
 - owner shift-right-click: `SHIFT_RIGHT_CLICK`
@@ -87,15 +79,15 @@ The current resource scenes under `src/main/resources/data/block_party/scenes/` 
 - `test_dialogue.json`: right-click dialogue chain
 - `test_hide.json`: left-click hide action
 
-`SendDialogue` constructs a `Dialogue` from JSON, opens it for the owning player with `SOpenDialogue`, and waits until a response arrives. `DialogueScreen.RespondButton` sends `CDialogueRespond`; the server loads the NPC row through `CNPCQuery`, finds the server entity, and calls `BlockPartyNPC.setResponse`.
+`SendDialogue` constructs a `Dialogue` from JSON, opens it for the owning player with `DialogueOpenPayload`, and waits until a response arrives. `DialogueScreen` sends `DialogueRespondPayload`; the server loads the NPC row, finds the server entity, and records the selected response on the active Moe dialogue state.
 
 ### Hiding And Retreat
 
 Hiding is a two-entity/block lifecycle:
 
-1. `block_party.scene.actions.Hide` calls `npc.hide(HideUntil)`.
-2. `Moe.hide(HideUntil)` marks the NPC database row's `HIDING` column true, creates a `MoeInHiding` ghost, attaches it to the current block position, and adds the hiding spot to `HidingSpots`.
-3. If the ghost spawns successfully, `Layer2.hide(HideUntil)` places the original `actualBlockState` back into the world and removes the Moe with `RemovalReason.DISCARDED`.
+1. `block_party.scene.actions.Hide` calls `moe.hide(HideUntil)`.
+2. `Moe.hide(HideUntil)` writes the Moe's current identity into the NPC row, marks `Hiding = 1`, stores the hidden position, creates a `MoeInHiding` shell, and adds the hiding spot to `HidingSpots`.
+3. The Moe's original `BlockState` is placed back into the world and the visible Moe is discarded.
 4. `MoeInHiding.tick()` stays fixed at the attached block position, increments `ticksHidden`, and calls `spawn()` when `HideUntil.isOver(...)` returns true.
 5. `MoeInHiding.spawn()` creates a new `Moe`, triggers `SceneTrigger.HIDING_SPOT_DISCOVERED`, loads the DB row into it, restores the block state and block entity persistent data, destroys the block, adds the Moe entity, and kills the ghost marker if spawning succeeded.
 
@@ -118,21 +110,21 @@ There are three persistence layers:
 - world `SavedData`, via `BlockPartyDB` and `HidingSpots`
 - SQLite, via `block_party.db.sql.Table`, `Row`, `Column`, and record schemas in `block_party.db.records`
 
-`BlockPartyDB` stores lightweight saved-data lists such as claimed names and player-to-NPC IDs, while actual records live in `blockparty.db` using SQLite. `BlockPartyDB.onWorldLoad` initializes SQLite and creates tables for shrines, locations, gardens, and NPCs. `Saplings` exists as a schema field but I did not see `Saplings.create(level)` called in `onWorldLoad`.
+`BlockPartyDB` stores lightweight saved-data lists such as claimed names and player-to-NPC IDs, while actual records live in `blockparty.db` using SQLite. The active server bootstrap initializes SQLite and creates the minimal NPC, shrine, garden, location, and sapling tables needed by the current NeoForge surface.
 
-NPC SQL data lives in `block_party.db.records.NPC`. It stores owner UUID, name, block state, traits, health, food/stress-like stats, last seen, home, shrine reference, dead flag, and hiding flag. `NPC.load(BlockPartyNPC)` pushes those values back into a new or loaded entity.
+NPC SQL data lives in `block_party.db.records.NPC`. It stores owner UUID, name, block state, traits, health, food/stress-like stats, last seen, home, shrine reference, dead flag, and hiding flag. Active load/detail services push row values into `Moe` shells and controller payloads.
 
-`Layer5.onSyncedDataUpdated` updates the DB row whenever synced data changes and `hasRow()` is true. This is broad and convenient, but risky because synced-data churn can become database churn.
+The old broad synced-data DB-write hook is no longer the preferred mental model for the active shell. Current row writes are explicit around spawn, hide, reveal, list/detail/call/remove services, profile/stat persistence, and block-entity row claims.
 
 ### Removal
 
 There are several removal concepts:
 
-- normal entity removal when a Moe hides: `Layer2.hide` places the block and discards the entity.
+- normal entity removal when a Moe hides: `Moe.hide` places the block and discards the visible entity.
 - hidden marker removal: `MoeInHiding.kill()` removes its entry from `HidingSpots` then calls `super.kill()`.
-- death while corporeal: `Layer2.die` calls `hide(HideUntil.EXPOSED)` after normal death.
+- death while corporeal: the active Moe death/dead-row behavior is narrower than the old layer stack and should be verified through GameTests before expanding.
 - hidden block destroyed while air: `MoeInHiding.hurt` marks the DB row `DEAD` and kills the marker.
-- UI removal: `CNPCRemove` removes an NPC ID from the player's list only if `NPC.isDeadOrEstrangedFrom(player)`.
+- UI removal: `NpcRemoveRequestPayload` de-lists only owned/allowed NPC records according to the server service rules.
 
 I did not find a complete hard-delete flow for NPC database rows during normal gameplay. `Row.delete()` exists, but I did not see it used in the NPC removal path.
 
@@ -160,24 +152,21 @@ Registration classes:
 - `block_party.registry.CustomResources`
 - `block_party.client.BlockPartyRenderers`
 
-The mod uses Forge `DeferredRegister` and `RegistryObject`. It targets Forge `1.19.4-45.2.0` with official mappings and Java 17 in `build.gradle`.
+The mod uses NeoForge `DeferredRegister` and `DeferredHolder`. It targets NeoForge `21.4.102-beta` for Minecraft `1.21.4` with Java 21 in `build.gradle`. Active metadata lives in `src/main/resources/META-INF/neoforge.mods.toml`.
 
 ### Moe And Entity Classes
 
-Concrete classes:
+Active classes:
 
-- `block_party.entities.BlockPartyNPC`: base NPC class, name display, honorific, block tag name.
-- `block_party.entities.Moe`: concrete block-person NPC, DB sync enabled, hide override, sounds.
+- `block_party.entities.Moe`: concrete block-person NPC, row-backed identity/profile state, hide override, inventory, sounds, and scene/dialogue state.
 - `block_party.entities.MoeInHiding`: invisible/marker entity attached to a block while a Moe is hiding.
-- `block_party.entities.Senpai`: currently just extends `BlockPartyNPC`; I did not find it registered in `CustomEntities`.
+- `block_party.entities.MoeSpawner`: helper/service for spawn and call-style restoration/teleport work.
 
-Layer classes:
-
-- `Layer1` through `Layer7` under `src/main/java/block_party/entities/abstraction/`
+Frozen-reference classes such as `BlockPartyNPC`, `Senpai`, and `Layer1`-through-`Layer7` are no longer active in `src/main/java`. Compatibility notes still refer to them when describing old Forge behavior that the NeoForge shell intentionally preserves.
 
 ### Personality And Profile Generation
 
-Profile state is mostly in `Layer4`.
+Profile state is mostly on `Moe` and the row-backed `NPC` record.
 
 Traits and profile enums:
 
@@ -190,16 +179,14 @@ Traits and profile enums:
 Data sources:
 
 - names: `block_party.registry.resources.Names`, loading `data/*/moes/names`
-- block trait tags: `block_party.registry.CustomTags` and JSON under `src/main/resources/data/block_party/tags/blocks/moe/...`
+- block trait tags: `block_party.registry.CustomTags` and JSON under `src/main/resources/data/block_party/tags/block/moe/...`
 
 Generation flow:
 
-- `Moe` constructor initially sets a unique gender-based given name.
-- `Layer4.finalizeSpawn` also sets a unique name and weighted blood type.
-- `CustomSpawnEggItem` sets block state first, then randomizes `Dere`, weighs `BloodType`, assigns player, and claims DB row.
-- `Layer4.setAdditionalBlockStateData` derives gender, blood type, dere, and zodiac from block tags.
+- `CustomSpawnEggItem` sets block state first, assigns owner/row identity, and lets the active Moe/profile path derive row-backed defaults.
+- block tags and social-affinity resources drive visible traits, names, and profile defaults where current code has restored them.
 
-Risk note: name assignment appears duplicated between `Moe` constructor and `Layer4.finalizeSpawn`. Static reading cannot prove which path wins in all spawn cases.
+Risk note: name, trait, and social-affinity generation still cross resource loading, spawn-time defaults, row persistence, and old baseline expectations. Keep this covered with focused tests before consolidating.
 
 ### Dialogue And Conversation System
 
@@ -215,9 +202,9 @@ Core files:
 - `block_party.scene.actions.SendDialogue`
 - `block_party.scene.actions.SendResponse`
 - `block_party.client.screens.DialogueScreen`
-- `block_party.messages.SOpenDialogue`
-- `block_party.messages.CDialogueRespond`
-- `block_party.messages.CDialogueClose`
+- `block_party.network.payload.DialogueOpenPayload`
+- `block_party.network.payload.DialogueRespondPayload`
+- `block_party.network.payload.DialogueClosePayload`
 
 Scenes are JSON resources under `data/*/scenes`. Each has a trigger, filters, and actions. Filters must all pass. Matching scenes are shuffled and one fulfilled scene is selected.
 
@@ -227,34 +214,25 @@ Supported registered actions include dialogue, response, health/food/loyalty/str
 
 Network setup:
 
-- `block_party.registry.CustomMessenger`
-- `block_party.messages.AbstractMessage`
+- `block_party.network.CustomMessenger`
+- `block_party.network.payload.*`
 
-Server-bound packet registrations in `CustomMessenger.registerServer`:
+Server-bound custom payload registrations in `CustomMessenger.registerPayloads`:
 
-- `CDialogueClose`
-- `CDialogueRespond`
-- `CNPCRemove`
-- `CNPCRequest`
-- `CNPCTeleport`
-- `CRemovePage`
+- `NpcRemoveRequestPayload`
+- `NpcCallRequestPayload`
+- `DialogueRespondPayload`
+- `DialogueClosePayload`
+- `ShrineListRequestPayload`
 
-Client-bound packet registrations in `CustomMessenger.registerClient`:
+Client-bound custom payload registrations:
 
-- `SCloseDialogue`
-- `SNPCList`
-- `SNPCResponse`
-- `SOpenCellPhone`
-- `SOpenDialogue`
-- `SOpenYearbook`
-- `SShrineList`
+- `NpcCallPayload`
+- `ControllerOpenPayload`
+- `DialogueOpenPayload`
+- `ShrineListPayload`
 
-Files present but not registered in the current messenger setup:
-
-- `CNPCQuery` is abstract base behavior for server-bound NPC lookup.
-- `SOpenController` is base behavior for controller screens.
-
-Potential issue: the code uses `AbstractMessage.Server` for client-bound messages and `AbstractMessage.Client` for server-bound messages, which is semantically confusing even if it works through overridden handlers.
+NeoForge 1.21.4 custom payloads are registered through `RegisterPayloadHandlersEvent` and `PayloadRegistrar`. `DialogueClosePayload` is serverbound because the active transport does not allow the same payload ID to be registered in both directions.
 
 ### Client Rendering And UI
 
@@ -320,22 +298,22 @@ Record schemas:
 SQLite dependency:
 
 - `build.gradle` integrates `org.xerial:sqlite-jdbc:3.40.1.0`
-- `shadowJar` relocates `org.sqlite` to `block_party.org.sqlite`
+- NeoForge jar-in-jar includes `org.xerial:sqlite-jdbc:[3.40.1.0,3.41)`
 
 `BlockPartyDB` opens the DB at the world path `blockparty.db`, creates tables on world load, and closes tracked connections on world unload.
 
-Risk note: SQL strings are assembled manually in several places. Some values use prepared-statement columns, but table names and selected IDs are interpolated into SQL strings. Static reading suggests the ID sources are internal numeric values, so exploitability may be low, but porting should preserve behavior while tightening safety later.
+Risk note: SQL strings are assembled manually in several places. Some values use prepared-statement columns, but table names and selected IDs are interpolated into SQL strings. Static reading suggests the ID sources are internal numeric values, so exploitability may be low, but future cleanup should preserve behavior while tightening safety later.
 
 ### Chores, Pranks, And Adventuring
 
 The README claims Moes bring food, pull pranks, perform chores, and tag along on adventures. In code, I found only supporting scaffolding:
 
-- follow state: `Layer3.FOLLOWING`, `Layer3.isFollowing`, `Layer3.setFollowing`
-- cell-phone teleport/call: `CNPCTeleport`, `CellPhone`, `ForcedChunk`, `Moe.onTeleport`
-- stat fields: food, exhaustion, saturation, stress, relaxation, loyalty, affection, age in `Layer4`
-- empty update hooks: `Layer7.updateHungerState`, `updateLonelyState`, `updateStressState`, `updateActionState`, `updateSleepState`
+- follow state: `Moe.isFollowing`, `Moe.setFollowing`
+- cell-phone teleport/call: `NpcCallRequestPayload`, `NpcCallPayload`, `CellPhone`, `MoeSpawner`, and Minecraft 1.21.4 `TeleportTransition`
+- stat fields: food, fullness, stress, relaxation, loyalty, affection, age, personality traits, home, and visible block state on `Moe`/`NPC`
+- old hunger/loneliness/stress/action/sleep update hooks are not active gameplay loops in the current normalized shell
 - sounds such as `MOE_FEED`, `MOE_GRIEF`, `MOE_FOLLOW`, `MOE_EAT`, `MOE_SLEEPING`
-- inventory/menu support in `Layer6`
+- 36-slot inventory/menu support on `Moe`
 
 I did not find concrete AI goals for following, chores, pranks, gifting food, combat adventuring, or sleep. Treat those as unfinished or planned unless there are files outside the scanned `src/main/java/block_party` tree.
 
@@ -343,8 +321,8 @@ I did not find concrete AI goals for following, chores, pranks, gifting food, co
 
 ### Appears Stable Or Coherent
 
-- Forge registration structure in `BlockParty`, `CustomBlocks`, `CustomItems`, `CustomEntities`, and related registries is conventional for Forge 1.19.x.
-- The layered entity design makes responsibilities discoverable despite being deep.
+- NeoForge registration structure in `BlockParty`, `CustomBlocks`, `CustomItems`, `CustomEntities`, `CustomCreativeTabs`, and related registries is conventional for the current 1.21.4 target.
+- The normalized `Moe` shell keeps the active entity/runtime surface easier to reason about than the frozen layered source.
 - Block-to-Moe spawn and hide/reveal lifecycle is implemented end-to-end.
 - Resource reload listeners for scenes, names, textures, sounds, and aliases are clear.
 - Client rendering has a defined model/layer/screen organization.
@@ -352,44 +330,38 @@ I did not find concrete AI goals for following, chores, pranks, gifting food, co
 
 ### Unfinished Or Placeholder
 
-- Creative tab code in `BlockParty` is commented out with `TODO: Refactor creative tabs`.
-- `CustomBlocks.registerRenderTypes` is entirely commented out.
-- `Layer7.updateHungerState`, `updateLonelyState`, `updateStressState`, `updateActionState`, and `updateSleepState` are empty.
 - Chores/pranks/adventuring/follow AI are not implemented in the scanned code.
 - `Senpai` exists but is not registered as an entity.
 - `SceneActions.Markov` exists but is not registered.
-- `BlockPartyDB.Saplings` exists but `Saplings.create(level)` is not called in `onWorldLoad`.
-- `SNPCList.handle` is empty.
-- `DialogueScreen.renderTooltips` contains a commented `???`.
+- full old Forge scene action/filter coverage, full Forge NPC row synchronization, and planned `BlockPartyNPC`/`Senpai` hierarchy restoration remain follow-ups.
 
 ### Duplicated Or Confusing
 
-- Name/blood generation happens in multiple places: `BlockPartyNPC` constructor, `Moe` constructor, `Layer4.finalizeSpawn`, and `CustomSpawnEggItem`.
-- `Layer1.doHurtTarget` and `Layer7.doHurtTarget` previously called back into their own overrides and could stack overflow. They now delegate to `super.doHurtTarget(target)` before applying layer-specific behavior.
-- `AbstractMessage.Client` and `AbstractMessage.Server` names appear reversed relative to packet direction use.
-- `Moe.getFamilyName` derives a block translation key, while `Layer4.getFamilyName` returns `"Minashigo"`; this is probably intentional override behavior, but worth preserving in tests.
+- Name/blood/profile generation still has multiple historical entry points between row data, tags, spawn, and old frozen source expectations.
+- `Layer1.doHurtTarget` and `Layer7.doHurtTarget` previously called back into their own overrides and could stack overflow. The active NeoForge combat path delegates safely through vanilla mob combat and remains covered by GameTests.
+- Some class names and compatibility notes still refer to old Forge packet/entity concepts. Keep those references only when they describe old-world parity.
+- family-name behavior still needs explicit tests if the old block translation-key behavior is restored more fully.
 
 ### Risky Or Bug-Prone
 
-- `MoeInHiding.readAdditionalSaveData` now restores the saved hide condition from NBT; keep this fixed behavior covered during save/load migration.
-- `HidingSpots` maps `BlockPos` only, even though `spawn(ServerLevel, DimBlockPos)` receives a dimensional position. Because each `SavedData` instance is per `ServerLevel` in `HidingSpots.get`, this may be acceptable, but it should be verified during migration.
+- `MoeInHiding.readAdditionalSaveData` now restores the saved hide condition from NBT; keep this fixed behavior covered during save/load work.
+- `HidingSpots` maps `BlockPos` only, even though some APIs receive dimensional positions. Because each `SavedData` instance is per `ServerLevel`, this may be acceptable, but it should be verified across dimensions.
 - `HidingSpots.get(ServerLevel, BlockPos)` returns `spot.list.get(pos)` as primitive `long`; callers rely on `isNormalBlock` first to avoid unboxing null. The order is fragile.
 - `SceneManager.trigger` only replaces the current scene if the incoming priority is greater than the current trigger. Equal-priority triggers are ignored until the active action clears.
 - `SceneManager.setAction(null)` calls `onComplete` on the existing action. For `SendDialogue`, that can enqueue response follow-up behavior during interruption; verify whether that is intended.
-- `Layer5.onSyncedDataUpdated` writes DB updates broadly and may do so often.
-- `Column.set` uses reference comparison (`this.value != value`) rather than equality. For boxed, string, enum, block-state, or position values this can mark dirty unexpectedly or miss logical equality.
-- `Row.update()` builds SQL from dirty columns and assumes at least one dirty column; if no columns are dirty, `getColumnSetters` would substring an empty string.
-- `MoeTextures.get` appears to call `CustomResources.MOE_TEXTURES.map.getOrDefault(state, ...)` where the map key type is `Block`, not `BlockState`. This may cause fallback textures to be used more often than intended.
+- DB writes should stay explicit and covered by tests so row synchronization does not regress back into broad synced-data churn.
+- `Column.set` reference/equality behavior and no-op `Row.update()` handling should remain covered by DB tests.
+- Moe texture metadata was normalized in the active NeoForge path, but visual override/fallback screenshots are still useful release checks.
 - `Markov.chain` stores entries by `probability` instead of cumulative `total`, which likely breaks weighted selection if it is ever used.
 
-## Proposed Test Plan Before Porting
+## Current Regression Plan
 
-Start with behavior-preserving tests and manual smoke tests in the current Forge version before changing loader or Minecraft version.
+Start with behavior-preserving tests and manual smoke tests in the current NeoForge 1.21.4 build before changing risky behavior.
 
 1. Build and launch smoke test
    - Run Gradle build/client once on the current code.
    - Record any existing compile/runtime failures as baseline.
-   - Verify `mods.toml`, assets, data packs, SQLite relocation, and resource reloads load without hard crashes.
+   - Verify `neoforge.mods.toml`, assets, data packs, SQLite jar-in-jar loading, and resource reloads load without hard crashes.
 
 2. Spawn lifecycle test
    - In a test world, place a block in `block_party:spawns_moes`.
@@ -398,11 +370,11 @@ Start with behavior-preserving tests and manual smoke tests in the current Forge
 
 3. Trait/profile test
    - Spawn Moes from blocks tagged for gender, blood type, dere, zodiac, wings, glow, cat features, and ignores-volume.
-   - Verify `Layer4.setAdditionalBlockStateData`, `Layer2.setBlockState`, sound selection, scale, navigation type, and renderer layers.
+   - Verify active `Moe` block-state/profile derivation, sound selection, scale, navigation type, and renderer layers.
 
 4. Dialogue scene test
    - Use `test_dialogue.json` through right-click.
-   - Verify `SceneManager.trigger`, `SOpenDialogue`, `DialogueScreen`, `CDialogueRespond`, chained responses, and `End` behavior.
+   - Verify `SceneManager.trigger`, `DialogueOpenPayload`, `DialogueScreen`, `DialogueRespondPayload`, chained responses, and `End` behavior.
    - Add a scene with filters/counters/cookies before changing this system if it is intended to survive.
 
 5. Hide/reveal test
@@ -413,15 +385,15 @@ Start with behavior-preserving tests and manual smoke tests in the current Forge
 6. Persistence test
    - Spawn, rename/profile-change if possible, hide, save, quit, reload.
    - Verify DB row, player NPC list, `HidingSpots`, entity NBT, and block entity NBT restoration.
-   - Specifically test `HideUntil` restoration so the resolved timed-hide restore behavior survives migration.
+   - Specifically test `HideUntil` restoration so the resolved timed-hide restore behavior stays fixed.
 
 7. Controller UI test
    - Open `YearbookItem` and `CellPhoneItem`.
-   - Verify `SOpenYearbook`, `SOpenCellPhone`, `CNPCRequest`, `SNPCResponse`, `CNPCTeleport`, `ForcedChunk`, and `Moe.onTeleport`.
+   - Verify `ControllerOpenPayload`, `NpcDetailPayload`, `NpcCallRequestPayload`, `NpcCallPayload`, `CellPhone`, `MoeSpawner`, and `TeleportTransition` behavior.
 
 8. Death/removal test
    - Kill or expose a hidden Moe and inspect `NPC.DEAD`, `NPC.HIDING`, player list removal, and row lifetime.
-   - Verify expected behavior before deciding whether NeoForge migration should preserve or fix it.
+   - Verify expected behavior before deciding whether follow-up fixes should preserve or change it.
 
 9. Resource reload/data-pack test
    - Reload names, aliases, textures, sounds, and scenes.
@@ -429,63 +401,29 @@ Start with behavior-preserving tests and manual smoke tests in the current Forge
    - Confirm `minecraft` namespace scene/resources are intentionally remapped by `Scenes.own`.
 
 10. Regression harness
-   - Add minimal GameTest-style tests if staying on a Minecraft version that supports them cleanly.
-   - Where GameTest is too expensive, preserve a manual smoke-test checklist and golden world save with known Moes, hidden Moes, and DB state.
+   - Run `.\gradlew.bat runGameTestServer` and keep manual smoke-test checklists/golden worlds for client-only coverage.
 
-## Proposed NeoForge Migration Plan
+## Current Modernization Plan
 
-Order the migration from lowest-risk mechanical work to highest-risk behavioral changes.
+Order follow-up work from safest behavior locks to broader feature restoration.
 
-1. Freeze baseline
-   - Create a branch and run current build/client smoke tests.
-   - Save logs, generated DB schema, a small test world, and screenshots of Moe spawn/dialogue/hide.
+1. Keep current NeoForge baseline green
+   - Run `.\gradlew.bat compileJava --no-daemon` and `.\gradlew.bat runGameTestServer --no-daemon`.
+   - Save logs, generated DB schema, a small test world, and screenshots of Moe spawn/dialogue/hide before large behavior changes.
 
-2. Update Gradle and metadata first
-   - Replace ForgeGradle/Forge coordinates in `build.gradle` with the target NeoForge toolchain.
-   - Update `mods.toml` or metadata format only as required by the target Minecraft/NeoForge version.
-   - Keep package names and gameplay code unchanged.
+2. Preserve active API seams
+   - Keep registry names, payload IDs, SQLite table/column names, resource paths, and item/entity IDs stable.
+   - When Minecraft or NeoForge versions move again, update Gradle, metadata, generated resources, and GameTests first.
 
-3. Port registration wrappers
-   - Start with `BlockParty`, `CustomBlocks`, `CustomItems`, `CustomEntities`, `CustomSounds`, `CustomParticles`, `CustomBlockEntities`.
-   - Preserve registry names exactly.
-   - Keep `CustomResources`, scene action/filter registry names, and packet IDs stable until the mod loads.
+3. Expand parity tests around restored systems
+   - Cover spawn, hide/reveal, profile traits, social affinities, Yearbook, Cell Phone, dialogue, shrine/location records, resources, and decorative blocks.
+   - Treat old Forge behavior as a compatibility input, not as a reason to reintroduce old APIs.
 
-4. Port data/resource reload listeners
-   - Move `CustomResources`, `Scenes`, `Names`, `MoeTextures`, `MoeSounds`, and `BlockAliases` to the new reload/event APIs.
-   - Verify all paths under `data/*/moes`, `data/*/scenes`, and client texture resources still load.
+4. Finish active client validation
+   - Screenshot-test `MoeRenderer`, `MoeModel`, `MoeRenderState`, layers, `DialogueScreen`, `YearbookScreen`, `CellPhoneScreen`, Samurai armor, JapanRenderer, particles, and transparent blocks.
 
-5. Port networking
-   - Replace `SimpleChannel` setup and packet registration in `CustomMessenger`.
-   - Preserve packet payload fields and direction behavior first, even though class names are confusing.
-   - Add logging around unregistered/unused packets only after parity is confirmed.
+5. Address remaining architecture risks
+   - Tighten SQL update helpers, hidden-spot edge cases, profile generation, data-pack diagnostics, and save schema versioning behind tests.
 
-6. Port entity APIs
-   - Update `EntityType`, attributes, synched data, spawn packets, dimensions, navigation, interaction, damage, and NBT method names.
-   - Port the `Layer1`-`Layer7` stack without redesigning it.
-   - Fix only compile/API breaks at this stage; preserve the already-fixed `doHurtTarget` super-call behavior.
-
-7. Port client rendering
-   - Update model layer registration, renderer registration, render layers, pose stack/model APIs, screens, buttons, and sound UI calls.
-   - Verify `MoeRenderer`, `MoeModel`, `EmoteLayer`, `GlowLayer`, `SpecialLayer`, `DialogueScreen`, `YearbookScreen`, and `CellPhoneScreen`.
-
-8. Port persistence and world hooks
-   - Update `SavedData`, `DimensionDataStorage`, level load/unload events, player login events, and chunk forcing APIs.
-   - Keep SQLite schema and `blockparty.db` filename stable.
-   - Verify `BlockPartyDB`, `HidingSpots`, `ForcedChunk`, and `CellPhone`.
-
-9. Port tags, data, worldgen, and block entities
-   - Update tag locations if the target Minecraft version changed conventions.
-   - Port `AbstractDataBlockEntity` and locative/shrine/garden block entities.
-   - Port worldgen after core Moe lifecycle works, because worldgen is less central to NPC behavior.
-
-10. Run parity tests
-   - Execute the test plan above in the NeoForge branch.
-   - Compare DB rows, NBT, visible textures, dialogue behavior, and hide/reveal behavior against the baseline.
-
-11. Only then fix remaining known behavior bugs
-   - After parity is measurable, fix remaining risks such as `MoeTextures` key mismatch, empty dirty SQL updates, hidden-spot edge cases, and other open issues.
-   - Each fix should get a narrow regression test or manual before/after note.
-
-12. Implement unfinished systems last
-   - Chores, pranks, adventuring, hunger/stress/sleep, and richer following should come after the port is stable.
-   - These are new behavior, not migration work, and should not be mixed with loader/API migration.
+6. Restore planned systems last
+   - Chores, pranks, adventuring, hunger/stress/sleep, richer following, Senpai, and the broader NPC hierarchy are new behavior on top of the stable NeoForge port.

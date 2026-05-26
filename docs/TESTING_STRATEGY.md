@@ -66,7 +66,7 @@ Manual checks should cover things automated tests will not catch well yet:
 - seasonal texture behavior around Christmas/Halloween helpers
 - full play loops: spawn, talk, hide, reveal, save, reload, call by phone, inspect in Yearbook
 
-The golden world should be captured before bug fixes and before migration. Keep screenshots and brief notes for expected results.
+The golden world should be captured before risky bug fixes and before future Minecraft/NeoForge version moves. Keep screenshots and brief notes for expected results.
 
 ## Major Systems
 
@@ -95,23 +95,21 @@ GameTest:
 
 Manual:
 
-- Creative/inventory discoverability, because creative tab behavior is currently commented out.
+- Creative/inventory discoverability and active creative-tab sort order.
 - Visible block item models and cutout/cutout-mipped render behavior for decorative blocks.
 
 Capture before fixes:
 
 - Exact valid/invalid spawn behavior.
-- Current creative-tab absence or item discoverability.
-- Current render behavior for transparent blocks whose render type registration is commented out.
+- Current creative-tab item discoverability and sort order.
+- Current render behavior for transparent blocks registered through `BlockPartyClientEvents`.
 
 ### Moe Entity Lifecycle
 
 Files:
 
-- `src/main/java/block_party/entities/BlockPartyNPC.java`
 - `src/main/java/block_party/entities/Moe.java`
 - `src/main/java/block_party/entities/MoeInHiding.java`
-- `src/main/java/block_party/entities/abstraction/Layer1.java` through `Layer7.java`
 - `src/main/java/block_party/entities/goals/HideUntil.java`
 - `src/main/java/block_party/entities/data/HidingSpots.java`
 
@@ -124,12 +122,12 @@ Unit test:
 GameTest:
 
 - Spawned Moe persists near player and does not despawn from distance.
-- `Layer2.setBlockState` changes visible block identity, scale, fire/pathing flags, and navigation category where observable.
+- `Moe.setBlockState` changes visible block identity, scale, fire/pathing flags, and navigation category where observable.
 - Death of a corporeal Moe triggers current hide/retreat behavior.
 - `Moe.hide(...)` creates a hiding marker and restores the source block.
 - `MoeInHiding.spawn()` restores the same NPC record and removes the hiding block.
 - `HidingSpots` reveal behavior for left-click start, block break, piston pre-event, falling-block conversion, timer expiry, and air exposure.
-- Combat coverage for `Layer1.doHurtTarget` and `Layer7.doHurtTarget` preserving the resolved non-recursive super-call behavior.
+- Combat coverage for active `Moe` attack behavior preserving the resolved non-recursive vanilla delegation.
 
 Manual:
 
@@ -147,7 +145,7 @@ Capture before remaining fixes:
 
 Files:
 
-- `src/main/java/block_party/entities/abstraction/Layer4.java`
+- `src/main/java/block_party/entities/Moe.java`
 - `src/main/java/block_party/scene/traits/Gender.java`
 - `src/main/java/block_party/scene/traits/BloodType.java`
 - `src/main/java/block_party/scene/traits/Dere.java`
@@ -174,7 +172,7 @@ Manual:
 - Dialogue substitutions display the expected given name, family name, and pronouns.
 - Cat features, wings, glow, and festive textures are visually/audibly recognizable.
 
-Capture before fixes/migration:
+Capture before fixes/version moves:
 
 - The current winner among constructor defaults, block tags, randomization, and `finalizeSpawn`.
 - Current behavior when names run out.
@@ -218,7 +216,7 @@ Manual:
 - `DialogueScreen` visual layout, speaker staging, text reveal timing, response button positions, tooltip/text modes, sound playback, and close behavior.
 - Chained dialogue feels the same before and after port.
 
-Capture before fixes/migration:
+Capture before fixes/version moves:
 
 - Scene priority/interruption behavior.
 - Current JSON namespace remapping via `Scenes.own(...)`.
@@ -228,19 +226,18 @@ Capture before fixes/migration:
 
 Files:
 
-- `src/main/java/block_party/registry/CustomMessenger.java`
-- `src/main/java/block_party/messages/AbstractMessage.java`
-- `src/main/java/block_party/messages/CDialogueRespond.java`
-- `src/main/java/block_party/messages/CDialogueClose.java`
-- `src/main/java/block_party/messages/CNPCQuery.java`
-- `src/main/java/block_party/messages/CNPCRequest.java`
-- `src/main/java/block_party/messages/CNPCRemove.java`
-- `src/main/java/block_party/messages/CNPCTeleport.java`
-- `src/main/java/block_party/messages/SOpenDialogue.java`
-- `src/main/java/block_party/messages/SOpenYearbook.java`
-- `src/main/java/block_party/messages/SOpenCellPhone.java`
-- `src/main/java/block_party/messages/SNPCResponse.java`
-- `src/main/java/block_party/messages/SShrineList.java`
+- `src/main/java/block_party/network/CustomMessenger.java`
+- `src/main/java/block_party/network/ClientPayloadBridge.java`
+- `src/main/java/block_party/network/payload/DialogueRespondPayload.java`
+- `src/main/java/block_party/network/payload/DialogueClosePayload.java`
+- `src/main/java/block_party/network/payload/DialogueOpenPayload.java`
+- `src/main/java/block_party/network/payload/ControllerOpenPayload.java`
+- `src/main/java/block_party/network/payload/NpcCallRequestPayload.java`
+- `src/main/java/block_party/network/payload/NpcCallPayload.java`
+- `src/main/java/block_party/network/payload/NpcDetailPayload.java`
+- `src/main/java/block_party/network/payload/NpcRemoveRequestPayload.java`
+- `src/main/java/block_party/network/payload/ShrineListRequestPayload.java`
+- `src/main/java/block_party/network/payload/ShrineListPayload.java`
 
 Unit test:
 
@@ -250,22 +247,22 @@ Unit test:
 
 GameTest:
 
-- `CDialogueRespond` changes the correct server-side Moe response.
-- `CNPCRequest` returns the requested NPC data for owned records.
-- `CNPCRemove` removes only dead or estranged NPC records from the player's visible list.
-- `CNPCTeleport` finds a listed Moe and teleports it near the player where current behavior succeeds.
-- `SShrineList` contents reflect current shrine visibility rules.
+- `DialogueRespondPayload` changes the correct server-side Moe response.
+- `NpcDetailPayload` returns the requested NPC data for owned records.
+- `NpcRemoveRequestPayload` removes only allowed NPC records from the player's visible list.
+- `NpcCallRequestPayload`/`NpcCallPayload` find a listed Moe and teleport it near the player where current behavior succeeds.
+- `ShrineListPayload` contents reflect current shrine visibility rules.
 
 Manual:
 
-- Actual screen opening for `SOpenDialogue`, `SOpenYearbook`, and `SOpenCellPhone`.
+- Actual screen opening for `DialogueOpenPayload` and `ControllerOpenPayload` in Yearbook/Cell Phone modes.
 - Failure behavior when a phone target cannot be found.
 - Packet-driven UI does not open when the player no longer holds the expected item.
 
-Capture before fixes/migration:
+Capture before fixes/version moves:
 
-- Packet IDs/order from `CustomMessenger.register(...)` if old clients/worlds are expected to interoperate during migration.
-- Exact behavior of the confusing `AbstractMessage.Client` and `AbstractMessage.Server` naming.
+- Payload IDs/order from `CustomMessenger.registerPayloads(...)` if old clients/worlds are expected to interoperate during future version moves.
+- Direction and ID behavior for the NeoForge custom payload registrations.
 
 ### Persistence And Database
 
@@ -306,7 +303,7 @@ Manual:
 - Confirm old-world DB file survives a port without data loss.
 - Test real server stop/start around hidden Moes and known NPC lists.
 
-Capture before fixes/migration:
+Capture before fixes/version moves:
 
 - Current DB schema exactly.
 - Current behavior for no-op updates and dirty tracking.
@@ -347,10 +344,10 @@ Manual:
 - Verify `JapanRenderer` shrine-dependent skybox effect.
 - Verify all relevant sounds by ear.
 
-Capture before fixes/migration:
+Capture before fixes/version moves:
 
 - Screenshots for texture lookup bug baseline.
-- Current transparent/cutout block rendering with `CustomBlocks.registerRenderTypes` commented out.
+- Current transparent/cutout block rendering through `BlockPartyClientEvents.registerRenderTypes`.
 - Current UI layout at common window sizes.
 
 ### Resource Loading And Data Packs
@@ -383,7 +380,7 @@ Manual:
 - Data-pack override smoke test with one custom scene, one custom texture override, and one custom name list.
 - Resource reload in a running client/server.
 
-Capture before fixes/migration:
+Capture before fixes/version moves:
 
 - Current behavior for `minecraft` namespace resources remapped to `block_party`.
 - Current fallback behavior for missing texture/sound/name entries.
@@ -422,7 +419,7 @@ Manual:
 - Full shrine tablet effect: lightning visual, ambient sound, spawned Moe.
 - Garden/favorite-location gameplay if any is visible in current build.
 
-Capture before fixes/migration:
+Capture before fixes/version moves:
 
 - Whether favorite-location return/respawn is currently observable.
 - Exact shrine list visibility rule, including owner and dimension behavior.
@@ -431,12 +428,10 @@ Capture before fixes/migration:
 
 Files:
 
-- `src/main/java/block_party/entities/abstraction/Layer3.java`
-- `src/main/java/block_party/entities/abstraction/Layer4.java`
-- `src/main/java/block_party/entities/abstraction/Layer6.java`
-- `src/main/java/block_party/entities/abstraction/Layer7.java`
+- `src/main/java/block_party/entities/Moe.java`
+- `src/main/java/block_party/db/records/NPC.java`
 - `src/main/java/block_party/world/CellPhone.java`
-- `src/main/java/block_party/world/chunk/ForcedChunk.java`
+- `src/main/java/block_party/entities/MoeSpawner.java`
 
 Unit test:
 
@@ -454,16 +449,16 @@ Manual:
 - Any discovered chore, prank, or adventuring behavior should be recorded in the golden-world checklist.
 - Full Cell Phone adventure flow: call Moe from far away, inspect following state, observe what it does next.
 
-Capture before fixes/migration:
+Capture before fixes/version moves:
 
 - That chores/pranks/adventuring are currently mostly scaffolding, not active gameplay.
-- Current `isFollowing` behavior after `CNPCTeleport`.
+- Current `isFollowing` behavior after `NpcCallRequestPayload`/`NpcCallPayload`.
 
 ## Baseline Before Fixes
 
 Before fixing remaining known bugs from `docs/TECH_DEBT.md`, capture:
 
-- `Layer1.doHurtTarget` and `Layer7.doHurtTarget` non-recursive combat result.
+- Active `Moe` non-recursive combat result.
 - `MoeInHiding` hide timer behavior across save/load with restored `HideUntil`.
 - `MoeTextures.get` actual visual result for override and fallback textures.
 - `Row.update()` no-dirty-column behavior.
@@ -472,9 +467,9 @@ Before fixing remaining known bugs from `docs/TECH_DEBT.md`, capture:
 - `BlockPartyDB` current table schema, including missing `Saplings.create(level)` behavior.
 - Current render-layer behavior for cutout blocks.
 
-## Baseline Before NeoForge Migration
+## Baseline Before Future Minecraft/NeoForge Version Moves
 
-Before migration starts, prepare a golden world with:
+Before moving Minecraft/NeoForge versions again, prepare a golden world with:
 
 - one valid spawned Moe from a simple block
 - one Moe from a block with block-state properties
@@ -508,4 +503,4 @@ Record:
 6. Add GameTests for save/load persistence and phone/yearbook server behavior.
 7. Build the manual golden-world checklist and screenshots.
 8. Only then fix remaining dangerous bugs.
-9. Re-run all tests before and after each migration slice.
+9. Re-run all tests before and after each risky behavior fix or future version-move slice.

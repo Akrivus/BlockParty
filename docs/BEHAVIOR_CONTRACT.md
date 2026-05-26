@@ -239,11 +239,11 @@ If a listed Moe cannot be found, current failure behavior should be preserved an
 
 The README says Moes perform chores depending on the block they personify. I did not find confirmed current chore gameplay.
 
-Port contract:
+Current NeoForge contract:
 
 - Do not remove profile stats, inventory behavior, block tags, sounds, or scene hooks that future chore behavior may depend on.
-- Do not introduce new chore outcomes during the port unless they already existed in testable gameplay.
-- If any chore behavior is discovered in manual testing, record it as a parity requirement before migration.
+- Do not introduce new chore outcomes during current-version stabilization unless they already existed in testable gameplay.
+- If any chore behavior is discovered in manual testing, record it as a parity requirement before future version moves.
 
 Expected future player-facing shape:
 
@@ -257,10 +257,10 @@ Expected future player-facing shape:
 
 The README says Moes pull pranks. I did not find confirmed current prank gameplay.
 
-Port contract:
+Current NeoForge contract:
 
 - Preserve prank-related stats, sounds, dialogue hooks, and personality categories.
-- Do not add new world-changing prank behavior during loader/API migration.
+- Do not add new world-changing prank behavior during current NeoForge stabilization.
 - If current data packs or manual play reveal prank scenes, preserve their triggers, dialogue, and outcomes exactly.
 
 Expected future player-facing shape:
@@ -285,7 +285,7 @@ Port contract:
 
 `Uncertain`
 
-I did not find a complete visible follow AI loop. Do not treat richer adventuring behavior as part of the port unless parity testing proves it already works.
+I did not find a complete visible follow AI loop. Do not treat richer adventuring behavior as part of the current NeoForge baseline unless parity testing proves it already works.
 
 ## Persistence
 
