@@ -370,9 +370,23 @@ Supported filters:
 - `block_party:block`
 - `block_party:held_item`
 - `block_party:player_held_item`
+- `block_party:player_has_item`
+- `block_party:moe_has_item`
+- `block_party:has_item`
 - `block_party:social_target_block`
 
 For item and block `name`, prefix with `#` to match a tag.
+
+Inventory item filters search a whole inventory rather than only one hand.
+`has_item` is an alias for `moe_has_item`.
+
+```json
+{
+  "type": "block_party:player_has_item",
+  "item": "minecraft:apple",
+  "count": 2
+}
+```
 
 ## Follow, Routine, Anchor, And Social Filters
 
@@ -649,6 +663,63 @@ Notes:
 - `set_home_to_anchor` copies the current routine anchor into the Moe home.
 - `clear_follow_session`, `wait`, and `dismiss` all clear the active follow
   session.
+
+## Inventory And Item Actions
+
+Open Moe inventory:
+
+```json
+{
+  "type": "block_party:open_inventory"
+}
+```
+
+`open_inventory` opens the active Moe's inventory for the dialogue target, or the
+Moe owner when no dialogue target is set.
+
+Give an item:
+
+```json
+{
+  "type": "block_party:give_item",
+  "action": {
+    "item": "minecraft:cookie",
+    "count": 3,
+    "target": "player"
+  }
+}
+```
+
+Fields:
+
+- `item`: item ID. Required for a non-empty stack.
+- `count`: item count. Defaults to `1`.
+- `target`: `player` default, or `moe`.
+
+Take an item:
+
+```json
+{
+  "type": "block_party:take_item",
+  "action": {
+    "item": "minecraft:apple",
+    "count": 2,
+    "source": "player",
+    "destination": "moe"
+  }
+}
+```
+
+Fields:
+
+- `item`: item ID or item tag when matching inventory contents.
+- `count`: item count. Defaults to `1`.
+- `source`: `player` default, or `moe`.
+- `destination`: `moe` default, `player`, or `discard`.
+
+The default `take_item` behavior is gift-like: remove the item from the player
+and store it in the Moe inventory. If the Moe inventory cannot hold the item,
+the action does not remove it from the player.
 
 ## Hide And Sleep Actions
 

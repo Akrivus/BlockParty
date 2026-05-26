@@ -14,6 +14,7 @@ import block_party.scene.Response;
 import block_party.scene.SceneAction;
 import block_party.scene.SceneTrigger;
 import block_party.scene.SceneVariables;
+import block_party.scene.actions.OpenInventoryAction;
 import block_party.db.voicemail.Voicemails;
 import com.google.gson.JsonParser;
 import java.sql.Connection;
@@ -28,6 +29,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -495,6 +497,69 @@ public final class SceneGameTests {
         clear.apply(moe);
         if (moe.isFollowing()) {
             helper.fail("Expected clear_follow_session action to dismiss the active session");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void inventorySceneActionParsesAsOpenInventoryCommand(GameTestHelper helper) {
+        SceneAction openInventory = parseAction("{\"type\":\"block_party:open_inventory\"}");
+
+        if (openInventory != OpenInventoryAction.INSTANCE) {
+            helper.fail("Expected open_inventory scene action to parse as OpenInventoryAction");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void itemSceneActionsGiveAndTakeItems(GameTestHelper helper) {
+        UUID owner = new UUID(523L, 23L);
+        Moe moe = spawnMoe(helper, owner);
+        SceneAction give = parseAction("{\"type\":\"block_party:give_item\",\"action\":{\"item\":\"minecraft:cookie\",\"count\":3,\"target\":\"moe\"}}");
+        SceneAction take = parseAction("{\"type\":\"block_party:take_item\",\"action\":{\"item\":\"minecraft:cookie\",\"count\":2,\"source\":\"moe\",\"destination\":\"discard\"}}");
+
+        give.apply(moe);
+        if (moe.getInventory().countItem(Items.COOKIE) != 3) {
+            helper.fail("Expected give_item to add cookies to the Moe inventory");
+            return;
+        }
+
+        take.apply(moe);
+        if (moe.getInventory().countItem(Items.COOKIE) != 1) {
+            helper.fail("Expected take_item to remove two cookies from the Moe inventory");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void inventorySceneFiltersMatchPlayerAndMoeItems(GameTestHelper helper) {
+        UUID owner = new UUID(524L, 24L);
+        Moe moe = spawnMoe(helper, owner);
+        moe.getInventory().setItem(0, new net.minecraft.world.item.ItemStack(Items.COOKIE, 1));
+
+        ScenesReloadListener.ParsedScene accepts = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  {"type":"block_party:moe_has_item","filter":{"item":"minecraft:cookie","count":1}},
+                  {"type":"block_party:has_item","filter":{"item":"minecraft:cookie","count":1}}
+                ],"actions":[]}
+                """);
+        ScenesReloadListener.ParsedScene rejects = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  {"type":"block_party:moe_has_item","filter":{"item":"minecraft:diamond","count":1}}
+                ],"actions":[]}
+                """);
+
+        if (!accepts.scene().fulfills(moe)) {
+            helper.fail("Expected inventory filters to match player and Moe inventory contents");
+            return;
+        }
+        if (rejects.scene().fulfills(moe)) {
+            helper.fail("Expected inventory filters to reject missing player item");
             return;
         }
         helper.kill(moe);

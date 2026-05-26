@@ -17,14 +17,18 @@ import block_party.scene.actions.CreateVoicemailAction;
 import block_party.scene.actions.ClearRoutineIntentAction;
 import block_party.scene.actions.ClearFollowSessionAction;
 import block_party.scene.actions.EndAction;
+import block_party.scene.actions.GiveItemAction;
 import block_party.scene.actions.GoToAnchorAction;
 import block_party.scene.actions.HideAction;
+import block_party.scene.actions.OpenInventoryAction;
+import block_party.scene.actions.SceneItemStacks;
 import block_party.scene.actions.SendDialogueAction;
 import block_party.scene.actions.SendResponseAction;
 import block_party.scene.actions.SetHomeToAnchorAction;
 import block_party.scene.actions.SetRoutineIntentAction;
 import block_party.scene.actions.SleepAtHomeAction;
 import block_party.scene.actions.StartFollowSessionAction;
+import block_party.scene.actions.TakeItemAction;
 import block_party.entities.movement.PlayerMovementIntent;
 import block_party.entities.movement.RoutineIntent;
 import com.google.gson.JsonArray;
@@ -204,6 +208,15 @@ public final class ScenesReloadListener implements PreparableReloadListener {
             case "set_routine_intent" -> new SetRoutineIntentAction(RoutineIntent.fromValue(GsonHelper.getAsString(payload, "intent", "idle")));
             case "clear_routine_intent" -> ClearRoutineIntentAction.INSTANCE;
             case "sleep_at_home" -> new SleepAtHomeAction(HideUntil.EXPOSED.fromValue(GsonHelper.getAsString(payload, "until", "exposed")));
+            case "open_inventory" -> OpenInventoryAction.INSTANCE;
+            case "give_item" -> new GiveItemAction(
+                    SceneItemStacks.parse(payload),
+                    GiveItemAction.Target.fromValue(GsonHelper.getAsString(payload, "target", "player")));
+            case "take_item" -> new TakeItemAction(
+                    payload,
+                    Math.max(1, GsonHelper.getAsInt(payload, "count", 1)),
+                    TakeItemAction.Source.fromValue(GsonHelper.getAsString(payload, "source", "player")),
+                    TakeItemAction.Destination.fromValue(GsonHelper.getAsString(payload, "destination", "moe")));
             case "clear_follow_session", "wait", "dismiss" -> ClearFollowSessionAction.INSTANCE;
             default -> EndAction.INSTANCE;
         };

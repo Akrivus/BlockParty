@@ -6,6 +6,7 @@ import block_party.db.records.PlayerRelationship;
 import block_party.entities.Moe;
 import block_party.entities.movement.MoeAnchor;
 import block_party.entities.social.MoeSocialContext;
+import block_party.scene.actions.SceneItemStacks;
 import com.google.gson.JsonObject;
 import java.util.Locale;
 import java.util.Optional;
@@ -66,6 +67,8 @@ public final class SceneObservationFactories {
             case "has_cookie" -> moe -> cookieMatches(moe, json);
             case "held_item" -> moe -> itemMatches(moe.getItemInHand(hand(json)), json);
             case "player_held_item" -> moe -> targetPlayer(moe) != null && itemMatches(targetPlayer(moe).getItemInHand(hand(json)), json);
+            case "has_item", "moe_has_item" -> moe -> maybeNegate(SceneItemStacks.has(moe.getInventory(), json), json);
+            case "player_has_item" -> moe -> targetPlayer(moe) != null && maybeNegate(SceneItemStacks.has(targetPlayer(moe).getInventory(), json), json);
             case "block" -> moe -> blockMatches(moe.getVisibleBlockState(), json);
             case "name" -> moe -> stringMatches(moe.getGivenName(), json);
             case "has_social_target" -> moe -> MoeSocialContext.find(moe, socialRadius(json)).isPresent();
