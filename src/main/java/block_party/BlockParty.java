@@ -26,6 +26,8 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Calendar;
 
@@ -33,6 +35,7 @@ import java.util.Calendar;
 public final class BlockParty {
     public static final String ID = "block_party";
     public static final String VERSION = "26.6";
+    public static final Logger LOGGER = LoggerFactory.getLogger(ID);
 
     public BlockParty(IEventBus modBus) {
         CustomBlocks.register(modBus);
@@ -57,6 +60,7 @@ public final class BlockParty {
         NeoForge.EVENT_BUS.addListener(BlockPartyDB::onServerStopped);
         NeoForge.EVENT_BUS.addListener(CellPhone::onServerTick);
         NeoForge.EVENT_BUS.addListener(CellPhone::onServerStopped);
+        NeoForge.EVENT_BUS.addListener(block_party.world.structure.MoeStructureCohortCoordinator::onServerTick);
         NeoForge.EVENT_BUS.addListener(TsukumogamiSpawns::onBlockPlaced);
         NeoForge.EVENT_BUS.addListener(TsukumogamiSpawns::onBlockBroken);
         NeoForge.EVENT_BUS.addListener(TsukumogamiSpawns::onServerTick);

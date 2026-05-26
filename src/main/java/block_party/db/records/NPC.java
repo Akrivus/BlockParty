@@ -4,6 +4,7 @@ import block_party.db.BlockPartyDB;
 import block_party.db.DimBlockPos;
 import block_party.blocks.entity.ShimenawaBlockEntity;
 import block_party.entities.Moe;
+import block_party.world.structure.MoeStructureAssignment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -55,7 +56,8 @@ public record NPC(
         boolean hasHome,
         DimBlockPos home,
         boolean hiding,
-        BlockPos hiddenPos) {
+        BlockPos hiddenPos,
+        MoeStructureAssignment structureAssignment) {
     private static final UUID EMPTY_UUID = new UUID(0L, 0L);
 
     public static void createTable(BlockPartyDB db) throws SQLException {
@@ -100,7 +102,18 @@ public record NPC(
                         HiddenPosDim TEXT NOT NULL DEFAULT 'minecraft:overworld',
                         HiddenPosX INTEGER NOT NULL DEFAULT 0,
                         HiddenPosY INTEGER NOT NULL DEFAULT 0,
-                        HiddenPosZ INTEGER NOT NULL DEFAULT 0
+                        HiddenPosZ INTEGER NOT NULL DEFAULT 0,
+                        StructureCohortUUID TEXT NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+                        StructureId TEXT NOT NULL DEFAULT '',
+                        StructurePartIndex INTEGER NOT NULL DEFAULT -1,
+                        StructureOffsetX INTEGER NOT NULL DEFAULT 0,
+                        StructureOffsetY INTEGER NOT NULL DEFAULT 0,
+                        StructureOffsetZ INTEGER NOT NULL DEFAULT 0,
+                        StructureTargetDim TEXT NOT NULL DEFAULT 'minecraft:overworld',
+                        StructureTargetX INTEGER NOT NULL DEFAULT 0,
+                        StructureTargetY INTEGER NOT NULL DEFAULT 0,
+                        StructureTargetZ INTEGER NOT NULL DEFAULT 0,
+                        StructureState TEXT NOT NULL DEFAULT 'NONE'
                     );
                     """);
             ensureColumn(statement, "VisibleBlockState", "INTEGER NOT NULL DEFAULT 0");
@@ -131,6 +144,17 @@ public record NPC(
             ensureColumn(statement, "HiddenPosX", "INTEGER NOT NULL DEFAULT 0");
             ensureColumn(statement, "HiddenPosY", "INTEGER NOT NULL DEFAULT 0");
             ensureColumn(statement, "HiddenPosZ", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "StructureCohortUUID", "TEXT NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'");
+            ensureColumn(statement, "StructureId", "TEXT NOT NULL DEFAULT ''");
+            ensureColumn(statement, "StructurePartIndex", "INTEGER NOT NULL DEFAULT -1");
+            ensureColumn(statement, "StructureOffsetX", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "StructureOffsetY", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "StructureOffsetZ", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "StructureTargetDim", "TEXT NOT NULL DEFAULT 'minecraft:overworld'");
+            ensureColumn(statement, "StructureTargetX", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "StructureTargetY", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "StructureTargetZ", "INTEGER NOT NULL DEFAULT 0");
+            ensureColumn(statement, "StructureState", "TEXT NOT NULL DEFAULT 'NONE'");
         } finally {
             db.free(connection);
         }
@@ -161,8 +185,11 @@ public record NPC(
                     Gender, BloodType, Dere, Zodiac, Emotion, Scale, IsCorporeal, Health,
                     FoodLevel, Exhaustion, Saturation, Stress, Relaxation, Loyalty, Affection, Slouch, Age,
                     LastSeenAt, HasHome, HomePosDim, HomePosX, HomePosY, HomePosZ,
-                    HiddenPosDim, HiddenPosX, HiddenPosY, HiddenPosZ
-                ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    HiddenPosDim, HiddenPosX, HiddenPosY, HiddenPosZ,
+                    StructureCohortUUID, StructureId, StructurePartIndex,
+                    StructureOffsetX, StructureOffsetY, StructureOffsetZ,
+                    StructureTargetDim, StructureTargetX, StructureTargetY, StructureTargetZ, StructureState
+                ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(DatabaseID) DO UPDATE SET
                     PosDim = excluded.PosDim,
                     PosX = excluded.PosX,
@@ -199,15 +226,29 @@ public record NPC(
                     HiddenPosDim = excluded.HiddenPosDim,
                     HiddenPosX = excluded.HiddenPosX,
                     HiddenPosY = excluded.HiddenPosY,
-                    HiddenPosZ = excluded.HiddenPosZ;
+                    HiddenPosZ = excluded.HiddenPosZ,
+                    StructureCohortUUID = excluded.StructureCohortUUID,
+                    StructureId = excluded.StructureId,
+                    StructurePartIndex = excluded.StructurePartIndex,
+                    StructureOffsetX = excluded.StructureOffsetX,
+                    StructureOffsetY = excluded.StructureOffsetY,
+                    StructureOffsetZ = excluded.StructureOffsetZ,
+                    StructureTargetDim = excluded.StructureTargetDim,
+                    StructureTargetX = excluded.StructureTargetX,
+                    StructureTargetY = excluded.StructureTargetY,
+                    StructureTargetZ = excluded.StructureTargetZ,
+                    StructureState = excluded.StructureState;
                 """ : """
                 INSERT INTO NPCs (
                     PosDim, PosX, PosY, PosZ, PlayerUUID, Dead, Name, BlockState, VisibleBlockState, Hiding,
                     Gender, BloodType, Dere, Zodiac, Emotion, Scale, IsCorporeal, Health,
                     FoodLevel, Exhaustion, Saturation, Stress, Relaxation, Loyalty, Affection, Slouch, Age,
                     LastSeenAt, HasHome, HomePosDim, HomePosX, HomePosY, HomePosZ,
-                    HiddenPosDim, HiddenPosX, HiddenPosY, HiddenPosZ
-                ) VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    HiddenPosDim, HiddenPosX, HiddenPosY, HiddenPosZ,
+                    StructureCohortUUID, StructureId, StructurePartIndex,
+                    StructureOffsetX, StructureOffsetY, StructureOffsetZ,
+                    StructureTargetDim, StructureTargetX, StructureTargetY, StructureTargetZ, StructureState
+                ) VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """;
         try (PreparedStatement statement = connection.prepareStatement(sql, explicitId ? Statement.NO_GENERATED_KEYS : Statement.RETURN_GENERATED_KEYS)) {
             int offset = explicitId ? 1 : 0;
@@ -241,6 +282,7 @@ public record NPC(
             statement.setBoolean(28 + offset, moe.hasHome());
             bindPosition(statement, 29 + offset, moe.getHome().getDim(), moe.getHome().getPos());
             bindPosition(statement, 33 + offset, level.dimension(), hiddenPos);
+            bindStructureAssignment(statement, 37 + offset, moe.structureAssignment());
             statement.executeUpdate();
             if (explicitId) {
                 return find(db, databaseId).orElseThrow(() -> new SQLException("Upserted NPC row " + databaseId + " was not readable"));
@@ -324,7 +366,11 @@ public record NPC(
                     FoodLevel = ?, Exhaustion = ?, Saturation = ?, Stress = ?, Relaxation = ?,
                     Loyalty = ?, Affection = ?, Slouch = ?, Age = ?,
                     LastSeenAt = ?, HasHome = ?,
-                    HomePosDim = ?, HomePosX = ?, HomePosY = ?, HomePosZ = ?
+                    HomePosDim = ?, HomePosX = ?, HomePosY = ?, HomePosZ = ?,
+                    StructureCohortUUID = ?, StructureId = ?, StructurePartIndex = ?,
+                    StructureOffsetX = ?, StructureOffsetY = ?, StructureOffsetZ = ?,
+                    StructureTargetDim = ?, StructureTargetX = ?, StructureTargetY = ?, StructureTargetZ = ?,
+                    StructureState = ?
                 WHERE DatabaseID = ?;
                 """)) {
             bindPosition(statement, 1, level.dimension(), moe.blockPosition());
@@ -352,7 +398,8 @@ public record NPC(
             statement.setLong(26, moe.getLastSeen());
             statement.setBoolean(27, moe.hasHome());
             bindPosition(statement, 28, moe.getHome().getDim(), moe.getHome().getPos());
-            statement.setLong(32, this.databaseId);
+            bindStructureAssignment(statement, 32, moe.structureAssignment());
+            statement.setLong(43, this.databaseId);
             statement.executeUpdate();
         } finally {
             db.free(connection);
@@ -430,6 +477,24 @@ public record NPC(
         }
     }
 
+    public static void updateStructureAssignment(BlockPartyDB db, long id, MoeStructureAssignment assignment) throws SQLException {
+        Connection connection = db.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                UPDATE NPCs
+                SET StructureCohortUUID = ?, StructureId = ?, StructurePartIndex = ?,
+                    StructureOffsetX = ?, StructureOffsetY = ?, StructureOffsetZ = ?,
+                    StructureTargetDim = ?, StructureTargetX = ?, StructureTargetY = ?, StructureTargetZ = ?,
+                    StructureState = ?
+                WHERE DatabaseID = ?;
+                """)) {
+            bindStructureAssignment(statement, 1, assignment);
+            statement.setLong(12, id);
+            statement.executeUpdate();
+        } finally {
+            db.free(connection);
+        }
+    }
+
     public void applyTo(Moe moe) {
         moe.setDatabaseID(this.databaseId);
         moe.setPlayerUUID(this.playerUuid);
@@ -456,6 +521,7 @@ public record NPC(
         moe.setLastSeen(this.lastSeenAt);
         moe.setHasHome(this.hasHome);
         moe.setHome(this.home);
+        moe.setStructureAssignment(this.structureAssignment, false);
     }
 
     private static NPC read(ResultSet result) throws SQLException {
@@ -490,7 +556,26 @@ public record NPC(
                 new DimBlockPos(parseDimension(result.getString("HomePosDim")),
                         new BlockPos(result.getInt("HomePosX"), result.getInt("HomePosY"), result.getInt("HomePosZ"))),
                 result.getBoolean("Hiding"),
-                new BlockPos(result.getInt("HiddenPosX"), result.getInt("HiddenPosY"), result.getInt("HiddenPosZ")));
+                new BlockPos(result.getInt("HiddenPosX"), result.getInt("HiddenPosY"), result.getInt("HiddenPosZ")),
+                readStructureAssignment(result));
+    }
+
+    private static MoeStructureAssignment readStructureAssignment(ResultSet result) throws SQLException {
+        CompoundTag compound = new CompoundTag();
+        compound.putString("CohortUUID", result.getString("StructureCohortUUID"));
+        compound.putString("StructureId", result.getString("StructureId"));
+        compound.putInt("PartIndex", result.getInt("StructurePartIndex"));
+        compound.putLong("Offset", new BlockPos(
+                result.getInt("StructureOffsetX"),
+                result.getInt("StructureOffsetY"),
+                result.getInt("StructureOffsetZ")).asLong());
+        compound.putString("State", result.getString("StructureState"));
+        compound.put("Target", new DimBlockPos(
+                parseDimension(result.getString("StructureTargetDim")),
+                new BlockPos(result.getInt("StructureTargetX"),
+                        result.getInt("StructureTargetY"),
+                        result.getInt("StructureTargetZ"))).write());
+        return MoeStructureAssignment.read(compound);
     }
 
     private static UUID parseUuid(String value) {
@@ -515,5 +600,20 @@ public record NPC(
         statement.setInt(start + 1, pos.getX());
         statement.setInt(start + 2, pos.getY());
         statement.setInt(start + 3, pos.getZ());
+    }
+
+    private static void bindStructureAssignment(PreparedStatement statement, int start, MoeStructureAssignment assignment) throws SQLException {
+        MoeStructureAssignment safe = assignment == null ? MoeStructureAssignment.none() : assignment;
+        statement.setString(start, safe.cohortId().toString());
+        statement.setString(start + 1, safe.structureId().toString());
+        statement.setInt(start + 2, safe.partIndex());
+        statement.setInt(start + 3, safe.offset().getX());
+        statement.setInt(start + 4, safe.offset().getY());
+        statement.setInt(start + 5, safe.offset().getZ());
+        statement.setString(start + 6, safe.target().getDim().location().toString());
+        statement.setInt(start + 7, safe.target().getPos().getX());
+        statement.setInt(start + 8, safe.target().getPos().getY());
+        statement.setInt(start + 9, safe.target().getPos().getZ());
+        statement.setString(start + 10, safe.state().name());
     }
 }

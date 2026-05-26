@@ -24,6 +24,8 @@ import block_party.scene.Dialogue;
 import block_party.scene.Response;
 import block_party.scene.SceneManager;
 import block_party.scene.SceneTrigger;
+import block_party.world.structure.MoeStructureAssignment;
+import block_party.world.structure.MoeStructureCohortCoordinator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -142,6 +144,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     private UUID dialogueTarget = new UUID(0L, 0L);
     private FollowSession followSession = FollowSession.none();
     private RoutineIntent routineIntent = RoutineIntent.IDLE;
+    private MoeStructureAssignment structureAssignment = MoeStructureAssignment.none();
     private final SceneManager sceneManager = new SceneManager(this);
 
     public Moe(EntityType<? extends Moe> entityType, Level level) {
@@ -255,6 +258,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         if (compound.contains("RoutineIntent")) {
             this.setRoutineIntent(RoutineIntent.fromValue(compound.getString("RoutineIntent")));
         }
+        if (compound.contains("StructureAssignment")) {
+            this.setStructureAssignment(MoeStructureAssignment.read(compound.getCompound("StructureAssignment")), false);
+        }
         if (compound.contains("LastSeenAt")) {
             this.setLastSeen(compound.getLong("LastSeenAt"));
         }
@@ -301,6 +307,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         compound.putBoolean("HasHome", this.hasHome());
         compound.put("Home", this.getHome().write());
         compound.putString("RoutineIntent", this.getRoutineIntent().name());
+        if (this.structureAssignment.assigned()) {
+            compound.put("StructureAssignment", this.structureAssignment.write());
+        }
         compound.putLong("LastSeenAt", this.getLastSeen());
         compound.putInt("TimeUntilHungry", this.getTimeUntilHungry());
         compound.putInt("TimeUntilLonely", this.getTimeUntilLonely());
@@ -412,6 +421,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     @Override
     public boolean skipAttackInteraction(Entity attacker) {
         if (attacker instanceof Player player && !this.level().isClientSide && this.canDialogueWith(player, false)) {
+            MoeStructureCohortCoordinator.onThreatened(this);
             this.setDialogueTarget(player.getUUID());
             this.triggerScene(player.isShiftKeyDown() ? SceneTrigger.SHIFT_LEFT_CLICK : SceneTrigger.LEFT_CLICK);
             return true;
@@ -423,12 +433,14 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
         Entity attacker = damageSource.getDirectEntity();
         if (attacker instanceof Player player && this.canDialogueWith(player, false)) {
+            MoeStructureCohortCoordinator.onThreatened(this);
             this.setDialogueTarget(player.getUUID());
             this.triggerScene(player.isShiftKeyDown() ? SceneTrigger.SHIFT_LEFT_CLICK : SceneTrigger.LEFT_CLICK);
             return false;
         }
         boolean hurt = super.hurtServer(level, damageSource, amount * this.getBlockBuffer());
         if (hurt) {
+            MoeStructureCohortCoordinator.onThreatened(this);
             this.syncHealthToDb(level);
             this.triggerScene(SceneTrigger.HURT);
         }
@@ -1132,6 +1144,31 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     public void setRoutineIntent(RoutineIntent routineIntent) {
         this.routineIntent = routineIntent == null ? RoutineIntent.IDLE : routineIntent;
+    }
+
+    public MoeStructureAssignment structureAssignment() {
+        return this.structureAssignment;
+    }
+
+    public void setStructureAssignment(MoeStructureAssignment assignment) {
+        this.setStructureAssignment(assignment, true);
+    }
+
+    public void setStructureAssignment(MoeStructureAssignment assignment, boolean syncToDb) {
+        this.structureAssignment = assignment == null ? MoeStructureAssignment.none() : assignment;
+        if (syncToDb) {
+            this.syncStructureAssignmentToDb();
+        }
+    }
+
+    private void syncStructureAssignmentToDb() {
+        if (!(this.level() instanceof ServerLevel level) || this.getDatabaseID() < 0L) {
+            return;
+        }
+        try {
+            NPC.updateStructureAssignment(BlockPartyDB.get(level), this.getDatabaseID(), this.structureAssignment);
+        } catch (SQLException ignored) {
+        }
     }
 
     public RoutineIntent getEffectiveRoutineIntent() {
