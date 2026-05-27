@@ -172,7 +172,7 @@ public final class EntityDataGameTests {
         Moe moe = helper.spawn(CustomEntities.MOE.get(), 0, 1, 0);
         assertFloat(helper, 20.0F, (float) moe.getAttributeValue(Attributes.MAX_HEALTH), "max health attribute");
         assertFloat(helper, 2.0F, (float) moe.getAttributeValue(Attributes.ATTACK_DAMAGE), "attack damage attribute");
-        assertFloat(helper, 0.4F, (float) moe.getAttributeValue(Attributes.MOVEMENT_SPEED), "movement speed attribute");
+        assertFloat(helper, 0.25F, (float) moe.getAttributeValue(Attributes.MOVEMENT_SPEED), "movement speed attribute");
         assertFloat(helper, 2.0F, (float) moe.getAttributeValue(Attributes.ATTACK_SPEED), "attack speed attribute");
         assertFloat(helper, 1.6F, (float) moe.getAttributeValue(Attributes.FLYING_SPEED), "flying speed attribute");
         assertFloat(helper, 256.0F, (float) moe.getAttributeValue(Attributes.FOLLOW_RANGE), "follow range attribute");

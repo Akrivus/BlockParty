@@ -214,7 +214,7 @@ Minimal forced chunk loading is active for row-backed lookup and cleanup parity.
 
 Active foundations:
 
-- registered attributes: max health `20.0`, attack damage `2.0`, movement speed `0.4`, attack speed `2.0`, flying speed `1.6`, and follow range `256.0`
+- registered attributes: max health `20.0`, attack damage `2.0`, movement speed `0.25`, attack speed `2.0`, flying speed `1.6`, and follow range `256.0`
 - non-despawn behavior through `removeWhenFarAway(false)`
 - Forge-style path malus setup for doors and trapdoors
 - home helpers: `getDimBlockPos()`, `setHomeToCurrentPosition()`, persisted `HasHome`, and persisted `Home`
