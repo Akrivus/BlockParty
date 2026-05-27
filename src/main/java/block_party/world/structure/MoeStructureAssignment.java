@@ -17,6 +17,7 @@ public record MoeStructureAssignment(
         DimBlockPos target,
         State state) {
     public static final String DESERT_WELL = "desert_well";
+    public static final String SANDSTONE_PYRAMID = "sandstone_pyramid";
     private static final UUID EMPTY_UUID = new UUID(0L, 0L);
     private static final ResourceLocation EMPTY_STRUCTURE = ResourceLocation.withDefaultNamespace("none");
 
@@ -26,6 +27,10 @@ public record MoeStructureAssignment(
 
     public static MoeStructureAssignment desertWell(UUID cohortId, int partIndex, BlockPos offset, DimBlockPos target) {
         return new MoeStructureAssignment(cohortId, ResourceLocation.withDefaultNamespace(DESERT_WELL), partIndex, offset, target, State.IDLE);
+    }
+
+    public static MoeStructureAssignment sandstonePyramid(UUID cohortId, int partIndex, BlockPos offset, DimBlockPos target) {
+        return new MoeStructureAssignment(cohortId, block_party.BlockParty.source(SANDSTONE_PYRAMID), partIndex, offset, target, State.IDLE);
     }
 
     public boolean assigned() {

@@ -41,7 +41,7 @@ public final class MoeStructureCohortCoordinator {
     private MoeStructureCohortCoordinator() {
     }
 
-    public static boolean isDesertWellSource(BlockState state) {
+    public static boolean isPyramidSource(BlockState state) {
         return state.is(Blocks.SANDSTONE)
                 || state.is(Blocks.SANDSTONE_SLAB)
                 || state.is(Blocks.SANDSTONE_STAIRS)
@@ -54,12 +54,12 @@ public final class MoeStructureCohortCoordinator {
                 || state.is(Blocks.CHISELED_SANDSTONE);
     }
 
-    public static void spawnDesertWellPrototypeCohort(ServerLevel level, BlockPos anchor, UUID owner, Moe first) {
+    public static void spawnSandstonePyramidPrototypeCohort(ServerLevel level, BlockPos anchor, UUID owner, Moe first) {
         if (first == null || first.structureAssignment().assigned()) {
             return;
         }
         UUID cohort = UUID.randomUUID();
-        MoeStructureTemplate template = MoeStructureTemplates.desertWell(level);
+        MoeStructureTemplate template = MoeStructureTemplates.sandstonePyramid();
         int count = Math.min(MAX_PROTOTYPE_COHORT_SIZE, template.partCount());
         assign(first, cohort, 0, anchor, true);
         for (int index = 1; index < count; index++) {
@@ -69,7 +69,7 @@ public final class MoeStructureCohortCoordinator {
             MoeSpawner.spawn(level, spawn, part.state(), owner, new net.minecraft.nbt.CompoundTag(), moe ->
                     assign(moe, cohort, partIndex, anchor, false));
         }
-        BlockParty.LOGGER.info("Created desert_well Moe cohort {} with {}/{} assigned parts from {} at anchor {}",
+        BlockParty.LOGGER.info("Created sandstone_pyramid Moe cohort {} with {}/{} assigned parts from {} at anchor {}",
                 cohort, count, template.partCount(), template.source(), anchor);
     }
 
@@ -89,7 +89,7 @@ public final class MoeStructureCohortCoordinator {
             }
         }
         NEXT_DISPATCH_TICK.put(assignment.cohortId(), level.getGameTime());
-        BlockParty.LOGGER.info("Threatened desert_well Moe cohort {} from member {} part {}; assembling {} loaded members",
+        BlockParty.LOGGER.info("Threatened Moe structure cohort {} from member {} part {}; assembling {} loaded members",
                 assignment.cohortId(), threatened.getDatabaseID(), assignment.partIndex(), members.size());
     }
 
@@ -199,7 +199,7 @@ public final class MoeStructureCohortCoordinator {
         moe.setStructureAssignment(assignment.withState(MoeStructureAssignment.State.HIDDEN), true);
         MOVEMENT_START_TICK.remove(moe.getDatabaseID());
         if (moe.hide(HideUntil.EXPOSED) != null) {
-            BlockParty.LOGGER.info("Moe {} completed desert_well hide cohort {} part {} at {}{}",
+            BlockParty.LOGGER.info("Moe {} completed sandstone_pyramid hide cohort {} part {} at {}{}",
                     moe.getDatabaseID(), cohort, assignment.partIndex(), targetPos, settled ? " after close-range settle" : "");
         }
     }
@@ -227,16 +227,16 @@ public final class MoeStructureCohortCoordinator {
     }
 
     private static void assign(Moe moe, UUID cohort, int partIndex, BlockPos anchor, boolean persist) {
-        MoeStructureTemplate.Part part = MoeStructureTemplates.desertWellPart((ServerLevel) moe.level(), partIndex);
+        MoeStructureTemplate.Part part = MoeStructureTemplates.sandstonePyramidPart(partIndex);
         BlockPos target = anchor.offset(part.offset());
-        MoeStructureAssignment assignment = MoeStructureAssignment.desertWell(
+        MoeStructureAssignment assignment = MoeStructureAssignment.sandstonePyramid(
                 cohort,
                 partIndex,
                 part.offset(),
                 new DimBlockPos(moe.level().dimension(), target));
         moe.setBlockState(part.state());
         moe.setStructureAssignment(assignment, persist);
-        BlockParty.LOGGER.info("Assigned Moe {} to desert_well cohort {} part {} offset {} target {}",
+        BlockParty.LOGGER.info("Assigned Moe {} to sandstone_pyramid cohort {} part {} offset {} target {}",
                 moe.getDatabaseID(), cohort, partIndex, part.offset(), target);
     }
 }

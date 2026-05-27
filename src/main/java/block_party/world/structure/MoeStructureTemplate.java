@@ -37,7 +37,8 @@ public record MoeStructureTemplate(ResourceLocation id, Source source, List<Part
 
     public enum Source {
         FEATURE_REGISTRY,
-        PROTOTYPE_FALLBACK
+        PROTOTYPE_FALLBACK,
+        PROCEDURAL_GENERATOR
     }
 
     public record Part(BlockPos offset, BlockState state, int accessibilityBand) {
