@@ -1,0 +1,59 @@
+{
+  "rules": [
+    {
+      "layer": "block",
+      "observer": {
+        "block_tag": "minecraft:logs"
+      },
+      "target": {
+        "block_tag": "minecraft:logs"
+      },
+      "affinity": 0.38,
+      "interest": 0.22
+    },
+    {
+      "layer": "block",
+      "observer": {
+        "block": "minecraft:grass_block"
+      },
+      "target": {
+        "block": "minecraft:grass_block"
+      },
+      "affinity": 0.38,
+      "interest": 0.18
+    },
+    {
+      "layer": "block",
+      "observer": {
+        "block": "minecraft:moss_block"
+      },
+      "target": {
+        "block": "minecraft:moss_block"
+      },
+      "affinity": 0.4,
+      "interest": 0.2
+    },
+    {
+      "layer": "block",
+      "observer": {
+        "block_tag": "minecraft:planks"
+      },
+      "target": {
+        "block_tag": "minecraft:planks"
+      },
+      "affinity": 0.18,
+      "interest": 0.12
+    },
+    {
+      "layer": "block",
+      "observer": {
+        "block_tag": "minecraft:wool"
+      },
+      "target": {
+        "block_tag": "minecraft:wool"
+      },
+      "affinity": 0.24,
+      "interest": 0.16
+    }
+  ]
+}

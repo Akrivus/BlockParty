@@ -1,10 +1,12 @@
 package block_party.gametest;
 
 import block_party.BlockParty;
+import block_party.entities.preferences.MoeItemPreferences;
 import block_party.entities.social.MoeSocialRules;
 import block_party.entities.social.SocialAffinities;
 import block_party.registry.resources.BlockAliasesReloadListener;
 import block_party.registry.resources.CountingJsonReloadListener;
+import block_party.registry.resources.MoeItemPreferenceReloadListener;
 import block_party.registry.resources.MoeNamesReloadListener;
 import block_party.registry.resources.MoeSoundsReloadListener;
 import block_party.registry.resources.MoeTextureReloadListener;
@@ -29,6 +31,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.NoteBlock;
@@ -52,6 +56,18 @@ public final class ResourceGameTests {
         assertVanillaInBlockTag(helper, "bamboo", "moe/ignores_volume");
         assertVanillaInBlockTag(helper, "glass", "moe/traits/destructible_by_explosion");
         assertVanillaInBlockTag(helper, "oak_log", "moe/traits/flammable");
+        assertVanillaInBlockTag(helper, "ice", "moe/traits/ignores_rain");
+        assertVanillaInBlockTag(helper, "packed_ice", "moe/traits/ignores_rain");
+        assertVanillaInBlockTag(helper, "obsidian", "moe/traits/ignores_rain");
+        assertVanillaInBlockTag(helper, "prismarine", "moe/traits/ignores_rain");
+        assertVanillaInBlockTag(helper, "grass_block", "moe/traits/ignores_rain");
+        assertVanillaInBlockTag(helper, "soul_sand", "moe/traits/ignores_darkness");
+        assertVanillaNotInBlockTag(helper, "stone", "moe/traits/ignores_rain");
+        assertVanillaNotInBlockTag(helper, "sand", "moe/traits/ignores_rain");
+        assertVanillaNotInBlockTag(helper, "nether_bricks", "moe/traits/ignores_rain");
+        assertVanillaNotInBlockTag(helper, "nether_bricks", "moe/has_cat_features");
+        assertVanillaNotInBlockTag(helper, "red_nether_bricks", "moe/has_cat_features");
+        assertVanillaNotInBlockTag(helper, "soul_sand", "moe/has_cat_features");
         assertInTag(helper, BuiltInRegistries.ITEM, Registries.ITEM, "sakura_log", "sakura_logs");
         helper.succeed();
     }
@@ -64,6 +80,17 @@ public final class ResourceGameTests {
         TagKey<net.minecraft.world.level.block.Block> tag = TagKey.create(Registries.BLOCK, BlockParty.source(tagPath));
         if (!holder.is(tag)) {
             helper.fail("Expected " + entryId + " in tag " + tag.location());
+        }
+    }
+
+    private static void assertVanillaNotInBlockTag(GameTestHelper helper, String entryPath, String tagPath) {
+        ResourceLocation entryId = ResourceLocation.withDefaultNamespace(entryPath);
+        Holder.Reference<net.minecraft.world.level.block.Block> holder = BuiltInRegistries.BLOCK
+                .get(ResourceKey.create(Registries.BLOCK, entryId))
+                .orElseThrow(() -> new IllegalStateException("Missing registry entry " + entryId));
+        TagKey<net.minecraft.world.level.block.Block> tag = TagKey.create(Registries.BLOCK, BlockParty.source(tagPath));
+        if (holder.is(tag)) {
+            helper.fail("Expected " + entryId + " outside tag " + tag.location());
         }
     }
 
@@ -97,6 +124,11 @@ public final class ResourceGameTests {
         assertLoaded(helper, "moes/social_affinities");
         if (SocialAffinities.ruleCount() <= 0) {
             helper.fail("Expected social affinity reload listener to build at least one rule");
+            return;
+        }
+        assertLoaded(helper, "moes/item_preferences");
+        if (MoeItemPreferences.ruleCount() <= 0) {
+            helper.fail("Expected item preference reload listener to build at least one rule");
             return;
         }
         assertLoaded(helper, "scenes");
@@ -213,12 +245,30 @@ public final class ResourceGameTests {
         }
 
         List<SocialAffinities.Rule> socialRules = SocialAffinityReloadListener.safeParseRules(JsonParser.parseString("""
-                {"rules":[{"observer":{"block_tag":"minecraft:logs","dere":"dandere"},"target":{"block":"minecraft:netherrack","zodiac":"pisces"},"tension":0.5,"interest":0.4}]}
+                {"rules":[{"layer":"block","observer":{"block_tag":"minecraft:logs","dere":"dandere"},"target":{"block":"minecraft:netherrack","zodiac":"pisces"},"tension":0.5,"interest":0.4}]}
                 """).getAsJsonObject());
         if (socialRules.size() != 1 || !socialRules.getFirst().matches(
                 new SocialAffinities.Profile(Blocks.OAK_LOG.defaultBlockState(), "O", "DANDERE", "ARIES", "FEMALE", "HAPPY"),
                 new SocialAffinities.Profile(Blocks.NETHERRACK.defaultBlockState(), "A", "KUUDERE", "PISCES", "MALE", "NORMAL"))) {
             helper.fail("Expected unified social affinity rule to parse and match block plus traits");
+            return;
+        }
+        if (socialRules.getFirst().layer() != SocialAffinities.RuleLayer.BLOCK) {
+            helper.fail("Expected explicit social affinity layer to parse as block");
+            return;
+        }
+
+        List<MoeItemPreferences.Rule> itemRules = MoeItemPreferenceReloadListener.safeParseRules(JsonParser.parseString("""
+                {"rules":[{"layer":"dere","observer":{"dere":"deredere"},"item":{"item_tag":"minecraft:coals"},"preference":0.4,"interest":0.2,"begging":0.3}]}
+                """).getAsJsonObject());
+        if (itemRules.size() != 1 || !itemRules.getFirst().matches(
+                new SocialAffinities.Profile(Blocks.STONE.defaultBlockState(), "O", "DEREDERE", "ARIES", "FEMALE", "HAPPY"),
+                new ItemStack(Items.COAL))) {
+            helper.fail("Expected item preference rule to parse and match item tags plus traits");
+            return;
+        }
+        if (itemRules.getFirst().layer() != MoeItemPreferences.PreferenceLayer.DERE) {
+            helper.fail("Expected explicit item preference layer to parse as dere");
             return;
         }
         helper.succeed();
@@ -243,6 +293,22 @@ public final class ResourceGameTests {
                 new SocialAffinities.Profile(Blocks.MAGMA_BLOCK.defaultBlockState(), "A", "DANDERE", "PISCES", "FEMALE", "NORMAL"));
         if (infiniburn.tension() <= 0.0F || infiniburn.interest() <= 0.0F) {
             helper.fail("Expected bundled flammable-to-infiniburn affinity to use vanilla infiniburn_overworld tag");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void bundledSocialAffinitiesExposeLayeredSignals(GameTestHelper helper) {
+        SocialAffinities.LayeredSignal layered = SocialAffinities.layeredSignal(
+                new SocialAffinities.Profile(Blocks.OAK_LOG.defaultBlockState(), "O", "KUUDERE", "ARIES", "FEMALE", "NORMAL"),
+                new SocialAffinities.Profile(Blocks.MAGMA_BLOCK.defaultBlockState(), "A", "DANDERE", "PISCES", "FEMALE", "NORMAL"));
+        if (layered.block().tension() <= 0.0F || layered.strongestLayer() != SocialAffinities.RuleLayer.BLOCK) {
+            helper.fail("Expected block layer to carry log-to-magma environmental tension");
+            return;
+        }
+        if (layered.dere().tension() != 0.0F || layered.zodiac().tension() != 0.0F) {
+            helper.fail("Expected empty target traits to keep dere and zodiac layers quiet for block observation");
             return;
         }
         helper.succeed();
@@ -315,6 +381,50 @@ public final class ResourceGameTests {
                 new SocialAffinities.Profile(Blocks.TNT.defaultBlockState(), "A", "DANDERE", "PISCES", "FEMALE", "NORMAL"));
         if (signal.tension() <= 0.0F || signal.interest() <= 0.0F) {
             helper.fail("Expected bundled TNT fragility block affinity to add tension and interest");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void bundledItemPreferencesMatchSpecialBlockCases(GameTestHelper helper) {
+        MoeItemPreferences.PreferenceSignal catFish = MoeItemPreferences.signal(
+                new SocialAffinities.Profile(Blocks.CHEST.defaultBlockState(), "O", "KUUDERE", "ARIES", "FEMALE", "NORMAL"),
+                new ItemStack(Items.COD));
+        if (!catFish.wantsToBeg() || catFish.preference() <= 0.0F || catFish.interest() <= 0.0F) {
+            helper.fail("Expected cat-feature Moe to beg for fish");
+            return;
+        }
+
+        MoeItemPreferences.PreferenceSignal furnaceCoal = MoeItemPreferences.signal(
+                new SocialAffinities.Profile(Blocks.FURNACE.defaultBlockState(), "A", "DANDERE", "PISCES", "FEMALE", "NORMAL"),
+                new ItemStack(Items.COAL));
+        if (!furnaceCoal.wantsToBeg() || furnaceCoal.preference() <= 0.0F || furnaceCoal.interest() <= 0.0F) {
+            helper.fail("Expected furnace Moe to beg for coal");
+            return;
+        }
+
+        MoeItemPreferences.PreferenceSignal furnaceDiamond = MoeItemPreferences.signal(
+                new SocialAffinities.Profile(Blocks.FURNACE.defaultBlockState(), "A", "DANDERE", "PISCES", "FEMALE", "NORMAL"),
+                new ItemStack(Items.DIAMOND));
+        if (furnaceDiamond.preference() > 0.0F || furnaceDiamond.begging() > 0.0F) {
+            helper.fail("Expected furnace Moe not to have a bundled preference for diamonds");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void bundledItemPreferencesExposeLayeredSignals(GameTestHelper helper) {
+        MoeItemPreferences.LayeredSignal layered = MoeItemPreferences.layeredSignal(
+                new SocialAffinities.Profile(Blocks.CHEST.defaultBlockState(), "O", "DEREDERE", "ARIES", "FEMALE", "NORMAL"),
+                new ItemStack(Items.COD));
+        if (!layered.combined().wantsToBeg() || layered.block().begging() <= 0.0F) {
+            helper.fail("Expected block item preference layer to drive cat fish begging");
+            return;
+        }
+        if (layered.strongestLayer() != MoeItemPreferences.PreferenceLayer.BLOCK) {
+            helper.fail("Expected cat fish preference to be strongest in the block layer");
             return;
         }
         helper.succeed();

@@ -19,17 +19,31 @@ public final class SocialAffinities {
     }
 
     public static MoeSocialRules.SocialSignal signal(Profile observer, Profile target) {
+        return signal(observer, target, RuleLayer.ALL);
+    }
+
+    public static MoeSocialRules.SocialSignal signal(Profile observer, Profile target, RuleLayer layer) {
         float affinity = 0.0F;
         float tension = 0.0F;
         float interest = 0.0F;
         for (Rule rule : rules) {
-            if (rule.matches(observer, target)) {
+            if ((layer == RuleLayer.ALL || rule.layer() == layer) && rule.matches(observer, target)) {
                 affinity += rule.affinity();
                 tension += rule.tension();
                 interest += rule.interest();
             }
         }
         return new MoeSocialRules.SocialSignal(clamp(affinity), clamp(tension), clamp(interest));
+    }
+
+    public static LayeredSignal layeredSignal(Profile observer, Profile target) {
+        return new LayeredSignal(
+                signal(observer, target, RuleLayer.BLOCK),
+                signal(observer, target, RuleLayer.BLOOD_TYPE),
+                signal(observer, target, RuleLayer.DERE),
+                signal(observer, target, RuleLayer.ZODIAC),
+                signal(observer, target, RuleLayer.EMOTION),
+                signal(observer, target, RuleLayer.GENERAL));
     }
 
     public static int ruleCount() {
@@ -119,6 +133,25 @@ public final class SocialAffinities {
                     && matches(this.emotion, profile.emotion());
         }
 
+        public RuleLayer inferredLayer() {
+            if (this.block.isPresent()) {
+                return RuleLayer.BLOCK;
+            }
+            if (this.zodiac.isPresent()) {
+                return RuleLayer.ZODIAC;
+            }
+            if (this.dere.isPresent()) {
+                return RuleLayer.DERE;
+            }
+            if (this.bloodType.isPresent()) {
+                return RuleLayer.BLOOD_TYPE;
+            }
+            if (this.emotion.isPresent()) {
+                return RuleLayer.EMOTION;
+            }
+            return RuleLayer.GENERAL;
+        }
+
         private static boolean matches(Optional<String> expected, String actual) {
             return expected.isEmpty() || expected.get().equals(actual);
         }
@@ -134,9 +167,98 @@ public final class SocialAffinities {
         }
     }
 
-    public record Rule(Matcher observer, Matcher target, float affinity, float tension, float interest) {
+    public enum RuleLayer {
+        ALL,
+        BLOCK,
+        BLOOD_TYPE,
+        DERE,
+        ZODIAC,
+        EMOTION,
+        GENERAL;
+
+        public static RuleLayer fromString(String value) {
+            if (value == null || value.isBlank()) {
+                return GENERAL;
+            }
+            try {
+                return RuleLayer.valueOf(value.toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException exception) {
+                return GENERAL;
+            }
+        }
+    }
+
+    public record LayeredSignal(
+            MoeSocialRules.SocialSignal block,
+            MoeSocialRules.SocialSignal bloodType,
+            MoeSocialRules.SocialSignal dere,
+            MoeSocialRules.SocialSignal zodiac,
+            MoeSocialRules.SocialSignal emotion,
+            MoeSocialRules.SocialSignal general) {
+        public MoeSocialRules.SocialSignal combined() {
+            return MoeSocialRules.combine(
+                    MoeSocialRules.combine(MoeSocialRules.combine(this.block, this.bloodType), MoeSocialRules.combine(this.dere, this.zodiac)),
+                    MoeSocialRules.combine(this.emotion, this.general));
+        }
+
+        public RuleLayer strongestLayer() {
+            RuleLayer strongest = RuleLayer.GENERAL;
+            float best = strength(this.general);
+            if (strength(this.block) > best) {
+                strongest = RuleLayer.BLOCK;
+                best = strength(this.block);
+            }
+            if (strength(this.bloodType) > best) {
+                strongest = RuleLayer.BLOOD_TYPE;
+                best = strength(this.bloodType);
+            }
+            if (strength(this.dere) > best) {
+                strongest = RuleLayer.DERE;
+                best = strength(this.dere);
+            }
+            if (strength(this.zodiac) > best) {
+                strongest = RuleLayer.ZODIAC;
+                best = strength(this.zodiac);
+            }
+            if (strength(this.emotion) > best) {
+                strongest = RuleLayer.EMOTION;
+            }
+            return strongest;
+        }
+
+        private static float strength(MoeSocialRules.SocialSignal signal) {
+            return signal.affinity() + signal.tension() + signal.interest();
+        }
+    }
+
+    public record Rule(Matcher observer, Matcher target, RuleLayer layer, float affinity, float tension, float interest) {
+        public Rule(Matcher observer, Matcher target, float affinity, float tension, float interest) {
+            this(observer, target, inferLayer(observer, target), affinity, tension, interest);
+        }
+
         public boolean matches(Profile observerProfile, Profile targetProfile) {
             return this.observer.matches(observerProfile) && this.target.matches(targetProfile);
+        }
+
+        public static RuleLayer inferLayer(Matcher observer, Matcher target) {
+            RuleLayer observerLayer = observer.inferredLayer();
+            RuleLayer targetLayer = target.inferredLayer();
+            if (observerLayer == RuleLayer.BLOCK || targetLayer == RuleLayer.BLOCK) {
+                return RuleLayer.BLOCK;
+            }
+            if (observerLayer == RuleLayer.ZODIAC || targetLayer == RuleLayer.ZODIAC) {
+                return RuleLayer.ZODIAC;
+            }
+            if (observerLayer == RuleLayer.DERE || targetLayer == RuleLayer.DERE) {
+                return RuleLayer.DERE;
+            }
+            if (observerLayer == RuleLayer.BLOOD_TYPE || targetLayer == RuleLayer.BLOOD_TYPE) {
+                return RuleLayer.BLOOD_TYPE;
+            }
+            if (observerLayer == RuleLayer.EMOTION || targetLayer == RuleLayer.EMOTION) {
+                return RuleLayer.EMOTION;
+            }
+            return RuleLayer.GENERAL;
         }
     }
 }

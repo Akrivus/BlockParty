@@ -1,6 +1,9 @@
 package block_party.scene;
 
 import block_party.entities.Moe;
+import block_party.entities.environment.MoeEnvironmentalObservation;
+import block_party.entities.environment.MoeEnvironmentalRules;
+import block_party.entities.environment.MoePlaceMemory;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -30,6 +33,37 @@ public enum SceneObservations implements SceneObservation {
     BLOOD_TYPE_B(moe -> "B".equalsIgnoreCase(moe.getBloodType())),
     BLOOD_TYPE_A(moe -> "A".equalsIgnoreCase(moe.getBloodType())),
     BLOOD_TYPE_O(moe -> "O".equalsIgnoreCase(moe.getBloodType())),
+    REMEMBERS_PLACE(moe -> moe.rememberedPlace().isPresent()),
+    REMEMBERS_HOUSE(moe -> rememberedPlaceType(moe, MoePlaceMemory.PlaceType.HOUSE)),
+    REMEMBERS_SHELTER(moe -> rememberedPlaceType(moe, MoePlaceMemory.PlaceType.SHELTER)),
+    REMEMBERS_GARDEN(moe -> rememberedPlaceType(moe, MoePlaceMemory.PlaceType.GARDEN)),
+    REMEMBERS_GROVE(moe -> rememberedPlaceType(moe, MoePlaceMemory.PlaceType.GROVE)),
+    REMEMBERS_FIELD(moe -> rememberedPlaceType(moe, MoePlaceMemory.PlaceType.FIELD)),
+    REMEMBERS_WORKSHOP(moe -> rememberedPlaceType(moe, MoePlaceMemory.PlaceType.WORKSHOP)),
+    REMEMBERS_WATERFRONT(moe -> rememberedPlaceType(moe, MoePlaceMemory.PlaceType.WATERFRONT)),
+    REMEMBERS_CAVE(moe -> rememberedPlaceType(moe, MoePlaceMemory.PlaceType.CAVE)),
+    REMEMBERS_SHRINE(moe -> rememberedPlaceType(moe, MoePlaceMemory.PlaceType.SHRINE)),
+    REMEMBERS_FARM(moe -> rememberedPlaceType(moe, MoePlaceMemory.PlaceType.FARM)),
+    AT_REMEMBERED_PLACE(moe -> moe.rememberedPlace()
+            .map(place -> moe.blockPosition().distSqr(place.pos()) <= 4.0D)
+            .orElse(false)),
+    REMEMBERED_PLACE_OVERCROWDED(moe -> moe.rememberedPlace()
+            .map(place -> MoePlaceMemory.evaluate(moe, place.pos()).overcrowded())
+            .orElse(false)),
+    REMEMBERED_PLACE_INVALID(moe -> moe.rememberedPlace()
+            .map(place -> !MoePlaceMemory.stillValid(moe, place))
+            .orElse(false)),
+    HAS_ENVIRONMENTAL_OBSERVATION(moe -> moe.latestEnvironmentalObservation().isPresent()),
+    OBSERVED_AWE(moe -> latestObservationKind(moe, MoeEnvironmentalObservation.Kind.AWE)),
+    OBSERVED_AFFINITY(moe -> latestObservationKind(moe, MoeEnvironmentalObservation.Kind.AFFINITY)),
+    OBSERVED_TENSION(moe -> latestObservationKind(moe, MoeEnvironmentalObservation.Kind.TENSION)),
+    HAS_GIFT_MEMORY(moe -> moe.latestGiftPreferenceSignal().isPresent()),
+    LIKED_GIFT(moe -> moe.latestGiftPreferenceSignal().map(block_party.entities.preferences.MoeItemPreferences.PreferenceSignal::liked).orElse(false)),
+    DISLIKED_GIFT(moe -> moe.latestGiftPreferenceSignal().map(block_party.entities.preferences.MoeItemPreferences.PreferenceSignal::disliked).orElse(false)),
+    INTERESTING_GIFT(moe -> moe.latestGiftPreferenceSignal().map(block_party.entities.preferences.MoeItemPreferences.PreferenceSignal::interesting).orElse(false)),
+    BEGGED_FOR_GIFT(moe -> moe.latestGiftPreferenceSignal().map(block_party.entities.preferences.MoeItemPreferences.PreferenceSignal::wantsToBeg).orElse(false)),
+    SHELTERING_FROM_RAIN(moe -> moe.level().isRaining()
+            && MoeEnvironmentalRules.isStrongShelter(moe.level(), moe.blockPosition())),
     HIMEDERE(moe -> trait(moe.getDere(), "HIMEDERE")),
     KUUDERE(moe -> trait(moe.getDere(), "KUUDERE")),
     TSUNDERE(moe -> trait(moe.getDere(), "TSUNDERE")),
@@ -79,6 +113,30 @@ public enum SceneObservations implements SceneObservation {
             Map.entry("if_blood_type_b", BLOOD_TYPE_B),
             Map.entry("if_blood_type_a", BLOOD_TYPE_A),
             Map.entry("if_blood_type_o", BLOOD_TYPE_O),
+            Map.entry("if_remembers_place", REMEMBERS_PLACE),
+            Map.entry("if_remembers_house", REMEMBERS_HOUSE),
+            Map.entry("if_remembers_shelter", REMEMBERS_SHELTER),
+            Map.entry("if_remembers_garden", REMEMBERS_GARDEN),
+            Map.entry("if_remembers_grove", REMEMBERS_GROVE),
+            Map.entry("if_remembers_field", REMEMBERS_FIELD),
+            Map.entry("if_remembers_workshop", REMEMBERS_WORKSHOP),
+            Map.entry("if_remembers_waterfront", REMEMBERS_WATERFRONT),
+            Map.entry("if_remembers_cave", REMEMBERS_CAVE),
+            Map.entry("if_remembers_shrine", REMEMBERS_SHRINE),
+            Map.entry("if_remembers_farm", REMEMBERS_FARM),
+            Map.entry("if_at_remembered_place", AT_REMEMBERED_PLACE),
+            Map.entry("if_remembered_place_overcrowded", REMEMBERED_PLACE_OVERCROWDED),
+            Map.entry("if_remembered_place_invalid", REMEMBERED_PLACE_INVALID),
+            Map.entry("if_has_environmental_observation", HAS_ENVIRONMENTAL_OBSERVATION),
+            Map.entry("if_observed_awe", OBSERVED_AWE),
+            Map.entry("if_observed_affinity", OBSERVED_AFFINITY),
+            Map.entry("if_observed_tension", OBSERVED_TENSION),
+            Map.entry("if_has_gift_memory", HAS_GIFT_MEMORY),
+            Map.entry("if_liked_gift", LIKED_GIFT),
+            Map.entry("if_disliked_gift", DISLIKED_GIFT),
+            Map.entry("if_interesting_gift", INTERESTING_GIFT),
+            Map.entry("if_begged_for_gift", BEGGED_FOR_GIFT),
+            Map.entry("if_sheltering_from_rain", SHELTERING_FROM_RAIN),
             Map.entry("if_himedere", HIMEDERE),
             Map.entry("if_kuudere", KUUDERE),
             Map.entry("if_tsundere", TSUNDERE),
@@ -126,5 +184,17 @@ public enum SceneObservations implements SceneObservation {
 
     private static boolean trait(String actual, String expected) {
         return expected.equalsIgnoreCase(actual);
+    }
+
+    private static boolean rememberedPlaceType(Moe moe, MoePlaceMemory.PlaceType type) {
+        return moe.rememberedPlace()
+                .map(place -> place.type() == type)
+                .orElse(false);
+    }
+
+    private static boolean latestObservationKind(Moe moe, MoeEnvironmentalObservation.Kind kind) {
+        return moe.latestEnvironmentalObservation()
+                .map(observation -> observation.kind() == kind)
+                .orElse(false);
     }
 }

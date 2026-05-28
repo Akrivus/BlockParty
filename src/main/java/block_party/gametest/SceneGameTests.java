@@ -135,6 +135,9 @@ public final class SceneGameTests {
         assertEquals(helper, SceneTrigger.PARTY_INVITE, parseScene("""
                 {"trigger":"block_party:party_invite","filters":["block_party:always"],"actions":[]}
                 """).trigger(), "party invite scene trigger");
+        assertEquals(helper, SceneTrigger.GIFT_RECEIVED, parseScene("""
+                {"trigger":"block_party:gift_received","filters":["block_party:always"],"actions":[]}
+                """).trigger(), "gift received scene trigger");
         assertEquals(helper, SceneTrigger.WAIT, parseScene("""
                 {"trigger":"block_party:wait","filters":["block_party:always"],"actions":[]}
                 """).trigger(), "wait scene trigger");
@@ -177,6 +180,56 @@ public final class SceneGameTests {
         }
         if (rejects.scene().fulfills(moe)) {
             helper.fail("Expected structured scene filters to reject mismatched Moe state");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void environmentalSceneFiltersMatchPlaceMemoryAndObservation(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(525L, 25L));
+        ServerLevel level = helper.getLevel();
+        BlockPos houseSpot = helper.absolutePos(new BlockPos(4, 1, 1));
+        MovementGameTestSupport.buildLitDoorShelter(level, houseSpot);
+        level.setBlock(helper.absolutePos(new BlockPos(2, 1, 1)), Blocks.OAK_LOG.defaultBlockState(), 3);
+
+        if (moe.observePlaceNow().isEmpty()) {
+            helper.fail("Expected Moe to remember the nearby lit door shelter");
+            return;
+        }
+        if (moe.rememberedPlace().isEmpty() || moe.rememberedPlace().get().type() != block_party.entities.environment.MoePlaceMemory.PlaceType.HOUSE) {
+            helper.fail("Expected Moe to remember a house before scene filtering, got " + moe.rememberedPlace());
+            return;
+        }
+        if (moe.observeEnvironmentNow().isEmpty()) {
+            helper.fail("Expected Moe to remember the nearby environmental block observation");
+            return;
+        }
+        if (moe.latestEnvironmentalObservation().isEmpty()) {
+            helper.fail("Expected Moe latest environmental observation to be available before scene filtering");
+            return;
+        }
+
+        ScenesReloadListener.ParsedScene accepts = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  "block_party:if_remembers_place",
+                  "block_party:if_remembers_house",
+                  "block_party:if_has_environmental_observation"
+                ],"actions":[]}
+                """);
+        ScenesReloadListener.ParsedScene rejects = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  "block_party:if_remembers_garden"
+                ],"actions":[]}
+                """);
+
+        if (!accepts.scene().fulfills(moe)) {
+            helper.fail("Expected environmental scene filters to accept remembered house and environmental observation");
+            return;
+        }
+        if (rejects.scene().fulfills(moe)) {
+            helper.fail("Expected environmental scene filters to reject mismatched remembered place type");
             return;
         }
         helper.kill(moe);
@@ -530,6 +583,52 @@ public final class SceneGameTests {
         take.apply(moe);
         if (moe.getInventory().countItem(Items.COOKIE) != 1) {
             helper.fail("Expected take_item to remove two cookies from the Moe inventory");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void giftReceptionUsesItemPreferenceSignal(GameTestHelper helper) {
+        UUID owner = new UUID(526L, 26L);
+        Moe moe = spawnMoe(helper, owner);
+        moe.setBlockState(Blocks.CHEST.defaultBlockState());
+        moe.setEmotion("NORMAL");
+        SceneAction give = parseAction("{\"type\":\"block_party:give_item\",\"action\":{\"item\":\"minecraft:cod\",\"count\":1,\"target\":\"moe\"}}");
+
+        give.apply(moe);
+
+        if (moe.getInventory().countItem(Items.COD) != 1) {
+            helper.fail("Expected gift action to add cod to the Moe inventory");
+            return;
+        }
+        if (moe.latestGiftPreferenceSignal().isEmpty() || !moe.latestGiftPreferenceSignal().get().wantsToBeg()) {
+            helper.fail("Expected cat-feature Moe to remember a begged-for fish gift");
+            return;
+        }
+        assertEquals(helper, "HAPPY", moe.getEmotion(), "gift reaction emotion");
+        assertEquals(helper, "HAPPY_DANCE", moe.getAnimationKey(), "gift reaction animation");
+
+        ScenesReloadListener.ParsedScene accepts = parseScene("""
+                {"trigger":"block_party:gift_received","filters":[
+                  "block_party:if_has_gift_memory",
+                  "block_party:if_liked_gift",
+                  "block_party:if_begged_for_gift"
+                ],"actions":[]}
+                """);
+        ScenesReloadListener.ParsedScene rejects = parseScene("""
+                {"trigger":"block_party:gift_received","filters":[
+                  "block_party:if_disliked_gift"
+                ],"actions":[]}
+                """);
+
+        if (!accepts.scene().fulfills(moe)) {
+            helper.fail("Expected gift scene filters to accept liked fish gift");
+            return;
+        }
+        if (rejects.scene().fulfills(moe)) {
+            helper.fail("Expected gift scene filters to reject disliked gift");
             return;
         }
         helper.kill(moe);

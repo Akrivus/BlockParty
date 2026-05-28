@@ -10,6 +10,7 @@ public enum SceneTrigger {
     FOLLOW_STARTED(7),
     FOLLOW_ENDED(7),
     PARTY_INVITE(7),
+    GIFT_RECEIVED(7),
     WAIT(7),
     DISMISS(7),
     SHIFT_LEFT_CLICK(7),

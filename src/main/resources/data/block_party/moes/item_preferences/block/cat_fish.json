@@ -1,0 +1,34 @@
+{
+  "rules": [
+    {
+      "layer": "block",
+      "observer": {
+        "block_tag": "block_party:moe/has_cat_features"
+      },
+      "item": "minecraft:cod",
+      "preference": 0.7,
+      "interest": 0.45,
+      "begging": 0.8
+    },
+    {
+      "layer": "block",
+      "observer": {
+        "block_tag": "block_party:moe/has_cat_features"
+      },
+      "item": "minecraft:salmon",
+      "preference": 0.72,
+      "interest": 0.45,
+      "begging": 0.82
+    },
+    {
+      "layer": "block",
+      "observer": {
+        "block_tag": "block_party:moe/has_cat_features"
+      },
+      "item": "minecraft:tropical_fish",
+      "preference": 0.65,
+      "interest": 0.5,
+      "begging": 0.75
+    }
+  ]
+}

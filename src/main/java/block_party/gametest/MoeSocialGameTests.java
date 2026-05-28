@@ -1,17 +1,24 @@
 package block_party.gametest;
 
 import block_party.BlockParty;
+import block_party.db.BlockPartyDB;
 import block_party.entities.Moe;
+import block_party.entities.environment.MoePlaceMemory;
 import block_party.entities.social.MoeSocialRules;
 import block_party.entities.social.SocialAffinities;
 import block_party.registry.CustomEntities;
+import java.sql.SQLException;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+
+import static block_party.gametest.MovementGameTestSupport.insertSimpleDataBlock;
 
 @GameTestHolder(BlockParty.ID)
 @PrefixGameTestTemplate(false)
@@ -141,16 +148,22 @@ public final class MoeSocialGameTests {
 
     @GameTest(template = "empty", timeoutTicks = 20)
     public static void socialTickLetsMoeReactToCompatibleNeighbor(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        level.setDayTime(1000L);
+        level.setWeatherParameters(6000, 0, false, false);
         Moe observer = helper.spawn(CustomEntities.MOE.get(), 0, 1, 0);
         Moe receiver = helper.spawn(CustomEntities.MOE.get(), 2, 1, 0);
         observer.setBloodType("O");
         receiver.setBloodType("AB");
+        observer.setSitting(true);
+        receiver.setSitting(true);
         observer.setEmotion("NORMAL");
         observer.setRelaxation(0.0F);
 
         observer.updateActionState();
 
         assertEquals(helper, "HAPPY", observer.getEmotion(), "observer emotion after compatible social tick");
+        assertEquals(helper, "HAPPY_DANCE", observer.getAnimationKey(), "observer animation after compatible social tick");
         assertGreater(helper, observer.getRelaxation(), 0.0F, "observer relaxation after compatible social tick");
         helper.kill(observer);
         helper.kill(receiver);
@@ -159,27 +172,26 @@ public final class MoeSocialGameTests {
 
     @GameTest(template = "empty", timeoutTicks = 20)
     public static void socialTickAppliesDereSpecificEmotion(GameTestHelper helper) {
-        Moe observer = helper.spawn(CustomEntities.MOE.get(), 0, 1, 0);
-        Moe receiver = helper.spawn(CustomEntities.MOE.get(), 2, 1, 0);
-        observer.setBloodType("O");
-        receiver.setBloodType("AB");
-        observer.setDere("YANDERE");
-        observer.setEmotion("NORMAL");
-        observer.setStress(0.0F);
+        MoeSocialRules.SocialSignal signal = MoeSocialRules.combine(
+                MoeSocialRules.bloodSignal("O", "AB"),
+                new MoeSocialRules.SocialSignal(0.0F, 0.0F, 0.1F));
+        MoeSocialRules.DereReaction reaction = MoeSocialRules.dereReaction(
+                "YANDERE",
+                MoeSocialRules.visualFor("O", "AB", signal),
+                signal,
+                4.0D);
 
-        observer.updateActionState();
-
-        assertEquals(helper, "SMITTEN", observer.getEmotion(), "yandere compatible social emotion");
-        assertGreater(helper, observer.getStress(), 0.0F, "yandere cling stress");
-        helper.kill(observer);
-        helper.kill(receiver);
+        assertEquals(helper, MoeSocialRules.DereReaction.CLING, reaction, "yandere compatible social reaction");
+        assertEquals(helper, "SMITTEN", MoeSocialRules.responseEmotion("YANDERE", signal, reaction, "SMITTEN"), "yandere compatible social emotion");
+        assertEquals(helper, "SMITTEN", MoeSocialRules.reactionEmotion("YANDERE", reaction, false), "yandere compatible reaction emotion");
         helper.succeed();
     }
-
 
     @GameTest(template = "empty", timeoutTicks = 60)
     public static void socialTickStartsApproachTowardCompatibleNeighbor(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
+        level.setDayTime(1000L);
+        level.setWeatherParameters(6000, 0, false, false);
         for (int x = 0; x <= 6; x++) {
             level.setBlock(helper.absolutePos(new BlockPos(x, 0, 0)), Blocks.STONE.defaultBlockState(), 3);
         }
@@ -203,6 +215,91 @@ public final class MoeSocialGameTests {
             helper.kill(receiver);
             helper.succeed();
         });
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void idleMoeSharesFriendlyRememberedHangout(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        UUID owner = new UUID(1603L, 2603L);
+        Moe observer = spawnMoe(helper, level, owner, new BlockPos(1, 1, 1));
+        Moe friend = spawnMoe(helper, level, owner, new BlockPos(3, 1, 1));
+        observer.setBloodType("O");
+        observer.setDere("DEREDERE");
+        friend.setBloodType("AB");
+        friend.setDere("DANDERE");
+
+        BlockPos garden = helper.absolutePos(new BlockPos(8, 1, 1));
+        level.setBlock(garden.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
+        try {
+            insertSimpleDataBlock(BlockPartyDB.get(level), "GardenLanterns", owner, level, garden);
+        } catch (SQLException exception) {
+            helper.fail("Expected garden hangout setup to succeed: " + exception.getMessage());
+            return;
+        }
+        MoePlaceMemory.Place place = friend.observePlaceNow().orElse(null);
+        if (place == null || place.type() != MoePlaceMemory.PlaceType.GARDEN) {
+            helper.fail("Expected friend to remember garden hangout, got " + place);
+            return;
+        }
+
+        Vec3 destination = observer.idleRoutineDestination();
+        if (destination == null || destination.distanceToSqr(Vec3.atBottomCenterOf(place.pos())) > 36.0D) {
+            helper.fail("Expected observer to drift toward friend's remembered garden, got " + destination);
+            return;
+        }
+        Moe.MoeSocialPlaceMemory memory = observer.socialPlaceMemoryForTests().orElse(null);
+        if (memory == null || memory.behavior() != MoeSocialRules.SocialPlaceBehavior.SHARE) {
+            helper.fail("Expected friendly social place behavior to share, got " + memory);
+            return;
+        }
+        helper.kill(observer);
+        helper.kill(friend);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void tenseMoeAvoidsFriendsRememberedHangout(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        UUID owner = new UUID(1604L, 2604L);
+        Moe observer = spawnMoe(helper, level, owner, new BlockPos(7, 1, 1));
+        Moe friend = spawnMoe(helper, level, owner, new BlockPos(5, 1, 1));
+        observer.setBloodType("A");
+        observer.setDere("DANDERE");
+        friend.setBloodType("B");
+        friend.setDere("TSUNDERE");
+
+        BlockPos garden = helper.absolutePos(new BlockPos(8, 1, 1));
+        level.setBlock(garden.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
+        try {
+            insertSimpleDataBlock(BlockPartyDB.get(level), "GardenLanterns", owner, level, garden);
+        } catch (SQLException exception) {
+            helper.fail("Expected tense hangout setup to succeed: " + exception.getMessage());
+            return;
+        }
+        MoePlaceMemory.Place place = friend.observePlaceNow().orElse(null);
+        if (place == null || place.type() != MoePlaceMemory.PlaceType.GARDEN) {
+            helper.fail("Expected friend to remember garden hangout, got " + place);
+            return;
+        }
+
+        Vec3 center = Vec3.atBottomCenterOf(place.pos());
+        Vec3 destination = observer.idleRoutineDestination();
+        if (destination == null || destination.distanceToSqr(center) <= observer.position().distanceToSqr(center)) {
+            helper.fail("Expected tense observer to move away from friend's remembered garden, got " + destination);
+            return;
+        }
+        Moe.MoeSocialPlaceMemory memory = observer.socialPlaceMemoryForTests().orElse(null);
+        if (memory == null || memory.behavior() != MoeSocialRules.SocialPlaceBehavior.AVOID) {
+            helper.fail("Expected tense social place behavior to avoid, got " + memory);
+            return;
+        }
+        helper.kill(observer);
+        helper.kill(friend);
+        helper.succeed();
+    }
+
+    private static Moe spawnMoe(GameTestHelper helper, ServerLevel level, UUID owner, BlockPos relativeSource) {
+        return MovementGameTestSupport.spawnMoe(helper, level, owner, relativeSource);
     }
 
     private static void assertGreater(GameTestHelper helper, float actual, float threshold, String label) {

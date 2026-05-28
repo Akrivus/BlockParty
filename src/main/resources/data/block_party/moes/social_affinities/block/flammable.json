@@ -1,6 +1,7 @@
 {
   "rules": [
     {
+      "layer": "block",
       "observer": {
         "block_tag": "block_party:moe/traits/flammable"
       },

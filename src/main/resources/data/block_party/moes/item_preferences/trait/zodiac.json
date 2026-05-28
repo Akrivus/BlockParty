@@ -1,0 +1,34 @@
+{
+  "rules": [
+    {
+      "layer": "zodiac",
+      "observer": {
+        "zodiac": "aries"
+      },
+      "item": "minecraft:baked_potato",
+      "preference": 0.2,
+      "interest": 0.24,
+      "begging": 0.1
+    },
+    {
+      "layer": "zodiac",
+      "observer": {
+        "zodiac": "taurus"
+      },
+      "item": "minecraft:pumpkin_pie",
+      "preference": 0.25,
+      "interest": 0.18,
+      "begging": 0.14
+    },
+    {
+      "layer": "zodiac",
+      "observer": {
+        "zodiac": "pisces"
+      },
+      "item": "minecraft:kelp",
+      "preference": 0.18,
+      "interest": 0.16,
+      "begging": 0.08
+    }
+  ]
+}

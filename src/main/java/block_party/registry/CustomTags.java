@@ -24,6 +24,8 @@ public final class CustomTags {
     public static final TagKey<Block> HAS_WINGS = block("moe/has_wings");
     public static final TagKey<Block> IGNORES_VOLUME = block("moe/ignores_volume");
     public static final TagKey<Block> CARDINAL = block("moe/traits/cardinal");
+    public static final TagKey<Block> IGNORES_DARKNESS = block("moe/traits/ignores_darkness");
+    public static final TagKey<Block> IGNORES_RAIN = block("moe/traits/ignores_rain");
     public static final TagKey<Block> BLOOD_TYPE_A = block("moe/traits/blood_type/a");
     public static final TagKey<Block> BLOOD_TYPE_AB = block("moe/traits/blood_type/ab");
     public static final TagKey<Block> BLOOD_TYPE_B = block("moe/traits/blood_type/b");

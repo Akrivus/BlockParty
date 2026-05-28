@@ -54,6 +54,29 @@ public final class MoeSocialRules {
         return SocialMovement.IDLE;
     }
 
+    public static SocialPlaceBehavior placeBehavior(String dereType, String bloodType, SocialSignal signal, int occupancy, int capacity) {
+        String dere = normalizeDere(dereType);
+        String blood = normalizeBloodType(bloodType);
+        boolean crowded = capacity > 0 && occupancy >= capacity;
+        if (signal.tension() > signal.affinity() || crowded && signal.tension() >= 0.2F) {
+            return switch (dere) {
+                case "YANDERE", "HIMEDERE" -> SocialPlaceBehavior.GUARD;
+                default -> SocialPlaceBehavior.AVOID;
+            };
+        }
+        if (signal.affinity() >= 0.6F) {
+            return switch (dere) {
+                case "YANDERE", "HIMEDERE" -> SocialPlaceBehavior.GUARD;
+                case "KUUDERE", "DANDERE" -> SocialPlaceBehavior.ORBIT;
+                default -> SocialPlaceBehavior.SHARE;
+            };
+        }
+        if (signal.interest() >= 0.5F || "O".equals(blood) || "AB".equals(blood)) {
+            return SocialPlaceBehavior.ORBIT;
+        }
+        return SocialPlaceBehavior.IGNORE;
+    }
+
     public static int socialTickDelay(String dereType, int randomValue) {
         float activity = dereActivity(dereType);
         int base = Math.max(16, Math.round(30.0F / activity));
@@ -274,6 +297,14 @@ public final class MoeSocialRules {
         APPROACH,
         AVOID,
         IDLE
+    }
+
+    public enum SocialPlaceBehavior {
+        SHARE,
+        ORBIT,
+        GUARD,
+        AVOID,
+        IGNORE
     }
 
     public enum SocialVisual {

@@ -518,10 +518,29 @@ public final class EntityDataGameTests {
         Moe cat = new Moe(CustomEntities.MOE.get(), helper.getLevel());
         cat.setBlockState(Blocks.ANDESITE.defaultBlockState());
         assertEquals(helper, true, cat.hasCatFeatures(), "cat feature flag");
+        assertEquals(helper, false, cat.ignoresRain(), "cat rain avoidance remains default");
 
         Moe grounded = new Moe(CustomEntities.MOE.get(), helper.getLevel());
         grounded.setBlockState(Blocks.STONE.defaultBlockState());
         assertEquals(helper, true, grounded.getNavigation() instanceof GroundPathNavigation, "grounded navigation");
+
+        Moe netherBrick = new Moe(CustomEntities.MOE.get(), helper.getLevel());
+        netherBrick.setBlockState(Blocks.NETHER_BRICKS.defaultBlockState());
+        assertEquals(helper, false, netherBrick.ignoresRain(), "nether brick rain avoidance remains default");
+        assertEquals(helper, true, netherBrick.ignoresDarkness(), "nether brick darkness opt-out flag");
+        assertEquals(helper, false, netherBrick.hasCatFeatures(), "nether brick is not catlike");
+
+        Moe ice = new Moe(CustomEntities.MOE.get(), helper.getLevel());
+        ice.setBlockState(Blocks.PACKED_ICE.defaultBlockState());
+        assertEquals(helper, true, ice.ignoresRain(), "ice rain opt-out flag");
+
+        Moe grass = new Moe(CustomEntities.MOE.get(), helper.getLevel());
+        grass.setBlockState(Blocks.GRASS_BLOCK.defaultBlockState());
+        assertEquals(helper, true, grass.ignoresRain(), "dirt tag rain opt-out flag");
+
+        Moe sand = new Moe(CustomEntities.MOE.get(), helper.getLevel());
+        sand.setBlockState(Blocks.SAND.defaultBlockState());
+        assertEquals(helper, false, sand.ignoresRain(), "sand rain avoidance remains default");
 
         Moe ignoresVolume = new Moe(CustomEntities.MOE.get(), helper.getLevel());
         ignoresVolume.setMoeScale(0.25F);

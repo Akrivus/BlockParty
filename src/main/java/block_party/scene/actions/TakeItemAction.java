@@ -33,7 +33,12 @@ public record TakeItemAction(JsonObject matcher, int count, Source source, Desti
             return;
         }
         switch (this.destination) {
-            case MOE -> SceneItemStacks.insert(moe.getInventory(), removed);
+            case MOE -> {
+                int inserted = SceneItemStacks.insert(moe.getInventory(), removed);
+                if (inserted > 0) {
+                    moe.receiveGift(removed.copyWithCount(inserted));
+                }
+            }
             case PLAYER -> {
                 Player player = SceneActionPlayers.targetPlayer(moe);
                 if (player != null) {

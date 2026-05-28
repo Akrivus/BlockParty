@@ -1,0 +1,35 @@
+{
+  "rules": [
+    {
+      "layer": "dere",
+      "observer": {
+        "dere": "deredere"
+      },
+      "item": "minecraft:cookie",
+      "preference": 0.32,
+      "interest": 0.2,
+      "begging": 0.25
+    },
+    {
+      "layer": "dere",
+      "observer": {
+        "dere": "tsundere"
+      },
+      "item": "minecraft:sweet_berries",
+      "preference": 0.24,
+      "aversion": 0.12,
+      "interest": 0.28,
+      "begging": 0.12
+    },
+    {
+      "layer": "dere",
+      "observer": {
+        "dere": "kuudere"
+      },
+      "item": "minecraft:melon_slice",
+      "preference": 0.18,
+      "interest": 0.08,
+      "begging": 0.04
+    }
+  ]
+}

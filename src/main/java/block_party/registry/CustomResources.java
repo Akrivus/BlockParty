@@ -4,6 +4,7 @@ import block_party.BlockParty;
 import block_party.registry.resources.BlockAliasesReloadListener;
 import block_party.registry.resources.CountingJsonReloadListener;
 import block_party.registry.resources.MoeNamesReloadListener;
+import block_party.registry.resources.MoeItemPreferenceReloadListener;
 import block_party.registry.resources.MoeSoundsReloadListener;
 import block_party.registry.resources.MoeTextureReloadListener;
 import block_party.registry.resources.ScenesReloadListener;
@@ -20,6 +21,8 @@ public final class CustomResources {
     public static final MoeTextureReloadListener MOE_TEXTURES = new MoeTextureReloadListener();
     public static final CountingJsonReloadListener MOE_SOCIAL_AFFINITY_RESOURCES = new CountingJsonReloadListener("moes/social_affinities");
     public static final SocialAffinityReloadListener MOE_SOCIAL_AFFINITIES = new SocialAffinityReloadListener();
+    public static final CountingJsonReloadListener MOE_ITEM_PREFERENCE_RESOURCES = new CountingJsonReloadListener("moes/item_preferences");
+    public static final MoeItemPreferenceReloadListener MOE_ITEM_PREFERENCES = new MoeItemPreferenceReloadListener();
     public static final CountingJsonReloadListener SCENE_RESOURCES = new CountingJsonReloadListener("scenes");
     public static final ScenesReloadListener SCENES = new ScenesReloadListener();
 
@@ -35,6 +38,8 @@ public final class CustomResources {
         event.addListener(BlockParty.source("moe_sounds"), MOE_SOUNDS);
         event.addListener(BlockParty.source("moe_social_affinity_resources"), MOE_SOCIAL_AFFINITY_RESOURCES);
         event.addListener(BlockParty.source("moe_social_affinities"), MOE_SOCIAL_AFFINITIES);
+        event.addListener(BlockParty.source("moe_item_preference_resources"), MOE_ITEM_PREFERENCE_RESOURCES);
+        event.addListener(BlockParty.source("moe_item_preferences"), MOE_ITEM_PREFERENCES);
         event.addListener(BlockParty.source("scene_resources"), SCENE_RESOURCES);
         event.addListener(BlockParty.source("scenes"), SCENES);
     }

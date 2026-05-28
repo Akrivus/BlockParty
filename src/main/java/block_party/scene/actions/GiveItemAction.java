@@ -18,7 +18,10 @@ public record GiveItemAction(ItemStack stack, Target target) implements SceneAct
         }
         ItemStack gift = this.stack.copy();
         if (this.target == Target.MOE) {
-            SceneItemStacks.insert(moe.getInventory(), gift);
+            int inserted = SceneItemStacks.insert(moe.getInventory(), gift);
+            if (inserted > 0) {
+                moe.receiveGift(gift.copyWithCount(inserted));
+            }
             return;
         }
         Player player = SceneActionPlayers.targetPlayer(moe);

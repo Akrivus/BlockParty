@@ -4,6 +4,9 @@ import block_party.db.BlockPartyDB;
 import block_party.db.DimBlockPos;
 import block_party.db.records.NPC;
 import block_party.entities.data.HidingSpots;
+import block_party.entities.environment.MoeEnvironmentalObservation;
+import block_party.entities.environment.MoeEnvironmentalRules;
+import block_party.entities.environment.MoePlaceMemory;
 import block_party.entities.goals.HideUntil;
 import block_party.entities.movement.MoeAnchor;
 import block_party.entities.movement.MoeAnchorType;
@@ -12,6 +15,7 @@ import block_party.entities.movement.FollowSession;
 import block_party.entities.movement.PartyInvites;
 import block_party.entities.movement.PlayerMovementIntent;
 import block_party.entities.movement.RoutineIntent;
+import block_party.entities.preferences.MoeItemPreferences;
 import block_party.entities.social.MoeSocialRules;
 import block_party.entities.social.MoeSocialContext;
 import block_party.items.InviteItem;
@@ -50,6 +54,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -68,6 +73,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.sql.SQLException;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -138,6 +144,17 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     private int socialMovementTicks;
     private Vec3 socialMovementDestination;
     private double socialMovementSpeed;
+    private int environmentalMovementTicks;
+    private Vec3 environmentalMovementDestination;
+    private double environmentalMovementSpeed;
+    private int temporaryAnimationTicks;
+    private String temporaryAnimationKey = "DEFAULT";
+    private int environmentalObservationDelay;
+    private int environmentalObservationMemoryTicks;
+    private MoeEnvironmentalObservation.Observation environmentalObservation = MoeEnvironmentalObservation.Observation.none();
+    private MoePlaceMemory.Place rememberedPlace = MoePlaceMemory.Place.none();
+    private int giftMemoryTicks;
+    private MoeItemPreferences.PreferenceSignal giftPreferenceSignal = MoeItemPreferences.PreferenceSignal.neutral();
     private Dialogue dialogue;
     private Response response;
     private boolean guiPreview;
@@ -156,6 +173,14 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         this.home = this.getDimBlockPos();
         this.inventory.addListener(this);
         this.setBloodType(this.weightedBloodType());
+    }
+
+    @Override
+    protected void registerGoals() {
+        this.goalSelector.addGoal(1, new FollowSessionGoal());
+        this.goalSelector.addGoal(2, new EnvironmentalMovementGoal());
+        this.goalSelector.addGoal(3, new SocialReactionGoal());
+        this.goalSelector.addGoal(4, new IdleRoutineGoal());
     }
 
     @Override
@@ -227,6 +252,8 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         if (compound.contains("Animation")) {
             this.setAnimationKey(compound.getString("Animation"));
         }
+        this.temporaryAnimationTicks = 0;
+        this.temporaryAnimationKey = "DEFAULT";
         if (compound.contains("FoodLevel")) {
             this.setFoodLevel(compound.getFloat("FoodLevel"));
         }
@@ -261,6 +288,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         if (compound.contains("StructureAssignment")) {
             this.setStructureAssignment(MoeStructureAssignment.read(compound.getCompound("StructureAssignment")), false);
         }
+        this.rememberedPlace = compound.contains("RememberedPlace")
+                ? MoePlaceMemory.Place.read(compound.getCompound("RememberedPlace"))
+                : MoePlaceMemory.Place.none();
         if (compound.contains("LastSeenAt")) {
             this.setLastSeen(compound.getLong("LastSeenAt"));
         }
@@ -294,7 +324,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         compound.putString("Dere", this.getDere());
         compound.putString("Zodiac", this.getZodiac());
         compound.putString("Emotion", this.getEmotion());
-        compound.putString("Animation", this.getAnimationKey());
+        compound.putString("Animation", this.temporaryAnimationTicks > 0 ? "DEFAULT" : this.getAnimationKey());
         compound.putFloat("FoodLevel", this.getFoodLevel());
         compound.putFloat("Exhaustion", this.getExhaustion());
         compound.putFloat("Saturation", this.getSaturation());
@@ -309,6 +339,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         compound.putString("RoutineIntent", this.getRoutineIntent().name());
         if (this.structureAssignment.assigned()) {
             compound.put("StructureAssignment", this.structureAssignment.write());
+        }
+        if (this.rememberedPlace.type() != MoePlaceMemory.PlaceType.NONE) {
+            compound.put("RememberedPlace", this.rememberedPlace.write());
         }
         compound.putLong("LastSeenAt", this.getLastSeen());
         compound.putInt("TimeUntilHungry", this.getTimeUntilHungry());
@@ -350,11 +383,13 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         super.tick();
         if (!this.level().isClientSide) {
             this.sceneManager.tick();
+            this.tickTemporaryAnimation();
+            this.tickEnvironmentalObservation();
+            this.tickGiftMemory();
             this.tickFollowSession();
             this.updateHungerState();
             this.updateLonelyState();
             this.updateStressState();
-            this.updateActionState();
             this.updateSleepState();
         }
     }
@@ -797,7 +832,11 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     }
 
     public void setEmotion(String emotion) {
-        this.entityData.set(EMOTION, normalize(emotion, "NORMAL", "ANGRY", "BEGGING", "CONFUSED", "CRYING", "MISCHIEVOUS", "EMBARRASSED", "HAPPY", "NORMAL", "PAINED", "PSYCHOTIC", "SCARED", "SICK", "SNOOTY", "SMITTEN", "TIRED"));
+        String normalized = normalize(emotion, "NORMAL", "ANGRY", "BEGGING", "CONFUSED", "CRYING", "MISCHIEVOUS", "EMBARRASSED", "HAPPY", "NORMAL", "PAINED", "PSYCHOTIC", "SCARED", "SICK", "SNOOTY", "SMITTEN", "TIRED");
+        this.entityData.set(EMOTION, normalized);
+        if ("BEGGING".equals(normalized)) {
+            this.setTemporaryAnimationKey("BEG", 50);
+        }
     }
 
     public String getAnimationKey() {
@@ -805,7 +844,21 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     }
 
     public void setAnimationKey(String animation) {
-        this.entityData.set(ANIMATION, normalize(animation, "DEFAULT", "DEFAULT", "YEARBOOK", "WAVE"));
+        this.clearTemporaryAnimation();
+        this.setNormalizedAnimationKey(animation);
+    }
+
+    public void setTemporaryAnimationKey(String animation, int ticks) {
+        if (this.hasDialogue() || ticks <= 0) {
+            return;
+        }
+        String normalized = normalizeAnimation(animation);
+        if ("DEFAULT".equals(normalized)) {
+            return;
+        }
+        this.temporaryAnimationKey = normalized;
+        this.temporaryAnimationTicks = ticks;
+        this.entityData.set(ANIMATION, normalized);
     }
 
     public boolean isGuiPreview() {
@@ -827,6 +880,19 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     public void addFoodLevel(float foodLevel) {
         this.setFoodLevel(this.getFoodLevel() + foodLevel);
         this.syncFoodToDb();
+    }
+
+    public MoeItemPreferences.PreferenceSignal receiveGift(ItemStack stack) {
+        MoeItemPreferences.PreferenceSignal signal = MoeItemPreferences.signal(this, stack);
+        this.giftPreferenceSignal = signal;
+        this.giftMemoryTicks = 20 * 20;
+        this.reactToGift(signal);
+        this.triggerScene(SceneTrigger.GIFT_RECEIVED);
+        return signal;
+    }
+
+    public java.util.Optional<MoeItemPreferences.PreferenceSignal> latestGiftPreferenceSignal() {
+        return this.giftMemoryTicks > 0 ? java.util.Optional.of(this.giftPreferenceSignal) : java.util.Optional.empty();
     }
 
     public float getExhaustion() {
@@ -1063,16 +1129,25 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         }
         if (this.updateFollowSessionMovement()) {
             this.clearSocialMovementIntent();
+            this.clearEnvironmentalMovementIntent();
+            return;
+        }
+        if (this.updateEnvironmentalRoutineMovement()) {
+            this.clearSocialMovementIntent();
             return;
         }
         if (this.socialTickDelay > 0) {
             --this.socialTickDelay;
-            this.updateSocialMovementIntent();
+            if (!this.updateSocialMovementIntent()) {
+                this.updateEnvironmentalMovementIntent();
+            }
             return;
         }
         this.socialTickDelay = MoeSocialRules.socialTickDelay(this.getDere(), this.random.nextInt());
         if (!this.updateBloodTypeSocialState()) {
             this.updateIdleRoutineMovement();
+        } else {
+            this.clearEnvironmentalMovementIntent();
         }
     }
 
@@ -1218,9 +1293,17 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         if (this.isFollowing() || this.isSitting() || this.isPassenger()) {
             return null;
         }
+        Vec3 socialPlaceDestination = this.socialPlaceDestination();
+        if (socialPlaceDestination != null) {
+            return socialPlaceDestination;
+        }
         Vec3 socialDestination = this.idleSocialOrbitDestination();
         if (socialDestination != null) {
             return socialDestination;
+        }
+        Vec3 rememberedDestination = this.rememberedIdlePlaceDestination();
+        if (rememberedDestination != null) {
+            return rememberedDestination;
         }
         return this.idleAnchorDestination();
     }
@@ -1238,6 +1321,325 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         return true;
     }
 
+    private boolean updateEnvironmentalRoutineMovement() {
+        boolean seekingRainShelter = this.shouldSeekRainShelter();
+        boolean seekingLight = this.shouldSeekLight();
+        Vec3 destination = this.environmentalRoutineDestination();
+        if (destination == null || this.position().distanceToSqr(destination) <= 1.44D) {
+            this.clearEnvironmentalMovementIntent();
+            return false;
+        }
+        boolean moved = this.setEnvironmentalMovementDestination(destination, this.environmentalMoveSpeed());
+        if (moved) {
+            this.setTemporaryAnimationKey(seekingRainShelter ? "SHIVER" : seekingLight ? "LOOK_AROUND" : "DEFAULT", 36);
+        }
+        return moved;
+    }
+
+    public Vec3 environmentalRoutineDestination() {
+        if (this.isFollowing() || this.isSitting() || this.isPassenger()) {
+            return null;
+        }
+        BlockPos origin = this.blockPosition();
+        if (this.shouldSeekRainShelter()) {
+            Vec3 remembered = this.rememberedPlaceDestination(MoePlaceMemory.PlaceType.HOUSE, MoePlaceMemory.PlaceType.SHELTER, MoePlaceMemory.PlaceType.WORKSHOP);
+            if (remembered != null) {
+                return remembered;
+            }
+            Vec3 shelter = MoeEnvironmentalRules.bestShelter(this.level(), origin, MoeEnvironmentalRules.WEATHER_RADIUS)
+                    .map(Vec3::atBottomCenterOf)
+                    .orElse(null);
+            if (shelter != null) {
+                return shelter;
+            }
+        }
+        if (this.shouldSeekLight()) {
+            Vec3 remembered = this.rememberedPlaceDestination(MoePlaceMemory.PlaceType.HOUSE, MoePlaceMemory.PlaceType.WORKSHOP);
+            if (remembered != null) {
+                return remembered;
+            }
+            return MoeEnvironmentalRules.bestLight(this.level(), origin, MoeEnvironmentalRules.LIGHT_RADIUS)
+                    .map(Vec3::atBottomCenterOf)
+                    .orElse(null);
+        }
+        return null;
+    }
+
+    public boolean shouldSeekRainShelter() {
+        return !this.ignoresRain()
+                && this.level().isRaining()
+                && !MoeEnvironmentalRules.isStrongShelter(this.level(), this.blockPosition());
+    }
+
+    public boolean shouldSeekLight() {
+        if (this.ignoresDarkness()) {
+            return false;
+        }
+        BlockPos feet = this.blockPosition();
+        BlockPos head = feet.above();
+        int blockLight = MoeEnvironmentalRules.blockLight(this.level(), feet);
+        boolean locallyDark = blockLight < 8;
+        boolean skyIsNotEnough = this.level().isNight() || this.isNightByTime() || !this.level().canSeeSky(head);
+        return locallyDark && skyIsNotEnough;
+    }
+
+    private boolean isNightByTime() {
+        long dayTime = Math.floorMod(this.level().getDayTime(), 24000L);
+        return dayTime >= 13000L && dayTime <= 23000L;
+    }
+
+    private double environmentalMoveSpeed() {
+        return 0.7D + Math.min(0.35D, MoeSocialRules.socialMoveSpeed(this.getDere()) * 0.25D);
+    }
+
+    private int environmentalMovementDuration() {
+        return Math.max(36, MoeSocialRules.socialMovementDuration(this.getDere()) + 12);
+    }
+
+    public boolean hasEnvironmentalMovementIntent() {
+        return this.environmentalMovementTicks > 0 && this.environmentalMovementDestination != null;
+    }
+
+    private boolean setEnvironmentalMovementDestination(Vec3 destination, double speed) {
+        this.environmentalMovementDestination = destination;
+        this.environmentalMovementSpeed = speed;
+        this.environmentalMovementTicks = this.environmentalMovementDuration();
+        return this.moveToEnvironmentalDestination(destination, speed);
+    }
+
+    private boolean updateEnvironmentalMovementIntent() {
+        if (this.environmentalMovementTicks <= 0 || this.environmentalMovementDestination == null) {
+            return false;
+        }
+        if (this.isFollowing() || this.isSitting() || this.isPassenger() || this.hasDialogue()) {
+            this.clearEnvironmentalMovementIntent();
+            return false;
+        }
+        if (!this.shouldSeekRainShelter() && !this.shouldSeekLight()) {
+            this.clearEnvironmentalMovementIntent();
+            return false;
+        }
+        if (this.position().distanceToSqr(this.environmentalMovementDestination) <= 1.0D) {
+            this.clearEnvironmentalMovementIntent();
+            return false;
+        }
+        --this.environmentalMovementTicks;
+        boolean moving = this.moveToEnvironmentalDestination(this.environmentalMovementDestination, this.environmentalMovementSpeed);
+        if (!moving) {
+            this.clearEnvironmentalMovementIntent();
+        }
+        return moving;
+    }
+
+    private boolean moveToEnvironmentalDestination(Vec3 destination, double speed) {
+        boolean navigating = this.getNavigation().moveTo(destination.x, destination.y, destination.z, speed);
+        if (!navigating) {
+            this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, speed);
+        }
+        return true;
+    }
+
+    private void clearEnvironmentalMovementIntent() {
+        this.environmentalMovementTicks = 0;
+        this.environmentalMovementDestination = null;
+        this.environmentalMovementSpeed = 0.0D;
+    }
+
+    public MoeEnvironmentalRules.ShelterScore shelterScoreAt(BlockPos feetPos) {
+        return MoeEnvironmentalRules.shelterScore(this.level(), feetPos);
+    }
+
+    public java.util.Optional<MoeEnvironmentalObservation.Observation> observeEnvironmentNow() {
+        java.util.Optional<MoeEnvironmentalObservation.Observation> observation = MoeEnvironmentalObservation.scan(this);
+        observation.ifPresent(this::rememberEnvironmentalObservation);
+        return observation;
+    }
+
+    public java.util.Optional<MoeEnvironmentalObservation.Observation> latestEnvironmentalObservation() {
+        return this.environmentalObservationMemoryTicks > 0
+                && this.environmentalObservation.kind() != MoeEnvironmentalObservation.Kind.NONE
+                ? java.util.Optional.of(this.environmentalObservation)
+                : java.util.Optional.empty();
+    }
+
+    public java.util.Optional<MoePlaceMemory.Place> observePlaceNow() {
+        java.util.Optional<MoePlaceMemory.Place> place = MoePlaceMemory.scan(this);
+        place.ifPresent(this::rememberPlace);
+        return place;
+    }
+
+    public java.util.Optional<MoePlaceMemory.Place> rememberedPlace() {
+        return this.rememberedPlace.type() == MoePlaceMemory.PlaceType.NONE
+                ? java.util.Optional.empty()
+                : java.util.Optional.of(this.rememberedPlace);
+    }
+
+    private void tickEnvironmentalObservation() {
+        if (this.environmentalObservationMemoryTicks > 0) {
+            --this.environmentalObservationMemoryTicks;
+            if (this.environmentalObservationMemoryTicks <= 0) {
+                this.environmentalObservation = MoeEnvironmentalObservation.Observation.none();
+            }
+        }
+        if (this.shouldSkipEnvironmentalObservation()) {
+            return;
+        }
+        if (this.environmentalObservationDelay > 0) {
+            --this.environmentalObservationDelay;
+            return;
+        }
+        this.environmentalObservationDelay = 40 + this.random.nextInt(60);
+        this.observeEnvironmentNow();
+        this.observePlaceNow();
+    }
+
+    private void tickGiftMemory() {
+        if (this.giftMemoryTicks > 0) {
+            --this.giftMemoryTicks;
+            if (this.giftMemoryTicks <= 0) {
+                this.giftPreferenceSignal = MoeItemPreferences.PreferenceSignal.neutral();
+            }
+        }
+    }
+
+    private void reactToGift(MoeItemPreferences.PreferenceSignal signal) {
+        if (signal.disliked()) {
+            this.setEmotion("SNOOTY");
+            this.setTemporaryAnimationKey("SHIVER", 50);
+            return;
+        }
+        if (signal.wantsToBeg() || signal.liked()) {
+            this.setEmotion("HAPPY");
+            this.setTemporaryAnimationKey("HAPPY_DANCE", 60);
+            return;
+        }
+        if (signal.interesting()) {
+            this.setEmotion("CONFUSED");
+            this.setTemporaryAnimationKey("AWE", 50);
+        }
+    }
+
+    private boolean shouldSkipEnvironmentalObservation() {
+        return this.level().isClientSide || this.hasDialogue() || this.isPassenger();
+    }
+
+    private void rememberEnvironmentalObservation(MoeEnvironmentalObservation.Observation observation) {
+        this.environmentalObservation = observation;
+        this.environmentalObservationMemoryTicks = 20 * 20;
+        this.getLookControl().setLookAt(
+                observation.pos().getX() + 0.5D,
+                observation.pos().getY() + 0.5D,
+                observation.pos().getZ() + 0.5D,
+                30.0F,
+                30.0F);
+        this.setTemporaryAnimationKey(MoeEnvironmentalObservation.animationFor(observation.kind()), 48);
+        if (observation.kind() == MoeEnvironmentalObservation.Kind.TENSION) {
+            this.addStress(0.02F);
+        } else if (observation.kind() == MoeEnvironmentalObservation.Kind.AFFINITY) {
+            this.addRelaxation(0.02F);
+        }
+    }
+
+    private void rememberPlace(MoePlaceMemory.Place place) {
+        if (place.type() == MoePlaceMemory.PlaceType.NONE || place.overcrowded()) {
+            return;
+        }
+        if (this.rememberedPlace.type() == MoePlaceMemory.PlaceType.NONE
+                || place.score() >= this.rememberedPlace.score() - 8.0D
+                || !MoePlaceMemory.stillValid(this, this.rememberedPlace)) {
+            this.rememberedPlace = place;
+        }
+    }
+
+    private Vec3 rememberedIdlePlaceDestination() {
+        if (this.getEffectiveRoutineIntent() != RoutineIntent.IDLE && this.getEffectiveRoutineIntent() != RoutineIntent.RELAX) {
+            return null;
+        }
+        if (!MoePlaceMemory.stillValid(this, this.rememberedPlace)) {
+            this.rememberedPlace = MoePlaceMemory.Place.none();
+            return null;
+        }
+        if (this.currentRoutineAnchor().map(anchor -> anchor.type() != MoeAnchorType.HOME).orElse(false)) {
+            return null;
+        }
+        return switch (this.rememberedPlace.type()) {
+            case HOUSE, GARDEN, GROVE, FIELD, WORKSHOP, WATERFRONT, CAVE, SHRINE, FARM -> Vec3.atBottomCenterOf(this.rememberedPlace.pos());
+            case SHELTER, NONE -> null;
+        };
+    }
+
+    private Vec3 rememberedPlaceDestination(MoePlaceMemory.PlaceType... types) {
+        if (!MoePlaceMemory.stillValid(this, this.rememberedPlace)) {
+            this.rememberedPlace = MoePlaceMemory.Place.none();
+            return null;
+        }
+        for (MoePlaceMemory.PlaceType type : types) {
+            if (this.rememberedPlace.type() == type) {
+                return Vec3.atBottomCenterOf(this.rememberedPlace.pos());
+            }
+        }
+        return null;
+    }
+
+    private boolean shouldSkipGoalMovement() {
+        return this.level().isClientSide || this.hasDialogue() || this.isSitting() || this.isPassenger();
+    }
+
+    private boolean canRunFollowGoal() {
+        return !this.level().isClientSide && this.isFollowing() && !this.hasDialogue();
+    }
+
+    private boolean canRunSocialGoal() {
+        if (this.shouldSkipGoalMovement() || this.isFollowing()) {
+            this.clearSocialMovementIntent();
+            return false;
+        }
+        if (this.hasEnvironmentalMovementIntent() || this.environmentalRoutineDestination() != null) {
+            return false;
+        }
+        if (this.socialMovementTicks > 0 && this.socialMovementDestination != null) {
+            return true;
+        }
+        if (this.socialTickDelay > 0) {
+            --this.socialTickDelay;
+            return false;
+        }
+        return MoeSocialContext.find(this, 8.0D).isPresent();
+    }
+
+    private boolean tickSocialGoal() {
+        if (this.socialMovementTicks > 0 && this.socialMovementDestination != null) {
+            return this.updateSocialMovementIntent();
+        }
+        this.socialTickDelay = MoeSocialRules.socialTickDelay(this.getDere(), this.random.nextInt());
+        boolean moved = this.updateBloodTypeSocialState();
+        if (moved) {
+            this.clearEnvironmentalMovementIntent();
+        }
+        return moved;
+    }
+
+    private boolean canRunEnvironmentalGoal() {
+        if (this.shouldSkipGoalMovement() || this.isFollowing()) {
+            this.clearEnvironmentalMovementIntent();
+            return false;
+        }
+        return this.hasEnvironmentalMovementIntent() || this.environmentalRoutineDestination() != null;
+    }
+
+    private boolean tickEnvironmentalGoal() {
+        if (this.hasEnvironmentalMovementIntent()) {
+            return this.updateEnvironmentalMovementIntent();
+        }
+        return this.updateEnvironmentalRoutineMovement();
+    }
+
+    private boolean canRunIdleGoal() {
+        return !this.shouldSkipGoalMovement()
+                && !this.isFollowing()
+                && (this.getEffectiveRoutineIntent() == RoutineIntent.SLEEP || this.idleRoutineDestination() != null);
+    }
+
     private Vec3 idleSocialOrbitDestination() {
         List<Moe> nearby = MoeSocialContext.nearby(this, IDLE_SOCIAL_RADIUS).stream()
                 .filter(other -> !other.isFollowing() && !other.isSitting() && !other.isPassenger())
@@ -1252,6 +1654,107 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         center = center.scale(1.0D / (nearby.size() + 1));
         double radius = Math.min(4.5D, 2.25D + nearby.size() * 0.35D);
         return this.orbitDestination(center, radius, 1.75D);
+    }
+
+    public Vec3 socialPlaceDestination() {
+        SocialPlaceCandidate candidate = this.bestSocialPlaceCandidate();
+        if (candidate == null || candidate.behavior() == MoeSocialRules.SocialPlaceBehavior.IGNORE) {
+            return null;
+        }
+        Vec3 center = Vec3.atBottomCenterOf(candidate.place().pos());
+        double distanceSqr = this.position().distanceToSqr(center);
+        return switch (candidate.behavior()) {
+            case SHARE -> distanceSqr > 5.0D * 5.0D
+                    ? center
+                    : this.orbitDestination(center, Math.max(2.0D, 1.6D + candidate.place().occupancy() * 0.35D), 1.0D);
+            case ORBIT -> this.orbitDestination(center, Math.min(5.0D, 2.75D + candidate.place().occupancy() * 0.45D), 1.8D);
+            case GUARD -> this.guardDestination(center, candidate.owner().position());
+            case AVOID -> this.avoidPlaceDestination(center, 4.5D);
+            case IGNORE -> null;
+        };
+    }
+
+    public java.util.Optional<MoeSocialPlaceMemory> socialPlaceMemoryForTests() {
+        SocialPlaceCandidate candidate = this.bestSocialPlaceCandidate();
+        return candidate == null ? java.util.Optional.empty() : java.util.Optional.of(candidate.memory());
+    }
+
+    private SocialPlaceCandidate bestSocialPlaceCandidate() {
+        List<Moe> nearby = MoeSocialContext.nearby(this, IDLE_SOCIAL_RADIUS + MoePlaceMemory.PLACE_RADIUS).stream()
+                .filter(other -> other != this && !other.isRemoved() && other.isAlive())
+                .filter(other -> !other.isFollowing() && !other.isSitting() && !other.isPassenger())
+                .toList();
+        SocialPlaceCandidate best = null;
+        for (Moe other : nearby) {
+            MoePlaceMemory.Place place = other.rememberedPlace().orElse(null);
+            if (place == null || !MoePlaceMemory.stillValid(other, place) || place.overcrowded()) {
+                continue;
+            }
+            if (!isSocialPlaceType(place.type())) {
+                continue;
+            }
+            MoeSocialRules.SocialSignal signal = MoeSocialContext.signal(this, other);
+            MoeSocialRules.SocialPlaceBehavior behavior = MoeSocialRules.placeBehavior(this.getDere(), this.getBloodType(), signal, place.occupancy(), place.capacity());
+            if (behavior == MoeSocialRules.SocialPlaceBehavior.IGNORE) {
+                continue;
+            }
+            double score = socialPlaceScore(this, other, place, signal, behavior);
+            SocialPlaceCandidate candidate = new SocialPlaceCandidate(
+                    other,
+                    place,
+                    behavior,
+                    new MoeSocialPlaceMemory(other.getUUID(), place.type(), place.pos(), behavior, signal, score));
+            if (best == null || candidate.memory().score() > best.memory().score()) {
+                best = candidate;
+            }
+        }
+        return best;
+    }
+
+    private static boolean isSocialPlaceType(MoePlaceMemory.PlaceType type) {
+        return switch (type) {
+            case GARDEN, GROVE, FIELD, WORKSHOP, WATERFRONT, SHRINE, FARM -> true;
+            case HOUSE, SHELTER, CAVE, NONE -> false;
+        };
+    }
+
+    private static double socialPlaceScore(Moe observer, Moe owner, MoePlaceMemory.Place place, MoeSocialRules.SocialSignal signal, MoeSocialRules.SocialPlaceBehavior behavior) {
+        double placeDistance = Math.sqrt(observer.blockPosition().distSqr(place.pos()));
+        double ownerDistance = Math.sqrt(observer.distanceToSqr(owner));
+        double behaviorWeight = switch (behavior) {
+            case SHARE -> 18.0D;
+            case ORBIT -> 13.0D;
+            case GUARD -> 10.0D;
+            case AVOID -> 8.0D;
+            case IGNORE -> 0.0D;
+        };
+        return behaviorWeight
+                + signal.affinity() * 28.0D
+                + signal.interest() * 14.0D
+                - signal.tension() * 10.0D
+                + Math.max(0.0D, place.score()) * 0.08D
+                - placeDistance * 0.35D
+                - ownerDistance * 0.15D;
+    }
+
+    private Vec3 guardDestination(Vec3 center, Vec3 ownerPosition) {
+        Vec3 fromOwner = center.subtract(ownerPosition.x, center.y, ownerPosition.z);
+        if (fromOwner.lengthSqr() < 0.0001D) {
+            fromOwner = this.position().subtract(center);
+        }
+        if (fromOwner.lengthSqr() < 0.0001D) {
+            fromOwner = new Vec3(1.0D, 0.0D, 0.0D);
+        }
+        Vec3 radial = fromOwner.normalize();
+        return new Vec3(center.x, this.getY(), center.z).add(radial.scale(2.25D));
+    }
+
+    private Vec3 avoidPlaceDestination(Vec3 center, double distance) {
+        Vec3 away = this.position().subtract(center);
+        if (away.lengthSqr() < 0.0001D) {
+            away = new Vec3(this.random.nextDouble() - 0.5D, 0.0D, this.random.nextDouble() - 0.5D);
+        }
+        return this.position().add(away.normalize().scale(distance));
     }
 
     private Vec3 idleAnchorDestination() {
@@ -1322,6 +1825,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         MoeSocialRules.DereReaction reaction = context.reaction();
         boolean moved = this.updateBloodTypeSocialMovement(socialTarget, strongest);
         moved = this.updateDereSocialReaction(socialTarget, reaction) || moved;
+        this.updateSocialAnimation(strongest, visual, reaction);
         // Prevent particle spam, use animations instead.
         // this.spawnBloodTypeSocialParticles(socialTarget, visual);
         // this.spawnDereSocialParticles(reaction);
@@ -1459,6 +1963,30 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         }
     }
 
+    private void updateSocialAnimation(MoeSocialRules.SocialSignal signal, MoeSocialRules.SocialVisual visual, MoeSocialRules.DereReaction reaction) {
+        String animation = switch (reaction) {
+            case CELEBRATE, CLING -> "HAPPY_DANCE";
+            case FLUSTER_RETREAT, SHY_RETREAT -> "SHIVER";
+            case SHOW_OFF -> "WAVE";
+            case OBSERVE -> visual == MoeSocialRules.SocialVisual.INTEREST ? "AWE" : "LOOK_AROUND";
+            case NONE -> socialAnimationFor(signal, visual);
+        };
+        this.setTemporaryAnimationKey(animation, 44);
+    }
+
+    private static String socialAnimationFor(MoeSocialRules.SocialSignal signal, MoeSocialRules.SocialVisual visual) {
+        if (signal.tension() > signal.affinity() && signal.tension() >= 0.35F) {
+            return "SHIVER";
+        }
+        if (signal.affinity() >= 0.6F || visual == MoeSocialRules.SocialVisual.FAME || visual == MoeSocialRules.SocialVisual.AFFINITY) {
+            return "HAPPY_DANCE";
+        }
+        if (signal.interest() >= 0.5F || visual == MoeSocialRules.SocialVisual.INTEREST) {
+            return "AWE";
+        }
+        return "DEFAULT";
+    }
+
     private void spawnBloodTypeSocialParticles(Moe socialTarget, MoeSocialRules.SocialVisual visual) {
         if (!(this.level() instanceof ServerLevel serverLevel)) {
             return;
@@ -1515,6 +2043,22 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
             case OBSERVE -> ParticleTypes.HAPPY_VILLAGER;
             case NONE -> ParticleTypes.POOF;
         };
+    }
+
+    public record MoeSocialPlaceMemory(
+            UUID owner,
+            MoePlaceMemory.PlaceType type,
+            BlockPos pos,
+            MoeSocialRules.SocialPlaceBehavior behavior,
+            MoeSocialRules.SocialSignal signal,
+            double score) {
+    }
+
+    private record SocialPlaceCandidate(
+            Moe owner,
+            MoePlaceMemory.Place place,
+            MoeSocialRules.SocialPlaceBehavior behavior,
+            MoeSocialPlaceMemory memory) {
     }
 
     public int getTimeUntilHungry() {
@@ -1575,6 +2119,14 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     public boolean ignoresVolume() {
         return this.getVisibleBlockState().is(CustomTags.IGNORES_VOLUME);
+    }
+
+    public boolean ignoresRain() {
+        return this.getVisibleBlockState().is(CustomTags.IGNORES_RAIN);
+    }
+
+    public boolean ignoresDarkness() {
+        return this.getVisibleBlockState().is(CustomTags.IGNORES_DARKNESS);
     }
 
     public boolean isAssociatedPlayer(Entity entity) {
@@ -1763,6 +2315,36 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         return fallback;
     }
 
+    private void tickTemporaryAnimation() {
+        if (this.temporaryAnimationTicks <= 0) {
+            return;
+        }
+        if (this.hasDialogue()) {
+            this.clearTemporaryAnimation();
+            return;
+        }
+        --this.temporaryAnimationTicks;
+        if (this.temporaryAnimationTicks <= 0) {
+            if (this.temporaryAnimationKey.equals(this.getAnimationKey())) {
+                this.setNormalizedAnimationKey("DEFAULT");
+            }
+            this.clearTemporaryAnimation();
+        }
+    }
+
+    private void clearTemporaryAnimation() {
+        this.temporaryAnimationTicks = 0;
+        this.temporaryAnimationKey = "DEFAULT";
+    }
+
+    private void setNormalizedAnimationKey(String animation) {
+        this.entityData.set(ANIMATION, normalizeAnimation(animation));
+    }
+
+    private static String normalizeAnimation(String animation) {
+        return normalize(animation, "DEFAULT", "DEFAULT", "AWE", "BEG", "HAPPY_DANCE", "LOOK_AROUND", "SHIVER", "YEARBOOK", "WAVE");
+    }
+
     private String weightedBloodType() {
         int value = this.random.nextInt(8);
         if (value < 1) {
@@ -1775,6 +2357,137 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
             return "A";
         }
         return "O";
+    }
+
+    private final class FollowSessionGoal extends Goal {
+        private FollowSessionGoal() {
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse() {
+            return Moe.this.canRunFollowGoal();
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return this.canUse();
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
+        public void start() {
+            Moe.this.clearSocialMovementIntent();
+            Moe.this.clearEnvironmentalMovementIntent();
+        }
+
+        @Override
+        public void tick() {
+            Moe.this.updateFollowSessionMovement();
+        }
+    }
+
+    private final class SocialReactionGoal extends Goal {
+        private SocialReactionGoal() {
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            return Moe.this.canRunSocialGoal();
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return Moe.this.socialMovementTicks > 0
+                    && Moe.this.socialMovementDestination != null
+                    && !Moe.this.shouldSkipGoalMovement()
+                    && !Moe.this.isFollowing();
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
+        public void tick() {
+            Moe.this.tickSocialGoal();
+        }
+
+        @Override
+        public void stop() {
+            if (Moe.this.shouldSkipGoalMovement() || Moe.this.isFollowing()) {
+                Moe.this.clearSocialMovementIntent();
+            }
+        }
+    }
+
+    private final class EnvironmentalMovementGoal extends Goal {
+        private EnvironmentalMovementGoal() {
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse() {
+            return Moe.this.canRunEnvironmentalGoal();
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return Moe.this.hasEnvironmentalMovementIntent()
+                    && !Moe.this.shouldSkipGoalMovement()
+                    && !Moe.this.isFollowing()
+                    && (Moe.this.shouldSeekRainShelter() || Moe.this.shouldSeekLight());
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
+        public void tick() {
+            Moe.this.tickEnvironmentalGoal();
+        }
+
+        @Override
+        public void stop() {
+            if (Moe.this.shouldSkipGoalMovement() || Moe.this.isFollowing()
+                    || (!Moe.this.shouldSeekRainShelter() && !Moe.this.shouldSeekLight())) {
+                Moe.this.clearEnvironmentalMovementIntent();
+            }
+        }
+    }
+
+    private final class IdleRoutineGoal extends Goal {
+        private IdleRoutineGoal() {
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse() {
+            return Moe.this.canRunIdleGoal();
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return this.canUse();
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
+        public void tick() {
+            Moe.this.updateIdleRoutineMovement();
+        }
     }
 
     public MoeInHiding hide(HideUntil until) {
