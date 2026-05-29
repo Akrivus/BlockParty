@@ -75,7 +75,12 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         }
         Collections.shuffle(candidates);
         candidates.removeIf(scene -> !scene.fulfills(moe));
-        return candidates.isEmpty() ? null : candidates.getFirst();
+        if (candidates.isEmpty()) {
+            return null;
+        }
+        int mostSpecific = candidates.stream().mapToInt(Scene::filterCount).max().orElse(0);
+        candidates.removeIf(scene -> scene.filterCount() < mostSpecific);
+        return candidates.getFirst();
     }
 
     @Override

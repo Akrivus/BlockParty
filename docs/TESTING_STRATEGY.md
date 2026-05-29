@@ -1,6 +1,12 @@
 # Testing Strategy
 
-This project needs tests that protect behavior before bug fixes or feature work. The goal is not to test Minecraft itself; it is to capture Block Party's current contracts around Moes, block identity, dialogue, hiding, persistence, and companion tools.
+This project uses tests to protect Block Party's current contracts around Moes, block identity, dialogue, hiding, persistence, companion tools, and data-driven content. This file is the test strategy, not a backlog. The old standalone regression test plan has been retired because the repo now has broad active coverage.
+
+Current inventory as of this documentation pass:
+
+- 248 NeoForge GameTests under `src/main/java/block_party/gametest`.
+- 83 pure regression test methods under `src/test/java/block_party/regression`.
+- Manual release checks remain necessary for renderer, screen, sound, particle, skybox, and armor behavior.
 
 Use three layers:
 
@@ -31,13 +37,13 @@ Avoid pure JUnit for behavior that needs a real registry, `Level`, `ServerLevel`
 
 GameTests should cover in-world server behavior. They should run with a real test level, real registries, real blocks, real entities, and ticks.
 
-Run the initial GameTest suite separately from regression tests:
+Run the GameTest suite:
 
 - `gradlew runGameTestServer`
 
-Historical Java regression tests target the old Forge API and are currently disabled in Gradle. Re-enable or rewrite them only when they cover active NeoForge code.
+Pure regression tests should stay limited to active NeoForge contracts. Old Forge-only tests should remain out of the active build unless rewritten against current code.
 
-Good candidates:
+Coverage should continue to include:
 
 - Moe spawn from `CustomSpawnEggItem`
 - valid and invalid block-origin behavior
@@ -48,7 +54,7 @@ Good candidates:
 - database creation and row sync through `BlockPartyDB`, `NPC`, and `Recordable`
 - Yearbook/Cell Phone server-side packet effects where UI is not required
 - shrine/garden/location record creation/deletion
-- resolved dangerous-bug behavior such as non-recursive combat and `HideUntil` restore, plus remaining baselines such as no-op DB update and hidden spot null handling
+- regression-prone behavior such as non-recursive combat, `HideUntil` restore, no-op DB updates, and hidden-spot reveal safety
 
 GameTests should favor observable assertions: block exists or is removed, entity exists or is removed, database row contains expected values, owner UUID matches, hidden spot exists, NPC list contains an ID.
 
@@ -186,11 +192,12 @@ Files:
 - `src/main/java/block_party/scene/Dialogue.java`
 - `src/main/java/block_party/scene/Response.java`
 - `src/main/java/block_party/scene/Speaker.java`
-- `src/main/java/block_party/scene/ISceneAction.java`
-- `src/main/java/block_party/scene/ISceneObservation.java`
+- `src/main/java/block_party/scene/SceneAction.java`
+- `src/main/java/block_party/scene/SceneObservation.java`
+- `src/main/java/block_party/scene/SceneObservations.java`
+- `src/main/java/block_party/scene/SceneObservationFactories.java`
 - `src/main/java/block_party/scene/actions/*.java`
-- `src/main/java/block_party/scene/observations/*.java`
-- `src/main/java/block_party/registry/resources/Scenes.java`
+- `src/main/java/block_party/registry/resources/ScenesReloadListener.java`
 - `src/main/resources/data/block_party/scenes/test_dialogue.json`
 - `src/main/resources/data/block_party/scenes/test_hide.json`
 
@@ -199,8 +206,8 @@ Unit test:
 - `Response.fromValue(...)` and translation key generation.
 - `Speaker` NBT/JSON defaults where constructible without client/world state.
 - `Dialogue.write/read` round trip for text, tooltip flag, speaker, sound ID, and responses if sound registry lookup can be controlled.
-- `DoCounter`/`DoCookie` operation parsing and mutation using `Counters` and `Cookies`.
-- `Markov` current weighted behavior before deciding whether to fix/register it.
+- `CounterAction`/`CookieAction` operation parsing and mutation using `Counters` and `Cookies`.
+- Parser-supported scene action/filter IDs stay synchronized with `SCENE_DATAPACK_SCHEMA.md`.
 
 GameTest:
 
@@ -219,7 +226,7 @@ Manual:
 Capture before fixes/version moves:
 
 - Scene priority/interruption behavior.
-- Current JSON namespace remapping via `Scenes.own(...)`.
+- Current JSON namespace remapping in `ScenesReloadListener`.
 - Current behavior for malformed or missing scene fields.
 
 ### Networking Packets
@@ -355,18 +362,20 @@ Capture before fixes/version moves:
 Files:
 
 - `src/main/java/block_party/registry/CustomResources.java`
-- `src/main/java/block_party/registry/resources/Scenes.java`
-- `src/main/java/block_party/registry/resources/Names.java`
+- `src/main/java/block_party/registry/resources/ScenesReloadListener.java`
+- `src/main/java/block_party/registry/resources/MoeNamesReloadListener.java`
 - `src/main/java/block_party/registry/resources/MoeTextures.java`
+- `src/main/java/block_party/registry/resources/MoeTextureReloadListener.java`
 - `src/main/java/block_party/registry/resources/MoeSounds.java`
-- `src/main/java/block_party/registry/resources/BlockAliases.java`
+- `src/main/java/block_party/registry/resources/MoeSoundsReloadListener.java`
+- `src/main/java/block_party/registry/resources/BlockAliasesReloadListener.java`
 - resources under `src/main/resources/data/block_party/`
 - resources under `src/main/resources/data/minecraft/`
 
 Unit test:
 
 - JSON parsing helpers only if registry lookups can be faked.
-- `Scenes.own(...)` namespace remapping.
+- `ScenesReloadListener` namespace remapping.
 - `MoeTextures.BlockStatePattern.matches(...)` if made accessible or covered through package-private tests.
 
 GameTest:
@@ -454,17 +463,17 @@ Capture before fixes/version moves:
 - That chores/pranks/adventuring are currently mostly scaffolding, not active gameplay.
 - Current `isFollowing` behavior after `NpcCallRequestPayload`/`NpcCallPayload`.
 
-## Baseline Before Fixes
+## Baseline Before Risky Fixes
 
-Before fixing remaining known bugs from `docs/TECH_DEBT.md`, capture:
+Before changing behavior in a risky area, either rely on existing tests or add the missing coverage first. Known high-value baselines:
 
 - Active `Moe` non-recursive combat result.
 - `MoeInHiding` hide timer behavior across save/load with restored `HideUntil`.
-- `MoeTextures.get` actual visual result for override and fallback textures.
+- `MoeTextures.get` override and fallback behavior.
 - `Row.update()` no-dirty-column behavior.
 - `HidingSpots` behavior for missing positions and multiple dimensions.
-- `YearbookItem.interactLivingEntity` behavior when owner is offline or unresolved.
-- `BlockPartyDB` current table schema, including missing `Saplings.create(level)` behavior.
+- Yearbook/Cell Phone behavior when owner or target state is missing.
+- `BlockPartyDB` current table schema.
 - Current render-layer behavior for cutout blocks.
 
 ## Baseline Before Future Minecraft/NeoForge Version Moves
@@ -493,14 +502,10 @@ Record:
 - resource reload logs
 - manual notes for sounds and visual effects
 
-## Test Implementation Order
+## Maintenance Rules
 
-1. Add JUnit infrastructure and pure tests for enums, `DimBlockPos`, scene variables, and safe serialization.
-2. Add DB unit tests around `Column`, `Row`, and no-op dirty update behavior.
-3. Add GameTests for spawn, ownership, block origin, and DB row creation.
-4. Add GameTests for dialogue trigger and response behavior.
-5. Add GameTests for hide/reveal and hidden event paths.
-6. Add GameTests for save/load persistence and phone/yearbook server behavior.
-7. Build the manual golden-world checklist and screenshots.
-8. Only then fix remaining dangerous bugs.
-9. Re-run all tests before and after each risky behavior fix or future version-move slice.
+1. Add tests with the feature or cleanup that needs them; do not maintain a separate long-form regression backlog.
+2. Keep GameTests close to player-visible server behavior.
+3. Keep pure regression tests focused on deterministic parsing, codecs, row serialization, and utility contracts.
+4. Use `SCENE_DATAPACK_SCHEMA.md` as the source of truth for content-authoring validation expectations.
+5. Re-run the relevant suite before and after each risky behavior fix or future version-move slice.

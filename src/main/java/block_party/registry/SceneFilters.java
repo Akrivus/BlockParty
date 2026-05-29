@@ -27,18 +27,28 @@ public final class SceneFilters {
                 "if_at_remembered_place", "if_remembered_place_overcrowded", "if_remembered_place_invalid",
                 "if_has_environmental_observation", "if_observed_awe", "if_observed_affinity",
                 "if_observed_tension", "if_has_gift_memory", "if_liked_gift", "if_disliked_gift",
-                "if_interesting_gift", "if_begged_for_gift", "if_sheltering_from_rain",
+                "if_interesting_gift", "if_begged_for_gift", "if_social_place", "if_social_place_share",
+                "if_social_place_orbit", "if_social_place_guard", "if_social_place_avoid",
+                "if_sheltering_from_rain",
                 "if_himedere", "if_kuudere", "if_tsundere", "if_yandere", "if_deredere", "if_dandere",
                 "if_angry", "if_begging", "if_confused", "if_crying", "if_mischievous", "if_embarrassed",
                 "if_happy", "if_normal", "if_pained", "if_psychotic", "if_scared", "if_sick",
                 "if_snooty", "if_smitten", "if_tired", "if_male", "if_female", "if_nonbinary",
                 "self", "health", "food_level", "loyalty", "stress", "player_counter",
+                "has_attention", "attention_type", "attention_source",
+                "attention_item", "attention_count", "attention_block",
                 "player_has_cookie", "player_held_item", "player_has_item", "counter", "has_cookie", "held_item",
                 "has_item", "moe_has_item", "block",
                 "family_name", "name", "has_social_target", "social_affinity", "social_tension",
                 "social_interest", "social_visual", "social_reaction", "social_target_name",
                 "social_target_block", "social_target_blood_type", "social_target_dere",
-                "social_target_zodiac", "social_target_emotion");
+                "social_target_zodiac", "social_target_emotion",
+                "remembered_place_type", "remembered_place_score", "remembered_place_occupancy",
+                "remembered_place_capacity", "remembered_place_anchor_type", "observed_block",
+                "observed_signal_layer", "observed_affinity", "observed_tension", "observed_interest",
+                "gift_preference", "gift_aversion", "gift_interest", "gift_begging", "gift_item",
+                "held_item_preference", "held_item_begging", "social_place_behavior", "social_place_type",
+                "social_place_distance", "social_place_owner_name");
     }
 
     private SceneFilters() {

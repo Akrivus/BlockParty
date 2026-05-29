@@ -44,6 +44,15 @@ public enum SceneObservations implements SceneObservation {
     REMEMBERS_CAVE(moe -> rememberedPlaceType(moe, MoePlaceMemory.PlaceType.CAVE)),
     REMEMBERS_SHRINE(moe -> rememberedPlaceType(moe, MoePlaceMemory.PlaceType.SHRINE)),
     REMEMBERS_FARM(moe -> rememberedPlaceType(moe, MoePlaceMemory.PlaceType.FARM)),
+    REMEMBERED_PLACE_HAS_GARDEN_LANTERN(moe -> moe.rememberedPlace()
+            .map(place -> MoePlaceMemory.hasGardenLantern(moe, place))
+            .orElse(false)),
+    REMEMBERED_PLACE_HAS_LIT_GARDEN_LANTERN(moe -> moe.rememberedPlace()
+            .map(place -> MoePlaceMemory.hasLitGardenLantern(moe, place))
+            .orElse(false)),
+    REMEMBERED_PLACE_HAS_UNLIT_GARDEN_LANTERN(moe -> moe.rememberedPlace()
+            .map(place -> MoePlaceMemory.hasUnlitGardenLantern(moe, place))
+            .orElse(false)),
     AT_REMEMBERED_PLACE(moe -> moe.rememberedPlace()
             .map(place -> moe.blockPosition().distSqr(place.pos()) <= 4.0D)
             .orElse(false)),
@@ -57,6 +66,11 @@ public enum SceneObservations implements SceneObservation {
     OBSERVED_AWE(moe -> latestObservationKind(moe, MoeEnvironmentalObservation.Kind.AWE)),
     OBSERVED_AFFINITY(moe -> latestObservationKind(moe, MoeEnvironmentalObservation.Kind.AFFINITY)),
     OBSERVED_TENSION(moe -> latestObservationKind(moe, MoeEnvironmentalObservation.Kind.TENSION)),
+    HAS_SOCIAL_PLACE(moe -> moe.socialPlaceMemoryForTests().isPresent()),
+    SOCIAL_PLACE_SHARE(moe -> socialPlaceBehavior(moe, block_party.entities.social.MoeSocialRules.SocialPlaceBehavior.SHARE)),
+    SOCIAL_PLACE_ORBIT(moe -> socialPlaceBehavior(moe, block_party.entities.social.MoeSocialRules.SocialPlaceBehavior.ORBIT)),
+    SOCIAL_PLACE_GUARD(moe -> socialPlaceBehavior(moe, block_party.entities.social.MoeSocialRules.SocialPlaceBehavior.GUARD)),
+    SOCIAL_PLACE_AVOID(moe -> socialPlaceBehavior(moe, block_party.entities.social.MoeSocialRules.SocialPlaceBehavior.AVOID)),
     HAS_GIFT_MEMORY(moe -> moe.latestGiftPreferenceSignal().isPresent()),
     LIKED_GIFT(moe -> moe.latestGiftPreferenceSignal().map(block_party.entities.preferences.MoeItemPreferences.PreferenceSignal::liked).orElse(false)),
     DISLIKED_GIFT(moe -> moe.latestGiftPreferenceSignal().map(block_party.entities.preferences.MoeItemPreferences.PreferenceSignal::disliked).orElse(false)),
@@ -124,6 +138,9 @@ public enum SceneObservations implements SceneObservation {
             Map.entry("if_remembers_cave", REMEMBERS_CAVE),
             Map.entry("if_remembers_shrine", REMEMBERS_SHRINE),
             Map.entry("if_remembers_farm", REMEMBERS_FARM),
+            Map.entry("if_remembered_place_has_garden_lantern", REMEMBERED_PLACE_HAS_GARDEN_LANTERN),
+            Map.entry("if_remembered_place_has_lit_garden_lantern", REMEMBERED_PLACE_HAS_LIT_GARDEN_LANTERN),
+            Map.entry("if_remembered_place_has_unlit_garden_lantern", REMEMBERED_PLACE_HAS_UNLIT_GARDEN_LANTERN),
             Map.entry("if_at_remembered_place", AT_REMEMBERED_PLACE),
             Map.entry("if_remembered_place_overcrowded", REMEMBERED_PLACE_OVERCROWDED),
             Map.entry("if_remembered_place_invalid", REMEMBERED_PLACE_INVALID),
@@ -131,6 +148,11 @@ public enum SceneObservations implements SceneObservation {
             Map.entry("if_observed_awe", OBSERVED_AWE),
             Map.entry("if_observed_affinity", OBSERVED_AFFINITY),
             Map.entry("if_observed_tension", OBSERVED_TENSION),
+            Map.entry("if_social_place", HAS_SOCIAL_PLACE),
+            Map.entry("if_social_place_share", SOCIAL_PLACE_SHARE),
+            Map.entry("if_social_place_orbit", SOCIAL_PLACE_ORBIT),
+            Map.entry("if_social_place_guard", SOCIAL_PLACE_GUARD),
+            Map.entry("if_social_place_avoid", SOCIAL_PLACE_AVOID),
             Map.entry("if_has_gift_memory", HAS_GIFT_MEMORY),
             Map.entry("if_liked_gift", LIKED_GIFT),
             Map.entry("if_disliked_gift", DISLIKED_GIFT),
@@ -195,6 +217,12 @@ public enum SceneObservations implements SceneObservation {
     private static boolean latestObservationKind(Moe moe, MoeEnvironmentalObservation.Kind kind) {
         return moe.latestEnvironmentalObservation()
                 .map(observation -> observation.kind() == kind)
+                .orElse(false);
+    }
+
+    private static boolean socialPlaceBehavior(Moe moe, block_party.entities.social.MoeSocialRules.SocialPlaceBehavior behavior) {
+        return moe.socialPlaceMemoryForTests()
+                .map(memory -> memory.behavior() == behavior)
                 .orElse(false);
     }
 }

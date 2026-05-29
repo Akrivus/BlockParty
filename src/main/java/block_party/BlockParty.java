@@ -18,6 +18,7 @@ import block_party.registry.CustomSounds;
 import block_party.registry.SceneActions;
 import block_party.registry.SceneFilters;
 import block_party.world.CellPhone;
+import block_party.world.Attention;
 import block_party.world.TsukumogamiSpawns;
 import block_party.db.voicemail.Voicemails;
 import net.minecraft.resources.ResourceLocation;
@@ -61,6 +62,9 @@ public final class BlockParty {
         NeoForge.EVENT_BUS.addListener(CellPhone::onServerTick);
         NeoForge.EVENT_BUS.addListener(CellPhone::onServerStopped);
         NeoForge.EVENT_BUS.addListener(block_party.world.structure.MoeStructureCohortCoordinator::onServerTick);
+        NeoForge.EVENT_BUS.addListener(Attention::onServerStopped);
+        NeoForge.EVENT_BUS.addListener(Attention::onBlockBroken);
+        NeoForge.EVENT_BUS.addListener(Attention::onBlockDrops);
         NeoForge.EVENT_BUS.addListener(TsukumogamiSpawns::onBlockPlaced);
         NeoForge.EVENT_BUS.addListener(TsukumogamiSpawns::onBlockBroken);
         NeoForge.EVENT_BUS.addListener(TsukumogamiSpawns::onServerTick);

@@ -275,7 +275,7 @@ Expected future player-facing shape:
 
 The README says Moes can tag along with players on adventures. Current observable support includes ownership, a following flag, phone teleport, combat stats, health, attack/hurt/death sounds, inventory, and persistence.
 
-Port contract:
+Current NeoForge contract:
 
 - Calling a Moe to the player should continue to place it near the player and mark it as following when current behavior succeeds.
 - Moes should not despawn from distance.

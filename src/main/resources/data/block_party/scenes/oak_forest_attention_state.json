@@ -1,0 +1,33 @@
+{
+  "trigger": "block_party:attention",
+  "filters": [
+    "block_party:is_cardinal",
+    {
+      "type": "block_party:attention_type",
+      "filter": {
+        "type": "oak_forest"
+      }
+    },
+    {
+      "type": "block_party:attention_source",
+      "filter": {
+        "source": "sapling_drop"
+      }
+    },
+    {
+      "type": "block_party:attention_item",
+      "filter": {
+        "item": "minecraft:oak_sapling"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "type": "block_party:cookie",
+      "action": {
+        "name": "oak_forest_attention",
+        "value": "active"
+      }
+    }
+  ]
+}

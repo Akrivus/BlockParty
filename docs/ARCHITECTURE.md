@@ -67,19 +67,20 @@ Player interactions are converted into scene triggers on the active Moe surface:
 
 Scene and dialogue behavior is data-driven:
 
-- scene reload listener: `block_party.registry.resources.Scenes`
+- scene reload listener: `block_party.registry.resources.ScenesReloadListener`
 - scene manager: `block_party.scene.SceneManager`
 - triggers: `block_party.scene.SceneTrigger`
-- actions: `block_party.scene.ISceneAction` and `block_party.scene.actions.*`
-- filters: `block_party.scene.ISceneObservation` and `block_party.scene.observations.*`
+- actions: `block_party.scene.SceneAction` and `block_party.scene.actions.*`
+- filters: `block_party.scene.SceneObservation`, `SceneObservations`, and `SceneObservationFactories`
 - action/filter registries: `block_party.registry.SceneActions`, `block_party.registry.SceneFilters`
 
-The current resource scenes under `src/main/resources/data/block_party/scenes/` are test content only:
+The current resource scenes under `src/main/resources/data/block_party/scenes/` include smoke-test content plus active content-forward scenes:
 
 - `test_dialogue.json`: right-click dialogue chain
 - `test_hide.json`: left-click hide action
+- attention/place-memory scenes such as `oak_forest_attention_*.json`
 
-`SendDialogue` constructs a `Dialogue` from JSON, opens it for the owning player with `DialogueOpenPayload`, and waits until a response arrives. `DialogueScreen` sends `DialogueRespondPayload`; the server loads the NPC row, finds the server entity, and records the selected response on the active Moe dialogue state.
+`SendDialogueAction` constructs a `Dialogue` from JSON, opens it for the owning player with `DialogueOpenPayload`, and waits until a response arrives. `DialogueScreen` sends `DialogueRespondPayload`; the server loads the NPC row, finds the server entity, and records the selected response on the active Moe dialogue state.
 
 ### Hiding And Retreat
 
@@ -100,7 +101,7 @@ Hidden markers are tracked in `block_party.entities.data.HidingSpots`, a `SavedD
 
 When those events touch a hidden block, `HidingSpots.spawn(...)` tries to reveal the Moe.
 
-Resolved note: `MoeInHiding.readAdditionalSaveData` now restores `HideUntil` from the saved NBT string. Timed hide save/load should still be kept in parity coverage during persistence API migration.
+Compatibility note: `MoeInHiding.readAdditionalSaveData` restores `HideUntil` from the saved NBT string. Timed hide save/load should remain covered when persistence code changes.
 
 ### Saving And Loading
 
@@ -136,9 +137,9 @@ Entry point: `src/main/java/block_party/BlockParty.java`.
 
 Important registries:
 
-- `BlockParty.BLOCKS`, `ITEMS`, `ENTITIES`, `BLOCK_ENTITIES`, `PARTICLES`, `SOUNDS`, `WORLDGEN_FEATURES`
-- custom registry builders for scene actions and filters: `BlockParty.ACTIONS`, `BlockParty.FILTERS`
-- packet channel: `BlockParty.MESSENGER`
+- `CustomBlocks.BLOCKS`, `CustomItems.ITEMS`, `CustomEntities.ENTITIES`, `CustomBlockEntities.BLOCK_ENTITIES`, `CustomParticles.PARTICLES`, `CustomSounds.SOUNDS`, and `CustomWorldGen` feature keys
+- custom registry builders for scene actions and filters: `SceneActions.ACTIONS`, `SceneFilters.FILTERS`
+- custom payload registration: `CustomMessenger.registerPayloads`
 
 Registration classes:
 
@@ -198,9 +199,9 @@ Core files:
 - `block_party.scene.Response`
 - `block_party.scene.Speaker`
 - `block_party.scene.SceneTrigger`
-- `block_party.registry.resources.Scenes`
-- `block_party.scene.actions.SendDialogue`
-- `block_party.scene.actions.SendResponse`
+- `block_party.registry.resources.ScenesReloadListener`
+- `block_party.scene.actions.SendDialogueAction`
+- `block_party.scene.actions.SendResponseAction`
 - `block_party.client.screens.DialogueScreen`
 - `block_party.network.payload.DialogueOpenPayload`
 - `block_party.network.payload.DialogueRespondPayload`
@@ -208,7 +209,7 @@ Core files:
 
 Scenes are JSON resources under `data/*/scenes`. Each has a trigger, filters, and actions. Filters must all pass. Matching scenes are shuffled and one fulfilled scene is selected.
 
-Supported registered actions include dialogue, response, health/food/loyalty/stress mutation, cookie/counter mutation, hide, and end. `Markov` exists but is not registered in `SceneActions`, so I did not find a JSON entry point for it.
+Parser-supported actions include dialogue, response, health/food/loyalty/stress mutation, cookie/counter mutation, hide, voicemail, follow-session, anchor/routine, sleep-at-home, inventory/item transfer, wait/dismiss, and end. Keep `SceneActions`, `ScenesReloadListener`, and `SCENE_DATAPACK_SCHEMA.md` synchronized when this list changes.
 
 ### Networking Packets
 
@@ -317,113 +318,59 @@ The README claims Moes bring food, pull pranks, perform chores, and tag along on
 
 I did not find concrete AI goals for following, chores, pranks, gifting food, combat adventuring, or sleep. Treat those as unfinished or planned unless there are files outside the scanned `src/main/java/block_party` tree.
 
-## Stable, Unfinished, Duplicated, And Risky Areas
+## Architecture Boundaries
 
-### Appears Stable Or Coherent
+The codebase should stay organized around visible ownership boundaries. This matters more as content systems expand.
 
-- NeoForge registration structure in `BlockParty`, `CustomBlocks`, `CustomItems`, `CustomEntities`, `CustomCreativeTabs`, and related registries is conventional for the current 1.21.4 target.
-- The normalized `Moe` shell keeps the active entity/runtime surface easier to reason about than the frozen layered source.
-- Block-to-Moe spawn and hide/reveal lifecycle is implemented end-to-end.
-- Resource reload listeners for scenes, names, textures, sounds, and aliases are clear.
-- Client rendering has a defined model/layer/screen organization.
-- SQLite row abstraction is consistently used by NPC and block-record classes.
+Package responsibilities:
 
-### Unfinished Or Placeholder
+- `blocks`: block classes and block entities. Block entities may claim/update SQLite rows, but should not own Moe behavior.
+- `client`: renderers, models, screens, particles, client-only payload handling, and visual effects. Client code mirrors server state; it is not authoritative.
+- `db`: SQLite records, row helpers, and world saved-data bridges. DB code should not decide gameplay outcomes beyond persistence queries and ownership checks.
+- `entities`: live entity state and small domain helpers for Moe behavior.
+- `entities.environment`: environmental observations and place memory.
+- `entities.movement`: anchors, movement intents, and navigation helpers.
+- `entities.preferences`: item preference and gift signal logic.
+- `entities.social`: social target/signal/rule evaluation.
+- `entities.chores`: chore-specific planning and execution helpers.
+- `items`: item interaction entry points. Items should delegate service behavior rather than duplicating controller or entity logic.
+- `network`: typed NeoForge payload records and transport glue. Payload handlers should validate authority and delegate to server services.
+- `registry`: NeoForge registration and reload listener wiring.
+- `scene`: data-driven behavior language: triggers, scene selection, observations, actions, dialogue, and scene-local variables.
+- `world`: server-level services that are broader than one entity, such as Cell Phone lookup, attention, or world event aggregation.
 
-- Chores/pranks/adventuring/follow AI are not implemented in the scanned code.
-- `Senpai` exists but is not registered as an entity.
-- `SceneActions.Markov` exists but is not registered.
-- full old Forge scene action/filter coverage, full Forge NPC row synchronization, and planned `BlockPartyNPC`/`Senpai` hierarchy restoration remain follow-ups.
+Thin-class rule:
 
-### Duplicated Or Confusing
+- Entity classes should expose state, lifecycle hooks, and orchestration points. Scanning, scoring, path selection, social math, item preference math, and persistence transforms should live in focused collaborators.
+- Avoid new "just one more method" additions to `Moe` when the behavior has its own vocabulary.
+- Keep package-private helpers near the package that owns the domain concept.
+- Use imports for normal Java dependencies. Fully qualified class names should be rare and intentional, usually only to resolve a same-name collision.
 
-- Name/blood/profile generation still has multiple historical entry points between row data, tags, spawn, and old frozen source expectations.
-- `Layer1.doHurtTarget` and `Layer7.doHurtTarget` previously called back into their own overrides and could stack overflow. The active NeoForge combat path delegates safely through vanilla mob combat and remains covered by GameTests.
-- Some class names and compatibility notes still refer to old Forge packet/entity concepts. Keep those references only when they describe old-world parity.
-- family-name behavior still needs explicit tests if the old block translation-key behavior is restored more fully.
+DRY rule:
 
-### Risky Or Bug-Prone
+- Shared content behavior should become a scene action/filter or a domain service before it is copied into multiple item/entity methods.
+- Scene-pack-facing concepts should be named once in `SceneActions`, `SceneFilters`, and `SCENE_DATAPACK_SCHEMA.md`.
+- Registry IDs, payload IDs, table names, NBT keys, and resource paths are compatibility surfaces. Reuse constants or shared helpers when code needs the same value in more than one place.
 
-- `MoeInHiding.readAdditionalSaveData` now restores the saved hide condition from NBT; keep this fixed behavior covered during save/load work.
-- `HidingSpots` maps `BlockPos` only, even though some APIs receive dimensional positions. Because each `SavedData` instance is per `ServerLevel`, this may be acceptable, but it should be verified across dimensions.
-- `HidingSpots.get(ServerLevel, BlockPos)` returns `spot.list.get(pos)` as primitive `long`; callers rely on `isNormalBlock` first to avoid unboxing null. The order is fragile.
-- `SceneManager.trigger` only replaces the current scene if the incoming priority is greater than the current trigger. Equal-priority triggers are ignored until the active action clears.
-- `SceneManager.setAction(null)` calls `onComplete` on the existing action. For `SendDialogue`, that can enqueue response follow-up behavior during interruption; verify whether that is intended.
-- DB writes should stay explicit and covered by tests so row synchronization does not regress back into broad synced-data churn.
-- `Column.set` reference/equality behavior and no-op `Row.update()` handling should remain covered by DB tests.
-- Moe texture metadata was normalized in the active NeoForge path, but visual override/fallback screenshots are still useful release checks.
-- `Markov.chain` stores entries by `probability` instead of cumulative `total`, which likely breaks weighted selection if it is ever used.
+## Authoring Contracts
 
-## Current Regression Plan
+Author-facing content contracts live in `docs/SCENE_DATAPACK_SCHEMA.md`. That file is the source of truth for scene JSON, social affinities, names, aliases, block trait tags, and fail-closed behavior.
 
-Start with behavior-preserving tests and manual smoke tests in the current NeoForge 1.21.4 build before changing risky behavior.
+Important content-authoring invariants:
 
-1. Build and launch smoke test
-   - Run Gradle build/client once on the current code.
-   - Record any existing compile/runtime failures as baseline.
-   - Verify `neoforge.mods.toml`, assets, data packs, SQLite jar-in-jar loading, and resource reloads load without hard crashes.
+- Prefer explicit `block_party:*` IDs in authored content.
+- Unknown filters fail closed, disabling the scene.
+- Unknown object actions become `end`; this should stay documented and tested until a stricter author diagnostic replaces it.
+- Cookies and counters are per Moe database ID, not global progression.
+- Player/global progression state is not a first-class scene authoring surface yet.
+- Java primitives added for content should expose a small scene action/filter when content authors are expected to use them.
 
-2. Spawn lifecycle test
-   - In a test world, place a block in `block_party:spawns_moes`.
-   - Use `CustomSpawnEggItem`.
-   - Verify source block is removed, `Moe` appears, owner UUID is set, block state is preserved, texture fallback works, name is assigned, and a row exists in `blockparty.db`.
+For generated scene packs, Codex or another authoring tool should target the schema document, not Java implementation details. If a desired story beat cannot be expressed in that schema, add a small Java primitive and update the schema in the same slice.
 
-3. Trait/profile test
-   - Spawn Moes from blocks tagged for gender, blood type, dere, zodiac, wings, glow, cat features, and ignores-volume.
-   - Verify active `Moe` block-state/profile derivation, sound selection, scale, navigation type, and renderer layers.
+## Maintenance Rules
 
-4. Dialogue scene test
-   - Use `test_dialogue.json` through right-click.
-   - Verify `SceneManager.trigger`, `DialogueOpenPayload`, `DialogueScreen`, `DialogueRespondPayload`, chained responses, and `End` behavior.
-   - Add a scene with filters/counters/cookies before changing this system if it is intended to survive.
-
-5. Hide/reveal test
-   - Use `test_hide.json` through left-click.
-   - Verify Moe becomes a block, `MoeInHiding` exists, `HidingSpots` saved data records the position, and the Moe returns after `ONE_SECOND_PASSES`.
-   - Repeat for break-start, break-end, piston push, falling block, chunk unload/reload, and full server restart.
-
-6. Persistence test
-   - Spawn, rename/profile-change if possible, hide, save, quit, reload.
-   - Verify DB row, player NPC list, `HidingSpots`, entity NBT, and block entity NBT restoration.
-   - Specifically test `HideUntil` restoration so the resolved timed-hide restore behavior stays fixed.
-
-7. Controller UI test
-   - Open `YearbookItem` and `CellPhoneItem`.
-   - Verify `ControllerOpenPayload`, `NpcDetailPayload`, `NpcCallRequestPayload`, `NpcCallPayload`, `CellPhone`, `MoeSpawner`, and `TeleportTransition` behavior.
-
-8. Death/removal test
-   - Kill or expose a hidden Moe and inspect `NPC.DEAD`, `NPC.HIDING`, player list removal, and row lifetime.
-   - Verify expected behavior before deciding whether follow-up fixes should preserve or change it.
-
-9. Resource reload/data-pack test
-   - Reload names, aliases, textures, sounds, and scenes.
-   - Verify malformed JSON failure behavior is documented.
-   - Confirm `minecraft` namespace scene/resources are intentionally remapped by `Scenes.own`.
-
-10. Regression harness
-   - Run `.\gradlew.bat runGameTestServer` and keep manual smoke-test checklists/golden worlds for client-only coverage.
-
-## Current Modernization Plan
-
-Order follow-up work from safest behavior locks to broader feature restoration.
-
-1. Keep current NeoForge baseline green
-   - Run `.\gradlew.bat compileJava --no-daemon` and `.\gradlew.bat runGameTestServer --no-daemon`.
-   - Save logs, generated DB schema, a small test world, and screenshots of Moe spawn/dialogue/hide before large behavior changes.
-
-2. Preserve active API seams
-   - Keep registry names, payload IDs, SQLite table/column names, resource paths, and item/entity IDs stable.
-   - When Minecraft or NeoForge versions move again, update Gradle, metadata, generated resources, and GameTests first.
-
-3. Expand parity tests around restored systems
-   - Cover spawn, hide/reveal, profile traits, social affinities, Yearbook, Cell Phone, dialogue, shrine/location records, resources, and decorative blocks.
-   - Treat old Forge behavior as a compatibility input, not as a reason to reintroduce old APIs.
-
-4. Finish active client validation
-   - Screenshot-test `MoeRenderer`, `MoeModel`, `MoeRenderState`, layers, `DialogueScreen`, `YearbookScreen`, `CellPhoneScreen`, Samurai armor, JapanRenderer, particles, and transparent blocks.
-
-5. Address remaining architecture risks
-   - Tighten SQL update helpers, hidden-spot edge cases, profile generation, data-pack diagnostics, and save schema versioning behind tests.
-
-6. Restore planned systems last
-   - Chores, pranks, adventuring, hunger/stress/sleep, richer following, Senpai, and the broader NPC hierarchy are new behavior on top of the stable NeoForge port.
+- Keep `TESTING_STRATEGY.md` as the test strategy and coverage map. Do not recreate a standalone regression backlog.
+- Keep `TECH_DEBT.md` limited to unresolved debt. Remove fixed items instead of carrying "resolved" sections forward.
+- Keep `COMPATIBILITY_NOTES.md` for intentional differences from the old Forge baseline.
+- Keep `ENTITY_STATE_FLOW.md` focused on runtime state authority and lifecycle flow.
+- Keep `SCENE_DATAPACK_SCHEMA.md` author-facing. Avoid Java-only terminology there unless authors need it to make correct content.

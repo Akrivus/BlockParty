@@ -2,6 +2,7 @@ package block_party.db;
 
 import block_party.blocks.entity.AbstractDataBlockEntity;
 import block_party.blocks.entity.ShimenawaBlockEntity;
+import block_party.db.records.AttentionRecord;
 import block_party.db.records.Garden;
 import block_party.db.records.Location;
 import block_party.db.records.NPC;
@@ -116,6 +117,25 @@ public final class BlockPartyDB extends SavedData {
                         PlayerUUID TEXT NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
                         RequiredCondition TEXT NOT NULL DEFAULT 'ALWAYS',
                         Priority INTEGER NOT NULL DEFAULT 0
+                    );
+                    """);
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS AttentionRecords (
+                        DatabaseID INTEGER PRIMARY KEY AUTOINCREMENT,
+                        PlayerUUID TEXT NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+                        Type TEXT NOT NULL DEFAULT '',
+                        Source TEXT NOT NULL DEFAULT '',
+                        PosDim TEXT NOT NULL DEFAULT 'minecraft:overworld',
+                        PosX INTEGER NOT NULL DEFAULT 0,
+                        PosY INTEGER NOT NULL DEFAULT 0,
+                        PosZ INTEGER NOT NULL DEFAULT 0,
+                        BlockState INTEGER NOT NULL DEFAULT 0,
+                        ItemID TEXT NOT NULL DEFAULT '',
+                        ItemCount INTEGER NOT NULL DEFAULT 0,
+                        Count INTEGER NOT NULL DEFAULT 0,
+                        FirstGameTime INTEGER NOT NULL DEFAULT 0,
+                        LastGameTime INTEGER NOT NULL DEFAULT 0,
+                        UNIQUE(PlayerUUID, Type, Source, ItemID)
                     );
                     """);
         } finally {
@@ -659,6 +679,78 @@ public final class BlockPartyDB extends SavedData {
         return Shrine.closest(this.listShrineRows(player), origin);
     }
 
+    public void recordAttention(ServerLevel level, UUID player, String type, String source, BlockPos pos, BlockState state, String itemId, int itemCount, long gameTime) throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                INSERT INTO AttentionRecords (
+                    PlayerUUID, Type, Source, PosDim, PosX, PosY, PosZ, BlockState, ItemID, ItemCount, Count, FirstGameTime, LastGameTime
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
+                ON CONFLICT(PlayerUUID, Type, Source, ItemID) DO UPDATE SET
+                    PosDim = excluded.PosDim,
+                    PosX = excluded.PosX,
+                    PosY = excluded.PosY,
+                    PosZ = excluded.PosZ,
+                    BlockState = excluded.BlockState,
+                    ItemCount = excluded.ItemCount,
+                    Count = AttentionRecords.Count + 1,
+                    LastGameTime = excluded.LastGameTime;
+                """)) {
+            statement.setString(1, player.toString());
+            statement.setString(2, normalizeAttentionKey(type));
+            statement.setString(3, normalizeAttentionKey(source));
+            statement.setString(4, level.dimension().location().toString());
+            statement.setInt(5, pos.getX());
+            statement.setInt(6, pos.getY());
+            statement.setInt(7, pos.getZ());
+            statement.setInt(8, Block.getId(state));
+            statement.setString(9, normalizeAttentionKey(itemId));
+            statement.setInt(10, Math.max(0, itemCount));
+            statement.setLong(11, gameTime);
+            statement.setLong(12, gameTime);
+            statement.executeUpdate();
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    public java.util.Optional<AttentionRecord> latestAttention(UUID player) throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT DatabaseID, PlayerUUID, Type, Source, PosDim, PosX, PosY, PosZ, BlockState, ItemID, ItemCount, Count, FirstGameTime, LastGameTime
+                FROM AttentionRecords
+                WHERE PlayerUUID = ?
+                ORDER BY LastGameTime DESC, DatabaseID DESC
+                LIMIT 1;
+                """)) {
+            statement.setString(1, player.toString());
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next() ? java.util.Optional.of(readAttention(result)) : java.util.Optional.empty();
+            }
+        } finally {
+            this.free(connection);
+        }
+    }
+
+    public java.util.Optional<AttentionRecord> findAttention(UUID player, String type, String source) throws SQLException {
+        Connection connection = this.openConnection();
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT DatabaseID, PlayerUUID, Type, Source, PosDim, PosX, PosY, PosZ, BlockState, ItemID, ItemCount, Count, FirstGameTime, LastGameTime
+                FROM AttentionRecords
+                WHERE PlayerUUID = ? AND Type = ? AND Source = ?
+                ORDER BY LastGameTime DESC, DatabaseID DESC
+                LIMIT 1;
+                """)) {
+            statement.setString(1, player.toString());
+            statement.setString(2, normalizeAttentionKey(type));
+            statement.setString(3, normalizeAttentionKey(source));
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next() ? java.util.Optional.of(readAttention(result)) : java.util.Optional.empty();
+            }
+        } finally {
+            this.free(connection);
+        }
+    }
+
     public void deleteDataBlock(String table, long id) throws SQLException {
         if ("NPCs".equals(table)) {
             this.deleteNpc(id);
@@ -916,6 +1008,25 @@ public final class BlockPartyDB extends SavedData {
                 result.getLong("CreatedGameTime"),
                 result.getLong("MatureAtGameTime"),
                 result.getLong("ShrineDatabaseID"));
+    }
+
+    private static AttentionRecord readAttention(ResultSet result) throws SQLException {
+        return new AttentionRecord(
+                result.getLong("DatabaseID"),
+                readUuid(result, "PlayerUUID"),
+                result.getString("Type"),
+                result.getString("Source"),
+                readDimBlockPos(result),
+                Block.stateById(result.getInt("BlockState")),
+                result.getString("ItemID"),
+                result.getInt("ItemCount"),
+                result.getInt("Count"),
+                result.getLong("FirstGameTime"),
+                result.getLong("LastGameTime"));
+    }
+
+    private static String normalizeAttentionKey(String value) {
+        return value == null ? "" : value.trim().toLowerCase(java.util.Locale.ROOT);
     }
 
     private static DimBlockPos readDimBlockPos(ResultSet result) throws SQLException {

@@ -3,6 +3,9 @@ package block_party.entities;
 import block_party.db.BlockPartyDB;
 import block_party.db.DimBlockPos;
 import block_party.db.records.NPC;
+import block_party.entities.chores.PlaceBlockChores;
+import block_party.entities.chores.PlaceBlockChores.Chore;
+import block_party.entities.chores.PlaceBlockChores.Config;
 import block_party.entities.data.HidingSpots;
 import block_party.entities.environment.MoeEnvironmentalObservation;
 import block_party.entities.environment.MoeEnvironmentalRules;
@@ -21,6 +24,7 @@ import block_party.entities.social.MoeSocialContext;
 import block_party.items.InviteItem;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomTags;
+import block_party.blocks.GardenLanternBlock;
 import block_party.registry.resources.BlockAliasesReloadListener;
 import block_party.registry.resources.MoeNamesReloadListener;
 import block_party.registry.resources.MoeSounds;
@@ -50,6 +54,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
@@ -83,6 +88,8 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     private static final int COMPATIBILITY_FOLLOW_TICKS = 20 * 60 * 5;
     private static final double IDLE_ANCHOR_RADIUS = 24.0D;
     private static final double IDLE_SOCIAL_RADIUS = 10.0D;
+    private static final double GARDEN_LANTERN_CHORE_RADIUS = 16.0D;
+    private static final double CARDINAL_FOREST_CHORE_RADIUS = 16.0D;
 
     public static final EntityDataAccessor<String> DATABASE_ID =
             SynchedEntityData.defineId(Moe.class, EntityDataSerializers.STRING);
@@ -155,6 +162,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     private MoePlaceMemory.Place rememberedPlace = MoePlaceMemory.Place.none();
     private int giftMemoryTicks;
     private MoeItemPreferences.PreferenceSignal giftPreferenceSignal = MoeItemPreferences.PreferenceSignal.neutral();
+    private ItemStack giftItemMemory = ItemStack.EMPTY;
     private Dialogue dialogue;
     private Response response;
     private boolean guiPreview;
@@ -162,6 +170,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     private FollowSession followSession = FollowSession.none();
     private RoutineIntent routineIntent = RoutineIntent.IDLE;
     private MoeStructureAssignment structureAssignment = MoeStructureAssignment.none();
+    private Chore placeBlockChore = Chore.none();
     private final SceneManager sceneManager = new SceneManager(this);
 
     public Moe(EntityType<? extends Moe> entityType, Level level) {
@@ -177,6 +186,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     @Override
     protected void registerGoals() {
+        this.goalSelector.addGoal(0, new CardinalForestChoreGoal());
         this.goalSelector.addGoal(1, new FollowSessionGoal());
         this.goalSelector.addGoal(2, new EnvironmentalMovementGoal());
         this.goalSelector.addGoal(3, new SocialReactionGoal());
@@ -288,6 +298,14 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         if (compound.contains("StructureAssignment")) {
             this.setStructureAssignment(MoeStructureAssignment.read(compound.getCompound("StructureAssignment")), false);
         }
+        if (compound.contains("PlaceBlockChore")) {
+            this.placeBlockChore = Chore.read(compound.getCompound("PlaceBlockChore"));
+        } else if (compound.contains("CardinalForestChoreOrigin")) {
+            this.placeBlockChore = new Chore(
+                    "oak_sapling",
+                    new DimBlockPos(compound.getCompound("CardinalForestChoreOrigin")),
+                    compound.getInt("CardinalForestChoreTicks"));
+        }
         this.rememberedPlace = compound.contains("RememberedPlace")
                 ? MoePlaceMemory.Place.read(compound.getCompound("RememberedPlace"))
                 : MoePlaceMemory.Place.none();
@@ -339,6 +357,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         compound.putString("RoutineIntent", this.getRoutineIntent().name());
         if (this.structureAssignment.assigned()) {
             compound.put("StructureAssignment", this.structureAssignment.write());
+        }
+        if (this.placeBlockChore.active()) {
+            compound.put("PlaceBlockChore", this.placeBlockChore.write());
         }
         if (this.rememberedPlace.type() != MoePlaceMemory.PlaceType.NONE) {
             compound.put("RememberedPlace", this.rememberedPlace.write());
@@ -885,6 +906,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     public MoeItemPreferences.PreferenceSignal receiveGift(ItemStack stack) {
         MoeItemPreferences.PreferenceSignal signal = MoeItemPreferences.signal(this, stack);
         this.giftPreferenceSignal = signal;
+        this.giftItemMemory = stack == null ? ItemStack.EMPTY : stack.copy();
         this.giftMemoryTicks = 20 * 20;
         this.reactToGift(signal);
         this.triggerScene(SceneTrigger.GIFT_RECEIVED);
@@ -893,6 +915,10 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     public java.util.Optional<MoeItemPreferences.PreferenceSignal> latestGiftPreferenceSignal() {
         return this.giftMemoryTicks > 0 ? java.util.Optional.of(this.giftPreferenceSignal) : java.util.Optional.empty();
+    }
+
+    public java.util.Optional<ItemStack> latestGiftItem() {
+        return this.giftMemoryTicks > 0 && !this.giftItemMemory.isEmpty() ? java.util.Optional.of(this.giftItemMemory.copy()) : java.util.Optional.empty();
     }
 
     public float getExhaustion() {
@@ -1054,7 +1080,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     public void setDialogue(Dialogue dialogue) {
         this.dialogue = dialogue;
         this.response = null;
-        this.setAnimationKey(dialogue == null ? "DEFAULT" : dialogue.speaker().animation());
+        if (dialogue != null) {
+            this.setAnimationKey(dialogue.speaker().animation());
+        }
     }
 
     public boolean hasDialogue() {
@@ -1293,6 +1321,10 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         if (this.isFollowing() || this.isSitting() || this.isPassenger()) {
             return null;
         }
+        Vec3 lanternDestination = this.unlitGardenLanternDestination();
+        if (lanternDestination != null) {
+            return lanternDestination;
+        }
         Vec3 socialPlaceDestination = this.socialPlaceDestination();
         if (socialPlaceDestination != null) {
             return socialPlaceDestination;
@@ -1312,6 +1344,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         if (this.getEffectiveRoutineIntent() == RoutineIntent.SLEEP && this.sleepAtHome(HideUntil.EXPOSED)) {
             return true;
         }
+        if (this.lightNearbyGardenLantern()) {
+            return true;
+        }
         Vec3 destination = this.idleRoutineDestination();
         if (destination == null || this.position().distanceToSqr(destination) <= 1.44D) {
             return false;
@@ -1319,6 +1354,101 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, this.idleRoutineMoveSpeed());
         this.applyIdleRoutineWellbeing();
         return true;
+    }
+
+    public boolean lightNearbyGardenLantern() {
+        if (!(this.level() instanceof ServerLevel level) || this.shouldSkipGoalMovement()) {
+            return false;
+        }
+        BlockPos lantern = this.nearestUnlitGardenLantern(2.25D).orElse(null);
+        if (lantern == null) {
+            return false;
+        }
+        BlockState state = level.getBlockState(lantern);
+        level.setBlock(lantern, state.setValue(GardenLanternBlock.LIT, true), 3);
+        this.rememberedPlace = new MoePlaceMemory.Place(
+                MoePlaceMemory.PlaceType.GARDEN,
+                lantern.immutable(),
+                132.0D,
+                0,
+                6,
+                MoeEnvironmentalRules.shelterScore(level, lantern),
+                new MoePlaceMemory.Features(0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, MoeAnchorType.GARDEN, 0.0D, 70));
+        this.addRelaxation(0.08F);
+        this.setTemporaryAnimationKey("AWE", 40);
+        this.getLookControl().setLookAt(lantern.getX() + 0.5D, lantern.getY() + 0.5D, lantern.getZ() + 0.5D, 30.0F, 30.0F);
+        return true;
+    }
+
+    public java.util.Optional<BlockPos> nearestUnlitGardenLanternForTests(double radius) {
+        return this.nearestUnlitGardenLantern(radius);
+    }
+
+    private Vec3 unlitGardenLanternDestination() {
+        if (this.getEffectiveRoutineIntent() == RoutineIntent.SLEEP) {
+            return null;
+        }
+        BlockPos lantern = this.nearestUnlitGardenLantern(GARDEN_LANTERN_CHORE_RADIUS).orElse(null);
+        if (lantern == null) {
+            return null;
+        }
+        return this.bestLanternStandingPosition(lantern)
+                .map(Vec3::atBottomCenterOf)
+                .orElse(Vec3.atBottomCenterOf(lantern));
+    }
+
+    private java.util.Optional<BlockPos> nearestUnlitGardenLantern(double radius) {
+        if (!(this.level() instanceof ServerLevel level)) {
+            return java.util.Optional.empty();
+        }
+        double radiusSqr = radius * radius;
+        BlockPos origin = this.blockPosition();
+        BlockPos best = null;
+        double bestDistance = Double.MAX_VALUE;
+        int blockRadius = (int) Math.ceil(radius);
+        for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-blockRadius, -3, -blockRadius), origin.offset(blockRadius, 3, blockRadius))) {
+            BlockPos immutable = pos.immutable();
+            double distance = immutable.distSqr(origin);
+            if (distance > radiusSqr || distance >= bestDistance) {
+                continue;
+            }
+            BlockState state = level.getBlockState(immutable);
+            if (state.is(CustomTags.PLACE_GARDEN_LANTERNS)
+                    && state.hasProperty(GardenLanternBlock.LIT)
+                    && !state.getValue(GardenLanternBlock.LIT)
+                    && this.isLanternInGardenContext(immutable)) {
+                best = immutable;
+                bestDistance = distance;
+            }
+        }
+        return java.util.Optional.ofNullable(best);
+    }
+
+    private boolean isLanternInGardenContext(BlockPos lantern) {
+        if (this.rememberedPlace.type() == MoePlaceMemory.PlaceType.GARDEN && this.rememberedPlace.pos().distSqr(lantern) <= 8.0D * 8.0D) {
+            return true;
+        }
+        return MoePlaceMemory.evaluate(this, lantern).type() == MoePlaceMemory.PlaceType.GARDEN
+                || MoeAnchorResolver.nearbyRoutineAnchor(this, GARDEN_LANTERN_CHORE_RADIUS, RoutineIntent.RELAX)
+                .map(anchor -> anchor.type() == MoeAnchorType.GARDEN && anchor.dimPos().getPos().distSqr(lantern) <= 8.0D * 8.0D)
+                .orElse(false);
+    }
+
+    private java.util.Optional<BlockPos> bestLanternStandingPosition(BlockPos lantern) {
+        BlockPos best = null;
+        double bestDistance = Double.MAX_VALUE;
+        for (BlockPos candidate : BlockPos.betweenClosed(lantern.offset(-1, -1, -1), lantern.offset(1, 1, 1))) {
+            BlockPos immutable = candidate.immutable();
+            if (immutable.equals(lantern) || !MoeEnvironmentalRules.canStandAt(this.level(), immutable)) {
+                continue;
+            }
+            double distance = immutable.distSqr(this.blockPosition());
+            if (distance < bestDistance) {
+                best = immutable;
+                bestDistance = distance;
+            }
+        }
+        return java.util.Optional.ofNullable(best);
     }
 
     private boolean updateEnvironmentalRoutineMovement() {
@@ -1498,6 +1628,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
             --this.giftMemoryTicks;
             if (this.giftMemoryTicks <= 0) {
                 this.giftPreferenceSignal = MoeItemPreferences.PreferenceSignal.neutral();
+                this.giftItemMemory = ItemStack.EMPTY;
             }
         }
     }
@@ -1583,6 +1714,164 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     private boolean shouldSkipGoalMovement() {
         return this.level().isClientSide || this.hasDialogue() || this.isSitting() || this.isPassenger();
+    }
+
+    public void startOakForestAttentionChore(BlockPos origin, UUID playerUuid) {
+        this.startPlaceBlockChore(Config.OAK_SAPLING, origin, playerUuid);
+    }
+
+    public void startPlaceBlockChore(Config config, BlockPos origin, UUID playerUuid) {
+        if (!(this.level() instanceof ServerLevel level) || origin == null) {
+            return;
+        }
+        Config safe = config == null ? Config.OAK_SAPLING : config;
+        this.placeBlockChore = new Chore(safe.key(), new DimBlockPos(level.dimension(), origin.immutable()), 20 * 45);
+        this.setRoutineIntent(RoutineIntent.CHORE);
+        if (playerUuid != null) {
+            this.setDialogueTarget(playerUuid);
+        }
+    }
+
+    public boolean hasCardinalForestChoreForTests() {
+        return this.hasCardinalForestChore();
+    }
+
+    public boolean tickCardinalForestChoreForTests() {
+        return this.tickCardinalForestChore();
+    }
+
+    private boolean hasCardinalForestChore() {
+        Config config = this.placeBlockChoreConfig();
+        return config == Config.OAK_SAPLING
+                && this.hasPlaceBlockChore()
+                && this.getVisibleBlockState().is(Blocks.OAK_LOG);
+    }
+
+    private boolean hasPlaceBlockChore() {
+        return this.placeBlockChore.active()
+                && !this.placeBlockChore.origin().isEmpty()
+                && this.placeBlockChore.origin().getDim() == this.level().dimension()
+                && this.placeBlockChoreConfig() != null;
+    }
+
+    private boolean canRunCardinalForestChore() {
+        if (this.shouldSkipGoalMovement() || this.isFollowing() || !this.hasPlaceBlockChore()) {
+            return false;
+        }
+        Config config = this.placeBlockChoreConfig();
+        boolean canRun = PlaceBlockChores.count(this.inventory, config.item()) > 0 || this.nearestPlaceBlockChoreDrop(config).isPresent();
+        if (!canRun) {
+            this.clearPlaceBlockChore();
+        }
+        return canRun;
+    }
+
+    private boolean tickCardinalForestChore() {
+        if (!this.hasPlaceBlockChore()) {
+            this.clearPlaceBlockChore();
+            return false;
+        }
+        this.placeBlockChore = this.placeBlockChore.tick();
+        if (!this.placeBlockChore.active()) {
+            this.clearPlaceBlockChore();
+            return false;
+        }
+        Config config = this.placeBlockChoreConfig();
+        this.syncPlaceBlockChoreHand(config);
+        ItemEntity drop = this.nearestPlaceBlockChoreDrop(config).orElse(null);
+        if (drop != null && PlaceBlockChores.count(this.inventory, config.item()) < config.maxCarry()) {
+            return this.collectPlaceBlockChoreDrop(drop, config);
+        }
+        if (PlaceBlockChores.count(this.inventory, config.item()) > 0) {
+            return this.placeBlockFromChore(config);
+        }
+        this.clearPlaceBlockChore();
+        return false;
+    }
+
+    private boolean collectPlaceBlockChoreDrop(ItemEntity drop, Config config) {
+        if (drop == null || !drop.isAlive()) {
+            return false;
+        }
+        this.getLookControl().setLookAt(drop, 30.0F, 30.0F);
+        if (this.distanceToSqr(drop) > 1.75D * 1.75D) {
+            this.getNavigation().moveTo(drop, 0.9D);
+            this.getMoveControl().setWantedPosition(drop.getX(), drop.getY(), drop.getZ(), 0.9D);
+            return true;
+        }
+        ItemStack stack = drop.getItem();
+        if (!stack.is(config.item())) {
+            return false;
+        }
+        ItemStack remainder = this.inventory.addItem(stack.copy());
+        if (remainder.isEmpty()) {
+            drop.discard();
+        } else if (remainder.getCount() != stack.getCount()) {
+            drop.setItem(remainder);
+        } else {
+            return false;
+        }
+        this.syncPlaceBlockChoreHand(config);
+        this.setTemporaryAnimationKey("AWE", 30);
+        return true;
+    }
+
+    private boolean placeBlockFromChore(Config config) {
+        BlockPos plantPos = this.nearestPlaceBlockChoreSpot(config).orElse(null);
+        if (plantPos == null) {
+            this.clearPlaceBlockChore();
+            return false;
+        }
+        this.getLookControl().setLookAt(plantPos.getX() + 0.5D, plantPos.getY() + 0.5D, plantPos.getZ() + 0.5D, 30.0F, 30.0F);
+        if (this.blockPosition().distSqr(plantPos) > 2.25D * 2.25D) {
+            Vec3 destination = Vec3.atBottomCenterOf(plantPos);
+            this.getMoveControl().setWantedPosition(destination.x, destination.y, destination.z, 0.8D);
+            this.getNavigation().moveTo(destination.x, destination.y, destination.z, 0.8D);
+            return true;
+        }
+        ServerLevel level = (ServerLevel) this.level();
+        if (!PlaceBlockChores.removeOne(this.inventory, config.item())) {
+            this.clearPlaceBlockChore();
+            return false;
+        }
+        level.setBlock(plantPos, config.placeState(), 3);
+        this.syncPlaceBlockChoreHand(config);
+        this.addRelaxation(0.05F);
+        this.setTemporaryAnimationKey("AWE", 35);
+        if (PlaceBlockChores.count(this.inventory, config.item()) <= 0 && this.nearestPlaceBlockChoreDrop(config).isEmpty()) {
+            this.clearPlaceBlockChore();
+        }
+        return true;
+    }
+
+    private java.util.Optional<ItemEntity> nearestPlaceBlockChoreDrop(Config config) {
+        if (!this.hasPlaceBlockChore() || config == null) {
+            return java.util.Optional.empty();
+        }
+        return PlaceBlockChores.nearestDrop(this, this.placeBlockChore, config, CARDINAL_FOREST_CHORE_RADIUS);
+    }
+
+    private java.util.Optional<BlockPos> nearestPlaceBlockChoreSpot(Config config) {
+        if (!(this.level() instanceof ServerLevel level)) {
+            return java.util.Optional.empty();
+        }
+        return PlaceBlockChores.nearestSpot(level, this.placeBlockChore.origin().getPos(), config);
+    }
+
+    private void syncPlaceBlockChoreHand(Config config) {
+        PlaceBlockChores.syncHand(this, config);
+    }
+
+    private Config placeBlockChoreConfig() {
+        return Config.fromKey(this.placeBlockChore.key());
+    }
+
+    private void clearPlaceBlockChore() {
+        this.syncPlaceBlockChoreHand(this.placeBlockChoreConfig());
+        this.placeBlockChore = Chore.none();
+        if (this.getRoutineIntent() == RoutineIntent.CHORE) {
+            this.setRoutineIntent(RoutineIntent.IDLE);
+        }
     }
 
     private boolean canRunFollowGoal() {
@@ -1703,7 +1992,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
                     other,
                     place,
                     behavior,
-                    new MoeSocialPlaceMemory(other.getUUID(), place.type(), place.pos(), behavior, signal, score));
+                    new MoeSocialPlaceMemory(other.getUUID(), other.getGivenName(), place.type(), place.pos(), behavior, signal, score));
             if (best == null || candidate.memory().score() > best.memory().score()) {
                 best = candidate;
             }
@@ -2047,6 +2336,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     public record MoeSocialPlaceMemory(
             UUID owner,
+            String ownerName,
             MoePlaceMemory.PlaceType type,
             BlockPos pos,
             MoeSocialRules.SocialPlaceBehavior behavior,
@@ -2388,6 +2678,38 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         @Override
         public void tick() {
             Moe.this.updateFollowSessionMovement();
+        }
+    }
+
+    private final class CardinalForestChoreGoal extends Goal {
+        private CardinalForestChoreGoal() {
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            return Moe.this.canRunCardinalForestChore();
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return Moe.this.canRunCardinalForestChore();
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
+        public void start() {
+            Moe.this.clearSocialMovementIntent();
+            Moe.this.clearEnvironmentalMovementIntent();
+        }
+
+        @Override
+        public void tick() {
+            Moe.this.tickCardinalForestChore();
         }
     }
 

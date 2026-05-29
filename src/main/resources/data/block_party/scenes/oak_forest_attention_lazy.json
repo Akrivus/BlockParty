@@ -1,0 +1,60 @@
+{
+  "trigger": "block_party:right_click",
+  "filters": [
+    "block_party:is_cardinal",
+    {
+      "type": "block_party:has_cookie",
+      "filter": {
+        "name": "oak_forest_attention",
+        "operation": "equals",
+        "value": "active"
+      }
+    },
+    {
+      "type": "block_party:attention_type",
+      "filter": {
+        "type": "oak_forest"
+      }
+    },
+    {
+      "type": "block_party:attention_source",
+      "filter": {
+        "source": "sapling_drop"
+      }
+    },
+    {
+      "type": "block_party:attention_item",
+      "filter": {
+        "item": "minecraft:oak_sapling"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "type": "block_party:send_dialogue",
+      "action": {
+        "text": "Hey. Oak saplings do not plant themselves, you know. I'll fix it this time.",
+        "tooltip": true,
+        "speaker": {
+          "animation": "wave",
+          "emotion": "snooty"
+        },
+        "responses": [
+          {
+            "icon": "block_party:next_response",
+            "actions": [
+              {
+                "type": "block_party:cookie",
+                "action": {
+                  "operation": "delete",
+                  "name": "oak_forest_attention"
+                }
+              },
+              "block_party:end"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

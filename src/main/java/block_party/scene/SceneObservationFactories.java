@@ -2,10 +2,14 @@ package block_party.scene;
 
 import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
+import block_party.db.records.AttentionRecord;
 import block_party.db.records.PlayerRelationship;
 import block_party.entities.Moe;
+import block_party.entities.environment.MoePlaceMemory;
 import block_party.entities.movement.MoeAnchor;
+import block_party.entities.preferences.MoeItemPreferences;
 import block_party.entities.social.MoeSocialContext;
+import block_party.entities.social.SocialAffinities;
 import block_party.scene.actions.SceneItemStacks;
 import com.google.gson.JsonObject;
 import java.util.Locale;
@@ -51,6 +55,12 @@ public final class SceneObservationFactories {
             case "target_relationship_stress" -> moe -> targetRelationship(moe).map(relationship -> compare(relationship.stress(), json)).orElse(false);
             case "target_yearbook_signed" -> moe -> targetRelationship(moe).map(PlayerRelationship::yearbookSigned).map(pass -> maybeNegate(pass, json)).orElse(false);
             case "target_phone_contact" -> moe -> targetRelationship(moe).map(PlayerRelationship::phoneContact).map(pass -> maybeNegate(pass, json)).orElse(false);
+            case "has_attention" -> moe -> maybeNegate(attention(moe, json).isPresent(), json);
+            case "attention_type" -> moe -> attention(moe, json).map(record -> attentionKeyMatches(record.type(), json, "type")).orElse(false);
+            case "attention_source" -> moe -> attention(moe, json).map(record -> attentionKeyMatches(record.source(), json, "source")).orElse(false);
+            case "attention_item" -> moe -> attention(moe, json).map(record -> itemMatches(new ItemStack(registryValue(BuiltInRegistries.ITEM, Registries.ITEM, ResourceLocation.parse(record.itemId())), Math.max(1, record.itemCount())), json)).orElse(false);
+            case "attention_count" -> moe -> attention(moe, json).map(record -> compare(record.count(), json)).orElse(false);
+            case "attention_block" -> moe -> attention(moe, json).map(record -> blockMatches(record.blockState(), json)).orElse(false);
             case "follow_intent" -> moe -> enumMatches(moe.getFollowIntent(), json);
             case "follow_ticks_remaining" -> moe -> compare(moe.getFollowTicksRemaining(), json);
             case "follow_player_is_target" -> moe -> maybeNegate(moe.getFollowPlayerUUID().equals(targetPlayerUuid(moe)), json);
@@ -83,6 +93,36 @@ public final class SceneObservationFactories {
             case "social_target_dere" -> moe -> socialContext(moe, json).map(context -> traitMatches(context.target().getDere(), json)).orElse(false);
             case "social_target_zodiac" -> moe -> socialContext(moe, json).map(context -> traitMatches(context.target().getZodiac(), json)).orElse(false);
             case "social_target_emotion" -> moe -> socialContext(moe, json).map(context -> traitMatches(context.target().getEmotion(), json)).orElse(false);
+            case "remembered_place_type" -> moe -> moe.rememberedPlace().map(place -> enumMatches(place.type(), json)).orElse(false);
+            case "remembered_place_score" -> moe -> moe.rememberedPlace().map(place -> compare((float) place.score(), json)).orElse(false);
+            case "remembered_place_occupancy" -> moe -> moe.rememberedPlace().map(place -> compare(place.occupancy(), json)).orElse(false);
+            case "remembered_place_capacity" -> moe -> moe.rememberedPlace().map(place -> compare(place.capacity(), json)).orElse(false);
+            case "remembered_place_anchor_type" -> moe -> moe.rememberedPlace().map(place -> place.features().anchorType() != null && enumMatches(place.features().anchorType(), json)).orElse(false);
+            case "remembered_place_has_garden_lantern" -> moe -> moe.rememberedPlace()
+                    .map(place -> maybeNegate(MoePlaceMemory.hasGardenLantern(moe, place), json))
+                    .orElse(false);
+            case "remembered_place_has_lit_garden_lantern" -> moe -> moe.rememberedPlace()
+                    .map(place -> maybeNegate(MoePlaceMemory.hasLitGardenLantern(moe, place), json))
+                    .orElse(false);
+            case "remembered_place_has_unlit_garden_lantern" -> moe -> moe.rememberedPlace()
+                    .map(place -> maybeNegate(MoePlaceMemory.hasUnlitGardenLantern(moe, place), json))
+                    .orElse(false);
+            case "observed_block" -> moe -> moe.latestEnvironmentalObservation().map(observation -> blockMatches(observation.state(), json)).orElse(false);
+            case "observed_signal_layer" -> moe -> moe.latestEnvironmentalObservation().map(observation -> enumMatches(observation.layeredSignal().strongestLayer(), json)).orElse(false);
+            case "observed_affinity" -> moe -> moe.latestEnvironmentalObservation().map(observation -> compare(observation.signal().affinity(), json)).orElse(false);
+            case "observed_tension" -> moe -> moe.latestEnvironmentalObservation().map(observation -> compare(observation.signal().tension(), json)).orElse(false);
+            case "observed_interest" -> moe -> moe.latestEnvironmentalObservation().map(observation -> compare(observation.signal().interest(), json)).orElse(false);
+            case "gift_preference" -> moe -> moe.latestGiftPreferenceSignal().map(signal -> compare(signal.preference(), json)).orElse(false);
+            case "gift_aversion" -> moe -> moe.latestGiftPreferenceSignal().map(signal -> compare(signal.aversion(), json)).orElse(false);
+            case "gift_interest" -> moe -> moe.latestGiftPreferenceSignal().map(signal -> compare(signal.interest(), json)).orElse(false);
+            case "gift_begging" -> moe -> moe.latestGiftPreferenceSignal().map(signal -> compare(signal.begging(), json)).orElse(false);
+            case "gift_item" -> moe -> moe.latestGiftItem().map(stack -> itemMatches(stack, json)).orElse(false);
+            case "held_item_preference" -> moe -> targetPlayer(moe) != null && compare(heldItemSignal(moe, json).preference(), json);
+            case "held_item_begging" -> moe -> targetPlayer(moe) != null && compare(heldItemSignal(moe, json).begging(), json);
+            case "social_place_behavior" -> moe -> moe.socialPlaceMemoryForTests().map(memory -> enumMatches(memory.behavior(), json)).orElse(false);
+            case "social_place_type" -> moe -> moe.socialPlaceMemoryForTests().map(memory -> enumMatches(memory.type(), json)).orElse(false);
+            case "social_place_distance" -> moe -> moe.socialPlaceMemoryForTests().map(memory -> compare((float) Math.sqrt(memory.pos().distSqr(moe.blockPosition())), json)).orElse(false);
+            case "social_place_owner_name" -> moe -> moe.socialPlaceMemoryForTests().map(memory -> stringMatches(memory.ownerName(), json)).orElse(false);
             case "player_counter", "player_has_cookie", "family_name" -> FAIL_CLOSED;
             default -> FAIL_CLOSED;
         };
@@ -153,7 +193,7 @@ public final class SceneObservationFactories {
     }
 
     private static boolean blockMatches(BlockState state, JsonObject json) {
-        String name = GsonHelper.getAsString(json, "name", "");
+        String name = GsonHelper.getAsString(json, json.has("block") ? "block" : "name", "");
         if (name.isBlank()) {
             return false;
         }
@@ -167,7 +207,7 @@ public final class SceneObservationFactories {
     }
 
     private static boolean itemMatches(ItemStack stack, JsonObject json) {
-        String name = GsonHelper.getAsString(json, "name", "");
+        String name = GsonHelper.getAsString(json, json.has("item") ? "item" : "name", "");
         if (name.isBlank()) {
             return false;
         }
@@ -201,6 +241,39 @@ public final class SceneObservationFactories {
             default -> actual.equals(expected);
         };
         return maybeNegate(pass, json);
+    }
+
+    private static boolean attentionKeyMatches(String actual, JsonObject json, String key) {
+        if (json.has("value")) {
+            return stringMatches(actual, json);
+        }
+        JsonObject wrapped = new JsonObject();
+        wrapped.addProperty("value", GsonHelper.getAsString(json, key, ""));
+        if (json.has("operation")) {
+            wrapped.add("operation", json.get("operation"));
+        }
+        if (json.has("not")) {
+            wrapped.add("not", json.get("not"));
+        }
+        return stringMatches(actual, wrapped);
+    }
+
+    private static MoeItemPreferences.PreferenceSignal heldItemSignal(Moe moe, JsonObject json) {
+        ServerPlayer player = targetPlayer(moe);
+        if (player == null) {
+            return MoeItemPreferences.PreferenceSignal.neutral();
+        }
+        ItemStack stack = player.getItemInHand(hand(json));
+        if (stack.isEmpty()) {
+            return MoeItemPreferences.PreferenceSignal.neutral();
+        }
+        return MoeItemPreferences.signal(new SocialAffinities.Profile(
+                moe.getActualBlockState(),
+                moe.getBloodType(),
+                moe.getDere(),
+                moe.getZodiac(),
+                moe.getGender(),
+                moe.getEmotion()), stack);
     }
 
     private static boolean traitMatches(String actual, JsonObject json) {
@@ -243,6 +316,22 @@ public final class SceneObservationFactories {
             return Optional.empty();
         }
         return BlockPartyDB.get(level).findPlayerRelationshipSafe(moe.getDatabaseID(), targetPlayerUuid(moe));
+    }
+
+    private static Optional<AttentionRecord> attention(Moe moe, JsonObject json) {
+        if (!(moe.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+            return Optional.empty();
+        }
+        try {
+            String type = GsonHelper.getAsString(json, "type", "");
+            String source = GsonHelper.getAsString(json, "source", "");
+            if (!type.isBlank() && !source.isBlank()) {
+                return BlockPartyDB.get(level).findAttention(targetPlayerUuid(moe), type, source);
+            }
+            return BlockPartyDB.get(level).latestAttention(targetPlayerUuid(moe));
+        } catch (RuntimeException | java.sql.SQLException exception) {
+            return Optional.empty();
+        }
     }
 
     private static UUID targetPlayerUuid(Moe moe) {

@@ -7,6 +7,51 @@ today, what defaults are applied, and what fails closed.
 The goal is to make authored mechanics and generated datapacks target the same
 small behavior language.
 
+## Authoring Contract
+
+This document is the compatibility surface for scene-pack authors and generated
+scene packs. Do not depend on Java class names, package names, or implementation
+details that are not described here.
+
+Stable author-facing surfaces:
+
+- resource locations for triggers, filters, actions, response icons, traits, and
+  content files
+- JSON field names and documented defaults
+- fail-closed behavior for unknown filters
+- documented fallback behavior for unknown actions
+- per-Moe cookie/counter state
+- social-affinity matcher fields and signal fields
+
+Non-contract implementation details:
+
+- Java package names
+- concrete helper class names
+- internal database table layout
+- renderer/model implementation details
+- GameTest helper names
+
+If a content idea cannot be expressed with this schema, add a narrow Java
+primitive first, then expose it here as a filter, action, resource shape, or
+documented limitation. Do not encode one-off story logic directly in entity,
+item, or screen classes.
+
+## Authoring Workflow
+
+Recommended workflow for human-authored or Codex-authored packs:
+
+1. Start with one scene and one trigger.
+2. Add the smallest set of filters needed to protect the scene.
+3. Add one dialogue/action beat.
+4. Run `/reload` and check logs.
+5. Trigger the scene in game.
+6. Add cookies/counters only after the first scene fires.
+7. Split larger stories into multiple scenes chained by responses or state.
+
+Generated packs should prefer explicit, repetitive JSON over clever implicit
+state. A scene pack is easier to debug when every trigger, filter, action, and
+state key has a clear author-facing name.
+
 ## Resource Layout
 
 Block Party loads content from normal Minecraft data/resource packs. The active
@@ -16,10 +61,14 @@ server-side content roots are:
 - `data/<namespace>/moes/social_affinities/*.json`
 - `data/<namespace>/moes/names/*.json`
 - `data/<namespace>/moes/aliases/*.json`
+- `data/<namespace>/moes/textures/*.json`
+- `data/<namespace>/moes/sounds/*.json`
 - `data/<namespace>/tags/block/moe/**/*.json`
 
 The primary mechanic authoring surface is `data/<namespace>/scenes/*.json`.
 Social tuning lives in `data/<namespace>/moes/social_affinities/*.json`.
+Texture/sound overrides live under `data/<namespace>/moes/textures` and
+`data/<namespace>/moes/sounds`.
 
 Scene IDs are the file path under `scenes` without `.json`. For example:
 
@@ -472,6 +521,85 @@ Social reaction values:
 - `show_off`
 - `observe`
 - `none`
+
+## Attention, Place Memory, Observation, And Gift Filters
+
+Recent content-forward systems expose authoring hooks for attention, remembered
+places, environmental observations, gifts, and social-place behavior.
+
+Attention filters:
+
+- `block_party:has_attention`
+- `block_party:attention_type`
+- `block_party:attention_source`
+- `block_party:attention_item`
+- `block_party:attention_count`
+- `block_party:attention_block`
+
+Remembered-place filters:
+
+- `block_party:if_remembers_place`
+- `block_party:if_remembers_house`
+- `block_party:if_remembers_shelter`
+- `block_party:if_remembers_garden`
+- `block_party:if_remembers_grove`
+- `block_party:if_remembers_field`
+- `block_party:if_remembers_workshop`
+- `block_party:if_remembers_waterfront`
+- `block_party:if_remembers_cave`
+- `block_party:if_remembers_shrine`
+- `block_party:if_remembers_farm`
+- `block_party:if_at_remembered_place`
+- `block_party:if_remembered_place_overcrowded`
+- `block_party:if_remembered_place_invalid`
+- `block_party:remembered_place_type`
+- `block_party:remembered_place_score`
+- `block_party:remembered_place_occupancy`
+- `block_party:remembered_place_capacity`
+- `block_party:remembered_place_anchor_type`
+
+Environmental observation filters:
+
+- `block_party:if_has_environmental_observation`
+- `block_party:if_observed_awe`
+- `block_party:if_observed_affinity`
+- `block_party:if_observed_tension`
+- `block_party:observed_block`
+- `block_party:observed_signal_layer`
+- `block_party:observed_affinity`
+- `block_party:observed_tension`
+- `block_party:observed_interest`
+
+Gift and item-preference filters:
+
+- `block_party:if_has_gift_memory`
+- `block_party:if_liked_gift`
+- `block_party:if_disliked_gift`
+- `block_party:if_interesting_gift`
+- `block_party:if_begged_for_gift`
+- `block_party:gift_preference`
+- `block_party:gift_aversion`
+- `block_party:gift_interest`
+- `block_party:gift_begging`
+- `block_party:gift_item`
+- `block_party:held_item_preference`
+- `block_party:held_item_begging`
+
+Social-place filters:
+
+- `block_party:if_social_place`
+- `block_party:if_social_place_share`
+- `block_party:if_social_place_orbit`
+- `block_party:if_social_place_guard`
+- `block_party:if_social_place_avoid`
+- `block_party:social_place_behavior`
+- `block_party:social_place_type`
+- `block_party:social_place_distance`
+- `block_party:social_place_owner_name`
+
+These filters are intentionally descriptive rather than script-like. If a scene
+needs a new world scan or scoring rule, add that rule in Java as a small
+observation primitive, then expose one filter ID here.
 
 ## Action Forms
 

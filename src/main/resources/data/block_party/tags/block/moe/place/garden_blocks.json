@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "#block_party:moe/place/garden_lanterns",
+    "#block_party:moe/place/farmland",
+    "#block_party:moe/place/crops",
+    "#minecraft:flowers",
+    "minecraft:campfire",
+    "minecraft:soul_campfire"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "block_party:shrine_tablet",
+    "minecraft:enchanting_table",
+    "minecraft:beacon",
+    "minecraft:candle",
+    "minecraft:lantern",
+    "minecraft:soul_lantern"
+  ]
+}

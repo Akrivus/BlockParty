@@ -24,4 +24,8 @@ public final class Scene {
     public List<SceneAction> getActions() {
         return this.actions;
     }
+
+    public int filterCount() {
+        return this.filters.size();
+    }
 }

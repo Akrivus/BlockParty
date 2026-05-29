@@ -34,7 +34,7 @@ public final class SceneManager {
     }
 
     public boolean trigger(SceneTrigger trigger) {
-        if (this.trigger.getPriority() >= trigger.getPriority()) {
+        if (this.trigger != SceneTrigger.CREATION && this.trigger.getPriority() >= trigger.getPriority()) {
             return false;
         }
         Scene scene = CustomResources.SCENES.get(trigger, this.moe);

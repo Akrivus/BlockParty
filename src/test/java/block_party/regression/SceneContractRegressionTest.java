@@ -37,6 +37,7 @@ final class SceneContractRegressionTest implements RegressionTest {
     private void testSceneTriggerPriorities() {
         assertEquals(8, SceneTrigger.CREATION.getPriority(), "Creation trigger priority");
         assertEquals(8, SceneTrigger.HIDING_SPOT_DISCOVERED.getPriority(), "Hiding discovered trigger priority");
+        assertEquals(8, SceneTrigger.ATTENTION.getPriority(), "Attention trigger priority");
         assertEquals(7, SceneTrigger.SHIFT_LEFT_CLICK.getPriority(), "Shift-left trigger priority");
         assertEquals(6, SceneTrigger.LEFT_CLICK.getPriority(), "Left-click trigger priority");
         assertEquals(6, SceneTrigger.SHIFT_RIGHT_CLICK.getPriority(), "Shift-right trigger priority");

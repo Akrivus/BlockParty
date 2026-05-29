@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:base_stone_overworld",
+    "#minecraft:base_stone_nether",
+    "minecraft:dripstone_block",
+    "minecraft:pointed_dripstone",
+    "minecraft:calcite",
+    "minecraft:tuff",
+    "minecraft:sculk"
+  ]
+}

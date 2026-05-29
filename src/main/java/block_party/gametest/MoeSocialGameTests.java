@@ -1,12 +1,15 @@
 package block_party.gametest;
 
 import block_party.BlockParty;
+import block_party.blocks.GardenLanternBlock;
 import block_party.db.BlockPartyDB;
 import block_party.entities.Moe;
 import block_party.entities.environment.MoePlaceMemory;
 import block_party.entities.social.MoeSocialRules;
 import block_party.entities.social.SocialAffinities;
+import block_party.registry.CustomBlocks;
 import block_party.registry.CustomEntities;
+import block_party.scene.SceneObservations;
 import java.sql.SQLException;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -265,8 +268,10 @@ public final class MoeSocialGameTests {
         Moe friend = spawnMoe(helper, level, owner, new BlockPos(5, 1, 1));
         observer.setBloodType("A");
         observer.setDere("DANDERE");
+        observer.setBlockState(Blocks.OAK_LOG.defaultBlockState());
         friend.setBloodType("B");
         friend.setDere("TSUNDERE");
+        friend.setBlockState(Blocks.MAGMA_BLOCK.defaultBlockState());
 
         BlockPos garden = helper.absolutePos(new BlockPos(8, 1, 1));
         level.setBlock(garden.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
@@ -295,6 +300,63 @@ public final class MoeSocialGameTests {
         }
         helper.kill(observer);
         helper.kill(friend);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void gardenLanternsAnchorGardenMemoryAndSceneFilters(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        UUID owner = new UUID(1605L, 2605L);
+        Moe moe = spawnMoe(helper, level, owner, new BlockPos(1, 1, 1));
+        BlockPos lantern = helper.absolutePos(new BlockPos(4, 1, 1));
+        level.setBlock(lantern.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
+        level.setBlock(lantern, CustomBlocks.GARDEN_LANTERN.get().defaultBlockState(), 3);
+        try {
+            insertSimpleDataBlock(BlockPartyDB.get(level), "GardenLanterns", owner, level, lantern);
+        } catch (SQLException exception) {
+            helper.fail("Expected garden lantern anchor setup to succeed: " + exception.getMessage());
+            return;
+        }
+
+        MoePlaceMemory.Place place = moe.observePlaceNow().orElse(null);
+        if (place == null || place.type() != MoePlaceMemory.PlaceType.GARDEN) {
+            helper.fail("Expected garden lantern to anchor garden memory, got " + place);
+            return;
+        }
+        assertEquals(helper, true, SceneObservations.REMEMBERED_PLACE_HAS_GARDEN_LANTERN.verify(moe), "remembered garden lantern filter");
+        assertEquals(helper, true, SceneObservations.REMEMBERED_PLACE_HAS_UNLIT_GARDEN_LANTERN.verify(moe), "remembered unlit garden lantern filter");
+        assertEquals(helper, false, SceneObservations.REMEMBERED_PLACE_HAS_LIT_GARDEN_LANTERN.verify(moe), "remembered lit garden lantern filter before lighting");
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void corporealMoeLightsNearbyUnlitGardenLantern(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        UUID owner = new UUID(1606L, 2606L);
+        Moe moe = spawnMoe(helper, level, owner, new BlockPos(1, 1, 1));
+        BlockPos lantern = helper.absolutePos(new BlockPos(2, 1, 1));
+        level.setBlock(lantern.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
+        level.setBlock(lantern, CustomBlocks.GARDEN_LANTERN.get().defaultBlockState(), 3);
+        try {
+            insertSimpleDataBlock(BlockPartyDB.get(level), "GardenLanterns", owner, level, lantern);
+        } catch (SQLException exception) {
+            helper.fail("Expected garden lantern anchor setup to succeed: " + exception.getMessage());
+            return;
+        }
+        MoePlaceMemory.Place place = moe.observePlaceNow().orElse(null);
+        if (place == null || place.type() != MoePlaceMemory.PlaceType.GARDEN) {
+            helper.fail("Expected Moe to remember garden before lighting, got " + place);
+            return;
+        }
+
+        if (!moe.lightNearbyGardenLantern()) {
+            helper.fail("Expected corporeal Moe to light a nearby garden lantern");
+            return;
+        }
+        assertEquals(helper, true, level.getBlockState(lantern).getValue(GardenLanternBlock.LIT), "garden lantern lit by Moe");
+        assertEquals(helper, true, SceneObservations.REMEMBERED_PLACE_HAS_LIT_GARDEN_LANTERN.verify(moe), "remembered lit garden lantern filter after lighting");
+        helper.kill(moe);
         helper.succeed();
     }
 

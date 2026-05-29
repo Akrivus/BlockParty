@@ -4,16 +4,12 @@ import block_party.entities.Moe;
 import block_party.entities.movement.MoeAnchor;
 import block_party.entities.movement.MoeAnchorResolver;
 import block_party.entities.movement.MoeAnchorType;
-import block_party.registry.CustomBlocks;
+import block_party.registry.CustomTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.DoorBlock;
-import net.minecraft.world.level.block.FurnaceBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.entity.EntityTypeTest;
 
@@ -22,6 +18,7 @@ import java.util.Optional;
 public final class MoePlaceMemory {
     public static final double PLACE_RADIUS = 14.0D;
     private static final double ANCHOR_EVIDENCE_RADIUS = 10.0D;
+    private static final int FEATURE_RADIUS = 5;
 
     private MoePlaceMemory() {
     }
@@ -47,6 +44,9 @@ public final class MoePlaceMemory {
                     }
                 }
             }
+        }
+        if (best.type() == PlaceType.NONE) {
+            best = evaluate(moe, origin, anchors);
         }
         return best.type() == PlaceType.NONE ? Optional.empty() : Optional.of(best);
     }
@@ -76,6 +76,36 @@ public final class MoePlaceMemory {
         }
         Place current = evaluate(moe, place.pos());
         return current.type() == place.type() && !current.overcrowded();
+    }
+
+    public static boolean hasGardenLantern(Moe moe, Place place) {
+        return gardenLanternCount(moe, place, null) > 0;
+    }
+
+    public static boolean hasLitGardenLantern(Moe moe, Place place) {
+        return gardenLanternCount(moe, place, true) > 0;
+    }
+
+    public static boolean hasUnlitGardenLantern(Moe moe, Place place) {
+        return gardenLanternCount(moe, place, false) > 0;
+    }
+
+    private static int gardenLanternCount(Moe moe, Place place, Boolean lit) {
+        if (moe == null || place == null || place.type() == PlaceType.NONE) {
+            return 0;
+        }
+        int count = 0;
+        for (BlockPos pos : BlockPos.betweenClosed(
+                place.pos().offset(-FEATURE_RADIUS, -2, -FEATURE_RADIUS),
+                place.pos().offset(FEATURE_RADIUS, 3, FEATURE_RADIUS))) {
+            BlockState state = moe.level().getBlockState(pos);
+            if (state.is(CustomTags.PLACE_GARDEN_LANTERNS)
+                    && (lit == null || state.hasProperty(block_party.blocks.GardenLanternBlock.LIT)
+                    && state.getValue(block_party.blocks.GardenLanternBlock.LIT) == lit)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private static PlaceType typeFor(Level level, BlockPos pos, MoeEnvironmentalRules.ShelterScore shelter, Features features) {
@@ -130,7 +160,8 @@ public final class MoePlaceMemory {
             case WORKSHOP -> 72.0D + features.workshopBlocks() * 8.0D + shelter.score() * 0.2D;
             case SHRINE -> 78.0D + features.shrineBlocks() * 18.0D + shelter.blockLight();
             case FARM -> 66.0D + features.cropBlocks() * 3.5D + features.farmland() * 2.0D + shelter.blockLight() * 0.4D;
-            case GARDEN -> 62.0D + features.gardenBlocks() * 4.0D + shelter.blockLight();
+            case GARDEN -> 62.0D + features.gardenBlocks() * 4.0D + shelter.blockLight()
+                    + (features.anchorType() == MoeAnchorType.GARDEN ? 28.0D : 0.0D);
             case GROVE -> 58.0D + features.logs() * 3.0D + features.leaves() * 1.5D;
             case WATERFRONT -> 56.0D + features.water() * 2.0D + features.grass();
             case CAVE -> 54.0D + features.caveBlocks() * 1.2D + shelter.solidSides() * 3.0D;
@@ -188,7 +219,7 @@ public final class MoePlaceMemory {
         int shrineBlocks = 0;
         int cropBlocks = 0;
         int farmland = 0;
-        int radius = 5;
+        int radius = FEATURE_RADIUS;
         for (int x = -radius; x <= radius; x++) {
             for (int y = -2; y <= 3; y++) {
                 for (int z = -radius; z <= radius; z++) {
@@ -209,7 +240,7 @@ public final class MoePlaceMemory {
                     if (state.is(net.minecraft.tags.BlockTags.LEAVES)) {
                         leaves++;
                     }
-                    if (state.is(Blocks.GRASS_BLOCK) || state.is(Blocks.SHORT_GRASS) || state.is(Blocks.TALL_GRASS)) {
+                    if (state.is(CustomTags.PLACE_GRASS_BLOCKS)) {
                         grass++;
                     }
                     if (state.getFluidState().is(FluidTags.WATER)) {
@@ -224,7 +255,7 @@ public final class MoePlaceMemory {
                     if (isCropBlock(state)) {
                         cropBlocks++;
                     }
-                    if (state.is(Blocks.FARMLAND)) {
+                    if (state.is(CustomTags.PLACE_FARMLAND)) {
                         farmland++;
                     }
                 }
@@ -234,58 +265,29 @@ public final class MoePlaceMemory {
     }
 
     private static boolean isWorkshopBlock(BlockState state) {
-        return state.is(Blocks.CRAFTING_TABLE)
-                || state.is(Blocks.SMITHING_TABLE)
-                || state.is(Blocks.FLETCHING_TABLE)
-                || state.is(Blocks.LOOM)
-                || state.is(Blocks.STONECUTTER)
-                || state.getBlock() instanceof FurnaceBlock;
+        return state.is(CustomTags.PLACE_WORKSHOP_BLOCKS);
     }
 
     private static boolean isGardenBlock(BlockState state) {
-        return state.is(net.minecraft.tags.BlockTags.FLOWERS)
-                || state.is(Blocks.FARMLAND)
-                || state.is(Blocks.WHEAT)
-                || state.is(Blocks.CARROTS)
-                || state.is(Blocks.POTATOES)
-                || state.is(Blocks.BEETROOTS)
-                || state.getBlock() instanceof CampfireBlock;
+        return state.is(CustomTags.PLACE_GARDEN_BLOCKS);
     }
 
     private static boolean isCaveBlock(BlockState state) {
-        return state.is(BlockTags.BASE_STONE_OVERWORLD)
-                || state.is(BlockTags.BASE_STONE_NETHER)
-                || state.is(Blocks.DRIPSTONE_BLOCK)
-                || state.is(Blocks.POINTED_DRIPSTONE)
-                || state.is(Blocks.CALCITE)
-                || state.is(Blocks.TUFF)
-                || state.is(Blocks.SCULK);
+        return state.is(CustomTags.PLACE_CAVE_BLOCKS);
     }
 
     private static boolean isShrineBlock(BlockState state) {
-        return state.is(CustomBlocks.SHRINE_TABLET.get())
-                || state.is(Blocks.ENCHANTING_TABLE)
-                || state.is(Blocks.BEACON)
-                || state.is(Blocks.CANDLE)
-                || state.is(Blocks.LANTERN)
-                || state.is(Blocks.SOUL_LANTERN);
+        return state.is(CustomTags.PLACE_SHRINE_BLOCKS);
     }
 
     private static boolean isCropBlock(BlockState state) {
-        return state.is(Blocks.WHEAT)
-                || state.is(Blocks.CARROTS)
-                || state.is(Blocks.POTATOES)
-                || state.is(Blocks.BEETROOTS)
-                || state.is(Blocks.MELON_STEM)
-                || state.is(Blocks.PUMPKIN_STEM)
-                || state.is(Blocks.ATTACHED_MELON_STEM)
-                || state.is(Blocks.ATTACHED_PUMPKIN_STEM)
-                || state.is(Blocks.SWEET_BERRY_BUSH);
+        return state.is(CustomTags.PLACE_CROPS);
     }
 
     private static AnchorEvidence anchorEvidence(Moe moe, BlockPos pos, java.util.List<MoeAnchor> anchors) {
         MoeAnchor best = null;
         double bestDistance = Double.MAX_VALUE;
+        double bestScore = Double.NEGATIVE_INFINITY;
         double radiusSqr = ANCHOR_EVIDENCE_RADIUS * ANCHOR_EVIDENCE_RADIUS;
         for (MoeAnchor anchor : anchors) {
             if (anchor.dimPos().getDim() != moe.level().dimension()) {
@@ -295,9 +297,11 @@ public final class MoePlaceMemory {
             if (anchor.type() == MoeAnchorType.HOME && distance > 9.0D) {
                 continue;
             }
-            if (distance <= radiusSqr && (best == null || distance < bestDistance || distance == bestDistance && anchor.priority() > best.priority())) {
+            double score = anchor.priority() - Math.sqrt(distance) * 6.0D;
+            if (distance <= radiusSqr && (best == null || score > bestScore || score == bestScore && distance < bestDistance)) {
                 best = anchor;
                 bestDistance = distance;
+                bestScore = score;
             }
         }
         return best == null ? AnchorEvidence.none() : new AnchorEvidence(best.type(), bestDistance, best.priority());

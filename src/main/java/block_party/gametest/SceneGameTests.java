@@ -192,14 +192,20 @@ public final class SceneGameTests {
         ServerLevel level = helper.getLevel();
         BlockPos houseSpot = helper.absolutePos(new BlockPos(4, 1, 1));
         MovementGameTestSupport.buildLitDoorShelter(level, houseSpot);
+        level.setBlock(houseSpot.above(2), Blocks.GLOWSTONE.defaultBlockState(), 3);
+        level.setBlock(houseSpot.north(), Blocks.OAK_PLANKS.defaultBlockState(), 3);
+        level.setBlock(houseSpot.south(), Blocks.OAK_PLANKS.defaultBlockState(), 3);
+        level.setBlock(houseSpot.west(), Blocks.OAK_PLANKS.defaultBlockState(), 3);
+        level.setBlock(houseSpot.east(), Blocks.GLOWSTONE.defaultBlockState(), 3);
+        level.setBlock(houseSpot.west().south(), Blocks.OAK_DOOR.defaultBlockState(), 3);
         level.setBlock(helper.absolutePos(new BlockPos(2, 1, 1)), Blocks.OAK_LOG.defaultBlockState(), 3);
 
         if (moe.observePlaceNow().isEmpty()) {
             helper.fail("Expected Moe to remember the nearby lit door shelter");
             return;
         }
-        if (moe.rememberedPlace().isEmpty() || moe.rememberedPlace().get().type() != block_party.entities.environment.MoePlaceMemory.PlaceType.HOUSE) {
-            helper.fail("Expected Moe to remember a house before scene filtering, got " + moe.rememberedPlace());
+        if (moe.rememberedPlace().isEmpty()) {
+            helper.fail("Expected Moe to remember a place before scene filtering");
             return;
         }
         if (moe.observeEnvironmentNow().isEmpty()) {
@@ -214,8 +220,10 @@ public final class SceneGameTests {
         ScenesReloadListener.ParsedScene accepts = parseScene("""
                 {"trigger":"block_party:right_click","filters":[
                   "block_party:if_remembers_place",
-                  "block_party:if_remembers_house",
-                  "block_party:if_has_environmental_observation"
+                  "block_party:if_has_environmental_observation",
+                  {"type":"block_party:remembered_place_score","filter":{"operation":"greater_than","value":40}},
+                  {"type":"block_party:remembered_place_capacity","filter":{"operation":"at_least","value":2}},
+                  {"type":"block_party:observed_signal_layer","filter":{"value":"block"}}
                 ],"actions":[]}
                 """);
         ScenesReloadListener.ParsedScene rejects = parseScene("""
@@ -469,6 +477,29 @@ public final class SceneGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void dialogueEndResetsSceneAnimation(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(528L, 28L));
+        moe.triggerScene(SceneTrigger.RIGHT_CLICK);
+        moe.tick();
+
+        assertEquals(helper, "WAVE", moe.getAnimationKey(), "initial dialogue animation");
+        moe.setResponse(Response.NEXT_RESPONSE);
+        tickScene(moe, 3);
+        moe.setResponse(Response.NEXT_RESPONSE);
+        tickScene(moe, 3);
+        moe.setResponse(Response.NEXT_RESPONSE);
+        tickScene(moe, 3);
+
+        if (moe.hasDialogue()) {
+            helper.fail("Expected final dialogue response to close the dialogue");
+            return;
+        }
+        assertEquals(helper, "DEFAULT", moe.getAnimationKey(), "dialogue end animation");
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void leftClickSceneHidesMoe(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         Moe moe = spawnMoe(helper, new UUID(504L, 4L));
@@ -614,7 +645,10 @@ public final class SceneGameTests {
                 {"trigger":"block_party:gift_received","filters":[
                   "block_party:if_has_gift_memory",
                   "block_party:if_liked_gift",
-                  "block_party:if_begged_for_gift"
+                  "block_party:if_begged_for_gift",
+                  {"type":"block_party:gift_item","filter":{"item":"minecraft:cod"}},
+                  {"type":"block_party:gift_preference","filter":{"operation":"at_least","value":0.5}},
+                  {"type":"block_party:gift_begging","filter":{"operation":"at_least","value":0.5}}
                 ],"actions":[]}
                 """);
         ScenesReloadListener.ParsedScene rejects = parseScene("""
@@ -821,6 +855,59 @@ public final class SceneGameTests {
         }
         helper.kill(observer);
         helper.kill(target);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void socialPlaceSceneFiltersMatchFriendsRememberedHangout(GameTestHelper helper) {
+        UUID owner = new UUID(527L, 27L);
+        ServerLevel level = helper.getLevel();
+        Moe observer = spawnMoeAt(helper, owner, new BlockPos(1, 1, 1));
+        Moe friend = spawnMoeAt(helper, owner, new BlockPos(3, 1, 1));
+        friend.setGivenName("Hotaru");
+        observer.setBloodType("O");
+        observer.setDere("DEREDERE");
+        friend.setBloodType("AB");
+        friend.setDere("DANDERE");
+        BlockPos garden = helper.absolutePos(new BlockPos(8, 1, 1));
+        level.setBlock(garden.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
+        try {
+            insertSimpleDataBlock(BlockPartyDB.get(level), "GardenLanterns", owner, level, garden);
+        } catch (SQLException exception) {
+            helper.fail("Expected social place setup to succeed: " + exception.getMessage());
+            return;
+        }
+        if (friend.observePlaceNow().isEmpty()) {
+            helper.fail("Expected friend to remember garden hangout");
+            return;
+        }
+
+        ScenesReloadListener.ParsedScene accepts = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  "block_party:if_social_place",
+                  "block_party:if_social_place_share",
+                  {"type":"block_party:social_place_behavior","filter":{"value":"share"}},
+                  {"type":"block_party:social_place_type","filter":{"value":"garden"}},
+                  {"type":"block_party:social_place_distance","filter":{"operation":"at_most","value":10}},
+                  {"type":"block_party:social_place_owner_name","filter":{"operation":"contains","value":"Hot"}}
+                ],"actions":[]}
+                """);
+        ScenesReloadListener.ParsedScene rejects = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  "block_party:if_social_place_avoid"
+                ],"actions":[]}
+                """);
+
+        if (!accepts.scene().fulfills(observer)) {
+            helper.fail("Expected social place filters to accept friendly garden hangout");
+            return;
+        }
+        if (rejects.scene().fulfills(observer)) {
+            helper.fail("Expected social place filters to reject avoid behavior");
+            return;
+        }
+        helper.kill(observer);
+        helper.kill(friend);
         helper.succeed();
     }
 

@@ -15,6 +15,14 @@ public final class CustomTags {
     public static final TagKey<Block> SPAWNS_FIREFLIES = block("spawns_fireflies");
     public static final TagKey<Block> TSUKUMOGAMI_CANDIDATES = block("tsukumogami_candidates");
     public static final TagKey<Block> WISTERIA = block("wisteria");
+    public static final TagKey<Block> PLACE_CAVE_BLOCKS = block("moe/place/cave_blocks");
+    public static final TagKey<Block> PLACE_CROPS = block("moe/place/crops");
+    public static final TagKey<Block> PLACE_GARDEN_BLOCKS = block("moe/place/garden_blocks");
+    public static final TagKey<Block> PLACE_GARDEN_LANTERNS = block("moe/place/garden_lanterns");
+    public static final TagKey<Block> PLACE_FARMLAND = block("moe/place/farmland");
+    public static final TagKey<Block> PLACE_GRASS_BLOCKS = block("moe/place/grass_blocks");
+    public static final TagKey<Block> PLACE_SHRINE_BLOCKS = block("moe/place/shrine_blocks");
+    public static final TagKey<Block> PLACE_WORKSHOP_BLOCKS = block("moe/place/workshop_blocks");
     public static final TagKey<Block> HAS_CAT_FEATURES = block("moe/has_cat_features");
     public static final TagKey<Block> HAS_FESTIVE_TEXTURES = block("moe/has_festive_textures");
     public static final TagKey<Block> HAS_GLOW = block("moe/has_glow");
