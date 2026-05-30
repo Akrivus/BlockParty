@@ -20,7 +20,7 @@ Stable author-facing surfaces:
 - JSON field names and documented defaults
 - fail-closed behavior for unknown filters
 - documented fallback behavior for unknown actions
-- per-Moe cookie/counter state
+- scoped cookie/counter state for Moes, players, and the world
 - social-affinity matcher fields and signal fields
 
 Non-contract implementation details:
@@ -337,7 +337,11 @@ Example:
 
 ## Counter And Cookie Filters
 
-Counters and cookies are stored per Moe database ID.
+Counters and cookies are stored in explicit scopes:
+
+- `npc` / `moe`: per Moe database ID, the default for `counter` and `has_cookie`
+- `player`: per target player UUID
+- `world` / `global`: shared world progression state
 
 Counter filter:
 
@@ -362,13 +366,19 @@ Cookie filter:
 
 If `has_cookie` omits `value`, it passes when the named cookie exists.
 
-Player-scoped filters currently fail closed:
+Scoped filter IDs:
 
 - `block_party:player_counter`
 - `block_party:player_has_cookie`
-- `block_party:family_name`
+- `block_party:world_counter`
+- `block_party:world_has_cookie`
 
-Do not use them for active content until their backing state is restored.
+The generic `counter` and `has_cookie` filters also accept `"scope": "player"`
+or `"scope": "world"`.
+
+`block_party:family_name` matches the Moe-specific localized family name for
+the source block, such as `Suzu` for `minecraft:bell`. It accepts the same
+string operations as `name`.
 
 ## Identity, Item, And Block Filters
 
@@ -764,7 +774,14 @@ Counter operations:
 - `set`
 - `delete`
 
-Counters and cookies are per Moe database ID, not global player/world flags.
+Cookie and counter actions default to `npc` scope. Use `"scope": "player"` or
+`"scope": "world"` on `block_party:cookie` and `block_party:counter`, or use the
+scoped action IDs:
+
+- `block_party:player_cookie`
+- `block_party:player_counter`
+- `block_party:world_cookie`
+- `block_party:world_counter`
 
 ## Movement And Routine Actions
 
@@ -984,7 +1001,8 @@ break reload.
 
 - Prefer `block_party:*` IDs.
 - Use one scene per mechanic beat. Let responses chain beats together.
-- Use cookies/counters for per-Moe state, not global progression.
+- Choose cookie/counter scope intentionally: `npc` for one Moe, `player` for one
+  player's progression, and `world` for shared progression.
 - Use filters to protect one-time scenes, for example a counter equal to `0`.
 - Use routine intents and anchors for movement-like behavior before adding Java.
 - Add a tiny scene first, then expand it once it fires reliably in game.
@@ -998,9 +1016,6 @@ break reload.
   diagnostics.
 - Unknown object actions become `end`.
 - Unknown filters fail closed.
-- Player/global progression flags are not yet a first-class scene variable
-  surface.
-- Per-Moe counters/cookies are available; player-scoped counters/cookies are not.
 - Passive spawning, boss progression, and structure recognition should call into
   this scene surface through small Java primitives rather than one-off JSON
   hacks.

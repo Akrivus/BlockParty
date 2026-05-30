@@ -37,13 +37,13 @@ Risk scale:
 - Owner surface: `registry.resources`, `scene`, `scene.actions`, `SceneObservationFactories`, and `docs/SCENE_DATAPACK_SCHEMA.md`.
 - Direction: add a schema or validator tests for scene, social-affinity, names, aliases, sounds, and texture metadata. Unknown filters should keep failing closed.
 
-### Scene state scope is per-Moe, not a full authoring model yet
+### Scene variable scope is explicit for Moe, player, and world state
 
-- Evidence: cookies/counters are per Moe database ID. Player/global progression and shared pack-level state are not first-class authoring surfaces.
-- Maintenance risk: Medium. Authors may try to model story progression through ad hoc Java additions or fragile JSON workarounds.
+- Evidence: cookies/counters now have explicit `npc`, `player`, and `world` scopes. Legacy per-Moe accessors still exist for compatibility, but new authoring should choose a scope intentionally.
+- Maintenance risk: Low to medium. The next risk is drift between scene actions, filters, markdown substitution, and docs as new variable users are added.
 - Gameplay importance: Medium to high for content-forward features.
 - Owner surface: `scene.data`, `BlockPartyDB`, `SCENE_DATAPACK_SCHEMA.md`.
-- Direction: decide whether player/global state is needed before adding more one-off filters. If added, give it explicit ownership, serialization, and tests.
+- Direction: keep scope handling centralized through `SceneVariables` and cover any new variable-facing authoring surface with persistence and GameTest coverage.
 
 ### Profile and social signal generation is still spread across multiple surfaces
 

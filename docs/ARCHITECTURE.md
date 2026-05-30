@@ -361,8 +361,7 @@ Important content-authoring invariants:
 - Prefer explicit `block_party:*` IDs in authored content.
 - Unknown filters fail closed, disabling the scene.
 - Unknown object actions become `end`; this should stay documented and tested until a stricter author diagnostic replaces it.
-- Cookies and counters are per Moe database ID, not global progression.
-- Player/global progression state is not a first-class scene authoring surface yet.
+- Cookies and counters use explicit `npc`, `player`, and `world` scopes.
 - Java primitives added for content should expose a small scene action/filter when content authors are expected to use them.
 
 For generated scene packs, Codex or another authoring tool should target the schema document, not Java implementation details. If a desired story beat cannot be expressed in that schema, add a small Java primitive and update the schema in the same slice.

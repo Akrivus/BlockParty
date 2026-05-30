@@ -12,6 +12,8 @@ import block_party.registry.resources.MoeTextures;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.model.HumanoidModel.ArmPose;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -22,10 +24,15 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
+import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
 public class MoeRenderer extends MobRenderer<Moe, MoeRenderState, MoeModel> {
+    private static final double NAMEPLATE_DISTANCE_SQ = 64.0D;
+
     public MoeRenderer(EntityRendererProvider.Context context) {
         super(context, new MoeModel(context.bakeLayer(BlockPartyRenderers.MOE)), 0.25F);
         this.addLayer(new ItemInHandLayer<>(this));
@@ -61,10 +68,12 @@ public class MoeRenderer extends MobRenderer<Moe, MoeRenderState, MoeModel> {
         state.health = moe.getHealth();
         state.maxHealth = moe.getMaxHealth();
         state.mainArm = moe.getMainArm();
-        state.attackArm = moe.swingingArm == net.minecraft.world.InteractionHand.OFF_HAND ? moe.getMainArm().getOpposite() : moe.getMainArm();
+        state.attackArm = moe.swingingArm == InteractionHand.OFF_HAND ? moe.getMainArm().getOpposite() : moe.getMainArm();
         state.isCrouching = moe.isShiftKeyDown();
-        state.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.EMPTY;
-        state.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.EMPTY;
+        state.rightArmPose = ArmPose.EMPTY;
+        state.leftArmPose = ArmPose.EMPTY;
+        state.nameTag = moe.getDisplayName();
+        state.nameTagAttachment = moe.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, moe.getYRot(partialTick));
         fillEyeColor(moe, state.eyeColor);
     }
 
@@ -74,22 +83,36 @@ public class MoeRenderer extends MobRenderer<Moe, MoeRenderState, MoeModel> {
     }
 
     @Override
+    protected boolean shouldShowName(Moe moe, double distanceToCameraSq) {
+        return distanceToCameraSq <= NAMEPLATE_DISTANCE_SQ || super.shouldShowName(moe, distanceToCameraSq);
+    }
+
+    @Override
     protected void renderNameTag(MoeRenderState state, Component name, PoseStack stack, MultiBufferSource buffer, int packedLight) {
-        if (state.distanceToCameraSq > 64.0D) {
+        if (state.distanceToCameraSq > NAMEPLATE_DISTANCE_SQ) {
             return;
         }
-        String[] lines = new String[] { String.format("%d / %d", (int) state.health, (int) state.maxHealth), name.getString() };
+        Vec3 attachment = state.nameTagAttachment;
+        if (attachment == null) {
+            return;
+        }
+        Component[] lines = new Component[] { Component.literal(String.format("%d / %d", (int) state.health, (int) state.maxHealth)), name };
+        boolean seeThrough = !state.isDiscrete;
         stack.pushPose();
-        stack.translate(0.0D, state.boundingBoxHeight + 0.5F, 0.0D);
+        stack.translate(attachment.x, attachment.y + 0.5D, attachment.z);
         stack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-        stack.scale(-0.025F, -0.025F, 0.025F);
+        stack.scale(0.025F, -0.025F, 0.025F);
+        Matrix4f matrix = stack.last().pose();
+        Font font = this.getFont();
+        int background = (int) (Minecraft.getInstance().options.getBackgroundOpacity(0.25F) * 255.0F) << 24;
         for (int index = 0; index < lines.length; ++index) {
-            Font font = this.getFont();
-            int x = -font.width(lines[index]) / 2;
-            int y = index * -10;
-            Matrix4f matrix = stack.last().pose();
-            int alpha = (int) (Minecraft.getInstance().options.getBackgroundOpacity(0.25F) * 255.0F) << 24;
-            font.drawInBatch(lines[index], x, y, 0xFFFFFFFF, false, matrix, buffer, Font.DisplayMode.NORMAL, alpha, packedLight);
+            Component line = lines[index];
+            float x = (float) (-font.width(line)) / 2.0F;
+            float y = (float) (index * 10);
+            font.drawInBatch(line, x, y, -2130706433, false, matrix, buffer, seeThrough ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL, background, packedLight);
+            if (seeThrough) {
+                font.drawInBatch(line, x, y, -1, false, matrix, buffer, Font.DisplayMode.NORMAL, 0, LightTexture.lightCoordsWithEmission(packedLight, 2));
+            }
         }
         stack.popPose();
     }

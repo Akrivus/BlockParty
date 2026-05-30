@@ -125,7 +125,11 @@ public final class SceneObservationFactories {
             case "social_place_type" -> moe -> moe.socialPlaceMemoryForTests().map(memory -> enumMatches(memory.type(), json)).orElse(false);
             case "social_place_distance" -> moe -> moe.socialPlaceMemoryForTests().map(memory -> compare((float) Math.sqrt(memory.pos().distSqr(moe.blockPosition())), json)).orElse(false);
             case "social_place_owner_name" -> moe -> moe.socialPlaceMemoryForTests().map(memory -> stringMatches(memory.ownerName(), json)).orElse(false);
-            case "player_counter", "player_has_cookie", "family_name" -> FAIL_CLOSED;
+            case "player_counter" -> moe -> counterMatches(moe, json, SceneVariableScope.PLAYER);
+            case "player_has_cookie" -> moe -> cookieMatches(moe, json, SceneVariableScope.PLAYER);
+            case "world_counter" -> moe -> counterMatches(moe, json, SceneVariableScope.WORLD);
+            case "world_has_cookie" -> moe -> cookieMatches(moe, json, SceneVariableScope.WORLD);
+            case "family_name" -> moe -> stringMatches(moe.getFamilyName(), json);
             default -> FAIL_CLOSED;
         };
     }
@@ -160,20 +164,42 @@ public final class SceneObservationFactories {
     }
 
     private static boolean counterMatches(Moe moe, JsonObject json) {
-        Integer value = SceneVariables.get(moe.level())
-                .counters(moe.getDatabaseID())
+        return counterMatches(moe, json, variableScope(json, SceneVariableScope.NPC));
+    }
+
+    private static boolean counterMatches(Moe moe, JsonObject json, SceneVariableScope scope) {
+        Integer value = scopedVariables(moe, scope)
+                .counters()
                 .get(GsonHelper.getAsString(json, "name", ""));
         return compare(value == null ? 0 : value, json);
     }
 
     private static boolean cookieMatches(Moe moe, JsonObject json) {
-        String value = SceneVariables.get(moe.level())
-                .cookies(moe.getDatabaseID())
+        return cookieMatches(moe, json, variableScope(json, SceneVariableScope.NPC));
+    }
+
+    private static boolean cookieMatches(Moe moe, JsonObject json, SceneVariableScope scope) {
+        String value = scopedVariables(moe, scope)
+                .cookies()
                 .get(GsonHelper.getAsString(json, "name", ""));
         if (!json.has("value")) {
             return value != null;
         }
         return stringMatches(value, json);
+    }
+
+    private static SceneVariableStore scopedVariables(Moe moe, SceneVariableScope scope) {
+        SceneVariables variables = SceneVariables.get(moe.level());
+        return switch (scope) {
+            case NPC -> variables.npc(moe.getDatabaseID());
+            case PLAYER -> variables.player(targetPlayerUuid(moe));
+            case WORLD -> variables.world();
+        };
+    }
+
+    private static SceneVariableScope variableScope(JsonObject json, SceneVariableScope fallback) {
+        String key = json.has("scope") ? "scope" : "target";
+        return SceneVariableScope.fromValue(GsonHelper.getAsString(json, key, fallback.serializedName()), fallback);
     }
 
     private static boolean entityMatches(Moe moe, JsonObject json) {

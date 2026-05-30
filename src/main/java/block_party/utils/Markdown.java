@@ -23,7 +23,7 @@ public final class Markdown {
         ServerPlayer player = targetPlayer(moe);
         if (player != null) {
             line = highlight(line, PLAYER_COUNTER_PATTERN, "yellow", name -> String.valueOf(playerCounterValue(player, name)));
-            line = highlight(line, PLAYER_COOKIE_PATTERN, "cyan", name -> SceneVariables.get(player.level()).cookies(player.getUUID().getMostSignificantBits()).get(name));
+            line = highlight(line, PLAYER_COOKIE_PATTERN, "cyan", name -> SceneVariables.get(player.level()).playerCookies(player.getUUID()).get(name));
         }
         return mark(line);
     }
@@ -103,7 +103,7 @@ public final class Markdown {
     }
 
     private static int playerCounterValue(ServerPlayer player, String name) {
-        Integer value = SceneVariables.get(player.level()).counters(player.getUUID().getMostSignificantBits()).get(name);
+        Integer value = SceneVariables.get(player.level()).playerCounters(player.getUUID()).get(name);
         return value == null ? 0 : value;
     }
 }

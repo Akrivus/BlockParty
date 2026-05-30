@@ -11,13 +11,17 @@ final class SceneActionPlayers {
     }
 
     static Player targetPlayer(Moe moe) {
-        UUID target = moe.getDialogueTarget();
-        UUID playerUuid = EMPTY_UUID.equals(target) ? moe.getPlayerUUID() : target;
+        UUID playerUuid = targetPlayerUuid(moe);
         for (Player player : moe.level().players()) {
             if (player.getUUID().equals(playerUuid)) {
                 return player;
             }
         }
         return null;
+    }
+
+    static UUID targetPlayerUuid(Moe moe) {
+        UUID target = moe.getDialogueTarget();
+        return EMPTY_UUID.equals(target) ? moe.getPlayerUUID() : target;
     }
 }

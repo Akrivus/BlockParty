@@ -154,6 +154,10 @@ public final class PersistenceGameTests {
         SceneVariables variables = new SceneVariables();
         variables.cookies(42L).set("name", "Moe");
         variables.counters(42L).set("health", 20);
+        variables.playerCookies(new UUID(0x1234L, 0x5678L)).set("route", "friend");
+        variables.playerCounters(new UUID(0x1234L, 0x5678L)).set("visits", 5);
+        variables.worldCookies().set("season", "spring");
+        variables.worldCounters().set("festival_day", 2);
         variables.locations(42L).set("home", new DimBlockPos(Level.OVERWORLD, new BlockPos(1, 2, 3)));
         variables.targets(42L).set("look_at", 123);
         return variables;
@@ -162,6 +166,10 @@ public final class PersistenceGameTests {
     private static void assertSceneVariables(GameTestHelper helper, SceneVariables variables) {
         assertEquals(helper, "Moe", variables.cookies(42L).get("name"), "SceneVariables cookie");
         assertEquals(helper, 20, variables.counters(42L).get("health"), "SceneVariables counter");
+        assertEquals(helper, "friend", variables.playerCookies(new UUID(0x1234L, 0x5678L)).get("route"), "SceneVariables player cookie");
+        assertEquals(helper, 5, variables.playerCounters(new UUID(0x1234L, 0x5678L)).get("visits"), "SceneVariables player counter");
+        assertEquals(helper, "spring", variables.worldCookies().get("season"), "SceneVariables world cookie");
+        assertEquals(helper, 2, variables.worldCounters().get("festival_day"), "SceneVariables world counter");
         Locations locations = variables.locations(42L);
         DimBlockPos home = locations.get("home");
         if (!new BlockPos(1, 2, 3).equals(home.getPos()) || home.isEmpty()) {

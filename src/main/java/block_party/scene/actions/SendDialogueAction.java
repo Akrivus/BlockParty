@@ -80,6 +80,7 @@ public final class SendDialogueAction implements SceneAction {
                 .replace("@social.name", socialTargetName(moe))
                 .replace("@nearby.names", nearbyNames(moe))
                 .replace("@nearby.name", nearbyName(moe))
+                .replace("@family_name", moe.getFamilyName())
                 .replace("@name", moe.getGivenName());
         return Markdown.markWithSubs(resolved, moe);
     }

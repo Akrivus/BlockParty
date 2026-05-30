@@ -2,6 +2,7 @@ package block_party.entities;
 
 import block_party.db.BlockPartyDB;
 import block_party.db.records.NPC;
+import block_party.entities.profile.MoeFamilyNames;
 import block_party.db.DimBlockPos;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomTags;
@@ -13,7 +14,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -187,7 +187,7 @@ public final class MoeSpawner {
         if (!moe.isCardinal() || !"Tokumei".equals(moe.getGivenName())) {
             return;
         }
-        String name = Component.translatable(moe.getVisibleBlockState().getBlock().getDescriptionId()).getString();
+        String name = MoeFamilyNames.get(moe.getVisibleBlockState());
         if (!name.isBlank()) {
             moe.setGivenName(name);
         }

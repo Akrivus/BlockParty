@@ -10,6 +10,7 @@ import block_party.scene.SceneObservation;
 import block_party.scene.SceneObservationFactories;
 import block_party.scene.SceneObservations;
 import block_party.scene.SceneTrigger;
+import block_party.scene.SceneVariableScope;
 import block_party.scene.Speaker;
 import block_party.scene.actions.CookieAction;
 import block_party.scene.actions.CounterAction;
@@ -233,11 +234,33 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         parsers.put("cookie", payload -> new CookieAction(
                 CookieAction.Operation.fromValue(GsonHelper.getAsString(payload, "operation", "set")),
                 GsonHelper.getAsString(payload, "name", ""),
-                GsonHelper.getAsString(payload, "value", "")));
+                GsonHelper.getAsString(payload, "value", ""),
+                variableScope(payload, SceneVariableScope.NPC)));
+        parsers.put("player_cookie", payload -> new CookieAction(
+                CookieAction.Operation.fromValue(GsonHelper.getAsString(payload, "operation", "set")),
+                GsonHelper.getAsString(payload, "name", ""),
+                GsonHelper.getAsString(payload, "value", ""),
+                SceneVariableScope.PLAYER));
+        parsers.put("world_cookie", payload -> new CookieAction(
+                CookieAction.Operation.fromValue(GsonHelper.getAsString(payload, "operation", "set")),
+                GsonHelper.getAsString(payload, "name", ""),
+                GsonHelper.getAsString(payload, "value", ""),
+                SceneVariableScope.WORLD));
         parsers.put("counter", payload -> new CounterAction(
                 CounterAction.Operation.fromValue(GsonHelper.getAsString(payload, "operation", "add")),
                 GsonHelper.getAsString(payload, "name", ""),
-                GsonHelper.getAsInt(payload, "value", 1)));
+                GsonHelper.getAsInt(payload, "value", 1),
+                variableScope(payload, SceneVariableScope.NPC)));
+        parsers.put("player_counter", payload -> new CounterAction(
+                CounterAction.Operation.fromValue(GsonHelper.getAsString(payload, "operation", "add")),
+                GsonHelper.getAsString(payload, "name", ""),
+                GsonHelper.getAsInt(payload, "value", 1),
+                SceneVariableScope.PLAYER));
+        parsers.put("world_counter", payload -> new CounterAction(
+                CounterAction.Operation.fromValue(GsonHelper.getAsString(payload, "operation", "add")),
+                GsonHelper.getAsString(payload, "name", ""),
+                GsonHelper.getAsInt(payload, "value", 1),
+                SceneVariableScope.WORLD));
         parsers.put("hide", payload -> new HideAction(HideUntil.EXPOSED.fromValue(GsonHelper.getAsString(payload, "until", "exposed"))));
         parsers.put("create_voicemail", payload -> new CreateVoicemailAction(
                 GsonHelper.getAsString(payload, "text", ""),
@@ -269,6 +292,11 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         parsers.put("dismiss", payload -> ClearFollowSessionAction.INSTANCE);
         parsers.put("end", payload -> EndAction.INSTANCE);
         return Collections.unmodifiableMap(parsers);
+    }
+
+    private static SceneVariableScope variableScope(JsonObject payload, SceneVariableScope fallback) {
+        String key = payload.has("scope") ? "scope" : "target";
+        return SceneVariableScope.fromValue(GsonHelper.getAsString(payload, key, fallback.serializedName()), fallback);
     }
 
     private static StatAction parseStat(StatAction.Stat stat, JsonObject json) {

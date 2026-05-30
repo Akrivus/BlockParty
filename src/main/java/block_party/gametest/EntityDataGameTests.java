@@ -293,7 +293,15 @@ public final class EntityDataGameTests {
         assertFloat(helper, 6.0F, moe.getLoyalty(), "add loyalty");
         assertFloat(helper, 7.0F, moe.getAffection(), "add affection");
         assertFloat(helper, 8.0F, moe.getAge(), "add age");
-        assertEquals(helper, "Minashigo", moe.getFamilyName(), "family name");
+        moe.setBlockState(Blocks.BELL.defaultBlockState());
+        assertEquals(helper, "Suzu", moe.getFamilyName(), "family name");
+        assertEquals(helper, "Suzu", moe.getFamilyNameComponent().getString(), "family name component");
+        assertEquals(helper, "Suzu", moe.getDisplayName().getString(), "cardinal display name");
+
+        Moe corporeal = new Moe(CustomEntities.MOE.get(), helper.getLevel());
+        corporeal.setBlockState(Blocks.DIRT.defaultBlockState());
+        corporeal.setGivenName("Akemi");
+        assertEquals(helper, "Akemi", corporeal.getDisplayName().getString(), "corporeal display name");
         helper.succeed();
     }
 

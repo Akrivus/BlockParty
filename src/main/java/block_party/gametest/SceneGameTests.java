@@ -157,6 +157,10 @@ public final class SceneGameTests {
         SceneVariables variables = SceneVariables.get(moe.level());
         variables.cookies(moe.getDatabaseID()).set("mood", "sunny");
         variables.counters(moe.getDatabaseID()).set("score", 3);
+        variables.playerCookies(moe.getOwnerUUID()).set("chapter", "intro");
+        variables.playerCounters(moe.getOwnerUUID()).set("visits", 2);
+        variables.worldCookies().set("festival", "active");
+        variables.worldCounters().set("day", 4);
 
         ScenesReloadListener.ParsedScene accepts = parseScene("""
                 {"trigger":"block_party:right_click","filters":[
@@ -164,6 +168,10 @@ public final class SceneGameTests {
                   {"type":"block_party:food_level","filter":{"operation":"less_than","value":10}},
                   {"type":"block_party:counter","filter":{"name":"score","operation":"equals","value":3}},
                   {"type":"block_party:has_cookie","filter":{"name":"mood","operation":"equals","value":"sunny"}},
+                  {"type":"block_party:player_counter","filter":{"name":"visits","operation":"equals","value":2}},
+                  {"type":"block_party:player_has_cookie","filter":{"name":"chapter","operation":"equals","value":"intro"}},
+                  {"type":"block_party:world_counter","filter":{"name":"day","operation":"at_least","value":4}},
+                  {"type":"block_party:world_has_cookie","filter":{"name":"festival","operation":"equals","value":"active"}},
                   {"type":"block_party:block","filter":{"name":"block_party:sakura_log"}},
                   {"type":"block_party:name","filter":{"operation":"prefix","value":"Ake"}},
                   {"type":"block_party:self","filter":{"name":"block_party:moe"}}
@@ -251,16 +259,17 @@ public final class SceneGameTests {
         ScenesReloadListener.ParsedScene unknown = parseScene("""
                 {"trigger":"block_party:right_click","filters":["block_party:not_a_real_filter"],"actions":[]}
                 """);
-        ScenesReloadListener.ParsedScene deferred = parseScene("""
-                {"trigger":"block_party:right_click","filters":[{"type":"block_party:family_name","filter":{"value":"Minashigo"}}],"actions":[]}
+        ScenesReloadListener.ParsedScene familyName = parseScene("""
+                {"trigger":"block_party:right_click","filters":[{"type":"block_party:family_name","filter":{"value":"Suzu"}}],"actions":[]}
                 """);
+        moe.setBlockState(Blocks.BELL.defaultBlockState());
 
         if (unknown.scene().fulfills(moe)) {
             helper.fail("Expected unknown scene filters to fail closed");
             return;
         }
-        if (deferred.scene().fulfills(moe)) {
-            helper.fail("Expected deferred scene filters to fail closed");
+        if (!familyName.scene().fulfills(moe)) {
+            helper.fail("Expected family name scene filter to match translated Moe family name");
             return;
         }
         helper.kill(moe);
@@ -525,13 +534,22 @@ public final class SceneGameTests {
         Moe moe = spawnMoe(helper, new UUID(505L, 5L));
         SceneAction cookie = parseAction("{\"type\":\"block_party:cookie\",\"action\":{\"name\":\"phase5_cookie\",\"value\":\"yes\"}}");
         SceneAction counter = parseAction("{\"type\":\"block_party:counter\",\"action\":{\"name\":\"phase5_counter\",\"operation\":\"add\",\"value\":3}}");
+        SceneAction playerCookie = parseAction("{\"type\":\"block_party:player_cookie\",\"action\":{\"name\":\"phase5_player_cookie\",\"value\":\"seen\"}}");
+        SceneAction playerCounter = parseAction("{\"type\":\"block_party:counter\",\"action\":{\"scope\":\"player\",\"name\":\"phase5_player_counter\",\"operation\":\"set\",\"value\":8}}");
+        SceneAction worldCounter = parseAction("{\"type\":\"block_party:world_counter\",\"action\":{\"name\":\"phase5_world_counter\",\"operation\":\"add\",\"value\":2}}");
 
         cookie.apply(moe);
         counter.apply(moe);
+        playerCookie.apply(moe);
+        playerCounter.apply(moe);
+        worldCounter.apply(moe);
 
         SceneVariables variables = SceneVariables.get(moe.level());
         assertEquals(helper, "yes", variables.cookies(moe.getDatabaseID()).get("phase5_cookie"), "scene cookie value");
         assertEquals(helper, 3, variables.counters(moe.getDatabaseID()).get("phase5_counter"), "scene counter value");
+        assertEquals(helper, "seen", variables.playerCookies(moe.getOwnerUUID()).get("phase5_player_cookie"), "player scene cookie value");
+        assertEquals(helper, 8, variables.playerCounters(moe.getOwnerUUID()).get("phase5_player_counter"), "player scene counter value");
+        assertEquals(helper, 2, variables.worldCounters().get("phase5_world_counter"), "world scene counter value");
         helper.kill(moe);
         helper.succeed();
     }

@@ -2,15 +2,30 @@ package block_party.scene.actions;
 
 import block_party.entities.Moe;
 import block_party.scene.SceneAction;
+import block_party.scene.SceneVariableScope;
+import block_party.scene.SceneVariableStore;
 import block_party.scene.SceneVariables;
 import block_party.scene.data.Counters;
 import java.util.Locale;
 
-public record CounterAction(Operation operation, String name, int value) implements SceneAction {
+public record CounterAction(Operation operation, String name, int value, SceneVariableScope scope) implements SceneAction {
+    public CounterAction(Operation operation, String name, int value) {
+        this(operation, name, value, SceneVariableScope.NPC);
+    }
+
     @Override
     public void apply(Moe moe) {
-        Counters counters = SceneVariables.get(moe.level()).counters(moe.getDatabaseID());
+        Counters counters = scopedVariables(moe, this.scope).counters();
         this.operation.apply(counters, this.name, this.value);
+    }
+
+    private static SceneVariableStore scopedVariables(Moe moe, SceneVariableScope scope) {
+        SceneVariables variables = SceneVariables.get(moe.level());
+        return switch (scope) {
+            case NPC -> variables.npc(moe.getDatabaseID());
+            case PLAYER -> variables.player(SceneActionPlayers.targetPlayerUuid(moe));
+            case WORLD -> variables.world();
+        };
     }
 
     public enum Operation {

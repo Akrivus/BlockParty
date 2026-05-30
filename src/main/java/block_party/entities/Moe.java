@@ -22,6 +22,7 @@ import block_party.entities.movement.RoutineIntent;
 import block_party.entities.preferences.MoeGiftMemory;
 import block_party.entities.preferences.MoeItemPreferences;
 import block_party.entities.profile.MoeBlockProfile;
+import block_party.entities.profile.MoeFamilyNames;
 import block_party.entities.social.MoeSocialBehavior;
 import block_party.entities.social.MoeSocialPlaceMemory;
 import block_party.items.InviteItem;
@@ -613,7 +614,11 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     @Override
     public Component getDisplayName() {
-        return this.getName();
+        String givenName = this.getGivenName();
+        if (this.isCardinal() || givenName == null || givenName.isBlank()) {
+            return this.getFamilyNameComponent();
+        }
+        return Component.literal(givenName);
     }
 
     @Override
@@ -1021,7 +1026,11 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     }
 
     public String getFamilyName() {
-        return "Minashigo";
+        return MoeFamilyNames.get(this.getVisibleBlockState());
+    }
+
+    public Component getFamilyNameComponent() {
+        return MoeFamilyNames.component(this.getVisibleBlockState());
     }
 
     public boolean hasHome() {
