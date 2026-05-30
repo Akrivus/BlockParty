@@ -2,6 +2,7 @@ package block_party.client;
 
 import block_party.network.payload.NpcDetailPayload;
 import java.util.Locale;
+import java.util.UUID;
 import net.minecraft.network.chat.Component;
 
 public final class ClientTranslations {
@@ -51,7 +52,7 @@ public final class ClientTranslations {
         return Component.translatable("trait.block_party.relationship.acquainted");
     }
 
-    public static Component relationship(NpcDetailPayload npc, java.util.UUID viewer) {
+    public static Component relationship(NpcDetailPayload npc, UUID viewer) {
         return relationship(npc.dead(), npc.loyalty());
     }
 

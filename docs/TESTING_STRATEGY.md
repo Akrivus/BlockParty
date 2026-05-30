@@ -2,17 +2,19 @@
 
 This project uses tests to protect Block Party's current contracts around Moes, block identity, dialogue, hiding, persistence, companion tools, and data-driven content. This file is the test strategy, not a backlog. The old standalone regression test plan has been retired because the repo now has broad active coverage.
 
-Current inventory as of this documentation pass:
+Current active inventory as of the Phase 1 guardrail pass:
 
-- 248 NeoForge GameTests under `src/main/java/block_party/gametest`.
-- 83 pure regression test methods under `src/test/java/block_party/regression`.
+- 234 NeoForge GameTests under `src/main/java/block_party/gametest`.
+- The historical pure regression tests under `src/test/java/block_party/regression` are not part of the active Gradle test source set because they target old Forge APIs.
+- `phase1Compliance`, `localCi`, `fullCi`, and the repo-managed pre-commit hook provide lightweight local CI entry points.
 - Manual release checks remain necessary for renderer, screen, sound, particle, skybox, and armor behavior.
 
-Use three layers:
+Use four layers:
 
 1. Pure JUnit tests for logic that can run without a Minecraft world.
 2. GameTests for in-world behavior that needs blocks, entities, ticks, events, saved data, or server-side gameplay.
-3. Manual golden-world checks for rendering, UI, sound, screenshots, and complete interaction flows.
+3. Static guardrails for cleanup contracts that are cheaper to enforce by source scan than by gameplay tests.
+4. Manual golden-world checks for rendering, UI, sound, screenshots, and complete interaction flows.
 
 Do not use infrastructure work as the moment to decide what behavior should change. First capture the behavior, then fix or improve.
 
@@ -58,7 +60,18 @@ Coverage should continue to include:
 
 GameTests should favor observable assertions: block exists or is removed, entity exists or is removed, database row contains expected values, owner UUID matches, hidden spot exists, NPC list contains an ID.
 
-## Layer 3: Manual Golden-World Checklist
+## Layer 3: Static Guardrails
+
+Run the Phase 1 compliance guardrail:
+
+- `gradlew phase1Compliance`
+- `gradlew localCi`
+- `gradlew fullCi`
+- `gradlew installGitHooks`
+
+`phase1Compliance` is intentionally narrow. It enforces the current inline FQCN budget and fails on raw SQL table-name literals in source strings. `localCi` adds compilation for a fast pre-PR check, while `fullCi` adds GameTests for the full verification path. `installGitHooks` points Git at `scripts/git-hooks`, whose pre-commit hook runs only `phase1Compliance` so normal commits remain quick.
+
+## Layer 4: Manual Golden-World Checklist
 
 Manual testing should use a small saved world that contains known blocks, known Moes, hidden Moes, shrine/garden/location blocks, and a populated `blockparty.db`.
 

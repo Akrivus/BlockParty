@@ -81,10 +81,55 @@ import java.sql.SQLException;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 
 public class Moe extends PathfinderMob implements ContainerListener, MenuProvider {
     private static final String EMPTY_UUID = "00000000-0000-0000-0000-000000000000";
+    public static final String NBT_DATABASE_ID = "DatabaseID";
+    public static final String NBT_BLOCK_STATE = "BlockState";
+    public static final String NBT_VISIBLE_BLOCK_STATE = "VisibleBlockState";
+    public static final String NBT_SCALE = "Scale";
+    public static final String NBT_FOLLOWING = "Following";
+    public static final String NBT_SITTING = "Sitting";
+    public static final String NBT_PLAYER_UUID = "PlayerUUID";
+    public static final String NBT_OWNER_UUID = "OwnerUUID";
+    public static final String NBT_GIVEN_NAME = "GivenName";
+    public static final String NBT_GENDER = "Gender";
+    public static final String NBT_BLOOD_TYPE = "BloodType";
+    public static final String NBT_DERE = "Dere";
+    public static final String NBT_ZODIAC = "Zodiac";
+    public static final String NBT_EMOTION = "Emotion";
+    public static final String NBT_ANIMATION = "Animation";
+    public static final String NBT_FOOD_LEVEL = "FoodLevel";
+    public static final String NBT_EXHAUSTION = "Exhaustion";
+    public static final String NBT_SATURATION = "Saturation";
+    public static final String NBT_STRESS = "Stress";
+    public static final String NBT_RELAXATION = "Relaxation";
+    public static final String NBT_LOYALTY = "Loyalty";
+    public static final String NBT_AFFECTION = "Affection";
+    public static final String NBT_SLOUCH = "Slouch";
+    public static final String NBT_AGE = "Age";
+    public static final String NBT_HAS_HOME = "HasHome";
+    public static final String NBT_HOME = "Home";
+    public static final String NBT_ROUTINE_INTENT = "RoutineIntent";
+    public static final String NBT_FOLLOW_SESSION = "FollowSession";
+    public static final String NBT_FOLLOW_PLAYER_UUID = "PlayerUUID";
+    public static final String NBT_FOLLOW_INTENT = "Intent";
+    public static final String NBT_FOLLOW_TICKS_REMAINING = "TicksRemaining";
+    public static final String NBT_FOLLOW_CAN_CHANGE_DIMENSION = "CanChangeDimension";
+    public static final String NBT_STRUCTURE_ASSIGNMENT = "StructureAssignment";
+    public static final String NBT_PLACE_BLOCK_CHORE = "PlaceBlockChore";
+    public static final String NBT_CARDINAL_FOREST_CHORE_ORIGIN = "CardinalForestChoreOrigin";
+    public static final String NBT_CARDINAL_FOREST_CHORE_TICKS = "CardinalForestChoreTicks";
+    public static final String NBT_REMEMBERED_PLACE = "RememberedPlace";
+    public static final String NBT_LAST_SEEN_AT = "LastSeenAt";
+    public static final String NBT_TIME_UNTIL_HUNGRY = "TimeUntilHungry";
+    public static final String NBT_TIME_UNTIL_LONELY = "TimeUntilLonely";
+    public static final String NBT_TIME_UNTIL_STRESS = "TimeUntilStress";
+    public static final String NBT_TIME_SINCE_SLEEP = "TimeSinceSleep";
+    public static final String NBT_INVENTORY = "Inventory";
+    public static final String NBT_TILE_ENTITY = "TileEntity";
     private static final int COMPATIBILITY_FOLLOW_TICKS = 20 * 60 * 5;
     private static final double IDLE_ANCHOR_RADIUS = 24.0D;
     private static final double IDLE_SOCIAL_RADIUS = 10.0D;
@@ -223,162 +268,164 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
-        this.setDatabaseID(compound.getLong("DatabaseID"));
-        this.setBlockState(Block.stateById(compound.getInt("BlockState")), false);
-        this.setVisibleBlockState(compound.contains("VisibleBlockState")
-                ? Block.stateById(compound.getInt("VisibleBlockState"))
+        this.setDatabaseID(compound.getLong(NBT_DATABASE_ID));
+        this.setBlockState(Block.stateById(compound.getInt(NBT_BLOCK_STATE)), false);
+        this.setVisibleBlockState(compound.contains(NBT_VISIBLE_BLOCK_STATE)
+                ? Block.stateById(compound.getInt(NBT_VISIBLE_BLOCK_STATE))
                 : this.getBlockState());
-        this.setMoeScale(compound.contains("Scale") ? compound.getFloat("Scale") : 1.0F);
-        this.setSitting(compound.getBoolean("Sitting"));
-        if (compound.contains("OwnerUUID")) {
-            this.setPlayerUUID(UUID.fromString(compound.getString("OwnerUUID")));
+        this.setMoeScale(compound.contains(NBT_SCALE) ? compound.getFloat(NBT_SCALE) : 1.0F);
+        this.setSitting(compound.getBoolean(NBT_SITTING));
+        if (compound.contains(NBT_OWNER_UUID)) {
+            this.setPlayerUUID(UUID.fromString(compound.getString(NBT_OWNER_UUID)));
         }
-        if (compound.contains("PlayerUUID")) {
-            this.setPlayerUUID(UUID.fromString(compound.getString("PlayerUUID")));
+        if (compound.contains(NBT_PLAYER_UUID)) {
+            this.setPlayerUUID(UUID.fromString(compound.getString(NBT_PLAYER_UUID)));
         }
-        if (compound.contains("FollowSession")) {
-            this.readFollowSession(compound.getCompound("FollowSession"));
+        if (compound.contains(NBT_FOLLOW_SESSION)) {
+            this.readFollowSession(compound.getCompound(NBT_FOLLOW_SESSION));
         } else {
-            this.setFollowing(compound.getBoolean("Following"));
+            this.setFollowing(compound.getBoolean(NBT_FOLLOWING));
         }
-        if (compound.contains("GivenName")) {
-            this.setGivenName(compound.getString("GivenName"));
+        if (compound.contains(NBT_GIVEN_NAME)) {
+            this.setGivenName(compound.getString(NBT_GIVEN_NAME));
         }
-        if (compound.contains("Gender")) {
-            this.setGender(compound.getString("Gender"));
+        if (compound.contains(NBT_GENDER)) {
+            this.setGender(compound.getString(NBT_GENDER));
         }
-        if (compound.contains("BloodType")) {
-            this.setBloodType(compound.getString("BloodType"));
+        if (compound.contains(NBT_BLOOD_TYPE)) {
+            this.setBloodType(compound.getString(NBT_BLOOD_TYPE));
         }
-        if (compound.contains("Dere")) {
-            this.setDere(compound.getString("Dere"));
+        if (compound.contains(NBT_DERE)) {
+            this.setDere(compound.getString(NBT_DERE));
         }
-        if (compound.contains("Zodiac")) {
-            this.setZodiac(compound.getString("Zodiac"));
+        if (compound.contains(NBT_ZODIAC)) {
+            this.setZodiac(compound.getString(NBT_ZODIAC));
         }
-        if (compound.contains("Emotion")) {
-            this.setEmotion(compound.getString("Emotion"));
+        if (compound.contains(NBT_EMOTION)) {
+            this.setEmotion(compound.getString(NBT_EMOTION));
         }
-        if (compound.contains("Animation")) {
-            this.setAnimationKey(compound.getString("Animation"));
+        if (compound.contains(NBT_ANIMATION)) {
+            this.setAnimationKey(compound.getString(NBT_ANIMATION));
         }
         this.temporaryAnimationTicks = 0;
         this.temporaryAnimationKey = "DEFAULT";
-        if (compound.contains("FoodLevel")) {
-            this.setFoodLevel(compound.getFloat("FoodLevel"));
+        if (compound.contains(NBT_FOOD_LEVEL)) {
+            this.setFoodLevel(compound.getFloat(NBT_FOOD_LEVEL));
         }
-        if (compound.contains("Exhaustion")) {
-            this.setExhaustion(compound.getFloat("Exhaustion"));
+        if (compound.contains(NBT_EXHAUSTION)) {
+            this.setExhaustion(compound.getFloat(NBT_EXHAUSTION));
         }
-        if (compound.contains("Saturation")) {
-            this.setSaturation(compound.getFloat("Saturation"));
+        if (compound.contains(NBT_SATURATION)) {
+            this.setSaturation(compound.getFloat(NBT_SATURATION));
         }
-        if (compound.contains("Stress")) {
-            this.setStress(compound.getFloat("Stress"));
+        if (compound.contains(NBT_STRESS)) {
+            this.setStress(compound.getFloat(NBT_STRESS));
         }
-        if (compound.contains("Relaxation")) {
-            this.setRelaxation(compound.getFloat("Relaxation"));
+        if (compound.contains(NBT_RELAXATION)) {
+            this.setRelaxation(compound.getFloat(NBT_RELAXATION));
         }
-        if (compound.contains("Loyalty")) {
-            this.setLoyalty(compound.getFloat("Loyalty"));
+        if (compound.contains(NBT_LOYALTY)) {
+            this.setLoyalty(compound.getFloat(NBT_LOYALTY));
         }
-        if (compound.contains("Affection")) {
-            this.setAffection(compound.getFloat("Affection"));
+        if (compound.contains(NBT_AFFECTION)) {
+            this.setAffection(compound.getFloat(NBT_AFFECTION));
         }
-        if (compound.contains("Age")) {
-            this.setAge(compound.getFloat("Age"));
+        if (compound.contains(NBT_AGE)) {
+            this.setAge(compound.getFloat(NBT_AGE));
         }
-        this.setHasHome(compound.getBoolean("HasHome"));
-        if (compound.contains("Home")) {
-            this.setHome(new DimBlockPos(compound.getCompound("Home")));
+        this.setHasHome(compound.getBoolean(NBT_HAS_HOME));
+        if (compound.contains(NBT_HOME)) {
+            this.setHome(new DimBlockPos(compound.getCompound(NBT_HOME)));
         }
-        if (compound.contains("RoutineIntent")) {
-            this.setRoutineIntent(RoutineIntent.fromValue(compound.getString("RoutineIntent")));
+        if (compound.contains(NBT_ROUTINE_INTENT)) {
+            this.setRoutineIntent(RoutineIntent.fromValue(compound.getString(NBT_ROUTINE_INTENT)));
         }
-        if (compound.contains("StructureAssignment")) {
-            this.setStructureAssignment(MoeStructureAssignment.read(compound.getCompound("StructureAssignment")), false);
+        if (compound.contains(NBT_STRUCTURE_ASSIGNMENT)) {
+            this.setStructureAssignment(MoeStructureAssignment.read(compound.getCompound(NBT_STRUCTURE_ASSIGNMENT)), false);
         }
-        if (compound.contains("PlaceBlockChore")) {
-            this.placeBlockChore = Chore.read(compound.getCompound("PlaceBlockChore"));
-        } else if (compound.contains("CardinalForestChoreOrigin")) {
+        if (compound.contains(NBT_PLACE_BLOCK_CHORE)) {
+            this.placeBlockChore = Chore.read(compound.getCompound(NBT_PLACE_BLOCK_CHORE));
+        } else if (compound.contains(NBT_CARDINAL_FOREST_CHORE_ORIGIN)) {
             this.placeBlockChore = new Chore(
                     "oak_sapling",
-                    new DimBlockPos(compound.getCompound("CardinalForestChoreOrigin")),
-                    compound.getInt("CardinalForestChoreTicks"));
+                    new DimBlockPos(compound.getCompound(NBT_CARDINAL_FOREST_CHORE_ORIGIN)),
+                    compound.getInt(NBT_CARDINAL_FOREST_CHORE_TICKS));
         }
-        this.rememberedPlace = compound.contains("RememberedPlace")
-                ? MoePlaceMemory.Place.read(compound.getCompound("RememberedPlace"))
+        this.rememberedPlace = compound.contains(NBT_REMEMBERED_PLACE)
+                ? MoePlaceMemory.Place.read(compound.getCompound(NBT_REMEMBERED_PLACE))
                 : MoePlaceMemory.Place.none();
-        if (compound.contains("LastSeenAt")) {
-            this.setLastSeen(compound.getLong("LastSeenAt"));
+        if (compound.contains(NBT_LAST_SEEN_AT)) {
+            this.setLastSeen(compound.getLong(NBT_LAST_SEEN_AT));
         }
-        this.timeUntilHungry = compound.getInt("TimeUntilHungry");
-        this.timeUntilLonely = compound.getInt("TimeUntilLonely");
-        this.timeUntilStress = compound.getInt("TimeUntilStress");
-        this.timeSinceSleep = compound.getInt("TimeSinceSleep");
-        this.inventory.fromTag(compound.getList("Inventory", 10), this.registryAccess());
-        if (compound.contains("Slouch")) {
-            this.setSlouch(compound.getFloat("Slouch"));
+        this.timeUntilHungry = compound.getInt(NBT_TIME_UNTIL_HUNGRY);
+        this.timeUntilLonely = compound.getInt(NBT_TIME_UNTIL_LONELY);
+        this.timeUntilStress = compound.getInt(NBT_TIME_UNTIL_STRESS);
+        this.timeSinceSleep = compound.getInt(NBT_TIME_SINCE_SLEEP);
+        this.inventory.fromTag(compound.getList(NBT_INVENTORY, 10), this.registryAccess());
+        if (compound.contains(NBT_SLOUCH)) {
+            this.setSlouch(compound.getFloat(NBT_SLOUCH));
         }
-        this.setTileEntityData(compound.getCompound("TileEntity"));
+        this.setTileEntityData(compound.getCompound(NBT_TILE_ENTITY));
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
-        compound.putLong("DatabaseID", this.getDatabaseID());
-        compound.putInt("BlockState", Block.getId(this.getBlockState()));
-        compound.putInt("VisibleBlockState", Block.getId(this.getVisibleBlockState()));
-        compound.putFloat("Scale", this.getMoeScale());
-        compound.putBoolean("Following", this.isFollowing());
+        compound.putLong(NBT_DATABASE_ID, this.getDatabaseID());
+        compound.putInt(NBT_BLOCK_STATE, Block.getId(this.getBlockState()));
+        compound.putInt(NBT_VISIBLE_BLOCK_STATE, Block.getId(this.getVisibleBlockState()));
+        compound.putFloat(NBT_SCALE, this.getMoeScale());
+        compound.putBoolean(NBT_FOLLOWING, this.isFollowing());
         if (this.isFollowing()) {
-            compound.put("FollowSession", this.writeFollowSession());
+            compound.put(NBT_FOLLOW_SESSION, this.writeFollowSession());
         }
-        compound.putBoolean("Sitting", this.isSitting());
-        compound.putString("PlayerUUID", this.getPlayerUUID().toString());
-        compound.putString("OwnerUUID", this.getPlayerUUID().toString());
-        compound.putString("GivenName", this.getGivenName());
-        compound.putString("Gender", this.getGender());
-        compound.putString("BloodType", this.getBloodType());
-        compound.putString("Dere", this.getDere());
-        compound.putString("Zodiac", this.getZodiac());
-        compound.putString("Emotion", this.getEmotion());
-        compound.putString("Animation", this.temporaryAnimationTicks > 0 ? "DEFAULT" : this.getAnimationKey());
-        compound.putFloat("FoodLevel", this.getFoodLevel());
-        compound.putFloat("Exhaustion", this.getExhaustion());
-        compound.putFloat("Saturation", this.getSaturation());
-        compound.putFloat("Stress", this.getStress());
-        compound.putFloat("Relaxation", this.getRelaxation());
-        compound.putFloat("Loyalty", this.getLoyalty());
-        compound.putFloat("Affection", this.getAffection());
-        compound.putFloat("Slouch", this.getSlouch());
-        compound.putFloat("Age", this.getAge());
-        compound.putBoolean("HasHome", this.hasHome());
-        compound.put("Home", this.getHome().write());
-        compound.putString("RoutineIntent", this.getRoutineIntent().name());
+        compound.putBoolean(NBT_SITTING, this.isSitting());
+        compound.putString(NBT_PLAYER_UUID, this.getPlayerUUID().toString());
+        compound.putString(NBT_OWNER_UUID, this.getPlayerUUID().toString());
+        compound.putString(NBT_GIVEN_NAME, this.getGivenName());
+        compound.putString(NBT_GENDER, this.getGender());
+        compound.putString(NBT_BLOOD_TYPE, this.getBloodType());
+        compound.putString(NBT_DERE, this.getDere());
+        compound.putString(NBT_ZODIAC, this.getZodiac());
+        compound.putString(NBT_EMOTION, this.getEmotion());
+        compound.putString(NBT_ANIMATION, this.temporaryAnimationTicks > 0 ? "DEFAULT" : this.getAnimationKey());
+        compound.putFloat(NBT_FOOD_LEVEL, this.getFoodLevel());
+        compound.putFloat(NBT_EXHAUSTION, this.getExhaustion());
+        compound.putFloat(NBT_SATURATION, this.getSaturation());
+        compound.putFloat(NBT_STRESS, this.getStress());
+        compound.putFloat(NBT_RELAXATION, this.getRelaxation());
+        compound.putFloat(NBT_LOYALTY, this.getLoyalty());
+        compound.putFloat(NBT_AFFECTION, this.getAffection());
+        compound.putFloat(NBT_SLOUCH, this.getSlouch());
+        compound.putFloat(NBT_AGE, this.getAge());
+        compound.putBoolean(NBT_HAS_HOME, this.hasHome());
+        compound.put(NBT_HOME, this.getHome().write());
+        compound.putString(NBT_ROUTINE_INTENT, this.getRoutineIntent().name());
         if (this.structureAssignment.assigned()) {
-            compound.put("StructureAssignment", this.structureAssignment.write());
+            compound.put(NBT_STRUCTURE_ASSIGNMENT, this.structureAssignment.write());
         }
         if (this.placeBlockChore.active()) {
-            compound.put("PlaceBlockChore", this.placeBlockChore.write());
+            compound.put(NBT_PLACE_BLOCK_CHORE, this.placeBlockChore.write());
         }
         if (this.rememberedPlace.type() != MoePlaceMemory.PlaceType.NONE) {
-            compound.put("RememberedPlace", this.rememberedPlace.write());
+            compound.put(NBT_REMEMBERED_PLACE, this.rememberedPlace.write());
         }
-        compound.putLong("LastSeenAt", this.getLastSeen());
-        compound.putInt("TimeUntilHungry", this.getTimeUntilHungry());
-        compound.putInt("TimeUntilLonely", this.getTimeUntilLonely());
-        compound.putInt("TimeUntilStress", this.getTimeUntilStress());
-        compound.putInt("TimeSinceSleep", this.getTimeSinceSleep());
-        compound.put("Inventory", this.inventory.createTag(this.registryAccess()));
-        compound.put("TileEntity", this.getTileEntityData().copy());
+        compound.putLong(NBT_LAST_SEEN_AT, this.getLastSeen());
+        compound.putInt(NBT_TIME_UNTIL_HUNGRY, this.getTimeUntilHungry());
+        compound.putInt(NBT_TIME_UNTIL_LONELY, this.getTimeUntilLonely());
+        compound.putInt(NBT_TIME_UNTIL_STRESS, this.getTimeUntilStress());
+        compound.putInt(NBT_TIME_SINCE_SLEEP, this.getTimeSinceSleep());
+        compound.put(NBT_INVENTORY, this.inventory.createTag(this.registryAccess()));
+        compound.put(NBT_TILE_ENTITY, this.getTileEntityData().copy());
     }
 
     private void readFollowSession(CompoundTag compound) {
-        UUID playerUuid = compound.contains("PlayerUUID") ? UUID.fromString(compound.getString("PlayerUUID")) : this.getPlayerUUID();
+        UUID playerUuid = compound.contains(NBT_FOLLOW_PLAYER_UUID)
+                ? UUID.fromString(compound.getString(NBT_FOLLOW_PLAYER_UUID))
+                : this.getPlayerUUID();
         PlayerMovementIntent intent = PlayerMovementIntent.FOLLOW_REQUEST;
-        if (compound.contains("Intent")) {
+        if (compound.contains(NBT_FOLLOW_INTENT)) {
             try {
-                intent = PlayerMovementIntent.valueOf(compound.getString("Intent"));
+                intent = PlayerMovementIntent.valueOf(compound.getString(NBT_FOLLOW_INTENT));
             } catch (IllegalArgumentException ignored) {
                 intent = PlayerMovementIntent.FOLLOW_REQUEST;
             }
@@ -386,16 +433,16 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         this.startFollowSession(
                 playerUuid,
                 intent,
-                compound.getInt("TicksRemaining"),
-                compound.getBoolean("CanChangeDimension"));
+                compound.getInt(NBT_FOLLOW_TICKS_REMAINING),
+                compound.getBoolean(NBT_FOLLOW_CAN_CHANGE_DIMENSION));
     }
 
     private CompoundTag writeFollowSession() {
         CompoundTag compound = new CompoundTag();
-        compound.putString("PlayerUUID", this.followSession.playerUuid().toString());
-        compound.putString("Intent", this.followSession.intent().name());
-        compound.putInt("TicksRemaining", this.followSession.ticksRemaining());
-        compound.putBoolean("CanChangeDimension", this.followSession.canChangeDimension());
+        compound.putString(NBT_FOLLOW_PLAYER_UUID, this.followSession.playerUuid().toString());
+        compound.putString(NBT_FOLLOW_INTENT, this.followSession.intent().name());
+        compound.putInt(NBT_FOLLOW_TICKS_REMAINING, this.followSession.ticksRemaining());
+        compound.putBoolean(NBT_FOLLOW_CAN_CHANGE_DIMENSION, this.followSession.canChangeDimension());
         return compound;
     }
 
@@ -913,12 +960,12 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         return signal;
     }
 
-    public java.util.Optional<MoeItemPreferences.PreferenceSignal> latestGiftPreferenceSignal() {
-        return this.giftMemoryTicks > 0 ? java.util.Optional.of(this.giftPreferenceSignal) : java.util.Optional.empty();
+    public Optional<MoeItemPreferences.PreferenceSignal> latestGiftPreferenceSignal() {
+        return this.giftMemoryTicks > 0 ? Optional.of(this.giftPreferenceSignal) : Optional.empty();
     }
 
-    public java.util.Optional<ItemStack> latestGiftItem() {
-        return this.giftMemoryTicks > 0 && !this.giftItemMemory.isEmpty() ? java.util.Optional.of(this.giftItemMemory.copy()) : java.util.Optional.empty();
+    public Optional<ItemStack> latestGiftItem() {
+        return this.giftMemoryTicks > 0 && !this.giftItemMemory.isEmpty() ? Optional.of(this.giftItemMemory.copy()) : Optional.empty();
     }
 
     public float getExhaustion() {
@@ -1237,7 +1284,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
                 .orElse(null);
     }
 
-    public java.util.Optional<MoeAnchor> currentRoutineAnchor() {
+    public Optional<MoeAnchor> currentRoutineAnchor() {
         return MoeAnchorResolver.bestRoutineAnchor(this);
     }
 
@@ -1288,7 +1335,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     }
 
     public boolean moveTowardCurrentRoutineAnchor(double speed) {
-        java.util.Optional<MoeAnchor> anchor = this.currentRoutineAnchor();
+        Optional<MoeAnchor> anchor = this.currentRoutineAnchor();
         if (anchor.isEmpty() || anchor.get().dimPos().getDim() != this.level().dimension()) {
             return false;
         }
@@ -1380,7 +1427,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         return true;
     }
 
-    public java.util.Optional<BlockPos> nearestUnlitGardenLanternForTests(double radius) {
+    public Optional<BlockPos> nearestUnlitGardenLanternForTests(double radius) {
         return this.nearestUnlitGardenLantern(radius);
     }
 
@@ -1397,9 +1444,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
                 .orElse(Vec3.atBottomCenterOf(lantern));
     }
 
-    private java.util.Optional<BlockPos> nearestUnlitGardenLantern(double radius) {
+    private Optional<BlockPos> nearestUnlitGardenLantern(double radius) {
         if (!(this.level() instanceof ServerLevel level)) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         double radiusSqr = radius * radius;
         BlockPos origin = this.blockPosition();
@@ -1421,7 +1468,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
                 bestDistance = distance;
             }
         }
-        return java.util.Optional.ofNullable(best);
+        return Optional.ofNullable(best);
     }
 
     private boolean isLanternInGardenContext(BlockPos lantern) {
@@ -1434,7 +1481,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
                 .orElse(false);
     }
 
-    private java.util.Optional<BlockPos> bestLanternStandingPosition(BlockPos lantern) {
+    private Optional<BlockPos> bestLanternStandingPosition(BlockPos lantern) {
         BlockPos best = null;
         double bestDistance = Double.MAX_VALUE;
         for (BlockPos candidate : BlockPos.betweenClosed(lantern.offset(-1, -1, -1), lantern.offset(1, 1, 1))) {
@@ -1448,7 +1495,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
                 bestDistance = distance;
             }
         }
-        return java.util.Optional.ofNullable(best);
+        return Optional.ofNullable(best);
     }
 
     private boolean updateEnvironmentalRoutineMovement() {
@@ -1579,29 +1626,29 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         return MoeEnvironmentalRules.shelterScore(this.level(), feetPos);
     }
 
-    public java.util.Optional<MoeEnvironmentalObservation.Observation> observeEnvironmentNow() {
-        java.util.Optional<MoeEnvironmentalObservation.Observation> observation = MoeEnvironmentalObservation.scan(this);
+    public Optional<MoeEnvironmentalObservation.Observation> observeEnvironmentNow() {
+        Optional<MoeEnvironmentalObservation.Observation> observation = MoeEnvironmentalObservation.scan(this);
         observation.ifPresent(this::rememberEnvironmentalObservation);
         return observation;
     }
 
-    public java.util.Optional<MoeEnvironmentalObservation.Observation> latestEnvironmentalObservation() {
+    public Optional<MoeEnvironmentalObservation.Observation> latestEnvironmentalObservation() {
         return this.environmentalObservationMemoryTicks > 0
                 && this.environmentalObservation.kind() != MoeEnvironmentalObservation.Kind.NONE
-                ? java.util.Optional.of(this.environmentalObservation)
-                : java.util.Optional.empty();
+                ? Optional.of(this.environmentalObservation)
+                : Optional.empty();
     }
 
-    public java.util.Optional<MoePlaceMemory.Place> observePlaceNow() {
-        java.util.Optional<MoePlaceMemory.Place> place = MoePlaceMemory.scan(this);
+    public Optional<MoePlaceMemory.Place> observePlaceNow() {
+        Optional<MoePlaceMemory.Place> place = MoePlaceMemory.scan(this);
         place.ifPresent(this::rememberPlace);
         return place;
     }
 
-    public java.util.Optional<MoePlaceMemory.Place> rememberedPlace() {
+    public Optional<MoePlaceMemory.Place> rememberedPlace() {
         return this.rememberedPlace.type() == MoePlaceMemory.PlaceType.NONE
-                ? java.util.Optional.empty()
-                : java.util.Optional.of(this.rememberedPlace);
+                ? Optional.empty()
+                : Optional.of(this.rememberedPlace);
     }
 
     private void tickEnvironmentalObservation() {
@@ -1844,16 +1891,16 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         return true;
     }
 
-    private java.util.Optional<ItemEntity> nearestPlaceBlockChoreDrop(Config config) {
+    private Optional<ItemEntity> nearestPlaceBlockChoreDrop(Config config) {
         if (!this.hasPlaceBlockChore() || config == null) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         return PlaceBlockChores.nearestDrop(this, this.placeBlockChore, config, CARDINAL_FOREST_CHORE_RADIUS);
     }
 
-    private java.util.Optional<BlockPos> nearestPlaceBlockChoreSpot(Config config) {
+    private Optional<BlockPos> nearestPlaceBlockChoreSpot(Config config) {
         if (!(this.level() instanceof ServerLevel level)) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         return PlaceBlockChores.nearestSpot(level, this.placeBlockChore.origin().getPos(), config);
     }
@@ -1963,9 +2010,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         };
     }
 
-    public java.util.Optional<MoeSocialPlaceMemory> socialPlaceMemoryForTests() {
+    public Optional<MoeSocialPlaceMemory> socialPlaceMemoryForTests() {
         SocialPlaceCandidate candidate = this.bestSocialPlaceCandidate();
-        return candidate == null ? java.util.Optional.empty() : java.util.Optional.of(candidate.memory());
+        return candidate == null ? Optional.empty() : Optional.of(candidate.memory());
     }
 
     private SocialPlaceCandidate bestSocialPlaceCandidate() {

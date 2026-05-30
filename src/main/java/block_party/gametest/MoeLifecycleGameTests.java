@@ -9,6 +9,8 @@ import block_party.entities.data.HidingSpots;
 import block_party.entities.goals.HideUntil;
 import block_party.items.CustomSpawnEggItem;
 import block_party.registry.CustomBlocks;
+import block_party.registry.CustomEntities;
+import block_party.registry.CustomItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -84,7 +86,7 @@ public final class MoeLifecycleGameTests {
         assertValidDere(helper, moe.getDere(), "spawned Moe dere type");
         assertValidZodiac(helper, moe.getZodiac(), "spawned Moe zodiac sign");
 
-        Moe loaded = new Moe(block_party.registry.CustomEntities.MOE.get(), level);
+        Moe loaded = new Moe(CustomEntities.MOE.get(), level);
         loaded.load(moe.saveWithoutId(new CompoundTag()));
         assertEquals(helper, owner, loaded.getOwnerUUID(), "spawned Moe persisted owner UUID");
         assertEquals(helper, sourceState, loaded.getBlockState(), "spawned Moe persisted source block state");
@@ -180,7 +182,7 @@ public final class MoeLifecycleGameTests {
         BlockState invalidState = Blocks.BEDROCK.defaultBlockState();
         level.setBlock(source, invalidState, 3);
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
-        ItemStack stack = new ItemStack(block_party.registry.CustomItems.MOE_SPAWN_EGG.get());
+        ItemStack stack = new ItemStack(CustomItems.MOE_SPAWN_EGG.get());
         int rowsBefore = countNpcRows(helper);
 
         InteractionResult result = useSpawnEgg(level, player, stack, source, Direction.UP);
@@ -198,7 +200,7 @@ public final class MoeLifecycleGameTests {
         BlockPos source = helper.absolutePos(new BlockPos(1, 1, 1));
         level.setBlock(source, CustomBlocks.SAKURA_PLANKS.get().defaultBlockState(), 3);
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
-        ItemStack stack = new ItemStack(block_party.registry.CustomItems.MOE_SPAWN_EGG.get());
+        ItemStack stack = new ItemStack(CustomItems.MOE_SPAWN_EGG.get());
 
         InteractionResult result = useSpawnEgg(level, player, stack, source, Direction.UP);
 
@@ -214,7 +216,7 @@ public final class MoeLifecycleGameTests {
         BlockPos source = helper.absolutePos(new BlockPos(1, 1, 1));
         level.setBlock(source, CustomBlocks.GINKGO_PLANKS.get().defaultBlockState(), 3);
         Player player = helper.makeMockPlayer(GameType.CREATIVE);
-        ItemStack stack = new ItemStack(block_party.registry.CustomItems.MOE_SPAWN_EGG.get());
+        ItemStack stack = new ItemStack(CustomItems.MOE_SPAWN_EGG.get());
 
         InteractionResult result = useSpawnEgg(level, player, stack, source, Direction.UP);
 
@@ -243,7 +245,7 @@ public final class MoeLifecycleGameTests {
         }
 
         assertEquals(helper, "captured", moe.getTileEntityData().getString("BlockPartyTestValue"), "spawned Moe block entity data");
-        Moe loaded = new Moe(block_party.registry.CustomEntities.MOE.get(), level);
+        Moe loaded = new Moe(CustomEntities.MOE.get(), level);
         loaded.load(moe.saveWithoutId(new CompoundTag()));
         assertEquals(helper, "captured", loaded.getTileEntityData().getString("BlockPartyTestValue"), "persisted Moe block entity data");
         helper.kill(moe);
@@ -282,7 +284,7 @@ public final class MoeLifecycleGameTests {
         BlockPos pos = helper.absolutePos(new BlockPos(2, 1, 2));
         UUID owner = new UUID(55L, 66L);
         BlockState sourceState = CustomBlocks.SAKURA_PLANKS.get().defaultBlockState();
-        Moe moe = new Moe(block_party.registry.CustomEntities.MOE.get(), level);
+        Moe moe = new Moe(CustomEntities.MOE.get(), level);
         moe.moveToBlock(pos);
         moe.setOwnerUUID(owner);
         moe.setBlockState(sourceState);
@@ -395,7 +397,7 @@ public final class MoeLifecycleGameTests {
         BlockPos pos = helper.absolutePos(new BlockPos(2, 1, 2));
         UUID owner = new UUID(77L, 88L);
         BlockState sourceState = CustomBlocks.GINKGO_PLANKS.get().defaultBlockState();
-        Moe moe = new Moe(block_party.registry.CustomEntities.MOE.get(), level);
+        Moe moe = new Moe(CustomEntities.MOE.get(), level);
         moe.moveToBlock(pos);
         moe.setOwnerUUID(owner);
         moe.setBlockState(sourceState);
@@ -577,7 +579,7 @@ public final class MoeLifecycleGameTests {
         long missingId = Long.MAX_VALUE - 123L;
         level.setBlock(pos, CustomBlocks.GINKGO_PLANKS.get().defaultBlockState(), 3);
 
-        MoeInHiding hidden = new MoeInHiding(block_party.registry.CustomEntities.MOE_IN_HIDING.get(), level);
+        MoeInHiding hidden = new MoeInHiding(CustomEntities.MOE_IN_HIDING.get(), level);
         hidden.setDatabaseID(missingId);
         hidden.setAttachPos(pos);
         hidden.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
@@ -672,7 +674,7 @@ public final class MoeLifecycleGameTests {
     }
 
     private static Moe createPersistedMoe(GameTestHelper helper, ServerLevel level, BlockPos pos, UUID owner, BlockState sourceState) {
-        Moe moe = new Moe(block_party.registry.CustomEntities.MOE.get(), level);
+        Moe moe = new Moe(CustomEntities.MOE.get(), level);
         moe.moveToBlock(pos);
         moe.setOwnerUUID(owner);
         moe.setBlockState(sourceState);
@@ -717,7 +719,7 @@ public final class MoeLifecycleGameTests {
     private static InteractionResult useSpawnEgg(ServerLevel level, Player player, ItemStack stack, BlockPos source, Direction face) {
         Vec3 hitLocation = Vec3.atCenterOf(source);
         BlockHitResult hit = new BlockHitResult(hitLocation, face, source, false);
-        return block_party.registry.CustomItems.MOE_SPAWN_EGG.get().useOn(
+        return CustomItems.MOE_SPAWN_EGG.get().useOn(
                 new net.minecraft.world.item.context.UseOnContext(level, player, InteractionHand.MAIN_HAND, stack, hit));
     }
 
@@ -725,7 +727,7 @@ public final class MoeLifecycleGameTests {
         BlockPartyDB db = BlockPartyDB.get(helper.getLevel());
         try {
             Connection connection = db.openConnection();
-            try (ResultSet result = connection.createStatement().executeQuery("SELECT COUNT(*) FROM NPCs;")) {
+            try (ResultSet result = connection.createStatement().executeQuery("SELECT COUNT(*) FROM " + BlockPartyDB.TABLE_NPCS + ";")) {
                 return result.next() ? result.getInt(1) : 0;
             } finally {
                 db.free(connection);

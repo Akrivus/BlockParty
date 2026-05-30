@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +47,7 @@ public final class MoeTextureReloadListener implements PreparableReloadListener 
             try (BufferedReader reader = resource.openAsReader()) {
                 safeParseOverride(JsonParser.parseReader(reader).getAsJsonObject())
                         .ifPresent(value -> overrides.computeIfAbsent(value.state().getBlock(), ignored -> new ArrayList<>()).add(value));
-            } catch (RuntimeException | java.io.IOException ignored) {
+            } catch (RuntimeException | IOException ignored) {
                 // Fails closed; malformed resources should not break the client reload.
             }
         });

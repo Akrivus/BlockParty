@@ -1,5 +1,6 @@
 package block_party.entities.environment;
 
+import block_party.blocks.GardenLanternBlock;
 import block_party.entities.Moe;
 import block_party.entities.movement.MoeAnchor;
 import block_party.entities.movement.MoeAnchorResolver;
@@ -7,12 +8,15 @@ import block_party.entities.movement.MoeAnchorType;
 import block_party.registry.CustomTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.phys.AABB;
 
+import java.util.List;
 import java.util.Optional;
 
 public final class MoePlaceMemory {
@@ -26,7 +30,7 @@ public final class MoePlaceMemory {
     public static Optional<Place> scan(Moe moe) {
         BlockPos origin = moe.blockPosition();
         Place best = Place.none();
-        java.util.List<MoeAnchor> anchors = MoeAnchorResolver.activeAnchors(moe);
+        List<MoeAnchor> anchors = MoeAnchorResolver.activeAnchors(moe);
         int radius = (int) Math.ceil(PLACE_RADIUS);
         for (int x = -radius; x <= radius; x++) {
             for (int y = -1; y <= 1; y++) {
@@ -55,7 +59,7 @@ public final class MoePlaceMemory {
         return evaluate(moe, pos, MoeAnchorResolver.activeAnchors(moe));
     }
 
-    private static Place evaluate(Moe moe, BlockPos pos, java.util.List<MoeAnchor> anchors) {
+    private static Place evaluate(Moe moe, BlockPos pos, List<MoeAnchor> anchors) {
         Level level = moe.level();
         MoeEnvironmentalRules.ShelterScore shelter = MoeEnvironmentalRules.shelterScore(level, pos);
         Features features = scanFeatures(level, pos, anchorEvidence(moe, pos, anchors));
@@ -100,8 +104,8 @@ public final class MoePlaceMemory {
                 place.pos().offset(FEATURE_RADIUS, 3, FEATURE_RADIUS))) {
             BlockState state = moe.level().getBlockState(pos);
             if (state.is(CustomTags.PLACE_GARDEN_LANTERNS)
-                    && (lit == null || state.hasProperty(block_party.blocks.GardenLanternBlock.LIT)
-                    && state.getValue(block_party.blocks.GardenLanternBlock.LIT) == lit)) {
+                    && (lit == null || state.hasProperty(GardenLanternBlock.LIT)
+                    && state.getValue(GardenLanternBlock.LIT) == lit)) {
                 count++;
             }
         }
@@ -203,7 +207,7 @@ public final class MoePlaceMemory {
     }
 
     private static int occupancy(Moe moe, BlockPos pos) {
-        return moe.level().getEntities(EntityTypeTest.forClass(Moe.class), new net.minecraft.world.phys.AABB(pos).inflate(5.0D), other ->
+        return moe.level().getEntities(EntityTypeTest.forClass(Moe.class), new AABB(pos).inflate(5.0D), other ->
                 other != moe && other.isAlive() && !other.isRemoved()).size();
     }
 
@@ -234,10 +238,10 @@ public final class MoePlaceMemory {
                     if (isGardenBlock(state)) {
                         gardenBlocks++;
                     }
-                    if (state.is(net.minecraft.tags.BlockTags.LOGS)) {
+                    if (state.is(BlockTags.LOGS)) {
                         logs++;
                     }
-                    if (state.is(net.minecraft.tags.BlockTags.LEAVES)) {
+                    if (state.is(BlockTags.LEAVES)) {
                         leaves++;
                     }
                     if (state.is(CustomTags.PLACE_GRASS_BLOCKS)) {
@@ -284,7 +288,7 @@ public final class MoePlaceMemory {
         return state.is(CustomTags.PLACE_CROPS);
     }
 
-    private static AnchorEvidence anchorEvidence(Moe moe, BlockPos pos, java.util.List<MoeAnchor> anchors) {
+    private static AnchorEvidence anchorEvidence(Moe moe, BlockPos pos, List<MoeAnchor> anchors) {
         MoeAnchor best = null;
         double bestDistance = Double.MAX_VALUE;
         double bestScore = Double.NEGATIVE_INFINITY;

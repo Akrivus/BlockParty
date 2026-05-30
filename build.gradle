@@ -38,6 +38,91 @@ tasks.register('regressionTest') {
     dependsOn tasks.named('runGameTestServer')
 }
 
+tasks.register('phase1Compliance') {
+    group = 'verification'
+    description = 'Checks Phase 1 cleanup guardrails for FQCN budget and raw SQL table names.'
+
+    doLast {
+        def sourceRoot = file('src/main/java')
+        def javaFiles = fileTree(sourceRoot) {
+            include '**/*.java'
+        }.files.sort()
+        def fqcnPattern = ~/\b(?:java|javax|net|com|org|block_party)(?:\.[A-Za-z_$][A-Za-z0-9_$]*){2,}\b/
+        def sqlTablePattern = ~/(?i)\b(?:FROM|JOIN|INTO|UPDATE|TABLE|DELETE\s+FROM|INSERT\s+INTO|CREATE\s+TABLE|ALTER\s+TABLE)\s+(NPCs|Shrines|GardenLanterns|Locations|Saplings|TsukumogamiCandidates|PlayerRelationships|AttentionRecords)\b/
+        def fqcnFindings = []
+        def sqlFindings = []
+
+        javaFiles.each { sourceFile ->
+            def relative = rootProject.relativePath(sourceFile)
+            sourceFile.readLines('UTF-8').eachWithIndex { line, index ->
+                def lineNumber = index + 1
+                def trimmed = line.trim()
+                if (!trimmed.startsWith('package ') && !trimmed.startsWith('import ')) {
+                    def code = stripStringLiterals(line)
+                    def matcher = fqcnPattern.matcher(code)
+                    while (matcher.find()) {
+                        fqcnFindings << "${relative}:${lineNumber}: ${matcher.group()}"
+                    }
+                }
+
+                def stringText = stringLiterals(line).join(' ')
+                def tableMatcher = sqlTablePattern.matcher(stringText)
+                while (tableMatcher.find()) {
+                    sqlFindings << "${relative}:${lineNumber}: ${tableMatcher.group()}"
+                }
+            }
+        }
+
+        def fqcnBudget = 32
+        if (fqcnFindings.size() > fqcnBudget || !sqlFindings.isEmpty()) {
+            def message = new StringBuilder('Phase 1 compliance guardrail failed.')
+            message.append(System.lineSeparator())
+            message.append("FQCN tokens: ${fqcnFindings.size()} / ${fqcnBudget}")
+            if (fqcnFindings.size() > fqcnBudget) {
+                message.append(System.lineSeparator()).append('FQCN findings:')
+                fqcnFindings.take(50).each { message.append(System.lineSeparator()).append("  - ${it}") }
+            }
+            if (!sqlFindings.isEmpty()) {
+                message.append(System.lineSeparator()).append('Raw SQL table-name findings:')
+                sqlFindings.take(50).each { message.append(System.lineSeparator()).append("  - ${it}") }
+            }
+            throw new GradleException(message.toString())
+        }
+
+        logger.lifecycle("Phase 1 compliance passed: ${fqcnFindings.size()} FQCN tokens within budget ${fqcnBudget}; no raw SQL table names.")
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('phase1Compliance')
+}
+
+tasks.register('localCi') {
+    group = 'verification'
+    description = 'Runs fast local CI checks before committing.'
+    dependsOn tasks.named('phase1Compliance')
+    dependsOn tasks.named('compileJava')
+}
+
+tasks.register('fullCi') {
+    group = 'verification'
+    description = 'Runs the full local verification suite, including GameTests.'
+    dependsOn tasks.named('localCi')
+    dependsOn tasks.named('regressionTest')
+}
+
+tasks.register('installGitHooks') {
+    group = 'verification'
+    description = 'Configures Git to use the repository-managed hooks in scripts/git-hooks.'
+
+    doLast {
+        exec {
+            commandLine 'git', 'config', 'core.hooksPath', 'scripts/git-hooks'
+        }
+        logger.lifecycle('Git hooks installed from scripts/git-hooks. Pre-commit now runs phase1Compliance.')
+    }
+}
+
 tasks.named('test') {
     dependsOn tasks.named('regressionTest')
 }
@@ -77,4 +162,69 @@ tasks.named('runGameTestServer') {
     doFirst {
         delete layout.buildDirectory.dir('gametest-run/world')
     }
+}
+
+static String stripStringLiterals(String line) {
+    StringBuilder result = new StringBuilder()
+    boolean inString = false
+    boolean inChar = false
+    boolean escaped = false
+    for (int index = 0; index < line.length(); ++index) {
+        char current = line.charAt(index)
+        if (inString) {
+            if (escaped) {
+                escaped = false
+            } else if (current == '\\' as char) {
+                escaped = true
+            } else if (current == '"' as char) {
+                inString = false
+            }
+            result.append(' ')
+        } else if (inChar) {
+            if (escaped) {
+                escaped = false
+            } else if (current == '\\' as char) {
+                escaped = true
+            } else if (current == '\'' as char) {
+                inChar = false
+            }
+            result.append(' ')
+        } else if (current == '"' as char) {
+            inString = true
+            result.append(' ')
+        } else if (current == '\'' as char) {
+            inChar = true
+            result.append(' ')
+        } else {
+            result.append(current)
+        }
+    }
+    return result.toString()
+}
+
+static List<String> stringLiterals(String line) {
+    List<String> literals = []
+    StringBuilder currentLiteral = new StringBuilder()
+    boolean inString = false
+    boolean escaped = false
+    for (int index = 0; index < line.length(); ++index) {
+        char current = line.charAt(index)
+        if (inString) {
+            if (escaped) {
+                currentLiteral.append(current)
+                escaped = false
+            } else if (current == '\\' as char) {
+                escaped = true
+            } else if (current == '"' as char) {
+                literals.add(currentLiteral.toString())
+                currentLiteral.setLength(0)
+                inString = false
+            } else {
+                currentLiteral.append(current)
+            }
+        } else if (current == '"' as char) {
+            inString = true
+        }
+    }
+    return literals
 }

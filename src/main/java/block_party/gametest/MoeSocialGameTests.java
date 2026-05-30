@@ -234,7 +234,7 @@ public final class MoeSocialGameTests {
         BlockPos garden = helper.absolutePos(new BlockPos(8, 1, 1));
         level.setBlock(garden.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
         try {
-            insertSimpleDataBlock(BlockPartyDB.get(level), "GardenLanterns", owner, level, garden);
+            insertSimpleDataBlock(BlockPartyDB.get(level), BlockPartyDB.TABLE_GARDEN_LANTERNS, owner, level, garden);
         } catch (SQLException exception) {
             helper.fail("Expected garden hangout setup to succeed: " + exception.getMessage());
             return;
@@ -276,7 +276,7 @@ public final class MoeSocialGameTests {
         BlockPos garden = helper.absolutePos(new BlockPos(8, 1, 1));
         level.setBlock(garden.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
         try {
-            insertSimpleDataBlock(BlockPartyDB.get(level), "GardenLanterns", owner, level, garden);
+            insertSimpleDataBlock(BlockPartyDB.get(level), BlockPartyDB.TABLE_GARDEN_LANTERNS, owner, level, garden);
         } catch (SQLException exception) {
             helper.fail("Expected tense hangout setup to succeed: " + exception.getMessage());
             return;
@@ -312,7 +312,7 @@ public final class MoeSocialGameTests {
         level.setBlock(lantern.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
         level.setBlock(lantern, CustomBlocks.GARDEN_LANTERN.get().defaultBlockState(), 3);
         try {
-            insertSimpleDataBlock(BlockPartyDB.get(level), "GardenLanterns", owner, level, lantern);
+            insertSimpleDataBlock(BlockPartyDB.get(level), BlockPartyDB.TABLE_GARDEN_LANTERNS, owner, level, lantern);
         } catch (SQLException exception) {
             helper.fail("Expected garden lantern anchor setup to succeed: " + exception.getMessage());
             return;
@@ -339,7 +339,7 @@ public final class MoeSocialGameTests {
         level.setBlock(lantern.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
         level.setBlock(lantern, CustomBlocks.GARDEN_LANTERN.get().defaultBlockState(), 3);
         try {
-            insertSimpleDataBlock(BlockPartyDB.get(level), "GardenLanterns", owner, level, lantern);
+            insertSimpleDataBlock(BlockPartyDB.get(level), BlockPartyDB.TABLE_GARDEN_LANTERNS, owner, level, lantern);
         } catch (SQLException exception) {
             helper.fail("Expected garden lantern anchor setup to succeed: " + exception.getMessage());
             return;

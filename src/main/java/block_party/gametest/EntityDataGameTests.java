@@ -4,6 +4,7 @@ import block_party.BlockParty;
 import block_party.entities.Moe;
 import block_party.entities.MoeInHiding;
 import block_party.entities.goals.HideUntil;
+import block_party.entities.movement.PlayerMovementIntent;
 import block_party.entities.movement.RoutineIntent;
 import block_party.registry.CustomBlocks;
 import block_party.registry.CustomEntities;
@@ -133,37 +134,48 @@ public final class EntityDataGameTests {
     public static void moeWritesLegacyLayerNbtKeys(GameTestHelper helper) {
         Moe moe = new Moe(CustomEntities.MOE.get(), helper.getLevel());
         moe.setHome(new DimBlockPos(Level.OVERWORLD, new BlockPos(1, 2, 3)));
+        moe.startFollowSession(new UUID(100L, 200L), PlayerMovementIntent.PARTY_INVITE, 123, true, false);
         CompoundTag tag = moe.saveWithoutId(new CompoundTag());
-        assertHasKey(helper, tag, "DatabaseID");
-        assertHasKey(helper, tag, "BlockState");
-        assertHasKey(helper, tag, "Scale");
-        assertHasKey(helper, tag, "TileEntity");
-        assertHasKey(helper, tag, "Following");
-        assertHasKey(helper, tag, "Sitting");
-        assertHasKey(helper, tag, "OwnerUUID");
-        assertHasKey(helper, tag, "GivenName");
-        assertHasKey(helper, tag, "Gender");
-        assertHasKey(helper, tag, "BloodType");
-        assertHasKey(helper, tag, "Dere");
-        assertHasKey(helper, tag, "Zodiac");
-        assertHasKey(helper, tag, "Emotion");
-        assertHasKey(helper, tag, "FoodLevel");
-        assertHasKey(helper, tag, "Exhaustion");
-        assertHasKey(helper, tag, "Saturation");
-        assertHasKey(helper, tag, "Stress");
-        assertHasKey(helper, tag, "Relaxation");
-        assertHasKey(helper, tag, "Loyalty");
-        assertHasKey(helper, tag, "Affection");
-        assertHasKey(helper, tag, "Slouch");
-        assertHasKey(helper, tag, "Age");
-        assertHasKey(helper, tag, "HasHome");
-        assertHasKey(helper, tag, "Home");
-        assertHasKey(helper, tag, "RoutineIntent");
-        assertHasKey(helper, tag, "TimeUntilHungry");
-        assertHasKey(helper, tag, "TimeUntilLonely");
-        assertHasKey(helper, tag, "TimeUntilStress");
-        assertHasKey(helper, tag, "TimeSinceSleep");
-        assertHasKey(helper, tag, "Inventory");
+        assertHasKey(helper, tag, Moe.NBT_DATABASE_ID);
+        assertHasKey(helper, tag, Moe.NBT_BLOCK_STATE);
+        assertHasKey(helper, tag, Moe.NBT_SCALE);
+        assertHasKey(helper, tag, Moe.NBT_TILE_ENTITY);
+        assertHasKey(helper, tag, Moe.NBT_FOLLOWING);
+        assertHasKey(helper, tag, Moe.NBT_SITTING);
+        assertHasKey(helper, tag, Moe.NBT_OWNER_UUID);
+        assertHasKey(helper, tag, Moe.NBT_GIVEN_NAME);
+        assertHasKey(helper, tag, Moe.NBT_GENDER);
+        assertHasKey(helper, tag, Moe.NBT_BLOOD_TYPE);
+        assertHasKey(helper, tag, Moe.NBT_DERE);
+        assertHasKey(helper, tag, Moe.NBT_ZODIAC);
+        assertHasKey(helper, tag, Moe.NBT_EMOTION);
+        assertHasKey(helper, tag, Moe.NBT_FOOD_LEVEL);
+        assertHasKey(helper, tag, Moe.NBT_EXHAUSTION);
+        assertHasKey(helper, tag, Moe.NBT_SATURATION);
+        assertHasKey(helper, tag, Moe.NBT_STRESS);
+        assertHasKey(helper, tag, Moe.NBT_RELAXATION);
+        assertHasKey(helper, tag, Moe.NBT_LOYALTY);
+        assertHasKey(helper, tag, Moe.NBT_AFFECTION);
+        assertHasKey(helper, tag, Moe.NBT_SLOUCH);
+        assertHasKey(helper, tag, Moe.NBT_AGE);
+        assertHasKey(helper, tag, Moe.NBT_HAS_HOME);
+        assertHasKey(helper, tag, Moe.NBT_HOME);
+        assertHasKey(helper, tag, Moe.NBT_ROUTINE_INTENT);
+        assertHasKey(helper, tag, Moe.NBT_TIME_UNTIL_HUNGRY);
+        assertHasKey(helper, tag, Moe.NBT_TIME_UNTIL_LONELY);
+        assertHasKey(helper, tag, Moe.NBT_TIME_UNTIL_STRESS);
+        assertHasKey(helper, tag, Moe.NBT_TIME_SINCE_SLEEP);
+        assertHasKey(helper, tag, Moe.NBT_INVENTORY);
+        assertHasKey(helper, tag, Moe.NBT_FOLLOW_SESSION);
+        CompoundTag follow = tag.getCompound(Moe.NBT_FOLLOW_SESSION);
+        assertHasKey(helper, follow, Moe.NBT_FOLLOW_PLAYER_UUID);
+        assertHasKey(helper, follow, Moe.NBT_FOLLOW_INTENT);
+        assertHasKey(helper, follow, Moe.NBT_FOLLOW_TICKS_REMAINING);
+        assertHasKey(helper, follow, Moe.NBT_FOLLOW_CAN_CHANGE_DIMENSION);
+        assertEquals(helper, "00000000-0000-0064-0000-0000000000c8", follow.getString(Moe.NBT_FOLLOW_PLAYER_UUID), "Moe follow player UUID");
+        assertEquals(helper, PlayerMovementIntent.PARTY_INVITE.name(), follow.getString(Moe.NBT_FOLLOW_INTENT), "Moe follow intent");
+        assertEquals(helper, 123, follow.getInt(Moe.NBT_FOLLOW_TICKS_REMAINING), "Moe follow ticks remaining");
+        assertEquals(helper, true, follow.getBoolean(Moe.NBT_FOLLOW_CAN_CHANGE_DIMENSION), "Moe follow dimension flag");
         helper.succeed();
     }
 
@@ -569,19 +581,30 @@ public final class EntityDataGameTests {
     @GameTest(template = "empty", timeoutTicks = 20)
     public static void moeInHidingStateRoundTrips(GameTestHelper helper) {
         BlockPos attachPos = new BlockPos(3, 4, 5);
+        UUID owner = new UUID(840L, 480L);
         MoeInHiding hiding = new MoeInHiding(CustomEntities.MOE_IN_HIDING.get(), helper.getLevel());
         hiding.setDatabaseID(84L);
         hiding.setAttachPos(attachPos);
         hiding.setHideUntil(HideUntil.ONE_SECOND_PASSES);
         hiding.setTicksHidden(17);
+        hiding.setOwnerUUID(owner);
+
+        CompoundTag saved = hiding.saveWithoutId(new CompoundTag());
+        assertHasKey(helper, saved, MoeInHiding.NBT_DATABASE_ID);
+        assertHasKey(helper, saved, MoeInHiding.NBT_ATTACH_POS);
+        assertHasKey(helper, saved, MoeInHiding.NBT_HIDE_UNTIL);
+        assertHasKey(helper, saved, MoeInHiding.NBT_TICKS_HIDDEN);
+        assertHasKey(helper, saved, MoeInHiding.NBT_PLAYER_UUID);
+        assertHasKey(helper, saved, MoeInHiding.NBT_OWNER_UUID);
 
         MoeInHiding loaded = new MoeInHiding(CustomEntities.MOE_IN_HIDING.get(), helper.getLevel());
-        loaded.load(hiding.saveWithoutId(new CompoundTag()));
+        loaded.load(saved);
 
         assertEquals(helper, 84L, loaded.getDatabaseID(), "MoeInHiding database ID");
         assertEquals(helper, attachPos, loaded.getAttachPos(), "MoeInHiding attached position");
         assertEquals(helper, HideUntil.ONE_SECOND_PASSES, loaded.getHideUntil(), "MoeInHiding HideUntil");
         assertEquals(helper, 17, loaded.getTicksHidden(), "MoeInHiding ticksHidden");
+        assertEquals(helper, owner, loaded.getOwnerUUID(), "MoeInHiding owner UUID");
         helper.succeed();
     }
 

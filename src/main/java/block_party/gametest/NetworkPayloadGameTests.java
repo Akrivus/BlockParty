@@ -27,7 +27,9 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -355,6 +357,21 @@ public final class NetworkPayloadGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void payloadTypeIdsRemainStable(GameTestHelper helper) {
+        assertPayloadType(helper, NpcRemoveRequestPayload.TYPE, "npc_remove_request");
+        assertPayloadType(helper, NpcCallRequestPayload.TYPE, "npc_call_request");
+        assertPayloadType(helper, DialogueRespondPayload.TYPE, "dialogue_respond");
+        assertPayloadType(helper, DialogueClosePayload.TYPE, "dialogue_close");
+        assertPayloadType(helper, ShrineListRequestPayload.TYPE, "shrine_list_request");
+        assertPayloadType(helper, NpcCallPayload.TYPE, "npc_call");
+        assertPayloadType(helper, NpcDetailPayload.TYPE, "npc_detail");
+        assertPayloadType(helper, ControllerOpenPayload.TYPE, "controller_open");
+        assertPayloadType(helper, DialogueOpenPayload.TYPE, "dialogue_open");
+        assertPayloadType(helper, ShrineListPayload.TYPE, "shrine_list");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void dialogueResponseAcceptsRelatedNonOwner(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPartyDB db = BlockPartyDB.get(level);
@@ -497,6 +514,13 @@ public final class NetworkPayloadGameTests {
         return codec.decode(buffer);
     }
 
+    private static void assertPayloadType(GameTestHelper helper, CustomPacketPayload.Type<?> type, String path) {
+        ResourceLocation expected = BlockParty.source(path);
+        if (!expected.equals(type.id())) {
+            helper.fail("Expected payload type ID " + expected + ", got " + type.id());
+        }
+    }
+
     private static Moe spawnOwnedMoe(GameTestHelper helper, ServerLevel level, UUID owner, BlockPos relativeSource) {
         BlockPos source = helper.absolutePos(relativeSource);
         BlockState state = CustomBlocks.ENTRIES.get("sakura_log").get().defaultBlockState();
@@ -512,9 +536,9 @@ public final class NetworkPayloadGameTests {
         try {
             Connection connection = db.openConnection();
             try (PreparedStatement statement = connection.prepareStatement("""
-                    INSERT INTO NPCs (PlayerUUID, Name, BlockState, Gender)
+                    INSERT INTO %s (PlayerUUID, Name, BlockState, Gender)
                     VALUES ('not-a-uuid', 'Corrupt', 0, 'female');
-                    """, Statement.RETURN_GENERATED_KEYS)) {
+                    """.formatted(BlockPartyDB.TABLE_NPCS), Statement.RETURN_GENERATED_KEYS)) {
                 statement.executeUpdate();
                 try (ResultSet keys = statement.getGeneratedKeys()) {
                     if (!keys.next()) {
@@ -546,7 +570,7 @@ public final class NetworkPayloadGameTests {
     private static void deleteAllShrines(GameTestHelper helper, BlockPartyDB db) {
         try {
             Connection connection = db.openConnection();
-            try (PreparedStatement statement = connection.prepareStatement("DELETE FROM Shrines;")) {
+            try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + BlockPartyDB.TABLE_SHRINES + ";")) {
                 statement.executeUpdate();
             } finally {
                 db.free(connection);
@@ -556,11 +580,11 @@ public final class NetworkPayloadGameTests {
         }
     }
 
-    private static boolean insertShrine(GameTestHelper helper, BlockPartyDB db, long id, UUID owner, net.minecraft.resources.ResourceKey<Level> dimension, BlockPos pos) {
+    private static boolean insertShrine(GameTestHelper helper, BlockPartyDB db, long id, UUID owner, ResourceKey<Level> dimension, BlockPos pos) {
         try {
             Connection connection = db.openConnection();
             try (PreparedStatement statement = connection.prepareStatement("""
-                    INSERT INTO Shrines (DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID)
+                    INSERT INTO %s (DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID)
                     VALUES (?, ?, ?, ?, ?, ?)
                     ON CONFLICT(DatabaseID) DO UPDATE SET
                         PosDim = excluded.PosDim,
@@ -568,7 +592,7 @@ public final class NetworkPayloadGameTests {
                         PosY = excluded.PosY,
                         PosZ = excluded.PosZ,
                         PlayerUUID = excluded.PlayerUUID;
-                    """)) {
+                    """.formatted(BlockPartyDB.TABLE_SHRINES))) {
                 statement.setLong(1, id);
                 statement.setString(2, dimension.location().toString());
                 statement.setInt(3, pos.getX());

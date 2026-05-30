@@ -18,13 +18,16 @@ Risk scale:
 - Owner surface: `entities`, `entities.movement`, `entities.social`, `entities.environment`, `entities.preferences`, `entities.chores`, `world`, and `scene`.
 - Direction: prefer small domain services and value objects. Keep entity methods as state accessors or orchestration entry points; put scanning, scoring, planning, and persistence helpers in named collaborators.
 
-### Avoid fully qualified class names in implementation code
+### Keep cleanup guardrails active
 
-- Evidence: recent work has exposed places where code uses entire package names inline instead of imports or smaller adapter types.
-- Maintenance risk: Medium. Fully qualified names obscure the actual dependency graph and make file-level structure harder to scan.
+- Evidence: recent cleanup reduced inline fully qualified class names and consolidated table/NBT constants, but these are easy regressions to reintroduce during routine feature work.
+- Phase 1 baseline: as of 2026-05-29, `src/main/java` has 223 inline fully qualified class-name tokens after excluding `package`/`import` lines and string literals. Breakdown: `java.util` 125, `net.minecraft` 52, `block_party` 44, `java.sql` 2. Largest files by count are `BlockPartyDB.java` 54, `Moe.java` 32, `CustomBlocks.java` 11, `MoeLifecycleGameTests.java` 11, and `DecorativeContentGameTests.java` 10.
+- Phase 1 cleanup measurement: as of 2026-05-29, the same scan reports 30 inline fully qualified class-name tokens.
+- Guardrail: `./gradlew phase1Compliance` is wired into `check` and fails if inline FQCN usage rises above the Phase 1 budget or raw SQL table names are introduced in source strings.
+- Maintenance risk: Medium. Fully qualified names obscure the actual dependency graph, and duplicated persistence identifiers make world compatibility harder to reason about.
 - Gameplay importance: Low.
-- Owner surface: all Java packages.
-- Direction: use imports for normal dependencies. Keep fully qualified names only where they intentionally disambiguate same-named classes or avoid an import collision that would reduce readability.
+- Owner surface: `build.gradle`, all Java packages, and persistence-facing docs.
+- Direction: keep `phase1Compliance` passing. Use imports for normal dependencies. Keep fully qualified names only where they intentionally disambiguate same-named classes or avoid an import collision that would reduce readability. Use constants for table names and repeated NBT keys.
 
 ### Scene/datapack authoring diagnostics need a better content-author path
 

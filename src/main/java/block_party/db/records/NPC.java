@@ -4,6 +4,7 @@ import block_party.db.BlockPartyDB;
 import block_party.db.DimBlockPos;
 import block_party.blocks.entity.ShimenawaBlockEntity;
 import block_party.entities.Moe;
+import block_party.registry.CustomEntities;
 import block_party.world.structure.MoeStructureAssignment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -25,6 +26,7 @@ import java.util.Optional;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public record NPC(
         long databaseId,
@@ -64,7 +66,7 @@ public record NPC(
         Connection connection = db.openConnection();
         try (Statement statement = connection.createStatement()) {
             statement.execute("""
-                    CREATE TABLE IF NOT EXISTS NPCs (
+                    CREATE TABLE IF NOT EXISTS %s (
                         DatabaseID INTEGER PRIMARY KEY AUTOINCREMENT,
                         PosDim TEXT NOT NULL DEFAULT 'minecraft:overworld',
                         PosX INTEGER NOT NULL DEFAULT 0,
@@ -115,7 +117,7 @@ public record NPC(
                         StructureTargetZ INTEGER NOT NULL DEFAULT 0,
                         StructureState TEXT NOT NULL DEFAULT 'NONE'
                     );
-                    """);
+                    """.formatted(BlockPartyDB.TABLE_NPCS));
             ensureColumn(statement, "VisibleBlockState", "INTEGER NOT NULL DEFAULT 0");
             ensureColumn(statement, "Gender", "TEXT NOT NULL DEFAULT 'FEMALE'");
             ensureColumn(statement, "BloodType", "TEXT NOT NULL DEFAULT 'O'");
@@ -162,13 +164,13 @@ public record NPC(
 
     private static void ensureColumn(Statement statement, String column, String definition) throws SQLException {
         Set<String> columns = new HashSet<>();
-        try (ResultSet result = statement.executeQuery("PRAGMA table_info(NPCs);")) {
+        try (ResultSet result = statement.executeQuery("PRAGMA table_info(" + BlockPartyDB.TABLE_NPCS + ");")) {
             while (result.next()) {
                 columns.add(result.getString("name"));
             }
         }
         if (!columns.contains(column)) {
-            statement.execute("ALTER TABLE NPCs ADD COLUMN " + column + " " + definition + ";");
+            statement.execute("ALTER TABLE " + BlockPartyDB.TABLE_NPCS + " ADD COLUMN " + column + " " + definition + ";");
         }
     }
 
@@ -180,7 +182,7 @@ public record NPC(
         Connection connection = db.openConnection();
         boolean explicitId = databaseId != null;
         String sql = explicitId ? """
-                INSERT INTO NPCs (
+                INSERT INTO %s (
                     DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, Dead, Name, BlockState, VisibleBlockState, Hiding,
                     Gender, BloodType, Dere, Zodiac, Emotion, Scale, IsCorporeal, Health,
                     FoodLevel, Exhaustion, Saturation, Stress, Relaxation, Loyalty, Affection, Slouch, Age,
@@ -238,8 +240,8 @@ public record NPC(
                     StructureTargetY = excluded.StructureTargetY,
                     StructureTargetZ = excluded.StructureTargetZ,
                     StructureState = excluded.StructureState;
-                """ : """
-                INSERT INTO NPCs (
+                """.formatted(BlockPartyDB.TABLE_NPCS) : """
+                INSERT INTO %s (
                     PosDim, PosX, PosY, PosZ, PlayerUUID, Dead, Name, BlockState, VisibleBlockState, Hiding,
                     Gender, BloodType, Dere, Zodiac, Emotion, Scale, IsCorporeal, Health,
                     FoodLevel, Exhaustion, Saturation, Stress, Relaxation, Loyalty, Affection, Slouch, Age,
@@ -249,7 +251,7 @@ public record NPC(
                     StructureOffsetX, StructureOffsetY, StructureOffsetZ,
                     StructureTargetDim, StructureTargetX, StructureTargetY, StructureTargetZ, StructureState
                 ) VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-                """;
+                """.formatted(BlockPartyDB.TABLE_NPCS);
         try (PreparedStatement statement = connection.prepareStatement(sql, explicitId ? Statement.NO_GENERATED_KEYS : Statement.RETURN_GENERATED_KEYS)) {
             int offset = explicitId ? 1 : 0;
             if (explicitId) {
@@ -300,7 +302,7 @@ public record NPC(
     }
 
     public static NPC createFromShimenawa(BlockPartyDB db, ServerLevel level, ShimenawaBlockEntity entity) throws SQLException {
-        Moe moe = new Moe(block_party.registry.CustomEntities.MOE.get(), level);
+        Moe moe = new Moe(CustomEntities.MOE.get(), level);
         moe.setDatabaseID(entity.getDatabaseID());
         moe.moveToBlock(entity.getBlockPos());
         moe.setPlayerUUID(entity.getPlayerUUID());
@@ -318,7 +320,7 @@ public record NPC(
 
     public static Optional<NPC> find(BlockPartyDB db, long id) throws SQLException {
         Connection connection = db.openConnection();
-        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM NPCs WHERE DatabaseID = ? LIMIT 1;")) {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + BlockPartyDB.TABLE_NPCS + " WHERE " + BlockPartyDB.COLUMN_DATABASE_ID + " = ? LIMIT 1;")) {
             statement.setLong(1, id);
             try (ResultSet result = statement.executeQuery()) {
                 return result.next() ? Optional.of(read(result)) : Optional.empty();
@@ -331,11 +333,11 @@ public record NPC(
     public static Optional<NPC> findCardinalNpc(BlockPartyDB db, BlockState visibleBlockState) throws SQLException {
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT * FROM NPCs
+                SELECT * FROM %s
                 WHERE VisibleBlockState = ? AND Dead = 0
                 ORDER BY DatabaseID ASC
                 LIMIT 1;
-                """)) {
+                """.formatted(BlockPartyDB.TABLE_NPCS))) {
             statement.setInt(1, Block.getId(visibleBlockState));
             try (ResultSet result = statement.executeQuery()) {
                 return result.next() ? Optional.of(read(result)) : Optional.empty();
@@ -347,7 +349,7 @@ public record NPC(
 
     public static void delete(BlockPartyDB db, long id) throws SQLException {
         Connection connection = db.openConnection();
-        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM NPCs WHERE DatabaseID = ?;")) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + BlockPartyDB.TABLE_NPCS + " WHERE " + BlockPartyDB.COLUMN_DATABASE_ID + " = ?;")) {
             statement.setLong(1, id);
             statement.executeUpdate();
         } finally {
@@ -358,7 +360,7 @@ public record NPC(
     public void updateFromMoe(BlockPartyDB db, ServerLevel level, Moe moe) throws SQLException {
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                UPDATE NPCs
+                UPDATE %s
                 SET PosDim = ?, PosX = ?, PosY = ?, PosZ = ?,
                     PlayerUUID = ?, Name = ?, BlockState = ?, VisibleBlockState = ?,
                     Gender = ?, BloodType = ?, Dere = ?, Zodiac = ?, Emotion = ?,
@@ -372,7 +374,7 @@ public record NPC(
                     StructureTargetDim = ?, StructureTargetX = ?, StructureTargetY = ?, StructureTargetZ = ?,
                     StructureState = ?
                 WHERE DatabaseID = ?;
-                """)) {
+                """.formatted(BlockPartyDB.TABLE_NPCS))) {
             bindPosition(statement, 1, level.dimension(), moe.blockPosition());
             statement.setString(5, moe.getPlayerUUID().toString());
             statement.setString(6, moe.getGivenName());
@@ -409,11 +411,11 @@ public record NPC(
     public void markHiding(BlockPartyDB db, ServerLevel level, BlockPos hiddenPos, BlockState hiddenState) throws SQLException {
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                UPDATE NPCs
+                UPDATE %s
                 SET Hiding = 1, BlockState = ?, VisibleBlockState = ?,
                     HiddenPosDim = ?, HiddenPosX = ?, HiddenPosY = ?, HiddenPosZ = ?
                 WHERE DatabaseID = ?;
-                """)) {
+                """.formatted(BlockPartyDB.TABLE_NPCS))) {
             statement.setInt(1, Block.getId(hiddenState));
             statement.setInt(2, Block.getId(hiddenState));
             bindPosition(statement, 3, level.dimension(), hiddenPos);
@@ -427,10 +429,10 @@ public record NPC(
     public void markRevealed(BlockPartyDB db, ServerLevel level, BlockPos pos) throws SQLException {
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                UPDATE NPCs
+                UPDATE %s
                 SET Hiding = 0, PosDim = ?, PosX = ?, PosY = ?, PosZ = ?
                 WHERE DatabaseID = ?;
-                """)) {
+                """.formatted(BlockPartyDB.TABLE_NPCS))) {
             bindPosition(statement, 1, level.dimension(), pos);
             statement.setLong(5, this.databaseId);
             statement.executeUpdate();
@@ -441,7 +443,7 @@ public record NPC(
 
     public void markDead(BlockPartyDB db) throws SQLException {
         Connection connection = db.openConnection();
-        try (PreparedStatement statement = connection.prepareStatement("UPDATE NPCs SET Dead = 1 WHERE DatabaseID = ?;")) {
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE " + BlockPartyDB.TABLE_NPCS + " SET Dead = 1 WHERE " + BlockPartyDB.COLUMN_DATABASE_ID + " = ?;")) {
             statement.setLong(1, this.databaseId);
             statement.executeUpdate();
         } finally {
@@ -451,7 +453,7 @@ public record NPC(
 
     public static void updateHealth(BlockPartyDB db, long id, float health) throws SQLException {
         Connection connection = db.openConnection();
-        try (PreparedStatement statement = connection.prepareStatement("UPDATE NPCs SET Health = ? WHERE DatabaseID = ?;")) {
+        try (PreparedStatement statement = connection.prepareStatement("UPDATE " + BlockPartyDB.TABLE_NPCS + " SET Health = ? WHERE " + BlockPartyDB.COLUMN_DATABASE_ID + " = ?;")) {
             statement.setFloat(1, health);
             statement.setLong(2, id);
             statement.executeUpdate();
@@ -463,10 +465,10 @@ public record NPC(
     public static void updateFood(BlockPartyDB db, long id, float foodLevel, float exhaustion, float saturation) throws SQLException {
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                UPDATE NPCs
+                UPDATE %s
                 SET FoodLevel = ?, Exhaustion = ?, Saturation = ?
                 WHERE DatabaseID = ?;
-                """)) {
+                """.formatted(BlockPartyDB.TABLE_NPCS))) {
             statement.setFloat(1, foodLevel);
             statement.setFloat(2, exhaustion);
             statement.setFloat(3, saturation);
@@ -480,13 +482,13 @@ public record NPC(
     public static void updateStructureAssignment(BlockPartyDB db, long id, MoeStructureAssignment assignment) throws SQLException {
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                UPDATE NPCs
+                UPDATE %s
                 SET StructureCohortUUID = ?, StructureId = ?, StructurePartIndex = ?,
                     StructureOffsetX = ?, StructureOffsetY = ?, StructureOffsetZ = ?,
                     StructureTargetDim = ?, StructureTargetX = ?, StructureTargetY = ?, StructureTargetZ = ?,
                     StructureState = ?
                 WHERE DatabaseID = ?;
-                """)) {
+                """.formatted(BlockPartyDB.TABLE_NPCS))) {
             bindStructureAssignment(statement, 1, assignment);
             statement.setLong(12, id);
             statement.executeUpdate();
@@ -582,7 +584,7 @@ public record NPC(
         return value == null || value.isBlank() ? EMPTY_UUID : UUID.fromString(value);
     }
 
-    private static void applyPersistentString(CompoundTag data, String key, java.util.function.Consumer<String> setter) {
+    private static void applyPersistentString(CompoundTag data, String key, Consumer<String> setter) {
         if (data.contains(key)) {
             setter.accept(data.getString(key));
         }

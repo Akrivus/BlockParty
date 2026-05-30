@@ -1,5 +1,6 @@
 package block_party.scene;
 
+import java.util.Locale;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 
@@ -53,7 +54,7 @@ public record Speaker(
 
         public Identity fromValue(String key) {
             try {
-                return Identity.valueOf(key.toUpperCase(java.util.Locale.ROOT));
+                return Identity.valueOf(key.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException exception) {
                 return this;
             }
@@ -67,7 +68,7 @@ public record Speaker(
 
         public Position fromValue(String key) {
             try {
-                return Position.valueOf(key.toUpperCase(java.util.Locale.ROOT));
+                return Position.valueOf(key.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException exception) {
                 return this;
             }

@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
@@ -85,7 +86,7 @@ public final class AttentionGameTests {
         }
         moe.triggerScene(SceneTrigger.RIGHT_CLICK);
         moe.sceneManager().tick();
-        if (!moe.hasDialogue() || !moe.getDialogue().text().toLowerCase(java.util.Locale.ROOT).contains("oak sapling")
+        if (!moe.hasDialogue() || !moe.getDialogue().text().toLowerCase(Locale.ROOT).contains("oak sapling")
                 || !moe.getDialogue().responses().containsKey(Response.NEXT_RESPONSE)) {
             helper.fail("Expected oak forest attention scene dialogue, got " + (moe.hasDialogue() ? moe.getDialogue().text() : "<none>"));
             return;
@@ -344,7 +345,7 @@ public final class AttentionGameTests {
 
     private static void clearAttention(BlockPartyDB db) throws SQLException {
         Connection connection = db.openConnection();
-        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM AttentionRecords;")) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + BlockPartyDB.TABLE_ATTENTION_RECORDS + ";")) {
             statement.executeUpdate();
         } finally {
             db.free(connection);

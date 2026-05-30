@@ -4,6 +4,8 @@ import block_party.entities.Moe;
 import block_party.entities.environment.MoeEnvironmentalObservation;
 import block_party.entities.environment.MoeEnvironmentalRules;
 import block_party.entities.environment.MoePlaceMemory;
+import block_party.entities.preferences.MoeItemPreferences.PreferenceSignal;
+import block_party.entities.social.MoeSocialRules.SocialPlaceBehavior;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -67,15 +69,15 @@ public enum SceneObservations implements SceneObservation {
     OBSERVED_AFFINITY(moe -> latestObservationKind(moe, MoeEnvironmentalObservation.Kind.AFFINITY)),
     OBSERVED_TENSION(moe -> latestObservationKind(moe, MoeEnvironmentalObservation.Kind.TENSION)),
     HAS_SOCIAL_PLACE(moe -> moe.socialPlaceMemoryForTests().isPresent()),
-    SOCIAL_PLACE_SHARE(moe -> socialPlaceBehavior(moe, block_party.entities.social.MoeSocialRules.SocialPlaceBehavior.SHARE)),
-    SOCIAL_PLACE_ORBIT(moe -> socialPlaceBehavior(moe, block_party.entities.social.MoeSocialRules.SocialPlaceBehavior.ORBIT)),
-    SOCIAL_PLACE_GUARD(moe -> socialPlaceBehavior(moe, block_party.entities.social.MoeSocialRules.SocialPlaceBehavior.GUARD)),
-    SOCIAL_PLACE_AVOID(moe -> socialPlaceBehavior(moe, block_party.entities.social.MoeSocialRules.SocialPlaceBehavior.AVOID)),
+    SOCIAL_PLACE_SHARE(moe -> socialPlaceBehavior(moe, SocialPlaceBehavior.SHARE)),
+    SOCIAL_PLACE_ORBIT(moe -> socialPlaceBehavior(moe, SocialPlaceBehavior.ORBIT)),
+    SOCIAL_PLACE_GUARD(moe -> socialPlaceBehavior(moe, SocialPlaceBehavior.GUARD)),
+    SOCIAL_PLACE_AVOID(moe -> socialPlaceBehavior(moe, SocialPlaceBehavior.AVOID)),
     HAS_GIFT_MEMORY(moe -> moe.latestGiftPreferenceSignal().isPresent()),
-    LIKED_GIFT(moe -> moe.latestGiftPreferenceSignal().map(block_party.entities.preferences.MoeItemPreferences.PreferenceSignal::liked).orElse(false)),
-    DISLIKED_GIFT(moe -> moe.latestGiftPreferenceSignal().map(block_party.entities.preferences.MoeItemPreferences.PreferenceSignal::disliked).orElse(false)),
-    INTERESTING_GIFT(moe -> moe.latestGiftPreferenceSignal().map(block_party.entities.preferences.MoeItemPreferences.PreferenceSignal::interesting).orElse(false)),
-    BEGGED_FOR_GIFT(moe -> moe.latestGiftPreferenceSignal().map(block_party.entities.preferences.MoeItemPreferences.PreferenceSignal::wantsToBeg).orElse(false)),
+    LIKED_GIFT(moe -> moe.latestGiftPreferenceSignal().map(PreferenceSignal::liked).orElse(false)),
+    DISLIKED_GIFT(moe -> moe.latestGiftPreferenceSignal().map(PreferenceSignal::disliked).orElse(false)),
+    INTERESTING_GIFT(moe -> moe.latestGiftPreferenceSignal().map(PreferenceSignal::interesting).orElse(false)),
+    BEGGED_FOR_GIFT(moe -> moe.latestGiftPreferenceSignal().map(PreferenceSignal::wantsToBeg).orElse(false)),
     SHELTERING_FROM_RAIN(moe -> moe.level().isRaining()
             && MoeEnvironmentalRules.isStrongShelter(moe.level(), moe.blockPosition())),
     HIMEDERE(moe -> trait(moe.getDere(), "HIMEDERE")),
@@ -220,7 +222,7 @@ public enum SceneObservations implements SceneObservation {
                 .orElse(false);
     }
 
-    private static boolean socialPlaceBehavior(Moe moe, block_party.entities.social.MoeSocialRules.SocialPlaceBehavior behavior) {
+    private static boolean socialPlaceBehavior(Moe moe, SocialPlaceBehavior behavior) {
         return moe.socialPlaceMemoryForTests()
                 .map(memory -> memory.behavior() == behavior)
                 .orElse(false);

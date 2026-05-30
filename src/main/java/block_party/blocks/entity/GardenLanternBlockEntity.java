@@ -1,6 +1,7 @@
 package block_party.blocks.entity;
 
 import block_party.registry.CustomBlockEntities;
+import block_party.db.BlockPartyDB;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -11,6 +12,6 @@ public class GardenLanternBlockEntity extends AbstractDataBlockEntity {
 
     @Override
     public String getTableName() {
-        return "GardenLanterns";
+        return BlockPartyDB.TABLE_GARDEN_LANTERNS;
     }
 }

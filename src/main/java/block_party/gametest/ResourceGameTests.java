@@ -74,10 +74,10 @@ public final class ResourceGameTests {
 
     private static void assertVanillaInBlockTag(GameTestHelper helper, String entryPath, String tagPath) {
         ResourceLocation entryId = ResourceLocation.withDefaultNamespace(entryPath);
-        Holder.Reference<net.minecraft.world.level.block.Block> holder = BuiltInRegistries.BLOCK
+        Holder.Reference<Block> holder = BuiltInRegistries.BLOCK
                 .get(ResourceKey.create(Registries.BLOCK, entryId))
                 .orElseThrow(() -> new IllegalStateException("Missing registry entry " + entryId));
-        TagKey<net.minecraft.world.level.block.Block> tag = TagKey.create(Registries.BLOCK, BlockParty.source(tagPath));
+        TagKey<Block> tag = TagKey.create(Registries.BLOCK, BlockParty.source(tagPath));
         if (!holder.is(tag)) {
             helper.fail("Expected " + entryId + " in tag " + tag.location());
         }
@@ -85,10 +85,10 @@ public final class ResourceGameTests {
 
     private static void assertVanillaNotInBlockTag(GameTestHelper helper, String entryPath, String tagPath) {
         ResourceLocation entryId = ResourceLocation.withDefaultNamespace(entryPath);
-        Holder.Reference<net.minecraft.world.level.block.Block> holder = BuiltInRegistries.BLOCK
+        Holder.Reference<Block> holder = BuiltInRegistries.BLOCK
                 .get(ResourceKey.create(Registries.BLOCK, entryId))
                 .orElseThrow(() -> new IllegalStateException("Missing registry entry " + entryId));
-        TagKey<net.minecraft.world.level.block.Block> tag = TagKey.create(Registries.BLOCK, BlockParty.source(tagPath));
+        TagKey<Block> tag = TagKey.create(Registries.BLOCK, BlockParty.source(tagPath));
         if (holder.is(tag)) {
             helper.fail("Expected " + entryId + " outside tag " + tag.location());
         }

@@ -24,8 +24,10 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -123,11 +125,11 @@ public final class Attention {
         return true;
     }
 
-    private static java.util.Optional<TreeCutMemory> recentTreeCut(ServerLevel level, BlockPos pos, Definition definition) {
+    private static Optional<TreeCutMemory> recentTreeCut(ServerLevel level, BlockPos pos, Definition definition) {
         String key = levelKey(level);
         List<TreeCutMemory> memories = RECENT_TREE_CUTS.get(key);
         if (memories == null || memories.isEmpty()) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         long now = level.getGameTime();
         memories.removeIf(memory -> now - memory.gameTime() > TREE_CUT_MEMORY_TICKS);
@@ -135,7 +137,7 @@ public final class Attention {
         return memories.stream()
                 .filter(memory -> memory.definition().equals(definition))
                 .filter(memory -> memory.pos().distSqr(pos) <= radiusSqr)
-                .min(java.util.Comparator
+                .min(Comparator
                         .comparingDouble((TreeCutMemory memory) -> memory.pos().distSqr(pos))
                         .thenComparingLong(memory -> -memory.gameTime()));
     }

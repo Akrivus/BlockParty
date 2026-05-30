@@ -20,6 +20,7 @@ import block_party.registry.SceneFilters;
 import block_party.world.CellPhone;
 import block_party.world.Attention;
 import block_party.world.TsukumogamiSpawns;
+import block_party.world.structure.MoeStructureCohortCoordinator;
 import block_party.db.voicemail.Voicemails;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
@@ -61,7 +62,7 @@ public final class BlockParty {
         NeoForge.EVENT_BUS.addListener(BlockPartyDB::onServerStopped);
         NeoForge.EVENT_BUS.addListener(CellPhone::onServerTick);
         NeoForge.EVENT_BUS.addListener(CellPhone::onServerStopped);
-        NeoForge.EVENT_BUS.addListener(block_party.world.structure.MoeStructureCohortCoordinator::onServerTick);
+        NeoForge.EVENT_BUS.addListener(MoeStructureCohortCoordinator::onServerTick);
         NeoForge.EVENT_BUS.addListener(Attention::onServerStopped);
         NeoForge.EVENT_BUS.addListener(Attention::onBlockBroken);
         NeoForge.EVENT_BUS.addListener(Attention::onBlockDrops);

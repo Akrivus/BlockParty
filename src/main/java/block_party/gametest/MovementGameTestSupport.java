@@ -33,9 +33,9 @@ final class MovementGameTestSupport {
     static void insertLocation(BlockPartyDB db, UUID owner, ServerLevel level, BlockPos pos, String condition, int priority) throws SQLException {
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                INSERT INTO Locations (PosDim, PosX, PosY, PosZ, PlayerUUID, RequiredCondition, Priority)
+                INSERT INTO %s (PosDim, PosX, PosY, PosZ, PlayerUUID, RequiredCondition, Priority)
                 VALUES (?, ?, ?, ?, ?, ?, ?);
-                """)) {
+                """.formatted(BlockPartyDB.TABLE_LOCATIONS))) {
             bindPosition(statement, level, pos);
             statement.setString(5, owner.toString());
             statement.setString(6, condition);

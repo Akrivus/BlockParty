@@ -108,10 +108,10 @@ public final class BlockEntityGameTests {
         BlockPartyDB db = configuredDb(helper);
         try {
             BlockPartyDB.createDataBlockTables(db);
-            assertTableExists(helper, db, "Shrines");
-            assertTableExists(helper, db, "GardenLanterns");
-            assertTableExists(helper, db, "Locations");
-            assertTableExists(helper, db, "Saplings");
+            assertTableExists(helper, db, BlockPartyDB.TABLE_SHRINES);
+            assertTableExists(helper, db, BlockPartyDB.TABLE_GARDEN_LANTERNS);
+            assertTableExists(helper, db, BlockPartyDB.TABLE_LOCATIONS);
+            assertTableExists(helper, db, BlockPartyDB.TABLE_SAPLINGS);
         } catch (SQLException exception) {
             helper.fail("Expected data block tables to be creatable: " + exception.getMessage());
             return;
@@ -137,12 +137,12 @@ public final class BlockEntityGameTests {
         entity.markClaimed(owner);
 
         try {
-            if (!db.dataBlockRowExists("GardenLanterns", entity.getDatabaseID())) {
+            if (!db.dataBlockRowExists(BlockPartyDB.TABLE_GARDEN_LANTERNS, entity.getDatabaseID())) {
                 helper.fail("Expected claimed garden lantern to create a row");
                 return;
             }
             level.removeBlock(pos, false);
-            if (db.dataBlockRowExists("GardenLanterns", entity.getDatabaseID())) {
+            if (db.dataBlockRowExists(BlockPartyDB.TABLE_GARDEN_LANTERNS, entity.getDatabaseID())) {
                 helper.fail("Expected removed garden lantern to delete its row");
                 return;
             }
@@ -172,7 +172,7 @@ public final class BlockEntityGameTests {
         try {
             Connection connection = db.openConnection();
             try (PreparedStatement statement = connection.prepareStatement(
-                    "SELECT RequiredCondition, Priority FROM Locations WHERE DatabaseID = ? LIMIT 1;")) {
+                    "SELECT RequiredCondition, Priority FROM " + BlockPartyDB.TABLE_LOCATIONS + " WHERE DatabaseID = ? LIMIT 1;")) {
                 statement.setLong(1, entity.getDatabaseID());
                 try (ResultSet result = statement.executeQuery()) {
                     if (!result.next()) {
@@ -456,7 +456,7 @@ public final class BlockEntityGameTests {
     private static void deleteAllShrines(GameTestHelper helper, BlockPartyDB db) {
         try {
             Connection connection = db.openConnection();
-            try (PreparedStatement statement = connection.prepareStatement("DELETE FROM Shrines;")) {
+            try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + BlockPartyDB.TABLE_SHRINES + ";")) {
                 statement.executeUpdate();
             } finally {
                 db.free(connection);
@@ -551,7 +551,7 @@ public final class BlockEntityGameTests {
         BlockPartyDB db = BlockPartyDB.get(helper.getLevel());
         try {
             Connection connection = db.openConnection();
-            try (ResultSet result = connection.createStatement().executeQuery("SELECT COUNT(*) FROM NPCs;")) {
+            try (ResultSet result = connection.createStatement().executeQuery("SELECT COUNT(*) FROM " + BlockPartyDB.TABLE_NPCS + ";")) {
                 return result.next() ? result.getInt(1) : 0;
             } finally {
                 db.free(connection);

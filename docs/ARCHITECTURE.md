@@ -303,7 +303,7 @@ SQLite dependency:
 
 `BlockPartyDB` opens the DB at the world path `blockparty.db`, creates tables on world load, and closes tracked connections on world unload.
 
-Risk note: SQL strings are assembled manually in several places. Some values use prepared-statement columns, but table names and selected IDs are interpolated into SQL strings. Static reading suggests the ID sources are internal numeric values, so exploitability may be low, but future cleanup should preserve behavior while tightening safety later.
+Risk note: SQL strings are still assembled manually in several places, but table names and shared columns are now treated as compatibility constants. Keep dynamic values in prepared-statement bindings, and run `phase1Compliance` after DB edits to catch raw table-name literal regressions.
 
 ### Chores, Pranks, And Adventuring
 
@@ -350,7 +350,7 @@ DRY rule:
 
 - Shared content behavior should become a scene action/filter or a domain service before it is copied into multiple item/entity methods.
 - Scene-pack-facing concepts should be named once in `SceneActions`, `SceneFilters`, and `SCENE_DATAPACK_SCHEMA.md`.
-- Registry IDs, payload IDs, table names, NBT keys, and resource paths are compatibility surfaces. Reuse constants or shared helpers when code needs the same value in more than one place.
+- Registry IDs, payload IDs, table names, NBT keys, and resource paths are compatibility surfaces. Reuse constants or shared helpers when code needs the same value in more than one place. `phase1Compliance` enforces the current FQCN budget and raw SQL table-name guardrail; GameTests enforce the behavior-level contracts.
 
 ## Authoring Contracts
 
@@ -374,3 +374,4 @@ For generated scene packs, Codex or another authoring tool should target the sch
 - Keep `COMPATIBILITY_NOTES.md` for intentional differences from the old Forge baseline.
 - Keep `ENTITY_STATE_FLOW.md` focused on runtime state authority and lifecycle flow.
 - Keep `SCENE_DATAPACK_SCHEMA.md` author-facing. Avoid Java-only terminology there unless authors need it to make correct content.
+- Run `./gradlew phase1Compliance` before cleanup-heavy changes. It enforces the current inline FQCN budget and rejects raw SQL table-name literals. Run `./gradlew installGitHooks` once per clone to enable the same guardrail as a pre-commit hook.

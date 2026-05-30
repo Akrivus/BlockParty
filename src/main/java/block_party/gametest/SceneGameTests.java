@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -705,7 +706,7 @@ public final class SceneGameTests {
         Moe moe = spawnMoe(helper, owner);
         ServerLevel level = helper.getLevel();
         try {
-            insertSimpleDataBlock(BlockPartyDB.get(level), "GardenLanterns", owner, level, helper.absolutePos(new BlockPos(5, 1, 1)));
+            insertSimpleDataBlock(BlockPartyDB.get(level), BlockPartyDB.TABLE_GARDEN_LANTERNS, owner, level, helper.absolutePos(new BlockPos(5, 1, 1)));
         } catch (SQLException exception) {
             helper.fail("Expected anchor filter setup to succeed: " + exception.getMessage());
             return;
@@ -745,7 +746,7 @@ public final class SceneGameTests {
         ServerLevel level = helper.getLevel();
         BlockPos anchorPos = helper.absolutePos(new BlockPos(6, 1, 1));
         try {
-            insertSimpleDataBlock(BlockPartyDB.get(level), "GardenLanterns", owner, level, anchorPos);
+            insertSimpleDataBlock(BlockPartyDB.get(level), BlockPartyDB.TABLE_GARDEN_LANTERNS, owner, level, anchorPos);
         } catch (SQLException exception) {
             helper.fail("Expected anchor action setup to succeed: " + exception.getMessage());
             return;
@@ -872,7 +873,7 @@ public final class SceneGameTests {
         BlockPos garden = helper.absolutePos(new BlockPos(8, 1, 1));
         level.setBlock(garden.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
         try {
-            insertSimpleDataBlock(BlockPartyDB.get(level), "GardenLanterns", owner, level, garden);
+            insertSimpleDataBlock(BlockPartyDB.get(level), BlockPartyDB.TABLE_GARDEN_LANTERNS, owner, level, garden);
         } catch (SQLException exception) {
             helper.fail("Expected social place setup to succeed: " + exception.getMessage());
             return;
@@ -996,7 +997,7 @@ public final class SceneGameTests {
     }
 
     private static void assertEquals(GameTestHelper helper, Object expected, Object actual, String label) {
-        if (!java.util.Objects.equals(expected, actual)) {
+        if (!Objects.equals(expected, actual)) {
             helper.fail("Expected " + label + " to be " + expected + ", got " + actual);
         }
     }

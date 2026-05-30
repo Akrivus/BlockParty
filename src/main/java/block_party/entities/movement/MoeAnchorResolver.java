@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.server.level.ServerLevel;
 
 public final class MoeAnchorResolver {
     private static final UUID EMPTY_UUID = new UUID(0L, 0L);
@@ -27,7 +28,7 @@ public final class MoeAnchorResolver {
         if (moe.hasHome() && !moe.getHome().isEmpty()) {
             anchors.add(new MoeAnchor(MoeAnchorType.HOME, moe.getDatabaseID(), moe.getHome(), moe.getPlayerUUID(), 10));
         }
-        if (!(moe.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+        if (!(moe.level() instanceof ServerLevel level)) {
             return List.copyOf(anchors);
         }
         BlockPartyDB db = BlockPartyDB.get(level);

@@ -10,8 +10,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.CommonComponents;
@@ -78,9 +81,9 @@ public class CellPhoneScreen extends ControllerScreen {
         int adjustedMouseY = Math.round(mouseY - yOffset);
         graphics.pose().pushPose();
         graphics.pose().translate(xOffset + this.width / 2.0F, yOffset + 2.0F + HEIGHT / 2.0F, 0.0F);
-        graphics.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees(rotation));
+        graphics.pose().mulPose(Axis.ZP.rotationDegrees(rotation));
         graphics.pose().translate(-this.width / 2.0F, -2.0F - HEIGHT / 2.0F, 0.0F);
-        graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, CELL_PHONE_TEXTURE, this.left(WIDTH), 2, 0.0F, 0.0F, WIDTH, HEIGHT, 256, 256);
+        graphics.blit(RenderType::guiTextured, CELL_PHONE_TEXTURE, this.left(WIDTH), 2, 0.0F, 0.0F, WIDTH, HEIGHT, 256, 256);
         this.renderScrollBar(graphics);
         this.renderPhoneWidgets(graphics, adjustedMouseX, adjustedMouseY, partialTick);
         graphics.pose().popPose();
@@ -92,7 +95,7 @@ public class CellPhoneScreen extends ControllerScreen {
     private void renderScrollBar(GuiGraphics graphics) {
         int denominator = Math.max(1, this.contacts.size() - this.contacts.size() % 4);
         int y = (int) (Math.min((double) this.start / denominator, 1.0D) * 35.0D);
-        graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, CELL_PHONE_TEXTURE, this.absoluteCenter(-37), 40 + y, 108, 82, 7, 15, 256, 256);
+        graphics.blit(RenderType::guiTextured, CELL_PHONE_TEXTURE, this.absoluteCenter(-37), 40 + y, 108, 82, 7, 15, 256, 256);
     }
 
     private void loadContacts() {
@@ -310,13 +313,13 @@ public class CellPhoneScreen extends ControllerScreen {
 
         @Override
         protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-            graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, CELL_PHONE_TEXTURE, this.getX(), this.getY(), 108, this.isHoveredOrFocused() ? 98 : 115, this.width, this.height, 256, 256);
+            graphics.blit(RenderType::guiTextured, CELL_PHONE_TEXTURE, this.getX(), this.getY(), 108, this.isHoveredOrFocused() ? 98 : 115, this.width, this.height, 256, 256);
             int color = this.reachable ? this.isHoveredOrFocused() ? 0xFFFFFF : 0xFF7FB6 : 0x777777;
-            graphics.drawString(net.minecraft.client.Minecraft.getInstance().font, this.getMessage(), this.getX() + 10, this.getY() + 4, color, false);
+            graphics.drawString(Minecraft.getInstance().font, this.getMessage(), this.getX() + 10, this.getY() + 4, color, false);
         }
 
         private static boolean isReachable(NpcDetailPayload npc) {
-            net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
+            Minecraft minecraft = Minecraft.getInstance();
             if (minecraft.player == null) {
                 return false;
             }
@@ -332,7 +335,7 @@ public class CellPhoneScreen extends ControllerScreen {
         @Override
         protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             int textureX = this.isHoveredOrFocused() ? 116 : 108;
-            graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, CELL_PHONE_TEXTURE, this.getX(), this.getY(), textureX, 73, this.width, this.height, 256, 256);
+            graphics.blit(RenderType::guiTextured, CELL_PHONE_TEXTURE, this.getX(), this.getY(), textureX, 73, this.width, this.height, 256, 256);
         }
     }
 }

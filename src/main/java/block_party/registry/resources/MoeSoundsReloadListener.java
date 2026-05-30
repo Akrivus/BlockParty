@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -67,7 +68,7 @@ public final class MoeSoundsReloadListener implements PreparableReloadListener {
                 if (!sounds.isEmpty()) {
                     overrides.put(block.get(), sounds);
                 }
-            } catch (RuntimeException | java.io.IOException ignored) {
+            } catch (RuntimeException | IOException ignored) {
                 // Fails closed; missing optional sound overrides fall back to default Moe sounds.
             }
         });

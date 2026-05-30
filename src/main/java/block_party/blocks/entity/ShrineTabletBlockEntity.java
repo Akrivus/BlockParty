@@ -2,6 +2,7 @@ package block_party.blocks.entity;
 
 import block_party.entities.Moe;
 import block_party.entities.MoeSpawner;
+import block_party.db.BlockPartyDB;
 import block_party.network.CustomMessenger;
 import block_party.registry.CustomBlockEntities;
 import block_party.registry.CustomSounds;
@@ -23,7 +24,7 @@ public class ShrineTabletBlockEntity extends AbstractDataBlockEntity {
 
     @Override
     public String getTableName() {
-        return "Shrines";
+        return BlockPartyDB.TABLE_SHRINES;
     }
 
     @Override

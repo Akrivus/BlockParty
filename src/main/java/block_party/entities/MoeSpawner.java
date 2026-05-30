@@ -2,6 +2,7 @@ package block_party.entities;
 
 import block_party.db.BlockPartyDB;
 import block_party.db.records.NPC;
+import block_party.db.DimBlockPos;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomTags;
 import block_party.world.CellPhone;
@@ -71,7 +72,7 @@ public final class MoeSpawner {
         configure.accept(moe);
         if (!moe.hasHome()) {
             moe.setHasHome(true);
-            moe.setHome(new block_party.db.DimBlockPos(level.dimension(), spawnPos));
+            moe.setHome(new DimBlockPos(level.dimension(), spawnPos));
         }
         Resolution resolution = resolve(level, moe, player);
         return resolution == null ? null : resolution.moe();
@@ -114,7 +115,7 @@ public final class MoeSpawner {
         configure.accept(moe);
         if (!moe.hasHome()) {
             moe.setHasHome(true);
-            moe.setHome(new block_party.db.DimBlockPos(level.dimension(), spawnPos));
+            moe.setHome(new DimBlockPos(level.dimension(), spawnPos));
         }
         return resolve(level, moe, player);
     }

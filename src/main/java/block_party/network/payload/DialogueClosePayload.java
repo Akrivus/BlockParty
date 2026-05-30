@@ -1,5 +1,6 @@
 package block_party.network.payload;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import block_party.BlockParty;
@@ -10,6 +11,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -23,7 +25,7 @@ public record DialogueClosePayload(long databaseId) implements CustomPacketPaylo
     }
 
     public static boolean closeDialogue(ServerLevel level, BlockPartyDB db, UUID player, long databaseId) {
-        java.util.Optional<Moe> moe = db.findRelatedLoadedMoe(level, player, databaseId);
+        Optional<Moe> moe = db.findRelatedLoadedMoe(level, player, databaseId);
         if (moe.isEmpty()) {
             return false;
         }
@@ -35,7 +37,7 @@ public record DialogueClosePayload(long databaseId) implements CustomPacketPaylo
         if (!(player.level() instanceof ServerLevel level)) {
             return false;
         }
-        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer && VoicemailPlayback.close(serverPlayer)) {
+        if (player instanceof ServerPlayer serverPlayer && VoicemailPlayback.close(serverPlayer)) {
             return true;
         }
         return closeDialogue(level, BlockPartyDB.get(level), player.getUUID(), databaseId);

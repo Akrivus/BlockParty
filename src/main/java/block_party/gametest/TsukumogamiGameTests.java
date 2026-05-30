@@ -18,6 +18,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -106,7 +107,7 @@ public final class TsukumogamiGameTests {
             helper.fail("Expected one mature tsukumogami candidate to spawn, got " + spawned);
             return;
         }
-        List<Moe> moes = level.getEntitiesOfClass(Moe.class, new net.minecraft.world.phys.AABB(pos.above()).inflate(1.0D));
+        List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(pos.above()).inflate(1.0D));
         if (moes.size() != 1) {
             helper.fail("Expected spawned tsukumogami Moe above source block, got " + moes.size());
             return;
@@ -167,9 +168,9 @@ public final class TsukumogamiGameTests {
     private static void insertShrine(BlockPartyDB db, ServerLevel level, BlockPos pos, UUID owner) throws SQLException {
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                INSERT INTO Shrines (DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID)
+                INSERT INTO %s (DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID)
                 VALUES (?, ?, ?, ?, ?, ?);
-                """)) {
+                """.formatted(BlockPartyDB.TABLE_SHRINES))) {
             statement.setLong(1, Math.abs(pos.asLong()));
             statement.setString(2, level.dimension().location().toString());
             statement.setInt(3, pos.getX());
@@ -184,8 +185,8 @@ public final class TsukumogamiGameTests {
 
     private static void clearTsukumogamiState(BlockPartyDB db) throws SQLException {
         Connection connection = db.openConnection();
-        try (PreparedStatement shrineStatement = connection.prepareStatement("DELETE FROM Shrines;");
-             PreparedStatement candidateStatement = connection.prepareStatement("DELETE FROM TsukumogamiCandidates;")) {
+        try (PreparedStatement shrineStatement = connection.prepareStatement("DELETE FROM " + BlockPartyDB.TABLE_SHRINES + ";");
+             PreparedStatement candidateStatement = connection.prepareStatement("DELETE FROM " + BlockPartyDB.TABLE_TSUKUMOGAMI_CANDIDATES + ";")) {
             shrineStatement.executeUpdate();
             candidateStatement.executeUpdate();
         } finally {

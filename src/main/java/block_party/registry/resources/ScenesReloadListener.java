@@ -40,9 +40,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
@@ -87,8 +89,8 @@ public final class ScenesReloadListener implements PreparableReloadListener {
     public CompletableFuture<Void> reload(
             PreparationBarrier barrier,
             ResourceManager resourceManager,
-            java.util.concurrent.Executor backgroundExecutor,
-            java.util.concurrent.Executor gameExecutor) {
+            Executor backgroundExecutor,
+            Executor gameExecutor) {
         return CompletableFuture
                 .supplyAsync(() -> load(resourceManager), backgroundExecutor)
                 .thenCompose(barrier::wait)
@@ -229,7 +231,7 @@ public final class ScenesReloadListener implements PreparableReloadListener {
 
     private static PlayerMovementIntent parseMovementIntent(String value) {
         try {
-            return PlayerMovementIntent.valueOf(value.toUpperCase(java.util.Locale.ROOT));
+            return PlayerMovementIntent.valueOf(value.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException exception) {
             return PlayerMovementIntent.FOLLOW_REQUEST;
         }
@@ -286,7 +288,7 @@ public final class ScenesReloadListener implements PreparableReloadListener {
                 Speaker.Identity.CHARACTER.fromValue(GsonHelper.getAsString(json, "identity", "character")),
                 Speaker.Position.LEFT.fromValue(GsonHelper.getAsString(json, "position", "left")),
                 GsonHelper.getAsString(json, "animation", "DEFAULT"),
-                GsonHelper.getAsString(json, "emotion", "NORMAL").toUpperCase(java.util.Locale.ROOT),
+                GsonHelper.getAsString(json, "emotion", "NORMAL").toUpperCase(Locale.ROOT),
                 speaks,
                 speaks ? resource(GsonHelper.getAsString(json, "voice", "")) : null,
                 GsonHelper.getAsFloat(json, "scale", 1.0F));

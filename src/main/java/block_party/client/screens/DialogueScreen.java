@@ -20,11 +20,13 @@ import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -77,11 +79,11 @@ public class DialogueScreen extends Screen {
     private void renderPanel(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         int left = this.left();
         int top = this.bottom() - HEIGHT;
-        graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, DIALOGUE_TEXTURE, left, top, 0.0F, 0.0F, WIDTH, HEIGHT, 256, 256);
+        graphics.blit(RenderType::guiTextured, DIALOGUE_TEXTURE, left, top, 0.0F, 0.0F, WIDTH, HEIGHT, 256, 256);
 
         if (!this.responseMode || this.dialogue.tooltip()) {
             String visible = this.visibleText();
-            List<net.minecraft.util.FormattedCharSequence> lines = this.font.split(Component.literal(visible), 232);
+            List<FormattedCharSequence> lines = this.font.split(Component.literal(visible), 232);
             for (int index = 0; index < Math.min(3, lines.size()); ++index) {
                 graphics.drawString(this.font, lines.get(index), left + 5, top + 5 + index * 9, 0xFFFFFFFF, true);
             }
@@ -273,7 +275,7 @@ public class DialogueScreen extends Screen {
         @Override
         protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             int y = this.textureY + (this.isHoveredOrFocused() ? 10 : 0);
-            graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, DIALOGUE_TEXTURE, this.getX(), this.getY(), this.textureX, y, this.width, this.height, 256, 256);
+            graphics.blit(RenderType::guiTextured, DIALOGUE_TEXTURE, this.getX(), this.getY(), this.textureX, y, this.width, this.height, 256, 256);
         }
     }
 
@@ -288,8 +290,8 @@ public class DialogueScreen extends Screen {
         @Override
         protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             int y = this.isHoveredOrFocused() ? 61 : 48;
-            graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, DIALOGUE_TEXTURE, this.getX(), this.getY(), 4.0F, y, this.width, this.height, 256, 256);
-            graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, DIALOGUE_TEXTURE, this.getX() + 2, this.getY() + 1, this.response.ordinal() * 10, 74.0F, 10, 10, 256, 256);
+            graphics.blit(RenderType::guiTextured, DIALOGUE_TEXTURE, this.getX(), this.getY(), 4.0F, y, this.width, this.height, 256, 256);
+            graphics.blit(RenderType::guiTextured, DIALOGUE_TEXTURE, this.getX() + 2, this.getY() + 1, this.response.ordinal() * 10, 74.0F, 10, 10, 256, 256);
             graphics.drawString(Minecraft.getInstance().font, this.getMessage(), this.getX() + 16, this.getY() + 2, 0xFFFFFFFF, true);
         }
     }

@@ -1,5 +1,6 @@
 package block_party.scene;
 
+import java.util.Locale;
 import net.minecraft.resources.ResourceLocation;
 
 public enum Response {
@@ -17,7 +18,7 @@ public enum Response {
 
     public Response fromValue(String key) {
         try {
-            return Response.valueOf(key.toUpperCase(java.util.Locale.ROOT));
+            return Response.valueOf(key.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException exception) {
             return this;
         }

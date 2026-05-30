@@ -11,6 +11,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -62,7 +63,7 @@ public class YearbookScreen extends ControllerScreen {
     }
 
     private void renderBook(GuiGraphics graphics) {
-        graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, YEARBOOK_TEXTURE, this.left(WIDTH), 2, 0.0F, 0.0F, WIDTH, HEIGHT, 256, 256);
+        graphics.blit(RenderType::guiTextured, YEARBOOK_TEXTURE, this.left(WIDTH), 2, 0.0F, 0.0F, WIDTH, HEIGHT, 256, 256);
     }
 
     private void renderPreview(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -230,7 +231,7 @@ public class YearbookScreen extends ControllerScreen {
         protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             int textureX = this.next ? 226 : 147;
             int textureY = this.isHoveredOrFocused() ? 35 : 63;
-            graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, YEARBOOK_TEXTURE, this.getX(), this.getY(), textureX, textureY, this.width, this.height, 256, 256);
+            graphics.blit(RenderType::guiTextured, YEARBOOK_TEXTURE, this.getX(), this.getY(), textureX, textureY, this.width, this.height, 256, 256);
         }
     }
 
@@ -241,7 +242,7 @@ public class YearbookScreen extends ControllerScreen {
 
         @Override
         protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-            graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, YEARBOOK_TEXTURE, this.getX(), this.getY(), this.isHoveredOrFocused() ? 164 : 146, 7, this.width, this.height, 256, 256);
+            graphics.blit(RenderType::guiTextured, YEARBOOK_TEXTURE, this.getX(), this.getY(), this.isHoveredOrFocused() ? 164 : 146, 7, this.width, this.height, 256, 256);
         }
     }
 }

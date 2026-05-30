@@ -4,7 +4,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import java.io.Reader;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
@@ -25,12 +27,12 @@ public final class CountingJsonReloadListener implements PreparableReloadListene
     }
 
     @Override
-    public java.util.concurrent.CompletableFuture<Void> reload(
+    public CompletableFuture<Void> reload(
             PreparationBarrier barrier,
             ResourceManager resourceManager,
-            java.util.concurrent.Executor backgroundExecutor,
-            java.util.concurrent.Executor gameExecutor) {
-        return java.util.concurrent.CompletableFuture
+            Executor backgroundExecutor,
+            Executor gameExecutor) {
+        return CompletableFuture
                 .supplyAsync(() -> load(resourceManager), backgroundExecutor)
                 .thenCompose(barrier::wait)
                 .thenAcceptAsync(count -> LOADED_COUNTS.put(this.directory, count), gameExecutor);

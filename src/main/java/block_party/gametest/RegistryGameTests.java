@@ -61,6 +61,31 @@ public final class RegistryGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void sceneAuthoringIdsStayRegistered(GameTestHelper helper) {
+        for (String id : List.of(
+                "send_dialogue", "send_response", "health", "food_level", "loyalty", "stress",
+                "cookie", "counter", "hide", "create_voicemail", "start_follow_session",
+                "clear_follow_session", "go_to_anchor", "set_home_to_anchor", "set_routine_intent",
+                "clear_routine_intent", "sleep_at_home", "open_inventory", "give_item", "take_item",
+                "wait", "dismiss", "end")) {
+            assertRegistered(helper, SceneActions.REGISTRY, id);
+        }
+        for (String id : List.of(
+                "is_following", "can_follow_across_dimensions",
+                "if_remembered_place_has_garden_lantern",
+                "if_remembered_place_has_lit_garden_lantern",
+                "if_remembered_place_has_unlit_garden_lantern",
+                "target_affection", "target_loyalty", "target_trust", "target_relationship_stress",
+                "target_yearbook_signed", "target_phone_contact",
+                "follow_intent", "follow_ticks_remaining", "follow_player_is_target",
+                "has_anchor", "anchor_type", "anchor_distance", "anchor_priority", "anchor_player_owned",
+                "routine_intent", "explicit_routine_intent")) {
+            assertRegistered(helper, SceneFilters.REGISTRY, id);
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void creativeTabContainsManualReviewItems(GameTestHelper helper) {
         List<ItemStack> stacks = CustomCreativeTabs.reviewStacks();
         assertTabContains(helper, stacks, "moe_spawn_egg");

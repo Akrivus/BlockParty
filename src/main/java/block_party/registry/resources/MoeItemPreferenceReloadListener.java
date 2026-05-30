@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +33,7 @@ public final class MoeItemPreferenceReloadListener implements PreparableReloadLi
         manager.listResources(DIRECTORY, path -> path.getPath().endsWith(".json")).forEach((location, resource) -> {
             try (BufferedReader reader = resource.openAsReader()) {
                 rules.addAll(safeParseRules(JsonParser.parseReader(reader).getAsJsonObject()));
-            } catch (RuntimeException | java.io.IOException ignored) {
+            } catch (RuntimeException | IOException ignored) {
                 // Malformed preference resources fail closed so tuning datapacks remain isolated.
             }
         });

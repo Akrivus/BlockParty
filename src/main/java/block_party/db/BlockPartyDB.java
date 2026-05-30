@@ -21,6 +21,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -45,12 +46,32 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
 
 public final class BlockPartyDB extends SavedData {
     public static final String KEY = "BlockParty_DB";
+    public static final String TABLE_NPCS = "NPCs";
+    public static final String TABLE_SHRINES = "Shrines";
+    public static final String TABLE_GARDEN_LANTERNS = "GardenLanterns";
+    public static final String TABLE_LOCATIONS = "Locations";
+    public static final String TABLE_SAPLINGS = "Saplings";
+    public static final String TABLE_TSUKUMOGAMI_CANDIDATES = "TsukumogamiCandidates";
+    public static final String TABLE_PLAYER_RELATIONSHIPS = "PlayerRelationships";
+    public static final String TABLE_ATTENTION_RECORDS = "AttentionRecords";
+    public static final String COLUMN_DATABASE_ID = "DatabaseID";
+    public static final String COLUMN_PLAYER_UUID = "PlayerUUID";
+    public static final String COLUMN_POS_DIM = "PosDim";
+    public static final String COLUMN_POS_X = "PosX";
+    public static final String COLUMN_POS_Y = "PosY";
+    public static final String COLUMN_POS_Z = "PosZ";
+    public static final String NBT_NAMES = "Names";
+    public static final String NBT_NPCS_BY_PLAYER = "NPCsByPlayer";
+    public static final String NBT_NPCS = "NPCs";
+    public static final String NBT_PLAYER = "Player";
     public static final Factory<BlockPartyDB> FACTORY = new Factory<>(
             BlockPartyDB::new,
             BlockPartyDB::load);
@@ -88,11 +109,11 @@ public final class BlockPartyDB extends SavedData {
     public static void createDataBlockTables(BlockPartyDB data) throws SQLException {
         Connection connection = data.openConnection();
         try (Statement statement = connection.createStatement()) {
-            statement.execute(dataBlockTableSql("Shrines"));
-            statement.execute(dataBlockTableSql("GardenLanterns"));
-            statement.execute(dataBlockTableSql("Saplings"));
+            statement.execute(dataBlockTableSql(TABLE_SHRINES));
+            statement.execute(dataBlockTableSql(TABLE_GARDEN_LANTERNS));
+            statement.execute(dataBlockTableSql(TABLE_SAPLINGS));
             statement.execute("""
-                    CREATE TABLE IF NOT EXISTS TsukumogamiCandidates (
+                    CREATE TABLE IF NOT EXISTS %s (
                         DatabaseID INTEGER PRIMARY KEY AUTOINCREMENT,
                         PosDim TEXT NOT NULL DEFAULT 'minecraft:overworld',
                         PosX INTEGER NOT NULL DEFAULT 0,
@@ -106,9 +127,9 @@ public final class BlockPartyDB extends SavedData {
                         ShrineDatabaseID INTEGER NOT NULL DEFAULT 0,
                         UNIQUE(PosDim, PosX, PosY, PosZ)
                     );
-                    """);
+                    """.formatted(TABLE_TSUKUMOGAMI_CANDIDATES));
             statement.execute("""
-                    CREATE TABLE IF NOT EXISTS Locations (
+                    CREATE TABLE IF NOT EXISTS %s (
                         DatabaseID INTEGER PRIMARY KEY,
                         PosDim TEXT NOT NULL DEFAULT 'minecraft:overworld',
                         PosX INTEGER NOT NULL DEFAULT 0,
@@ -118,9 +139,9 @@ public final class BlockPartyDB extends SavedData {
                         RequiredCondition TEXT NOT NULL DEFAULT 'ALWAYS',
                         Priority INTEGER NOT NULL DEFAULT 0
                     );
-                    """);
+                    """.formatted(TABLE_LOCATIONS));
             statement.execute("""
-                    CREATE TABLE IF NOT EXISTS AttentionRecords (
+                    CREATE TABLE IF NOT EXISTS %s (
                         DatabaseID INTEGER PRIMARY KEY AUTOINCREMENT,
                         PlayerUUID TEXT NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
                         Type TEXT NOT NULL DEFAULT '',
@@ -137,7 +158,7 @@ public final class BlockPartyDB extends SavedData {
                         LastGameTime INTEGER NOT NULL DEFAULT 0,
                         UNIQUE(PlayerUUID, Type, Source, ItemID)
                     );
-                    """);
+                    """.formatted(TABLE_ATTENTION_RECORDS));
         } finally {
             data.free(connection);
         }
@@ -185,12 +206,12 @@ public final class BlockPartyDB extends SavedData {
 
     public static BlockPartyDB load(CompoundTag compound, HolderLookup.Provider provider) {
         BlockPartyDB data = new BlockPartyDB();
-        compound.getList("Names", NBT.STRING).forEach(name -> data.names.add(name.getAsString()));
-        compound.getList("NPCsByPlayer", NBT.COMPOUND).forEach(nbt -> {
+        compound.getList(NBT_NAMES, NBT.STRING).forEach(name -> data.names.add(name.getAsString()));
+        compound.getList(NBT_NPCS_BY_PLAYER, NBT.COMPOUND).forEach(nbt -> {
             CompoundTag tag = (CompoundTag) nbt;
             List<Long> npcs = new ArrayList<>();
-            tag.getList("NPCs", NBT.LONG).forEach(npc -> npcs.add(((LongTag) npc).getAsLong()));
-            data.byPlayer.put(UUID.fromString(tag.getString("Player")), npcs);
+            tag.getList(NBT_NPCS, NBT.LONG).forEach(npc -> npcs.add(((LongTag) npc).getAsLong()));
+            data.byPlayer.put(UUID.fromString(tag.getString(NBT_PLAYER)), npcs);
         });
         return data;
     }
@@ -199,18 +220,18 @@ public final class BlockPartyDB extends SavedData {
     public CompoundTag save(CompoundTag compound, HolderLookup.Provider provider) {
         ListTag names = new ListTag();
         this.names.forEach(name -> names.add(StringTag.valueOf(name)));
-        compound.put("Names", names);
+        compound.put(NBT_NAMES, names);
 
         ListTag byPlayer = new ListTag();
         this.byPlayer.forEach((player, npcs) -> {
             CompoundTag tag = new CompoundTag();
-            tag.putString("Player", player.toString());
+            tag.putString(NBT_PLAYER, player.toString());
             ListTag list = new ListTag();
             npcs.forEach(npc -> list.add(LongTag.valueOf(npc)));
-            tag.put("NPCs", list);
+            tag.put(NBT_NPCS, list);
             byPlayer.add(tag);
         });
-        compound.put("NPCsByPlayer", byPlayer);
+        compound.put(NBT_NPCS_BY_PLAYER, byPlayer);
         return compound;
     }
 
@@ -276,43 +297,43 @@ public final class BlockPartyDB extends SavedData {
     }
 
     @Deprecated
-    public java.util.Optional<NPC> loadOwnedNpc(UUID player, long id) {
+    public Optional<NPC> loadOwnedNpc(UUID player, long id) {
         return this.loadPlayerNpc(player, id);
     }
 
-    public java.util.Optional<NPC> loadPlayerNpc(UUID player, long id) {
+    public Optional<NPC> loadPlayerNpc(UUID player, long id) {
         try {
-            java.util.Optional<NPC> row = this.findNpc(id);
+            Optional<NPC> row = this.findNpc(id);
             if (row.isEmpty()) {
-                return java.util.Optional.empty();
+                return Optional.empty();
             }
             NPC npc = row.get();
             if (npc.dead() || !player.equals(npc.playerUuid())) {
-                return java.util.Optional.empty();
+                return Optional.empty();
             }
-            return java.util.Optional.of(npc);
+            return Optional.of(npc);
         } catch (RuntimeException | SQLException exception) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
     }
 
-    public java.util.Optional<NPC> loadYearbookNpc(UUID player, long id) {
+    public Optional<NPC> loadYearbookNpc(UUID player, long id) {
         if (!this.hasYearbookPage(player, id)) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         return this.findNpcSafe(id);
     }
 
-    public java.util.Optional<NPC> loadRelatedNpc(UUID player, long id) {
+    public Optional<NPC> loadRelatedNpc(UUID player, long id) {
         if (!this.hasPlayerRelationship(player, id)) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         return this.findNpcSafe(id);
     }
 
-    public java.util.Optional<NPC> loadPhoneContactNpc(UUID player, long id) {
+    public Optional<NPC> loadPhoneContactNpc(UUID player, long id) {
         if (!this.hasPhoneContact(player, id)) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         return this.findNpcSafe(id);
     }
@@ -336,61 +357,61 @@ public final class BlockPartyDB extends SavedData {
     }
 
     @Deprecated
-    public java.util.Optional<Moe> callOwnedNpc(ServerPlayer player, long id) {
+    public Optional<Moe> callOwnedNpc(ServerPlayer player, long id) {
         return this.callPhoneContactNpc(player, id);
     }
 
-    public java.util.Optional<Moe> callPhoneContactNpc(ServerPlayer player, long id) {
+    public Optional<Moe> callPhoneContactNpc(ServerPlayer player, long id) {
         if (!(player.level() instanceof ServerLevel level)) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         return this.callPhoneContactNpc(level, player.getUUID(), player.position(), player.getYRot(), id);
     }
 
     @Deprecated
-    public java.util.Optional<Moe> findOwnedLoadedMoe(ServerLevel level, UUID player, long id) {
+    public Optional<Moe> findOwnedLoadedMoe(ServerLevel level, UUID player, long id) {
         return this.findPlayerLoadedMoe(level, player, id);
     }
 
-    public java.util.Optional<Moe> findPlayerLoadedMoe(ServerLevel level, UUID player, long id) {
-        java.util.Optional<NPC> row = this.loadPlayerNpc(player, id);
+    public Optional<Moe> findPlayerLoadedMoe(ServerLevel level, UUID player, long id) {
+        Optional<NPC> row = this.loadPlayerNpc(player, id);
         if (row.isEmpty() || row.get().hiding()) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         ServerLevel npcLevel = level.getServer().getLevel(row.get().dimension());
         if (npcLevel != level) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         return CellPhone.findLoadedMoe(level, id);
     }
 
-    public java.util.Optional<Moe> findRelatedLoadedMoe(ServerLevel level, UUID player, long id) {
-        java.util.Optional<NPC> row = this.loadRelatedNpc(player, id);
+    public Optional<Moe> findRelatedLoadedMoe(ServerLevel level, UUID player, long id) {
+        Optional<NPC> row = this.loadRelatedNpc(player, id);
         if (row.isEmpty() || row.get().hiding()) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         ServerLevel npcLevel = level.getServer().getLevel(row.get().dimension());
         if (npcLevel != level) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         return CellPhone.findLoadedMoe(level, id);
     }
 
     @Deprecated
-    public java.util.Optional<Moe> callOwnedNpc(ServerLevel callerLevel, UUID player, BlockPos callerPos, long id) {
+    public Optional<Moe> callOwnedNpc(ServerLevel callerLevel, UUID player, BlockPos callerPos, long id) {
         return this.callPhoneContactNpc(callerLevel, player, callerPos, id);
     }
 
     @Deprecated
-    public java.util.Optional<Moe> callOwnedNpc(ServerLevel callerLevel, UUID player, Vec3 callerPos, float callerYRot, long id) {
+    public Optional<Moe> callOwnedNpc(ServerLevel callerLevel, UUID player, Vec3 callerPos, float callerYRot, long id) {
         return this.callPhoneContactNpc(callerLevel, player, callerPos, callerYRot, id);
     }
 
-    public java.util.Optional<Moe> callPhoneContactNpc(ServerLevel callerLevel, UUID player, BlockPos callerPos, long id) {
+    public Optional<Moe> callPhoneContactNpc(ServerLevel callerLevel, UUID player, BlockPos callerPos, long id) {
         return this.callPhoneContactNpc(callerLevel, player, Vec3.atBottomCenterOf(callerPos), -90.0F, id);
     }
 
-    public java.util.Optional<Moe> callPhoneContactNpc(ServerLevel callerLevel, UUID player, Vec3 callerPos, float callerYRot, long id) {
+    public Optional<Moe> callPhoneContactNpc(ServerLevel callerLevel, UUID player, Vec3 callerPos, float callerYRot, long id) {
         return new CellPhone(this, callerLevel, player, callerPos, callerYRot, id).call();
     }
 
@@ -439,27 +460,27 @@ public final class BlockPartyDB extends SavedData {
         return this.connections.size();
     }
 
-    public NPC createNpc(ServerLevel level, block_party.entities.Moe moe) throws SQLException {
+    public NPC createNpc(ServerLevel level, Moe moe) throws SQLException {
         return NPC.create(this, level, moe);
     }
 
-    public NPC createNpc(ServerLevel level, block_party.entities.Moe moe, long databaseId, boolean hiding, BlockPos hiddenPos) throws SQLException {
+    public NPC createNpc(ServerLevel level, Moe moe, long databaseId, boolean hiding, BlockPos hiddenPos) throws SQLException {
         return NPC.create(this, level, moe, databaseId, hiding, hiddenPos);
     }
 
-    public java.util.Optional<NPC> findNpc(long id) throws SQLException {
+    public Optional<NPC> findNpc(long id) throws SQLException {
         return NPC.find(this, id);
     }
 
-    public java.util.Optional<NPC> findNpcSafe(long id) {
+    public Optional<NPC> findNpcSafe(long id) {
         try {
             return this.findNpc(id);
         } catch (RuntimeException | SQLException exception) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
     }
 
-    public java.util.Optional<NPC> findCardinalNpc(net.minecraft.world.level.block.state.BlockState visibleBlockState) throws SQLException {
+    public Optional<NPC> findCardinalNpc(BlockState visibleBlockState) throws SQLException {
         return NPC.findCardinalNpc(this, visibleBlockState);
     }
 
@@ -467,15 +488,15 @@ public final class BlockPartyDB extends SavedData {
         return PlayerRelationship.ensure(this, npcId, player);
     }
 
-    public java.util.Optional<PlayerRelationship> findPlayerRelationship(long npcId, UUID player) throws SQLException {
+    public Optional<PlayerRelationship> findPlayerRelationship(long npcId, UUID player) throws SQLException {
         return PlayerRelationship.find(this, npcId, player);
     }
 
-    public java.util.Optional<PlayerRelationship> findPlayerRelationshipSafe(long npcId, UUID player) {
+    public Optional<PlayerRelationship> findPlayerRelationshipSafe(long npcId, UUID player) {
         try {
             return this.findPlayerRelationship(npcId, player);
         } catch (RuntimeException | SQLException exception) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
     }
 
@@ -505,7 +526,7 @@ public final class BlockPartyDB extends SavedData {
 
     public void upsertDataBlock(AbstractDataBlockEntity entity) throws SQLException {
         String table = entity.getTableName();
-        if ("NPCs".equals(table)) {
+        if (TABLE_NPCS.equals(table)) {
             if (entity instanceof ShimenawaBlockEntity shimenawa && entity.getLevel() instanceof ServerLevel level) {
                 NPC row = NPC.createFromShimenawa(this, level, shimenawa);
                 this.addPlayerNpc(row.playerUuid(), row.databaseId());
@@ -514,14 +535,15 @@ public final class BlockPartyDB extends SavedData {
         }
 
         Connection connection = this.openConnection();
-        try (PreparedStatement statement = connection.prepareStatement(upsertSql(table, "Locations".equals(table)))) {
+        boolean locative = TABLE_LOCATIONS.equals(table);
+        try (PreparedStatement statement = connection.prepareStatement(upsertSql(table, locative))) {
             statement.setLong(1, entity.getDatabaseID());
             statement.setString(2, entity.getDimBlockPos().getDim().location().toString());
             statement.setInt(3, entity.getBlockPos().getX());
             statement.setInt(4, entity.getBlockPos().getY());
             statement.setInt(5, entity.getBlockPos().getZ());
             statement.setString(6, entity.getPlayerUUID().toString());
-            if ("Locations".equals(table)) {
+            if (locative) {
                 statement.setString(7, entity.getRequiredCondition());
                 statement.setInt(8, entity.getPriority());
             }
@@ -534,7 +556,7 @@ public final class BlockPartyDB extends SavedData {
     private static String upsertSql(String table, boolean locative) {
         if (locative) {
             return """
-                    INSERT INTO Locations (
+                    INSERT INTO %s (
                         DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, RequiredCondition, Priority
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT(DatabaseID) DO UPDATE SET
@@ -545,7 +567,7 @@ public final class BlockPartyDB extends SavedData {
                         PlayerUUID = excluded.PlayerUUID,
                         RequiredCondition = excluded.RequiredCondition,
                         Priority = excluded.Priority;
-                    """;
+                    """.formatted(TABLE_LOCATIONS);
         }
         return """
                 INSERT INTO %s (
@@ -562,7 +584,7 @@ public final class BlockPartyDB extends SavedData {
 
     public boolean dataBlockRowExists(String table, long id) throws SQLException {
         Connection connection = this.openConnection();
-        try (PreparedStatement statement = connection.prepareStatement("SELECT 1 FROM " + table + " WHERE DatabaseID = ? LIMIT 1;")) {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT 1 FROM " + table + " WHERE " + COLUMN_DATABASE_ID + " = ? LIMIT 1;")) {
             statement.setLong(1, id);
             try (ResultSet result = statement.executeQuery()) {
                 return result.next();
@@ -575,9 +597,9 @@ public final class BlockPartyDB extends SavedData {
     public List<Garden> listGardens() throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID FROM GardenLanterns
+                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID FROM %s
                 ORDER BY DatabaseID ASC;
-                """)) {
+                """.formatted(TABLE_GARDEN_LANTERNS))) {
             List<Garden> rows = new ArrayList<>();
             try (ResultSet result = statement.executeQuery()) {
                 while (result.next()) {
@@ -596,16 +618,16 @@ public final class BlockPartyDB extends SavedData {
     public List<Sapling> listSaplings() throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID FROM Saplings
+                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID FROM %s
                 ORDER BY DatabaseID ASC;
-                """)) {
+                """.formatted(TABLE_SAPLINGS))) {
             List<Sapling> rows = new ArrayList<>();
             try (ResultSet result = statement.executeQuery()) {
                 while (result.next()) {
                     rows.add(new Sapling(
-                            result.getLong("DatabaseID"),
+                            result.getLong(COLUMN_DATABASE_ID),
                             readDimBlockPos(result),
-                            readUuid(result, "PlayerUUID")));
+                            readUuid(result, COLUMN_PLAYER_UUID)));
                 }
             }
             return List.copyOf(rows);
@@ -617,9 +639,9 @@ public final class BlockPartyDB extends SavedData {
     public List<Location> listLocations() throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, RequiredCondition, Priority FROM Locations
+                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, RequiredCondition, Priority FROM %s
                 ORDER BY Priority DESC, DatabaseID ASC;
-                """)) {
+                """.formatted(TABLE_LOCATIONS))) {
             List<Location> rows = new ArrayList<>();
             try (ResultSet result = statement.executeQuery()) {
                 while (result.next()) {
@@ -635,10 +657,10 @@ public final class BlockPartyDB extends SavedData {
     public List<Location> listLocations(UUID player) throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, RequiredCondition, Priority FROM Locations
+                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, RequiredCondition, Priority FROM %s
                 WHERE PlayerUUID = ?
                 ORDER BY Priority DESC, DatabaseID ASC;
-                """)) {
+                """.formatted(TABLE_LOCATIONS))) {
             statement.setString(1, player.toString());
             List<Location> rows = new ArrayList<>();
             try (ResultSet result = statement.executeQuery()) {
@@ -655,18 +677,18 @@ public final class BlockPartyDB extends SavedData {
     public List<Shrine> listShrineRows(UUID player) throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID FROM Shrines
+                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID FROM %s
                 WHERE PlayerUUID = ?
                 ORDER BY DatabaseID ASC;
-                """)) {
+                """.formatted(TABLE_SHRINES))) {
             statement.setString(1, player.toString());
             List<Shrine> rows = new ArrayList<>();
             try (ResultSet result = statement.executeQuery()) {
                 while (result.next()) {
                     rows.add(new Shrine(
-                            result.getLong("DatabaseID"),
+                            result.getLong(COLUMN_DATABASE_ID),
                             readDimBlockPos(result),
-                            readUuid(result, "PlayerUUID")));
+                            readUuid(result, COLUMN_PLAYER_UUID)));
                 }
             }
             return List.copyOf(rows);
@@ -675,14 +697,14 @@ public final class BlockPartyDB extends SavedData {
         }
     }
 
-    public java.util.Optional<Shrine> findClosestShrine(UUID player, DimBlockPos origin) throws SQLException {
+    public Optional<Shrine> findClosestShrine(UUID player, DimBlockPos origin) throws SQLException {
         return Shrine.closest(this.listShrineRows(player), origin);
     }
 
     public void recordAttention(ServerLevel level, UUID player, String type, String source, BlockPos pos, BlockState state, String itemId, int itemCount, long gameTime) throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                INSERT INTO AttentionRecords (
+                INSERT INTO %s (
                     PlayerUUID, Type, Source, PosDim, PosX, PosY, PosZ, BlockState, ItemID, ItemCount, Count, FirstGameTime, LastGameTime
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
                 ON CONFLICT(PlayerUUID, Type, Source, ItemID) DO UPDATE SET
@@ -692,9 +714,9 @@ public final class BlockPartyDB extends SavedData {
                     PosZ = excluded.PosZ,
                     BlockState = excluded.BlockState,
                     ItemCount = excluded.ItemCount,
-                    Count = AttentionRecords.Count + 1,
+                    Count = %s.Count + 1,
                     LastGameTime = excluded.LastGameTime;
-                """)) {
+                """.formatted(TABLE_ATTENTION_RECORDS, TABLE_ATTENTION_RECORDS))) {
             statement.setString(1, player.toString());
             statement.setString(2, normalizeAttentionKey(type));
             statement.setString(3, normalizeAttentionKey(source));
@@ -713,38 +735,38 @@ public final class BlockPartyDB extends SavedData {
         }
     }
 
-    public java.util.Optional<AttentionRecord> latestAttention(UUID player) throws SQLException {
+    public Optional<AttentionRecord> latestAttention(UUID player) throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
                 SELECT DatabaseID, PlayerUUID, Type, Source, PosDim, PosX, PosY, PosZ, BlockState, ItemID, ItemCount, Count, FirstGameTime, LastGameTime
-                FROM AttentionRecords
+                FROM %s
                 WHERE PlayerUUID = ?
                 ORDER BY LastGameTime DESC, DatabaseID DESC
                 LIMIT 1;
-                """)) {
+                """.formatted(TABLE_ATTENTION_RECORDS))) {
             statement.setString(1, player.toString());
             try (ResultSet result = statement.executeQuery()) {
-                return result.next() ? java.util.Optional.of(readAttention(result)) : java.util.Optional.empty();
+                return result.next() ? Optional.of(readAttention(result)) : Optional.empty();
             }
         } finally {
             this.free(connection);
         }
     }
 
-    public java.util.Optional<AttentionRecord> findAttention(UUID player, String type, String source) throws SQLException {
+    public Optional<AttentionRecord> findAttention(UUID player, String type, String source) throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
                 SELECT DatabaseID, PlayerUUID, Type, Source, PosDim, PosX, PosY, PosZ, BlockState, ItemID, ItemCount, Count, FirstGameTime, LastGameTime
-                FROM AttentionRecords
+                FROM %s
                 WHERE PlayerUUID = ? AND Type = ? AND Source = ?
                 ORDER BY LastGameTime DESC, DatabaseID DESC
                 LIMIT 1;
-                """)) {
+                """.formatted(TABLE_ATTENTION_RECORDS))) {
             statement.setString(1, player.toString());
             statement.setString(2, normalizeAttentionKey(type));
             statement.setString(3, normalizeAttentionKey(source));
             try (ResultSet result = statement.executeQuery()) {
-                return result.next() ? java.util.Optional.of(readAttention(result)) : java.util.Optional.empty();
+                return result.next() ? Optional.of(readAttention(result)) : Optional.empty();
             }
         } finally {
             this.free(connection);
@@ -752,12 +774,12 @@ public final class BlockPartyDB extends SavedData {
     }
 
     public void deleteDataBlock(String table, long id) throws SQLException {
-        if ("NPCs".equals(table)) {
+        if (TABLE_NPCS.equals(table)) {
             this.deleteNpc(id);
             return;
         }
         Connection connection = this.openConnection();
-        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + table + " WHERE DatabaseID = ?;")) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + table + " WHERE " + COLUMN_DATABASE_ID + " = ?;")) {
             statement.setLong(1, id);
             statement.executeUpdate();
         } finally {
@@ -765,21 +787,21 @@ public final class BlockPartyDB extends SavedData {
         }
     }
 
-    public List<ShrineEntry> listShrines(UUID player, net.minecraft.resources.ResourceKey<Level> dimension) throws SQLException {
+    public List<ShrineEntry> listShrines(UUID player, ResourceKey<Level> dimension) throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT DatabaseID, PosX, PosY, PosZ FROM Shrines
+                SELECT DatabaseID, PosX, PosY, PosZ FROM %s
                 WHERE PlayerUUID = ? OR PosDim = ?
                 ORDER BY DatabaseID ASC;
-                """)) {
+                """.formatted(TABLE_SHRINES))) {
             statement.setString(1, player.toString());
             statement.setString(2, dimension.location().toString());
             List<ShrineEntry> shrines = new ArrayList<>();
             try (ResultSet result = statement.executeQuery()) {
                 while (result.next()) {
                     shrines.add(new ShrineEntry(
-                            result.getLong("DatabaseID"),
-                            new BlockPos(result.getInt("PosX"), result.getInt("PosY"), result.getInt("PosZ"))));
+                            result.getLong(COLUMN_DATABASE_ID),
+                            new BlockPos(result.getInt(COLUMN_POS_X), result.getInt(COLUMN_POS_Y), result.getInt(COLUMN_POS_Z))));
                 }
             }
             return List.copyOf(shrines);
@@ -794,18 +816,18 @@ public final class BlockPartyDB extends SavedData {
     public List<Shrine> listShrineRows(ResourceKey<Level> dimension) throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID FROM Shrines
+                SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID FROM %s
                 WHERE PosDim = ?
                 ORDER BY DatabaseID ASC;
-                """)) {
+                """.formatted(TABLE_SHRINES))) {
             statement.setString(1, dimension.location().toString());
             List<Shrine> rows = new ArrayList<>();
             try (ResultSet result = statement.executeQuery()) {
                 while (result.next()) {
                     rows.add(new Shrine(
-                            result.getLong("DatabaseID"),
+                            result.getLong(COLUMN_DATABASE_ID),
                             readDimBlockPos(result),
-                            readUuid(result, "PlayerUUID")));
+                            readUuid(result, COLUMN_PLAYER_UUID)));
                 }
             }
             return List.copyOf(rows);
@@ -819,7 +841,7 @@ public final class BlockPartyDB extends SavedData {
                                            long shrineDatabaseId) throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                INSERT INTO TsukumogamiCandidates (
+                INSERT INTO %s (
                     PosDim, PosX, PosY, PosZ, PlayerUUID, BlockState, TileEntityData,
                     CreatedGameTime, MatureAtGameTime, ShrineDatabaseID
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -830,7 +852,7 @@ public final class BlockPartyDB extends SavedData {
                     CreatedGameTime = excluded.CreatedGameTime,
                     MatureAtGameTime = excluded.MatureAtGameTime,
                     ShrineDatabaseID = excluded.ShrineDatabaseID;
-                """)) {
+                """.formatted(TABLE_TSUKUMOGAMI_CANDIDATES))) {
             statement.setString(1, level.dimension().location().toString());
             statement.setInt(2, pos.getX());
             statement.setInt(3, pos.getY());
@@ -852,10 +874,10 @@ public final class BlockPartyDB extends SavedData {
         try (PreparedStatement statement = connection.prepareStatement("""
                 SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, BlockState, TileEntityData,
                        CreatedGameTime, MatureAtGameTime, ShrineDatabaseID
-                FROM TsukumogamiCandidates
+                FROM %s
                 WHERE MatureAtGameTime <= ?
                 ORDER BY MatureAtGameTime ASC, DatabaseID ASC;
-                """)) {
+                """.formatted(TABLE_TSUKUMOGAMI_CANDIDATES))) {
             statement.setLong(1, gameTime);
             List<TsukumogamiCandidate> rows = new ArrayList<>();
             try (ResultSet result = statement.executeQuery()) {
@@ -869,21 +891,21 @@ public final class BlockPartyDB extends SavedData {
         }
     }
 
-    public java.util.Optional<TsukumogamiCandidate> findTsukumogamiCandidate(ServerLevel level, BlockPos pos) throws SQLException {
+    public Optional<TsukumogamiCandidate> findTsukumogamiCandidate(ServerLevel level, BlockPos pos) throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
                 SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, BlockState, TileEntityData,
                        CreatedGameTime, MatureAtGameTime, ShrineDatabaseID
-                FROM TsukumogamiCandidates
+                FROM %s
                 WHERE PosDim = ? AND PosX = ? AND PosY = ? AND PosZ = ?
                 LIMIT 1;
-                """)) {
+                """.formatted(TABLE_TSUKUMOGAMI_CANDIDATES))) {
             statement.setString(1, level.dimension().location().toString());
             statement.setInt(2, pos.getX());
             statement.setInt(3, pos.getY());
             statement.setInt(4, pos.getZ());
             try (ResultSet result = statement.executeQuery()) {
-                return result.next() ? java.util.Optional.of(readTsukumogamiCandidate(result)) : java.util.Optional.empty();
+                return result.next() ? Optional.of(readTsukumogamiCandidate(result)) : Optional.empty();
             }
         } finally {
             this.free(connection);
@@ -892,7 +914,7 @@ public final class BlockPartyDB extends SavedData {
 
     public void deleteTsukumogamiCandidate(long id) throws SQLException {
         Connection connection = this.openConnection();
-        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM TsukumogamiCandidates WHERE DatabaseID = ?;")) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + TABLE_TSUKUMOGAMI_CANDIDATES + " WHERE " + COLUMN_DATABASE_ID + " = ?;")) {
             statement.setLong(1, id);
             statement.executeUpdate();
         } finally {
@@ -903,9 +925,9 @@ public final class BlockPartyDB extends SavedData {
     public void deleteTsukumogamiCandidate(ServerLevel level, BlockPos pos) throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                DELETE FROM TsukumogamiCandidates
+                DELETE FROM %s
                 WHERE PosDim = ? AND PosX = ? AND PosY = ? AND PosZ = ?;
-                """)) {
+                """.formatted(TABLE_TSUKUMOGAMI_CANDIDATES))) {
             statement.setString(1, level.dimension().location().toString());
             statement.setInt(2, pos.getX());
             statement.setInt(3, pos.getY());
@@ -932,12 +954,12 @@ public final class BlockPartyDB extends SavedData {
     }
 
     private void seedLegacyRelationshipOrThrow(UUID player, long id) throws SQLException {
-        java.util.Optional<PlayerRelationship> existing = PlayerRelationship.find(this, id, player);
+        Optional<PlayerRelationship> existing = PlayerRelationship.find(this, id, player);
         PlayerRelationship.setYearbookSigned(this, id, player, true);
         PlayerRelationship.setPhoneContact(this, id, player, true);
         PlayerRelationship relationship = existing.orElseGet(() -> this.findPlayerRelationshipSafe(id, player).orElse(null));
         if (relationship == null || (relationship.affection() == 0.0F && relationship.loyalty() == 0.0F)) {
-            java.util.Optional<NPC> row = this.findNpc(id);
+            Optional<NPC> row = this.findNpc(id);
             if (row.isPresent()) {
                 PlayerRelationship.setFeelings(this, id, player, row.get().affection(), row.get().loyalty());
             }
@@ -986,9 +1008,9 @@ public final class BlockPartyDB extends SavedData {
 
     private static Location readLocation(ResultSet result) throws SQLException {
         return new Location(
-                result.getLong("DatabaseID"),
+                result.getLong(COLUMN_DATABASE_ID),
                 readDimBlockPos(result),
-                readUuid(result, "PlayerUUID"),
+                readUuid(result, COLUMN_PLAYER_UUID),
                 result.getString("RequiredCondition"),
                 result.getInt("Priority"));
     }
@@ -996,13 +1018,13 @@ public final class BlockPartyDB extends SavedData {
     private static TsukumogamiCandidate readTsukumogamiCandidate(ResultSet result) throws SQLException {
         CompoundTag tileEntityData = new CompoundTag();
         try {
-            tileEntityData = net.minecraft.nbt.TagParser.parseTag(result.getString("TileEntityData"));
+            tileEntityData = TagParser.parseTag(result.getString("TileEntityData"));
         } catch (Exception ignored) {
         }
         return new TsukumogamiCandidate(
-                result.getLong("DatabaseID"),
+                result.getLong(COLUMN_DATABASE_ID),
                 readDimBlockPos(result),
-                readUuid(result, "PlayerUUID"),
+                readUuid(result, COLUMN_PLAYER_UUID),
                 Block.stateById(result.getInt("BlockState")),
                 tileEntityData,
                 result.getLong("CreatedGameTime"),
@@ -1012,8 +1034,8 @@ public final class BlockPartyDB extends SavedData {
 
     private static AttentionRecord readAttention(ResultSet result) throws SQLException {
         return new AttentionRecord(
-                result.getLong("DatabaseID"),
-                readUuid(result, "PlayerUUID"),
+                result.getLong(COLUMN_DATABASE_ID),
+                readUuid(result, COLUMN_PLAYER_UUID),
                 result.getString("Type"),
                 result.getString("Source"),
                 readDimBlockPos(result),
@@ -1026,13 +1048,13 @@ public final class BlockPartyDB extends SavedData {
     }
 
     private static String normalizeAttentionKey(String value) {
-        return value == null ? "" : value.trim().toLowerCase(java.util.Locale.ROOT);
+        return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
     }
 
     private static DimBlockPos readDimBlockPos(ResultSet result) throws SQLException {
         return new DimBlockPos(
-                parseDimension(result.getString("PosDim")),
-                new BlockPos(result.getInt("PosX"), result.getInt("PosY"), result.getInt("PosZ")));
+                parseDimension(result.getString(COLUMN_POS_DIM)),
+                new BlockPos(result.getInt(COLUMN_POS_X), result.getInt(COLUMN_POS_Y), result.getInt(COLUMN_POS_Z)));
     }
 
     private static UUID readUuid(ResultSet result, String column) throws SQLException {

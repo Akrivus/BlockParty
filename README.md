@@ -33,6 +33,17 @@ There's also a conversation system that is encoded in data packs,
 which inspired me to use LLMs for data-gen, but it is already
 pretty extensive on its own.
 
+## Developer Checks
+
+The active build uses Gradle tasks for local CI:
+
+- `.\gradlew.bat phase1Compliance --no-daemon`: fast cleanup guardrail for inline FQCN and raw SQL table-name regressions.
+- `.\gradlew.bat localCi --no-daemon`: fast pre-PR check, currently `phase1Compliance` plus `compileJava`.
+- `.\gradlew.bat fullCi --no-daemon`: full local verification, including the active GameTest suite.
+- `.\gradlew.bat installGitHooks --no-daemon`: configures Git to run the repo-managed pre-commit hook from `scripts/git-hooks`.
+
+The pre-commit hook intentionally runs only `phase1Compliance`, so ordinary commits stay quick. Use `localCi` or `fullCi` before broader changes.
+
 ## Story
 **TL;DR:** It's been five years, I don't need motivation from
 people on the internet anymore so if anyone wants to threaten

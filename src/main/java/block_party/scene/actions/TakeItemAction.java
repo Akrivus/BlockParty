@@ -3,6 +3,7 @@ package block_party.scene.actions;
 import block_party.entities.Moe;
 import block_party.scene.SceneAction;
 import com.google.gson.JsonObject;
+import java.util.Locale;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -64,7 +65,7 @@ public record TakeItemAction(JsonObject matcher, int count, Source source, Desti
 
         public static Source fromValue(String value) {
             try {
-                return Source.valueOf(value.toUpperCase(java.util.Locale.ROOT));
+                return Source.valueOf(value.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException exception) {
                 return PLAYER;
             }
@@ -78,7 +79,7 @@ public record TakeItemAction(JsonObject matcher, int count, Source source, Desti
 
         public static Destination fromValue(String value) {
             try {
-                return Destination.valueOf(value.toUpperCase(java.util.Locale.ROOT));
+                return Destination.valueOf(value.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException exception) {
                 return MOE;
             }

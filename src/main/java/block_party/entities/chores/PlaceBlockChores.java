@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.AABB;
 
+import java.util.Comparator;
 import java.util.Optional;
 
 public final class PlaceBlockChores {
@@ -31,7 +32,7 @@ public final class PlaceBlockChores {
         AABB bounds = new AABB(origin).inflate(radius, 4.0D, radius);
         return level.getEntitiesOfClass(ItemEntity.class, bounds, item -> item.isAlive() && item.getItem().is(config.item())).stream()
                 .filter(drop -> canReachDrop(moe, drop))
-                .min(java.util.Comparator.comparingDouble(item -> item.distanceToSqr(moe)));
+                .min(Comparator.comparingDouble(item -> item.distanceToSqr(moe)));
     }
 
     public static Optional<BlockPos> nearestSpot(ServerLevel level, BlockPos origin, Config config) {

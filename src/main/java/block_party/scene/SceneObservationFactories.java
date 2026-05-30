@@ -12,6 +12,7 @@ import block_party.entities.social.MoeSocialContext;
 import block_party.entities.social.SocialAffinities;
 import block_party.scene.actions.SceneItemStacks;
 import com.google.gson.JsonObject;
+import java.sql.SQLException;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,6 +22,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
@@ -299,12 +301,12 @@ public final class SceneObservationFactories {
     }
 
     private static InteractionHand hand(JsonObject json) {
-        String value = GsonHelper.getAsString(json, "hand", "main_hand").toUpperCase(java.util.Locale.ROOT);
+        String value = GsonHelper.getAsString(json, "hand", "main_hand").toUpperCase(Locale.ROOT);
         return InteractionHand.valueOf(value);
     }
 
     private static ServerPlayer targetPlayer(Moe moe) {
-        if (!(moe.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+        if (!(moe.level() instanceof ServerLevel level)) {
             return null;
         }
         ServerPlayer target = level.getServer().getPlayerList().getPlayer(moe.getDialogueTarget());
@@ -312,14 +314,14 @@ public final class SceneObservationFactories {
     }
 
     private static Optional<PlayerRelationship> targetRelationship(Moe moe) {
-        if (!(moe.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+        if (!(moe.level() instanceof ServerLevel level)) {
             return Optional.empty();
         }
         return BlockPartyDB.get(level).findPlayerRelationshipSafe(moe.getDatabaseID(), targetPlayerUuid(moe));
     }
 
     private static Optional<AttentionRecord> attention(Moe moe, JsonObject json) {
-        if (!(moe.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+        if (!(moe.level() instanceof ServerLevel level)) {
             return Optional.empty();
         }
         try {
@@ -329,7 +331,7 @@ public final class SceneObservationFactories {
                 return BlockPartyDB.get(level).findAttention(targetPlayerUuid(moe), type, source);
             }
             return BlockPartyDB.get(level).latestAttention(targetPlayerUuid(moe));
-        } catch (RuntimeException | java.sql.SQLException exception) {
+        } catch (RuntimeException | SQLException exception) {
             return Optional.empty();
         }
     }

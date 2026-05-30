@@ -1,6 +1,7 @@
 package block_party.client.model;
 
 import block_party.client.renderers.state.MoeRenderState;
+import com.mojang.blaze3d.vertex.PoseStack;
 import block_party.client.animation.Animation;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
@@ -219,7 +220,7 @@ public class MoeModel extends EntityModel<MoeRenderState> implements ArmedModel,
     }
 
     @Override
-    public void translateToHand(HumanoidArm side, com.mojang.blaze3d.vertex.PoseStack stack) {
+    public void translateToHand(HumanoidArm side, PoseStack stack) {
         ModelPart arm = this.getArmForSide(side);
         arm.translateAndRotate(stack);
         stack.translate(side == HumanoidArm.RIGHT ? 0.0625F : -0.0625F, -0.15F, 0.025F);

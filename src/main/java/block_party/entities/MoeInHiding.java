@@ -23,6 +23,12 @@ import java.util.UUID;
 
 public class MoeInHiding extends Entity {
     private static final String EMPTY_UUID = "00000000-0000-0000-0000-000000000000";
+    public static final String NBT_DATABASE_ID = "DatabaseID";
+    public static final String NBT_ATTACH_POS = "AttachPos";
+    public static final String NBT_HIDE_UNTIL = "HideUntil";
+    public static final String NBT_TICKS_HIDDEN = "TicksHidden";
+    public static final String NBT_PLAYER_UUID = "PlayerUUID";
+    public static final String NBT_OWNER_UUID = "OwnerUUID";
 
     public static final EntityDataAccessor<String> DATABASE_ID =
             SynchedEntityData.defineId(MoeInHiding.class, EntityDataSerializers.STRING);
@@ -49,26 +55,26 @@ public class MoeInHiding extends Entity {
 
     @Override
     protected void readAdditionalSaveData(CompoundTag compound) {
-        this.setDatabaseID(compound.getLong("DatabaseID"));
-        this.setAttachPos(BlockPos.of(compound.getLong("AttachPos")));
-        this.setHideUntil(HideUntil.fromValue(compound.getString("HideUntil")));
-        this.setTicksHidden(compound.getInt("TicksHidden"));
-        if (compound.contains("OwnerUUID")) {
-            this.setPlayerUUID(UUID.fromString(compound.getString("OwnerUUID")));
+        this.setDatabaseID(compound.getLong(NBT_DATABASE_ID));
+        this.setAttachPos(BlockPos.of(compound.getLong(NBT_ATTACH_POS)));
+        this.setHideUntil(HideUntil.fromValue(compound.getString(NBT_HIDE_UNTIL)));
+        this.setTicksHidden(compound.getInt(NBT_TICKS_HIDDEN));
+        if (compound.contains(NBT_OWNER_UUID)) {
+            this.setPlayerUUID(UUID.fromString(compound.getString(NBT_OWNER_UUID)));
         }
-        if (compound.contains("PlayerUUID")) {
-            this.setPlayerUUID(UUID.fromString(compound.getString("PlayerUUID")));
+        if (compound.contains(NBT_PLAYER_UUID)) {
+            this.setPlayerUUID(UUID.fromString(compound.getString(NBT_PLAYER_UUID)));
         }
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag compound) {
-        compound.putLong("DatabaseID", this.getDatabaseID());
-        compound.putLong("AttachPos", this.getAttachPos().asLong());
-        compound.putString("HideUntil", this.getHideUntil().getValue());
-        compound.putInt("TicksHidden", this.getTicksHidden());
-        compound.putString("PlayerUUID", this.getPlayerUUID().toString());
-        compound.putString("OwnerUUID", this.getPlayerUUID().toString());
+        compound.putLong(NBT_DATABASE_ID, this.getDatabaseID());
+        compound.putLong(NBT_ATTACH_POS, this.getAttachPos().asLong());
+        compound.putString(NBT_HIDE_UNTIL, this.getHideUntil().getValue());
+        compound.putInt(NBT_TICKS_HIDDEN, this.getTicksHidden());
+        compound.putString(NBT_PLAYER_UUID, this.getPlayerUUID().toString());
+        compound.putString(NBT_OWNER_UUID, this.getPlayerUUID().toString());
     }
 
     @Override

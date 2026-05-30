@@ -16,6 +16,7 @@ import block_party.blocks.WisteriaVineTipBlock;
 import block_party.registry.CustomBlocks;
 import block_party.registry.CustomItems;
 import block_party.registry.CustomWorldGen;
+import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -330,7 +331,7 @@ public final class DecorativeContentGameTests {
     }
 
     private static void assertEquals(GameTestHelper helper, Object expected, Object actual, String label) {
-        if (!java.util.Objects.equals(expected, actual)) {
+        if (!Objects.equals(expected, actual)) {
             helper.fail("Expected " + label + " to be " + expected + ", got " + actual);
         }
     }

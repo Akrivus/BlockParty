@@ -26,7 +26,7 @@ public record PlayerRelationship(
         Connection connection = db.openConnection();
         try (Statement statement = connection.createStatement()) {
             statement.execute("""
-                    CREATE TABLE IF NOT EXISTS PlayerRelationships (
+                    CREATE TABLE IF NOT EXISTS %s (
                         NpcID INTEGER NOT NULL,
                         PlayerUUID TEXT NOT NULL,
                         YearbookSigned INTEGER NOT NULL DEFAULT 0,
@@ -38,7 +38,7 @@ public record PlayerRelationship(
                         LastInteractionAt INTEGER NOT NULL DEFAULT 0,
                         PRIMARY KEY (NpcID, PlayerUUID)
                     );
-                    """);
+                    """.formatted(BlockPartyDB.TABLE_PLAYER_RELATIONSHIPS));
         } finally {
             db.free(connection);
         }
@@ -47,10 +47,10 @@ public record PlayerRelationship(
     public static PlayerRelationship ensure(BlockPartyDB db, long npcId, UUID playerUuid) throws SQLException {
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                INSERT INTO PlayerRelationships (NpcID, PlayerUUID)
+                INSERT INTO %s (NpcID, PlayerUUID)
                 VALUES (?, ?)
                 ON CONFLICT(NpcID, PlayerUUID) DO NOTHING;
-                """)) {
+                """.formatted(BlockPartyDB.TABLE_PLAYER_RELATIONSHIPS))) {
             statement.setLong(1, npcId);
             statement.setString(2, playerUuid.toString());
             statement.executeUpdate();
@@ -64,10 +64,10 @@ public record PlayerRelationship(
     public static Optional<PlayerRelationship> find(BlockPartyDB db, long npcId, UUID playerUuid) throws SQLException {
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT * FROM PlayerRelationships
+                SELECT * FROM %s
                 WHERE NpcID = ? AND PlayerUUID = ?
                 LIMIT 1;
-                """)) {
+                """.formatted(BlockPartyDB.TABLE_PLAYER_RELATIONSHIPS))) {
             statement.setLong(1, npcId);
             statement.setString(2, playerUuid.toString());
             try (ResultSet result = statement.executeQuery()) {
@@ -92,10 +92,10 @@ public record PlayerRelationship(
         ensure(db, npcId, playerUuid);
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                UPDATE PlayerRelationships
+                UPDATE %s
                 SET Affection = ?, Loyalty = ?
                 WHERE NpcID = ? AND PlayerUUID = ?;
-                """)) {
+                """.formatted(BlockPartyDB.TABLE_PLAYER_RELATIONSHIPS))) {
             statement.setFloat(1, affection);
             statement.setFloat(2, loyalty);
             statement.setLong(3, npcId);
@@ -117,10 +117,10 @@ public record PlayerRelationship(
     private static void updateBoolean(BlockPartyDB db, long npcId, UUID playerUuid, String column, boolean value) throws SQLException {
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                UPDATE PlayerRelationships
+                UPDATE %s
                 SET %s = ?
                 WHERE NpcID = ? AND PlayerUUID = ?;
-                """.formatted(column))) {
+                """.formatted(BlockPartyDB.TABLE_PLAYER_RELATIONSHIPS, column))) {
             statement.setBoolean(1, value);
             statement.setLong(2, npcId);
             statement.setString(3, playerUuid.toString());
@@ -133,10 +133,10 @@ public record PlayerRelationship(
     private static List<Long> listNpcIds(BlockPartyDB db, UUID playerUuid, String column) throws SQLException {
         Connection connection = db.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT NpcID FROM PlayerRelationships
+                SELECT NpcID FROM %s
                 WHERE PlayerUUID = ? AND %s = 1
                 ORDER BY NpcID ASC;
-                """.formatted(column))) {
+                """.formatted(BlockPartyDB.TABLE_PLAYER_RELATIONSHIPS, column))) {
             statement.setString(1, playerUuid.toString());
             List<Long> ids = new ArrayList<>();
             try (ResultSet result = statement.executeQuery()) {

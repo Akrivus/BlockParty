@@ -20,7 +20,8 @@ public final class SceneActions {
                 "send_dialogue", "send_response", "health", "food_level", "loyalty", "stress",
                 "cookie", "counter", "hide", "create_voicemail", "start_follow_session",
                 "clear_follow_session", "go_to_anchor", "set_home_to_anchor", "set_routine_intent",
-                "clear_routine_intent", "sleep_at_home", "end");
+                "clear_routine_intent", "sleep_at_home", "open_inventory", "give_item", "take_item",
+                "wait", "dismiss", "end");
     }
 
     private SceneActions() {

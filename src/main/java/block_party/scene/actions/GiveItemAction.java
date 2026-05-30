@@ -2,6 +2,7 @@ package block_party.scene.actions;
 
 import block_party.entities.Moe;
 import block_party.scene.SceneAction;
+import java.util.Locale;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -36,7 +37,7 @@ public record GiveItemAction(ItemStack stack, Target target) implements SceneAct
 
         public static Target fromValue(String value) {
             try {
-                return Target.valueOf(value.toUpperCase(java.util.Locale.ROOT));
+                return Target.valueOf(value.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException exception) {
                 return PLAYER;
             }

@@ -11,9 +11,11 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -25,7 +27,7 @@ public final class BlockAliasesReloadListener implements PreparableReloadListene
 
     public static BlockState resolve(BlockState state) {
         if (state == null) {
-            return net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
+            return Blocks.AIR.defaultBlockState();
         }
         Block alias = ALIASES.getOrDefault(state.getBlock(), state.getBlock());
         return alias.defaultBlockState();
@@ -69,7 +71,7 @@ public final class BlockAliasesReloadListener implements PreparableReloadListene
             try (BufferedReader reader = resource.openAsReader()) {
                 JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
                 aliases.putAll(parseAlias(aliasId, json));
-            } catch (RuntimeException | java.io.IOException ignored) {
+            } catch (RuntimeException | IOException ignored) {
                 // The counting listener still catches malformed JSON; this listener fails closed.
             }
         });

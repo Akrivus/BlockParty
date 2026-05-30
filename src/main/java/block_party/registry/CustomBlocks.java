@@ -22,11 +22,15 @@ import block_party.blocks.entity.PaperLanternBlockEntity;
 import block_party.blocks.entity.SakuraSaplingBlockEntity;
 import block_party.blocks.entity.ShimenawaBlockEntity;
 import block_party.blocks.entity.ShrineTabletBlockEntity;
+import block_party.blocks.entity.AbstractDataBlockEntity;
 import block_party.scene.SceneObservations;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -178,7 +182,7 @@ public final class CustomBlocks {
         if (ENTRIES.containsKey(id)) {
             return ENTRIES.get(id);
         }
-        java.util.function.Supplier<net.minecraft.core.particles.SimpleParticleType> particle = switch (id) {
+        Supplier<SimpleParticleType> particle = switch (id) {
             case "white_sakura_blossoms" -> CustomParticles.WHITE_SAKURA::get;
             default -> CustomParticles.SAKURA::get;
         };
@@ -193,7 +197,7 @@ public final class CustomBlocks {
         if (ENTRIES.containsKey(id)) {
             return ENTRIES.get(id);
         }
-        TreeGrower grower = new TreeGrower(id, java.util.Optional.empty(), java.util.Optional.of(feature), java.util.Optional.empty());
+        TreeGrower grower = new TreeGrower(id, Optional.empty(), Optional.of(feature), Optional.empty());
         DeferredBlock<Block> block = BLOCKS.registerBlock(id, properties -> new SaplingBlock(grower, properties),
                 BlockBehaviour.Properties.of().strength(0.0F).randomTicks().noCollission().sound(SoundType.GRASS));
         ENTRIES.put(id, block);
@@ -280,8 +284,8 @@ public final class CustomBlocks {
         return block;
     }
 
-    private static DeferredBlock<Block> registerDataSapling(String id, ResourceKey<ConfiguredFeature<?, ?>> feature, BiFunction<BlockPos, BlockState, ? extends block_party.blocks.entity.AbstractDataBlockEntity> initializer) {
-        TreeGrower grower = new TreeGrower(id, java.util.Optional.empty(), java.util.Optional.of(feature), java.util.Optional.empty());
+    private static DeferredBlock<Block> registerDataSapling(String id, ResourceKey<ConfiguredFeature<?, ?>> feature, BiFunction<BlockPos, BlockState, ? extends AbstractDataBlockEntity> initializer) {
+        TreeGrower grower = new TreeGrower(id, Optional.empty(), Optional.of(feature), Optional.empty());
         DeferredBlock<Block> block = BLOCKS.registerBlock(id, properties -> new DataSaplingBlock(grower, initializer, properties),
                 BlockBehaviour.Properties.of().strength(0.0F).randomTicks().noCollission().sound(SoundType.GRASS));
         ENTRIES.put(id, block);
@@ -372,7 +376,7 @@ public final class CustomBlocks {
         return block;
     }
 
-    private static DeferredBlock<Block> registerData(String id, BiFunction<BlockPos, BlockState, ? extends block_party.blocks.entity.AbstractDataBlockEntity> initializer) {
+    private static DeferredBlock<Block> registerData(String id, BiFunction<BlockPos, BlockState, ? extends AbstractDataBlockEntity> initializer) {
         DeferredBlock<Block> block = BLOCKS.registerBlock(id, properties -> new AbstractDataBlock(initializer, properties),
                 BlockBehaviour.Properties.of().strength(1.0F).sound(SoundType.WOOD));
         ENTRIES.put(id, block);

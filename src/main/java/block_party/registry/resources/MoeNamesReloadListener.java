@@ -8,8 +8,11 @@ import com.google.gson.JsonParser;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
@@ -39,12 +42,12 @@ public final class MoeNamesReloadListener implements PreparableReloadListener {
     }
 
     @Override
-    public java.util.concurrent.CompletableFuture<Void> reload(
+    public CompletableFuture<Void> reload(
             PreparationBarrier barrier,
             ResourceManager resourceManager,
-            java.util.concurrent.Executor backgroundExecutor,
-            java.util.concurrent.Executor gameExecutor) {
-        return java.util.concurrent.CompletableFuture
+            Executor backgroundExecutor,
+            Executor gameExecutor) {
+        return CompletableFuture
                 .supplyAsync(() -> load(resourceManager), backgroundExecutor)
                 .thenCompose(barrier::wait)
                 .thenAcceptAsync(loaded -> {
@@ -94,7 +97,7 @@ public final class MoeNamesReloadListener implements PreparableReloadListener {
         if (value == null || value.isBlank()) {
             return fallback;
         }
-        String normalized = value.toUpperCase(java.util.Locale.ROOT);
+        String normalized = value.toUpperCase(Locale.ROOT);
         return switch (normalized) {
             case "MALE", "FEMALE", "NONBINARY" -> normalized;
             default -> fallback;

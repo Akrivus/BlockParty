@@ -4,6 +4,7 @@ import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
 import block_party.db.records.NPC;
 import block_party.db.records.PlayerRelationship;
+import block_party.db.DimBlockPos;
 import block_party.entities.Moe;
 import block_party.entities.movement.FollowSession;
 import block_party.entities.movement.PlayerMovementContext;
@@ -15,6 +16,7 @@ import block_party.items.InviteItem;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomItems;
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
@@ -291,7 +293,7 @@ public final class PlayerMovementGameTests {
         moe.moveTo(helper.absolutePos(new BlockPos(1, 1, 1)), 0.0F, 0.0F);
         player.moveTo(helper.absolutePos(new BlockPos(4, 1, 1)), 0.0F, 0.0F);
         moe.setPlayerUUID(owner);
-        moe.setHome(new block_party.db.DimBlockPos(helper.getLevel().dimension(), helper.absolutePos(new BlockPos(8, 1, 1))));
+        moe.setHome(new DimBlockPos(helper.getLevel().dimension(), helper.absolutePos(new BlockPos(8, 1, 1))));
         moe.setHasHome(true);
         moe.startFollowSession(playerId, PlayerMovementIntent.PARTY_INVITE, 20 * 20, false, false);
 
@@ -316,7 +318,7 @@ public final class PlayerMovementGameTests {
         moe.moveTo(helper.absolutePos(new BlockPos(1, 1, 1)), 0.0F, 0.0F);
         player.moveTo(helper.absolutePos(new BlockPos(40, 1, 1)), 0.0F, 0.0F);
         moe.setPlayerUUID(owner);
-        moe.setHome(new block_party.db.DimBlockPos(helper.getLevel().dimension(), helper.absolutePos(new BlockPos(8, 1, 1))));
+        moe.setHome(new DimBlockPos(helper.getLevel().dimension(), helper.absolutePos(new BlockPos(8, 1, 1))));
         moe.setHasHome(true);
         moe.startFollowSession(playerId, PlayerMovementIntent.PARTY_INVITE, 20 * 20, false, false);
 
@@ -335,7 +337,7 @@ public final class PlayerMovementGameTests {
     }
 
     private static void assertEquals(GameTestHelper helper, Object expected, Object actual, String label) {
-        if (!java.util.Objects.equals(expected, actual)) {
+        if (!Objects.equals(expected, actual)) {
             helper.fail("Expected " + label + " to be " + expected + ", got " + actual);
         }
     }

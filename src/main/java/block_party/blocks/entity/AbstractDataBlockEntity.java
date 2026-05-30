@@ -16,6 +16,10 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class AbstractDataBlockEntity extends BlockEntity {
     public static final UUID BLANK_UUID = new UUID(0L, 0L);
+    public static final String NBT_DATABASE_ID = BlockPartyDB.COLUMN_DATABASE_ID;
+    public static final String NBT_PLAYER_UUID = BlockPartyDB.COLUMN_PLAYER_UUID;
+    public static final String NBT_HAS_ROW = "HasRow";
+    public static final String NBT_CLAIMED = "Claimed";
 
     private long databaseId;
     private UUID playerUuid = BLANK_UUID;
@@ -29,21 +33,21 @@ public abstract class AbstractDataBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(CompoundTag compound, HolderLookup.Provider provider) {
         super.loadAdditional(compound, provider);
-        if (compound.contains("DatabaseID")) {
-            this.databaseId = compound.getLong("DatabaseID");
+        if (compound.contains(NBT_DATABASE_ID)) {
+            this.databaseId = compound.getLong(NBT_DATABASE_ID);
         }
-        if (compound.hasUUID("PlayerUUID")) {
-            this.playerUuid = compound.getUUID("PlayerUUID");
+        if (compound.hasUUID(NBT_PLAYER_UUID)) {
+            this.playerUuid = compound.getUUID(NBT_PLAYER_UUID);
         }
-        this.claimed = compound.getBoolean("HasRow") || compound.getBoolean("Claimed");
+        this.claimed = compound.getBoolean(NBT_HAS_ROW) || compound.getBoolean(NBT_CLAIMED);
     }
 
     @Override
     protected void saveAdditional(CompoundTag compound, HolderLookup.Provider provider) {
-        compound.putLong("DatabaseID", this.databaseId);
-        compound.putBoolean("HasRow", this.claimed);
-        compound.putBoolean("Claimed", this.claimed);
-        compound.putUUID("PlayerUUID", this.playerUuid);
+        compound.putLong(NBT_DATABASE_ID, this.databaseId);
+        compound.putBoolean(NBT_HAS_ROW, this.claimed);
+        compound.putBoolean(NBT_CLAIMED, this.claimed);
+        compound.putUUID(NBT_PLAYER_UUID, this.playerUuid);
         super.saveAdditional(compound, provider);
     }
 

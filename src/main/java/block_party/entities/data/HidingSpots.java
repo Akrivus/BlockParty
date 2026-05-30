@@ -23,6 +23,9 @@ import java.util.OptionalLong;
 
 public final class HidingSpots extends SavedData {
     public static final String KEY = "BlockParty_HidingSpots";
+    public static final String NBT_HIDING_SPOTS = "HidingSpots";
+    public static final String NBT_BLOCK_POS = "BlockPos";
+    public static final String NBT_DATABASE_ID = "DatabaseID";
     public static final Factory<HidingSpots> FACTORY = new Factory<>(
             HidingSpots::new,
             HidingSpots::load);
@@ -35,9 +38,9 @@ public final class HidingSpots extends SavedData {
 
     public static HidingSpots load(CompoundTag compound, HolderLookup.Provider provider) {
         HidingSpots data = new HidingSpots();
-        compound.getList("HidingSpots", NBT.COMPOUND).forEach(element -> {
+        compound.getList(NBT_HIDING_SPOTS, NBT.COMPOUND).forEach(element -> {
             CompoundTag member = (CompoundTag) element;
-            data.spots.put(BlockPos.of(member.getLong("BlockPos")), member.getLong("DatabaseID"));
+            data.spots.put(BlockPos.of(member.getLong(NBT_BLOCK_POS)), member.getLong(NBT_DATABASE_ID));
         });
         return data;
     }
@@ -47,11 +50,11 @@ public final class HidingSpots extends SavedData {
         ListTag list = new ListTag();
         this.spots.forEach((pos, id) -> {
             CompoundTag member = new CompoundTag();
-            member.putLong("BlockPos", pos.asLong());
-            member.putLong("DatabaseID", id);
+            member.putLong(NBT_BLOCK_POS, pos.asLong());
+            member.putLong(NBT_DATABASE_ID, id);
             list.add(member);
         });
-        compound.put("HidingSpots", list);
+        compound.put(NBT_HIDING_SPOTS, list);
         return compound;
     }
 

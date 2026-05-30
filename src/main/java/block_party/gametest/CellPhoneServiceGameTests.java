@@ -396,9 +396,9 @@ public final class CellPhoneServiceGameTests {
         try {
             Connection connection = db.openConnection();
             try (PreparedStatement statement = connection.prepareStatement("""
-                    INSERT INTO NPCs (PlayerUUID, Name, BlockState, Gender)
+                    INSERT INTO %s (PlayerUUID, Name, BlockState, Gender)
                     VALUES ('not-a-uuid', 'Corrupt', 0, 'female');
-                    """, Statement.RETURN_GENERATED_KEYS)) {
+                    """.formatted(BlockPartyDB.TABLE_NPCS), Statement.RETURN_GENERATED_KEYS)) {
                 statement.executeUpdate();
                 try (ResultSet keys = statement.getGeneratedKeys()) {
                     if (!keys.next()) {

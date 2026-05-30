@@ -2,6 +2,7 @@ package block_party.gametest;
 
 import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
+import block_party.db.DimBlockPos;
 import block_party.entities.Moe;
 import block_party.entities.environment.MoeEnvironmentalObservation;
 import block_party.entities.environment.MoePlaceMemory;
@@ -43,7 +44,7 @@ public final class MoeMovementGameTests {
         Moe moe = new Moe(CustomEntities.MOE.get(), level);
         moe.moveTo(helper.absolutePos(new BlockPos(1, 1, 1)), 0.0F, 0.0F);
         moe.setPlayerUUID(owner);
-        moe.setHome(new block_party.db.DimBlockPos(level.dimension(), helper.absolutePos(new BlockPos(2, 1, 1))));
+        moe.setHome(new DimBlockPos(level.dimension(), helper.absolutePos(new BlockPos(2, 1, 1))));
         moe.setHasHome(true);
         try {
             insertLocation(db, owner, level, helper.absolutePos(new BlockPos(8, 1, 1)), "if_morning", 2);
@@ -71,7 +72,7 @@ public final class MoeMovementGameTests {
         moe.setPlayerUUID(owner);
         try {
             insertLocation(db, owner, level, helper.absolutePos(new BlockPos(10, 1, 1)), "if_night", 9);
-            insertSimpleDataBlock(db, "GardenLanterns", owner, level, helper.absolutePos(new BlockPos(5, 1, 1)));
+            insertSimpleDataBlock(db, BlockPartyDB.TABLE_GARDEN_LANTERNS, owner, level, helper.absolutePos(new BlockPos(5, 1, 1)));
         } catch (SQLException exception) {
             helper.fail("Expected garden anchor setup to succeed: " + exception.getMessage());
             return;
@@ -93,7 +94,7 @@ public final class MoeMovementGameTests {
         Moe moe = spawnMoe(helper, level, owner, new BlockPos(1, 1, 1));
         BlockPos anchorPos = helper.absolutePos(new BlockPos(12, 1, 1));
         try {
-            insertSimpleDataBlock(db, "GardenLanterns", owner, level, anchorPos);
+            insertSimpleDataBlock(db, BlockPartyDB.TABLE_GARDEN_LANTERNS, owner, level, anchorPos);
         } catch (SQLException exception) {
             helper.fail("Expected idle anchor setup to succeed: " + exception.getMessage());
             return;
@@ -126,7 +127,7 @@ public final class MoeMovementGameTests {
         Moe neighbor = spawnMoe(helper, level, owner, new BlockPos(4, 1, 1));
         BlockPos anchorPos = helper.absolutePos(new BlockPos(10, 1, 1));
         try {
-            insertSimpleDataBlock(db, "GardenLanterns", owner, level, anchorPos);
+            insertSimpleDataBlock(db, BlockPartyDB.TABLE_GARDEN_LANTERNS, owner, level, anchorPos);
         } catch (SQLException exception) {
             helper.fail("Expected idle social setup to succeed: " + exception.getMessage());
             return;
@@ -157,7 +158,7 @@ public final class MoeMovementGameTests {
         moe.setRelaxation(0.0F);
         try {
             insertLocation(db, owner, level, helper.absolutePos(new BlockPos(6, 1, 1)), "always", 2);
-            insertSimpleDataBlock(db, "GardenLanterns", owner, level, helper.absolutePos(new BlockPos(10, 1, 1)));
+            insertSimpleDataBlock(db, BlockPartyDB.TABLE_GARDEN_LANTERNS, owner, level, helper.absolutePos(new BlockPos(10, 1, 1)));
         } catch (SQLException exception) {
             helper.fail("Expected wellbeing routine setup to succeed: " + exception.getMessage());
             return;
@@ -180,7 +181,7 @@ public final class MoeMovementGameTests {
         moe.setRoutineIntent(RoutineIntent.GATHER);
         try {
             insertLocation(db, owner, level, helper.absolutePos(new BlockPos(4, 1, 1)), "always", 5);
-            insertSimpleDataBlock(db, "Saplings", owner, level, helper.absolutePos(new BlockPos(12, 1, 1)));
+            insertSimpleDataBlock(db, BlockPartyDB.TABLE_SAPLINGS, owner, level, helper.absolutePos(new BlockPos(12, 1, 1)));
         } catch (SQLException exception) {
             helper.fail("Expected explicit routine setup to succeed: " + exception.getMessage());
             return;
@@ -216,7 +217,7 @@ public final class MoeMovementGameTests {
         moe.setRoutineIntent(RoutineIntent.SLEEP);
         try {
             insertLocation(db, owner, level, helper.absolutePos(new BlockPos(4, 1, 1)), "always", 10);
-            insertSimpleDataBlock(db, "GardenLanterns", owner, level, helper.absolutePos(new BlockPos(6, 1, 1)));
+            insertSimpleDataBlock(db, BlockPartyDB.TABLE_GARDEN_LANTERNS, owner, level, helper.absolutePos(new BlockPos(6, 1, 1)));
         } catch (SQLException exception) {
             helper.fail("Expected sleep routine setup to succeed: " + exception.getMessage());
             return;
@@ -647,8 +648,8 @@ public final class MoeMovementGameTests {
         level.setBlock(gardenAnchor.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
         level.setBlock(shrineAnchor.below(), Blocks.STONE.defaultBlockState(), 3);
         try {
-            insertSimpleDataBlock(db, "GardenLanterns", owner, level, gardenAnchor);
-            insertSimpleDataBlock(db, "Shrines", owner, level, shrineAnchor);
+            insertSimpleDataBlock(db, BlockPartyDB.TABLE_GARDEN_LANTERNS, owner, level, gardenAnchor);
+            insertSimpleDataBlock(db, BlockPartyDB.TABLE_SHRINES, owner, level, shrineAnchor);
         } catch (SQLException exception) {
             helper.fail("Expected anchor evidence setup to succeed: " + exception.getMessage());
             return;

@@ -5,6 +5,7 @@ import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +41,7 @@ public record MoeSocialContext(
                 other != moe && other.isAlive() && !other.isRemoved())) {
             nearby.add(other);
         }
-        nearby.sort(java.util.Comparator.comparingDouble(moe::distanceToSqr));
+        nearby.sort(Comparator.comparingDouble(moe::distanceToSqr));
         return List.copyOf(nearby);
     }
 
