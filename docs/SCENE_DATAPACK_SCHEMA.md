@@ -605,8 +605,8 @@ observation primitive, then expose one filter ID here.
 
 Actions may be strings or objects.
 
-String actions currently only support `block_party:end`; unknown string actions
-also become `end`.
+String actions currently only support `block_party:end`. Unknown action IDs and
+non-`end` string actions fail scene parsing with an author-oriented error.
 
 ```json
 "block_party:end"
@@ -623,7 +623,9 @@ Object actions use `type` plus either inline fields or an `action` payload:
 }
 ```
 
-Unknown object action types become `end`.
+Unknown object action types fail scene parsing with an author-oriented error.
+When an object action includes an `action` field, that field must be an object
+payload.
 
 ## Dialogue Action
 
@@ -698,6 +700,31 @@ Response fields:
 - `actions`: actions to queue when this response is chosen.
 
 ## State Actions
+
+Stat actions:
+
+```json
+{
+  "type": "block_party:loyalty",
+  "action": {
+    "operation": "add",
+    "value": 1
+  }
+}
+```
+
+Supported stat action types:
+
+- `block_party:health`
+- `block_party:food_level`
+- `block_party:loyalty`
+- `block_party:stress`
+
+Stat operations:
+
+- `add` default
+- `subtract`
+- `set`
 
 Cookie action:
 

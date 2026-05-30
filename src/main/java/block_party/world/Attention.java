@@ -5,6 +5,8 @@ import block_party.db.DimBlockPos;
 import block_party.entities.Moe;
 import block_party.entities.MoeSpawner;
 import block_party.scene.SceneTrigger;
+import block_party.world.attention.AttentionDefinition;
+import block_party.world.attention.AttentionDefinitions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -12,11 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.BlockDropsEvent;
@@ -32,15 +30,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class Attention {
-    public static final String OAK_FOREST_TYPE = "oak_forest";
-    public static final String SAPLING_DROP_SOURCE = "sapling_drop";
-    public static final Definition OAK_FOREST = new Definition(
-            OAK_FOREST_TYPE,
-            SAPLING_DROP_SOURCE,
-            Items.OAK_SAPLING,
-            Blocks.OAK_LOG,
-            Blocks.OAK_LOG.defaultBlockState());
-    private static final List<Definition> DEFINITIONS = List.of(OAK_FOREST);
+    private static final List<AttentionDefinition> DEFINITIONS = AttentionDefinitions.all();
     private static final int TREE_CUT_MEMORY_TICKS = 20 * 90;
     private static final double TREE_CUT_MEMORY_RADIUS = 12.0D;
     private static final Map<String, List<TreeCutMemory>> RECENT_TREE_CUTS = new ConcurrentHashMap<>();
@@ -66,7 +56,7 @@ public final class Attention {
     }
 
     public static boolean rememberBrokenBlock(ServerLevel level, BlockPos pos, BlockState state, UUID playerUuid) {
-        Definition definition = definitionForBrokenBlock(state);
+        AttentionDefinition definition = definitionForBrokenBlock(state);
         if (level == null || pos == null || playerUuid == null || definition == null) {
             return false;
         }
@@ -96,7 +86,7 @@ public final class Attention {
         if (sapling.isEmpty()) {
             return false;
         }
-        Definition definition = drop.definition();
+        AttentionDefinition definition = drop.definition();
         UUID attentionPlayer = playerUuid == null ? recentTreeCut(level, pos, definition).map(TreeCutMemory::playerUuid).orElse(null) : playerUuid;
         if (attentionPlayer == null) {
             return false;
@@ -125,7 +115,7 @@ public final class Attention {
         return true;
     }
 
-    private static Optional<TreeCutMemory> recentTreeCut(ServerLevel level, BlockPos pos, Definition definition) {
+    private static Optional<TreeCutMemory> recentTreeCut(ServerLevel level, BlockPos pos, AttentionDefinition definition) {
         String key = levelKey(level);
         List<TreeCutMemory> memories = RECENT_TREE_CUTS.get(key);
         if (memories == null || memories.isEmpty()) {
@@ -146,11 +136,11 @@ public final class Attention {
         return System.identityHashCode(level.getServer()) + ":" + level.dimension().location();
     }
 
-    private static Definition definitionForBrokenBlock(BlockState state) {
+    private static AttentionDefinition definitionForBrokenBlock(BlockState state) {
         if (state == null) {
             return null;
         }
-        for (Definition definition : DEFINITIONS) {
+        for (AttentionDefinition definition : DEFINITIONS) {
             if (definition.matchesBrokenBlock(state)) {
                 return definition;
             }
@@ -161,7 +151,7 @@ public final class Attention {
     private static DropAttention firstAttentionDrop(List<ItemStack> drops) {
         for (ItemStack stack : drops) {
             if (!stack.isEmpty() && stack.is(ItemTags.SAPLINGS)) {
-                for (Definition definition : DEFINITIONS) {
+                for (AttentionDefinition definition : DEFINITIONS) {
                     if (definition.matchesDrop(stack)) {
                         return new DropAttention(definition, stack);
                     }
@@ -190,25 +180,9 @@ public final class Attention {
         return sourcePos.above();
     }
 
-    public record Definition(String type, String source, Item dropItem, Block contextBlock, BlockState cardinalState) {
-        public boolean matchesDrop(ItemStack stack) {
-            return stack.is(this.dropItem);
-        }
-
-        public boolean matchesBrokenBlock(BlockState state) {
-            return state.is(this.contextBlock);
-        }
-
-        public void startChore(Moe moe, BlockPos origin, UUID playerUuid) {
-            if (this.equals(OAK_FOREST)) {
-                moe.startOakForestAttentionChore(origin, playerUuid);
-            }
-        }
+    private record DropAttention(AttentionDefinition definition, ItemStack stack) {
     }
 
-    private record DropAttention(Definition definition, ItemStack stack) {
-    }
-
-    private record TreeCutMemory(Definition definition, UUID playerUuid, BlockPos pos, long gameTime) {
+    private record TreeCutMemory(AttentionDefinition definition, UUID playerUuid, BlockPos pos, long gameTime) {
     }
 }

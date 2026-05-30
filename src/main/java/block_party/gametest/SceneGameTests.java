@@ -537,6 +537,27 @@ public final class SceneGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void statSceneActionsMutateMoeState(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(522L, 22L));
+        moe.setHealth(10.0F);
+        moe.setFoodLevel(8.0F);
+        moe.setLoyalty(2.0F);
+        moe.setStress(5.0F);
+
+        parseAction("{\"type\":\"block_party:health\",\"action\":{\"operation\":\"add\",\"value\":3}}").apply(moe);
+        parseAction("{\"type\":\"block_party:food_level\",\"action\":{\"operation\":\"set\",\"value\":12}}").apply(moe);
+        parseAction("{\"type\":\"block_party:loyalty\",\"action\":{\"operation\":\"add\",\"value\":4}}").apply(moe);
+        parseAction("{\"type\":\"block_party:stress\",\"action\":{\"operation\":\"subtract\",\"value\":2}}").apply(moe);
+
+        assertEquals(helper, 13.0F, moe.getHealth(), "scene health action");
+        assertEquals(helper, 12.0F, moe.getFoodLevel(), "scene food level action");
+        assertEquals(helper, 6.0F, moe.getLoyalty(), "scene loyalty action");
+        assertEquals(helper, 3.0F, moe.getStress(), "scene stress action");
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void createVoicemailActionStoresDelayedMessage(GameTestHelper helper) {
         Moe moe = spawnMoe(helper, new UUID(506L, 6L));
         SceneAction action = parseAction("{\"type\":\"block_party:create_voicemail\",\"action\":{\"text\":\"Call me back, @name.\",\"speaker\":{\"emotion\":\"happy\"},\"sound\":\"block_party:item.cell_phone.dial\",\"delay_minutes\":90}}");
@@ -944,6 +965,28 @@ public final class SceneGameTests {
         }
     }
 
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void unknownSceneActionIdsFailWithAuthorContext(GameTestHelper helper) {
+        assertSceneParseFailsContaining(helper, """
+                {"trigger":"block_party:right_click","actions":[{"type":"block_party:not_a_real_action"}]}
+                """, "Unknown scene action ID block_party:not_a_real_action at scene block_party:test_scene actions[0]");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void malformedSceneActionPayloadsFailWithAuthorContext(GameTestHelper helper) {
+        assertSceneParseFailsContaining(helper, """
+                {"trigger":"block_party:right_click","actions":[{"type":"block_party:counter","action":[]}]}
+                """, "Scene action scene block_party:test_scene actions[0] field 'action' must be an object payload");
+        assertSceneParseFailsContaining(helper, """
+                {"trigger":"block_party:right_click","actions":"block_party:end"}
+                """, "Scene scene block_party:test_scene field 'actions' must be an array");
+        assertSceneParseFailsContaining(helper, """
+                {"trigger":"block_party:right_click","actions":["block_party:counter"]}
+                """, "only block_party:end supports string form");
+        helper.succeed();
+    }
+
     private static Moe spawnMoe(GameTestHelper helper, UUID owner) {
         return spawnMoeAt(helper, owner, new BlockPos(1, 1, 1));
     }
@@ -971,6 +1014,17 @@ public final class SceneGameTests {
 
     private static ScenesReloadListener.ParsedScene parseScene(String json) {
         return ScenesReloadListener.parseSceneForTests(BlockParty.source("test_scene"), JsonParser.parseString(json));
+    }
+
+    private static void assertSceneParseFailsContaining(GameTestHelper helper, String json, String expectedMessage) {
+        try {
+            parseScene(json);
+            helper.fail("Expected scene parse to fail with message containing: " + expectedMessage);
+        } catch (RuntimeException expected) {
+            if (expected.getMessage() == null || !expected.getMessage().contains(expectedMessage)) {
+                helper.fail("Expected scene parse failure to contain '" + expectedMessage + "', got: " + expected.getMessage());
+            }
+        }
     }
 
     private static void tickScene(Moe moe, int count) {

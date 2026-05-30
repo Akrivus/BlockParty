@@ -1,6 +1,7 @@
 package block_party.registry;
 
 import block_party.BlockParty;
+import block_party.registry.resources.ScenesReloadListener;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import net.minecraft.core.Registry;
@@ -16,18 +17,13 @@ public final class SceneActions {
     public static final Map<String, DeferredHolder<Builder, Builder>> ENTRIES = new LinkedHashMap<>();
 
     static {
-        registerAll(
-                "send_dialogue", "send_response", "health", "food_level", "loyalty", "stress",
-                "cookie", "counter", "hide", "create_voicemail", "start_follow_session",
-                "clear_follow_session", "go_to_anchor", "set_home_to_anchor", "set_routine_intent",
-                "clear_routine_intent", "sleep_at_home", "open_inventory", "give_item", "take_item",
-                "wait", "dismiss", "end");
+        registerAll(ScenesReloadListener.supportedActionPaths());
     }
 
     private SceneActions() {
     }
 
-    private static void registerAll(String... ids) {
+    private static void registerAll(Iterable<String> ids) {
         for (String id : ids) {
             ENTRIES.put(id, ACTIONS.register(id, () -> new Builder(id)));
         }

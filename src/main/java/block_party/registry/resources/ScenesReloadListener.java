@@ -28,6 +28,7 @@ import block_party.scene.actions.SetHomeToAnchorAction;
 import block_party.scene.actions.SetRoutineIntentAction;
 import block_party.scene.actions.SleepAtHomeAction;
 import block_party.scene.actions.StartFollowSessionAction;
+import block_party.scene.actions.StatAction;
 import block_party.scene.actions.TakeItemAction;
 import block_party.entities.movement.PlayerMovementIntent;
 import block_party.entities.movement.RoutineIntent;
@@ -42,6 +43,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -53,6 +55,7 @@ import net.minecraft.util.GsonHelper;
 
 public final class ScenesReloadListener implements PreparableReloadListener {
     private static final String DIRECTORY = "scenes";
+    private static final Map<String, ActionParser> ACTION_PARSERS = actionParsers();
     private static volatile int loadedCount;
 
     private Map<SceneTrigger, List<Scene>> scenes = Map.of();
@@ -60,6 +63,10 @@ public final class ScenesReloadListener implements PreparableReloadListener {
 
     public static int loadedCount() {
         return loadedCount;
+    }
+
+    public static Set<String> supportedActionPaths() {
+        return ACTION_PARSERS.keySet();
     }
 
     public int sceneCount() {
@@ -134,7 +141,7 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         JsonObject json = GsonHelper.convertToJsonObject(element, "scene " + id);
         SceneTrigger trigger = SceneTrigger.NULL.fromValue(own(resource(GsonHelper.getAsString(json, "trigger", "block_party:null"))));
         List<SceneObservation> filters = parseFilters(json.has("filters") ? json.getAsJsonArray("filters") : new JsonArray());
-        List<SceneAction> actions = parseActions(json.has("actions") ? json.getAsJsonArray("actions") : new JsonArray());
+        List<SceneAction> actions = parseActions(optionalArray(json, "actions", "scene " + id), "scene " + id);
         return new ParsedScene(trigger, new Scene(filters, actions));
     }
 
@@ -168,65 +175,107 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         return SceneObservationFactories.build(type, json);
     }
 
-    private static List<SceneAction> parseActions(JsonArray array) {
+    private static List<SceneAction> parseActions(JsonArray array, String context) {
         List<SceneAction> actions = new ArrayList<>();
-        for (JsonElement element : array) {
-            actions.add(parseAction(element));
+        for (int index = 0; index < array.size(); ++index) {
+            actions.add(parseAction(array.get(index), context + " actions[" + index + "]"));
         }
         return actions;
     }
 
     private static SceneAction parseAction(JsonElement element) {
-        if (element.isJsonObject()) {
-            return parseAction(element.getAsJsonObject());
-        }
-        ResourceLocation type = own(resource(element.getAsString()));
-        return "end".equals(type.getPath()) ? EndAction.INSTANCE : EndAction.INSTANCE;
+        return parseAction(element, "test action");
     }
 
     private static SceneAction parseAction(JsonObject json) {
-        ResourceLocation type = actionType(json);
-        JsonObject payload = json.has("action") && json.get("action").isJsonObject() ? json.getAsJsonObject("action") : json;
-        return switch (type.getPath()) {
-            case "send_dialogue" -> parseDialogue(payload);
-            case "send_response" -> parseResponse(payload);
-            case "hide" -> new HideAction(HideUntil.EXPOSED.fromValue(GsonHelper.getAsString(payload, "until", "exposed")));
-            case "cookie" -> new CookieAction(
-                    CookieAction.Operation.fromValue(GsonHelper.getAsString(payload, "operation", "set")),
-                    GsonHelper.getAsString(payload, "name", ""),
-                    GsonHelper.getAsString(payload, "value", ""));
-            case "counter" -> new CounterAction(
-                    CounterAction.Operation.fromValue(GsonHelper.getAsString(payload, "operation", "add")),
-                    GsonHelper.getAsString(payload, "name", ""),
-                    GsonHelper.getAsInt(payload, "value", 1));
-            case "create_voicemail" -> new CreateVoicemailAction(
-                    GsonHelper.getAsString(payload, "text", ""),
-                    GsonHelper.getAsBoolean(payload, "tooltip", true),
-                    parseSpeaker(payload.has("speaker") && payload.get("speaker").isJsonObject() ? payload.getAsJsonObject("speaker") : new JsonObject()),
-                    payload.has("sound") ? resource(GsonHelper.getAsString(payload, "sound", "")) : null,
-                    voicemailDelayMillis(payload));
-            case "start_follow_session" -> new StartFollowSessionAction(
-                    parseMovementIntent(GsonHelper.getAsString(payload, "intent", "follow_request")),
-                    Math.max(0, GsonHelper.getAsInt(payload, "ticks", 20 * 60)),
-                    GsonHelper.getAsBoolean(payload, "can_change_dimension", false),
-                    GsonHelper.getAsBoolean(payload, "trigger_scene", false));
-            case "go_to_anchor" -> new GoToAnchorAction(GsonHelper.getAsDouble(payload, "speed", 1.0D));
-            case "set_home_to_anchor" -> SetHomeToAnchorAction.INSTANCE;
-            case "set_routine_intent" -> new SetRoutineIntentAction(RoutineIntent.fromValue(GsonHelper.getAsString(payload, "intent", "idle")));
-            case "clear_routine_intent" -> ClearRoutineIntentAction.INSTANCE;
-            case "sleep_at_home" -> new SleepAtHomeAction(HideUntil.EXPOSED.fromValue(GsonHelper.getAsString(payload, "until", "exposed")));
-            case "open_inventory" -> OpenInventoryAction.INSTANCE;
-            case "give_item" -> new GiveItemAction(
-                    SceneItemStacks.parse(payload),
-                    GiveItemAction.Target.fromValue(GsonHelper.getAsString(payload, "target", "player")));
-            case "take_item" -> new TakeItemAction(
-                    payload,
-                    Math.max(1, GsonHelper.getAsInt(payload, "count", 1)),
-                    TakeItemAction.Source.fromValue(GsonHelper.getAsString(payload, "source", "player")),
-                    TakeItemAction.Destination.fromValue(GsonHelper.getAsString(payload, "destination", "moe")));
-            case "clear_follow_session", "wait", "dismiss" -> ClearFollowSessionAction.INSTANCE;
-            default -> EndAction.INSTANCE;
-        };
+        return parseAction(json, "test action");
+    }
+
+    private static SceneAction parseAction(JsonElement element, String context) {
+        if (element.isJsonObject()) {
+            return parseAction(element.getAsJsonObject(), context);
+        }
+        if (!element.isJsonPrimitive()) {
+            throw new IllegalArgumentException("Scene action " + context + " must be a string ID or object");
+        }
+        return parseStringAction(actionId(element.getAsString(), context), context);
+    }
+
+    private static SceneAction parseAction(JsonObject json, String context) {
+        ResourceLocation type = actionType(json, context);
+        JsonObject payload = actionPayload(json, context);
+        ActionParser parser = ACTION_PARSERS.get(type.getPath());
+        if (parser == null) {
+            throw unknownAction(type, context);
+        }
+        return parser.parse(payload);
+    }
+
+    private static SceneAction parseStringAction(ResourceLocation type, String context) {
+        if ("end".equals(type.getPath())) {
+            return EndAction.INSTANCE;
+        }
+        if (ACTION_PARSERS.containsKey(type.getPath())) {
+            throw new IllegalArgumentException("Scene action " + context + " uses " + type
+                    + " in string form; only block_party:end supports string form. Use an object with a type field.");
+        }
+        throw unknownAction(type, context);
+    }
+
+    private static Map<String, ActionParser> actionParsers() {
+        Map<String, ActionParser> parsers = new LinkedHashMap<>();
+        parsers.put("send_dialogue", ScenesReloadListener::parseDialogue);
+        parsers.put("send_response", ScenesReloadListener::parseResponse);
+        parsers.put("health", payload -> parseStat(StatAction.Stat.HEALTH, payload));
+        parsers.put("food_level", payload -> parseStat(StatAction.Stat.FOOD_LEVEL, payload));
+        parsers.put("loyalty", payload -> parseStat(StatAction.Stat.LOYALTY, payload));
+        parsers.put("stress", payload -> parseStat(StatAction.Stat.STRESS, payload));
+        parsers.put("cookie", payload -> new CookieAction(
+                CookieAction.Operation.fromValue(GsonHelper.getAsString(payload, "operation", "set")),
+                GsonHelper.getAsString(payload, "name", ""),
+                GsonHelper.getAsString(payload, "value", "")));
+        parsers.put("counter", payload -> new CounterAction(
+                CounterAction.Operation.fromValue(GsonHelper.getAsString(payload, "operation", "add")),
+                GsonHelper.getAsString(payload, "name", ""),
+                GsonHelper.getAsInt(payload, "value", 1)));
+        parsers.put("hide", payload -> new HideAction(HideUntil.EXPOSED.fromValue(GsonHelper.getAsString(payload, "until", "exposed"))));
+        parsers.put("create_voicemail", payload -> new CreateVoicemailAction(
+                GsonHelper.getAsString(payload, "text", ""),
+                GsonHelper.getAsBoolean(payload, "tooltip", true),
+                parseSpeaker(payload.has("speaker") && payload.get("speaker").isJsonObject() ? payload.getAsJsonObject("speaker") : new JsonObject()),
+                payload.has("sound") ? resource(GsonHelper.getAsString(payload, "sound", "")) : null,
+                voicemailDelayMillis(payload)));
+        parsers.put("start_follow_session", payload -> new StartFollowSessionAction(
+                parseMovementIntent(GsonHelper.getAsString(payload, "intent", "follow_request")),
+                Math.max(0, GsonHelper.getAsInt(payload, "ticks", 20 * 60)),
+                GsonHelper.getAsBoolean(payload, "can_change_dimension", false),
+                GsonHelper.getAsBoolean(payload, "trigger_scene", false)));
+        parsers.put("clear_follow_session", payload -> ClearFollowSessionAction.INSTANCE);
+        parsers.put("go_to_anchor", payload -> new GoToAnchorAction(GsonHelper.getAsDouble(payload, "speed", 1.0D)));
+        parsers.put("set_home_to_anchor", payload -> SetHomeToAnchorAction.INSTANCE);
+        parsers.put("set_routine_intent", payload -> new SetRoutineIntentAction(RoutineIntent.fromValue(GsonHelper.getAsString(payload, "intent", "idle"))));
+        parsers.put("clear_routine_intent", payload -> ClearRoutineIntentAction.INSTANCE);
+        parsers.put("sleep_at_home", payload -> new SleepAtHomeAction(HideUntil.EXPOSED.fromValue(GsonHelper.getAsString(payload, "until", "exposed"))));
+        parsers.put("open_inventory", payload -> OpenInventoryAction.INSTANCE);
+        parsers.put("give_item", payload -> new GiveItemAction(
+                SceneItemStacks.parse(payload),
+                GiveItemAction.Target.fromValue(GsonHelper.getAsString(payload, "target", "player"))));
+        parsers.put("take_item", payload -> new TakeItemAction(
+                payload,
+                Math.max(1, GsonHelper.getAsInt(payload, "count", 1)),
+                TakeItemAction.Source.fromValue(GsonHelper.getAsString(payload, "source", "player")),
+                TakeItemAction.Destination.fromValue(GsonHelper.getAsString(payload, "destination", "moe"))));
+        parsers.put("wait", payload -> ClearFollowSessionAction.INSTANCE);
+        parsers.put("dismiss", payload -> ClearFollowSessionAction.INSTANCE);
+        parsers.put("end", payload -> EndAction.INSTANCE);
+        return Collections.unmodifiableMap(parsers);
+    }
+
+    private static StatAction parseStat(StatAction.Stat stat, JsonObject json) {
+        return new StatAction(
+                stat,
+                StatAction.Operation.fromValue(GsonHelper.getAsString(json, "operation", "add")),
+                GsonHelper.getAsFloat(json, "value", 0.0F));
     }
 
     private static PlayerMovementIntent parseMovementIntent(String value) {
@@ -244,14 +293,50 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         return Math.max(0L, GsonHelper.getAsLong(json, "delay_minutes", 60L)) * 60L * 1000L;
     }
 
-    private static ResourceLocation actionType(JsonObject json) {
+    private static ResourceLocation actionType(JsonObject json, String context) {
         if (json.has("type")) {
-            return own(resource(GsonHelper.getAsString(json, "type", "block_party:end")));
+            return actionId(GsonHelper.getAsString(json, "type", "block_party:end"), context + " type");
         }
         if (json.has("action") && json.get("action").isJsonPrimitive()) {
-            return own(resource(GsonHelper.getAsString(json, "action", "block_party:end")));
+            return actionId(GsonHelper.getAsString(json, "action", "block_party:end"), context + " action");
         }
-        return BlockParty.source("end");
+        throw new IllegalArgumentException("Scene action " + context + " must include a string 'type' field");
+    }
+
+    private static JsonObject actionPayload(JsonObject json, String context) {
+        if (!json.has("action")) {
+            return json;
+        }
+        if (json.get("action").isJsonObject()) {
+            return json.getAsJsonObject("action");
+        }
+        if (json.get("action").isJsonPrimitive() && !json.has("type")) {
+            return json;
+        }
+        throw new IllegalArgumentException("Scene action " + context + " field 'action' must be an object payload");
+    }
+
+    private static JsonArray optionalArray(JsonObject json, String field, String context) {
+        if (!json.has(field)) {
+            return new JsonArray();
+        }
+        if (!json.get(field).isJsonArray()) {
+            throw new IllegalArgumentException("Scene " + context + " field '" + field + "' must be an array");
+        }
+        return json.getAsJsonArray(field);
+    }
+
+    private static ResourceLocation actionId(String value, String context) {
+        ResourceLocation id = ResourceLocation.tryParse(value);
+        if (id == null) {
+            throw new IllegalArgumentException("Scene action " + context + " has invalid action ID '" + value + "'");
+        }
+        return own(id);
+    }
+
+    private static IllegalArgumentException unknownAction(ResourceLocation type, String context) {
+        return new IllegalArgumentException("Unknown scene action ID " + type + " at " + context
+                + ". Supported action IDs: " + ACTION_PARSERS.keySet());
     }
 
     private static SendDialogueAction parseDialogue(JsonObject json) {
@@ -279,7 +364,7 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         return new SendResponseAction(
                 Response.CLOSE_DIALOGUE.fromValue(icon),
                 GsonHelper.getAsString(json, "text", ""),
-                parseActions(json.has("actions") && json.get("actions").isJsonArray() ? json.getAsJsonArray("actions") : new JsonArray()));
+                parseActions(optionalArray(json, "actions", "send_response action"), "send_response action"));
     }
 
     private static Speaker parseSpeaker(JsonObject json) {
@@ -318,5 +403,9 @@ public final class ScenesReloadListener implements PreparableReloadListener {
     }
 
     private record LoadedScenes(Map<SceneTrigger, List<Scene>> byTrigger, Map<ResourceLocation, Scene> byName) {
+    }
+
+    private interface ActionParser {
+        SceneAction parse(JsonObject payload);
     }
 }

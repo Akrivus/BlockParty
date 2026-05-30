@@ -4,6 +4,7 @@ import block_party.BlockParty;
 import block_party.blocks.GardenLanternBlock;
 import block_party.db.BlockPartyDB;
 import block_party.entities.Moe;
+import block_party.entities.social.MoeSocialPlaceMemory;
 import block_party.entities.environment.MoePlaceMemory;
 import block_party.entities.social.MoeSocialRules;
 import block_party.entities.social.SocialAffinities;
@@ -245,12 +246,12 @@ public final class MoeSocialGameTests {
             return;
         }
 
-        Vec3 destination = observer.idleRoutineDestination();
+        Vec3 destination = observer.routine().destination();
         if (destination == null || destination.distanceToSqr(Vec3.atBottomCenterOf(place.pos())) > 36.0D) {
             helper.fail("Expected observer to drift toward friend's remembered garden, got " + destination);
             return;
         }
-        Moe.MoeSocialPlaceMemory memory = observer.socialPlaceMemoryForTests().orElse(null);
+        MoeSocialPlaceMemory memory = observer.socialPlaceMemoryForTests().orElse(null);
         if (memory == null || memory.behavior() != MoeSocialRules.SocialPlaceBehavior.SHARE) {
             helper.fail("Expected friendly social place behavior to share, got " + memory);
             return;
@@ -288,12 +289,12 @@ public final class MoeSocialGameTests {
         }
 
         Vec3 center = Vec3.atBottomCenterOf(place.pos());
-        Vec3 destination = observer.idleRoutineDestination();
+        Vec3 destination = observer.routine().destination();
         if (destination == null || destination.distanceToSqr(center) <= observer.position().distanceToSqr(center)) {
             helper.fail("Expected tense observer to move away from friend's remembered garden, got " + destination);
             return;
         }
-        Moe.MoeSocialPlaceMemory memory = observer.socialPlaceMemoryForTests().orElse(null);
+        MoeSocialPlaceMemory memory = observer.socialPlaceMemoryForTests().orElse(null);
         if (memory == null || memory.behavior() != MoeSocialRules.SocialPlaceBehavior.AVOID) {
             helper.fail("Expected tense social place behavior to avoid, got " + memory);
             return;
@@ -338,19 +339,23 @@ public final class MoeSocialGameTests {
         BlockPos lantern = helper.absolutePos(new BlockPos(2, 1, 1));
         level.setBlock(lantern.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
         level.setBlock(lantern, CustomBlocks.GARDEN_LANTERN.get().defaultBlockState(), 3);
+        level.setBlock(lantern.north(), Blocks.POPPY.defaultBlockState(), 3);
+        level.setBlock(lantern.south(), Blocks.DANDELION.defaultBlockState(), 3);
+        level.setBlock(lantern.east(), Blocks.BLUE_ORCHID.defaultBlockState(), 3);
+        level.setBlock(lantern.west(), Blocks.ALLIUM.defaultBlockState(), 3);
         try {
             insertSimpleDataBlock(BlockPartyDB.get(level), BlockPartyDB.TABLE_GARDEN_LANTERNS, owner, level, lantern);
         } catch (SQLException exception) {
             helper.fail("Expected garden lantern anchor setup to succeed: " + exception.getMessage());
             return;
         }
-        MoePlaceMemory.Place place = moe.observePlaceNow().orElse(null);
+        MoePlaceMemory.Place place = MoePlaceMemory.evaluate(moe, lantern);
         if (place == null || place.type() != MoePlaceMemory.PlaceType.GARDEN) {
-            helper.fail("Expected Moe to remember garden before lighting, got " + place);
+            helper.fail("Expected lantern position to evaluate as garden before lighting, got " + place);
             return;
         }
 
-        if (!moe.lightNearbyGardenLantern()) {
+        if (!moe.routine().lightNearbyGardenLantern()) {
             helper.fail("Expected corporeal Moe to light a nearby garden lantern");
             return;
         }

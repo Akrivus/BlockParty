@@ -209,7 +209,7 @@ Core files:
 
 Scenes are JSON resources under `data/*/scenes`. Each has a trigger, filters, and actions. Filters must all pass. Matching scenes are shuffled and one fulfilled scene is selected.
 
-Parser-supported actions include dialogue, response, health/food/loyalty/stress mutation, cookie/counter mutation, hide, voicemail, follow-session, anchor/routine, sleep-at-home, inventory/item transfer, wait/dismiss, and end. Keep `SceneActions`, `ScenesReloadListener`, and `SCENE_DATAPACK_SCHEMA.md` synchronized when this list changes.
+Parser-supported actions include dialogue, response, health/food/loyalty/stress mutation, cookie/counter mutation, hide, voicemail, follow-session, anchor/routine, sleep-at-home, inventory/item transfer, wait/dismiss, and end. `SceneActions` derives its registered IDs from the parser registry, and a GameTest keeps the two surfaces synchronized.
 
 ### Networking Packets
 

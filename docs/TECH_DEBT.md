@@ -12,11 +12,11 @@ Risk scale:
 
 ### Keep classes thin and package boundaries visible
 
-- Evidence: `Moe` and several service-style classes are large coordination points. New content systems can easily add another method to an already broad class instead of creating a focused collaborator.
+- Evidence: `Moe` and several service-style classes are large coordination points. The AI goal, chore, social-behavior, environmental movement, idle routine, gift-memory, environmental-memory, attention-definition, and block-profile slices now have visible package ownership, but `Moe` still exposes a broad identity, persistence, interaction, and inventory surface.
 - Maintenance risk: High. The codebase is interconnected enough that fat files make ownership, review, and regression analysis harder.
 - Gameplay importance: Medium. This is mostly a maintainability risk, but mistakes in central classes affect core gameplay.
 - Owner surface: `entities`, `entities.movement`, `entities.social`, `entities.environment`, `entities.preferences`, `entities.chores`, `world`, and `scene`.
-- Direction: prefer small domain services and value objects. Keep entity methods as state accessors or orchestration entry points; put scanning, scoring, planning, and persistence helpers in named collaborators.
+- Direction: prefer small domain services and value objects. Keep entity methods as state accessors or orchestration entry points; put scanning, scoring, planning, lifecycle, and persistence helpers in named collaborators. The next cleanup slices should shrink `Moe` by moving cohesive non-movement clusters such as inventory/menu interaction or persistence serialization.
 
 ### Keep cleanup guardrails active
 
@@ -31,19 +31,11 @@ Risk scale:
 
 ### Scene/datapack authoring diagnostics need a better content-author path
 
-- Evidence: `SCENE_DATAPACK_SCHEMA.md` documents the active scene surface, but there is no machine-readable JSON Schema and some malformed content still fails at reload/runtime rather than giving author-oriented diagnostics.
+- Evidence: `SCENE_DATAPACK_SCHEMA.md` documents the active scene surface, but there is no machine-readable JSON Schema and some malformed non-scene content still fails at reload/runtime rather than giving author-oriented diagnostics. Scene actions now fail parsing for unknown action IDs and malformed action payloads.
 - Maintenance risk: Medium. Generated scene packs and third-party packs need predictable validation.
 - Gameplay importance: Medium. Bad scene data can silently disable content or produce hard-to-debug behavior.
 - Owner surface: `registry.resources`, `scene`, `scene.actions`, `SceneObservationFactories`, and `docs/SCENE_DATAPACK_SCHEMA.md`.
-- Direction: add a schema or validator tests for scene, social-affinity, names, aliases, sounds, and texture metadata. Unknown filters should keep failing closed; unknown actions should be explicitly documented and tested.
-
-### Scene action registry and parser can drift
-
-- Evidence: `ScenesReloadListener` parses actions such as `open_inventory`, `give_item`, `take_item`, `wait`, and `dismiss`; the registry-facing `SceneActions` list is a separate declaration.
-- Maintenance risk: Medium. Scene-pack authors and generated packs need one authoritative list of legal action IDs.
-- Gameplay importance: Medium.
-- Owner surface: `SceneActions`, `ScenesReloadListener`, `SCENE_DATAPACK_SCHEMA.md`, scene parser tests.
-- Direction: derive the documented/action registry list from one source or add a regression test that fails when parser-supported IDs and registered/documented IDs diverge.
+- Direction: add a schema or validator tests for scene, social-affinity, names, aliases, sounds, and texture metadata. Unknown filters should keep failing closed.
 
 ### Scene state scope is per-Moe, not a full authoring model yet
 
@@ -67,7 +59,7 @@ Risk scale:
 - Maintenance risk: Medium.
 - Gameplay importance: High. Losing rows, owner lists, hidden positions, or entity identity damages worlds.
 - Owner surface: `db`, `entities.data`, `entities.Moe`, `MoeInHiding`, `network.payload`.
-- Direction: document table ownership, add schema versioning before incompatible changes, and keep no-op update/round-trip tests in place.
+- Direction: defer explicit versioning until release prep, before public save compatibility matters. Keep this visible as a release-track item; in the meantime, document table ownership and keep no-op update/round-trip tests in place.
 
 ### Client visual parity remains partly manual
 

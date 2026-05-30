@@ -100,7 +100,7 @@ public final class MoeMovementGameTests {
             return;
         }
 
-        Vec3 destination = moe.idleRoutineDestination();
+        Vec3 destination = moe.routine().destination();
         if (destination == null) {
             helper.fail("Expected idle Moe to find a nearby routine anchor destination");
             return;
@@ -111,7 +111,7 @@ public final class MoeMovementGameTests {
             return;
         }
         moe.startFollowSession(owner, PlayerMovementIntent.PARTY_INVITE, 80, false, false);
-        if (moe.idleRoutineDestination() != null) {
+        if (moe.routine().destination() != null) {
             helper.fail("Expected party Moes to skip idle routine movement");
             return;
         }
@@ -133,7 +133,7 @@ public final class MoeMovementGameTests {
             return;
         }
 
-        Vec3 destination = observer.idleRoutineDestination();
+        Vec3 destination = observer.routine().destination();
         if (destination == null) {
             helper.fail("Expected idle Moe to orbit nearby social group");
             return;
@@ -275,7 +275,7 @@ public final class MoeMovementGameTests {
         buildLitDoorShelter(level, houseSpot);
         level.setBlock(houseSpot.above(3), Blocks.GLOWSTONE.defaultBlockState(), 3);
 
-        Vec3 destination = moe.environmentalRoutineDestination();
+        Vec3 destination = moe.environment().routineDestination();
         if (destination == null
                 || destination.distanceToSqr(Vec3.atBottomCenterOf(houseSpot)) > 9.0D
                 || !moe.shelterScoreAt(BlockPos.containing(destination)).nearDoor()) {
@@ -284,7 +284,7 @@ public final class MoeMovementGameTests {
         }
 
         moe.setBlockState(Blocks.PACKED_ICE.defaultBlockState());
-        if (moe.shouldSeekRainShelter()) {
+        if (moe.environment().shouldSeekRainShelter()) {
             helper.fail("Expected packed ice Moe to ignore rain shelter movement");
             return;
         }
@@ -306,7 +306,7 @@ public final class MoeMovementGameTests {
         level.setBlock(houseSpot.above(3), Blocks.GLOWSTONE.defaultBlockState(), 3);
 
         moe.updateActionState();
-        if (!moe.hasEnvironmentalMovementIntent()) {
+        if (!moe.environment().hasMovementIntent()) {
             helper.fail("Expected environmental movement to create a persistent intent");
             return;
         }
@@ -317,7 +317,7 @@ public final class MoeMovementGameTests {
 
         moe.getNavigation().stop();
         moe.updateActionState();
-        if (!moe.hasEnvironmentalMovementIntent()
+        if (!moe.environment().hasMovementIntent()
                 || (!moe.getNavigation().isInProgress() && !moe.getMoveControl().hasWanted())) {
             helper.fail("Expected environmental movement intent to continue between decision ticks");
             return;
@@ -478,7 +478,7 @@ public final class MoeMovementGameTests {
         level.setWeatherParameters(0, 6000, true, false);
         level.setRainLevel(1.0F);
 
-        Vec3 destination = moe.environmentalRoutineDestination();
+        Vec3 destination = moe.environment().routineDestination();
         if (destination == null || destination.distanceToSqr(Vec3.atBottomCenterOf(remembered.pos())) > 0.01D) {
             helper.fail("Expected rain avoidance to use remembered house before nearest shelter, got " + destination);
             return;
@@ -560,7 +560,7 @@ public final class MoeMovementGameTests {
             return;
         }
 
-        Vec3 destination = moe.idleRoutineDestination();
+        Vec3 destination = moe.routine().destination();
         if (destination == null || destination.distanceToSqr(Vec3.atBottomCenterOf(place.pos())) > 0.01D) {
             helper.fail("Expected idle routine to revisit remembered comfort place, got " + destination);
             return;
@@ -586,7 +586,7 @@ public final class MoeMovementGameTests {
         }
 
         level.setBlock(place.pos().below(), Blocks.AIR.defaultBlockState(), 3);
-        Vec3 destination = moe.idleRoutineDestination();
+        Vec3 destination = moe.routine().destination();
         if (destination != null && destination.distanceToSqr(Vec3.atBottomCenterOf(place.pos())) <= 0.01D) {
             helper.fail("Expected idle routine not to revisit invalid remembered place");
             return;
@@ -696,14 +696,14 @@ public final class MoeMovementGameTests {
         level.setBlock(lightSpot.below(), Blocks.STONE.defaultBlockState(), 3);
         level.setBlock(lightSpot, Blocks.TORCH.defaultBlockState(), 3);
 
-        Vec3 destination = moe.environmentalRoutineDestination();
+        Vec3 destination = moe.environment().routineDestination();
         if (destination == null || destination.distanceToSqr(Vec3.atBottomCenterOf(lightSpot)) > 0.01D) {
             helper.fail("Expected darkness avoidance to choose light source, got " + destination);
             return;
         }
 
         moe.setBlockState(Blocks.NETHER_BRICKS.defaultBlockState());
-        if (moe.shouldSeekLight()) {
+        if (moe.environment().shouldSeekLight()) {
             helper.fail("Expected nether brick Moe to ignore darkness movement");
             return;
         }

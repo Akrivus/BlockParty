@@ -4,7 +4,6 @@ import block_party.db.DimBlockPos;
 import block_party.entities.Moe;
 import block_party.entities.environment.MoeEnvironmentalRules;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -24,12 +23,12 @@ public final class PlaceBlockChores {
     private PlaceBlockChores() {
     }
 
-    public static Optional<ItemEntity> nearestDrop(Moe moe, Chore chore, Config config, double radius) {
-        if (!(moe.level() instanceof ServerLevel level) || !chore.active() || config == null) {
+    public static Optional<ItemEntity> nearestDrop(Moe moe, DimBlockPos origin, Config config, double radius) {
+        if (!(moe.level() instanceof ServerLevel level) || origin == null || origin.isEmpty() || config == null) {
             return Optional.empty();
         }
-        BlockPos origin = chore.origin().getPos();
-        AABB bounds = new AABB(origin).inflate(radius, 4.0D, radius);
+        BlockPos pos = origin.getPos();
+        AABB bounds = new AABB(pos).inflate(radius, 4.0D, radius);
         return level.getEntitiesOfClass(ItemEntity.class, bounds, item -> item.isAlive() && item.getItem().is(config.item())).stream()
                 .filter(drop -> canReachDrop(moe, drop))
                 .min(Comparator.comparingDouble(item -> item.distanceToSqr(moe)));
@@ -180,35 +179,6 @@ public final class PlaceBlockChores {
                 }
             }
             return null;
-        }
-    }
-
-    public record Chore(String key, DimBlockPos origin, int ticks) {
-        public static Chore none() {
-            return new Chore("", new DimBlockPos(), 0);
-        }
-
-        public boolean active() {
-            return this.ticks > 0 && this.key != null && !this.key.isBlank() && this.origin != null && !this.origin.isEmpty();
-        }
-
-        public Chore tick() {
-            return new Chore(this.key, this.origin, this.ticks - 1);
-        }
-
-        public CompoundTag write() {
-            CompoundTag tag = new CompoundTag();
-            tag.putString("Key", this.key == null ? "" : this.key);
-            tag.put("Origin", this.origin == null ? new DimBlockPos().write() : this.origin.write());
-            tag.putInt("Ticks", this.ticks);
-            return tag;
-        }
-
-        public static Chore read(CompoundTag tag) {
-            return new Chore(
-                    tag.getString("Key"),
-                    tag.contains("Origin") ? new DimBlockPos(tag.getCompound("Origin")) : new DimBlockPos(),
-                    tag.getInt("Ticks"));
         }
     }
 }

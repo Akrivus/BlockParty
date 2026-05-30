@@ -4,6 +4,8 @@ import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
 import block_party.db.records.AttentionRecord;
 import block_party.entities.Moe;
+import block_party.entities.chores.CardinalForestChore;
+import block_party.registry.CustomEntities;
 import block_party.scene.Response;
 import block_party.scene.SceneObservation;
 import block_party.scene.SceneObservationFactories;
@@ -19,6 +21,7 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -75,7 +78,7 @@ public final class AttentionGameTests {
         }
         Moe moe = moes.getFirst();
         if (!moe.isCardinal() || !moe.getVisibleBlockState().equals(Blocks.OAK_LOG.defaultBlockState())
-                || !moe.hasCardinalForestChoreForTests()) {
+                || !moe.chores().hasActive(CardinalForestChore.ID)) {
             helper.fail("Expected oak sapling attention to summon an oak log cardinal chore visitor");
             return;
         }
@@ -128,7 +131,7 @@ public final class AttentionGameTests {
         ItemEntity sapling = new ItemEntity(level, origin.getX() + 0.5D, origin.getY(), origin.getZ() + 0.5D, new ItemStack(Items.OAK_SAPLING));
         level.addFreshEntity(sapling);
 
-        if (!moe.tickCardinalForestChoreForTests() || sapling.isAlive()) {
+        if (!moe.chores().tickActive() || sapling.isAlive()) {
             helper.fail("Expected oak visitor to collect the dropped sapling");
             return;
         }
@@ -140,11 +143,11 @@ public final class AttentionGameTests {
             helper.fail("Expected collected oak sapling to appear in Moe hand");
             return;
         }
-        if (!moe.tickCardinalForestChoreForTests()) {
+        if (!moe.chores().tickActive()) {
             helper.fail("Expected oak visitor to plant the collected sapling");
             return;
         }
-        if (!level.getBlockState(origin).is(Blocks.OAK_SAPLING) || moe.hasCardinalForestChoreForTests()
+        if (!level.getBlockState(origin).is(Blocks.OAK_SAPLING) || moe.chores().hasActive(CardinalForestChore.ID)
                 || !moe.getInventory().getItem(0).isEmpty()) {
             helper.fail("Expected oak visitor to finish after planting an oak sapling");
             return;
@@ -154,6 +157,29 @@ public final class AttentionGameTests {
             return;
         }
         helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void activeChorePersistsWithTypeKey(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        UUID player = new UUID(1908L, 2908L);
+        BlockPos origin = helper.absolutePos(new BlockPos(2, 1, 2));
+        Moe moe = new Moe(CustomEntities.MOE.get(), level);
+        moe.chores().start(CardinalForestChore.oakSapling(level, origin, player));
+        CompoundTag saved = moe.saveWithoutId(new CompoundTag());
+        CompoundTag chore = saved.getCompound(Moe.NBT_CHORE);
+        if (!CardinalForestChore.ID.toString().equals(chore.getString("Type"))) {
+            helper.fail("Expected saved chore type key to be " + CardinalForestChore.ID + ", got " + chore);
+            return;
+        }
+
+        Moe loaded = new Moe(CustomEntities.MOE.get(), level);
+        loaded.load(saved);
+        if (!loaded.chores().hasActive(CardinalForestChore.ID)) {
+            helper.fail("Expected keyed chore read to restore active cardinal forest chore");
+            return;
+        }
         helper.succeed();
     }
 
@@ -184,7 +210,7 @@ public final class AttentionGameTests {
         moe.moveToBlock(spaced);
         moe.getInventory().setItem(0, new ItemStack(Items.OAK_SAPLING));
 
-        if (!moe.tickCardinalForestChoreForTests()) {
+        if (!moe.chores().tickActive()) {
             helper.fail("Expected oak visitor to plant at a spaced sapling spot");
             return;
         }
@@ -222,7 +248,7 @@ public final class AttentionGameTests {
         ItemEntity trappedSapling = new ItemEntity(level, trappedPos.getX() + 0.5D, trappedPos.getY() + 0.5D, trappedPos.getZ() + 0.5D, new ItemStack(Items.OAK_SAPLING));
         level.addFreshEntity(trappedSapling);
 
-        if (moe.tickCardinalForestChoreForTests()) {
+        if (moe.chores().tickActive()) {
             helper.fail("Expected oak visitor to ignore an unreachable sapling drop");
             return;
         }

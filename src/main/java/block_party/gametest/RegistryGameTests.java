@@ -15,6 +15,7 @@ import block_party.registry.CustomItems;
 import block_party.registry.CustomTags;
 import block_party.registry.SceneActions;
 import block_party.registry.SceneFilters;
+import block_party.registry.resources.ScenesReloadListener;
 import java.util.List;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.component.DataComponents;
@@ -62,12 +63,7 @@ public final class RegistryGameTests {
 
     @GameTest(template = "empty", timeoutTicks = 20)
     public static void sceneAuthoringIdsStayRegistered(GameTestHelper helper) {
-        for (String id : List.of(
-                "send_dialogue", "send_response", "health", "food_level", "loyalty", "stress",
-                "cookie", "counter", "hide", "create_voicemail", "start_follow_session",
-                "clear_follow_session", "go_to_anchor", "set_home_to_anchor", "set_routine_intent",
-                "clear_routine_intent", "sleep_at_home", "open_inventory", "give_item", "take_item",
-                "wait", "dismiss", "end")) {
+        for (String id : ScenesReloadListener.supportedActionPaths()) {
             assertRegistered(helper, SceneActions.REGISTRY, id);
         }
         for (String id : List.of(
@@ -81,6 +77,16 @@ public final class RegistryGameTests {
                 "has_anchor", "anchor_type", "anchor_distance", "anchor_priority", "anchor_player_owned",
                 "routine_intent", "explicit_routine_intent")) {
             assertRegistered(helper, SceneFilters.REGISTRY, id);
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void registeredSceneActionsMatchParserSupport(GameTestHelper helper) {
+        if (!SceneActions.ENTRIES.keySet().equals(ScenesReloadListener.supportedActionPaths())) {
+            helper.fail("Expected registered scene actions to match parser-supported actions, registered="
+                    + SceneActions.ENTRIES.keySet() + ", parsed=" + ScenesReloadListener.supportedActionPaths());
+            return;
         }
         helper.succeed();
     }
