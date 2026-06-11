@@ -12,11 +12,11 @@ Risk scale:
 
 ### Keep classes thin and package boundaries visible
 
-- Evidence: `Moe` and several service-style classes are large coordination points. The AI goal, chore, social-behavior, environmental movement, idle routine, gift-memory, environmental-memory, attention-definition, and block-profile slices now have visible package ownership, but `Moe` still exposes a broad identity, persistence, interaction, and inventory surface.
+- Evidence: `Moe` and several service-style classes are large coordination points. The AI goal, chore, social-behavior, environmental movement, idle routine, gift-memory, environmental-memory, attention-definition, block-profile, and inventory/menu slices now have visible package ownership, but `Moe` still exposes a broad identity, persistence, and interaction surface.
 - Maintenance risk: High. The codebase is interconnected enough that fat files make ownership, review, and regression analysis harder.
 - Gameplay importance: Medium. This is mostly a maintainability risk, but mistakes in central classes affect core gameplay.
 - Owner surface: `entities`, `entities.movement`, `entities.social`, `entities.environment`, `entities.preferences`, `entities.chores`, `world`, and `scene`.
-- Direction: prefer small domain services and value objects. Keep entity methods as state accessors or orchestration entry points; put scanning, scoring, planning, lifecycle, and persistence helpers in named collaborators. The next cleanup slices should shrink `Moe` by moving cohesive non-movement clusters such as inventory/menu interaction or persistence serialization.
+- Direction: prefer small domain services and value objects. Keep entity methods as state accessors or orchestration entry points; put scanning, scoring, planning, lifecycle, and persistence helpers in named collaborators. The next cleanup slice should evaluate persistence serialization.
 
 ### Keep cleanup guardrails active
 

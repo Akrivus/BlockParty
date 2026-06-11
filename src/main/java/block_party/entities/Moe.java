@@ -12,6 +12,7 @@ import block_party.entities.environment.MoeEnvironmentalObservation;
 import block_party.entities.environment.MoeEnvironmentalRules;
 import block_party.entities.environment.MoePlaceMemory;
 import block_party.entities.goals.HideUntil;
+import block_party.entities.inventory.MoeInventoryMenus;
 import block_party.entities.movement.MoeAnchor;
 import block_party.entities.movement.MoeAnchorResolver;
 import block_party.entities.movement.FollowSession;
@@ -38,7 +39,6 @@ import block_party.scene.SceneTrigger;
 import block_party.world.structure.MoeStructureAssignment;
 import block_party.world.structure.MoeStructureCohortCoordinator;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -48,6 +48,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.ContainerListener;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -66,7 +67,6 @@ import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.Block;
@@ -175,7 +175,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
             SynchedEntityData.defineId(Moe.class, EntityDataSerializers.FLOAT);
 
     private CompoundTag tileEntityData = new CompoundTag();
-    private final SimpleContainer inventory = new SimpleContainer(36);
+    private final MoeInventoryMenus inventory = new MoeInventoryMenus(this);
     private boolean hasHome;
     private DimBlockPos home = new DimBlockPos();
     private long lastSeen;
@@ -207,7 +207,6 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         this.setPathfindingMalus(PathType.TRAPDOOR, 0.0F);
         this.restrictTo(this.blockPosition(), 16);
         this.home = this.getDimBlockPos();
-        this.inventory.addListener(this);
         this.setBloodType(this.weightedBloodType());
     }
 
@@ -330,7 +329,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         this.timeUntilLonely = compound.getInt(NBT_TIME_UNTIL_LONELY);
         this.timeUntilStress = compound.getInt(NBT_TIME_UNTIL_STRESS);
         this.timeSinceSleep = compound.getInt(NBT_TIME_SINCE_SLEEP);
-        this.inventory.fromTag(compound.getList(NBT_INVENTORY, 10), this.registryAccess());
+        this.inventory.read(compound.getList(NBT_INVENTORY, 10));
         if (compound.contains(NBT_SLOUCH)) {
             this.setSlouch(compound.getFloat(NBT_SLOUCH));
         }
@@ -379,7 +378,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         compound.putInt(NBT_TIME_UNTIL_LONELY, this.getTimeUntilLonely());
         compound.putInt(NBT_TIME_UNTIL_STRESS, this.getTimeUntilStress());
         compound.putInt(NBT_TIME_SINCE_SLEEP, this.getTimeSinceSleep());
-        compound.put(NBT_INVENTORY, this.inventory.createTag(this.registryAccess()));
+        this.inventory.write(compound, NBT_INVENTORY);
         compound.put(NBT_TILE_ENTITY, this.getTileEntityData().copy());
     }
 
@@ -570,16 +569,11 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     @Override
     protected void dropEquipment(ServerLevel level) {
         super.dropEquipment(level);
-        for (int slot = 0; slot < this.inventory.getContainerSize(); ++slot) {
-            ItemStack stack = this.inventory.getItem(slot);
-            if (!stack.isEmpty()) {
-                this.spawnAtLocation(level, stack);
-            }
-        }
+        this.inventory.dropContents(level);
     }
 
     @Override
-    public void containerChanged(net.minecraft.world.Container inventory) {
+    public void containerChanged(Container inventory) {
         this.setSlouch(this.recalcSlouch());
     }
 
@@ -609,7 +603,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     }
 
     public SimpleContainer getInventory() {
-        return this.inventory;
+        return this.inventory.container();
     }
 
     @Override
@@ -623,33 +617,23 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
-        return ChestMenu.threeRows(id, inventory, this.inventory);
+        return this.inventory.createMenu(id, inventory);
     }
 
     public boolean openChestFor(Player player) {
-        player.openMenu(this);
-        return true;
+        return this.inventory.openChestFor(player);
     }
 
     public boolean openSpecialMenuFor(Player player) {
-        return false;
+        return this.inventory.openSpecialMenuFor(player);
     }
 
     public boolean isBeingLookedThrough() {
-        if (!this.isPlayerBusy()) {
-            return false;
-        }
-        return this.getPlayer().containerMenu instanceof ChestMenu menu && menu.getContainer().equals(this.inventory);
+        return this.inventory.isBeingLookedThrough();
     }
 
     public float recalcSlouch() {
-        float size = 0.0F;
-        for (int slot = 0; slot < this.inventory.getContainerSize(); ++slot) {
-            if (!this.inventory.getItem(slot).isEmpty()) {
-                size += 0.0277777778F;
-            }
-        }
-        return size;
+        return this.inventory.recalcSlouch();
     }
 
     public double movementSpeedAttribute() {

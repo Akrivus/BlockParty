@@ -4,7 +4,7 @@ This project uses tests to protect Block Party's current contracts around Moes, 
 
 Current active inventory as of the Phase 1 guardrail pass:
 
-- 234 NeoForge GameTests under `src/main/java/block_party/gametest`.
+- 239 NeoForge GameTests under `src/main/java/block_party/gametest`.
 - The historical pure regression tests under `src/test/java/block_party/regression` are not part of the active Gradle test source set because they target old Forge APIs.
 - `phase1Compliance`, `localCi`, `fullCi`, and the repo-managed pre-commit hook provide lightweight local CI entry points.
 - Manual release checks remain necessary for renderer, screen, sound, particle, skybox, and armor behavior.
