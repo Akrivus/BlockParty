@@ -4,6 +4,8 @@ import block_party.entities.Moe;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Optional;
+
 public final class ChoreScheduler {
     private final Moe moe;
     private MoeChore active = NoChore.INSTANCE;
@@ -28,6 +30,10 @@ public final class ChoreScheduler {
 
     public boolean hasActive(ResourceLocation id) {
         return this.active.active() && this.active.id().equals(id);
+    }
+
+    public Optional<ResourceLocation> activeId() {
+        return this.active.active() ? Optional.of(this.active.id()) : Optional.empty();
     }
 
     public boolean canRunActive() {

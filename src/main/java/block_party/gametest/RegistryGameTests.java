@@ -52,6 +52,7 @@ public final class RegistryGameTests {
     public static void representativeRegistryIdsExist(GameTestHelper helper) {
         assertRegistered(helper, BuiltInRegistries.BLOCK, "shoji_block");
         assertRegistered(helper, BuiltInRegistries.ITEM, "moe_spawn_egg");
+        assertRegistered(helper, BuiltInRegistries.ITEM, "debug_wand");
         assertRegistered(helper, BuiltInRegistries.SOUND_EVENT, "moe.laugh");
         assertRegistered(helper, BuiltInRegistries.PARTICLE_TYPE, "sakura");
         assertRegistered(helper, BuiltInRegistries.ENTITY_TYPE, "moe");
@@ -103,6 +104,7 @@ public final class RegistryGameTests {
         assertTabContains(helper, stacks, "sakura_log");
         assertTabContains(helper, stacks, "sakura_blossoms");
         assertTabContains(helper, stacks, "wisteria_vines");
+        assertTabOmits(helper, stacks, "debug_wand");
         helper.succeed();
     }
 
@@ -348,6 +350,17 @@ public final class RegistryGameTests {
         Item item = BuiltInRegistries.ITEM.getValue(BlockParty.source(path));
         if (item == null || stacks.stream().noneMatch(stack -> stack.is(item))) {
             helper.fail("Expected Block Party creative tab to contain " + BlockParty.source(path));
+        }
+    }
+
+    private static void assertTabOmits(GameTestHelper helper, List<ItemStack> stacks, String path) {
+        Item item = BuiltInRegistries.ITEM.getValue(BlockParty.source(path));
+        if (item == null) {
+            helper.fail("Expected registry ID " + BlockParty.source(path) + " to exist before creative tab omission check");
+            return;
+        }
+        if (stacks.stream().anyMatch(stack -> stack.is(item))) {
+            helper.fail("Expected Block Party creative tab to omit " + BlockParty.source(path));
         }
     }
 

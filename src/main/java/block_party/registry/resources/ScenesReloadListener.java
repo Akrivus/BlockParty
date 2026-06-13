@@ -33,13 +33,18 @@ import block_party.scene.actions.StatAction;
 import block_party.scene.actions.TakeItemAction;
 import block_party.entities.movement.PlayerMovementIntent;
 import block_party.entities.movement.RoutineIntent;
+import block_party.registry.SceneFilters;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -53,6 +58,7 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public final class ScenesReloadListener implements PreparableReloadListener {
     private static final String DIRECTORY = "scenes";
@@ -61,6 +67,7 @@ public final class ScenesReloadListener implements PreparableReloadListener {
 
     private Map<SceneTrigger, List<Scene>> scenes = Map.of();
     private Map<ResourceLocation, Scene> byName = Map.of();
+    private List<ContentValidationIssue> validationIssues = List.of();
 
     public static int loadedCount() {
         return loadedCount;
@@ -78,6 +85,14 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         return this.byName.get(own(id));
     }
 
+    public Set<ResourceLocation> sceneIds() {
+        return this.byName.keySet();
+    }
+
+    public List<ContentValidationIssue> validationIssues() {
+        return this.validationIssues;
+    }
+
     public Scene get(SceneTrigger trigger, Moe moe) {
         List<Scene> candidates = new ArrayList<>(this.scenes.getOrDefault(trigger, List.of()));
         if (candidates.isEmpty()) {
@@ -91,6 +106,16 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         int mostSpecific = candidates.stream().mapToInt(Scene::filterCount).max().orElse(0);
         candidates.removeIf(scene -> scene.filterCount() < mostSpecific);
         return candidates.getFirst();
+    }
+
+    public List<SceneDebugResult> debug(SceneTrigger trigger, Moe moe) {
+        return this.scenes.getOrDefault(trigger, List.of()).stream()
+                .map(scene -> {
+                    var diagnostic = scene.diagnose(moe);
+                    return new SceneDebugResult(scene.id(), diagnostic.passed(), scene.filterCount(), diagnostic.reasons());
+                })
+                .sorted((left, right) -> left.id().toString().compareTo(right.id().toString()))
+                .toList();
     }
 
     @Override
@@ -108,11 +133,14 @@ public final class ScenesReloadListener implements PreparableReloadListener {
     private static LoadedScenes load(ResourceManager resourceManager) {
         Map<SceneTrigger, List<Scene>> byTrigger = new ConcurrentHashMap<>();
         Map<ResourceLocation, Scene> byName = new LinkedHashMap<>();
+        Map<ResourceLocation, JsonObject> rawScenes = new LinkedHashMap<>();
         Map<ResourceLocation, Resource> resources = resourceManager.listResources(DIRECTORY, id -> id.getPath().endsWith(".json"));
         for (Map.Entry<ResourceLocation, Resource> entry : resources.entrySet()) {
             ResourceLocation id = own(resourceId(entry.getKey()));
             try (Reader reader = entry.getValue().openAsReader()) {
-                ParsedScene parsed = parseScene(id, JsonParser.parseReader(reader));
+                JsonObject json = GsonHelper.convertToJsonObject(JsonParser.parseReader(reader), "scene " + id);
+                rawScenes.put(id, json);
+                ParsedScene parsed = parseScene(id, json);
                 byTrigger.computeIfAbsent(parsed.trigger(), ignored -> new ArrayList<>()).add(parsed.scene());
                 byName.put(id, parsed.scene());
             } catch (Exception exception) {
@@ -121,13 +149,19 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         }
         Map<SceneTrigger, List<Scene>> immutableByTrigger = new LinkedHashMap<>();
         byTrigger.forEach((trigger, scenes) -> immutableByTrigger.put(trigger, List.copyOf(scenes)));
-        return new LoadedScenes(Map.copyOf(immutableByTrigger), Map.copyOf(byName));
+        return new LoadedScenes(Map.copyOf(immutableByTrigger), Map.copyOf(byName), validate(rawScenes));
     }
 
     private void applyLoaded(LoadedScenes loaded) {
         this.scenes = loaded.byTrigger();
         this.byName = loaded.byName();
+        this.validationIssues = loaded.validationIssues();
         loadedCount = loaded.byName().size();
+        if (!this.validationIssues.isEmpty()) {
+            BlockParty.LOGGER.warn("[Block Party Content] {} scene validation issue(s)", this.validationIssues.size());
+            this.validationIssues.stream().limit(50).forEach(issue ->
+                    BlockParty.LOGGER.warn("[Block Party Content] {}: {}", issue.sceneId(), issue.message()));
+        }
     }
 
     public static ParsedScene parseSceneForTests(ResourceLocation id, JsonElement element) {
@@ -143,7 +177,7 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         SceneTrigger trigger = SceneTrigger.NULL.fromValue(own(resource(GsonHelper.getAsString(json, "trigger", "block_party:null"))));
         List<SceneObservation> filters = parseFilters(json.has("filters") ? json.getAsJsonArray("filters") : new JsonArray());
         List<SceneAction> actions = parseActions(optionalArray(json, "actions", "scene " + id), "scene " + id);
-        return new ParsedScene(trigger, new Scene(filters, actions));
+        return new ParsedScene(trigger, new Scene(id, filters, actions));
     }
 
     private static List<SceneObservation> parseFilters(JsonArray array) {
@@ -354,6 +388,192 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         return json.getAsJsonArray(field);
     }
 
+    private static List<ContentValidationIssue> validate(Map<ResourceLocation, JsonObject> rawScenes) {
+        Set<String> writtenCookies = new HashSet<>();
+        rawScenes.values().forEach(json -> collectWrittenCookies(json, writtenCookies));
+        List<ContentValidationIssue> issues = new ArrayList<>();
+        rawScenes.forEach((id, json) -> validateScene(id, json, writtenCookies, issues));
+        return List.copyOf(issues);
+    }
+
+    private static void validateScene(ResourceLocation id, JsonObject json, Set<String> writtenCookies, List<ContentValidationIssue> issues) {
+        ResourceLocation trigger = resource(GsonHelper.getAsString(json, "trigger", "block_party:null"));
+        if (SceneTrigger.NULL.fromValue(own(trigger)) == SceneTrigger.NULL && !"null".equals(own(trigger).getPath())) {
+            issues.add(new ContentValidationIssue(id, "unknown trigger: " + trigger));
+        }
+        if (json.has("filters") && json.get("filters").isJsonArray()) {
+            for (JsonElement element : json.getAsJsonArray("filters")) {
+                validateFilter(id, element, writtenCookies, issues);
+            }
+        }
+        if (json.has("actions") && json.get("actions").isJsonArray()) {
+            validateActions(id, json.getAsJsonArray("actions"), issues);
+        }
+    }
+
+    private static void validateFilter(ResourceLocation id, JsonElement element, Set<String> writtenCookies, List<ContentValidationIssue> issues) {
+        ResourceLocation type = filterType(element);
+        if (type == null) {
+            issues.add(new ContentValidationIssue(id, "invalid filter entry"));
+            return;
+        }
+        if (!SceneFilters.ENTRIES.containsKey(type.getPath())) {
+            issues.add(new ContentValidationIssue(id, "unknown filter: " + type));
+        }
+        JsonObject payload = filterPayload(element);
+        switch (type.getPath()) {
+            case "has_cookie", "player_has_cookie", "world_has_cookie" -> validateCookieReference(id, payload, writtenCookies, issues);
+            case "held_item", "player_held_item", "attention_item", "gift_item" -> validateItem(id, payload, issues);
+            case "has_item", "moe_has_item", "player_has_item" -> validateItem(id, payload, issues);
+            case "block", "observed_block", "social_target_block" -> validateBlock(id, payload, issues);
+            case "self" -> validateEntity(id, payload, issues);
+            default -> {
+            }
+        }
+    }
+
+    private static void validateActions(ResourceLocation id, JsonArray actions, List<ContentValidationIssue> issues) {
+        for (JsonElement element : actions) {
+            if (element.isJsonPrimitive()) {
+                ResourceLocation action = ResourceLocation.tryParse(element.getAsString());
+                if (action == null || (!"end".equals(own(action).getPath()) && !ACTION_PARSERS.containsKey(own(action).getPath()))) {
+                    issues.add(new ContentValidationIssue(id, "unknown action: " + element.getAsString()));
+                }
+                continue;
+            }
+            if (!element.isJsonObject()) {
+                issues.add(new ContentValidationIssue(id, "invalid action entry"));
+                continue;
+            }
+            JsonObject source = element.getAsJsonObject();
+            ResourceLocation action = actionId(GsonHelper.getAsString(source, "type", GsonHelper.getAsString(source, "action", "block_party:end")), "validation");
+            if (!ACTION_PARSERS.containsKey(action.getPath()) && !"end".equals(action.getPath())) {
+                issues.add(new ContentValidationIssue(id, "unknown action: " + action));
+            }
+            JsonObject payload = source.has("action") && source.get("action").isJsonObject() ? source.getAsJsonObject("action") : source;
+            validateActionPayload(id, action.getPath(), payload, issues);
+        }
+    }
+
+    private static void validateActionPayload(ResourceLocation id, String action, JsonObject payload, List<ContentValidationIssue> issues) {
+        switch (action) {
+            case "send_dialogue" -> {
+                validateDialogueText(id, payload, issues);
+                if (payload.has("responses") && payload.get("responses").isJsonArray()) {
+                    for (JsonElement responseElement : payload.getAsJsonArray("responses")) {
+                        if (responseElement.isJsonObject()) {
+                            JsonObject response = responseElement.getAsJsonObject();
+                            validateDialogueText(id, response, issues);
+                            if (response.has("actions") && response.get("actions").isJsonArray()) {
+                                validateActions(id, response.getAsJsonArray("actions"), issues);
+                            }
+                        }
+                    }
+                }
+            }
+            case "give_item", "take_item" -> validateItem(id, payload, issues);
+            case "create_voicemail" -> validateDialogueText(id, payload, issues);
+            default -> {
+            }
+        }
+    }
+
+    private static void validateDialogueText(ResourceLocation id, JsonObject payload, List<ContentValidationIssue> issues) {
+        if (!payload.has("text") || !payload.get("text").isJsonPrimitive()) {
+            return;
+        }
+        String text = payload.get("text").getAsString();
+        String key = text.startsWith("translate:") ? text.substring("translate:".length()) : text;
+        if (key.startsWith("dialogue.") && !languageKeys().contains(key)) {
+            issues.add(new ContentValidationIssue(id, "missing localization: " + key));
+        }
+    }
+
+    private static void validateCookieReference(ResourceLocation id, JsonObject payload, Set<String> writtenCookies, List<ContentValidationIssue> issues) {
+        String name = GsonHelper.getAsString(payload, "name", "");
+        if (!name.isBlank() && !writtenCookies.contains(name)) {
+            issues.add(new ContentValidationIssue(id, "unknown flag: " + name));
+        }
+    }
+
+    private static void validateItem(ResourceLocation id, JsonObject payload, List<ContentValidationIssue> issues) {
+        String value = GsonHelper.getAsString(payload, payload.has("item") ? "item" : "name", "");
+        ResourceLocation parsed = ResourceLocation.tryParse(value);
+        if (!value.isBlank() && !value.startsWith("#") && (parsed == null || !BuiltInRegistries.ITEM.containsKey(parsed))) {
+            issues.add(new ContentValidationIssue(id, "references unknown item: " + value));
+        }
+    }
+
+    private static void validateBlock(ResourceLocation id, JsonObject payload, List<ContentValidationIssue> issues) {
+        String value = GsonHelper.getAsString(payload, payload.has("block") ? "block" : "name", "");
+        ResourceLocation parsed = ResourceLocation.tryParse(value);
+        if (!value.isBlank() && !value.startsWith("#") && (parsed == null || !BuiltInRegistries.BLOCK.containsKey(parsed))) {
+            issues.add(new ContentValidationIssue(id, "references unknown block: " + value));
+        }
+    }
+
+    private static void validateEntity(ResourceLocation id, JsonObject payload, List<ContentValidationIssue> issues) {
+        String value = GsonHelper.getAsString(payload, "name", "");
+        ResourceLocation parsed = ResourceLocation.tryParse(value);
+        if (!value.isBlank() && !value.startsWith("#") && (parsed == null || !BuiltInRegistries.ENTITY_TYPE.containsKey(parsed))) {
+            issues.add(new ContentValidationIssue(id, "references unknown entity: " + value));
+        }
+    }
+
+    private static void collectWrittenCookies(JsonElement element, Set<String> cookies) {
+        if (element == null || element.isJsonNull()) {
+            return;
+        }
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+            String type = object.has("type") && object.get("type").isJsonPrimitive()
+                    ? own(resource(object.get("type").getAsString())).getPath()
+                    : "";
+            JsonObject payload = object.has("action") && object.get("action").isJsonObject() ? object.getAsJsonObject("action") : object;
+            if (List.of("cookie", "player_cookie", "world_cookie").contains(type) && payload.has("name")) {
+                cookies.add(payload.get("name").getAsString());
+            }
+            object.entrySet().forEach(entry -> collectWrittenCookies(entry.getValue(), cookies));
+        } else if (element.isJsonArray()) {
+            element.getAsJsonArray().forEach(member -> collectWrittenCookies(member, cookies));
+        }
+    }
+
+    private static ResourceLocation filterType(JsonElement element) {
+        if (element.isJsonPrimitive()) {
+            return own(resource(element.getAsString()));
+        }
+        if (!element.isJsonObject()) {
+            return null;
+        }
+        JsonObject source = element.getAsJsonObject();
+        if (source.has("type")) {
+            return own(resource(GsonHelper.getAsString(source, "type", "block_party:always")));
+        }
+        if (source.has("filter") && source.get("filter").isJsonPrimitive()) {
+            return own(resource(GsonHelper.getAsString(source, "filter", "block_party:always")));
+        }
+        return BlockParty.source("always");
+    }
+
+    private static JsonObject filterPayload(JsonElement element) {
+        if (!element.isJsonObject()) {
+            return new JsonObject();
+        }
+        JsonObject source = element.getAsJsonObject();
+        return source.has("filter") && source.get("filter").isJsonObject() ? source.getAsJsonObject("filter") : source;
+    }
+
+    private static Set<String> languageKeys() {
+        try (Reader reader = new InputStreamReader(ScenesReloadListener.class.getClassLoader()
+                .getResourceAsStream("assets/block_party/lang/en_us.json"), StandardCharsets.UTF_8)) {
+            JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
+            return json.keySet();
+        } catch (Exception ignored) {
+            return Set.of();
+        }
+    }
+
     private static ResourceLocation actionId(String value, String context) {
         ResourceLocation id = ResourceLocation.tryParse(value);
         if (id == null) {
@@ -430,7 +650,16 @@ public final class ScenesReloadListener implements PreparableReloadListener {
     public record ParsedScene(SceneTrigger trigger, Scene scene) {
     }
 
-    private record LoadedScenes(Map<SceneTrigger, List<Scene>> byTrigger, Map<ResourceLocation, Scene> byName) {
+    public record SceneDebugResult(ResourceLocation id, boolean available, int filterCount, List<String> reasons) {
+    }
+
+    public record ContentValidationIssue(ResourceLocation sceneId, String message) {
+    }
+
+    private record LoadedScenes(
+            Map<SceneTrigger, List<Scene>> byTrigger,
+            Map<ResourceLocation, Scene> byName,
+            List<ContentValidationIssue> validationIssues) {
     }
 
     private interface ActionParser {

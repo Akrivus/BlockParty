@@ -13,6 +13,7 @@ import block_party.entities.social.SocialAffinities;
 import block_party.scene.actions.SceneItemStacks;
 import com.google.gson.JsonObject;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,9 +43,9 @@ public final class SceneObservationFactories {
     public static SceneObservation build(ResourceLocation type, JsonObject json) {
         SceneObservation simple = SceneObservations.byPath(type.getPath()).orElse(null);
         if (simple != null) {
-            return simple;
+            return diagnostic(type, json, simple);
         }
-        return switch (type.getPath()) {
+        SceneObservation built = switch (type.getPath()) {
             case "if_time" -> moe -> compare((int) (moe.level().getDayTime() % 24000L), json);
             case "self" -> moe -> entityMatches(moe, json);
             case "health" -> moe -> compare(moe.getHealth(), json);
@@ -132,6 +133,202 @@ public final class SceneObservationFactories {
             case "family_name" -> moe -> stringMatches(moe.getFamilyName(), json);
             default -> FAIL_CLOSED;
         };
+        return diagnostic(type, json, built);
+    }
+
+    private static SceneObservation diagnostic(ResourceLocation type, JsonObject json, SceneObservation observation) {
+        return new SceneObservation() {
+            @Override
+            public boolean verify(Moe moe) {
+                return observation.verify(moe);
+            }
+
+            @Override
+            public DiagnosticResult diagnose(Moe moe) {
+                if (this.verify(moe)) {
+                    return DiagnosticResult.pass();
+                }
+                return DiagnosticResult.fail(reason(type, json, moe));
+            }
+        };
+    }
+
+    private static String reason(ResourceLocation type, JsonObject json, Moe moe) {
+        String path = type.getPath();
+        return switch (path) {
+            case "health" -> compareReason("health", moe.getHealth(), json);
+            case "food_level" -> compareReason("energy", moe.getFoodLevel(), json);
+            case "loyalty" -> compareReason("loyalty", moe.getLoyalty(), json);
+            case "stress" -> compareReason("stress", moe.getStress(), json);
+            case "target_affection" -> relationshipReason(moe, "affection", json);
+            case "target_loyalty" -> relationshipReason(moe, "loyalty", json);
+            case "target_trust" -> relationshipReason(moe, "trust", json);
+            case "target_relationship_stress" -> relationshipReason(moe, "relationship stress", json);
+            case "target_yearbook_signed" -> booleanReason("yearbook unlocked", targetRelationship(moe).map(PlayerRelationship::yearbookSigned), json);
+            case "target_phone_contact" -> booleanReason("phone contact unlocked", targetRelationship(moe).map(PlayerRelationship::phoneContact), json);
+            case "counter" -> counterReason(moe, json, variableScope(json, SceneVariableScope.NPC), "counter");
+            case "player_counter" -> counterReason(moe, json, SceneVariableScope.PLAYER, "player counter");
+            case "world_counter" -> counterReason(moe, json, SceneVariableScope.WORLD, "world counter");
+            case "has_cookie" -> cookieReason(moe, json, variableScope(json, SceneVariableScope.NPC), "flag");
+            case "player_has_cookie" -> cookieReason(moe, json, SceneVariableScope.PLAYER, "player flag");
+            case "world_has_cookie" -> cookieReason(moe, json, SceneVariableScope.WORLD, "world flag");
+            case "held_item" -> itemReason("Moe held item", moe.getItemInHand(hand(json)), json);
+            case "player_held_item" -> targetPlayer(moe) == null
+                    ? "target player is offline"
+                    : itemReason("player held item", targetPlayer(moe).getItemInHand(hand(json)), json);
+            case "has_item", "moe_has_item" -> itemInventoryReason("Moe inventory", json);
+            case "player_has_item" -> targetPlayer(moe) == null ? "target player is offline" : itemInventoryReason("player inventory", json);
+            case "block" -> "requires block " + expectedName(json, "block") + ", current " + blockKey(moe.getVisibleBlockState());
+            case "name" -> stringReason("name", moe.getGivenName(), json);
+            case "family_name" -> stringReason("family name", moe.getFamilyName(), json);
+            case "follow_intent" -> enumReason("follow intent", moe.getFollowIntent(), json);
+            case "follow_ticks_remaining" -> compareReason("follow ticks remaining", moe.getFollowTicksRemaining(), json);
+            case "follow_player_is_target" -> "follow player " + moe.getFollowPlayerUUID() + " is not dialogue target " + targetPlayerUuid(moe);
+            case "has_anchor" -> currentAnchor(moe).isEmpty() ? "missing routine anchor" : "routine anchor does not match " + expectedType(json);
+            case "anchor_type" -> currentAnchor(moe)
+                    .map(anchor -> enumReason("anchor type", anchor.type(), json))
+                    .orElse("missing routine anchor");
+            case "anchor_distance" -> currentAnchor(moe)
+                    .map(anchor -> compareReason("anchor distance", anchorDistance(moe, anchor), json))
+                    .orElse("missing routine anchor");
+            case "anchor_priority" -> currentAnchor(moe)
+                    .map(anchor -> compareReason("anchor priority", anchor.priority(), json))
+                    .orElse("missing routine anchor");
+            case "anchor_player_owned" -> currentAnchor(moe)
+                    .map(anchor -> "anchor owner " + anchor.playerUuid() + " does not match Moe owner " + moe.getPlayerUUID())
+                    .orElse("missing routine anchor");
+            case "routine_intent" -> enumReason("routine intent", moe.getEffectiveRoutineIntent(), json);
+            case "explicit_routine_intent" -> enumReason("explicit routine intent", moe.getRoutineIntent(), json);
+            case "remembered_place_type" -> moe.rememberedPlace()
+                    .map(place -> enumReason("remembered place", place.type(), json))
+                    .orElse("missing remembered place");
+            case "remembered_place_score" -> moe.rememberedPlace()
+                    .map(place -> compareReason("remembered place score", (float) place.score(), json))
+                    .orElse("missing remembered place");
+            case "remembered_place_occupancy" -> moe.rememberedPlace()
+                    .map(place -> compareReason("remembered place occupancy", place.occupancy(), json))
+                    .orElse("missing remembered place");
+            case "remembered_place_capacity" -> moe.rememberedPlace()
+                    .map(place -> compareReason("remembered place capacity", place.capacity(), json))
+                    .orElse("missing remembered place");
+            case "observed_block" -> moe.latestEnvironmentalObservation()
+                    .map(observation -> "requires observed block " + expectedName(json, "block") + ", current " + blockKey(observation.state()))
+                    .orElse("missing environmental observation");
+            case "observed_affinity" -> moe.latestEnvironmentalObservation()
+                    .map(observation -> compareReason("observed affinity", observation.signal().affinity(), json))
+                    .orElse("missing environmental observation");
+            case "observed_tension" -> moe.latestEnvironmentalObservation()
+                    .map(observation -> compareReason("observed tension", observation.signal().tension(), json))
+                    .orElse("missing environmental observation");
+            case "observed_interest" -> moe.latestEnvironmentalObservation()
+                    .map(observation -> compareReason("observed interest", observation.signal().interest(), json))
+                    .orElse("missing environmental observation");
+            case "gift_preference" -> giftReason(moe, "gift preference", json);
+            case "gift_aversion" -> giftReason(moe, "gift aversion", json);
+            case "gift_interest" -> giftReason(moe, "gift interest", json);
+            case "gift_begging" -> giftReason(moe, "gift begging", json);
+            case "gift_item" -> moe.latestGiftItem().map(stack -> itemReason("gift item", stack, json)).orElse("missing gift item memory");
+            default -> genericReason(path, moe);
+        };
+    }
+
+    private static String relationshipReason(Moe moe, String field, JsonObject json) {
+        Optional<PlayerRelationship> relationship = targetRelationship(moe);
+        if (relationship.isEmpty()) {
+            return "missing relationship row for player " + targetPlayerUuid(moe);
+        }
+        PlayerRelationship row = relationship.get();
+        float actual = switch (field) {
+            case "affection" -> row.affection();
+            case "loyalty" -> row.loyalty();
+            case "trust" -> row.trust();
+            default -> row.stress();
+        };
+        return compareReason("requires " + field, actual, json);
+    }
+
+    private static String counterReason(Moe moe, JsonObject json, SceneVariableScope scope, String label) {
+        String name = GsonHelper.getAsString(json, "name", "");
+        Integer value = scopedVariables(moe, scope).counters().get(name);
+        return compareReason(label + " " + name, value == null ? 0 : value, json);
+    }
+
+    private static String cookieReason(Moe moe, JsonObject json, SceneVariableScope scope, String label) {
+        String name = GsonHelper.getAsString(json, "name", "");
+        String value = scopedVariables(moe, scope).cookies().get(name);
+        if (value == null) {
+            return "missing " + label + ": " + name;
+        }
+        if (json.has("value")) {
+            return stringReason(label + " " + name, value, json);
+        }
+        return "unexpected " + label + ": " + name;
+    }
+
+    private static String giftReason(Moe moe, String label, JsonObject json) {
+        if (moe.latestGiftPreferenceSignal().isEmpty()) {
+            return "missing gift preference memory";
+        }
+        var signal = moe.latestGiftPreferenceSignal().get();
+        float actual = switch (label) {
+            case "gift preference" -> signal.preference();
+            case "gift aversion" -> signal.aversion();
+            case "gift interest" -> signal.interest();
+            default -> signal.begging();
+        };
+        return compareReason(label, actual, json);
+    }
+
+    private static String booleanReason(String label, Optional<Boolean> actual, JsonObject json) {
+        if (actual.isEmpty()) {
+            return "missing relationship row";
+        }
+        boolean expected = !GsonHelper.getAsBoolean(json, "not", false);
+        return "requires " + label + "=" + expected + ", current " + actual.get();
+    }
+
+    private static String itemReason(String label, ItemStack stack, JsonObject json) {
+        String expected = expectedName(json, "item");
+        String actual = stack.isEmpty() ? "empty" : BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+        String count = json.has("count") ? ", count " + stack.getCount() + " vs " + json.get("count") : "";
+        return "requires " + label + ": " + expected + ", current " + actual + count;
+    }
+
+    private static String itemInventoryReason(String label, JsonObject json) {
+        return label + " missing required item " + expectedName(json, "item");
+    }
+
+    private static String stringReason(String label, String actual, JsonObject json) {
+        return "requires " + label + " " + operation(json) + " " + GsonHelper.getAsString(json, "value", "")
+                + ", current " + (actual == null ? "" : actual);
+    }
+
+    private static String enumReason(String label, Enum<?> actual, JsonObject json) {
+        return "requires " + label + "=" + GsonHelper.getAsString(json, "value", "") + ", current " + actual.name();
+    }
+
+    private static String compareReason(String label, float actual, JsonObject json) {
+        return label + " " + operation(json) + " " + GsonHelper.getAsFloat(json, "value", 0.0F) + ", current " + actual;
+    }
+
+    private static String operation(JsonObject json) {
+        return GsonHelper.getAsString(json, "operation", "equals");
+    }
+
+    private static String expectedType(JsonObject json) {
+        return GsonHelper.getAsString(json, "type", GsonHelper.getAsString(json, "value", ""));
+    }
+
+    private static String expectedName(JsonObject json, String preferredKey) {
+        return GsonHelper.getAsString(json, json.has(preferredKey) ? preferredKey : "name", "");
+    }
+
+    private static String blockKey(BlockState state) {
+        return BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString();
+    }
+
+    private static String genericReason(String path, Moe moe) {
+        return "filter failed: " + path + " for " + moe.getGivenName() + " #" + moe.getDatabaseID();
     }
 
     private static Optional<MoeAnchor> currentAnchor(Moe moe) {

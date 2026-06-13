@@ -4,6 +4,7 @@ import block_party.BlockParty;
 import block_party.items.CellPhoneItem;
 import block_party.items.CustomSpawnEggItem;
 import block_party.items.BokkenItem;
+import block_party.items.DebugWandItem;
 import block_party.items.InviteItem;
 import block_party.items.LetterItem;
 import block_party.items.MaskedSamuraiItem;
@@ -32,6 +33,7 @@ public final class CustomItems {
     public static final DeferredItem<Item> MOE_SPAWN_EGG = registerMoeSpawnEgg();
     public static final DeferredItem<Item> CELL_PHONE = registerCellPhone();
     public static final DeferredItem<Item> YEARBOOK = registerYearbook();
+    public static final DeferredItem<Item> DEBUG_WAND = ITEMS.registerItem("debug_wand", DebugWandItem::new);
 
     static {
         for (String blockId : CustomBlocks.ENTRIES.keySet()) {

@@ -2,6 +2,7 @@ package block_party;
 
 import block_party.client.BlockPartyRenderers;
 import block_party.client.BlockPartyClientEvents;
+import block_party.commands.DebugCommands;
 import block_party.db.BlockPartyDB;
 import block_party.entities.data.HidingSpots;
 import block_party.items.SamuraiArmorItem;
@@ -56,6 +57,7 @@ public final class BlockParty {
             BlockPartyRenderers.register(modBus);
         }
         NeoForge.EVENT_BUS.addListener(CustomResources::registerServerReloadListeners);
+        NeoForge.EVENT_BUS.addListener(DebugCommands::register);
         NeoForge.EVENT_BUS.addListener(CustomMessenger::onPlayerLogin);
         NeoForge.EVENT_BUS.addListener(Voicemails::onPlayerLogin);
         NeoForge.EVENT_BUS.addListener(BlockPartyDB::onServerStarted);
