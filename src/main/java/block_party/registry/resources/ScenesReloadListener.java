@@ -427,8 +427,6 @@ public final class ScenesReloadListener implements PreparableReloadListener {
             case "has_item", "moe_has_item", "player_has_item" -> validateItem(id, payload, issues);
             case "block", "observed_block", "social_target_block" -> validateBlock(id, payload, issues);
             case "self" -> validateEntity(id, payload, issues);
-            default -> {
-            }
         }
     }
 
@@ -446,13 +444,27 @@ public final class ScenesReloadListener implements PreparableReloadListener {
                 continue;
             }
             JsonObject source = element.getAsJsonObject();
-            ResourceLocation action = actionId(GsonHelper.getAsString(source, "type", GsonHelper.getAsString(source, "action", "block_party:end")), "validation");
+            ResourceLocation action = actionTypeForValidation(source);
+            if (action == null) {
+                issues.add(new ContentValidationIssue(id, "invalid action entry"));
+                continue;
+            }
             if (!ACTION_PARSERS.containsKey(action.getPath()) && !"end".equals(action.getPath())) {
                 issues.add(new ContentValidationIssue(id, "unknown action: " + action));
             }
             JsonObject payload = source.has("action") && source.get("action").isJsonObject() ? source.getAsJsonObject("action") : source;
             validateActionPayload(id, action.getPath(), payload, issues);
         }
+    }
+
+    private static ResourceLocation actionTypeForValidation(JsonObject source) {
+        if (source.has("type")) {
+            return actionId(GsonHelper.getAsString(source, "type", "block_party:end"), "validation");
+        }
+        if (source.has("action") && source.get("action").isJsonPrimitive()) {
+            return actionId(GsonHelper.getAsString(source, "action", "block_party:end"), "validation");
+        }
+        return null;
     }
 
     private static void validateActionPayload(ResourceLocation id, String action, JsonObject payload, List<ContentValidationIssue> issues) {
@@ -473,8 +485,6 @@ public final class ScenesReloadListener implements PreparableReloadListener {
             }
             case "give_item", "take_item" -> validateItem(id, payload, issues);
             case "create_voicemail" -> validateDialogueText(id, payload, issues);
-            default -> {
-            }
         }
     }
 
