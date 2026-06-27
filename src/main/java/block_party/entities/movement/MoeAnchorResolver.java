@@ -24,6 +24,10 @@ public final class MoeAnchorResolver {
     }
 
     public static List<MoeAnchor> activeAnchors(Moe moe) {
+        return moe.routineAnchors();
+    }
+
+    public static List<MoeAnchor> computeActiveAnchors(Moe moe) {
         List<MoeAnchor> anchors = new ArrayList<>();
         if (moe.hasHome() && !moe.getHome().isEmpty()) {
             anchors.add(new MoeAnchor(MoeAnchorType.HOME, moe.getDatabaseID(), moe.getHome(), moe.getPlayerUUID(), 10));

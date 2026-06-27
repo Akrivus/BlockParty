@@ -275,6 +275,7 @@ Supported operations:
 Supported numeric filters:
 
 - `block_party:if_time`: current day time modulo 24000
+- `block_party:elapsed_since_marker`: elapsed time since a named scene marker
 - `block_party:health`
 - `block_party:food_level`
 - `block_party:loyalty`
@@ -301,6 +302,33 @@ Example:
 ```
 
 Most object filters support `"not": true` to invert the result.
+
+Time marker filter:
+
+```json
+{
+  "type": "block_party:elapsed_since_marker",
+  "name": "oak_exchange_1",
+  "scope": "player",
+  "min_game_days": 1,
+  "min_real_minutes": 30
+}
+```
+
+Fields:
+
+- `name`: marker name.
+- `scope`: `npc` default, `player`, or `world`.
+- `min_game_ticks`: optional Minecraft game-time delay.
+- `min_game_days`: optional Minecraft day delay, in 24000-tick days.
+- `min_real_millis`: optional wall-clock delay.
+- `min_real_seconds`: optional wall-clock delay.
+- `min_real_minutes`: optional wall-clock delay.
+- `min_real_days`: optional wall-clock delay.
+
+All supplied game-time and real-time minimums must pass. Missing markers fail
+closed. Use this to pace relationship scenes without relying on repeated
+back-to-back triggers.
 
 ## String And Trait Filters
 
@@ -774,6 +802,34 @@ Counter operations:
 - `set`
 - `delete`
 
+Mark time action:
+
+```json
+{
+  "type": "block_party:mark_time",
+  "action": {
+    "name": "oak_exchange_1",
+    "scope": "player"
+  }
+}
+```
+
+`mark_time` records the current Minecraft game time and wall-clock time for a
+named marker. Use it with `elapsed_since_marker` to prevent exchange chains from
+being completed by spam-clicking a character.
+
+Refresh wood-family progression action:
+
+```json
+{
+  "type": "block_party:refresh_wood_family_progression"
+}
+```
+
+`refresh_wood_family_progression` checks the player's wood-family friendship
+cookies and sets `wood_family_arc_ready` when Oak, Birch, Dark Oak, and one of
+Spruce, Acacia, or Jungle are befriended.
+
 Cookie and counter actions default to `npc` scope. Use `"scope": "player"` or
 `"scope": "world"` on `block_party:cookie` and `block_party:counter`, or use the
 scoped action IDs:
@@ -1019,3 +1075,8 @@ break reload.
 - Passive spawning, boss progression, and structure recognition should call into
   this scene surface through small Java primitives rather than one-off JSON
   hacks.
+- Cardinal spawn eligibility can now consult scoped progression state in Java.
+  The first active samurai rule makes dark oak/Yami wait for wood-family
+  readiness before appearing as the boots payoff. Dirt and grass should use this
+  gate once they have a dedicated encounter path that does not change ordinary
+  dirt/grass Moe identity.

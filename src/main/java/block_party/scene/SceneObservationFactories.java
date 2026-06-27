@@ -47,6 +47,12 @@ public final class SceneObservationFactories {
         }
         SceneObservation built = switch (type.getPath()) {
             case "if_time" -> moe -> compare((int) (moe.level().getDayTime() % 24000L), json);
+            case "elapsed_since_marker" -> moe -> SceneTimeMarkers.elapsed(
+                    moe,
+                    GsonHelper.getAsString(json, "name", ""),
+                    variableScope(json, SceneVariableScope.NPC),
+                    markerGameTicks(json),
+                    markerRealMillis(json));
             case "self" -> moe -> entityMatches(moe, json);
             case "health" -> moe -> compare(moe.getHealth(), json);
             case "food_level" -> moe -> compare(moe.getFoodLevel(), json);
@@ -183,6 +189,7 @@ public final class SceneObservationFactories {
             case "family_name" -> stringReason("family name", moe.getFamilyName(), json);
             case "follow_intent" -> enumReason("follow intent", moe.getFollowIntent(), json);
             case "follow_ticks_remaining" -> compareReason("follow ticks remaining", moe.getFollowTicksRemaining(), json);
+            case "elapsed_since_marker" -> "time marker " + GsonHelper.getAsString(json, "name", "") + " has not elapsed";
             case "follow_player_is_target" -> "follow player " + moe.getFollowPlayerUUID() + " is not dialogue target " + targetPlayerUuid(moe);
             case "has_anchor" -> currentAnchor(moe).isEmpty() ? "missing routine anchor" : "routine anchor does not match " + expectedType(json);
             case "anchor_type" -> currentAnchor(moe)
@@ -362,6 +369,20 @@ public final class SceneObservationFactories {
 
     private static boolean counterMatches(Moe moe, JsonObject json) {
         return counterMatches(moe, json, variableScope(json, SceneVariableScope.NPC));
+    }
+
+    private static long markerGameTicks(JsonObject json) {
+        long ticks = GsonHelper.getAsLong(json, "min_game_ticks", 0L);
+        ticks += GsonHelper.getAsLong(json, "min_game_days", 0L) * 24000L;
+        return ticks;
+    }
+
+    private static long markerRealMillis(JsonObject json) {
+        long millis = GsonHelper.getAsLong(json, "min_real_millis", 0L);
+        millis += GsonHelper.getAsLong(json, "min_real_seconds", 0L) * 1000L;
+        millis += GsonHelper.getAsLong(json, "min_real_minutes", 0L) * 60_000L;
+        millis += GsonHelper.getAsLong(json, "min_real_days", 0L) * 86_400_000L;
+        return millis;
     }
 
     private static boolean counterMatches(Moe moe, JsonObject json, SceneVariableScope scope) {

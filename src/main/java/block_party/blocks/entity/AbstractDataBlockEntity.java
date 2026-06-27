@@ -58,6 +58,7 @@ public abstract class AbstractDataBlockEntity extends BlockEntity {
     public void setDatabaseID(long databaseId) {
         this.databaseId = databaseId;
         this.setChanged();
+        this.syncRowIfClaimed();
     }
 
     public UUID getPlayerUUID() {
@@ -67,6 +68,7 @@ public abstract class AbstractDataBlockEntity extends BlockEntity {
     public void setPlayerUUID(UUID playerUuid) {
         this.playerUuid = playerUuid == null ? BLANK_UUID : playerUuid;
         this.setChanged();
+        this.syncRowIfClaimed();
     }
 
     public boolean hasRow() {
@@ -77,6 +79,7 @@ public abstract class AbstractDataBlockEntity extends BlockEntity {
         this.playerUuid = playerUuid == null ? BLANK_UUID : playerUuid;
         this.claimed = true;
         this.setChanged();
+        this.syncRow();
     }
 
     public boolean claim(Player player) {
@@ -86,11 +89,7 @@ public abstract class AbstractDataBlockEntity extends BlockEntity {
         UUID playerUuid = player == null ? BLANK_UUID : player.getUUID();
         this.playerUuid = playerUuid;
         this.claimed = true;
-        try {
-            BlockPartyDB.get(this.level).upsertDataBlock(this);
-        } catch (SQLException exception) {
-            throw new IllegalStateException("Failed to claim Block Party data block " + this.databaseId, exception);
-        }
+        this.syncRow();
         this.afterUpdate();
         this.afterChange();
         this.setChanged();
@@ -114,12 +113,22 @@ public abstract class AbstractDataBlockEntity extends BlockEntity {
     @Override
     public void setChanged() {
         super.setChanged();
-        if (this.claimed && this.level != null && !this.level.isClientSide()) {
-            try {
-                BlockPartyDB.get(this.level).upsertDataBlock(this);
-            } catch (SQLException exception) {
-                throw new IllegalStateException("Failed to update Block Party data block " + this.databaseId, exception);
-            }
+    }
+
+    private void syncRowIfClaimed() {
+        if (this.claimed) {
+            this.syncRow();
+        }
+    }
+
+    private void syncRow() {
+        if (this.level == null || this.level.isClientSide()) {
+            return;
+        }
+        try {
+            BlockPartyDB.get(this.level).upsertDataBlock(this);
+        } catch (SQLException exception) {
+            throw new IllegalStateException("Failed to update Block Party data block " + this.databaseId, exception);
         }
     }
 

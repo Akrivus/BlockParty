@@ -1,0 +1,19 @@
+{
+  "trigger": "block_party:right_click",
+  "filters": [
+    "block_party:is_cardinal",
+    {"type": "block_party:block", "filter": {"name": "minecraft:dark_oak_log"}},
+    {"type": "block_party:player_has_cookie", "filter": {"name": "dark_oak_replenishment_seen"}},
+    {"type": "block_party:player_counter", "filter": {"name": "dark_oak_familiarity", "operation": "equals", "value": 1}},
+    {"type": "block_party:elapsed_since_marker", "filter": {"scope": "player", "name": "dark_oak_exchange_1", "min_game_days": 1}}
+  ],
+  "actions": [
+    {"type": "block_party:send_dialogue", "action": {"text": "Still here?", "tooltip": true, "responses": [
+      {"icon": "block_party:next_response", "text": "...", "actions": [
+        {"type": "block_party:player_counter", "action": {"name": "dark_oak_familiarity", "operation": "set", "value": 2}},
+        {"type": "block_party:mark_time", "action": {"scope": "player", "name": "dark_oak_exchange_2"}},
+        "block_party:end"
+      ]}
+    ]}}
+  ]
+}

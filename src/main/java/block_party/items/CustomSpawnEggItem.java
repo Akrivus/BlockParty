@@ -4,6 +4,7 @@ import block_party.entities.Moe;
 import block_party.entities.MoeSpawner;
 import block_party.db.DimBlockPos;
 import block_party.registry.CustomTags;
+import block_party.world.progression.CardinalSpawnRules;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -58,6 +59,9 @@ public final class CustomSpawnEggItem extends Item implements SortableItem {
     public static Moe spawnMoe(ServerLevel level, BlockPos sourcePos, Direction face, UUID player) {
         BlockState sourceState = level.getBlockState(sourcePos);
         if (!sourceState.is(CustomTags.SPAWNS_MOES)) {
+            return null;
+        }
+        if (!CardinalSpawnRules.canSpawn(level, sourceState, player)) {
             return null;
         }
 

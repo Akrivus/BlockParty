@@ -21,7 +21,9 @@ import block_party.scene.actions.EndAction;
 import block_party.scene.actions.GiveItemAction;
 import block_party.scene.actions.GoToAnchorAction;
 import block_party.scene.actions.HideAction;
+import block_party.scene.actions.MarkTimeAction;
 import block_party.scene.actions.OpenInventoryAction;
+import block_party.scene.actions.RefreshWoodFamilyProgressionAction;
 import block_party.scene.actions.SceneItemStacks;
 import block_party.scene.actions.SendDialogueAction;
 import block_party.scene.actions.SendResponseAction;
@@ -34,6 +36,7 @@ import block_party.scene.actions.TakeItemAction;
 import block_party.entities.movement.PlayerMovementIntent;
 import block_party.entities.movement.RoutineIntent;
 import block_party.registry.SceneFilters;
+import block_party.world.progression.WoodFamilyProgression;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -285,6 +288,10 @@ public final class ScenesReloadListener implements PreparableReloadListener {
                 GsonHelper.getAsString(payload, "name", ""),
                 GsonHelper.getAsInt(payload, "value", 1),
                 variableScope(payload, SceneVariableScope.NPC)));
+        parsers.put("mark_time", payload -> new MarkTimeAction(
+                GsonHelper.getAsString(payload, "name", ""),
+                variableScope(payload, SceneVariableScope.NPC)));
+        parsers.put("refresh_wood_family_progression", payload -> RefreshWoodFamilyProgressionAction.INSTANCE);
         parsers.put("player_counter", payload -> new CounterAction(
                 CounterAction.Operation.fromValue(GsonHelper.getAsString(payload, "operation", "add")),
                 GsonHelper.getAsString(payload, "name", ""),
@@ -389,11 +396,29 @@ public final class ScenesReloadListener implements PreparableReloadListener {
     }
 
     private static List<ContentValidationIssue> validate(Map<ResourceLocation, JsonObject> rawScenes) {
-        Set<String> writtenCookies = new HashSet<>();
+        Set<String> writtenCookies = knownProgressionCookies();
         rawScenes.values().forEach(json -> collectWrittenCookies(json, writtenCookies));
         List<ContentValidationIssue> issues = new ArrayList<>();
         rawScenes.forEach((id, json) -> validateScene(id, json, writtenCookies, issues));
         return List.copyOf(issues);
+    }
+
+    private static Set<String> knownProgressionCookies() {
+        Set<String> cookies = new HashSet<>();
+        cookies.add(WoodFamilyProgression.OAK_REPLENISHMENT_SEEN);
+        cookies.add(WoodFamilyProgression.BIRCH_REPLENISHMENT_SEEN);
+        cookies.add(WoodFamilyProgression.SPRUCE_WASTE_AVOIDED);
+        cookies.add(WoodFamilyProgression.ACACIA_CLEAN_USE_SEEN);
+        cookies.add(WoodFamilyProgression.JUNGLE_REPLENISHMENT_SEEN);
+        cookies.add(WoodFamilyProgression.DARK_OAK_REPLENISHMENT_SEEN);
+        cookies.add(WoodFamilyProgression.OAK_BEFRIENDED);
+        cookies.add(WoodFamilyProgression.BIRCH_BEFRIENDED);
+        cookies.add(WoodFamilyProgression.SPRUCE_BEFRIENDED);
+        cookies.add(WoodFamilyProgression.ACACIA_BEFRIENDED);
+        cookies.add(WoodFamilyProgression.JUNGLE_BEFRIENDED);
+        cookies.add(WoodFamilyProgression.DARK_OAK_BEFRIENDED);
+        cookies.add(WoodFamilyProgression.WOOD_FAMILY_ARC_READY);
+        return cookies;
     }
 
     private static void validateScene(ResourceLocation id, JsonObject json, Set<String> writtenCookies, List<ContentValidationIssue> issues) {

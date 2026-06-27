@@ -5,18 +5,17 @@ import block_party.db.BlockPartyDB;
 import block_party.db.records.AttentionRecord;
 import block_party.entities.Moe;
 import block_party.entities.chores.CardinalForestChore;
+import block_party.scene.SceneVariables;
+import block_party.world.progression.WoodFamilyProgression;
 import block_party.registry.CustomEntities;
-import block_party.scene.Response;
 import block_party.scene.SceneObservation;
 import block_party.scene.SceneObservationFactories;
-import block_party.scene.SceneTrigger;
 import block_party.world.Attention;
 import com.google.gson.JsonObject;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
@@ -87,13 +86,6 @@ public final class AttentionGameTests {
             helper.fail("Expected oak forest attention to wait for player interaction before opening dialogue");
             return;
         }
-        moe.triggerScene(SceneTrigger.RIGHT_CLICK);
-        moe.sceneManager().tick();
-        if (!moe.hasDialogue() || !moe.getDialogue().text().toLowerCase(Locale.ROOT).contains("oak sapling")
-                || !moe.getDialogue().responses().containsKey(Response.NEXT_RESPONSE)) {
-            helper.fail("Expected oak forest attention scene dialogue, got " + (moe.hasDialogue() ? moe.getDialogue().text() : "<none>"));
-            return;
-        }
         if (!filter("has_attention", json()).verify(moe)
                 || !filter("attention_type", json("type", "oak_forest")).verify(moe)
                 || !filter("attention_source", json("source", "sapling_drop")).verify(moe)
@@ -103,6 +95,45 @@ public final class AttentionGameTests {
             return;
         }
         helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void birchSaplingDropsUseGeneralizedForestAttention(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = BlockPartyDB.get(level);
+        UUID player = new UUID(1911L, 2911L);
+        BlockPos pos = helper.absolutePos(new BlockPos(2, 1, 2));
+        try {
+            clearAttention(db);
+        } catch (SQLException exception) {
+            helper.fail("Expected attention cleanup to succeed: " + exception.getMessage());
+            return;
+        }
+
+        if (!Attention.noticeDrops(level, pos, Blocks.BIRCH_LEAVES.defaultBlockState(), player, List.of(new ItemStack(Items.BIRCH_SAPLING, 2)))) {
+            helper.fail("Expected birch sapling drops to record forest attention");
+            return;
+        }
+
+        try {
+            AttentionRecord record = db.findAttention(player, "birch_forest", "sapling_drop").orElse(null);
+            if (record == null || !"minecraft:birch_sapling".equals(record.itemId()) || record.itemCount() != 2) {
+                helper.fail("Expected birch_forest/sapling_drop attention record with birch sapling item, got " + record);
+                return;
+            }
+        } catch (SQLException exception) {
+            helper.fail("Expected attention lookup to succeed: " + exception.getMessage());
+            return;
+        }
+
+        List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(pos).inflate(4.0D));
+        if (moes.size() != 1 || !moes.getFirst().getVisibleBlockState().equals(Blocks.BIRCH_LOG.defaultBlockState())
+                || !moes.getFirst().chores().hasActive(CardinalForestChore.ID)) {
+            helper.fail("Expected birch sapling attention to summon a birch log chore visitor");
+            return;
+        }
+        helper.kill(moes.getFirst());
         helper.succeed();
     }
 
@@ -152,8 +183,59 @@ public final class AttentionGameTests {
             helper.fail("Expected oak visitor to finish after planting an oak sapling");
             return;
         }
+        if (!SceneVariables.get(level).playerCookies(player).has(WoodFamilyProgression.OAK_REPLENISHMENT_SEEN)) {
+            helper.fail("Expected oak replenishment to record player conduct");
+            return;
+        }
         if (!moe.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty()) {
             helper.fail("Expected Moe hand to clear after planting the last oak sapling");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 40)
+    public static void darkOakAttentionVisitorPlantsFourSaplings(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = BlockPartyDB.get(level);
+        UUID player = new UUID(1912L, 2912L);
+        BlockPos origin = helper.absolutePos(new BlockPos(2, 1, 2));
+        preparePlantingSquare(level, origin, 2, 8);
+        try {
+            clearAttention(db);
+        } catch (SQLException exception) {
+            helper.fail("Expected attention cleanup to succeed: " + exception.getMessage());
+            return;
+        }
+        var cookies = SceneVariables.get(level).playerCookies(player);
+
+        if (!Attention.noticeDrops(level, origin, Blocks.DARK_OAK_LEAVES.defaultBlockState(), player, List.of(new ItemStack(Items.DARK_OAK_SAPLING, 4)))) {
+            helper.fail("Expected dark oak sapling attention to start");
+            return;
+        }
+        Moe moe = level.getEntitiesOfClass(Moe.class, new AABB(origin).inflate(4.0D)).getFirst();
+        moe.clearDialogue();
+        moe.moveToBlock(origin);
+        ItemEntity sapling = new ItemEntity(level, origin.getX() + 0.5D, origin.getY(), origin.getZ() + 0.5D, new ItemStack(Items.DARK_OAK_SAPLING, 4));
+        level.addFreshEntity(sapling);
+
+        if (!moe.chores().tickActive() || sapling.isAlive()) {
+            helper.fail("Expected dark oak visitor to collect four dropped saplings");
+            return;
+        }
+        if (!moe.chores().tickActive()) {
+            helper.fail("Expected dark oak visitor to plant a two-by-two sapling group");
+            return;
+        }
+        for (BlockPos planted : BlockPos.betweenClosed(origin, origin.offset(1, 0, 1))) {
+            if (!level.getBlockState(planted).is(Blocks.DARK_OAK_SAPLING)) {
+                helper.fail("Expected dark oak visitor to plant at " + planted);
+                return;
+            }
+        }
+        if (!cookies.has(WoodFamilyProgression.DARK_OAK_REPLENISHMENT_SEEN)) {
+            helper.fail("Expected dark oak replenishment conduct cookie");
             return;
         }
         helper.kill(moe);
@@ -387,6 +469,13 @@ public final class AttentionGameTests {
     private static void clearColumn(ServerLevel level, BlockPos pos, int height) {
         for (int y = 0; y <= height; ++y) {
             level.setBlock(pos.above(y), Blocks.AIR.defaultBlockState(), 3);
+        }
+    }
+
+    private static void preparePlantingSquare(ServerLevel level, BlockPos origin, int size, int height) {
+        for (BlockPos pos : BlockPos.betweenClosed(origin, origin.offset(size - 1, 0, size - 1))) {
+            level.setBlock(pos.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
+            clearColumn(level, pos, height);
         }
     }
 }

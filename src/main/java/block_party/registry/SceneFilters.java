@@ -21,6 +21,7 @@ public final class SceneFilters {
                 "can_follow_across_dimensions", "if_raining", "if_sunny",
                 "if_full_moon", "if_gibbous_moon", "if_half_moon", "if_crescent_moon", "if_new_moon",
                 "if_morning", "if_noon", "if_evening", "if_night", "if_midnight", "if_dawn", "if_time",
+                "elapsed_since_marker",
                 "if_blood_type_ab", "if_blood_type_b", "if_blood_type_a", "if_blood_type_o",
                 "if_remembers_place", "if_remembers_house", "if_remembers_shelter", "if_remembers_garden",
                 "if_remembers_grove", "if_remembers_field", "if_remembers_workshop",

@@ -18,11 +18,17 @@ import net.minecraft.world.phys.AABB;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public final class MoePlaceMemory {
     public static final double PLACE_RADIUS = 14.0D;
     private static final double ANCHOR_EVIDENCE_RADIUS = 10.0D;
     private static final int FEATURE_RADIUS = 5;
+    private static final long SITE_CACHE_TICKS = 120L;
+    private static final int SITE_CACHE_PRUNE_INTERVAL = 512;
+    private static final ConcurrentMap<SiteKey, CachedSite> SITE_CACHE = new ConcurrentHashMap<>();
+    private static int cacheLookups;
 
     private MoePlaceMemory() {
     }
@@ -61,14 +67,14 @@ public final class MoePlaceMemory {
 
     private static Place evaluate(Moe moe, BlockPos pos, List<MoeAnchor> anchors) {
         Level level = moe.level();
-        MoeEnvironmentalRules.ShelterScore shelter = MoeEnvironmentalRules.shelterScore(level, pos);
-        Features features = scanFeatures(level, pos, anchorEvidence(moe, pos, anchors));
-        PlaceType type = typeFor(level, pos, shelter, features);
+        SiteProfile site = siteProfile(level, pos);
+        Features features = site.features(anchorEvidence(moe, pos, anchors));
+        PlaceType type = typeFor(site, features);
         int occupancy = occupancy(moe, pos);
         int capacity = capacity(type);
-        double score = comfortScore(type, shelter, features) + anchorScore(features) - occupancyPenalty(occupancy, capacity);
+        double score = comfortScore(type, site.shelter(), features) + anchorScore(features) - occupancyPenalty(occupancy, capacity);
         score -= Math.sqrt(moe.blockPosition().distSqr(pos)) * 0.05D;
-        return new Place(type, pos.immutable(), score, occupancy, capacity, shelter, features);
+        return new Place(type, pos.immutable(), score, occupancy, capacity, site.shelter(), features);
     }
 
     public static boolean stillValid(Moe moe, Place place) {
@@ -112,7 +118,7 @@ public final class MoePlaceMemory {
         return count;
     }
 
-    private static PlaceType typeFor(Level level, BlockPos pos, MoeEnvironmentalRules.ShelterScore shelter, Features features) {
+    private static PlaceType typeFor(SiteProfile site, Features features) {
         if (features.anchorType() == MoeAnchorType.HOME) {
             return PlaceType.HOUSE;
         }
@@ -125,7 +131,7 @@ public final class MoePlaceMemory {
         if (features.anchorType() == MoeAnchorType.SAPLING) {
             return PlaceType.GROVE;
         }
-        if (shelter.score() >= 75 || shelter.nearDoor() && shelter.score() >= 35) {
+        if (site.shelter().score() >= 75 || site.shelter().nearDoor() && site.shelter().score() >= 35) {
             return features.workshopBlocks() >= 1 ? PlaceType.WORKSHOP : PlaceType.HOUSE;
         }
         if (features.shrineBlocks() >= 1) {
@@ -143,16 +149,16 @@ public final class MoePlaceMemory {
         if (features.logs() >= 2 && features.leaves() >= 4) {
             return PlaceType.GROVE;
         }
-        if (level.canSeeSky(pos.above()) && features.water() >= 5) {
+        if (site.seesSky() && features.water() >= 5) {
             return PlaceType.WATERFRONT;
         }
         if (features.caveBlocks() >= 18) {
             return PlaceType.CAVE;
         }
-        if (level.canSeeSky(pos.above()) && features.grass() >= 5) {
+        if (site.seesSky() && features.grass() >= 5) {
             return PlaceType.FIELD;
         }
-        if (shelter.covered() || shelter.score() >= 45) {
+        if (site.shelter().covered() || site.shelter().score() >= 45) {
             return PlaceType.SHELTER;
         }
         return PlaceType.NONE;
@@ -211,7 +217,29 @@ public final class MoePlaceMemory {
                 other != moe && other.isAlive() && !other.isRemoved()).size();
     }
 
-    private static Features scanFeatures(Level level, BlockPos origin, AnchorEvidence anchor) {
+    private static SiteProfile siteProfile(Level level, BlockPos pos) {
+        long gameTime = level.getGameTime();
+        SiteKey key = new SiteKey(System.identityHashCode(level), pos.asLong());
+        CachedSite cached = SITE_CACHE.get(key);
+        if (cached != null && gameTime >= cached.gameTime() && gameTime - cached.gameTime() < SITE_CACHE_TICKS) {
+            return cached.profile();
+        }
+        SiteProfile profile = scanSiteProfile(level, pos);
+        SITE_CACHE.put(key, new CachedSite(gameTime, profile));
+        pruneSiteCache(gameTime);
+        return profile;
+    }
+
+    private static void pruneSiteCache(long gameTime) {
+        ++cacheLookups;
+        if (cacheLookups < SITE_CACHE_PRUNE_INTERVAL) {
+            return;
+        }
+        cacheLookups = 0;
+        SITE_CACHE.entrySet().removeIf(entry -> gameTime - entry.getValue().gameTime() >= SITE_CACHE_TICKS);
+    }
+
+    private static SiteProfile scanSiteProfile(Level level, BlockPos origin) {
         int doors = 0;
         int workshopBlocks = 0;
         int gardenBlocks = 0;
@@ -265,7 +293,20 @@ public final class MoePlaceMemory {
                 }
             }
         }
-        return new Features(doors, workshopBlocks, gardenBlocks, logs, leaves, grass, water, caveBlocks, shrineBlocks, cropBlocks, farmland, anchor.type(), anchor.distanceSqr(), anchor.priority());
+        return new SiteProfile(
+                MoeEnvironmentalRules.shelterScore(level, origin),
+                level.canSeeSky(origin.above()),
+                doors,
+                workshopBlocks,
+                gardenBlocks,
+                logs,
+                leaves,
+                grass,
+                water,
+                caveBlocks,
+                shrineBlocks,
+                cropBlocks,
+                farmland);
     }
 
     private static boolean isWorkshopBlock(BlockState state) {
@@ -328,6 +369,45 @@ public final class MoePlaceMemory {
     private record AnchorEvidence(MoeAnchorType type, double distanceSqr, int priority) {
         static AnchorEvidence none() {
             return new AnchorEvidence(null, Double.MAX_VALUE, 0);
+        }
+    }
+
+    private record SiteKey(int levelId, long pos) {
+    }
+
+    private record CachedSite(long gameTime, SiteProfile profile) {
+    }
+
+    private record SiteProfile(
+            MoeEnvironmentalRules.ShelterScore shelter,
+            boolean seesSky,
+            int doors,
+            int workshopBlocks,
+            int gardenBlocks,
+            int logs,
+            int leaves,
+            int grass,
+            int water,
+            int caveBlocks,
+            int shrineBlocks,
+            int cropBlocks,
+            int farmland) {
+        private Features features(AnchorEvidence anchor) {
+            return new Features(
+                    this.doors,
+                    this.workshopBlocks,
+                    this.gardenBlocks,
+                    this.logs,
+                    this.leaves,
+                    this.grass,
+                    this.water,
+                    this.caveBlocks,
+                    this.shrineBlocks,
+                    this.cropBlocks,
+                    this.farmland,
+                    anchor.type(),
+                    anchor.distanceSqr(),
+                    anchor.priority());
         }
     }
 

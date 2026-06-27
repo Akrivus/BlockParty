@@ -3,6 +3,7 @@ package block_party.entities.chores;
 import block_party.db.DimBlockPos;
 import block_party.entities.Moe;
 import block_party.entities.environment.MoeEnvironmentalRules;
+import block_party.world.progression.WoodFamilyProgression;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
@@ -101,7 +102,12 @@ public final class PlaceBlockChores {
     }
 
     public enum Config {
-        OAK_SAPLING("oak_sapling", Items.OAK_SAPLING, Blocks.OAK_SAPLING.defaultBlockState(), 8.0D, 5, 6, 16);
+        OAK_SAPLING("oak_sapling", Items.OAK_SAPLING, Blocks.OAK_SAPLING.defaultBlockState(), 8.0D, 5, 6, 16, 1, WoodFamilyProgression.OAK_REPLENISHMENT_SEEN),
+        BIRCH_SAPLING("birch_sapling", Items.BIRCH_SAPLING, Blocks.BIRCH_SAPLING.defaultBlockState(), 8.0D, 5, 7, 16, 1, WoodFamilyProgression.BIRCH_REPLENISHMENT_SEEN),
+        SPRUCE_SAPLING("spruce_sapling", Items.SPRUCE_SAPLING, Blocks.SPRUCE_SAPLING.defaultBlockState(), 8.0D, 5, 9, 16, 1, WoodFamilyProgression.SPRUCE_WASTE_AVOIDED),
+        ACACIA_SAPLING("acacia_sapling", Items.ACACIA_SAPLING, Blocks.ACACIA_SAPLING.defaultBlockState(), 8.0D, 5, 7, 16, 1, WoodFamilyProgression.ACACIA_CLEAN_USE_SEEN),
+        JUNGLE_SAPLING("jungle_sapling", Items.JUNGLE_SAPLING, Blocks.JUNGLE_SAPLING.defaultBlockState(), 10.0D, 7, 14, 16, 2, WoodFamilyProgression.JUNGLE_REPLENISHMENT_SEEN),
+        DARK_OAK_SAPLING("dark_oak_sapling", Items.DARK_OAK_SAPLING, Blocks.DARK_OAK_SAPLING.defaultBlockState(), 8.0D, 7, 8, 16, 2, WoodFamilyProgression.DARK_OAK_REPLENISHMENT_SEEN);
 
         private final String key;
         private final Item item;
@@ -110,8 +116,11 @@ public final class PlaceBlockChores {
         private final int minSpacing;
         private final int verticalClearance;
         private final int maxCarry;
+        private final int footprint;
+        private final String conductCookie;
 
-        Config(String key, Item item, BlockState placeState, double placeRadius, int minSpacing, int verticalClearance, int maxCarry) {
+        Config(String key, Item item, BlockState placeState, double placeRadius, int minSpacing, int verticalClearance,
+               int maxCarry, int footprint, String conductCookie) {
             this.key = key;
             this.item = item;
             this.placeState = placeState;
@@ -119,6 +128,8 @@ public final class PlaceBlockChores {
             this.minSpacing = minSpacing;
             this.verticalClearance = verticalClearance;
             this.maxCarry = maxCarry;
+            this.footprint = footprint;
+            this.conductCookie = conductCookie;
         }
 
         public String key() {
@@ -141,13 +152,28 @@ public final class PlaceBlockChores {
             return this.maxCarry;
         }
 
+        public int requiredCount() {
+            return this.footprint * this.footprint;
+        }
+
+        public String conductCookie() {
+            return this.conductCookie;
+        }
+
         public boolean canPlace(ServerLevel level, BlockPos pos) {
-            return level.isEmptyBlock(pos)
-                    && !level.isEmptyBlock(pos.below())
-                    && this.placeState.canSurvive(level, pos)
-                    && MoeEnvironmentalRules.canStandAt(level, pos)
-                    && this.hasGrowthRoom(level, pos)
-                    && this.hasPlantSpacing(level, pos);
+            for (int x = 0; x < this.footprint; ++x) {
+                for (int z = 0; z < this.footprint; ++z) {
+                    BlockPos member = pos.offset(x, 0, z);
+                    if (!level.isEmptyBlock(member)
+                            || level.isEmptyBlock(member.below())
+                            || !this.placeState.canSurvive(level, member)
+                            || !MoeEnvironmentalRules.canStandAt(level, member)
+                            || !this.hasGrowthRoom(level, member)) {
+                        return false;
+                    }
+                }
+            }
+            return this.hasPlantSpacing(level, pos);
         }
 
         private boolean hasGrowthRoom(ServerLevel level, BlockPos pos) {
@@ -163,13 +189,21 @@ public final class PlaceBlockChores {
             int radius = this.minSpacing;
             for (BlockPos nearby : BlockPos.betweenClosed(pos.offset(-radius, -1, -radius), pos.offset(radius, 1, radius))) {
                 BlockPos immutable = nearby.immutable();
-                if (!immutable.equals(pos)
+                if (!this.insideFootprint(pos, immutable)
                         && Math.abs(immutable.getX() - pos.getX()) + Math.abs(immutable.getZ() - pos.getZ()) < radius
                         && level.getBlockState(immutable).is(this.placeState.getBlock())) {
                     return false;
                 }
             }
             return true;
+        }
+
+        private boolean insideFootprint(BlockPos origin, BlockPos pos) {
+            return pos.getY() == origin.getY()
+                    && pos.getX() >= origin.getX()
+                    && pos.getX() < origin.getX() + this.footprint
+                    && pos.getZ() >= origin.getZ()
+                    && pos.getZ() < origin.getZ() + this.footprint;
         }
 
         public static Config fromKey(String key) {

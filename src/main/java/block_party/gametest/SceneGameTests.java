@@ -15,6 +15,7 @@ import block_party.scene.SceneAction;
 import block_party.scene.SceneTrigger;
 import block_party.scene.SceneVariables;
 import block_party.scene.actions.OpenInventoryAction;
+import block_party.world.progression.WoodFamilyProgression;
 import block_party.db.voicemail.Voicemails;
 import com.google.gson.JsonParser;
 import java.sql.Connection;
@@ -550,6 +551,56 @@ public final class SceneGameTests {
         assertEquals(helper, "seen", variables.playerCookies(moe.getOwnerUUID()).get("phase5_player_cookie"), "player scene cookie value");
         assertEquals(helper, 8, variables.playerCounters(moe.getOwnerUUID()).get("phase5_player_counter"), "player scene counter value");
         assertEquals(helper, 2, variables.worldCounters().get("phase5_world_counter"), "world scene counter value");
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void refreshWoodFamilyProgressionActionSetsReadiness(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(533L, 33L));
+        var cookies = SceneVariables.get(moe.level()).playerCookies(moe.getOwnerUUID());
+        cookies.set(WoodFamilyProgression.OAK_BEFRIENDED, "true");
+        cookies.set(WoodFamilyProgression.BIRCH_BEFRIENDED, "true");
+        cookies.set(WoodFamilyProgression.DARK_OAK_BEFRIENDED, "true");
+        cookies.set(WoodFamilyProgression.SPRUCE_BEFRIENDED, "true");
+
+        parseAction("{\"type\":\"block_party:refresh_wood_family_progression\"}").apply(moe);
+
+        if (!cookies.has(WoodFamilyProgression.WOOD_FAMILY_ARC_READY)) {
+            helper.fail("Expected refreshed wood family progression to set readiness");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void timeMarkerActionAndFilterPaceSceneProgression(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(532L, 32L));
+        SceneAction mark = parseAction("""
+                {"type":"block_party:mark_time","action":{"scope":"player","name":"oak_exchange_1"}}
+                """);
+        var immediate = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  {"type":"block_party:elapsed_since_marker","filter":{"scope":"player","name":"oak_exchange_1"}}
+                ],"actions":[]}
+                """);
+        var later = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  {"type":"block_party:elapsed_since_marker","filter":{"scope":"player","name":"oak_exchange_1","min_game_ticks":20}}
+                ],"actions":[]}
+                """);
+
+        mark.apply(moe);
+
+        if (!immediate.scene().fulfills(moe)) {
+            helper.fail("Expected elapsed_since_marker with no minimum to pass after mark_time");
+            return;
+        }
+        if (later.scene().fulfills(moe)) {
+            helper.fail("Expected elapsed_since_marker with future game-time minimum to block immediate repeat");
+            return;
+        }
         helper.kill(moe);
         helper.succeed();
     }

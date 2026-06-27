@@ -78,7 +78,7 @@ The current resource scenes under `src/main/resources/data/block_party/scenes/` 
 
 - `test_dialogue.json`: right-click dialogue chain
 - `test_hide.json`: left-click hide action
-- attention/place-memory scenes such as `oak_forest_attention_*.json`
+- content-forward progression scenes such as `wood/*_exchange_*.json`
 
 `SendDialogueAction` constructs a `Dialogue` from JSON, opens it for the owning player with `DialogueOpenPayload`, and waits until a response arrives. `DialogueScreen` sends `DialogueRespondPayload`; the server loads the NPC row, finds the server entity, and records the selected response on the active Moe dialogue state.
 

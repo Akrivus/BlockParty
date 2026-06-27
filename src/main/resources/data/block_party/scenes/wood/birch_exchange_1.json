@@ -1,0 +1,18 @@
+{
+  "trigger": "block_party:right_click",
+  "filters": [
+    "block_party:is_cardinal",
+    {"type": "block_party:block", "filter": {"name": "minecraft:birch_log"}},
+    {"type": "block_party:player_has_cookie", "filter": {"name": "birch_replenishment_seen"}},
+    {"type": "block_party:player_counter", "filter": {"name": "birch_familiarity", "operation": "equals", "value": 0}}
+  ],
+  "actions": [
+    {"type": "block_party:send_dialogue", "action": {"text": "That was birch.", "tooltip": true, "responses": [
+      {"icon": "block_party:next_response", "text": "...", "actions": [
+        {"type": "block_party:player_counter", "action": {"name": "birch_familiarity", "operation": "set", "value": 1}},
+        {"type": "block_party:mark_time", "action": {"scope": "player", "name": "birch_exchange_1"}},
+        "block_party:end"
+      ]}
+    ]}}
+  ]
+}

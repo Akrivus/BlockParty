@@ -5,6 +5,7 @@ import block_party.db.DimBlockPos;
 import block_party.entities.Moe;
 import block_party.entities.chores.PlaceBlockChores.Config;
 import block_party.entities.movement.RoutineIntent;
+import block_party.world.progression.WoodFamilyProgression;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -36,7 +37,11 @@ public final class CardinalForestChore implements MoeChore {
     }
 
     public static CardinalForestChore oakSapling(ServerLevel level, BlockPos origin, UUID playerUuid) {
-        return new CardinalForestChore(Config.OAK_SAPLING, new DimBlockPos(level.dimension(), origin.immutable()), TICKS, playerUuid);
+        return sapling(level, origin, playerUuid, Config.OAK_SAPLING);
+    }
+
+    public static CardinalForestChore sapling(ServerLevel level, BlockPos origin, UUID playerUuid, Config config) {
+        return new CardinalForestChore(config, new DimBlockPos(level.dimension(), origin.immutable()), TICKS, playerUuid);
     }
 
     public static CardinalForestChore read(CompoundTag tag) {
@@ -90,8 +95,11 @@ public final class CardinalForestChore implements MoeChore {
         if (drop != null && PlaceBlockChores.count(moe.getInventory(), this.config.item()) < this.config.maxCarry()) {
             return this.collectDrop(moe, drop);
         }
-        if (PlaceBlockChores.count(moe.getInventory(), this.config.item()) > 0) {
+        if (PlaceBlockChores.count(moe.getInventory(), this.config.item()) >= this.config.requiredCount()) {
             return this.placeBlock(moe);
+        }
+        if (this.nearestDrop(moe).isPresent()) {
+            return true;
         }
         this.ticks = 0;
         return false;
@@ -169,15 +177,24 @@ public final class CardinalForestChore implements MoeChore {
             return true;
         }
         ServerLevel level = (ServerLevel) moe.level();
-        if (!PlaceBlockChores.removeOne(moe.getInventory(), this.config.item())) {
-            this.ticks = 0;
-            return false;
+        for (int i = 0; i < this.config.requiredCount(); ++i) {
+            if (!PlaceBlockChores.removeOne(moe.getInventory(), this.config.item())) {
+                this.ticks = 0;
+                return false;
+            }
         }
-        level.setBlock(plantPos, this.config.placeState(), 3);
+        for (int x = 0; x < (int) Math.sqrt(this.config.requiredCount()); ++x) {
+            for (int z = 0; z < (int) Math.sqrt(this.config.requiredCount()); ++z) {
+                level.setBlock(plantPos.offset(x, 0, z), this.config.placeState(), 3);
+            }
+        }
+        if (this.playerUuid != null) {
+            WoodFamilyProgression.recordReplenishment(level, this.playerUuid, this.config.conductCookie());
+        }
         PlaceBlockChores.syncHand(moe, this.config);
         moe.addRelaxation(0.05F);
         moe.setTemporaryAnimationKey("AWE", 35);
-        if (PlaceBlockChores.count(moe.getInventory(), this.config.item()) <= 0 && this.nearestDrop(moe).isEmpty()) {
+        if (PlaceBlockChores.count(moe.getInventory(), this.config.item()) < this.config.requiredCount() && this.nearestDrop(moe).isEmpty()) {
             this.ticks = 0;
         }
         return true;

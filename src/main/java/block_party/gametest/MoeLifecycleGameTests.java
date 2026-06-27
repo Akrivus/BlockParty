@@ -11,6 +11,10 @@ import block_party.items.CustomSpawnEggItem;
 import block_party.registry.CustomBlocks;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomItems;
+import block_party.scene.SceneVariables;
+import block_party.world.progression.ProgressionGate;
+import block_party.world.progression.SamuraiProgression;
+import block_party.world.progression.WoodFamilyProgression;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -121,6 +125,52 @@ public final class MoeLifecycleGameTests {
         assertEquals(helper, 1, moes.size(), "loaded cardinal personality entity count");
         assertEquals(helper, 1, countOwnerListEntries(BlockPartyDB.get(level), owner, second.getDatabaseID()), "cardinal personality relationship entries");
         helper.kill(second);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void yamiDarkOakCardinalWaitsForWoodFamilyReadiness(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        UUID owner = new UUID(1212L, 2323L);
+        BlockPos source = helper.absolutePos(new BlockPos(1, 1, 1));
+        level.setBlock(source, Blocks.DARK_OAK_LOG.defaultBlockState(), 3);
+
+        Moe blocked = CustomSpawnEggItem.spawnMoe(level, source, Direction.UP, owner);
+        if (blocked != null) {
+            helper.fail("Expected dark oak cardinal Yami to wait for wood family readiness");
+            return;
+        }
+        assertEquals(helper, Blocks.DARK_OAK_LOG.defaultBlockState(), level.getBlockState(source), "blocked Yami source remains");
+
+        var cookies = SceneVariables.get(level).playerCookies(owner);
+        cookies.set(WoodFamilyProgression.OAK_BEFRIENDED, "true");
+        cookies.set(WoodFamilyProgression.BIRCH_BEFRIENDED, "true");
+        cookies.set(WoodFamilyProgression.DARK_OAK_BEFRIENDED, "true");
+        cookies.set(WoodFamilyProgression.SPRUCE_BEFRIENDED, "true");
+
+        Moe moe = CustomSpawnEggItem.spawnMoe(level, source, Direction.UP, owner);
+        if (moe == null) {
+            helper.fail("Expected dark oak cardinal Yami to spawn after wood family readiness");
+            return;
+        }
+
+        assertEquals(helper, true, moe.isCardinal(), "Yami cardinal trait");
+        assertEquals(helper, Blocks.DARK_OAK_LOG.defaultBlockState(), moe.getVisibleBlockState(), "Yami visible block");
+        assertEquals(helper, Blocks.AIR.defaultBlockState(), level.getBlockState(source), "Yami source removed");
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void progressionGateReadsPlayerSamuraiBootsCookie(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        UUID owner = new UUID(1313L, 2424L);
+        ProgressionGate gate = ProgressionGate.playerCookie(SamuraiProgression.BOOTS_OBTAINED);
+
+        assertEquals(helper, false, gate.passes(level, owner), "boots gate before player cookie");
+
+        SceneVariables.get(level).playerCookies(owner).set(SamuraiProgression.BOOTS_OBTAINED, "true");
+        assertEquals(helper, true, gate.passes(level, owner), "boots gate after player cookie");
         helper.succeed();
     }
 

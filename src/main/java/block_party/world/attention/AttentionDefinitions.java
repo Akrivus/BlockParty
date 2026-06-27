@@ -4,7 +4,12 @@ import java.util.List;
 
 public final class AttentionDefinitions {
     private static final List<AttentionDefinition> ALL = List.of(
-            OakForestAttention.INSTANCE);
+            WoodForestAttention.OAK,
+            WoodForestAttention.BIRCH,
+            WoodForestAttention.SPRUCE,
+            WoodForestAttention.JUNGLE,
+            WoodForestAttention.ACACIA,
+            WoodForestAttention.DARK_OAK);
 
     private AttentionDefinitions() {
     }

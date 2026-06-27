@@ -126,6 +126,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     public static final String NBT_INVENTORY = "Inventory";
     public static final String NBT_TILE_ENTITY = "TileEntity";
     private static final int COMPATIBILITY_FOLLOW_TICKS = 20 * 60 * 5;
+    private static final int ROUTINE_ANCHOR_CACHE_TICKS = 100;
 
     public static final EntityDataAccessor<String> DATABASE_ID =
             SynchedEntityData.defineId(Moe.class, EntityDataSerializers.STRING);
@@ -199,6 +200,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     private final MoeRoutineBehavior routine = new MoeRoutineBehavior(this);
     private final MoeSocialBehavior social = new MoeSocialBehavior(this);
     private final SceneManager sceneManager = new SceneManager(this);
+    private List<MoeAnchor> routineAnchorCache = List.of();
+    private long routineAnchorCacheGameTime = Long.MIN_VALUE;
+    private boolean computingRoutineAnchorCache;
 
     public Moe(EntityType<? extends Moe> entityType, Level level) {
         super(entityType, level);
@@ -654,6 +658,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     public void setPlayerUUID(UUID playerUUID) {
         this.entityData.set(OWNER_UUID, playerUUID.toString());
+        this.invalidateRoutineAnchorCache();
     }
 
     @Deprecated
@@ -1031,6 +1036,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     public void setHome(DimBlockPos home) {
         this.home = home == null ? new DimBlockPos() : home;
+        this.invalidateRoutineAnchorCache();
     }
 
     public DimBlockPos getDimBlockPos() {
@@ -1213,6 +1219,33 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     public Optional<MoeAnchor> currentRoutineAnchor() {
         return MoeAnchorResolver.bestRoutineAnchor(this);
+    }
+
+    public List<MoeAnchor> routineAnchors() {
+        if (!(this.level() instanceof ServerLevel level)) {
+            return MoeAnchorResolver.computeActiveAnchors(this);
+        }
+        long gameTime = level.getGameTime();
+        if (this.computingRoutineAnchorCache) {
+            return this.routineAnchorCache;
+        }
+        if (this.routineAnchorCacheGameTime == Long.MIN_VALUE
+                || gameTime < this.routineAnchorCacheGameTime
+                || gameTime - this.routineAnchorCacheGameTime >= ROUTINE_ANCHOR_CACHE_TICKS) {
+            this.computingRoutineAnchorCache = true;
+            try {
+                this.routineAnchorCache = List.copyOf(MoeAnchorResolver.computeActiveAnchors(this));
+                this.routineAnchorCacheGameTime = gameTime;
+            } finally {
+                this.computingRoutineAnchorCache = false;
+            }
+        }
+        return this.routineAnchorCache;
+    }
+
+    public void invalidateRoutineAnchorCache() {
+        this.routineAnchorCache = List.of();
+        this.routineAnchorCacheGameTime = Long.MIN_VALUE;
     }
 
     public RoutineIntent getRoutineIntent() {
