@@ -2,9 +2,9 @@
 
 This project uses tests to protect Block Party's current contracts around Moes, block identity, dialogue, hiding, persistence, companion tools, and data-driven content. This file is the test strategy, not a backlog. The old standalone regression test plan has been retired because the repo now has broad active coverage.
 
-Current active inventory as of the Phase 1 guardrail pass:
+Current active inventory from the codebase audit:
 
-- 239 NeoForge GameTests under `src/main/java/block_party/gametest`.
+- 247 required NeoForge GameTests under `src/main/java/block_party/gametest`.
 - The historical pure regression tests under `src/test/java/block_party/regression` are not part of the active Gradle test source set because they target old Forge APIs.
 - `phase1Compliance`, `localCi`, `fullCi`, and the repo-managed pre-commit hook provide lightweight local CI entry points.
 - Manual release checks remain necessary for renderer, screen, sound, particle, skybox, and armor behavior.

@@ -19,23 +19,23 @@ These filters are implemented and should be treated as supported behavior:
   `has_cookie`, `player_counter`, `player_has_cookie`, `world_counter`, and
   `world_has_cookie`.
 - Runtime identity checks: `self`, `block`, `held_item`, `player_held_item`,
-  and `name`.
+  `name`, and `family_name`.
+- Target relationship and social state: target affection/loyalty/trust/stress,
+  social target identity, social affinity/tension/interest, social visual, and
+  social reaction filters.
+- Attention, follow, anchor, remembered-place, environmental observation,
+  social-place, gift-memory, and held-item preference filters.
 
 `SceneObservationFactories` is the active factory boundary. It keeps parsing
 logic out of the reload listener and makes unsupported filters visibly fail
 closed instead of silently becoming `always`.
 
-## Deferred Scaffolding
+## Active Restored Scaffolding
 
-These IDs remain registered because old data and future scene content may refer
-to them, but they do not currently have enough active backing state to be safe:
-
-- `family_name`
-
-The old Forge code had a family-name surface on the base NPC abstraction. The
-current NeoForge build has no active `BlockPartyNPC`/Senpai base surface. Until
-that system is restored intentionally, this filter must fail closed so scenes do
-not fire under false assumptions.
+`family_name` is active again. It matches the localized Moe family name derived
+from the source block profile, such as `Suzu` for a bell Moe. This matters for
+old-style block-family scenes and for generated content that wants to address a
+block family without relying on one concrete block ID.
 
 ## Over-Pruning Guardrail
 
@@ -43,3 +43,8 @@ Unknown filters also fail closed. This is deliberate: a missing or unported scen
 filter should disable that scene, not make it easier to trigger. That preserves
 player-facing safety while keeping unfinished product hooks visible for a later
 NPC/scenes pass.
+
+Registry-backed item, block, and entity references are stricter than generic
+unknown filters. A scene that references an unknown item, block, or entity is
+rejected during reload after logging a validation issue, because those references
+would otherwise be able to throw when the scene is evaluated.

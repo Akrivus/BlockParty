@@ -19,7 +19,7 @@ Stable author-facing surfaces:
   content files
 - JSON field names and documented defaults
 - fail-closed behavior for unknown filters
-- documented fallback behavior for unknown actions
+- strict rejection behavior for unknown or malformed actions
 - scoped cookie/counter state for Moes, players, and the world
 - social-affinity matcher fields and signal fields
 
@@ -134,6 +134,32 @@ Fields:
 
 All filters must pass for a scene to run. If multiple scenes match the same
 trigger, candidates are shuffled and the first fulfilled scene is selected.
+After filtering, scenes with the highest filter count are preferred. Do not rely
+on file order for story progression; equal-specificity scenes may be selected in
+any order.
+
+## Reload Validation
+
+Scene reload validates author-facing references before making scenes available.
+Validation issues are logged with the scene ID.
+
+These issues reject the affected scene:
+
+- unknown trigger IDs
+- malformed filter entries
+- unknown item, block, or entity references in scene filters or item actions
+- unknown action IDs
+- string actions other than `block_party:end`
+- malformed action entries or malformed action payloads
+
+These issues are diagnostic but do not reject the scene:
+
+- unknown filters, because they fail closed when evaluated
+- unknown cookie references
+- missing dialogue localization keys
+
+Rejected scenes are skipped individually. Other valid scenes from the same pack
+remain loaded.
 
 ## Triggers
 
@@ -573,6 +599,12 @@ Attention filters:
 - `block_party:attention_item`
 - `block_party:attention_count`
 - `block_party:attention_block`
+
+Attention events record every matching conduct event. The current wood-forest
+attention primitive summons at most one active matching cardinal visitor near the
+source/player at a time; repeated sapling drops update attention memory but do
+not create a stack of duplicate visitors while the first matching visitor still
+has an active chore.
 
 Remembered-place filters:
 
@@ -1057,20 +1089,23 @@ break reload.
 
 - Prefer `block_party:*` IDs.
 - Use one scene per mechanic beat. Let responses chain beats together.
+- Give every progression beat a unique cookie/counter/marker guard. Equal
+  specificity scenes may be selected in random order.
 - Choose cookie/counter scope intentionally: `npc` for one Moe, `player` for one
   player's progression, and `world` for shared progression.
 - Use filters to protect one-time scenes, for example a counter equal to `0`.
 - Use routine intents and anchors for movement-like behavior before adding Java.
 - Add a tiny scene first, then expand it once it fires reliably in game.
-- Treat unknown filters as disabled content and unknown actions as ending the
-  scene.
+- Treat unknown filters as disabled content. Unknown actions and invalid
+  item/block/entity references reject the affected scene at reload.
 
 ## Current Limitations
 
 - There is no formal JSON Schema file yet.
-- Scene parse errors can still be runtime-facing rather than content-author
+- Scene validation is markdown/GameTest-backed rather than a standalone JSON
+  Schema file.
+- Malformed non-scene resources may still fail closed without author-facing
   diagnostics.
-- Unknown object actions become `end`.
 - Unknown filters fail closed.
 - Passive spawning, boss progression, and structure recognition should call into
   this scene surface through small Java primitives rather than one-off JSON

@@ -4,6 +4,7 @@ import block_party.db.BlockPartyDB;
 import block_party.db.DimBlockPos;
 import block_party.entities.Moe;
 import block_party.entities.MoeSpawner;
+import block_party.entities.chores.CardinalForestChore;
 import block_party.scene.SceneTrigger;
 import block_party.world.attention.AttentionDefinition;
 import block_party.world.attention.AttentionDefinitions;
@@ -16,6 +17,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
@@ -33,6 +35,7 @@ public final class Attention {
     private static final List<AttentionDefinition> DEFINITIONS = AttentionDefinitions.all();
     private static final int TREE_CUT_MEMORY_TICKS = 20 * 90;
     private static final double TREE_CUT_MEMORY_RADIUS = 12.0D;
+    private static final double ACTIVE_VISITOR_RADIUS = 12.0D;
     private static final Map<String, List<TreeCutMemory>> RECENT_TREE_CUTS = new ConcurrentHashMap<>();
 
     private Attention() {
@@ -106,6 +109,9 @@ public final class Attention {
         } catch (SQLException exception) {
             return false;
         }
+        if (hasActiveAttentionVisitor(level, pos, definition, attentionPlayer)) {
+            return true;
+        }
         Moe moe = summonAttentionMoe(level, pos, definition.cardinalState(), attentionPlayer);
         if (moe != null) {
             moe.setDialogueTarget(attentionPlayer);
@@ -113,6 +119,19 @@ public final class Attention {
             moe.triggerScene(SceneTrigger.ATTENTION);
         }
         return true;
+    }
+
+    private static boolean hasActiveAttentionVisitor(ServerLevel level, BlockPos pos, AttentionDefinition definition, UUID player) {
+        double radiusSqr = ACTIVE_VISITOR_RADIUS * ACTIVE_VISITOR_RADIUS;
+        return level.getEntitiesOfClass(Moe.class, new AABB(pos).inflate(ACTIVE_VISITOR_RADIUS), moe ->
+                moe.isAlive()
+                        && !moe.isRemoved()
+                        && moe.isCardinal()
+                        && moe.chores().hasActive(CardinalForestChore.ID)
+                        && player.equals(moe.getDialogueTarget())
+                        && moe.getVisibleBlockState().equals(definition.cardinalState())
+                        && moe.distanceToSqr(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D) <= radiusSqr)
+                .size() > 0;
     }
 
     private static Optional<TreeCutMemory> recentTreeCut(ServerLevel level, BlockPos pos, AttentionDefinition definition) {

@@ -99,6 +99,22 @@ Use game time for "come back later" familiarity. Use real time only when the
 arc intentionally cares about long absences, return-after-months moments, or
 calendar-scale relationships.
 
+## Selection Rules
+
+Scene selection is deliberately light-weight: matching candidates are shuffled,
+then the most-specific fulfilled scenes are preferred by filter count. File order
+is not priority.
+
+For progression scenes:
+
+- Give every beat an explicit cookie, counter, or marker guard.
+- Make mutually exclusive beats visibly mutually exclusive in JSON.
+- Do not put two story-critical scenes on the same trigger with the same filters
+  and expect one to happen first.
+- Use `mark_time` plus `elapsed_since_marker` for "come back later" pacing.
+- Use response actions for immediate dialogue chains, and state filters for
+  relationship chains across visits.
+
 ## Dialogue Density
 
 Keep relationship-chain dialogue tiny. Good chain lines often look almost too
@@ -161,6 +177,26 @@ Yami reveals the boots
 Payoff scenes may require both the aggregate cookie and key component cookies
 when that makes the content easier to audit.
 
+## Attention Limits
+
+Attention should feel like being noticed, not like an entity farm.
+
+The active wood attention primitive records each matching sapling-drop conduct
+event, but it only keeps one matching active cardinal visitor near the
+source/player at a time. Repeated drops refresh attention memory while the first
+visitor is still doing the chore instead of summoning duplicates.
+
+Authoring implications:
+
+- Treat attention scenes as the first acknowledgement of conduct.
+- Use player-scoped cookies for conduct that should unlock later relationship
+  beats.
+- Let the active chore create the durable conduct cookie when it completes.
+- Avoid writing attention scenes that assume every sapling drop creates a fresh
+  character.
+- Add a Java-side limit before adding any new attention primitive that can fire
+  repeatedly during ordinary play.
+
 ## Authoring Checklist
 
 Before adding a new arc:
@@ -171,8 +207,11 @@ Before adding a new arc:
 - Name conduct cookies separately from friendship cookies.
 - Choose the aggregate readiness cookie, if any.
 - Sketch 3 short exchanges and one complete beat per required character.
+- Add mutually exclusive guards for scenes that share a trigger.
 - Add or reuse a refresh action if readiness depends on OR branches.
 - Add tests for conduct recording, pacing primitives, and payoff gates.
+- Add an attention duplicate-limit test for any new conduct primitive that
+  summons entities.
 - Update `docs/SAMURAI_ARC.md` or the relevant arc note with the new model.
 
 ## Current Wood Pattern

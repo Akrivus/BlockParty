@@ -99,6 +99,34 @@ public final class AttentionGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
+    public static void repeatAttentionReusesActiveVisitor(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPartyDB db = BlockPartyDB.get(level);
+        UUID player = new UUID(1913L, 2913L);
+        BlockPos pos = helper.absolutePos(new BlockPos(2, 1, 2));
+        try {
+            clearAttention(db);
+        } catch (SQLException exception) {
+            helper.fail("Expected attention cleanup to succeed: " + exception.getMessage());
+            return;
+        }
+
+        if (!Attention.noticeDrops(level, pos, Blocks.OAK_LEAVES.defaultBlockState(), player, List.of(new ItemStack(Items.OAK_SAPLING)))
+                || !Attention.noticeDrops(level, pos.east(), Blocks.OAK_LEAVES.defaultBlockState(), player, List.of(new ItemStack(Items.OAK_SAPLING)))) {
+            helper.fail("Expected repeated oak sapling attention to record");
+            return;
+        }
+
+        List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(pos).inflate(8.0D));
+        if (moes.size() != 1) {
+            helper.fail("Expected repeated attention to reuse the active visitor, got " + moes.size());
+            return;
+        }
+        helper.kill(moes.getFirst());
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void birchSaplingDropsUseGeneralizedForestAttention(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPartyDB db = BlockPartyDB.get(level);
@@ -242,11 +270,13 @@ public final class AttentionGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty", timeoutTicks = 20)
+    @GameTest(template = "empty", timeoutTicks = 40)
     public static void activeChorePersistsWithTypeKey(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         UUID player = new UUID(1908L, 2908L);
         BlockPos origin = helper.absolutePos(new BlockPos(2, 1, 2));
+        level.setBlock(origin.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
+        clearColumn(level, origin, 6);
         Moe moe = new Moe(CustomEntities.MOE.get(), level);
         moe.chores().start(CardinalForestChore.oakSapling(level, origin, player));
         CompoundTag saved = moe.saveWithoutId(new CompoundTag());
@@ -255,11 +285,25 @@ public final class AttentionGameTests {
             helper.fail("Expected saved chore type key to be " + CardinalForestChore.ID + ", got " + chore);
             return;
         }
+        if (!chore.hasUUID("Player") || !player.equals(chore.getUUID("Player"))) {
+            helper.fail("Expected saved chore to preserve player UUID, got " + chore);
+            return;
+        }
 
         Moe loaded = new Moe(CustomEntities.MOE.get(), level);
         loaded.load(saved);
         if (!loaded.chores().hasActive(CardinalForestChore.ID)) {
             helper.fail("Expected keyed chore read to restore active cardinal forest chore");
+            return;
+        }
+        loaded.moveToBlock(origin);
+        loaded.getInventory().setItem(0, new ItemStack(Items.OAK_SAPLING));
+        if (!loaded.chores().tickActive()) {
+            helper.fail("Expected restored chore to plant after reload");
+            return;
+        }
+        if (!SceneVariables.get(level).playerCookies(player).has(WoodFamilyProgression.OAK_REPLENISHMENT_SEEN)) {
+            helper.fail("Expected restored chore to record player conduct after reload");
             return;
         }
         helper.succeed();

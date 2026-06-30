@@ -1,6 +1,10 @@
 {
   "pack": {
     "description": "BlockParty",
-    "pack_format": 9
+    "pack_format": 46,
+    "supported_formats": {
+      "min_inclusive": 46,
+      "max_inclusive": 61
+    }
   }
 }

@@ -21,6 +21,10 @@ import java.util.UUID;
 public final class CardinalForestChore implements MoeChore {
     public static final ResourceLocation ID = BlockParty.source("cardinal_forest");
 
+    private static final String NBT_KEY = "Key";
+    private static final String NBT_ORIGIN = "Origin";
+    private static final String NBT_TICKS = "Ticks";
+    private static final String NBT_PLAYER = "Player";
     private static final double RADIUS = 16.0D;
     private static final int TICKS = 20 * 45;
 
@@ -46,10 +50,10 @@ public final class CardinalForestChore implements MoeChore {
 
     public static CardinalForestChore read(CompoundTag tag) {
         return new CardinalForestChore(
-                Config.fromKey(tag.getString("Key")),
-                tag.contains("Origin") ? new DimBlockPos(tag.getCompound("Origin")) : new DimBlockPos(),
-                tag.getInt("Ticks"),
-                null);
+                Config.fromKey(tag.getString(NBT_KEY)),
+                tag.contains(NBT_ORIGIN) ? new DimBlockPos(tag.getCompound(NBT_ORIGIN)) : new DimBlockPos(),
+                tag.getInt(NBT_TICKS),
+                tag.hasUUID(NBT_PLAYER) ? tag.getUUID(NBT_PLAYER) : null);
     }
 
     @Override
@@ -116,9 +120,12 @@ public final class CardinalForestChore implements MoeChore {
     @Override
     public CompoundTag write() {
         CompoundTag tag = new CompoundTag();
-        tag.putString("Key", this.config.key());
-        tag.put("Origin", this.origin.write());
-        tag.putInt("Ticks", this.ticks);
+        tag.putString(NBT_KEY, this.config.key());
+        tag.put(NBT_ORIGIN, this.origin.write());
+        tag.putInt(NBT_TICKS, this.ticks);
+        if (this.playerUuid != null) {
+            tag.putUUID(NBT_PLAYER, this.playerUuid);
+        }
         return tag;
     }
 

@@ -22,6 +22,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -1053,6 +1054,41 @@ public final class SceneGameTests {
         assertSceneParseFailsContaining(helper, """
                 {"trigger":"block_party:right_click","actions":["block_party:counter"]}
                 """, "only block_party:end supports string form");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void invalidSceneReferencesAreLoggedAndRejected(GameTestHelper helper) {
+        ScenesReloadListener.LoadedScenes loaded = ScenesReloadListener.loadScenesForTests(Map.of(
+                BlockParty.source("bad_block"), JsonParser.parseString("""
+                        {"trigger":"block_party:right_click","filters":[{"type":"block_party:block","filter":{"block":"block_party:not_real"}}],"actions":[]}
+                        """).getAsJsonObject(),
+                BlockParty.source("bad_action"), JsonParser.parseString("""
+                        {"trigger":"block_party:right_click","actions":[{"type":"block_party:not_real_action"}]}
+                        """).getAsJsonObject(),
+                BlockParty.source("good"), JsonParser.parseString("""
+                        {"trigger":"block_party:right_click","filters":["block_party:not_a_real_filter"],"actions":[]}
+                        """).getAsJsonObject()));
+
+        if (loaded.byName().containsKey(BlockParty.source("bad_block"))
+                || loaded.byName().containsKey(BlockParty.source("bad_action"))) {
+            helper.fail("Expected scenes with invalid registry/action references to be rejected");
+            return;
+        }
+        if (!loaded.byName().containsKey(BlockParty.source("good"))) {
+            helper.fail("Expected unknown-filter scene to remain loaded and fail closed at runtime");
+            return;
+        }
+        boolean rejectedBlock = loaded.validationIssues().stream()
+                .anyMatch(issue -> issue.rejectScene() && "references unknown block: block_party:not_real".equals(issue.message()));
+        boolean rejectedAction = loaded.validationIssues().stream()
+                .anyMatch(issue -> issue.rejectScene() && "unknown action: block_party:not_real_action".equals(issue.message()));
+        boolean unknownFilterLogged = loaded.validationIssues().stream()
+                .anyMatch(issue -> !issue.rejectScene() && issue.message().contains("unknown filter"));
+        if (!rejectedBlock || !rejectedAction || !unknownFilterLogged) {
+            helper.fail("Expected rejected reference issues plus non-rejecting unknown-filter diagnostic, got " + loaded.validationIssues());
+            return;
+        }
         helper.succeed();
     }
 

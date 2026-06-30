@@ -134,25 +134,56 @@ public final class ScenesReloadListener implements PreparableReloadListener {
     }
 
     private static LoadedScenes load(ResourceManager resourceManager) {
-        Map<SceneTrigger, List<Scene>> byTrigger = new ConcurrentHashMap<>();
-        Map<ResourceLocation, Scene> byName = new LinkedHashMap<>();
         Map<ResourceLocation, JsonObject> rawScenes = new LinkedHashMap<>();
+        List<ContentValidationIssue> issues = new ArrayList<>();
         Map<ResourceLocation, Resource> resources = resourceManager.listResources(DIRECTORY, id -> id.getPath().endsWith(".json"));
         for (Map.Entry<ResourceLocation, Resource> entry : resources.entrySet()) {
             ResourceLocation id = own(resourceId(entry.getKey()));
             try (Reader reader = entry.getValue().openAsReader()) {
                 JsonObject json = GsonHelper.convertToJsonObject(JsonParser.parseReader(reader), "scene " + id);
                 rawScenes.put(id, json);
-                ParsedScene parsed = parseScene(id, json);
+            } catch (Exception exception) {
+                issues.add(new ContentValidationIssue(id, "failed to read scene: " + exception.getMessage(), true));
+            }
+        }
+        return load(rawScenes, issues);
+    }
+
+    public static LoadedScenes loadScenesForTests(Map<ResourceLocation, JsonObject> rawScenes) {
+        return load(rawScenes, new ArrayList<>());
+    }
+
+    private static LoadedScenes load(Map<ResourceLocation, JsonObject> rawScenes, List<ContentValidationIssue> issues) {
+        issues.addAll(validate(rawScenes));
+        Set<ResourceLocation> rejected = rejectedSceneIds(issues);
+        Map<SceneTrigger, List<Scene>> byTrigger = new ConcurrentHashMap<>();
+        Map<ResourceLocation, Scene> byName = new LinkedHashMap<>();
+        for (Map.Entry<ResourceLocation, JsonObject> entry : rawScenes.entrySet()) {
+            ResourceLocation id = entry.getKey();
+            if (rejected.contains(id)) {
+                continue;
+            }
+            try {
+                ParsedScene parsed = parseScene(id, entry.getValue());
                 byTrigger.computeIfAbsent(parsed.trigger(), ignored -> new ArrayList<>()).add(parsed.scene());
                 byName.put(id, parsed.scene());
             } catch (Exception exception) {
-                throw new IllegalStateException("Failed to parse Block Party scene " + id, exception);
+                issues.add(new ContentValidationIssue(id, "failed to parse scene: " + exception.getMessage(), true));
             }
         }
         Map<SceneTrigger, List<Scene>> immutableByTrigger = new LinkedHashMap<>();
         byTrigger.forEach((trigger, scenes) -> immutableByTrigger.put(trigger, List.copyOf(scenes)));
-        return new LoadedScenes(Map.copyOf(immutableByTrigger), Map.copyOf(byName), validate(rawScenes));
+        return new LoadedScenes(Map.copyOf(immutableByTrigger), Map.copyOf(byName), List.copyOf(issues));
+    }
+
+    private static Set<ResourceLocation> rejectedSceneIds(List<ContentValidationIssue> issues) {
+        Set<ResourceLocation> rejected = new HashSet<>();
+        for (ContentValidationIssue issue : issues) {
+            if (issue.rejectScene()) {
+                rejected.add(issue.sceneId());
+            }
+        }
+        return rejected;
     }
 
     private void applyLoaded(LoadedScenes loaded) {
@@ -424,7 +455,7 @@ public final class ScenesReloadListener implements PreparableReloadListener {
     private static void validateScene(ResourceLocation id, JsonObject json, Set<String> writtenCookies, List<ContentValidationIssue> issues) {
         ResourceLocation trigger = resource(GsonHelper.getAsString(json, "trigger", "block_party:null"));
         if (SceneTrigger.NULL.fromValue(own(trigger)) == SceneTrigger.NULL && !"null".equals(own(trigger).getPath())) {
-            issues.add(new ContentValidationIssue(id, "unknown trigger: " + trigger));
+            issues.add(new ContentValidationIssue(id, "unknown trigger: " + trigger, true));
         }
         if (json.has("filters") && json.get("filters").isJsonArray()) {
             for (JsonElement element : json.getAsJsonArray("filters")) {
@@ -439,7 +470,7 @@ public final class ScenesReloadListener implements PreparableReloadListener {
     private static void validateFilter(ResourceLocation id, JsonElement element, Set<String> writtenCookies, List<ContentValidationIssue> issues) {
         ResourceLocation type = filterType(element);
         if (type == null) {
-            issues.add(new ContentValidationIssue(id, "invalid filter entry"));
+            issues.add(new ContentValidationIssue(id, "invalid filter entry", true));
             return;
         }
         if (!SceneFilters.ENTRIES.containsKey(type.getPath())) {
@@ -460,22 +491,30 @@ public final class ScenesReloadListener implements PreparableReloadListener {
             if (element.isJsonPrimitive()) {
                 ResourceLocation action = ResourceLocation.tryParse(element.getAsString());
                 if (action == null || (!"end".equals(own(action).getPath()) && !ACTION_PARSERS.containsKey(own(action).getPath()))) {
-                    issues.add(new ContentValidationIssue(id, "unknown action: " + element.getAsString()));
+                    issues.add(new ContentValidationIssue(id, "unknown action: " + element.getAsString(), true));
+                } else if (!"end".equals(own(action).getPath())) {
+                    issues.add(new ContentValidationIssue(id, "string action uses " + own(action)
+                            + "; only block_party:end supports string form", true));
                 }
                 continue;
             }
             if (!element.isJsonObject()) {
-                issues.add(new ContentValidationIssue(id, "invalid action entry"));
+                issues.add(new ContentValidationIssue(id, "invalid action entry", true));
                 continue;
             }
             JsonObject source = element.getAsJsonObject();
             ResourceLocation action = actionTypeForValidation(source);
             if (action == null) {
-                issues.add(new ContentValidationIssue(id, "invalid action entry"));
+                issues.add(new ContentValidationIssue(id, "invalid action entry", true));
+                continue;
+            }
+            if (source.has("action") && !source.get("action").isJsonObject()
+                    && !(source.get("action").isJsonPrimitive() && !source.has("type"))) {
+                issues.add(new ContentValidationIssue(id, "invalid action payload for " + action, true));
                 continue;
             }
             if (!ACTION_PARSERS.containsKey(action.getPath()) && !"end".equals(action.getPath())) {
-                issues.add(new ContentValidationIssue(id, "unknown action: " + action));
+                issues.add(new ContentValidationIssue(id, "unknown action: " + action, true));
             }
             JsonObject payload = source.has("action") && source.get("action").isJsonObject() ? source.getAsJsonObject("action") : source;
             validateActionPayload(id, action.getPath(), payload, issues);
@@ -484,10 +523,12 @@ public final class ScenesReloadListener implements PreparableReloadListener {
 
     private static ResourceLocation actionTypeForValidation(JsonObject source) {
         if (source.has("type")) {
-            return actionId(GsonHelper.getAsString(source, "type", "block_party:end"), "validation");
+            ResourceLocation id = ResourceLocation.tryParse(GsonHelper.getAsString(source, "type", "block_party:end"));
+            return id == null ? null : own(id);
         }
         if (source.has("action") && source.get("action").isJsonPrimitive()) {
-            return actionId(GsonHelper.getAsString(source, "action", "block_party:end"), "validation");
+            ResourceLocation id = ResourceLocation.tryParse(GsonHelper.getAsString(source, "action", "block_party:end"));
+            return id == null ? null : own(id);
         }
         return null;
     }
@@ -535,7 +576,7 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         String value = GsonHelper.getAsString(payload, payload.has("item") ? "item" : "name", "");
         ResourceLocation parsed = ResourceLocation.tryParse(value);
         if (!value.isBlank() && !value.startsWith("#") && (parsed == null || !BuiltInRegistries.ITEM.containsKey(parsed))) {
-            issues.add(new ContentValidationIssue(id, "references unknown item: " + value));
+            issues.add(new ContentValidationIssue(id, "references unknown item: " + value, true));
         }
     }
 
@@ -543,7 +584,7 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         String value = GsonHelper.getAsString(payload, payload.has("block") ? "block" : "name", "");
         ResourceLocation parsed = ResourceLocation.tryParse(value);
         if (!value.isBlank() && !value.startsWith("#") && (parsed == null || !BuiltInRegistries.BLOCK.containsKey(parsed))) {
-            issues.add(new ContentValidationIssue(id, "references unknown block: " + value));
+            issues.add(new ContentValidationIssue(id, "references unknown block: " + value, true));
         }
     }
 
@@ -551,7 +592,7 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         String value = GsonHelper.getAsString(payload, "name", "");
         ResourceLocation parsed = ResourceLocation.tryParse(value);
         if (!value.isBlank() && !value.startsWith("#") && (parsed == null || !BuiltInRegistries.ENTITY_TYPE.containsKey(parsed))) {
-            issues.add(new ContentValidationIssue(id, "references unknown entity: " + value));
+            issues.add(new ContentValidationIssue(id, "references unknown entity: " + value, true));
         }
     }
 
@@ -688,10 +729,13 @@ public final class ScenesReloadListener implements PreparableReloadListener {
     public record SceneDebugResult(ResourceLocation id, boolean available, int filterCount, List<String> reasons) {
     }
 
-    public record ContentValidationIssue(ResourceLocation sceneId, String message) {
+    public record ContentValidationIssue(ResourceLocation sceneId, String message, boolean rejectScene) {
+        public ContentValidationIssue(ResourceLocation sceneId, String message) {
+            this(sceneId, message, false);
+        }
     }
 
-    private record LoadedScenes(
+    public record LoadedScenes(
             Map<SceneTrigger, List<Scene>> byTrigger,
             Map<ResourceLocation, Scene> byName,
             List<ContentValidationIssue> validationIssues) {

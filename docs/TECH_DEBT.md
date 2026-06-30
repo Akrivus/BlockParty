@@ -29,13 +29,13 @@ Risk scale:
 - Owner surface: `build.gradle`, all Java packages, and persistence-facing docs.
 - Direction: keep `phase1Compliance` passing. Use imports for normal dependencies. Keep fully qualified names only where they intentionally disambiguate same-named classes or avoid an import collision that would reduce readability. Use constants for table names and repeated NBT keys.
 
-### Scene/datapack authoring diagnostics need a better content-author path
+### Scene/datapack authoring diagnostics need a schema-backed content-author path
 
-- Evidence: `SCENE_DATAPACK_SCHEMA.md` documents the active scene surface, but there is no machine-readable JSON Schema and some malformed non-scene content still fails at reload/runtime rather than giving author-oriented diagnostics. Scene actions now fail parsing for unknown action IDs and malformed action payloads.
+- Evidence: `SCENE_DATAPACK_SCHEMA.md` documents the active scene surface, and scene reload now logs validation issues while rejecting affected scenes for unsafe references such as unknown actions, malformed action payloads, and unknown item/block/entity IDs. There is still no machine-readable JSON Schema, and some malformed non-scene content still fails closed without author-oriented diagnostics.
 - Maintenance risk: Medium. Generated scene packs and third-party packs need predictable validation.
 - Gameplay importance: Medium. Bad scene data can silently disable content or produce hard-to-debug behavior.
 - Owner surface: `registry.resources`, `scene`, `scene.actions`, `SceneObservationFactories`, and `docs/SCENE_DATAPACK_SCHEMA.md`.
-- Direction: add a schema or validator tests for scene, social-affinity, names, aliases, sounds, and texture metadata. Unknown filters should keep failing closed.
+- Direction: add a schema or validator tests for scene, social-affinity, names, aliases, sounds, and texture metadata. Unknown filters should keep failing closed while unsafe registry/action references reject only the affected scene.
 
 ### Scene variable scope is explicit for Moe, player, and world state
 

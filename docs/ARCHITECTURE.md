@@ -13,9 +13,9 @@ The README describes Moes as affectionate block people who can bring food, pull 
 - interact through data-driven scenes and `DialogueScreen`
 - hide by becoming the original block again while a hidden marker entity tracks the database ID
 - re-spawn from hiding when the block is exposed, broken, moved, or timed out
+- react to player conduct through attention records and small chore primitives
+- use routine, social, and environmental movement helpers for non-dialogue behavior
 - inspect/call NPC records with yearbook/cell phone controller screens
-
-I did not find concrete chores, prank, or adventure AI implementations beyond data fields, sounds, `isFollowing`, empty update hooks, and README intent.
 
 ## Entity And NPC Lifecycle
 
@@ -211,6 +211,11 @@ Scenes are JSON resources under `data/*/scenes`. Each has a trigger, filters, an
 
 Parser-supported actions include dialogue, response, health/food/loyalty/stress mutation, cookie/counter mutation, hide, voicemail, follow-session, anchor/routine, sleep-at-home, inventory/item transfer, wait/dismiss, and end. `SceneActions` derives its registered IDs from the parser registry, and a GameTest keeps the two surfaces synchronized.
 
+Scene reload logs validation issues and rejects only the affected invalid scene
+when an author-facing reference would be unsafe, such as an unknown trigger,
+unknown item/block/entity reference, unknown action, or malformed action payload.
+Unknown filters remain loaded but fail closed at evaluation time.
+
 ### Networking Packets
 
 Network setup:
@@ -305,18 +310,29 @@ SQLite dependency:
 
 Risk note: SQL strings are still assembled manually in several places, but table names and shared columns are now treated as compatibility constants. Keep dynamic values in prepared-statement bindings, and run `phase1Compliance` after DB edits to catch raw table-name literal regressions.
 
-### Chores, Pranks, And Adventuring
+### Chores, Attention, And Adventuring
 
-The README claims Moes bring food, pull pranks, perform chores, and tag along on adventures. In code, I found only supporting scaffolding:
+The README claims Moes bring food, pull pranks, perform chores, and tag along on
+adventures. The active code has concrete support for some of that surface and
+scaffolding for the rest:
 
 - follow state: `Moe.isFollowing`, `Moe.setFollowing`
 - cell-phone teleport/call: `NpcCallRequestPayload`, `NpcCallPayload`, `CellPhone`, `MoeSpawner`, and Minecraft 1.21.4 `TeleportTransition`
 - stat fields: food, fullness, stress, relaxation, loyalty, affection, age, personality traits, home, and visible block state on `Moe`/`NPC`
-- old hunger/loneliness/stress/action/sleep update hooks are not active gameplay loops in the current normalized shell
 - sounds such as `MOE_FEED`, `MOE_GRIEF`, `MOE_FOLLOW`, `MOE_EAT`, `MOE_SLEEPING`
 - 36-slot inventory/menu support on `Moe`
+- active chore infrastructure in `entities.chores`, currently used by
+  `CardinalForestChore` for wood-family sapling replenishment
+- active attention recording in `world.Attention`, with wood-family attention
+  definitions that record sapling-drop conduct and summon at most one matching
+  active cardinal visitor near the source/player
+- active routine, anchor, social-place, and environmental movement helpers under
+  `entities.movement`, `entities.social`, and `entities.environment`
 
-I did not find concrete AI goals for following, chores, pranks, gifting food, combat adventuring, or sleep. Treat those as unfinished or planned unless there are files outside the scanned `src/main/java/block_party` tree.
+Pranks, gifting food, and combat adventuring should still be treated as planned
+unless a focused primitive and GameTests are added. Chores and movement helpers
+are no longer only scaffolding; preserve their narrow package ownership when
+adding new behavior.
 
 ## Architecture Boundaries
 
@@ -360,8 +376,12 @@ Important content-authoring invariants:
 
 - Prefer explicit `block_party:*` IDs in authored content.
 - Unknown filters fail closed, disabling the scene.
-- Unknown object actions become `end`; this should stay documented and tested until a stricter author diagnostic replaces it.
+- Unknown actions, malformed action payloads, unknown triggers, and invalid
+  item/block/entity references reject the affected scene during reload after
+  logging a content validation issue.
 - Cookies and counters use explicit `npc`, `player`, and `world` scopes.
+- Progression scenes must use explicit cookie/counter/marker guards; file order
+  is not scene priority.
 - Java primitives added for content should expose a small scene action/filter when content authors are expected to use them.
 
 For generated scene packs, Codex or another authoring tool should target the schema document, not Java implementation details. If a desired story beat cannot be expressed in that schema, add a small Java primitive and update the schema in the same slice.

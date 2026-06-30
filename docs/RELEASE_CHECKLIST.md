@@ -38,7 +38,7 @@ review time on the smaller code diff and on `docs/COMPATIBILITY_NOTES.md`.
 - `src/main/resources/assets/block_party/lang/en_us.json`: appended item
   translation coverage.
 - `src/main/java/block_party/db/BlockPartyDB.java`: restored sapling query table.
-- `src/main/java/block_party/entity/NPC.java`: compatibility migration for
+- `src/main/java/block_party/db/records/NPC.java`: compatibility migration for
   hidden-position columns.
 - `src/main/java/block_party/gametest/**`: active server-side smoke coverage.
 - `docs/COMPATIBILITY_NOTES.md`: intentional behavior differences and deferred

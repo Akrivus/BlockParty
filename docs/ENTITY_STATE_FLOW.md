@@ -9,7 +9,7 @@ The game has thin server-side entity shells for:
 - `block_party:moe` -> `block_party.entities.Moe`
 - `block_party:moe_in_hiding` -> `block_party.entities.MoeInHiding`
 
-These shells preserve identity and state data needed before broader networking is reintroduced. Minimal SQLite NPC row identity, server-side owner-list/query/remove services, typed data-block row queries for garden/location/sapling/shrine waypoint surfaces, typed NeoForge payload scaffolding for those service calls, server-side Cell Phone-style call behavior, Moe movement/combat attributes, safe vanilla combat delegation, 36-slot inventory NBT, block alias visible state, volume-derived scale, and profile/timer NBT parity are active for spawn, hide, reveal, Yearbook-like listing, Cell Phone-like lookup, and entity/profile parity. The current implementation also includes typed list/detail/remove/call/controller-open payloads, dialogue-open/respond/close contracts, the first client renderer/model path for active Moe shells, Yearbook/Cell Phone screens, client particle providers, client/server reload hooks for Moe textures and sounds, and server-side scene resource loading/execution for bundled dialogue, hide, cookie, counter, and end actions. It still does not include real follow AI/pathfinding, chores, pranks, full Yearbook profile parity, full Forge scene action/filter coverage, or full Forge NPC row synchronization.
+These shells preserve identity and state data needed before broader networking is reintroduced. Minimal SQLite NPC row identity, server-side owner-list/query/remove services, typed data-block row queries for garden/location/sapling/shrine waypoint surfaces, typed NeoForge payload scaffolding for those service calls, server-side Cell Phone-style call behavior, Moe movement/combat attributes, safe vanilla combat delegation, 36-slot inventory NBT, block alias visible state, volume-derived scale, and profile/timer NBT parity are active for spawn, hide, reveal, Yearbook-like listing, Cell Phone-like lookup, and entity/profile parity. The current implementation also includes typed list/detail/remove/call/controller-open payloads, dialogue-open/respond/close contracts, the first client renderer/model path for active Moe shells, Yearbook/Cell Phone screens, client particle providers, client/server reload hooks for Moe textures and sounds, server-side scene resource loading/execution, shimenawa-backed hidden NPC rows, and shrine-tablet server effects. It still does not include real follow AI/pathfinding, chores, pranks, full Yearbook profile parity, full Forge scene action/filter coverage, or full Forge NPC row synchronization.
 
 ## Moe Spawn Lifecycle
 
@@ -61,7 +61,7 @@ Persistence locations:
 - SQLite `NPCs` row stores row-backed identity fields.
 - `BlockPartyDB` SavedData stores `NPCsByPlayer` owner lists when a row-backed Moe is spawned with an owner UUID.
 
-SQLite-backed identity starts at `BlockPartyDB` bootstrap, which opens the world-local `blockparty.db` and creates the minimal `NPCs` table. Spawn inserts rows and assigns generated IDs. Hide and reveal update the same row. SQLite does not yet own shrine/shimenawa references, inventory contents, or full health behavior.
+SQLite-backed identity starts at `BlockPartyDB` bootstrap, which opens the world-local `blockparty.db` and creates the minimal `NPCs` table. Spawn inserts rows and assigns generated IDs. Hide and reveal update the same row. Shimenawa block entities create hidden `NPCs` rows at the block position. SQLite does not yet own Forge shrine reference columns on `NPCs`, inventory contents, or full health behavior.
 
 Minimal active `NPCs` columns:
 
@@ -353,7 +353,7 @@ Current SQLite authority:
 - SQLite is authoritative for server-side data block rows in the minimal `Shrines`, `GardenLanterns`, `Locations`, and `Saplings` tables.
 - Data block entity NBT preserves `DatabaseID`, `HasRow`, `Claimed`, and `PlayerUUID`; locative rows additionally persist `RequiredCondition` and `Priority`.
 - Shrine list queries filter server-side SQLite rows by the old `SShrineList` rule: include rows owned by the requester or rows in the requested dimension.
-- SQLite does not yet own Forge shrine/shimenawa references, inventory contents, or full health behavior.
+- SQLite does not yet own Forge shrine reference columns on `NPCs`, inventory contents, or full health behavior.
 
 Networking authority:
 
@@ -416,12 +416,12 @@ Vanilla entity data synchronization may cover fields stored in `SynchedEntityDat
 
 Currently unimplemented:
 
-- Forge NPC schema columns for shrine/shimenawa references, SQLite inventory storage, and full health behavior
+- Forge NPC schema columns for shrine references, SQLite inventory storage, and full health behavior
 - migration/backfill for existing `NPCs` tables if later columns change beyond the current additive migration path
 - alias-driven visible block state calculation is active for bundled `moes/aliases`; future real custom block shapes may need revisiting when their full block classes return
 - complex block entity full metadata/component restore remains incomplete; persistent data capture and restore through spawn/hide/reveal is active
 - SQLite inventory persistence is not active; Slice 2.3 only restores entity NBT inventory persistence and slouch recalculation
-- full Forge data block behavior remains incomplete; server-side block entity IDs, owner/location NBT, SQLite rows, locative condition/priority, shrine list queries, shrine list request/response packets, and login shrine-list sends are active, while shrine tablet effects, row-change broadcasts, and shimenawa NPC-row creation are deferred
+- full Forge data block behavior remains incomplete; server-side block entity IDs, owner/location NBT, SQLite rows, locative condition/priority, shrine list queries, shrine list request/response packets, login shrine-list sends, shrine tablet effects, row-change broadcasts, and shimenawa NPC-row creation are active, while client shrine-location storage/rendering remains deferred
 - client-side item-use feedback for spawn remains incomplete; server-side survival/creative consumption is active
 - server-to-client custom packet consumers outside dialogue/controller-open, NPC controller responses, and shrine-list login sync
 - full Forge Yearbook dead/estranged presentation behavior; active Yearbook content now renders row-backed trait translations and stat labels, and server detail requests snapshot live loaded Moe health while row-only/unreachable detail paths fall back to `0`
