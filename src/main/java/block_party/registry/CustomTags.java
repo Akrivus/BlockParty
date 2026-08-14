@@ -32,6 +32,9 @@ public final class CustomTags {
     public static final TagKey<Block> HAS_WINGS = block("moe/has_wings");
     public static final TagKey<Block> IGNORES_VOLUME = block("moe/ignores_volume");
     public static final TagKey<Block> CARDINAL = block("moe/traits/cardinal");
+    public static final TagKey<Block> SAMURAI_WOOD_CARDINALS = block("moe/progression/samurai_wood_cardinals");
+    public static final TagKey<Block> SAMURAI_FLOWER_CARDINALS = block("moe/progression/samurai_flower_cardinals");
+    public static final TagKey<Block> SAMURAI_ORE_CARDINALS = block("moe/progression/samurai_ore_cardinals");
     public static final TagKey<Block> IGNORES_DARKNESS = block("moe/traits/ignores_darkness");
     public static final TagKey<Block> IGNORES_RAIN = block("moe/traits/ignores_rain");
     public static final TagKey<Block> BLOOD_TYPE_A = block("moe/traits/blood_type/a");

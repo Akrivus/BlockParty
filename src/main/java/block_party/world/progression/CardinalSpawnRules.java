@@ -12,12 +12,15 @@ import net.minecraft.world.level.block.state.BlockState;
 public final class CardinalSpawnRules {
     private static final List<Rule> RULES = List.of(
             Rule.open(state -> state.is(Blocks.BELL)),
-            Rule.open(state -> state.is(Blocks.ACACIA_LOG)),
-            Rule.open(state -> state.is(Blocks.BIRCH_LOG)),
-            Rule.open(state -> state.is(Blocks.JUNGLE_LOG)),
-            Rule.open(state -> state.is(Blocks.OAK_LOG)),
-            Rule.open(state -> state.is(Blocks.SPRUCE_LOG)),
-            Rule.gated(state -> state.is(Blocks.DARK_OAK_LOG), WoodFamilyProgression::isReady));
+            Rule.open(state -> state.is(CustomTags.SAMURAI_WOOD_CARDINALS)),
+            Rule.gated(state -> state.is(CustomTags.SAMURAI_FLOWER_CARDINALS),
+                    ProgressionGate.playerCookie(SamuraiProgression.BOOTS_OBTAINED)),
+            Rule.gated(state -> state.is(CustomTags.SAMURAI_ORE_CARDINALS),
+                    ProgressionGate.playerCookie(SamuraiProgression.LEGS_OBTAINED)),
+            Rule.gated(state -> state.is(Blocks.CRYING_OBSIDIAN),
+                    ProgressionGate.playerCookie(SamuraiProgression.BOOTS_OBTAINED),
+                    ProgressionGate.playerCookie(SamuraiProgression.LEGS_OBTAINED),
+                    ProgressionGate.playerCookie(SamuraiProgression.DOU_OBTAINED)));
 
     private CardinalSpawnRules() {
     }

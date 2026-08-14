@@ -1112,6 +1112,14 @@ break reload.
   hacks.
 - Cardinal spawn eligibility can now consult scoped progression state in Java.
   The first active samurai rule makes dark oak/Yami wait for wood-family
-  readiness before appearing as the boots payoff. Dirt and grass should use this
-  gate once they have a dedicated encounter path that does not change ordinary
-  dirt/grass Moe identity.
+  readiness before appearing as the boots payoff. The future flower cardinal
+  ground arc should use this gate after the boots payoff. Ordinary dirt and
+  grass remain corporeal Moe types and must not become cardinal identities just
+  to carry that progression.
+- Samurai encounter categories are selected through the
+  `block_party:moe/progression/samurai_flower_cardinals` and
+  `block_party:moe/progression/samurai_ore_cardinals` block tags. Datapacks may
+  extend those tags without changing Java. Flower cardinals require the player
+  boots cookie, ore cardinals require the legs cookie, and Crying Obsidian
+  requires the boots, legs, and dou cookies. These gates control whether an
+  encounter may begin; they do not mark its scene arc complete.

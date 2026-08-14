@@ -12,6 +12,7 @@ import block_party.registry.CustomBlocks;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomItems;
 import block_party.scene.SceneVariables;
+import block_party.world.progression.CardinalSpawnRules;
 import block_party.world.progression.ProgressionGate;
 import block_party.world.progression.SamuraiProgression;
 import block_party.world.progression.WoodFamilyProgression;
@@ -171,6 +172,26 @@ public final class MoeLifecycleGameTests {
 
         SceneVariables.get(level).playerCookies(owner).set(SamuraiProgression.BOOTS_OBTAINED, "true");
         assertEquals(helper, true, gate.passes(level, owner), "boots gate after player cookie");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void samuraiCardinalEligibilityFollowsProgressionCookies(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        UUID owner = new UUID(1414L, 2525L);
+        var cookies = SceneVariables.get(level).playerCookies(owner);
+
+        assertEquals(helper, false, CardinalSpawnRules.canSpawn(level, Blocks.DANDELION.defaultBlockState(), owner), "flower before boots");
+        cookies.set(SamuraiProgression.BOOTS_OBTAINED, "true");
+        assertEquals(helper, true, CardinalSpawnRules.canSpawn(level, Blocks.DANDELION.defaultBlockState(), owner), "flower after boots");
+
+        assertEquals(helper, false, CardinalSpawnRules.canSpawn(level, Blocks.IRON_ORE.defaultBlockState(), owner), "ore before legs");
+        cookies.set(SamuraiProgression.LEGS_OBTAINED, "true");
+        assertEquals(helper, true, CardinalSpawnRules.canSpawn(level, Blocks.IRON_ORE.defaultBlockState(), owner), "ore after legs");
+
+        assertEquals(helper, false, CardinalSpawnRules.canSpawn(level, Blocks.CRYING_OBSIDIAN.defaultBlockState(), owner), "crying obsidian before dou");
+        cookies.set(SamuraiProgression.DOU_OBTAINED, "true");
+        assertEquals(helper, true, CardinalSpawnRules.canSpawn(level, Blocks.CRYING_OBSIDIAN.defaultBlockState(), owner), "crying obsidian after armor progression");
         helper.succeed();
     }
 

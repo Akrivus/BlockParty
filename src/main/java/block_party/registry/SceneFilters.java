@@ -47,6 +47,7 @@ public final class SceneFilters {
                 "follow_intent", "follow_ticks_remaining", "follow_player_is_target", "has_anchor",
                 "anchor_type", "anchor_distance", "anchor_priority", "anchor_player_owned",
                 "routine_intent", "explicit_routine_intent",
+                "samurai_armor_piece", "samurai_complete_armor",
                 "player_has_cookie", "world_has_cookie", "player_held_item", "player_has_item", "counter", "has_cookie", "held_item",
                 "has_item", "moe_has_item", "block",
                 "family_name", "name", "has_social_target", "social_affinity", "social_tension",

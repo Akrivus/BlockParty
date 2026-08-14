@@ -2,11 +2,9 @@
   "replace": false,
   "values": [
     "minecraft:bell",
-    "minecraft:acacia_log",
-    "minecraft:birch_log",
-    "minecraft:jungle_log",
-    "minecraft:oak_log",
-    "minecraft:spruce_log",
-    "minecraft:dark_oak_log"
+    "#block_party:moe/progression/samurai_wood_cardinals",
+    "#block_party:moe/progression/samurai_flower_cardinals",
+    "#block_party:moe/progression/samurai_ore_cardinals",
+    "minecraft:crying_obsidian"
   ]
 }

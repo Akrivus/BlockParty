@@ -1,7 +1,8 @@
-# Samurai Arc Progression Note
+# Built-In Volume: Samurai Arc
 
-This document keeps the Samurai arc practical. It is not a lore bible. Use it to
-answer early worldbuilding questions before they sprawl into one-off systems.
+This document is the working bible for the built-in Block Party volume. Keep it
+practical enough to drive scenes and primitives, but coherent enough that the
+prepackaged datapack can become the reference example for later volumes.
 
 For reusable scene-chain and pacing patterns, see `docs/SCENE_ARC_AUTHORING.md`.
 
@@ -21,13 +22,45 @@ reward the player; they attract Moes who recognize what the player is carrying.
 Each piece reopens a different part of the old relationship between Moes and the
 Overworld.
 
+The deeper secret is that the armor is not only equipment. The samurai tried to
+make himself immortal by becoming his armor: a counterfeit Moe path of
+human-to-object-to-spirit. The pieces are the separated organs of that failed
+transformation. Equipping them reunites a body of authority before the player
+understands what they are assembling.
+
 The player should prove that return can mean relationship instead of extraction.
+The ending is not the player choosing Suzu or Crying Obsidian as a faction. The
+player creates the conditions where the Moes can stop defining themselves around
+the samurai and choose a shared future.
+
+## Volume Thesis
+
+The built-in volume teaches the story engine by making the player arrange the
+world until reconciliation becomes possible.
+
+The player does not solve the Moes' emotional history by decree. They put things
+in the right place:
+
+- forests are replenished instead of stripped
+- overlooked ground Moes are recognized
+- caves become safe enough for return, not only extraction
+- armor pieces are gathered into one dangerous truth
+- the mask is broken and the trapped spirit is confronted
+- Suzu and Crying Obsidian can finally argue about the future instead of the war
+
+The final unlock is open torii gates as voluntary community movement, not a
+reward chest. The player has made return safe enough for the Moes to choose it.
 
 ## Suzu And The Gates
 
 Suzu, the bell Moe, guards the torii gate boundary. She is not the general cause
 of Moe spawning. She is the sealkeeper who decides whether voluntary return is
 safe enough to allow.
+
+Suzu is not simply anti-human. She is anti-knight: she distrusts anyone becoming
+the kind of armed authority that once made the gates into a system of control.
+As the player collects armor pieces, her concern should sharpen from suspicion
+to alarm. She knows the pieces were separated for a reason.
 
 Early game Moe appearances are need-based: a Moe appears because they need help,
 because a block has been awakened, or because a progression relic draws their
@@ -40,6 +73,11 @@ appearing in crisis.
 Sakura trees are not naturally occurring. Sakura wood is tied to old gate magic.
 Other wood torii can exist and may support character preferences, but sakura
 torii should remain special.
+
+Suzu should oppose using the sword on the mask. Her objection is not cowardice:
+her generation did not truly defeat the samurai, they took him apart. Reuniting
+the armor and striking the mask risks undoing the sacrifice that made the seal
+possible.
 
 ## Class Arcs
 
@@ -90,17 +128,23 @@ The boots begin the armor progression because they change what it means for the
 player to walk through the world. Yami should give them as the wood-family
 payoff, not as a standalone quest reward.
 
-### Dirt And Grass Moes
+### Dirt, Grass, And Flower Moes
 
 Theme: overlooked labor.
 
-Dirt and grass were likely laborers under the samurai. They come forward after
-the boots appear because the ground remembers who stepped on it.
+Dirt and grass are corporeal population types, like stone. They are individuals
+with homes, routines, and social clustering rather than one cardinal identity
+per block. They remain present throughout the game, then become more common
+after Suzu opens the torii gates and voluntary return begins.
 
-This arc should avoid grand speeches. Their story is strongest when expressed
-through practical labor, small requests, and recognition.
+Flowers use the grass Moe presentation as their base, with a small render-layer
+overlay that places the source flower on the character's head. Flower Moes carry
+the authored ground arc and can be cardinal voices without making ordinary dirt
+or grass Moes into unique NPCs.
 
-They should lead to the leg armor piece.
+The ground story should avoid grand speeches. Its strongest form is practical
+labor, small requests, and recognition. A flower cardinal should lead the player
+to the leg armor piece by giving that overlooked work a specific voice.
 
 ### Ore Moes
 
@@ -134,16 +178,29 @@ Suzu's rare structure niche: like bells, it is too structure-bound and rare to
 work as a normal natural spawn. It also already belongs to ruined portals,
 broken crossings, and failed return.
 
-Crying Obsidian holds the kabuto and mask. She sees the complete samurai armor
-as a way to bind physical reality back together. Because obsidian exists across
-all three vanilla dimensions and makes portals possible, her worldview should be
-about continuity, binding, and restoration at any cost.
+Crying Obsidian gives the player the final armor piece, **Masked Samurai's
+Kabuto** (`masked_samurai_kabuto`). With it, the player has the complete armor
+set and its special effect becomes active. Suzu does not trust that completed
+set: it has reunited too much of the samurai's authority.
+
+Crying Obsidian sees the completed armor as a way to bind physical reality back
+together. Because obsidian exists across all three vanilla dimensions and makes
+portals possible, her worldview should be about continuity, binding, and
+restoration at any cost.
+
+Crying Obsidian wants knights, but not because she worships the samurai. She
+wants resolution and strength. To her, Suzu has been guarding a wound: broken
+gates, scattered armor, a mask that still matters, and no future path. She wants
+the player strong enough to call the old authority back and end it.
 
 She is a foil to Suzu:
 
 - Suzu destroyed the gates to stop exploitation.
 - Crying Obsidian sees broken gates as an injury to reality.
-- The player decides whether return becomes consent or conquest.
+- Suzu fears restored authority.
+- Crying Obsidian fears permanent separation.
+- The player creates the conditions where return can become consent instead of
+  conquest.
 
 ## Armor Progression
 
@@ -153,13 +210,17 @@ primitives, not a bespoke progression framework.
 Progression chain:
 
 1. Yami gives the boots.
-2. Boots make dirt and grass cardinal Moes eligible.
-3. Dirt or grass arc gives the leg armor.
+2. Boots make the flower cardinal ground arc eligible.
+3. Flower arc gives the leg armor.
 4. Leg armor makes ore cardinal Moes eligible.
 5. Ore arc gives the dou.
 6. Full armor progression makes Crying Obsidian eligible.
-7. Crying Obsidian presents the kabuto and mask.
-8. Suzu reacts to the mask choice.
+7. Crying Obsidian gives the Masked Samurai's Kabuto; the full-set effect
+   becomes active.
+8. The player combines the sword with the sealed mask in a crafting table,
+   breaking it and summoning the spectral samurai.
+9. Defeating the samurai frees the ending conversation.
+10. Suzu and Crying Obsidian reconcile enough to open the torii gates.
 
 Existing scene cookies and counters should carry most state. Prefer player
 cookies for personal progression:
@@ -169,9 +230,11 @@ samurai_boots_obtained
 samurai_legs_obtained
 samurai_dou_obtained
 samurai_kabuto_obtained
+samurai_sword_obtained
+samurai_spirit_defeated
+torii_visitor_mode_unlocked
 dark_oak_arc_complete
-grass_arc_complete
-dirt_arc_complete
+flower_arc_complete
 ore_arc_complete
 crying_obsidian_arc_complete
 ```
@@ -179,25 +242,72 @@ crying_obsidian_arc_complete
 Use world cookies only for truly shared world state, such as a torii visitor mode
 that changes the world for all players.
 
-## Mask Choice
+## Sword, Mask, And Boss Trigger
 
-The mask is allowed to be a McGuffin at first.
+The sword is not just the final equipment slot. The armor represents authority;
+the sword represents judgment. It should be the tool that breaks the sealed
+mask and forces the old claim to appear.
 
-Keep Mask:
+The climax is a crafting-table event:
 
-- the player keeps a very strong protective relic, likely an infinite
-  Totem-of-Undying-style effect
-- Crying Obsidian remains validated
-- the ending can point toward a future expansion arc
+```text
+player has reunited the armor
+player obtains the sword
+player combines the sword with the sealed mask in a crafting table
+the mask breaks
+the spectral samurai is forced into the Overworld
+boss fight begins
+```
 
-Destroy or purify Mask:
+The event should feel irreversible. The player commits the act; Suzu warned
+against it, and Crying Obsidian insisted that unresolved power must be faced.
 
-- Suzu rewards the player
-- the samurai arc closes cleanly
-- torii visitor mode can unlock
+The spectral samurai is not loot. He is the obstacle that must be gone before
+Suzu can trust the gates again. The spirit is blocked from returning to the Moe
+realm, so the fight happens in the Overworld. Defeating him ends his claim
+forever.
 
-The first version does not need a complex fork. A cookie and reward difference
-is enough.
+Useful cookies:
+
+```text
+samurai_sword_obtained
+samurai_mask_broken
+samurai_spirit_summoned
+samurai_spirit_defeated
+```
+
+The mask is not an early reward or a player-owned prerequisite. When the ghost
+is defeated, the player receives the broken mask alone: a useless relic that
+records what happened rather than a new armor upgrade. It should be a dedicated,
+non-equipable broken-mask item rather than a second kabuto armor variant.
+
+## Ending Shape
+
+The ending should not be a binary faction choice where the player picks Suzu or
+Crying Obsidian. The stronger ending is reconciliation between Moes.
+
+After the samurai is gone:
+
+- Suzu no longer has to guard the seal as an emergency measure against him.
+- Crying Obsidian no longer has to treat broken gates as the only unresolved
+  proof that the old world still matters.
+- They do not need to agree about the gates immediately.
+- They do need to agree that the next gates will be built on consent.
+
+Opening the torii gates is the ending because the Moes reach an understanding,
+not because the player "wins" an argument. The player arranged the world so the
+conversation could happen.
+
+Ending implementation can stay simple at first:
+
+```text
+samurai_spirit_defeated
+=> torii_visitor_mode_unlocked
+```
+
+`torii_visitor_mode_unlocked` is world state. Once Suzu opens the gates, the
+same active-torii rule applies in every dimension rather than being a separate
+per-player reward.
 
 ## Missing Primitives
 
@@ -213,7 +323,7 @@ Example need:
 
 ```text
 player has samurai_boots_obtained
-=> dirt and grass cardinals may appear
+=> flower cardinals for the ground arc may appear
 ```
 
 This should not be Samurai-specific. It should become a general spawn condition
@@ -229,7 +339,7 @@ Scenes can set and query:
 
 ```text
 dark_oak_arc_complete
-grass_arc_complete
+flower_arc_complete
 ore_arc_complete
 ```
 
@@ -249,19 +359,178 @@ SamuraiProgression.hasCompleteArmor(player)
 
 Implementation can still be cookie-backed.
 
+### Full Armor Set Effect
+
+The completed set must expose one reliable gameplay state as soon as the player
+receives Masked Samurai's Kabuto. The exact mechanical effect is intentionally
+open, but it must be derived from the complete-set query instead of adding a
+second progression path.
+
+Scenes only need to know that the set is complete. Suzu's distrust is a story
+reaction to that fact, not a separate armor-state system.
+
+Implementation note: `SamuraiProgression.Piece.KABUTO` currently recognizes
+`samurai_kabuto`. Align it with `masked_samurai_kabuto` before content awards
+the final set piece, and update the associated registry coverage at the same
+time.
+
 ### Torii Visitor System
 
 The Suzu ending does not require full companion adventuring. It needs voluntary
 visitors.
 
-Add a periodic system that can spawn eligible Moes near active torii after the
-proper world or player unlock. This is a community feature, not full AI.
+After Suzu opens the gates, add a periodic system that lets corporeal Moes enter
+the area around an active torii in any dimension. This is a community feature,
+not full AI: it increases ordinary population presence around a gate rather than
+creating crisis spawns or companions.
 
 Design sentence:
 
 ```text
 I decided to stop by.
 ```
+
+The system needs a bounded local population rule: active torii are recognized
+in their own dimension, and corporeal Moe arrivals are capped per gate/area so
+they cannot become an uncontrolled general spawn multiplier.
+
+### Sword/Mask Event Primitive
+
+The sword and sealed mask need a small crafting-completion primitive before the
+boss fight becomes fancy. It validates player progression and detects the
+sword/mask crafting result.
+
+Minimum behavior:
+
+```text
+requires full armor progression
+requires samurai_sword_obtained
+sets samurai_mask_broken
+sets samurai_spirit_summoned
+spawns or schedules the spectral samurai encounter
+```
+
+### Flower Head Overlay
+
+Flower Moes should reuse the grass Moe presentation rather than creating a model
+for each flower. The client renderer needs a reusable `SpecialLayer` overlay
+that renders the Moe's visible flower block above the head. This is a visual
+identity surface, not a progression mechanic.
+
+The first implementation should register the supported flower blocks with that
+overlay and keep their cardinal status in the normal block trait tag. Dirt and
+grass stay outside that tag, so they remain corporeal routine-driven Moes.
+
+## Locked Implementation Strategy
+
+Build the volume as narrow, playable slices. Each slice should leave a usable
+piece of the reference datapack behind and introduce only the engine surface
+needed by its scenes. Do not make Suzu and Crying Obsidian into player-selected
+routes; their scenes are two perspectives required for the same ending.
+
+### Slice 1: Lock The Progression Vocabulary
+
+Extend `SamuraiProgression` and the documented cookie vocabulary to cover the
+whole volume before adding content that depends on it.
+
+Required state:
+
+```text
+armor: boots, legs, dou, Masked Samurai's Kabuto
+relics: sword, broken mask (post-boss only)
+climax: mask_broken, spirit_summoned, spirit_defeated
+ending: suzu_trust_ready, crying_obsidian_arc_complete,
+        torii_visitor_mode_unlocked
+```
+
+Expose reusable scene filters for an individual armor piece and complete armor,
+plus one refresh action where a scene changes derived progression state. The
+helper remains a convenience layer over ordinary player cookies; it is not a
+new general-purpose quest system.
+
+### Slice 2: Make Eligibility Data-Driven
+
+Complete the reusable progression gate for cardinal spawn eligibility. It must
+be able to query scoped cookies and counters without referring to the Samurai
+arc by name.
+
+Initial gates:
+
+```text
+boots -> flower cardinal ground-arc eligibility
+legs  -> ore cardinal eligibility
+full armor progression -> Crying Obsidian eligibility
+```
+
+Keep encounter eligibility separate from scene completion. A character being
+allowed to appear is not the same thing as the player completing their arc.
+
+### Slice 3: Complete The Wood-To-Boots Vertical Slice
+
+Author the stewardship and family scenes through Yami's boots payoff. This is
+the first complete example of the engine: conduct is observed, attention is
+earned, familiarity grows over time, a family state is derived, and a relic is
+given.
+
+Playable end state: the player earns the boots, a flower cardinal can begin the
+ground arc, and ordinary dirt/grass Moes remain corporeal world residents.
+
+### Slice 4: Add Ground And Ore Conduct
+
+Author flower-led practical labor scenes that award the leg armor, then ore
+safety-and-return scenes that award the dou. Add only the attention definitions
+those scenes truly need: overlooked ground work, cave safety, and safe return.
+Add the flower-head renderer overlay while authoring the first flower Moe.
+
+Playable end state: the player has enough armor for Crying Obsidian to take
+interest, and Suzu's warnings have escalated alongside that recognition.
+
+### Slice 5: Add Gate And Portal Recognition
+
+Add small, reusable world-recognition surfaces for torii and ruined portals:
+construction or discovery triggers, active/nearby filters, and anchors where a
+scene needs a character to approach or wait. Use these to author Suzu's gate
+scenes and Crying Obsidian's portal-bound introduction.
+
+Playable end state: the two cardinal perspectives are present in the world
+before the climax, rather than appearing only to explain it.
+
+### Slice 6: Deliver The Sword/Mask Event
+
+Implement the minimum irreversible crafting-table event: validate the full
+armor and sword, break the sealed mask used by the recipe, mark the spirit
+summoned, then spawn or schedule the encounter.
+
+Playable end state: a player can deliberately bring the samurai back into the
+Overworld after hearing both Suzu's warning and Crying Obsidian's argument.
+
+### Slice 7: Deliver A Minimal Samurai Encounter
+
+Add the spectral samurai as a combat entity with entrance dialogue, a
+defeat condition, and persistence/cleanup rules. Prioritize clear encounter
+ownership and reliable completion cookies over elaborate boss AI.
+
+Playable end state: defeating the spirit permanently sets
+`samurai_spirit_defeated` and allows the ending scenes to begin.
+
+### Slice 8: Reconciliation And Visitor Mode
+
+Author the Suzu/Crying Obsidian ending conversation, have Suzu open the gates,
+and add the periodic active-torii population system. Corporeal Moes should be
+able to enter the area around active torii in any dimension. This should feel
+like a community choosing to cross, not new crisis spawns or companions.
+
+Playable end state: the gates reopen as voluntary movement and the built-in
+volume has a clear, replayable ending state.
+
+### Acceptance Rule
+
+Do not advance a slice merely because its code compiles. Advance when its
+scenes can be played from a fresh world using documented prerequisites, its
+state is visible through cookies/counters or ordinary game behavior, and it
+does not require a hidden manual setup step. Each completed slice should add a
+small example to the authoring documentation if it introduces a reusable scene
+primitive.
 
 ## Defer
 
@@ -281,18 +550,24 @@ condition. Fancy boss behavior can come after the arc is playable.
    counters. Initial engine support is active through reusable progression
    gates, including wood-family readiness for Yami's boots payoff.
 2. Add Samurai progression helper backed by player cookies. Initial helper
-   support is active for armor piece queries and the first boots gate.
+   support is active for armor piece queries and the first boots gate. Align its
+   final-piece mapping with `masked_samurai_kabuto`.
 3. Author oak/birch stewardship scenes.
 4. Author enough wood-family culture/tension scenes to set
    `wood_family_arc_ready`, or the equivalent component cookies.
 5. Author Yami boots payoff scenes.
-6. Gate dirt and grass encounter eligibility behind boots.
-7. Author dirt or grass leg-armor scenes.
-8. Gate ore cardinal spawns behind leg armor.
-9. Author ore dou scenes.
-10. Add Crying Obsidian encounter eligibility for full armor.
-11. Add mask choice cookies and rewards.
-12. Add torii visitor mode unlocked by the Suzu-aligned ending.
+6. Add flower-head render overlays and tag the first flower cardinal(s).
+7. Gate flower cardinal encounter eligibility behind boots.
+8. Author flower-led leg-armor scenes.
+9. Gate ore cardinal spawns behind leg armor.
+10. Author ore dou scenes.
+11. Add Crying Obsidian encounter eligibility for full armor.
+12. Add sword acquisition and the sword/sealed-mask crafting-table event.
+13. Add spectral samurai dialogue/combat/defeat condition and award the
+    non-equipable broken-mask relic.
+14. Add Suzu/Crying Obsidian reconciliation scenes.
+15. Add Suzu's all-dimension torii population mode unlocked after the ghost is
+    defeated, including corporeal Moe presence around active gates.
 
 ## Active Phase 3 Slice
 

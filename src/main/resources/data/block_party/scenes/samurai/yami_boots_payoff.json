@@ -70,6 +70,9 @@
                   "value": "true"
                 }
               },
+              {
+                "type": "block_party:refresh_samurai_progression"
+              },
               "block_party:end"
             ]
           }

@@ -24,6 +24,7 @@ import block_party.scene.actions.HideAction;
 import block_party.scene.actions.MarkTimeAction;
 import block_party.scene.actions.OpenInventoryAction;
 import block_party.scene.actions.RefreshWoodFamilyProgressionAction;
+import block_party.scene.actions.RefreshSamuraiProgressionAction;
 import block_party.scene.actions.SceneItemStacks;
 import block_party.scene.actions.SendDialogueAction;
 import block_party.scene.actions.SendResponseAction;
@@ -323,6 +324,7 @@ public final class ScenesReloadListener implements PreparableReloadListener {
                 GsonHelper.getAsString(payload, "name", ""),
                 variableScope(payload, SceneVariableScope.NPC)));
         parsers.put("refresh_wood_family_progression", payload -> RefreshWoodFamilyProgressionAction.INSTANCE);
+        parsers.put("refresh_samurai_progression", payload -> RefreshSamuraiProgressionAction.INSTANCE);
         parsers.put("player_counter", payload -> new CounterAction(
                 CounterAction.Operation.fromValue(GsonHelper.getAsString(payload, "operation", "add")),
                 GsonHelper.getAsString(payload, "name", ""),

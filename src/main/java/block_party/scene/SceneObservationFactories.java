@@ -11,6 +11,7 @@ import block_party.entities.preferences.MoeItemPreferences;
 import block_party.entities.social.MoeSocialContext;
 import block_party.entities.social.SocialAffinities;
 import block_party.scene.actions.SceneItemStacks;
+import block_party.world.progression.SamuraiProgression;
 import com.google.gson.JsonObject;
 import java.sql.SQLException;
 import java.util.List;
@@ -82,6 +83,11 @@ public final class SceneObservationFactories {
                     .orElse(false);
             case "routine_intent" -> moe -> enumMatches(moe.getEffectiveRoutineIntent(), json);
             case "explicit_routine_intent" -> moe -> enumMatches(moe.getRoutineIntent(), json);
+            case "samurai_armor_piece" -> moe -> targetPlayer(moe) != null && maybeNegate(
+                    SamuraiProgression.hasPiece(targetPlayer(moe), SamuraiProgression.Piece.fromValue(
+                            GsonHelper.getAsString(json, "piece", GsonHelper.getAsString(json, "value", "")))), json);
+            case "samurai_complete_armor" -> moe -> targetPlayer(moe) != null
+                    && maybeNegate(SamuraiProgression.hasCompleteArmor(targetPlayer(moe)), json);
             case "counter" -> moe -> counterMatches(moe, json);
             case "has_cookie" -> moe -> cookieMatches(moe, json);
             case "held_item" -> moe -> itemMatches(moe.getItemInHand(hand(json)), json);

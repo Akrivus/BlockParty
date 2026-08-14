@@ -14,6 +14,14 @@ public record ProgressionGate(Scope scope, Kind kind, String name, Operation ope
         return new ProgressionGate(Scope.WORLD, Kind.COOKIE, name, Operation.EXISTS, "");
     }
 
+    public static ProgressionGate playerCookieEquals(String name, String value) {
+        return new ProgressionGate(Scope.PLAYER, Kind.COOKIE, name, Operation.EQUALS, value);
+    }
+
+    public static ProgressionGate worldCookieEquals(String name, String value) {
+        return new ProgressionGate(Scope.WORLD, Kind.COOKIE, name, Operation.EQUALS, value);
+    }
+
     public static ProgressionGate playerCounterAtLeast(String name, int value) {
         return new ProgressionGate(Scope.PLAYER, Kind.COUNTER, name, Operation.AT_LEAST, Integer.toString(value));
     }
