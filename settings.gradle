@@ -23,3 +23,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = 'BlockParty'
+
+include 'tools:conversation-core'
+include 'tools:conversation-workbench'

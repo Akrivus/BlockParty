@@ -1,0 +1,77 @@
+{
+  "projectFormat": 2,
+  "target": {"mod": "block_party", "minimumVersion": "26.6", "sceneSchema": 1, "packFormat": 61},
+  "pack": {"id": "flower_friendship", "namespace": "block_party_generated", "title": "Flower Friendship", "format": 61},
+  "contract": {
+    "requires": [],
+    "provides": [
+      {"id": "quest_accepted", "type": "COOKIE", "scope": "PLAYER"},
+      {"id": "quest_completed", "type": "COOKIE", "scope": "PLAYER"}
+    ],
+    "outcomes": ["request_declined", "warm_completion", "reliable_completion", "post_completion_seen"]
+  },
+  "state": [
+    {"id": "quest_accepted", "type": "COOKIE", "scope": "PLAYER", "initialCookie": false},
+    {"id": "quest_completed", "type": "COOKIE", "scope": "PLAYER", "initialCookie": false}
+  ],
+  "allowRawMechanics": false,
+  "entry": "introduction",
+  "nodes": [
+    {
+      "id": "introduction", "type": "DIALOGUE", "title": "The request", "trigger": "block_party:right_click",
+      "conditions": [{"type": "HAS_COOKIE", "scope": "PLAYER", "state": "quest_accepted", "not": true}],
+      "text": "I need three small flowers.", "tooltip": true,
+      "responses": [
+        {"cue": "chat_bubble", "label": "Ask why", "target": "explanation", "transition": "IMMEDIATE"},
+        {"cue": "green_checkmark", "label": "Accept", "target": "flower_gate", "transition": "LATER_INTERACTION", "actions": [{"type": "SET_COOKIE", "scope": "PLAYER", "state": "quest_accepted", "value": "true"}]},
+        {"cue": "red_x", "label": "Decline", "target": "declined", "transition": "IMMEDIATE"}
+      ]
+    },
+    {
+      "id": "explanation", "type": "DIALOGUE", "title": "Why flowers matter", "conditions": [],
+      "text": "They make this place feel tended.", "tooltip": true,
+      "responses": [
+        {"cue": "green_checkmark", "label": "Accept", "target": "flower_gate", "transition": "LATER_INTERACTION", "actions": [{"type": "SET_COOKIE", "scope": "PLAYER", "state": "quest_accepted", "value": "true"}]},
+        {"cue": "red_x", "label": "Decline", "target": "declined", "transition": "IMMEDIATE"}
+      ]
+    },
+    {
+      "id": "flower_gate", "type": "GAMEPLAY_GATE", "title": "Return with flowers", "trigger": "block_party:right_click",
+      "conditions": [
+        {"type": "HAS_COOKIE", "scope": "PLAYER", "state": "quest_accepted"},
+        {"type": "HAS_COOKIE", "scope": "PLAYER", "state": "quest_completed", "not": true},
+        {"type": "HAS_ITEM", "scope": "PLAYER", "item": "#minecraft:small_flowers", "count": 3}
+      ],
+      "actions": [
+        {"type": "TAKE_ITEM", "item": "#minecraft:small_flowers", "count": 3, "source": "player", "destination": "moe"},
+        {"type": "SET_COOKIE", "scope": "PLAYER", "state": "quest_completed", "value": "true"}
+      ],
+      "next": "completion"
+    },
+    {
+      "id": "completion", "type": "DIALOGUE", "title": "Completion", "conditions": [],
+      "text": "You actually came back.", "tooltip": true,
+      "responses": [
+        {"cue": "lovely_heart", "label": "Be warm", "target": "warm_end", "transition": "IMMEDIATE"},
+        {"cue": "trusty_armor", "label": "A promise is a promise", "target": "reliable_end", "transition": "IMMEDIATE"}
+      ]
+    },
+    {"id": "declined", "type": "END", "title": "Declined", "conditions": [], "ending": "request_declined", "actions": []},
+    {"id": "warm_end", "type": "END", "title": "Warm completion", "conditions": [], "ending": "warm_completion", "actions": [{"type": "GIVE_ITEM", "item": "minecraft:cookie", "count": 1, "target": "player"}]},
+    {"id": "reliable_end", "type": "END", "title": "Reliable completion", "conditions": [], "ending": "reliable_completion", "actions": [{"type": "GIVE_ITEM", "item": "minecraft:cookie", "count": 1, "target": "player"}]},
+    {
+      "id": "post_completion_gate", "type": "GAMEPLAY_GATE", "title": "Post-completion return", "trigger": "block_party:right_click",
+      "conditions": [
+        {"type": "HAS_COOKIE", "scope": "PLAYER", "state": "quest_accepted"},
+        {"type": "HAS_COOKIE", "scope": "PLAYER", "state": "quest_completed"}
+      ],
+      "actions": [], "next": "post_completion"
+    },
+    {
+      "id": "post_completion", "type": "DIALOGUE", "title": "Remember the flowers", "conditions": [],
+      "text": "The flowers are still doing well.", "tooltip": true,
+      "responses": [{"cue": "next_response", "label": "Continue", "target": "post_end", "transition": "IMMEDIATE"}]
+    },
+    {"id": "post_end", "type": "END", "title": "Post-completion seen", "conditions": [], "ending": "post_completion_seen", "actions": []}
+  ]
+}

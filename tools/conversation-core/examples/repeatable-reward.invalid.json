@@ -1,0 +1,48 @@
+{
+  "projectFormat": 2,
+  "target": {"mod": "block_party", "minimumVersion": "26.6", "sceneSchema": 1, "packFormat": 61},
+  "pack": {"id": "bad_reward", "namespace": "block_party_generated", "title": "Bad Reward", "format": 61},
+  "contract": {"requires": [], "provides": [], "outcomes": ["rewarded"]},
+  "state": [
+    {"id": "active", "type": "COOKIE", "scope": "PLAYER", "initialCookie": false}
+  ],
+  "allowRawMechanics": false,
+  "entry": "offer",
+  "nodes": [
+    {
+      "id": "offer",
+      "type": "DIALOGUE",
+      "title": "Offer",
+      "conditions": [],
+      "text": "Want a repeatable reward?",
+      "tooltip": true,
+      "responses": [
+        {
+          "cue": "green_checkmark",
+          "label": "Yes",
+          "target": "turn_in",
+          "transition": "LATER_INTERACTION",
+          "actions": [{"type": "SET_COOKIE", "scope": "PLAYER", "state": "active", "value": "true"}]
+        }
+      ]
+    },
+    {
+      "id": "turn_in",
+      "type": "GAMEPLAY_GATE",
+      "title": "Unsafe turn-in",
+      "conditions": [
+        {"type": "HAS_COOKIE", "scope": "PLAYER", "state": "active"},
+        {"type": "HAS_ITEM", "scope": "PLAYER", "item": "minecraft:dirt", "count": 1}
+      ],
+      "actions": [],
+      "next": "reward"
+    },
+    {
+      "id": "reward",
+      "type": "END",
+      "title": "Repeatable reward",
+      "ending": "rewarded",
+      "actions": [{"type": "GIVE_ITEM", "item": "minecraft:diamond", "count": 1, "target": "player"}]
+    }
+  ]
+}

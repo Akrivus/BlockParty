@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Block Party Conversation Workbench</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">BP</span><div><strong>Conversation Workbench</strong><small id="project-path">Loading project…</small></div></div>
+    <div class="toolbar">
+      <button id="undo" title="Undo (Ctrl+Z)">Undo</button><button id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
+      <button id="add-card">New card</button><button id="simulate">Simulate</button>
+      <button id="save" class="primary">Save project</button>
+      <span id="dirty" class="quiet">Saved</span>
+    </div>
+  </header>
+  <main class="shell">
+    <aside class="rail left-rail">
+      <label class="search"><span>Find a card</span><input id="search" type="search" placeholder="Title, id, dialogue…"></label>
+      <div class="filter-row"><button class="filter active" data-filter="ALL">All</button><button class="filter" data-filter="DIALOGUE">Talk</button><button class="filter" data-filter="GAMEPLAY_GATE">Gates</button><button class="filter" data-filter="END">Ends</button></div>
+      <section><div class="section-title"><span>Project map</span><b id="card-count">0</b></div><div id="outline" class="outline"></div></section>
+      <section class="diagnostics"><div class="section-title"><span>Checks</span><b id="check-count">—</b></div><div id="diagnostics"></div></section>
+    </aside>
+    <section class="workspace">
+      <div class="canvas-head"><div><b id="pack-title">Conversation</b><span id="pack-meta"></span></div><span class="legend"><i class="dot dialogue"></i> dialogue <i class="dot gate"></i> gate <i class="dot ending"></i> ending</span></div>
+      <div id="viewport"><div id="canvas"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
+    </section>
+    <aside class="rail inspector" id="inspector">
+      <div id="empty-inspector" class="empty"><span>↖</span><h2>Select a card</h2><p>Inspect its dialogue, mechanics, responses, and routes.</p></div>
+      <form id="card-form" hidden>
+        <div class="inspector-head"><span id="type-badge" class="badge"></span><button id="delete-card" type="button" class="danger">Delete</button></div>
+        <label>Card id<input name="id" required pattern="[a-z0-9_]+"></label>
+        <label>Title<input name="title"></label>
+        <label>Type<select name="type"><option>DIALOGUE</option><option>GAMEPLAY_GATE</option><option>END</option></select></label>
+        <label>Trigger<input name="trigger" placeholder="target_moe"></label>
+        <label>Dialogue<textarea name="text" rows="5" placeholder="What does the character say?"></textarea></label>
+        <div class="split"><label>Next card<input name="next" list="node-ids"></label><label>Ending<input name="ending"></label></div>
+        <details open><summary>Player responses <b id="response-count"></b></summary><div id="responses"></div><button id="add-response" type="button">+ Add response</button></details>
+        <details><summary>Conditions <b id="condition-count"></b></summary><p class="hint">Typed project conditions. Changes are validated immediately.</p><textarea id="conditions-json" class="code" rows="7"></textarea></details>
+        <details><summary>Actions <b id="action-count"></b></summary><p class="hint">Typed project actions and rewards.</p><textarea id="actions-json" class="code" rows="7"></textarea></details>
+        <datalist id="node-ids"></datalist>
+      </form>
+    </aside>
+  </main>
+  <dialog id="simulation-dialog"><form method="dialog"><div class="dialog-head"><div><small>ROUTE EXPLORER</small><h2>Simulate the conversation</h2></div><button value="close" aria-label="Close">×</button></div><div class="scenario-grid"><label>Cookies (JSON)<textarea id="scenario-cookies" rows="4">{}</textarea></label><label>Counters (JSON)<textarea id="scenario-counters" rows="4">{}</textarea></label><label>Inventory (JSON)<textarea id="scenario-inventory" rows="4">{}</textarea></label></div><button id="run-simulation" type="button" class="primary">Run simulation</button><div id="simulation-results"></div></form></dialog>
+  <dialog id="export-dialog"><form method="dialog"><div class="dialog-head"><div><small>VERIFIED OUTPUT</small><h2>Export scene pack</h2></div><button value="close" aria-label="Close">×</button></div><label>Empty output directory<input id="export-path" placeholder="C:\packs\flower-friendship"></label><div class="export-actions"><button id="run-export" type="button" class="primary">Validate and export</button></div><div id="export-result"></div></form></dialog>
+  <div id="toast" role="status"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+{
+  "projectFormat": 2,
+  "target": {
+    "mod": "block_party",
+    "minimumVersion": "26.6",
+    "sceneSchema": 1,
+    "packFormat": 61
+  },
+  "pack": {
+    "id": "flower_request",
+    "namespace": "block_party_generated",
+    "title": "Flower Request",
+    "format": 61
+  },
+  "contract": {
+    "requires": [],
+    "provides": [
+      {"id": "quest_accepted", "type": "COOKIE", "scope": "PLAYER"},
+      {"id": "quest_completed", "type": "COOKIE", "scope": "PLAYER"}
+    ],
+    "outcomes": ["flowers_delivered", "request_declined"]
+  },
+  "state": [
+    {"id": "quest_accepted", "type": "COOKIE", "scope": "PLAYER", "initialCookie": false},
+    {"id": "quest_completed", "type": "COOKIE", "scope": "PLAYER", "initialCookie": false}
+  ],
+  "allowRawMechanics": false,
+  "entry": "introduction",
+  "nodes": [
+    {
+      "id": "introduction",
+      "type": "DIALOGUE",
+      "title": "Ask for flowers",
+      "trigger": "block_party:right_click",
+      "conditions": [
+        {"type": "HAS_COOKIE", "scope": "PLAYER", "state": "quest_accepted", "not": true}
+      ],
+      "text": "Could you bring me three flowers?",
+      "tooltip": true,
+      "speaker": {"emotion": "hopeful"},
+      "responses": [
+        {
+          "cue": "green_checkmark",
+          "label": "Agree",
+          "target": "wait_for_flowers",
+          "transition": "LATER_INTERACTION",
+          "actions": [
+            {"type": "SET_COOKIE", "scope": "PLAYER", "state": "quest_accepted", "value": "true"}
+          ]
+        },
+        {
+          "cue": "red_x",
+          "label": "Decline",
+          "target": "declined",
+          "transition": "IMMEDIATE"
+        }
+      ],
+      "editor": {"x": 0, "y": 100}
+    },
+    {
+      "id": "wait_for_flowers",
+      "type": "GAMEPLAY_GATE",
+      "title": "Return with flowers",
+      "trigger": "block_party:right_click",
+      "conditions": [
+        {"type": "HAS_COOKIE", "scope": "PLAYER", "state": "quest_accepted"},
+        {"type": "HAS_COOKIE", "scope": "PLAYER", "state": "quest_completed", "not": true},
+        {"type": "HAS_ITEM", "scope": "PLAYER", "item": "#minecraft:small_flowers", "count": 3}
+      ],
+      "actions": [
+        {"type": "TAKE_ITEM", "item": "#minecraft:small_flowers", "count": 3, "source": "player", "destination": "moe"},
+        {"type": "SET_COOKIE", "scope": "PLAYER", "state": "quest_completed", "value": "true"}
+      ],
+      "next": "reward",
+      "editor": {"x": 280, "y": 0}
+    },
+    {
+      "id": "reward",
+      "type": "DIALOGUE",
+      "title": "Thank the player",
+      "text": "You remembered. Thank you.",
+      "tooltip": true,
+      "speaker": {"emotion": "happy"},
+      "responses": [
+        {"cue": "lovely_heart", "label": "You're welcome", "target": "rewarded", "transition": "IMMEDIATE"}
+      ],
+      "editor": {"x": 560, "y": 0}
+    },
+    {
+      "id": "rewarded",
+      "type": "END",
+      "title": "Warm ending",
+      "ending": "flowers_delivered",
+      "actions": [
+        {"type": "GIVE_ITEM", "item": "minecraft:cookie", "count": 1, "target": "player"}
+      ],
+      "editor": {"x": 840, "y": 0}
+    },
+    {
+      "id": "declined",
+      "type": "END",
+      "title": "Neutral ending",
+      "ending": "request_declined",
+      "editor": {"x": 280, "y": 220}
+    }
+  ]
+}

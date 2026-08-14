@@ -1,0 +1,71 @@
+{
+  "trigger": "block_party:right_click",
+  "filters": [
+    {
+      "type": "block_party:player_has_cookie",
+      "filter": {
+        "name": "block_party_generated.flower_request.quest_accepted"
+      }
+    },
+    {
+      "type": "block_party:player_has_cookie",
+      "filter": {
+        "name": "block_party_generated.flower_request.quest_completed",
+        "not": true
+      }
+    },
+    {
+      "type": "block_party:player_has_item",
+      "filter": {
+        "item": "#minecraft:small_flowers",
+        "count": 3
+      }
+    }
+  ],
+  "actions": [
+    {
+      "type": "block_party:take_item",
+      "action": {
+        "item": "#minecraft:small_flowers",
+        "count": 3,
+        "source": "player",
+        "destination": "moe"
+      }
+    },
+    {
+      "type": "block_party:player_cookie",
+      "action": {
+        "operation": "set",
+        "name": "block_party_generated.flower_request.quest_completed",
+        "value": "true"
+      }
+    },
+    {
+      "type": "block_party:send_dialogue",
+      "action": {
+        "text": "You remembered. Thank you.",
+        "tooltip": true,
+        "speaker": {
+          "emotion": "happy"
+        },
+        "responses": [
+          {
+            "icon": "block_party:lovely_heart",
+            "text": "You're welcome",
+            "actions": [
+              {
+                "type": "block_party:give_item",
+                "action": {
+                  "item": "minecraft:cookie",
+                  "count": 1,
+                  "target": "player"
+                }
+              },
+              "block_party:end"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

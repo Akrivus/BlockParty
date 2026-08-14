@@ -102,6 +102,8 @@ tasks.register('localCi') {
     description = 'Runs fast local CI checks before committing.'
     dependsOn tasks.named('phase1Compliance')
     dependsOn tasks.named('compileJava')
+    dependsOn ':tools:conversation-core:check'
+    dependsOn ':tools:conversation-workbench:check'
 }
 
 tasks.register('fullCi') {

@@ -1,0 +1,124 @@
+plugins {
+    id 'java-library'
+    id 'application'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+dependencies {
+    api 'com.google.code.gson:gson:2.11.0'
+}
+
+sourceSets {
+    test.java.srcDirs = []
+    test.resources.srcDirs = []
+}
+
+application {
+    mainClass = 'block_party.conversation.cli.ConversationCli'
+}
+
+tasks.register('conversationToolCheck') {
+    group = 'verification'
+    description = 'Runs the conversation tool through validation, simulation, graph export, and datapack compilation.'
+    dependsOn tasks.named('classes')
+
+    doLast {
+        def fixture = file('examples/flower-request.project.json')
+        def verification = layout.buildDirectory.dir('tool-check').get().asFile
+        delete verification
+
+        ['validate', 'simulate'].each { command ->
+            javaexec {
+                classpath = sourceSets.main.runtimeClasspath
+                mainClass = application.mainClass
+                args command, fixture.absolutePath
+            }
+        }
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            mainClass = application.mainClass
+            args 'simulate', fixture.absolutePath, file('examples/flowers-ready.scenario.json').absolutePath
+        }
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            mainClass = application.mainClass
+            args 'graph', fixture.absolutePath, new File(verification, 'flower-request.mmd').absolutePath
+        }
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            mainClass = application.mainClass
+            args 'compile', fixture.absolutePath, new File(verification, 'flower-pack').absolutePath
+        }
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            mainClass = application.mainClass
+            args 'build', fixture.absolutePath, new File(verification, 'flower-build').absolutePath
+        }
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            mainClass = application.mainClass
+            args 'explain', fixture.absolutePath, 'wait_for_flowers'
+        }
+        def directPack = new File(verification, 'flower-pack')
+        def builtPack = new File(verification, 'flower-build/datapack')
+        def directFiles = fileTree(directPack).files.collectEntries { source ->
+            [(directPack.toPath().relativize(source.toPath()).toString()): source.bytes]
+        }
+        def builtFiles = fileTree(builtPack).files.collectEntries { source ->
+            [(builtPack.toPath().relativize(source.toPath()).toString()): source.bytes]
+        }
+        if (directFiles.keySet() != builtFiles.keySet()
+                || directFiles.any { path, bytes -> !java.util.Arrays.equals(bytes, builtFiles[path]) }) {
+            throw new GradleException('Repeated compilation did not produce byte-identical datapacks.')
+        }
+        def invalidResult = javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            mainClass = application.mainClass
+            args 'validate', file('examples/repeatable-reward.invalid.json').absolutePath
+            ignoreExitValue = true
+        }
+        if (invalidResult.exitValue == 0) {
+            throw new GradleException('Repeatable reward fixture unexpectedly passed validation.')
+        }
+
+        def generationBrief = file('examples/generation/flower-friendship.brief.json')
+        def generated = new File(verification, 'generated-flower-pack')
+        def replayed = new File(verification, 'replayed-flower-pack')
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            mainClass = application.mainClass
+            args 'generate', generationBrief.absolutePath, generated.absolutePath
+        }
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            mainClass = application.mainClass
+            args 'replay', generated.absolutePath, replayed.absolutePath
+        }
+        ['project.json', 'datapack'].each { relative ->
+            def first = new File(generated, relative)
+            def second = new File(replayed, relative)
+            def firstFiles = first.isDirectory()
+                    ? fileTree(first).files.collectEntries { source ->
+                        [(first.toPath().relativize(source.toPath()).toString()): source.bytes]
+                    }
+                    : [(relative): first.bytes]
+            def secondFiles = second.isDirectory()
+                    ? fileTree(second).files.collectEntries { source ->
+                        [(second.toPath().relativize(source.toPath()).toString()): source.bytes]
+                    }
+                    : [(relative): second.bytes]
+            if (firstFiles.keySet() != secondFiles.keySet()
+                    || firstFiles.any { path, bytes -> !java.util.Arrays.equals(bytes, secondFiles[path]) }) {
+                throw new GradleException("Generation replay changed ${relative}.")
+            }
+        }
+        if (!new File(generated, 'generation/03-graph_repair').isDirectory()) {
+            throw new GradleException('Generation fixture did not exercise graph repair.')
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('conversationToolCheck')
+}

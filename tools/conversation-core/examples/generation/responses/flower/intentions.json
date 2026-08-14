@@ -1,0 +1,8 @@
+{
+  "scenes": [
+    {"node": "introduction", "speakerObjective": "Test whether the player will help.", "emotionalState": "Reserved", "mayReveal": ["Three flowers are needed."], "mustNotReveal": [], "playerChoicePurpose": {"chat_bubble": "Invite explanation."}, "continuity": []},
+    {"node": "explanation", "speakerObjective": "Explain without pleading.", "emotionalState": "Guarded", "mayReveal": ["The place should feel tended."], "mustNotReveal": [], "playerChoicePurpose": {}, "continuity": ["The player asked why."]},
+    {"node": "completion", "speakerObjective": "Recognize follow-through.", "emotionalState": "Pleasantly surprised", "mayReveal": ["The return mattered."], "mustNotReveal": [], "playerChoicePurpose": {}, "continuity": ["The player returned with three flowers."]},
+    {"node": "post_completion", "speakerObjective": "Remember the completed request.", "emotionalState": "Quietly appreciative", "mayReveal": ["The flowers are doing well."], "mustNotReveal": [], "playerChoicePurpose": {}, "continuity": ["The flower request was completed."]}
+  ]
+}

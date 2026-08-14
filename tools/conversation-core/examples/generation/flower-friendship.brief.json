@@ -1,0 +1,27 @@
+{
+  "generationFormat": 1,
+  "id": "flower_friendship",
+  "namespace": "block_party_generated",
+  "title": "Flower Friendship",
+  "prompt": "A reserved Moe asks the player for three small flowers, remembers whether they follow through, and reacts differently to warmth or reliability.",
+  "characters": ["target_moe"],
+  "documents": ["docs/SCENE_ARC_AUTHORING.md"],
+  "existingPacks": [],
+  "constraints": {
+    "minimumCards": 8,
+    "maximumCards": 12,
+    "maximumDialogueCharacters": 180,
+    "requiredFeatures": ["GAMEPLAY_GATE", "POST_COMPLETION"],
+    "allowedActions": ["SET_COOKIE", "TAKE_ITEM", "GIVE_ITEM"],
+    "allowedConditions": ["HAS_COOKIE", "HAS_ITEM"],
+    "responseCues": ["chat_bubble", "green_checkmark", "red_x", "lovely_heart", "trusty_armor", "next_response"]
+  },
+  "budget": {
+    "maximumCalls": 10,
+    "maximumInputCharacters": 500000,
+    "maximumOutputCharacters": 200000
+  },
+  "provider": "recorded",
+  "model": "fixture",
+  "recordedResponses": "responses/flower"
+}

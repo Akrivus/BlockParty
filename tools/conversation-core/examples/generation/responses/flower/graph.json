@@ -1,0 +1,10 @@
+{
+  "projectFormat": 2,
+  "target": {"mod": "block_party", "minimumVersion": "26.6", "sceneSchema": 1, "packFormat": 61},
+  "pack": {"id": "broken_graph", "namespace": "block_party_generated", "title": "Broken Graph", "format": 61},
+  "contract": {"requires": [], "provides": [], "outcomes": []},
+  "state": [],
+  "allowRawMechanics": false,
+  "entry": "missing",
+  "nodes": []
+}

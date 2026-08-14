@@ -1,0 +1,30 @@
+plugins {
+    id 'application'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.11.0'
+}
+
+sourceSets {
+    main.java.srcDirs += project(':tools:conversation-core').file('src/main/java')
+}
+
+application {
+    mainClass = 'block_party.conversation.workbench.WorkbenchServer'
+}
+
+tasks.register('workbenchCheck', JavaExec) {
+    group = 'verification'
+    description = 'Runs local workbench API and static-asset checks.'
+    dependsOn tasks.named('classes')
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'block_party.conversation.workbench.WorkbenchSelfTest'
+    args project(':tools:conversation-core').file('examples/flower-request.project.json').absolutePath
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('workbenchCheck')
+}

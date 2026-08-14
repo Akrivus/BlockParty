@@ -1,0 +1,10 @@
+{
+  "premise": "A reserved Moe tests whether the player follows through on a small request.",
+  "characterArc": "Caution becomes earned appreciation without a complete personality reversal.",
+  "beats": [
+    {"id": "request", "purpose": "Offer and explain the request.", "session": 1, "playerAgency": "Accept, question, or decline.", "gameplayRequirement": ""},
+    {"id": "turn_in", "purpose": "Recognize follow-through.", "session": 2, "playerAgency": "Respond warmly or reliably.", "gameplayRequirement": "Three small flowers."},
+    {"id": "aftercare", "purpose": "Remember the completed request.", "session": 3, "playerAgency": "Close the conversation.", "gameplayRequirement": ""}
+  ],
+  "outcomes": ["request_declined", "warm_completion", "reliable_completion", "post_completion_seen"]
+}
