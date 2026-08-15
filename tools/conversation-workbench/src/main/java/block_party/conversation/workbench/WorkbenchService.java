@@ -57,10 +57,14 @@ final class WorkbenchService {
             packName = "conversation-pack";
         }
         packName = packName.replaceAll("[^a-zA-Z0-9._-]", "-");
-        return workingDirectory.resolve(packName).normalize();
+        return workingDirectory.resolve("dist").resolve(packName).normalize();
     }
 
     static void createStarter(Path path) throws Exception {
+        createStarter(path, "new_conversation", "New Conversation");
+    }
+
+    static void createStarter(Path path, String requestedId, String requestedTitle) throws Exception {
         path = path.toAbsolutePath().normalize();
         if (Files.exists(path)) {
             throw new IllegalArgumentException("New project path already exists: " + path);
@@ -75,9 +79,13 @@ final class WorkbenchService {
                 List.of(), null, null, new EditorPosition(100, 100));
         SceneNode ending = new SceneNode("ending", NodeType.END, "Ending", null, List.of(), null, false, null,
                 List.of(), List.of(), null, "ending", new EditorPosition(410, 100));
+        String id = WorkbenchSession.safeId(requestedId);
+        String title = requestedTitle == null || requestedTitle.isBlank()
+                ? id.replace('_', ' ')
+                : requestedTitle.trim();
         ScenePackProject project = new ScenePackProject(2,
                 new ProjectTarget("block_party", "26.6", 1, 61),
-                new PackMetadata("new_conversation", "block_party_generated", "New Conversation", 61),
+                new PackMetadata(id, id, title, 61),
                 new PackContract(List.of(), List.of(), List.of("ending")), List.of(), false,
                 "introduction", List.of(introduction, ending));
         Files.writeString(path, ProjectJson.gson().toJson(project) + System.lineSeparator(), StandardCharsets.UTF_8);

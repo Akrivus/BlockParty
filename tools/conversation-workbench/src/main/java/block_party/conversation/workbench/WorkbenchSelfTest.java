@@ -22,6 +22,7 @@ public final class WorkbenchSelfTest {
         verifyStaticResources();
         verifyAuthoringSchema();
         verifyExportAndStarter(service, project);
+        verifySessionFlow(Path.of(args[0]));
         System.out.println("Workbench check passed.");
     }
 
@@ -90,6 +91,26 @@ public final class WorkbenchSelfTest {
         WorkbenchService starterService = new WorkbenchService(starter);
         if (!starterService.validate(starterService.load()).valid()) {
             throw new AssertionError("New-project starter must validate.");
+        }
+    }
+
+    private static void verifySessionFlow(Path fixture) throws Exception {
+        WorkbenchSession session = new WorkbenchSession(null);
+        if ((boolean) session.describe().get("projectOpen")) {
+            throw new AssertionError("A pathless workbench must start without a project.");
+        }
+        session.open(fixture);
+        if (!(boolean) session.describe().get("projectOpen")) {
+            throw new AssertionError("Opening a fixture must activate the session.");
+        }
+        session.close();
+        Path source = Files.createTempDirectory("block-party-session-check-")
+                .resolve("new-pack/project.json");
+        session.create(source, "My New Pack", "My New Pack");
+        ScenePackProject created = session.requireProject().load();
+        if (!"my_new_pack".equals(created.pack().id())
+                || !source.toAbsolutePath().normalize().equals(session.requireProject().projectPath())) {
+            throw new AssertionError("Session creation must normalize identity and open the new project.");
         }
     }
 }

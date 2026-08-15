@@ -18,12 +18,16 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public final class WorkbenchServer {
-    private final WorkbenchService service;
+    private final WorkbenchSession session;
     private final HttpServer server;
 
     private WorkbenchServer(Path project, int port) throws Exception {
-        service = new WorkbenchService(project);
+        session = new WorkbenchSession(project);
         server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 0);
+        server.createContext("/api/session", exchange -> api(exchange, this::session));
+        server.createContext("/api/open", exchange -> api(exchange, this::open));
+        server.createContext("/api/new", exchange -> api(exchange, this::create));
+        server.createContext("/api/close", exchange -> api(exchange, this::close));
         server.createContext("/api/project", exchange -> api(exchange, this::project));
         server.createContext("/api/schema", exchange -> api(exchange, this::schema));
         server.createContext("/api/validate", exchange -> api(exchange, this::validate));
@@ -40,41 +44,71 @@ public final class WorkbenchServer {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length == 0) {
-            System.err.println("Usage: conversation-workbench [--new] "
-                    + "<project.json|generation-directory> [--port <port>] [--no-open]");
-            System.exit(2);
-        }
-        boolean create = "--new".equals(args[0]);
-        int sourceIndex = create ? 1 : 0;
-        if (sourceIndex >= args.length) {
-            throw new IllegalArgumentException("--new requires a project path.");
-        }
+        boolean create = false;
         int port = 0;
         boolean open = true;
-        for (int i = sourceIndex + 1; i < args.length; i++) {
+        Path source = null;
+        for (int i = 0; i < args.length; i++) {
             if ("--port".equals(args[i]) && i + 1 < args.length) {
                 port = Integer.parseInt(args[++i]);
             } else if ("--no-open".equals(args[i])) {
                 open = false;
+            } else if ("--new".equals(args[i])) {
+                create = true;
+            } else if (!args[i].startsWith("--") && source == null) {
+                source = Path.of(args[i]);
             }
         }
-        Path source = Path.of(args[sourceIndex]);
         if (create) {
+            if (source == null) {
+                throw new IllegalArgumentException("--new requires a project path.");
+            }
             WorkbenchService.createStarter(source);
         }
         WorkbenchServer workbench = new WorkbenchServer(source, port);
         workbench.server.start();
         URI uri = URI.create("http://localhost:" + workbench.server.getAddress().getPort() + "/");
         System.out.println("Block Party Conversation Workbench: " + uri);
-        System.out.println("Editing: " + workbench.service.projectPath());
+        if (source == null) {
+            System.out.println("No pack selected; opening the start screen.");
+        } else {
+            System.out.println("Editing: " + workbench.session.requireProject().projectPath());
+        }
         if (open && Desktop.isDesktopSupported()) {
             Desktop.getDesktop().browse(uri);
         }
     }
 
+    private Object session(HttpExchange exchange) {
+        requireMethod(exchange, "GET");
+        return session.describe();
+    }
+
+    private Object open(HttpExchange exchange) throws Exception {
+        requireMethod(exchange, "POST");
+        JsonObject body = readObject(exchange);
+        return session.open(Path.of(requiredString(body, "path")));
+    }
+
+    private Object create(HttpExchange exchange) throws Exception {
+        requireMethod(exchange, "POST");
+        JsonObject body = readObject(exchange);
+        String id = requiredString(body, "id");
+        String title = body.has("title") ? body.get("title").getAsString() : id;
+        Path path = body.has("path") && !body.get("path").getAsString().isBlank()
+                ? Path.of(body.get("path").getAsString())
+                : null;
+        return session.create(path, id, title);
+    }
+
+    private Object close(HttpExchange exchange) {
+        requireMethod(exchange, "POST");
+        return session.close();
+    }
+
     private Object project(HttpExchange exchange) throws Exception {
         requireMethod(exchange, "GET");
+        WorkbenchService service = session.requireProject();
         ScenePackProject project = service.load();
         JsonObject response = new JsonObject();
         response.addProperty("path", service.projectPath().toString());
@@ -85,7 +119,7 @@ public final class WorkbenchServer {
 
     private Object validate(HttpExchange exchange) throws Exception {
         requireMethod(exchange, "POST");
-        return service.validate(readProject(exchange));
+        return session.requireProject().validate(readProject(exchange));
     }
 
     private Object schema(HttpExchange exchange) {
@@ -100,11 +134,12 @@ public final class WorkbenchServer {
         SimulationScenario scenario = body.has("scenario")
                 ? ProjectJson.gson().fromJson(body.get("scenario"), SimulationScenario.class)
                 : new SimulationScenario(null, null, null);
-        return service.simulate(project, scenario);
+        return session.requireProject().simulate(project, scenario);
     }
 
     private Object save(HttpExchange exchange) throws Exception {
         requireMethod(exchange, "POST");
+        WorkbenchService service = session.requireProject();
         service.save(readProject(exchange));
         return Map.of("saved", true, "path", service.projectPath().toString());
     }
@@ -114,38 +149,40 @@ public final class WorkbenchServer {
         JsonObject body = readObject(exchange);
         ScenePackProject project = ProjectJson.gson().fromJson(
                 body.get("project"), ScenePackProject.class);
-        return service.export(project, Path.of(body.get("output").getAsString()));
+        return session.requireProject().export(project, Path.of(body.get("output").getAsString()));
     }
 
     private Object provenance(HttpExchange exchange) throws Exception {
         requireMethod(exchange, "GET");
-        return service.provenance();
+        return session.requireProject().provenance();
     }
 
     private Object catalog(HttpExchange exchange) throws Exception {
         requireMethod(exchange, "POST");
         JsonObject body = readObject(exchange);
         GenerationBrief brief = ProjectJson.gson().fromJson(body.get("brief"), GenerationBrief.class);
-        return service.catalog(brief);
+        return session.requireProject().catalog(brief);
     }
 
     private Object startGeneration(HttpExchange exchange) throws Exception {
         requireMethod(exchange, "POST");
         JsonObject body = readObject(exchange);
         GenerationBrief brief = ProjectJson.gson().fromJson(body.get("brief"), GenerationBrief.class);
+        WorkbenchService service = session.requireProject();
         service.startGeneration(brief, Path.of(body.get("output").getAsString()));
         return service.generationStatus();
     }
 
     private Object generationStatus(HttpExchange exchange) {
         requireMethod(exchange, "GET");
-        return service.generationStatus();
+        return session.requireProject().generationStatus();
     }
 
     private Object requestRevision(HttpExchange exchange) throws Exception {
         requireMethod(exchange, "POST");
         JsonObject body = readObject(exchange);
-        return service.requestRevision(ProjectJson.gson().fromJson(body.get("project"), ScenePackProject.class),
+        return session.requireProject().requestRevision(
+                ProjectJson.gson().fromJson(body.get("project"), ScenePackProject.class),
                 body.get("node").getAsString(), body.get("instruction").getAsString(),
                 body.get("provider").getAsString(), body.get("model").getAsString(),
                 body.has("recordedResponses") ? body.get("recordedResponses").getAsString() : null);
@@ -158,7 +195,8 @@ public final class WorkbenchServer {
                 body.get("project"), ScenePackProject.class);
         DialogueAlternative alternative = ProjectJson.gson().fromJson(
                 body.get("alternative"), DialogueAlternative.class);
-        return service.applyRevision(project, body.get("node").getAsString(), alternative);
+        return session.requireProject().applyRevision(
+                project, body.get("node").getAsString(), alternative);
     }
 
     private ScenePackProject readProject(HttpExchange exchange) throws IOException {
@@ -169,6 +207,13 @@ public final class WorkbenchServer {
     private JsonObject readObject(HttpExchange exchange) throws IOException {
         String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
         return ProjectJson.gson().fromJson(body, JsonObject.class);
+    }
+
+    private static String requiredString(JsonObject body, String name) {
+        if (!body.has(name) || body.get(name).getAsString().isBlank()) {
+            throw new IllegalArgumentException(name + " is required.");
+        }
+        return body.get(name).getAsString();
     }
 
     private void api(HttpExchange exchange, ApiHandler handler) throws IOException {

@@ -153,26 +153,32 @@ Modpack scanning and runtime AI remain separate later projects. Generation
 currently produces multiple distributable scene packs rather than one
 unbounded conversation.
 
-## Iteration Four Workbench
+## Conversation Workbench
 
 The local Conversation Workbench is a card-based authoring surface over the
-same Java core. Install its standalone distribution with:
+same Java core. From the repository, the default launch is:
 
 For a complete prompt-to-export walkthrough, see
 [`CONVERSATION_TOOL_TUTORIAL.md`](CONVERSATION_TOOL_TUTORIAL.md).
 
 ```powershell
-.\gradlew.bat conversation-workbench:installDist
+.\gradlew.bat workbench
 ```
 
-Launch it with a project file or an Iteration 3 generation directory:
+The repository-level `.\workbench.bat` launcher provides the same start screen.
+It offers **New from prompt**, **New blank pack**, **Open existing pack**, and
+device-local recent packs. New projects default to
+`authoring\<pack-id>\project.json`; verified exports default to
+`dist\<pack-id>`.
 
-```powershell
-tools\conversation-workbench\build\install\conversation-workbench\bin\conversation-workbench.bat tools\conversation-core\examples\flower-request.project.json
-```
+Use `.\gradlew.bat installConversationTools` when standalone distributions are
+needed. `.\gradlew.bat checkConversationTools` runs the complete tool-specific
+verification set. Fully qualified `:tools:conversation-workbench:*` task paths
+remain available for CI and focused development.
 
 The server binds only to the loopback interface and opens a browser locally.
-Pass `--no-open` for a headless launch or `--port <port>` to choose a port.
+The standalone or repository batch launcher still accepts a project path,
+`--no-open`, and `--port <port>` for direct and headless launches.
 It does not require Minecraft, Node, a hosted service, or an API key.
 
 The workbench provides:

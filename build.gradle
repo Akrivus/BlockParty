@@ -106,6 +106,43 @@ tasks.register('localCi') {
     dependsOn ':tools:conversation-workbench:check'
 }
 
+tasks.register('workbench', JavaExec) {
+    group = 'conversation tools'
+    description = 'Builds and launches the Conversation Workbench.'
+    dependsOn ':tools:conversation-workbench:classes'
+    mainClass = 'block_party.conversation.workbench.WorkbenchServer'
+
+    doFirst {
+        def workbenchProject = project(':tools:conversation-workbench')
+        classpath = workbenchProject.sourceSets.main.runtimeClasspath
+        def projectPath = providers.gradleProperty('conversationProject').orNull
+        def forwarded = System.getenv('BLOCK_PARTY_WORKBENCH_ARGS')
+        if (forwarded) {
+            args org.apache.tools.ant.types.Commandline.translateCommandline(forwarded)
+        } else if (projectPath) {
+            args projectPath
+        }
+        if (providers.gradleProperty('noOpen').isPresent()) {
+            args '--no-open'
+        }
+    }
+}
+
+tasks.register('installConversationTools') {
+    group = 'conversation tools'
+    description = 'Installs standalone launchers for the conversation tools.'
+    dependsOn ':tools:conversation-core:installDist'
+    dependsOn ':tools:conversation-workbench:installDist'
+}
+
+tasks.register('checkConversationTools') {
+    group = 'conversation tools'
+    description = 'Runs conversation core, workbench, and compliance checks.'
+    dependsOn ':tools:conversation-core:check'
+    dependsOn ':tools:conversation-workbench:check'
+    dependsOn tasks.named('phase1Compliance')
+}
+
 tasks.register('fullCi') {
     group = 'verification'
     description = 'Runs the full local verification suite, including GameTests.'

@@ -19,63 +19,65 @@ There are three layers:
 Keep the project or generation directory as source. The exported datapack is a
 build artifact and can always be regenerated.
 
-## 1. Install the local tools
+## 1. Launch the workbench
 
 ```powershell
-.\gradlew.bat :tools:conversation-core:installDist :tools:conversation-workbench:installDist
+.\gradlew.bat workbench
 ```
 
-This creates two launchers:
+The repository-level launcher is equivalent:
+
+```powershell
+.\workbench.bat
+```
+
+The tool builds as needed, starts a loopback-only server, and opens its start
+screen in the default browser. The terminal stays occupied while it runs;
+press `Ctrl+C` there when finished.
+
+The start screen provides four paths:
+
+- **New from prompt** creates a source project and opens Generation Studio;
+- **New blank pack** creates a minimal valid introduction and ending;
+- **Open existing pack** accepts `project.json` or a generation directory;
+- **Recent packs** remembers paths in this browser.
+
+New source projects default to:
 
 ```text
-tools\conversation-core\build\install\conversation-core\bin\conversation-core.bat
-tools\conversation-workbench\build\install\conversation-workbench\bin\conversation-workbench.bat
+authoring\<pack-id>\project.json
 ```
 
-Re-run `installDist` after changing either tool's Java code or browser assets.
+The location can be changed under **Advanced location** before creation.
 
-## 2. Make a working copy of the example
-
-Do not edit the checked-in verification fixture directly. Copy it into a local
-authoring directory:
+## 2. Open the included example
 
 ```powershell
-New-Item -ItemType Directory -Force authoring
-Copy-Item tools\conversation-core\examples\flower-request.project.json authoring\flower-request.project.json
+.\workbench.bat tools\conversation-core\examples\flower-request.project.json
 ```
 
-The `authoring` directory is ignored only if your own Git configuration says
-so, so check `git status` before committing.
-
-## 3. Open the card workbench
-
-```powershell
-tools\conversation-workbench\build\install\conversation-workbench\bin\conversation-workbench.bat authoring\flower-request.project.json
-```
-
-The tool starts a loopback-only local server and normally opens the workbench
-in the default browser. The terminal stays occupied while the workbench is
-running. Press `Ctrl+C` there when finished.
+Avoid saving changes to the checked-in fixture. To make a durable working copy,
+create a blank pack from the start screen or copy the fixture into `authoring`.
 
 If a browser should not open automatically:
 
 ```powershell
-tools\conversation-workbench\build\install\conversation-workbench\bin\conversation-workbench.bat authoring\flower-request.project.json --no-open
+.\workbench.bat tools\conversation-core\examples\flower-request.project.json --no-open
 ```
 
 Open the local address printed in the terminal yourself. Add `--port 18765` if
 you need a fixed port.
 
-To begin with a minimal valid two-card project instead of copying an example:
+Direct blank creation remains available for automation:
 
 ```powershell
-tools\conversation-workbench\build\install\conversation-workbench\bin\conversation-workbench.bat --new authoring\my-pack.project.json
+.\workbench.bat --new authoring\my-pack\project.json
 ```
 
 `--new` refuses to overwrite an existing path. Use the Project settings panel
 to replace the starter pack identity, contract, and entry information.
 
-## 4. Read the graph
+## 3. Read the graph
 
 The center canvas contains one card per conversation state:
 
@@ -91,7 +93,7 @@ and do not alter compiled dialogue behavior.
 Use the left-side search and type buttons to narrow a larger pack. Selecting a
 card in the outline or canvas opens its inspector on the right.
 
-## 5. Edit a card
+## 4. Edit a card
 
 Select the `introduction` card and change its dialogue text. The workbench marks
 the project as unsaved and validates it after a short delay.
@@ -134,7 +136,7 @@ state there refactors typed condition and action references.
 
 `Ctrl+Z` undoes, `Ctrl+Shift+Z` redoes, and `Ctrl+S` saves.
 
-## 6. Use validation feedback
+## 5. Use validation feedback
 
 The Checks section displays errors and warnings. Select a diagnostic to focus
 its card.
@@ -150,7 +152,7 @@ Errors block saving and export. Typical examples include:
 Warnings identify suspicious but potentially intentional behavior, such as
 two root scenes that may match the same interaction.
 
-## 7. Simulate routes
+## 6. Simulate routes
 
 Choose **Simulate**. The three scenario fields accept JSON objects:
 
@@ -183,7 +185,7 @@ Select a route and use **Previous** and **Next** to step through every entered
 card, player choice, state change, external acquisition, and ending. **Remember
 scenario** keeps the scenario in this browser for the next session.
 
-## 8. Save and export
+## 7. Save and export
 
 **Save project** atomically replaces the opened source file after validation.
 It never writes a partially valid project.
@@ -196,13 +198,13 @@ Choose **Export** after the project is clean. The output directory is prefilled
 as:
 
 ```text
-<directory where the workbench was launched>\<pack-id>
+<directory where the workbench was launched>\dist\<pack-id>
 ```
 
 For the example, launching from the repository directory proposes:
 
 ```text
-C:\path\to\BlockParty\flower_request
+C:\path\to\BlockParty\dist\flower_request
 ```
 
 You may edit this path or copy a directory path from Windows Explorer. The
@@ -224,7 +226,7 @@ flower_request\
 Install or distribute the `datapack` directory. Retain `project.json` for later
 editing.
 
-## 9. Validate and build without the workbench
+## 8. Validate and build without the workbench
 
 The CLI provides the same authoritative operations for automation:
 
@@ -237,7 +239,7 @@ $tool = "tools\conversation-core\build\install\conversation-core\bin\conversatio
 
 `build` and workbench export both refuse non-empty output directories.
 
-## 10. Generate a project from a brief
+## 9. Generate a project from a brief
 
 Iteration 3 generation is optional. The included fixture uses recorded model
 responses, so it is deterministic and free:
@@ -267,7 +269,7 @@ For a live generation, set the brief's provider to `openai`, choose its model,
 and provide `OPENAI_API_KEY` in the launching process. The key is never written
 to the generation archive.
 
-## 11. Generate and review in the workbench
+## 10. Generate and review in the workbench
 
 Choose **Generate** in the top toolbar. Fill in the creative prompt and card
 bounds, then list only the repository documents that should become model
@@ -291,7 +293,7 @@ Choose **Review** to inspect the generation brief, usage totals, archived stage
 requests and responses, and final review. Selecting a generated dialogue card
 also shows the temporary scene intention that guided its prose.
 
-## 12. Request a mechanics-locked revision
+## 11. Request a mechanics-locked revision
 
 Select a dialogue card and choose **Revise**. Describe a prose change such as:
 
@@ -309,12 +311,22 @@ conditions, actions, state, rewards, targets, transitions, IDs, and contracts
 must retain the same mechanics fingerprint. The accepted result is still
 unsaved and can be undone before saving.
 
-## 13. Run the verification suite
+## 12. Install standalone tools and run checks
+
+Build redistributable launchers when the tools need to run outside a repository
+checkout:
+
+```powershell
+.\gradlew.bat installConversationTools
+```
+
+This creates the core and workbench launchers below `tools\...\build\install`.
+Re-run the install task after changing Java code or browser assets.
 
 Before committing tooling changes:
 
 ```powershell
-.\gradlew.bat :tools:conversation-core:check :tools:conversation-workbench:check phase1Compliance
+.\gradlew.bat checkConversationTools
 ```
 
 The checks cover valid and unsafe examples, simulation, compilation,
@@ -338,8 +350,8 @@ must remain running while the page is open.
 
 ### Changes to the UI do not appear
 
-Stop the workbench, re-run its `installDist` task, and launch the installed
-script again. Browser assets are packaged into the distribution.
+Stop and restart the workbench. If using an installed distribution, re-run
+`installConversationTools` first because browser assets are packaged into it.
 
 ### NeoForm reports an `output.jar` access error
 

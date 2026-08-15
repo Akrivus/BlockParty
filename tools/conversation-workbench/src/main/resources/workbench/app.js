@@ -1,4 +1,5 @@
 const state = {
+  session: null,
   project: null,
   path: "",
   schema: null,
@@ -15,6 +16,8 @@ const state = {
   trace: 0,
   step: 0,
 };
+const recentKey = "block-party-workbench:recent-packs";
+let startMode = "prompt";
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)],
   clone = (o) => JSON.parse(JSON.stringify(o));
@@ -34,7 +37,7 @@ async function api(path, body) {
   if (!response.ok) throw new Error(result.error || "Request failed");
   return result;
 }
-async function load() {
+async function loadProject() {
   try {
     const [data, schema, provenance] = await Promise.all([
       api("project"),
@@ -45,6 +48,10 @@ async function load() {
     state.schema = schema;
     state.provenance = provenance;
     state.path = data.path;
+    state.undo = [];
+    state.redo = [];
+    state.selected = null;
+    state.dirty = false;
     normalize();
     const recovered = localStorage.getItem(recoveryKey());
     if (
@@ -57,11 +64,176 @@ async function load() {
     }
     $("#project-path").textContent = data.path;
     $("#export-path").value = data.defaultExportPath || "";
+    $("#dirty").textContent = "Saved";
+    $("#save").disabled = true;
     restoreScenario();
+    document.body.classList.remove("start-mode");
+    $("#start-screen").hidden = true;
     render();
     await validate();
   } catch (e) {
     toast(e.message, true);
+  }
+}
+
+async function bootstrap() {
+  try {
+    state.session = await api("session");
+    if (state.session.projectOpen) {
+      await loadProject();
+    } else {
+      showStartScreen();
+    }
+  } catch (error) {
+    toast(error.message, true);
+  }
+}
+
+function showStartScreen() {
+  document.body.classList.add("start-mode");
+  $("#start-screen").hidden = false;
+  $("#start-create-panel").hidden = true;
+  $("#start-open-panel").hidden = true;
+  $("#start-working-directory").textContent = state.session?.workingDirectory
+    ? `Working directory: ${state.session.workingDirectory}`
+    : "";
+  renderRecents();
+}
+
+function recentPacks() {
+  try {
+    return JSON.parse(localStorage.getItem(recentKey) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function rememberRecent(path, title) {
+  const recents = recentPacks().filter((item) => item.path !== path);
+  recents.unshift({ path, title: title || path, opened: Date.now() });
+  localStorage.setItem(recentKey, JSON.stringify(recents.slice(0, 8)));
+}
+
+function renderRecents() {
+  const root = $("#recent-packs");
+  const recents = recentPacks();
+  if (!recents.length) {
+    root.innerHTML =
+      '<div class="recent-empty">Packs you open will appear here.</div>';
+    return;
+  }
+  root.innerHTML = recents
+    .map(
+      (item, index) =>
+        `<div class="recent-pack"><button type="button" data-recent-open="${index}"><strong>${esc(item.title)}</strong><small>${esc(item.path)}</small></button><button type="button" data-recent-remove="${index}" title="Remove from recent packs">×</button></div>`,
+    )
+    .join("");
+  $$("[data-recent-open]").forEach(
+    (button) =>
+      (button.onclick = () =>
+        openPack(recents[Number(button.dataset.recentOpen)].path)),
+  );
+  $$("[data-recent-remove]").forEach(
+    (button) =>
+      (button.onclick = () => {
+        recents.splice(Number(button.dataset.recentRemove), 1);
+        localStorage.setItem(recentKey, JSON.stringify(recents));
+        renderRecents();
+      }),
+  );
+}
+
+function slug(value) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function openStartPanel(mode) {
+  startMode = mode;
+  $("#start-create-panel").hidden = mode === "open";
+  $("#start-open-panel").hidden = mode !== "open";
+  if (mode !== "open") {
+    const prompt = mode === "prompt";
+    $("#start-prompt-fields").hidden = !prompt;
+    $("#start-create-kicker").textContent = prompt
+      ? "PROMPT TO PACK"
+      : "NEW PACK";
+    $("#start-create-heading").textContent = prompt
+      ? "Describe the conversation you want"
+      : "Create a minimal card graph";
+    $("#start-create").textContent = prompt
+      ? "Create and generate"
+      : "Create blank pack";
+    $("#start-title").focus();
+  } else {
+    $("#start-open-path").focus();
+  }
+}
+
+async function openPack(path) {
+  try {
+    state.session = await api("open", { path });
+    await loadProject();
+    rememberRecent(state.path, state.project.pack?.title);
+  } catch (error) {
+    toast(error.message, true);
+  }
+}
+
+async function createPack() {
+  const title = $("#start-title").value.trim();
+  const id = slug($("#start-id").value || title);
+  if (!title || !id) {
+    toast("Pack title and id are required.", true);
+    return;
+  }
+  if (startMode === "prompt" && !$("#start-prompt").value.trim()) {
+    toast("Describe the conversation you want to generate.", true);
+    return;
+  }
+  try {
+    state.session = await api("new", {
+      id,
+      title,
+      path: $("#start-source").value.trim(),
+    });
+    await loadProject();
+    rememberRecent(state.path, title);
+    if (startMode === "prompt") {
+      openGenerationStudio();
+      $("#gen-id").value = id;
+      $("#gen-title").value = title;
+      $("#gen-prompt").value = $("#start-prompt").value.trim();
+      $("#gen-characters").value = $("#start-characters").value.trim();
+      $("#gen-documents").value = $("#start-documents")
+        .value.split(",")
+        .map((value) => value.trim())
+        .filter(Boolean)
+        .join("\n");
+      $("#gen-output").value = state.path.replace(
+        /[\\/]project\.json$/,
+        "\\generated",
+      );
+    } else {
+      openProjectSettings();
+    }
+  } catch (error) {
+    toast(error.message, true);
+  }
+}
+
+async function returnToStart() {
+  if (state.dirty && !confirm("Leave this pack with unsaved changes?")) return;
+  try {
+    state.session = await api("close", {});
+    state.project = null;
+    state.path = "";
+    showStartScreen();
+  } catch (error) {
+    toast(error.message, true);
   }
 }
 function normalize() {
@@ -701,7 +873,8 @@ async function pollGeneration() {
   else if (status.state === "COMPLETE") {
     toast("Generation complete");
     localStorage.removeItem(recoveryKey());
-    await load();
+    await loadProject();
+    rememberRecent(state.path, state.project.pack?.title);
   }
 }
 
@@ -972,6 +1145,7 @@ $("#delete-card").onclick = () => {
 $("#undo").onclick = () => restore(state.undo, state.redo);
 $("#redo").onclick = () => restore(state.redo, state.undo);
 $("#save").onclick = save;
+$("#session-home").onclick = returnToStart;
 $("#connect-card").onclick = startConnection;
 $("#arrange").onclick = arrange;
 $("#project-settings").onclick = openProjectSettings;
@@ -1083,4 +1257,18 @@ function esc(s) {
 function attr(s) {
   return esc(s);
 }
-load();
+$$("[data-start-mode]").forEach(
+  (button) => (button.onclick = () => openStartPanel(button.dataset.startMode)),
+);
+$$(".start-cancel").forEach((button) => (button.onclick = showStartScreen));
+$("#start-title").oninput = () => {
+  if (!$("#start-id").dataset.edited) {
+    $("#start-id").value = slug($("#start-title").value);
+  }
+};
+$("#start-id").oninput = () => {
+  $("#start-id").dataset.edited = "true";
+};
+$("#start-create").onclick = createPack;
+$("#start-open").onclick = () => openPack($("#start-open-path").value.trim());
+bootstrap();

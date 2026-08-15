@@ -7,6 +7,123 @@
     <link rel="stylesheet" href="/app.css" />
   </head>
   <body>
+    <section id="start-screen" class="start-screen" hidden>
+      <div class="start-wrap">
+        <header class="start-hero">
+          <span class="brand-mark">BP</span>
+          <div>
+            <small>BLOCK PARTY CREATOR TOOLS</small>
+            <h1>Build a conversation pack</h1>
+            <p>
+              Begin with a creative prompt, a minimal card graph, or a pack you
+              already have.
+            </p>
+          </div>
+        </header>
+        <div class="start-options">
+          <button class="start-card featured" data-start-mode="prompt">
+            <span class="start-number">01</span>
+            <strong>New from prompt</strong>
+            <small>Generate a bounded scene pack, then refine its cards.</small>
+          </button>
+          <button class="start-card" data-start-mode="blank">
+            <span class="start-number">02</span>
+            <strong>New blank pack</strong>
+            <small>Start with a valid introduction and ending.</small>
+          </button>
+          <button class="start-card" data-start-mode="open">
+            <span class="start-number">03</span>
+            <strong>Open existing pack</strong>
+            <small>Open project.json or a generation directory.</small>
+          </button>
+        </div>
+        <section id="start-create-panel" class="start-panel" hidden>
+          <div class="start-panel-head">
+            <div>
+              <small id="start-create-kicker">NEW PACK</small>
+              <h2 id="start-create-heading">Create a conversation pack</h2>
+            </div>
+            <button class="start-cancel" type="button">Cancel</button>
+          </div>
+          <div class="start-form-grid">
+            <label
+              >Pack title<input
+                id="start-title"
+                placeholder="Flower Friendship"
+            /></label>
+            <label
+              >Pack id<input id="start-id" placeholder="flower_friendship"
+            /></label>
+          </div>
+          <div id="start-prompt-fields">
+            <label>
+              Creative prompt
+              <textarea
+                id="start-prompt"
+                rows="5"
+                placeholder="Describe the character, situation, choices, and desired arc."
+              ></textarea>
+            </label>
+            <div class="start-form-grid">
+              <label
+                >Characters<input
+                  id="start-characters"
+                  placeholder="Moe, the player"
+              /></label>
+              <label
+                >Context documents<input
+                  id="start-documents"
+                  placeholder="docs/world.md, docs/moe.md"
+              /></label>
+            </div>
+          </div>
+          <details>
+            <summary>Advanced location</summary>
+            <label>
+              Source project path
+              <input
+                id="start-source"
+                placeholder="Leave blank for authoring\pack-id\project.json"
+              />
+            </label>
+          </details>
+          <div class="dialog-actions">
+            <button id="start-create" type="button" class="primary">
+              Create and continue
+            </button>
+          </div>
+        </section>
+        <section id="start-open-panel" class="start-panel" hidden>
+          <div class="start-panel-head">
+            <div>
+              <small>OPEN PACK</small>
+              <h2>Continue an existing project</h2>
+            </div>
+            <button class="start-cancel" type="button">Cancel</button>
+          </div>
+          <label>
+            Project file or generation directory
+            <input
+              id="start-open-path"
+              placeholder="C:\packs\flower_friendship"
+            />
+          </label>
+          <div class="dialog-actions">
+            <button id="start-open" type="button" class="primary">
+              Open pack
+            </button>
+          </div>
+        </section>
+        <section class="recent-section">
+          <div class="section-title"><span>Recent packs</span></div>
+          <div id="recent-packs" class="recent-packs"></div>
+        </section>
+        <footer class="start-footer">
+          <span id="start-working-directory"></span>
+          <span>Create → Review → Validate → Export</span>
+        </footer>
+      </div>
+    </section>
     <header class="topbar">
       <div class="brand">
         <span class="brand-mark">BP</span>
@@ -16,6 +133,9 @@
         </div>
       </div>
       <div class="toolbar">
+        <button id="session-home" title="Open or create another pack">
+          Packs
+        </button>
         <button id="undo" title="Undo (Ctrl+Z)">Undo</button
         ><button id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
         <button id="project-settings">Project</button
