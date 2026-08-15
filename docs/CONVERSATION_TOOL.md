@@ -158,8 +158,11 @@ unbounded conversation.
 The local Conversation Workbench is a card-based authoring surface over the
 same Java core. Install its standalone distribution with:
 
+For a complete prompt-to-export walkthrough, see
+[`CONVERSATION_TOOL_TUTORIAL.md`](CONVERSATION_TOOL_TUTORIAL.md).
+
 ```powershell
-.\gradlew.bat :tools:conversation-workbench:installDist
+.\gradlew.bat conversation-workbench:installDist
 ```
 
 Launch it with a project file or an Iteration 3 generation directory:
@@ -176,10 +179,15 @@ The workbench provides:
 
 - a draggable card canvas with dialogue, gameplay-gate, and ending routes;
 - card search and type filters;
-- dialogue, response, transition, condition, action, and ending editing;
+- Java-schema-driven condition and action controls, including response actions;
+- project metadata, state declarations, contracts, dialogue, response,
+  transition, and ending editing;
+- direct card connections and automatic graph arrangement;
 - undo/redo and unsaved-change protection;
+- device-local crash recovery and remembered simulation scenarios;
 - debounced validation with diagnostics linked to affected cards;
-- scenario-based route simulation with traces and external requirements;
+- scenario-based route simulation with step-by-step traces and external
+  requirements;
 - atomic validated saves back to the opened `project.json`;
 - verified export of the source project, graph, reports, and datapack to an
   empty directory.
@@ -188,3 +196,34 @@ The browser never compiles or validates projects independently. Its local API
 delegates those operations to `conversation-core`, preserving one definition
 of the project format and generated datapack behavior. Projects with validation
 errors can be explored and repaired, but cannot be saved or exported.
+
+## Iteration Six Generation Studio
+
+The workbench's **Generate** panel turns an authoring brief into a bounded scene
+pack without leaving the local tool. Creators can edit the prompt, characters,
+repository documents, card bounds, dialogue limit, provider, model, call
+budget, recorded-response directory, and output directory. **Preview catalog**
+shows the exact bounded repository documents and hashes before any provider
+call.
+
+Generation runs asynchronously through catalog, arc-plan, graph, optional graph
+repair, intentions, dialogue, review, and build stages. The workbench polls
+local progress while Java retains ownership of budgets, validation, repair,
+simulation, compilation, and archives. When complete, the generated project
+becomes the open workbench project.
+
+The **Review** panel displays the brief, token and call totals, per-stage model
+metadata, archived requests and structured responses, review findings, and
+scene intentions. A generated card's intention also appears in its inspector.
+
+**Revise** requests two or three prose alternatives for the selected card.
+Alternatives are not applied automatically. Java checks response count, applies
+only dialogue text and optional response labels, compares the complete project
+mechanics fingerprint, and validates the result before returning it to the
+editor. Accepted revisions remain an ordinary undoable unsaved edit. Requests
+and responses are archived beneath `generation/revisions/` when a generation
+archive is available.
+
+The `recorded` provider keeps generation and revision tests deterministic and
+offline. The `openai` provider reads `OPENAI_API_KEY` only in the Java process;
+the browser, project, and archive never receive the key.

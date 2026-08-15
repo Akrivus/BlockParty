@@ -1,0 +1,189 @@
+{
+  "packId": "flower_request_generated",
+  "version": "26.6",
+  "title": "The Cake Is a Lie",
+  "description": "A self-aware Moe assigns the player a flower-fetching quest with a suspicious cake reward.",
+  "characters": [],
+  "cards": [
+    {
+      "id": "intro",
+      "speaker": "Moe",
+      "dialogue": "Psst. Test conversation detected. Fetch a dandelion. Cake awaits... maybe.",
+      "condition": {
+        "type": "ALWAYS"
+      },
+      "cue": "chat_bubble",
+      "responses": [
+        {
+          "text": "Accept quest",
+          "cue": "green_checkmark",
+          "nextCard": "quest_started"
+        },
+        {
+          "text": "No thanks",
+          "cue": "red_x",
+          "nextCard": "declined"
+        }
+      ]
+    },
+    {
+      "id": "quest_started",
+      "speaker": "Moe",
+      "dialogue": "Deal. Bring it here.",
+      "condition": {
+        "type": "ALWAYS"
+      },
+      "cue": "lovely_heart",
+      "actions": [
+        {
+          "type": "SET_COOKIE",
+          "key": "flower_quest_active",
+          "value": true
+        },
+        {
+          "type": "MARK_TIME",
+          "key": "flower_quest_started"
+        }
+      ],
+      "responses": [
+        {
+          "text": "I will",
+          "cue": "next_response",
+          "nextCard": "check_flower"
+        }
+      ]
+    },
+    {
+      "id": "check_flower",
+      "speaker": "Moe",
+      "dialogue": "Show me the flower.",
+      "condition": {
+        "type": "ALWAYS"
+      },
+      "cue": "chat_bubble",
+      "actions": [
+        {
+          "type": "OPEN_INVENTORY"
+        }
+      ],
+      "responses": [
+        {
+          "text": "Check",
+          "cue": "next_response",
+          "nextCard": "flower_found"
+        },
+        {
+          "text": "Not yet",
+          "cue": "red_x",
+          "nextCard": "flower_missing"
+        }
+      ]
+    },
+    {
+      "id": "flower_found",
+      "speaker": "Moe",
+      "dialogue": "You brought it! The cake is real. Probably.",
+      "condition": {
+        "type": "HAS_ITEM",
+        "item": "minecraft:dandelion"
+      },
+      "cue": "green_checkmark",
+      "actions": [
+        {
+          "type": "TAKE_ITEM",
+          "item": "minecraft:dandelion",
+          "count": 1
+        },
+        {
+          "type": "SET_COOKIE",
+          "key": "flower_quest_complete",
+          "value": true
+        }
+      ],
+      "responses": [
+        {
+          "text": "Claim reward",
+          "cue": "lovely_heart",
+          "nextCard": "reward"
+        }
+      ]
+    },
+    {
+      "id": "flower_missing",
+      "speaker": "Moe",
+      "dialogue": "No flower yet. Come back when you have one.",
+      "condition": {
+        "type": "ALWAYS"
+      },
+      "cue": "red_x",
+      "responses": [
+        {
+          "text": "Open inventory",
+          "cue": "leather_bag",
+          "nextCard": "check_flower"
+        },
+        {
+          "text": "Leave",
+          "cue": "close_dialogue",
+          "nextCard": "declined"
+        }
+      ]
+    },
+    {
+      "id": "reward",
+      "speaker": "Moe",
+      "dialogue": "Take this cake, brave tester.",
+      "condition": {
+        "type": "HAS_COOKIE",
+        "key": "flower_quest_complete"
+      },
+      "cue": "trusty_armor",
+      "actions": [
+        {
+          "type": "GIVE_ITEM",
+          "item": "minecraft:cake",
+          "count": 1
+        },
+        {
+          "type": "DELETE_COOKIE",
+          "key": "flower_quest_active"
+        }
+      ],
+      "responses": [
+        {
+          "text": "Thanks",
+          "cue": "lovely_heart",
+          "nextCard": "complete"
+        }
+      ]
+    },
+    {
+      "id": "complete",
+      "speaker": "Moe",
+      "dialogue": "Quest complete. The cake was not a lie.",
+      "condition": {
+        "type": "ALWAYS"
+      },
+      "cue": "green_checkmark",
+      "actions": [
+        {
+          "type": "END"
+        }
+      ]
+    },
+    {
+      "id": "declined",
+      "speaker": "Moe",
+      "dialogue": "Fair. We will pretend this branch passed testing.",
+      "condition": {
+        "type": "ALWAYS"
+      },
+      "cue": "close_dialogue",
+      "actions": [
+        {
+          "type": "END"
+        }
+      ]
+    }
+  ]
+}

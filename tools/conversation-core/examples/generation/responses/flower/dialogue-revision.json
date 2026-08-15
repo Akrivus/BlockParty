@@ -1,0 +1,14 @@
+{
+  "alternatives": [
+    {
+      "text": "Could you bring me three small flowers? I think this place could use something gentle.",
+      "responseLabels": [],
+      "rationale": "Warmer and more direct while preserving the question and acceptance choices."
+    },
+    {
+      "text": "Three small flowers would make this corner feel cared for. Would you help me find them?",
+      "responseLabels": [],
+      "rationale": "Inviting tone with the same informational and commitment branches."
+    }
+  ]
+}

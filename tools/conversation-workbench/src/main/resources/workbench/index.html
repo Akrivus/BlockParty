@@ -1,52 +1,381 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Block Party Conversation Workbench</title>
-  <link rel="stylesheet" href="/app.css">
-</head>
-<body>
-  <header class="topbar">
-    <div class="brand"><span class="brand-mark">BP</span><div><strong>Conversation Workbench</strong><small id="project-path">Loading project…</small></div></div>
-    <div class="toolbar">
-      <button id="undo" title="Undo (Ctrl+Z)">Undo</button><button id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
-      <button id="add-card">New card</button><button id="simulate">Simulate</button>
-      <button id="save" class="primary">Save project</button>
-      <span id="dirty" class="quiet">Saved</span>
-    </div>
-  </header>
-  <main class="shell">
-    <aside class="rail left-rail">
-      <label class="search"><span>Find a card</span><input id="search" type="search" placeholder="Title, id, dialogue…"></label>
-      <div class="filter-row"><button class="filter active" data-filter="ALL">All</button><button class="filter" data-filter="DIALOGUE">Talk</button><button class="filter" data-filter="GAMEPLAY_GATE">Gates</button><button class="filter" data-filter="END">Ends</button></div>
-      <section><div class="section-title"><span>Project map</span><b id="card-count">0</b></div><div id="outline" class="outline"></div></section>
-      <section class="diagnostics"><div class="section-title"><span>Checks</span><b id="check-count">—</b></div><div id="diagnostics"></div></section>
-    </aside>
-    <section class="workspace">
-      <div class="canvas-head"><div><b id="pack-title">Conversation</b><span id="pack-meta"></span></div><span class="legend"><i class="dot dialogue"></i> dialogue <i class="dot gate"></i> gate <i class="dot ending"></i> ending</span></div>
-      <div id="viewport"><div id="canvas"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
-    </section>
-    <aside class="rail inspector" id="inspector">
-      <div id="empty-inspector" class="empty"><span>↖</span><h2>Select a card</h2><p>Inspect its dialogue, mechanics, responses, and routes.</p></div>
-      <form id="card-form" hidden>
-        <div class="inspector-head"><span id="type-badge" class="badge"></span><button id="delete-card" type="button" class="danger">Delete</button></div>
-        <label>Card id<input name="id" required pattern="[a-z0-9_]+"></label>
-        <label>Title<input name="title"></label>
-        <label>Type<select name="type"><option>DIALOGUE</option><option>GAMEPLAY_GATE</option><option>END</option></select></label>
-        <label>Trigger<input name="trigger" placeholder="target_moe"></label>
-        <label>Dialogue<textarea name="text" rows="5" placeholder="What does the character say?"></textarea></label>
-        <div class="split"><label>Next card<input name="next" list="node-ids"></label><label>Ending<input name="ending"></label></div>
-        <details open><summary>Player responses <b id="response-count"></b></summary><div id="responses"></div><button id="add-response" type="button">+ Add response</button></details>
-        <details><summary>Conditions <b id="condition-count"></b></summary><p class="hint">Typed project conditions. Changes are validated immediately.</p><textarea id="conditions-json" class="code" rows="7"></textarea></details>
-        <details><summary>Actions <b id="action-count"></b></summary><p class="hint">Typed project actions and rewards.</p><textarea id="actions-json" class="code" rows="7"></textarea></details>
-        <datalist id="node-ids"></datalist>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Block Party Conversation Workbench</title>
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">BP</span>
+        <div>
+          <strong>Conversation Workbench</strong
+          ><small id="project-path">Loading project…</small>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button id="undo" title="Undo (Ctrl+Z)">Undo</button
+        ><button id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
+        <button id="project-settings">Project</button
+        ><button id="generation-studio">Generate</button
+        ><button id="review-generation">Review</button
+        ><button id="arrange">Arrange</button>
+        <button id="add-card">New card</button
+        ><button
+          id="connect-card"
+          title="Connect the selected card to another card"
+        >
+          Connect</button
+        ><button id="simulate">Simulate</button>
+        <button id="save" class="primary">Save project</button>
+        <span id="dirty" class="quiet">Saved</span>
+      </div>
+    </header>
+    <main class="shell">
+      <aside class="rail left-rail">
+        <label class="search"
+          ><span>Find a card</span
+          ><input id="search" type="search" placeholder="Title, id, dialogue…"
+        /></label>
+        <div class="filter-row">
+          <button class="filter active" data-filter="ALL">All</button
+          ><button class="filter" data-filter="DIALOGUE">Talk</button
+          ><button class="filter" data-filter="GAMEPLAY_GATE">Gates</button
+          ><button class="filter" data-filter="END">Ends</button>
+        </div>
+        <section>
+          <div class="section-title">
+            <span>Project map</span><b id="card-count">0</b>
+          </div>
+          <div id="outline" class="outline"></div>
+        </section>
+        <section class="diagnostics">
+          <div class="section-title">
+            <span>Checks</span><b id="check-count">—</b>
+          </div>
+          <div id="diagnostics"></div>
+        </section>
+      </aside>
+      <section class="workspace">
+        <div class="canvas-head">
+          <div>
+            <b id="pack-title">Conversation</b><span id="pack-meta"></span>
+          </div>
+          <span class="legend"
+            ><i class="dot dialogue"></i> dialogue <i class="dot gate"></i> gate
+            <i class="dot ending"></i> ending</span
+          >
+        </div>
+        <div id="viewport">
+          <div id="canvas">
+            <svg id="edges" aria-hidden="true"></svg>
+            <div id="cards"></div>
+          </div>
+        </div>
+      </section>
+      <aside class="rail inspector" id="inspector">
+        <div id="empty-inspector" class="empty">
+          <span>↖</span>
+          <h2>Select a card</h2>
+          <p>Inspect its dialogue, mechanics, responses, and routes.</p>
+        </div>
+        <form id="card-form" hidden>
+          <div class="inspector-head">
+            <span id="type-badge" class="badge"></span
+            ><span
+              ><button id="revise-card" type="button">Revise</button>
+              <button id="duplicate-card" type="button">Duplicate</button>
+              <button id="delete-card" type="button" class="danger">
+                Delete
+              </button></span
+            >
+          </div>
+          <div id="card-intention" class="card-intention" hidden></div>
+          <label
+            >Card id<input name="id" required pattern="[a-z0-9_]+"
+          /></label>
+          <label>Title<input name="title" /></label>
+          <label
+            >Type<select name="type">
+              <option>DIALOGUE</option>
+              <option>GAMEPLAY_GATE</option>
+              <option>END</option>
+            </select></label
+          >
+          <label
+            >Trigger<input name="trigger" placeholder="target_moe"
+          /></label>
+          <label
+            >Dialogue<textarea
+              name="text"
+              rows="5"
+              placeholder="What does the character say?"
+            ></textarea>
+          </label>
+          <div class="split">
+            <label>Next card<input name="next" list="node-ids" /></label
+            ><label>Ending<input name="ending" /></label>
+          </div>
+          <details open>
+            <summary>Player responses <b id="response-count"></b></summary>
+            <div id="responses"></div>
+            <button id="add-response" type="button">+ Add response</button>
+          </details>
+          <details>
+            <summary>Conditions <b id="condition-count"></b></summary>
+            <p class="hint">
+              Conditions are evaluated before this card can run.
+            </p>
+            <div id="conditions-editor"></div>
+            <button id="add-condition" type="button">+ Add condition</button>
+          </details>
+          <details>
+            <summary>Actions <b id="action-count"></b></summary>
+            <p class="hint">Actions run when this card is entered.</p>
+            <div id="actions-editor"></div>
+            <button id="add-action" type="button">+ Add action</button>
+          </details>
+          <datalist id="node-ids"></datalist>
+          <datalist id="state-ids"></datalist><datalist id="cue-ids"></datalist>
+        </form>
+      </aside>
+    </main>
+    <dialog id="project-dialog">
+      <form method="dialog">
+        <div class="dialog-head">
+          <div>
+            <small>PROJECT CONTRACT</small>
+            <h2>Project settings</h2>
+          </div>
+          <button value="close" aria-label="Close">×</button>
+        </div>
+        <div class="settings-grid">
+          <label>Pack id<input id="setting-pack-id" /></label
+          ><label>Title<input id="setting-title" /></label
+          ><label>Namespace<input id="setting-namespace" /></label
+          ><label>Entry card<input id="setting-entry" list="node-ids" /></label
+          ><label
+            >Pack format<input
+              id="setting-format"
+              type="number"
+              min="1" /></label
+          ><label class="check-label"
+            ><input id="setting-raw" type="checkbox" /> Allow raw
+            mechanics</label
+          >
+        </div>
+        <h3>Declared state</h3>
+        <div id="state-editor"></div>
+        <button id="add-state" type="button">+ Add state</button>
+        <h3>Pack contract</h3>
+        <div class="settings-grid">
+          <label
+            >Required state IDs, comma-separated<input
+              id="setting-requires" /></label
+          ><label
+            >Provided state IDs, comma-separated<input id="setting-provides"
+          /></label>
+        </div>
+        <label
+          >Named outcomes, one per line<textarea
+            id="setting-outcomes"
+            rows="4"
+          ></textarea>
+        </label>
+        <div class="dialog-actions">
+          <button id="apply-project" type="button" class="primary">
+            Apply settings
+          </button>
+        </div>
       </form>
-    </aside>
-  </main>
-  <dialog id="simulation-dialog"><form method="dialog"><div class="dialog-head"><div><small>ROUTE EXPLORER</small><h2>Simulate the conversation</h2></div><button value="close" aria-label="Close">×</button></div><div class="scenario-grid"><label>Cookies (JSON)<textarea id="scenario-cookies" rows="4">{}</textarea></label><label>Counters (JSON)<textarea id="scenario-counters" rows="4">{}</textarea></label><label>Inventory (JSON)<textarea id="scenario-inventory" rows="4">{}</textarea></label></div><button id="run-simulation" type="button" class="primary">Run simulation</button><div id="simulation-results"></div></form></dialog>
-  <dialog id="export-dialog"><form method="dialog"><div class="dialog-head"><div><small>VERIFIED OUTPUT</small><h2>Export scene pack</h2></div><button value="close" aria-label="Close">×</button></div><label>Empty output directory<input id="export-path" placeholder="C:\packs\flower-friendship"></label><div class="export-actions"><button id="run-export" type="button" class="primary">Validate and export</button></div><div id="export-result"></div></form></dialog>
-  <div id="toast" role="status"></div>
-  <script src="/app.js"></script>
-</body>
+    </dialog>
+    <dialog id="simulation-dialog">
+      <form method="dialog">
+        <div class="dialog-head">
+          <div>
+            <small>ROUTE DEBUGGER</small>
+            <h2>Simulate the conversation</h2>
+          </div>
+          <button value="close" aria-label="Close">×</button>
+        </div>
+        <div class="scenario-grid">
+          <label
+            >Cookies (JSON)<textarea id="scenario-cookies" rows="4">
+{}</textarea
+            ></label
+          ><label
+            >Counters (JSON)<textarea id="scenario-counters" rows="4">
+{}</textarea
+            ></label
+          ><label
+            >Inventory (JSON)<textarea id="scenario-inventory" rows="4">
+{}</textarea
+            >
+          </label>
+        </div>
+        <div class="simulation-actions">
+          <button id="run-simulation" type="button" class="primary">
+            Run all routes</button
+          ><button id="save-scenario" type="button">Remember scenario</button>
+        </div>
+        <div id="simulation-results"></div>
+        <div id="trace-debugger" hidden>
+          <div class="trace-toolbar">
+            <button id="trace-prev" type="button">← Previous</button
+            ><span id="trace-position"></span
+            ><button id="trace-next" type="button">Next →</button>
+          </div>
+          <div id="trace-step" class="trace-step"></div>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="export-dialog">
+      <form method="dialog">
+        <div class="dialog-head">
+          <div>
+            <small>VERIFIED OUTPUT</small>
+            <h2>Export scene pack</h2>
+          </div>
+          <button value="close" aria-label="Close">×</button>
+        </div>
+        <label
+          >Empty output directory<input
+            id="export-path"
+            placeholder="C:\packs\flower-friendship"
+        /></label>
+        <p class="hint">
+          Prefilled from the workbench launch directory and pack id. You can
+          paste another directory from Windows Explorer.
+        </p>
+        <div class="export-actions">
+          <button id="run-export" type="button" class="primary">
+            Validate and export
+          </button>
+        </div>
+        <div id="export-result"></div>
+      </form>
+    </dialog>
+    <dialog id="generation-dialog" class="wide-dialog">
+      <form method="dialog">
+        <div class="dialog-head">
+          <div>
+            <small>GENERATION STUDIO</small>
+            <h2>Generate a bounded scene pack</h2>
+          </div>
+          <button value="close" aria-label="Close">×</button>
+        </div>
+        <div class="generation-grid">
+          <section>
+            <label>Pack id<input id="gen-id" /></label
+            ><label>Title<input id="gen-title" /></label
+            ><label
+              >Creative prompt<textarea id="gen-prompt" rows="6"></textarea>
+            </label>
+            <div class="settings-grid">
+              <label
+                >Minimum cards<input
+                  id="gen-min"
+                  type="number"
+                  value="6" /></label
+              ><label
+                >Maximum cards<input id="gen-max" type="number" value="12"
+              /></label>
+            </div>
+            <label
+              >Characters, comma-separated<input id="gen-characters" /></label
+            ><label
+              >Repository documents, one per line<textarea
+                id="gen-documents"
+                rows="3"
+              ></textarea>
+            </label>
+          </section>
+          <section>
+            <div class="settings-grid">
+              <label
+                >Provider<select id="gen-provider">
+                  <option>recorded</option>
+                  <option>openai</option>
+                </select></label
+              ><label>Model<input id="gen-model" value="fixture" /></label>
+            </div>
+            <label
+              >Recorded responses directory<input
+                id="gen-recorded"
+                value="tools/conversation-core/examples/generation/responses/flower" /></label
+            ><label>Empty output directory<input id="gen-output" /></label>
+            <div class="settings-grid">
+              <label
+                >Maximum calls<input
+                  id="gen-calls"
+                  type="number"
+                  value="12" /></label
+              ><label
+                >Dialogue characters<input
+                  id="gen-dialogue-limit"
+                  type="number"
+                  value="240"
+              /></label>
+            </div>
+            <div class="generation-actions">
+              <button id="preview-catalog" type="button">Preview catalog</button
+              ><button id="start-generation" type="button" class="primary">
+                Start generation
+              </button>
+            </div>
+            <div id="catalog-preview"></div>
+            <div id="generation-progress"></div>
+          </section>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="review-dialog" class="wide-dialog">
+      <form method="dialog">
+        <div class="dialog-head">
+          <div>
+            <small>PROVENANCE</small>
+            <h2>Generation review</h2>
+          </div>
+          <button value="close" aria-label="Close">×</button>
+        </div>
+        <div id="provenance-content"></div>
+      </form>
+    </dialog>
+    <dialog id="revision-dialog">
+      <form method="dialog">
+        <div class="dialog-head">
+          <div>
+            <small>MECHANICS LOCKED</small>
+            <h2>Revise selected dialogue</h2>
+          </div>
+          <button value="close" aria-label="Close">×</button>
+        </div>
+        <label
+          >Revision instruction<textarea id="revision-instruction" rows="3">
+Make the dialogue warmer and more concise without changing the choice meanings.</textarea
+          >
+        </label>
+        <div class="settings-grid">
+          <label
+            >Provider<select id="revision-provider">
+              <option>recorded</option>
+              <option>openai</option>
+            </select></label
+          ><label>Model<input id="revision-model" value="fixture" /></label>
+        </div>
+        <label
+          >Recorded responses directory<input
+            id="revision-recorded"
+            value="tools/conversation-core/examples/generation/responses/flower" /></label
+        ><button id="request-revision" type="button" class="primary">
+          Generate alternatives
+        </button>
+        <div id="revision-alternatives"></div>
+      </form>
+    </dialog>
+    <div id="toast" role="status"></div>
+    <script src="/app.js"></script>
+  </body>
 </html>

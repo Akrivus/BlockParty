@@ -6,5 +6,6 @@ public enum GenerationStage {
     GRAPH_REPAIR,
     INTENTIONS,
     DIALOGUE,
+    DIALOGUE_REVISION,
     REVIEW
 }

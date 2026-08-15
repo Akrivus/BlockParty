@@ -12,7 +12,6 @@ import block_party.conversation.validation.Diagnostic;
 import block_party.conversation.validation.ProjectValidator;
 import block_party.conversation.validation.ValidationReport;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -25,9 +24,15 @@ import java.util.List;
 public final class GenerationPipeline {
     private static final int MAX_GRAPH_REPAIRS = 2;
     private final NarrativeModel model;
+    private final GenerationProgressListener progress;
 
     public GenerationPipeline(NarrativeModel model) {
+        this(model, GenerationProgressListener.NONE);
+    }
+
+    public GenerationPipeline(NarrativeModel model, GenerationProgressListener progress) {
         this.model = model;
+        this.progress = progress == null ? GenerationProgressListener.NONE : progress;
     }
 
     public GenerationResult generate(GenerationBrief brief, Path repositoryRoot, Path output) throws Exception {
@@ -40,7 +45,7 @@ public final class GenerationPipeline {
         ContentCatalog catalog = new ContentCataloger().catalog(brief, repositoryRoot);
         write(output.resolve("brief.json"), ProjectJson.gson().toJson(brief));
         write(output.resolve("catalog.json"), ProjectJson.gson().toJson(catalog));
-        Session session = new Session(brief.budget(), generation);
+        Session session = new Session(brief.budget(), generation, progress);
 
         ArcPlan plan = session.call(model, GenerationStage.ARC_PLAN,
                 "Plan a compact interactive Block Party scene pack. Return JSON only.",
@@ -65,24 +70,41 @@ public final class GenerationPipeline {
         if (!validation.valid()) throw new IllegalStateException("Graph repair exhausted with " + validation.errors() + " error(s).");
         enforceBrief(brief, graph);
 
-        Intentions intentions = session.call(model, GenerationStage.INTENTIONS,
-                "Write one temporary scene intention for every DIALOGUE node. Do not redesign mechanics. Return JSON only.",
-                context(brief, catalog, plan, graph), Intentions.class);
+        Intentions intentions = session.call(
+                model,
+                GenerationStage.INTENTIONS,
+                "Write one temporary scene intention for every DIALOGUE node. "
+                        + "Do not redesign mechanics. Return JSON only.",
+                context(brief, catalog, plan, graph),
+                Intentions.class);
         write(output.resolve("intentions.json"), ProjectJson.gson().toJson(intentions));
 
-        String mechanics = mechanicsFingerprint(graph);
-        ScenePackProject written = session.call(model, GenerationStage.DIALOGUE,
-                "Polish only dialogue text, response labels, speaker emotion, and animation. Preserve every mechanic, id, edge, and transition. Return the complete project JSON.",
-                context(brief, catalog, plan, graph, intentions), ScenePackProject.class);
-        if (!mechanics.equals(mechanicsFingerprint(written))) {
+        String mechanics = MechanicsFingerprint.of(graph);
+        ScenePackProject written = session.call(
+                model,
+                GenerationStage.DIALOGUE,
+                "Polish only dialogue text, response labels, speaker emotion, and animation. "
+                        + "Preserve every mechanic, id, edge, and transition. Return the complete project JSON.",
+                context(brief, catalog, plan, graph, intentions),
+                ScenePackProject.class);
+        if (!mechanics.equals(MechanicsFingerprint.of(written))) {
             throw new IllegalStateException("Dialogue stage attempted to mutate locked mechanics.");
         }
         ValidationReport finalValidation = new ProjectValidator().validate(written);
-        if (!finalValidation.valid()) throw new IllegalStateException("Dialogue output failed validation with " + finalValidation.errors() + " error(s).");
+        if (!finalValidation.valid()) {
+            throw new IllegalStateException(
+                    "Dialogue output failed validation with "
+                            + finalValidation.errors()
+                            + " error(s).");
+        }
 
-        GenerationReview review = session.call(model, GenerationStage.REVIEW,
-                "Review voice, continuity, repetition, promises, and player-choice meaning. Return findings as JSON; do not modify the project.",
-                context(brief, catalog, plan, written, intentions), GenerationReview.class);
+        GenerationReview review = session.call(
+                model,
+                GenerationStage.REVIEW,
+                "Review voice, continuity, repetition, promises, and player-choice meaning. "
+                        + "Return findings as JSON; do not modify the project.",
+                context(brief, catalog, plan, written, intentions),
+                GenerationReview.class);
         write(output.resolve("review.json"), ProjectJson.gson().toJson(review));
         if (review.findings().stream().anyMatch(finding -> "ERROR".equalsIgnoreCase(finding.severity()))) {
             throw new IllegalStateException("Generation review reported blocking findings.");
@@ -114,20 +136,6 @@ public final class GenerationPipeline {
         if (project.allowRawMechanics()) throw new IllegalStateException("Generated projects cannot enable raw mechanics.");
     }
 
-    private static String mechanicsFingerprint(ScenePackProject project) {
-        JsonObject json = ProjectJson.gson().toJsonTree(project).getAsJsonObject();
-        for (JsonElement nodeElement : json.getAsJsonArray("nodes")) {
-            JsonObject node = nodeElement.getAsJsonObject();
-            node.remove("text");
-            node.remove("speaker");
-            if (node.has("responses")) {
-                for (JsonElement edgeElement : node.getAsJsonArray("responses")) edgeElement.getAsJsonObject().remove("label");
-            }
-            node.remove("editor");
-        }
-        return ProjectJson.gson().toJson(json);
-    }
-
     private static String context(Object... values) {
         JsonArray context = new JsonArray();
         for (Object value : values) context.add(ProjectJson.gson().toJsonTree(value));
@@ -149,15 +157,17 @@ public final class GenerationPipeline {
     private static final class Session {
         private final GenerationBudget budget;
         private final Path archive;
+        private final GenerationProgressListener progress;
         private int calls;
         private int inputCharacters;
         private int outputCharacters;
         private int inputTokens;
         private int outputTokens;
 
-        Session(GenerationBudget budget, Path archive) {
+        Session(GenerationBudget budget, Path archive, GenerationProgressListener progress) {
             this.budget = budget;
             this.archive = archive;
+            this.progress = progress;
         }
 
         <T> T call(NarrativeModel model, GenerationStage stage, String system, String user, Class<T> type) throws Exception {
@@ -166,6 +176,7 @@ public final class GenerationPipeline {
                 throw new IllegalStateException("Generation input budget exhausted.");
             }
             int number = ++calls;
+            progress.stageStarted(stage, number);
             inputCharacters += system.length() + user.length();
             ModelRequest request = new ModelRequest(stage, system, user, null, budget.maximumOutputCharacters() - outputCharacters);
             Path directory = archive.resolve(String.format("%02d-%s", number, stage.name().toLowerCase(java.util.Locale.ROOT)));
@@ -192,6 +203,7 @@ public final class GenerationPipeline {
             metadata.addProperty("inputTokens", response.usage().inputTokens());
             metadata.addProperty("outputTokens", response.usage().outputTokens());
             write(directory.resolve("metadata.json"), ProjectJson.gson().toJson(metadata));
+            progress.stageCompleted(stage, number);
             return ProjectJson.gson().fromJson(response.structuredOutput(), type);
         }
 

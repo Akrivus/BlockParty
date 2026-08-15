@@ -1,0 +1,54 @@
+{
+  "generationFormat": 1,
+  "id": "flower_request_generated",
+  "namespace": "block_party_generated",
+  "title": "Flower Request Generated",
+  "prompt": "In this data pack, the Moes are self-aware they're in a test conversation, and joke with the player as they assign a task to retrieve an item, promising a reward for bringing it, maybe a cake, or maybe the cake is a lie.",
+  "characters": [],
+  "documents": [],
+  "existingPacks": [],
+  "constraints": {
+    "minimumCards": 6,
+    "maximumCards": 12,
+    "maximumDialogueCharacters": 240,
+    "requiredFeatures": [],
+    "allowedActions": [
+      "SET_COOKIE",
+      "DELETE_COOKIE",
+      "CHANGE_COUNTER",
+      "GIVE_ITEM",
+      "TAKE_ITEM",
+      "MARK_TIME",
+      "OPEN_INVENTORY",
+      "START_FOLLOW",
+      "CLEAR_FOLLOW",
+      "END"
+    ],
+    "allowedConditions": [
+      "ALWAYS",
+      "HAS_COOKIE",
+      "COUNTER",
+      "HAS_ITEM",
+      "HELD_ITEM",
+      "MOE_HAS_ITEM",
+      "BLOCK",
+      "ELAPSED_TIME"
+    ],
+    "responseCues": [
+      "chat_bubble",
+      "green_checkmark",
+      "red_x",
+      "lovely_heart",
+      "trusty_armor",
+      "next_response"
+    ]
+  },
+  "budget": {
+    "maximumCalls": 12,
+    "maximumInputCharacters": 500000,
+    "maximumOutputCharacters": 200000
+  },
+  "provider": "openai",
+  "model": "gpt-5.6-luna",
+  "recordedResponses": "tools/conversation-core/examples/generation/responses/flower"
+}

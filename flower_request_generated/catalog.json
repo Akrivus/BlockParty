@@ -1,0 +1,42 @@
+{
+  "blockPartyVersion": "26.6",
+  "characters": [],
+  "actions": [
+    "CHANGE_COUNTER",
+    "CLEAR_FOLLOW",
+    "DELETE_COOKIE",
+    "END",
+    "GIVE_ITEM",
+    "MARK_TIME",
+    "OPEN_INVENTORY",
+    "RAW",
+    "SET_COOKIE",
+    "START_FOLLOW",
+    "TAKE_ITEM"
+  ],
+  "conditions": [
+    "ALWAYS",
+    "BLOCK",
+    "COUNTER",
+    "ELAPSED_TIME",
+    "HAS_COOKIE",
+    "HAS_ITEM",
+    "HELD_ITEM",
+    "MOE_HAS_ITEM",
+    "RAW"
+  ],
+  "responseCues": [
+    "green_checkmark",
+    "red_x",
+    "chat_bubble",
+    "lovely_heart",
+    "trusty_armor",
+    "stressful_skull",
+    "leather_bag",
+    "anvil",
+    "next_response",
+    "close_dialogue",
+    "open_dialogue"
+  ],
+  "documents": []
+}

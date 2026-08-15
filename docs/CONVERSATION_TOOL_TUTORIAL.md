@@ -1,0 +1,348 @@
+# Conversation Tool Tutorial
+
+This tutorial takes a scene pack from source project to exported Block Party
+datapack. It uses the included flower-request example, requires no API key, and
+does not require Minecraft to be running.
+
+Run commands from the BlockParty repository directory unless a step says
+otherwise. PowerShell examples use Windows paths.
+
+## What the tools produce
+
+There are three layers:
+
+1. A generation brief describes the story, constraints, allowed mechanics, and
+   model provider.
+2. A `project.json` is the editable card graph and durable source file.
+3. An exported datapack contains the Block Party scene JSON used by the game.
+
+Keep the project or generation directory as source. The exported datapack is a
+build artifact and can always be regenerated.
+
+## 1. Install the local tools
+
+```powershell
+.\gradlew.bat :tools:conversation-core:installDist :tools:conversation-workbench:installDist
+```
+
+This creates two launchers:
+
+```text
+tools\conversation-core\build\install\conversation-core\bin\conversation-core.bat
+tools\conversation-workbench\build\install\conversation-workbench\bin\conversation-workbench.bat
+```
+
+Re-run `installDist` after changing either tool's Java code or browser assets.
+
+## 2. Make a working copy of the example
+
+Do not edit the checked-in verification fixture directly. Copy it into a local
+authoring directory:
+
+```powershell
+New-Item -ItemType Directory -Force authoring
+Copy-Item tools\conversation-core\examples\flower-request.project.json authoring\flower-request.project.json
+```
+
+The `authoring` directory is ignored only if your own Git configuration says
+so, so check `git status` before committing.
+
+## 3. Open the card workbench
+
+```powershell
+tools\conversation-workbench\build\install\conversation-workbench\bin\conversation-workbench.bat authoring\flower-request.project.json
+```
+
+The tool starts a loopback-only local server and normally opens the workbench
+in the default browser. The terminal stays occupied while the workbench is
+running. Press `Ctrl+C` there when finished.
+
+If a browser should not open automatically:
+
+```powershell
+tools\conversation-workbench\build\install\conversation-workbench\bin\conversation-workbench.bat authoring\flower-request.project.json --no-open
+```
+
+Open the local address printed in the terminal yourself. Add `--port 18765` if
+you need a fixed port.
+
+To begin with a minimal valid two-card project instead of copying an example:
+
+```powershell
+tools\conversation-workbench\build\install\conversation-workbench\bin\conversation-workbench.bat --new authoring\my-pack.project.json
+```
+
+`--new` refuses to overwrite an existing path. Use the Project settings panel
+to replace the starter pack identity, contract, and entry information.
+
+## 4. Read the graph
+
+The center canvas contains one card per conversation state:
+
+- coral cards are dialogue shown to the player;
+- green cards are gameplay gates checked on a later interaction;
+- gold cards are endings;
+- solid connections are immediate dialogue transitions;
+- dashed connections leave the current dialogue or wait for gameplay.
+
+Drag cards to organize the canvas. Card positions are saved as editor metadata
+and do not alter compiled dialogue behavior.
+
+Use the left-side search and type buttons to narrow a larger pack. Selecting a
+card in the outline or canvas opens its inspector on the right.
+
+## 5. Edit a card
+
+Select the `introduction` card and change its dialogue text. The workbench marks
+the project as unsaved and validates it after a short delay.
+
+Player responses contain:
+
+- **Label:** optional phrase displayed with the response;
+- **Cue:** the Block Party response icon or cue identifier;
+- **Target:** the destination card ID;
+- **Transition:** when that destination becomes active.
+
+The common transition choices are:
+
+- `IMMEDIATE` — nest the destination dialogue in the current interaction;
+- `LATER_INTERACTION` — end now and make the next scene available later;
+- `EXTERNAL_EVENT` — wait for gameplay or state outside the current dialogue;
+- `PACK_EXIT` — leave the scene pack.
+
+Conditions and actions use typed controls generated from the Java authoring
+schema. Choose a primitive type, then fill only the fields that apply to it.
+State fields offer the project's declared state, while scope, comparison, and
+counter-operation fields use enumerated choices. Raw mechanics retain a JSON
+field because their structure is intentionally outside the typed model.
+
+Response actions use the same controls inside each response.
+
+Use **New card** to add a dialogue card. Card IDs use lowercase letters,
+numbers, and underscores. Renaming an ID updates its known incoming links.
+Deleting a linked card intentionally leaves validation errors so the broken
+routes are visible and can be repaired explicitly.
+
+Select a card and choose **Connect**, then select its destination. Dialogue
+cards receive a new immediate player response; gameplay and ending-style cards
+use their next-card route. Choose **Arrange** to lay out cards by their distance
+from the project entry.
+
+Choose **Project** to edit pack identity, namespace, entry card, declared state,
+required/provided state, named outcomes, and raw-mechanics policy. Renaming a
+state there refactors typed condition and action references.
+
+`Ctrl+Z` undoes, `Ctrl+Shift+Z` redoes, and `Ctrl+S` saves.
+
+## 6. Use validation feedback
+
+The Checks section displays errors and warnings. Select a diagnostic to focus
+its card.
+
+Errors block saving and export. Typical examples include:
+
+- a response targeting a card that does not exist;
+- a missing ending or pack outcome;
+- state used without a declaration;
+- an immediate transition into a gameplay gate;
+- a reward route without a completion guard.
+
+Warnings identify suspicious but potentially intentional behavior, such as
+two root scenes that may match the same interaction.
+
+## 7. Simulate routes
+
+Choose **Simulate**. The three scenario fields accept JSON objects:
+
+```json
+{
+  "quest_accepted": true
+}
+```
+
+```json
+{
+  "friendship": 2
+}
+```
+
+```json
+{
+  "#minecraft:small_flowers": 3
+}
+```
+
+These represent cookies, counters, and inventory respectively. Empty scenarios
+use `{}`.
+
+Run the simulation to see route counts, endings, cycles, card traces, and
+external requirements. A missing inventory requirement is treated as gameplay
+that happens between conversations rather than a simulator failure.
+
+Select a route and use **Previous** and **Next** to step through every entered
+card, player choice, state change, external acquisition, and ending. **Remember
+scenario** keeps the scenario in this browser for the next session.
+
+## 8. Save and export
+
+**Save project** atomically replaces the opened source file after validation.
+It never writes a partially valid project.
+
+While a project is unsaved, the browser keeps a device-local recovery copy. If
+the workbench or browser closes unexpectedly, reopening the same source path
+offers to restore it. A successful save removes the recovery copy.
+
+Choose **Export** after the project is clean. The output directory is prefilled
+as:
+
+```text
+<directory where the workbench was launched>\<pack-id>
+```
+
+For the example, launching from the repository directory proposes:
+
+```text
+C:\path\to\BlockParty\flower_request
+```
+
+You may edit this path or copy a directory path from Windows Explorer. The
+target must either not exist or be an empty directory; this prevents accidental
+overwrites.
+
+Successful export creates:
+
+```text
+flower_request\
+├── project.json
+├── graph.mmd
+├── reports and route summaries
+└── datapack\
+    ├── pack.mcmeta
+    └── data\...
+```
+
+Install or distribute the `datapack` directory. Retain `project.json` for later
+editing.
+
+## 9. Validate and build without the workbench
+
+The CLI provides the same authoritative operations for automation:
+
+```powershell
+$tool = "tools\conversation-core\build\install\conversation-core\bin\conversation-core.bat"
+& $tool validate authoring\flower-request.project.json
+& $tool simulate authoring\flower-request.project.json
+& $tool build authoring\flower-request.project.json authoring\flower-build
+```
+
+`build` and workbench export both refuse non-empty output directories.
+
+## 10. Generate a project from a brief
+
+Iteration 3 generation is optional. The included fixture uses recorded model
+responses, so it is deterministic and free:
+
+```powershell
+$tool = "tools\conversation-core\build\install\conversation-core\bin\conversation-core.bat"
+& $tool generate tools\conversation-core\examples\generation\flower-friendship.brief.json authoring\generated-flower
+```
+
+Open the resulting generation directory directly:
+
+```powershell
+tools\conversation-workbench\build\install\conversation-workbench\bin\conversation-workbench.bat authoring\generated-flower
+```
+
+The workbench finds `project.json` inside it. The directory also retains the
+brief, bounded content catalog, stage requests and responses, review, reports,
+and generated datapack.
+
+To prove an archived generation is reproducible without contacting a model:
+
+```powershell
+& $tool replay authoring\generated-flower authoring\replayed-flower
+```
+
+For a live generation, set the brief's provider to `openai`, choose its model,
+and provide `OPENAI_API_KEY` in the launching process. The key is never written
+to the generation archive.
+
+## 11. Generate and review in the workbench
+
+Choose **Generate** in the top toolbar. Fill in the creative prompt and card
+bounds, then list only the repository documents that should become model
+context. Use **Preview catalog** before generation to inspect each included
+path, character count, and content hash.
+
+The recorded flower fixture uses:
+
+```text
+Provider: recorded
+Model: fixture
+Recorded responses: tools/conversation-core/examples/generation/responses/flower
+```
+
+Choose a new empty output directory and start generation. The stage display
+advances through arc planning, graph creation and repair, intentions, dialogue,
+review, and completion. A successful run automatically opens its generated
+project.
+
+Choose **Review** to inspect the generation brief, usage totals, archived stage
+requests and responses, and final review. Selecting a generated dialogue card
+also shows the temporary scene intention that guided its prose.
+
+## 12. Request a mechanics-locked revision
+
+Select a dialogue card and choose **Revise**. Describe a prose change such as:
+
+```text
+Make this warmer and shorter, while preserving the meaning of every response.
+```
+
+Choose the recorded provider for the deterministic example or the OpenAI
+provider for a live request. The alternatives panel shows proposed dialogue,
+response labels when supplied, and a rationale. Nothing changes until **Accept
+alternative** is selected.
+
+Acceptance is server-checked. Only dialogue and response labels may change;
+conditions, actions, state, rewards, targets, transitions, IDs, and contracts
+must retain the same mechanics fingerprint. The accepted result is still
+unsaved and can be undone before saving.
+
+## 13. Run the verification suite
+
+Before committing tooling changes:
+
+```powershell
+.\gradlew.bat :tools:conversation-core:check :tools:conversation-workbench:check phase1Compliance
+```
+
+The checks cover valid and unsafe examples, simulation, compilation,
+generation repair, archive replay, workbench resources, and workbench export.
+
+## Troubleshooting
+
+### The export directory is not empty
+
+Choose a new pack directory or move the previous export elsewhere. Export does
+not merge into or delete an existing directory.
+
+### The workbench cannot save
+
+Resolve red validation errors first. Warnings do not prevent saving.
+
+### The browser did not open
+
+Use the `http://localhost:<port>/` address printed in the terminal. The server
+must remain running while the page is open.
+
+### Changes to the UI do not appear
+
+Stop the workbench, re-run its `installDist` task, and launch the installed
+script again. Browser assets are packaged into the distribution.
+
+### NeoForm reports an `output.jar` access error
+
+That Windows file-lock issue belongs to the Minecraft artifact build rather
+than the standalone conversation tools. Re-running the affected Gradle command
+after the lock clears normally reuses the completed artifact.
