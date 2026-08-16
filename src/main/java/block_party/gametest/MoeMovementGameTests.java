@@ -675,9 +675,10 @@ public final class MoeMovementGameTests {
     public static void moeMovementGoalsRegisterByPriority(GameTestHelper helper) {
         Moe moe = new Moe(CustomEntities.MOE.get(), helper.getLevel());
         assertGoalPriority(helper, moe, "FollowSessionGoal", 1);
-        assertGoalPriority(helper, moe, "EnvironmentalMovementGoal", 2);
-        assertGoalPriority(helper, moe, "SocialReactionGoal", 3);
-        assertGoalPriority(helper, moe, "IdleRoutineGoal", 4);
+        assertGoalPriority(helper, moe, "SceneDirectiveGoal", 2);
+        assertGoalPriority(helper, moe, "EnvironmentalMovementGoal", 3);
+        assertGoalPriority(helper, moe, "SocialReactionGoal", 4);
+        assertGoalPriority(helper, moe, "IdleRoutineGoal", 5);
         helper.succeed();
     }
 

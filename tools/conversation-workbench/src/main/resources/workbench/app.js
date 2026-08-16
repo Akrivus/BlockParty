@@ -266,6 +266,25 @@ function normalize() {
     for (const r of n.responses) r.actions ??= [];
     n.editor ??= { x: 80 + (i % 3) * 290, y: 80 + Math.floor(i / 3) * 190 };
   }
+  normalizeEditorPositions(state.project.nodes);
+}
+function normalizeEditorPositions(nodes) {
+  if (!nodes.length) return false;
+  for (const [i, node] of nodes.entries()) {
+    node.editor ??= { x: 80 + (i % 3) * 290, y: 80 + Math.floor(i / 3) * 190 };
+    if (!Number.isFinite(node.editor.x)) node.editor.x = 80 + (i % 3) * 290;
+    if (!Number.isFinite(node.editor.y)) node.editor.y = 80 + Math.floor(i / 3) * 190;
+  }
+  const minX = Math.min(...nodes.map((node) => node.editor.x));
+  const minY = Math.min(...nodes.map((node) => node.editor.y));
+  const shiftX = Math.max(0, 80 - minX);
+  const shiftY = Math.max(0, 80 - minY);
+  if (!shiftX && !shiftY) return false;
+  for (const node of nodes) {
+    node.editor.x += shiftX;
+    node.editor.y += shiftY;
+  }
+  return true;
 }
 function snapshot() {
   state.undo.push(JSON.stringify(state.project));
@@ -337,8 +356,12 @@ function renderCanvas() {
   const cards = $("#cards");
   cards.innerHTML = "";
   $(".workspace").classList.toggle("connecting", !!state.connecting);
-  const shown = new Set(state.project.nodes.filter(visible).map((n) => n.id));
-  for (const n of state.project.nodes.filter(visible)) {
+  const visibleNodes = state.project.nodes.filter(visible);
+  const shown = new Set(visibleNodes.map((n) => n.id));
+  const canvas = $("#canvas");
+  canvas.style.width = `${Math.max(1800, ...visibleNodes.map((n) => n.editor.x + 310))}px`;
+  canvas.style.height = `${Math.max(1200, ...visibleNodes.map((n) => n.editor.y + 220))}px`;
+  for (const n of visibleNodes) {
     const card = document.createElement("article");
     card.className = `node-card ${n.type}${n.id === state.selected ? " selected" : ""}${state.diagnostics.some((d) => d.node === n.id && d.severity === "ERROR") ? " has-error" : ""}${state.connecting === n.id ? " connect-source" : state.connecting ? " connect-target" : ""}`;
     card.style.left = n.editor.x + "px";
@@ -528,6 +551,9 @@ function renderInspector() {
     "ending",
   ])
     f.elements[key].value = n[key] ?? "";
+  f.elements.selectionGroup.value = n.selection?.group || "";
+  f.elements.selectionWeight.value = n.selection?.weight || 1;
+  f.elements.selectionCooldownTicks.value = n.selection?.cooldownTicks || 0;
   $("#type-badge").textContent = n.type;
   $("#response-count").textContent = n.responses.length;
   $("#condition-count").textContent = n.conditions.length;
@@ -643,38 +669,117 @@ function renderPrimitiveList(root, list, kind, commit) {
           if (value === undefined) delete next[index][field];
           else next[index][field] = value;
           commit(next);
-        }),
+        }, primitive.type),
       );
     root.append(box);
   });
 }
-function primitiveField(name, value, kind, commit) {
+function primitiveField(name, value, kind, commit, primitiveType) {
   const label = document.createElement("label");
   label.textContent = words(name);
   if (name === "filter") {
     const filter = value && typeof value === "object" ? clone(value) : { type: "block_party:always" };
+    const selectedFilterType = filter.type || "block_party:always";
+    delete filter.type;
     const type = document.createElement("select");
     type.innerHTML = (state.schema.sceneFilters || [])
-      .map((entry) => `<option value="${attr(entry)}"${filter.type === entry ? " selected" : ""}>${esc(entry)}</option>`)
+      .map((entry) => `<option value="${attr(entry)}"${selectedFilterType === entry ? " selected" : ""}>${esc(entry)}</option>`)
       .join("");
+    const fieldEditor = document.createElement("div");
+    fieldEditor.className = "scene-filter-fields";
+    const advanced = document.createElement("details");
+    const summary = document.createElement("summary");
+    summary.textContent = "Advanced JSON";
     const payload = document.createElement("textarea");
-    const fields = clone(filter);
-    delete fields.type;
-    payload.value = JSON.stringify(fields, null, 2);
-    const save = () => {
+    advanced.append(summary, payload);
+    const hint = document.createElement("small");
+    const filterPath = () => type.value.replace(/^.*:/, "");
+    const editableFields = () => state.schema.sceneFilterFields?.[filterPath()] || [];
+    const syncPayload = () => {
+      const fields = clone(filter);
+      delete fields.type;
+      payload.value = JSON.stringify(fields, null, 2);
+    };
+    const save = () => commit({ type: type.value, ...clone(filter) });
+    const renderFields = () => {
+      fieldEditor.innerHTML = "";
+      const path = filterPath();
+      const expected = editableFields();
+      const valueChoices = state.schema.sceneFilterEnums?.[path] || [];
+      for (const field of expected) {
+        const row = document.createElement("label");
+        row.textContent = words(field);
+        let control;
+        const choices = field === "value" ? valueChoices : state.schema.sceneFilterFieldEnums?.[field] || [];
+        if (choices.length) {
+          control = document.createElement("select");
+          control.innerHTML = `<option value="">Choose…</option>${choices.map((choice) => `<option value="${attr(choice)}"${filter[field] === choice ? " selected" : ""}>${esc(choice)}</option>`).join("")}`;
+        } else if (field === "not") {
+          control = document.createElement("input");
+          control.type = "checkbox";
+          control.checked = !!filter[field];
+        } else if ((["value", "start", "end", "radius"].includes(field)
+          && ["if_time", "altitude", "light_level", "distance_to_location", "distance_to_assignment", "seconds_since_routine"].includes(path))
+          || field === "radius") {
+          control = document.createElement("input");
+          control.type = "number";
+          control.step = "any";
+          control.value = filter[field] ?? 0;
+        } else {
+          control = document.createElement("input");
+          control.value = filter[field] ?? "";
+          if (field === "block") control.placeholder = "minecraft:block or #namespace:tag";
+          if (field === "value" && ["dimension", "biome", "location_dimension"].includes(path)) control.placeholder = "namespace:resource";
+        }
+        control.onchange = () => {
+          const next = control.type === "checkbox" ? control.checked
+            : control.type === "number" ? Number(control.value)
+              : control.value || undefined;
+          if (next === undefined || next === false && field === "not") delete filter[field];
+          else filter[field] = next;
+          syncPayload();
+          save();
+        };
+        row.append(control);
+        fieldEditor.append(row);
+      }
+      hint.textContent = expected.length
+        ? "This filter is fully editable here; Advanced JSON preserves optional fields."
+        : "This filter has no required fields. Use Advanced JSON for optional legacy fields.";
+      syncPayload();
+    };
+    const updateType = () => {
+      const path = type.value.replace(/^.*:/, "");
+      const choices = state.schema.sceneFilterEnums?.[path] || [];
+      for (const key of Object.keys(filter)) delete filter[key];
+      if (choices.length) filter.value = choices[0];
+      renderFields();
+      save();
+    };
+    type.onchange = updateType;
+    payload.onchange = () => {
       try {
-        commit({ type: type.value, ...JSON.parse(payload.value || "{}") });
+        const parsed = JSON.parse(payload.value || "{}");
+        for (const key of Object.keys(filter)) delete filter[key];
+        Object.assign(filter, parsed);
+        renderFields();
+        save();
       } catch (e) {
         toast("Scene filter fields must be valid JSON.", true);
       }
     };
-    type.onchange = save;
-    payload.onchange = save;
-    label.append(type, payload);
+    renderFields();
+    label.append(type, fieldEditor, advanced, hint);
     return label;
   }
   let input;
-  const enumValues = state.schema.enums[name];
+  const contextualEnum =
+    primitiveType === "REMEMBER_LOCATION" && name === "source"
+      ? "locationSource"
+      : primitiveType === "ASSIGN_TARGET" && name === "target"
+        ? "assignmentTarget"
+        : name;
+  const enumValues = state.schema.enums[contextualEnum];
   if (enumValues) {
     input = document.createElement("select");
     input.innerHTML =
@@ -687,11 +792,12 @@ function primitiveField(name, value, kind, commit) {
     input.type = "checkbox";
     input.checked = !!value;
   } else if (
-    ["count", "amount", "ticks", "minGameDays"].includes(name) ||
+    ["count", "amount", "ticks", "minTicks", "maxTicks", "searchRadius", "verticalRadius", "minGameDays", "speed", "arrivalRadius", "timeoutTicks"].includes(name) ||
     (name === "value" && kind === "condition")
   ) {
     input = document.createElement("input");
     input.type = "number";
+    if (["speed", "arrivalRadius"].includes(name)) input.step = "any";
     input.value = value ?? 0;
   } else if (name === "raw" || name === "filter") {
     input = document.createElement("textarea");
@@ -1196,6 +1302,11 @@ $("#card-form").addEventListener("change", (e) => {
         for (const r of x.responses) if (r.target === old) r.target = n.id;
       }
       state.selected = n.id;
+    } else if (key.startsWith("selection")) {
+      n.selection ??= { group: "", weight: 1, cooldownTicks: 0 };
+      if (key === "selectionGroup") n.selection.group = e.target.value;
+      if (key === "selectionWeight") n.selection.weight = Number(e.target.value) || 1;
+      if (key === "selectionCooldownTicks") n.selection.cooldownTicks = Number(e.target.value) || 0;
     } else if (key === "emotion" || key === "animation") {
       n.speaker ??= {};
       if (e.target.value) n.speaker[key] = e.target.value;
@@ -1308,6 +1419,12 @@ $("#review-generation").onclick = () => {
 $("#revise-card").onclick = openRevision;
 $("#request-revision").onclick = requestRevision;
 $("#simulate").onclick = () => $("#simulation-dialog").showModal();
+$("#reveal-cards").onclick = () => {
+  const shifted = normalizeEditorPositions(state.project.nodes);
+  if (shifted) changed();
+  else renderCanvas();
+  $("#viewport").scrollTo({ left: 0, top: 0, behavior: "smooth" });
+};
 $("#run-simulation").onclick = runSimulation;
 $("#save-scenario").onclick = saveScenario;
 $("#trace-prev").onclick = () => {

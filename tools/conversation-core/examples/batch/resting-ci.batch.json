@@ -1,0 +1,53 @@
+{
+  "batchFormat": 1,
+  "id": "resting_fixture",
+  "namespace": "block_party_generated",
+  "title": "Resting Fixture",
+  "provider": "recorded",
+  "model": "fixture",
+  "recordedResponses": "tools/conversation-core/examples/generation/responses/flower",
+  "defaults": {
+    "automaticContext": true,
+    "trigger": "right_click",
+    "variations": 1,
+    "minimumCards": 2,
+    "maximumCards": 12,
+    "maximumDialogueCharacters": 160
+  },
+  "selectorTags": {
+    "resting": {
+      "filters": [
+        {
+          "type": "block_party:routine_intent",
+          "value": "rest"
+        }
+      ],
+      "promptContext": "The Moe is currently resting."
+    }
+  },
+  "families": [
+    {
+      "id": "general",
+      "prompt": "Write a brief, low-stakes resting conversation.",
+      "tags": ["resting"],
+      "variations": 1
+    },
+    {
+      "id": "dere",
+      "prompt": "Write a brief resting conversation influenced by {value} behavior.",
+      "tags": ["resting"],
+      "variations": 1,
+      "matrix": {
+        "mode": "each",
+        "selector": {
+          "filter": {
+            "type": "block_party:dere",
+            "value": "{value}"
+          },
+          "contextTag": "block_party:moe/traits/dere/{value}"
+        },
+        "values": ["tsundere"]
+      }
+    }
+  ]
+}

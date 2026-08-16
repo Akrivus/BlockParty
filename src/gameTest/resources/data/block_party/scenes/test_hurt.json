@@ -1,0 +1,7 @@
+{
+  "trigger": "block_party:hurt",
+  "filters": [
+    "block_party:always"
+  ],
+  "actions": []
+}

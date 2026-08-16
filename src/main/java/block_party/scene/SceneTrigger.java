@@ -12,6 +12,9 @@ public enum SceneTrigger {
     FOLLOW_ENDED(7),
     PARTY_INVITE(7),
     GIFT_RECEIVED(7),
+    ASSIGNMENT_ARRIVED(7),
+    ASSIGNMENT_FAILED(7),
+    ASSIGNMENT_CANCELLED(7),
     WAIT(7),
     DISMISS(7),
     SHIFT_LEFT_CLICK(7),
@@ -23,6 +26,7 @@ public enum SceneTrigger {
     STARE(2),
     EVERY_TICK(1),
     RANDOM_TICK(1),
+    ROUTINE_TICK(1),
     NULL(0);
 
     private final int priority;

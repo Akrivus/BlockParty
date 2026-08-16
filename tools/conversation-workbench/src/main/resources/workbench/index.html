@@ -189,9 +189,9 @@
             <b id="pack-title">Conversation</b><span id="pack-meta"></span>
           </div>
           <span class="legend"
-            ><i class="dot dialogue"></i> dialogue <i class="dot gate"></i> gate
-            <i class="dot ending"></i> ending</span
-          >
+            ><button id="reveal-cards" type="button">Reveal cards</button>
+            <i class="dot dialogue"></i> dialogue <i class="dot gate"></i> gate
+            <i class="dot ending"></i> ending</span>
         </div>
         <div id="viewport">
           <div id="canvas">
@@ -230,6 +230,14 @@
             </select></label
           >
           <label>Trigger<select name="trigger"></select></label>
+          <details>
+            <summary>Routine selection</summary>
+            <div class="split">
+              <label>Group<input name="selectionGroup" /></label>
+              <label>Weight<input name="selectionWeight" type="number" min="1" /></label>
+            </div>
+            <label>Cooldown ticks<input name="selectionCooldownTicks" type="number" min="0" /></label>
+          </details>
           <label
             >Dialogue<textarea
               name="text"

@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,16 +47,26 @@ public final class DatapackCompiler {
 
         ProjectIndex index = new ProjectIndex(project);
         Map<String, SceneNode> nodes = index.nodes();
-        List<SceneNode> roots = new ArrayList<>();
-        roots.add(nodes.get(project.entry()));
+        Map<String, SceneNode> rootsById = new LinkedHashMap<>();
+        rootsById.put(project.entry(), nodes.get(project.entry()));
         project.nodes().stream()
-                .filter(node -> node.type() == NodeType.GAMEPLAY_GATE && !node.id().equals(project.entry()))
-                .forEach(roots::add);
+                .filter(node -> node.type() == NodeType.GAMEPLAY_GATE
+                        || node.trigger() != null && !node.trigger().isBlank())
+                .forEach(node -> rootsById.put(node.id(), node));
 
         Path scenes = output.resolve("data").resolve(project.pack().namespace()).resolve("scenes").resolve(project.pack().id());
-        for (SceneNode root : roots) {
+        for (SceneNode root : rootsById.values()) {
             JsonObject scene = new JsonObject();
             scene.addProperty("trigger", compileTrigger(root.trigger()));
+            if (root.selection() != null) {
+                JsonObject selection = new JsonObject();
+                if (root.selection().group() != null && !root.selection().group().isBlank()) {
+                    selection.addProperty("group", root.selection().group());
+                }
+                selection.addProperty("weight", Math.max(1, root.selection().weight()));
+                selection.addProperty("cooldown_ticks", Math.max(0, root.selection().cooldownTicks()));
+                scene.add("selection", selection);
+            }
             JsonArray filters = new JsonArray();
             root.conditions().forEach(condition -> filters.add(MechanicsCompiler.condition(condition, index)));
             scene.add("filters", filters);
@@ -127,6 +138,7 @@ public final class DatapackCompiler {
             return;
         }
         if (next.type() == NodeType.GAMEPLAY_GATE
+                || next.trigger() != null && !next.trigger().isBlank()
                 || transition == block_party.conversation.model.TransitionType.LATER_INTERACTION
                 || transition == block_party.conversation.model.TransitionType.EXTERNAL_EVENT
                 || transition == block_party.conversation.model.TransitionType.PACK_EXIT) {

@@ -16,6 +16,7 @@ public record SceneNode(
         List<PackAction> actions,
         String next,
         String ending,
+        SceneSelection selection,
         EditorPosition editor) {
     public static final int MAX_RESPONSES = 3;
 

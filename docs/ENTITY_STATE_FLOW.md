@@ -341,7 +341,7 @@ Current SavedData authority:
 
 - `HidingSpots` is authoritative for hidden position to database ID indexing.
 - `BlockPartyDB` SavedData is authoritative for owner UUID to NPC ID lists and resource-loaded Moe name claims.
-- `SceneVariables` is authoritative for Moe-scoped scene cookies and counters once scene actions run. Locations and targets remain persistence scaffolding only.
+- `SceneVariables` is authoritative for scoped scene cookies, counters, and named locations. A Moe's NBT-persisted scene directive can autonomously approach a named location or supported entity target and expose arrival/failure state to scenes. The legacy integer `Targets` map remains compatibility scaffolding only.
 
 Current SQLite authority:
 

@@ -26,7 +26,7 @@ public final class SceneVariables extends SavedData {
 
     private final Map<ScopedKey, Cookies> cookies = Maps.newHashMap();
     private final Map<ScopedKey, Counters> counters = Maps.newHashMap();
-    private final Map<Long, Locations> locations = Maps.newHashMap();
+    private final Map<ScopedKey, Locations> locations = Maps.newHashMap();
     private final Map<Long, Targets> targets = Maps.newHashMap();
 
     public static SceneVariables get(Level level) {
@@ -41,7 +41,8 @@ public final class SceneVariables extends SavedData {
         readLegacyMap(compound, "Counters", data.counters, Counters::new);
         readScopedMap(compound, "ScopedCookies", data.cookies, Cookies::new);
         readScopedMap(compound, "ScopedCounters", data.counters, Counters::new);
-        readMap(compound, "Locations", data.locations, Locations::new);
+        readLegacyMap(compound, "Locations", data.locations, Locations::new);
+        readScopedMap(compound, "ScopedLocations", data.locations, Locations::new);
         readMap(compound, "Targets", data.targets, Targets::new);
         return data;
     }
@@ -52,7 +53,8 @@ public final class SceneVariables extends SavedData {
         compound.put("Counters", writeLegacyMap(this.counters));
         compound.put("ScopedCookies", writeScopedMap(this.cookies));
         compound.put("ScopedCounters", writeScopedMap(this.counters));
-        compound.put("Locations", writeMap(this.locations));
+        compound.put("Locations", writeLegacyMap(this.locations));
+        compound.put("ScopedLocations", writeScopedMap(this.locations));
         compound.put("Targets", writeMap(this.targets));
         return compound;
     }
@@ -97,12 +99,12 @@ public final class SceneVariables extends SavedData {
         this.setDirty();
         return new SceneVariableStore(
                 this.cookies.computeIfAbsent(key, ignored -> new Cookies()),
-                this.counters.computeIfAbsent(key, ignored -> new Counters()));
+                this.counters.computeIfAbsent(key, ignored -> new Counters()),
+                this.locations.computeIfAbsent(key, ignored -> new Locations()));
     }
 
     public Locations locations(long id) {
-        this.setDirty();
-        return this.locations.computeIfAbsent(id, ignored -> new Locations());
+        return this.npc(id).locations();
     }
 
     public Targets targets(long id) {

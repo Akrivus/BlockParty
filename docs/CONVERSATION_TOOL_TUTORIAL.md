@@ -404,6 +404,39 @@ the mod's live resources:
 the batch projects' exact pack directories beneath Block Party's scene
 resources.
 
+Selector tags can combine personality with dating-sim context. For example, a
+`rainy_evening` tag can lock `weather=rain` and `time_period=evening`, while a
+forest tag can lock `biome=#minecraft:is_forest`. The tag's `promptContext`
+should describe what the filters mean narratively; the filters remain the
+runtime source of truth.
+
+## 14. Author scene-directed movement
+
+Use `REMEMBER_LOCATION` to capture a reusable place, then
+`ASSIGN_LOCATION` to let the Moe travel there after the scene ends. Choose the
+location scope, speed, arrival radius, and timeout in the action editor. For a
+moving destination, use `ASSIGN_TARGET` with an owner, dialogue player, social
+target, or nearby Moe.
+
+Follow-up cards should use the `assignment_arrived`, `assignment_failed`, or
+`assignment_cancelled` trigger together with assignment filters. An assignment
+means the Moe intends to move; only an arrival-triggered card should describe
+the trip as complete.
+
+For background behavior, choose `routine_tick` and open **Routine selection**
+on the card. A group suppresses immediate repeats, weight controls relative
+frequency among equally specific eligible scenes, and cooldown ticks prevent
+the same scene from returning too soon. `ASSIGN_NEAR_BLOCK` can stage a Moe by
+a block or block tag; connect its arrival card to timed wait, animation,
+emotion, pose, or look actions.
+
+Generation recognizes the same vocabulary. A prompt such as “At sunset, if it
+is clear and this Moe is idle…” should produce evening, clear-weather, and idle
+scene filters on a `routine_tick` entry. “Walk to the garden, look at the
+lantern, wait, then return home” should produce separate outbound, block-arrival,
+staging, and return steps. Inspect `mechanics-audit.json` in Review when a
+requested mechanic required graph repair.
+
 ## Troubleshooting
 
 ### The export directory is not empty

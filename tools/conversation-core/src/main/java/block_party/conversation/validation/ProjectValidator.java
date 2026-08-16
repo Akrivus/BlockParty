@@ -124,6 +124,9 @@ public final class ProjectValidator {
                     "Unknown trigger '" + node.trigger() + "'. Use right_click for ordinary Moe interaction."));
         }
         validateSpeaker(node, issues);
+        if (node.selection() != null && (node.selection().weight() < 1 || node.selection().cooldownTicks() < 0)) {
+            issues.add(error("INVALID_SELECTION", node.id(), "Scene selection weight must be positive and cooldown cannot be negative."));
+        }
         if (node.type() == NodeType.GAMEPLAY_GATE && !node.id().equals(project.entry())
                 && node.conditions().stream().noneMatch(condition -> condition.type() == ConditionType.HAS_COOKIE
                         || condition.type() == ConditionType.COUNTER)) {
@@ -243,6 +246,32 @@ public final class ProjectValidator {
                 }
             } else if ((action.type() == ActionType.GIVE_ITEM || action.type() == ActionType.TAKE_ITEM) && !resource(action.item())) {
                 issues.add(error("INVALID_RESOURCE", node, "Item action requires a valid item or tag resource id."));
+            } else if ((action.type() == ActionType.REMEMBER_LOCATION || action.type() == ActionType.FORGET_LOCATION
+                    || action.type() == ActionType.ASSIGN_LOCATION)
+                    && (action.location() == null || !validId(action.location()))) {
+                issues.add(error("INVALID_LOCATION", node, "Location action requires a lowercase location name."));
+            } else if (action.type() == ActionType.ASSIGN_TARGET
+                    && !Set.of("owner", "dialogue_player", "social_target", "nearest_moe").contains(action.target())) {
+                issues.add(error("INVALID_TARGET", node, "Target assignment requires owner, dialogue_player, social_target, or nearest_moe."));
+            } else if (Set.of(ActionType.ASSIGN_LOCATION, ActionType.ASSIGN_TARGET).contains(action.type())
+                    && (action.speed() < 0.0D || action.arrivalRadius() < 0.0D || action.timeoutTicks() < 0)) {
+                issues.add(error("INVALID_ASSIGNMENT", node, "Assignment speed, arrival radius, and timeout cannot be negative."));
+            } else if (action.type() == ActionType.ASSIGN_NEAR_BLOCK && !resource(action.block())) {
+                issues.add(error("INVALID_RESOURCE", node, "Block assignment requires a valid block or tag resource ID."));
+            } else if (action.type() == ActionType.ASSIGN_NEAR_BLOCK
+                    && (action.searchRadius() < 0 || action.searchRadius() > 32
+                    || action.verticalRadius() < 0 || action.verticalRadius() > 16)) {
+                issues.add(error("INVALID_ASSIGNMENT", node, "Block search radius must be at most 32 and vertical radius at most 16."));
+            } else if (action.type() == ActionType.WAIT_RANDOM_TICKS
+                    && (action.minTicks() < 0 || action.maxTicks() < action.minTicks())) {
+                issues.add(error("INVALID_WAIT", node, "Random wait requires 0 <= minTicks <= maxTicks."));
+            } else if (Set.of(ActionType.WAIT_TICKS, ActionType.PLAY_ANIMATION, ActionType.SET_EMOTION).contains(action.type())
+                    && action.ticks() < 0) {
+                issues.add(error("INVALID_WAIT", node, "Timed action ticks cannot be negative."));
+            } else if (action.type() == ActionType.PLAY_ANIMATION && !SpeakerPresentation.validAnimation(action.animation())) {
+                issues.add(error("INVALID_ANIMATION", node, "Animation must be one of " + SpeakerPresentation.ANIMATIONS + "."));
+            } else if (action.type() == ActionType.SET_EMOTION && !SpeakerPresentation.validEmotion(action.emotion())) {
+                issues.add(error("INVALID_EMOTION", node, "Emotion must be one of " + SpeakerPresentation.EMOTIONS + "."));
             }
         }
     }

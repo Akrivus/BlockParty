@@ -75,8 +75,9 @@ public final class GenerationPipeline {
 
         ArcPlan plan = session.call(model, GenerationStage.ARC_PLAN,
                 "Plan a compact interactive Block Party scene pack. Return only an ArcPlan with "
-                        + "premise, characterArc, beats, and outcomes; do not write cards or dialogue.",
-                context(brief, catalog), ArcPlan.class);
+                        + "premise, characterArc, beats, and outcomes; do not write cards or dialogue. Treat every explicit "
+                        + "time, weather, state, movement, staging, and return instruction as a required gameplay beat.",
+                context(brief, catalog, GenerationMechanicsGuide.describe(brief)), ArcPlan.class);
         validatePlan(plan);
 
         ScenePackProject graph = session.call(model, GenerationStage.GRAPH,
@@ -87,13 +88,16 @@ public final class GenerationPipeline {
                         + "later GAMEPLAY_GATE must include a HAS_COOKIE or COUNTER condition written by an earlier choice. "
                         + "A DIALOGUE node may have at most " + SceneNode.MAX_RESPONSES + " player responses. "
                         + "Response cue is an icon enum from the schema; put words shown to the player in label. "
-                        + "Never emit SCENE_FILTER conditions; locked batch selectors are applied by the tool.",
-                context(brief, catalog, plan), ScenePackProject.class);
+                        + "Emit SCENE_FILTER conditions for environmental and state constraints requested by the creative prompt. "
+                        + "Locked selectors are added by the tool and must not be contradicted. Assignments are asynchronous: "
+                        + "continue post-arrival staging from assignment_arrived nodes with matching assignment result IDs.",
+                context(brief, catalog, GenerationMechanicsGuide.describe(brief), plan), ScenePackProject.class);
+        graph = normalizeSceneFilters(graph);
         graph = alignPackIdentity(brief, graph);
         graph = applyLockedSelectors(brief, graph);
         graph = truncateResponses(graph);
         graph = normalizeResponseCues(graph);
-        ValidationReport validation = new ProjectValidator().validate(graph);
+        ValidationReport validation = validateGraph(brief, graph);
         int repairs = 0;
         while (!validation.valid() && repairs++ < MAX_GRAPH_REPAIRS) {
             JsonObject repairContext = new JsonObject();
@@ -105,15 +109,21 @@ public final class GenerationPipeline {
                             + "in projectFormat 2; speaker must be an object, never null or a name string. "
                             + "Use null emotion and animation fields for cards without a speaker. For REPEATABLE_REWARD, "
                             + "declare a COOKIE state, add a not=true HAS_COOKIE condition for it to the GAMEPLAY_GATE, "
-                            + "and add SET_COOKIE for that same state directly to the gate actions; a counter guard is invalid.",
-                    ProjectJson.gson().toJson(repairContext), ScenePackProject.class);
+                            + "and add SET_COOKIE for that same state directly to the gate actions; a counter guard is invalid. "
+                            + "Honor MISSING_PROMPT_* diagnostics with the documented SCENE_FILTER, assignment, arrival, and staging primitives. "
+                            + "For CONFLICTING_MOVEMENT_MODES remove START_FOLLOW from assignment routes. For DEFERRED_ASSIGNMENT_START, "
+                            + "move the assignment onto the accepting response and target the assignment_arrived node with EXTERNAL_EVENT. "
+                            + "SCENE_FILTER requires a nested filter object whose own type is a block_party resource ID; never put that type in state.",
+                    context(repairContext, GenerationMechanicsGuide.describe(brief)), ScenePackProject.class);
+            graph = normalizeSceneFilters(graph);
             graph = alignPackIdentity(brief, graph);
             graph = applyLockedSelectors(brief, graph);
             graph = truncateResponses(graph);
             graph = normalizeResponseCues(graph);
-            validation = new ProjectValidator().validate(graph);
+            validation = validateGraph(brief, graph);
         }
         write(output.resolve("graph-validation.json"), ProjectJson.gson().toJson(validation));
+        write(output.resolve("mechanics-audit.json"), ProjectJson.gson().toJson(PromptMechanicsAudit.audit(brief, graph)));
         if (!validation.valid()) {
             throw new IllegalStateException("Graph repair exhausted with "
                     + validation.errors() + " error(s): " + errorSummary(validation));
@@ -170,7 +180,7 @@ public final class GenerationPipeline {
         if (!mechanics.equals(MechanicsFingerprint.of(written))) {
             throw new IllegalStateException("Dialogue stage attempted to mutate locked mechanics.");
         }
-        ValidationReport finalValidation = new ProjectValidator().validate(written);
+        ValidationReport finalValidation = validateGraph(brief, written);
         if (!finalValidation.valid()) {
             throw new IllegalStateException(
                     "Dialogue output failed validation with "
@@ -183,8 +193,9 @@ public final class GenerationPipeline {
                 GenerationStage.REVIEW,
                 "Review voice, continuity, repetition, promises, player-choice meaning, and canon. "
                         + "Check cardinal/corporeal identity, trait support, individual memories, and invented mechanics. "
+                        + "Confirm that requested scene filters and asynchronous assignment choreography are present. "
                         + "Return findings as JSON; do not modify the project.",
-                context(brief, catalog, plan, written, intentions),
+                context(brief, catalog, GenerationMechanicsGuide.describe(brief), plan, written, intentions),
                 GenerationReview.class);
         write(output.resolve("review.json"), ProjectJson.gson().toJson(review));
 
@@ -230,6 +241,29 @@ public final class GenerationPipeline {
         return ProjectJson.gson().fromJson(project, ScenePackProject.class);
     }
 
+    private static ScenePackProject normalizeSceneFilters(ScenePackProject graph) {
+        JsonObject project = ProjectJson.gson().toJsonTree(graph).getAsJsonObject();
+        for (JsonElement nodeElement : project.getAsJsonArray("nodes")) {
+            JsonObject node = nodeElement.getAsJsonObject();
+            if (!node.has("conditions") || !node.get("conditions").isJsonArray()) continue;
+            for (JsonElement conditionElement : node.getAsJsonArray("conditions")) {
+                JsonObject condition = conditionElement.getAsJsonObject();
+                if (!condition.has("type") || !"SCENE_FILTER".equals(condition.get("type").getAsString())) continue;
+                JsonObject filter = condition.has("filter") && condition.get("filter").isJsonObject()
+                        ? condition.getAsJsonObject("filter") : new JsonObject();
+                if ((!filter.has("type") || filter.get("type").isJsonNull())
+                        && condition.has("state") && !condition.get("state").isJsonNull()
+                        && !condition.get("state").getAsString().isBlank()) {
+                    String type = condition.get("state").getAsString();
+                    filter.addProperty("type", type.contains(":") ? type : "block_party:" + type);
+                }
+                filter.entrySet().removeIf(entry -> entry.getValue() == null || entry.getValue().isJsonNull());
+                condition.add("filter", filter);
+            }
+        }
+        return ProjectJson.gson().fromJson(project, ScenePackProject.class);
+    }
+
     private static String unqualifyCue(String cue) {
         int separator = cue.indexOf(':');
         return separator >= 0 ? cue.substring(separator + 1) : cue;
@@ -244,7 +278,7 @@ public final class GenerationPipeline {
         return ProjectJson.gson().fromJson(json, ScenePackProject.class);
     }
 
-    private static ScenePackProject applyLockedSelectors(GenerationBrief brief, ScenePackProject project) {
+    static ScenePackProject applyLockedSelectors(GenerationBrief brief, ScenePackProject project) {
         if (brief.lockedFilters().isEmpty() && (brief.lockedTrigger() == null || brief.lockedTrigger().isBlank())) {
             return project;
         }
@@ -255,9 +289,11 @@ public final class GenerationPipeline {
                 nodes.add(node);
                 continue;
             }
-            List<PackCondition> conditions = new ArrayList<>(node.conditions().stream()
-                    .filter(condition -> condition.type() != ConditionType.SCENE_FILTER).toList());
+            List<PackCondition> conditions = new ArrayList<>(node.conditions());
             for (JsonObject filter : brief.lockedFilters()) {
+                boolean present = conditions.stream().anyMatch(condition -> condition.type() == ConditionType.SCENE_FILTER
+                        && condition.filter() != null && condition.filter().equals(filter));
+                if (present) continue;
                 conditions.add(new PackCondition(
                         ConditionType.SCENE_FILTER, null, null, null, 0, null, 0, false, null, 0, filter, null));
             }
@@ -265,11 +301,27 @@ public final class GenerationPipeline {
                     ? node.trigger() : brief.lockedTrigger();
             nodes.add(new SceneNode(
                     node.id(), node.type(), node.title(), trigger, conditions, node.text(), node.tooltip(), node.speaker(),
-                    node.responses(), node.actions(), node.next(), node.ending(), node.editor()));
+                    node.responses(), node.actions(), node.next(), node.ending(), node.selection(), node.editor()));
         }
         return new ScenePackProject(
                 project.projectFormat(), project.target(), project.pack(), project.contract(), project.state(),
                 project.allowRawMechanics(), project.entry(), nodes);
+    }
+
+    private static ValidationReport validateGraph(GenerationBrief brief, ScenePackProject project) {
+        List<Diagnostic> diagnostics = new ArrayList<>(new ProjectValidator().validate(project).diagnostics());
+        diagnostics.addAll(PromptMechanicsAudit.audit(brief, project));
+        int cards = project.nodes().size();
+        if (cards < brief.constraints().minimumCards() || cards > brief.constraints().maximumCards()) {
+            diagnostics.add(new Diagnostic(
+                    Severity.WARNING,
+                    "CARD_COUNT_OUTSIDE_TARGET",
+                    null,
+                    "Generated graph has " + cards + " cards; requested target was "
+                            + brief.constraints().minimumCards() + "–" + brief.constraints().maximumCards()
+                            + ". Keeping the mechanically valid graph rather than adding or removing content solely for count."));
+        }
+        return new ValidationReport(diagnostics);
     }
 
     private static ScenePackProject applyDialogue(ScenePackProject graph, DialoguePass dialogue) {
@@ -364,11 +416,6 @@ public final class GenerationPipeline {
     }
 
     private static void enforceBrief(GenerationBrief brief, ScenePackProject project) {
-        int cards = project.nodes().size();
-        if (cards < brief.constraints().minimumCards()) {
-            throw new IllegalStateException("Generated graph has " + cards + " cards; expected at least "
-                    + brief.constraints().minimumCards() + ".");
-        }
         if (project.allowRawMechanics()) throw new IllegalStateException("Generated projects cannot enable raw mechanics.");
     }
 
@@ -386,6 +433,10 @@ public final class GenerationPipeline {
         JsonArray context = new JsonArray();
         for (Object value : values) context.add(ProjectJson.gson().toJsonTree(value));
         return ProjectJson.gson().toJson(context);
+    }
+
+    static JsonElement normalizeProjectResponseForTests(JsonElement response) {
+        return Session.normalizeProjectResponse(response, ScenePackProject.class);
     }
 
     private static void refuseNonEmpty(Path output) throws IOException {
@@ -485,8 +536,33 @@ public final class GenerationPipeline {
                 normalizeConditions(node);
                 normalizeTrigger(node);
             }
+            normalizeEditorPositions(normalized.getAsJsonArray("nodes"));
             normalizeDeclaredOutcomes(normalized);
             return normalized;
+        }
+
+        private static void normalizeEditorPositions(JsonArray nodes) {
+            int minimumX = Integer.MAX_VALUE;
+            int minimumY = Integer.MAX_VALUE;
+            for (JsonElement element : nodes) {
+                if (!element.isJsonObject()) continue;
+                JsonObject node = element.getAsJsonObject();
+                if (!node.has("editor") || !node.get("editor").isJsonObject()) continue;
+                JsonObject editor = node.getAsJsonObject("editor");
+                minimumX = Math.min(minimumX, editor.has("x") ? editor.get("x").getAsInt() : 0);
+                minimumY = Math.min(minimumY, editor.has("y") ? editor.get("y").getAsInt() : 0);
+            }
+            int shiftX = minimumX == Integer.MAX_VALUE ? 0 : Math.max(0, 80 - minimumX);
+            int shiftY = minimumY == Integer.MAX_VALUE ? 0 : Math.max(0, 80 - minimumY);
+            if (shiftX == 0 && shiftY == 0) return;
+            for (JsonElement element : nodes) {
+                if (!element.isJsonObject()) continue;
+                JsonObject node = element.getAsJsonObject();
+                if (!node.has("editor") || !node.get("editor").isJsonObject()) continue;
+                JsonObject editor = node.getAsJsonObject("editor");
+                editor.addProperty("x", (editor.has("x") ? editor.get("x").getAsInt() : 0) + shiftX);
+                editor.addProperty("y", (editor.has("y") ? editor.get("y").getAsInt() : 0) + shiftY);
+            }
         }
 
         private static void normalizeDeclaredOutcomes(JsonObject project) {
@@ -607,10 +683,25 @@ public final class GenerationPipeline {
             for (JsonElement element : node.getAsJsonArray("conditions")) {
                 if (!element.isJsonObject()) continue;
                 JsonObject condition = element.getAsJsonObject();
-                if (!"BLOCK".equals(stringValue(condition, "type"))) continue;
-                if (hasText(condition, "item") || !hasText(condition, "marker")) continue;
-                condition.addProperty("item", condition.get("marker").getAsString());
-                condition.add("marker", JsonNull.INSTANCE);
+                String type = stringValue(condition, "type");
+                if ("SCENE_FILTER".equals(type)) {
+                    JsonObject filter = condition.has("filter") && condition.get("filter").isJsonObject()
+                            ? condition.getAsJsonObject("filter") : new JsonObject();
+                    if ((!filter.has("type") || filter.get("type").isJsonNull()) && hasText(condition, "state")) {
+                        String filterType = condition.get("state").getAsString();
+                        filter.addProperty("type", filterType.contains(":") ? filterType : "block_party:" + filterType);
+                    }
+                    filter.entrySet().removeIf(entry -> entry.getValue() == null || entry.getValue().isJsonNull());
+                    condition.add("filter", filter);
+                } else if (condition.has("filter") && condition.get("filter").isJsonNull()) {
+                    // Strict response schemas emit nullable record fields explicitly. Gson's JsonObject adapter
+                    // rejects an explicit JsonNull, while an absent optional field correctly becomes null.
+                    condition.remove("filter");
+                }
+                if ("BLOCK".equals(type) && !hasText(condition, "item") && hasText(condition, "marker")) {
+                    condition.addProperty("item", condition.get("marker").getAsString());
+                    condition.add("marker", JsonNull.INSTANCE);
+                }
             }
         }
 

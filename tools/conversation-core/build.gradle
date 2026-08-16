@@ -34,6 +34,11 @@ tasks.register('conversationToolCheck') {
             mainClass = 'block_party.conversation.model.SceneFilterCatalogSelfTest'
             args rootProject.projectDir.absolutePath
         }
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            mainClass = 'block_party.conversation.generation.PromptMechanicsAuditSelfTest'
+            args rootProject.projectDir.absolutePath
+        }
         def fixture = file('examples/flower-request.project.json')
         def verification = layout.buildDirectory.dir('tool-check').get().asFile
         delete verification
@@ -138,7 +143,7 @@ tasks.register('conversationToolCheck') {
         def batchRoot = new File(verification, 'batch-authoring')
         batchRoot.mkdirs()
         def batchSpec = new File(batchRoot, 'resting.batch.json')
-        batchSpec.bytes = file('examples/batch/resting.batch.json').bytes
+        batchSpec.bytes = file('examples/batch/resting-ci.batch.json').bytes
         ['plan', 'expand', 'generate', 'validate'].each { operation ->
             javaexec {
                 classpath = sourceSets.main.runtimeClasspath

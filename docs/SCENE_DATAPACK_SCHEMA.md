@@ -340,6 +340,9 @@ Supported numeric filters:
 - `block_party:social_affinity`
 - `block_party:social_tension`
 - `block_party:social_interest`
+- `block_party:altitude`
+- `block_party:light_level`
+- `block_party:distance_to_location`
 
 Example:
 
@@ -379,6 +382,46 @@ Fields:
 All supplied game-time and real-time minimums must pass. Missing markers fail
 closed. Use this to pace relationship scenes without relying on repeated
 back-to-back triggers.
+
+## Environment And Named Location Filters
+
+Environment filters let scene selection act like a dating-sim schedule:
+
+- `time_period`: `morning`, `noon`, `evening`, `night`, `midnight`, or `dawn`
+- `weather`: `clear`, `rain`, or `thunder`
+- `dimension`: dimension resource ID
+- `biome`: biome resource ID or `#biome_tag`
+- `altitude`: numeric comparison against the Moe's Y coordinate
+- `can_see_sky`: flag filter, with optional `not`
+- `light_level`: numeric comparison; `source` is `maximum`, `block`, or `sky`
+- `near_block`: block ID or tag plus a radius from 0 through 16
+
+`if_time` also accepts `start` and `end`. A range whose start is greater than
+its end wraps across midnight.
+
+```json
+{
+  "type": "block_party:time_period",
+  "value": "evening"
+}
+```
+
+```json
+{
+  "type": "block_party:biome",
+  "value": "#minecraft:is_forest"
+}
+```
+
+Named locations store an exact dimension and block position. They are explicit
+narrative bookmarks and are separate from inferred remembered-place types.
+
+- `has_location`: requires `name` and optional `scope`
+- `at_location`: also accepts `radius`, default `2`
+- `distance_to_location`: numeric comparison, and fails across dimensions
+- `location_dimension`: requires `name`, `value`, and optional `scope`
+
+Scopes are `npc` (default), `player`, and `world`.
 
 ## String And Trait Filters
 
@@ -893,6 +936,97 @@ Mark time action:
 `mark_time` records the current Minecraft game time and wall-clock time for a
 named marker. Use it with `elapsed_since_marker` to prevent exchange chains from
 being completed by spam-clicking a character.
+
+Named location actions:
+
+```json
+{
+  "type": "block_party:remember_location",
+  "action": {
+    "scope": "player",
+    "name": "first_date"
+  }
+}
+```
+
+`remember_location` records a dimension and block position. Optional `source`
+values are `moe` (default), `player`, `home`, `current_anchor`, and
+`remembered_place`.
+`forget_location` uses the same `scope` and `name` fields to delete it. Existing
+1.19-era NPC location data remains readable as NPC-scoped locations.
+
+Scene-directed movement is persistent entity state:
+
+```json
+{
+  "type": "block_party:assign_location",
+  "action": {
+    "scope": "player",
+    "name": "meeting_spot",
+    "speed": 1.0,
+    "arrival_radius": 2.0,
+    "timeout_ticks": 1200
+  }
+}
+```
+
+`assign_target` accepts `selector`: `owner`, `dialogue_player`,
+`social_target`, or `nearest_moe`, plus the same movement fields.
+`clear_assignment` cancels an active assignment. Assignments suspend during
+dialogue and player-following, outrank ambient movement, and never teleport
+across dimensions.
+
+Assignment filters are `has_assignment`, `assignment_kind`,
+`assignment_status`, `assignment_location`, `assignment_target_type`,
+`distance_to_assignment`, and `assignment_target_present`. Terminal triggers
+are `assignment_arrived`, `assignment_failed`, and `assignment_cancelled`.
+Status values are `active`, `arrived`, `unreachable`, `timed_out`, and
+`cancelled`.
+
+Assignments may include an `id`. Terminal results preserve that ID separately
+from the next active assignment. Inspect them with `has_assignment_result`,
+`assignment_result_id`, `assignment_result_status`, and
+`assignment_failure_reason`, then run `consume_assignment_result`.
+
+Nearby block assignment resolves one block and a valid adjacent standing
+position:
+
+```json
+{
+  "type": "block_party:assign_near_block",
+  "action": {
+    "id": "visit_bed",
+    "block": "#minecraft:beds",
+    "search_radius": 16,
+    "vertical_radius": 4,
+    "arrival_radius": 2,
+    "timeout_ticks": 600
+  }
+}
+```
+
+Safe staging actions are `wait_ticks`, `wait_random_ticks`, `play_animation`,
+`set_emotion`, `sit`, `stand`, `jump`, `swing_hand`, and
+`look_at_assignment`. Timed emotions restore the previous emotion. Animation
+uses the existing temporary-animation system and likewise restores naturally.
+
+`routine_tick` is a jittered low-frequency autonomous trigger evaluated only
+while a Moe is free of dialogue, following, sitting, chores, assignments, and
+active scenes. Routine filters include `is_available_for_routine`,
+`seconds_since_routine`, `has_active_scene`, and `has_active_chore`.
+
+Root scenes may control variation without another routing format:
+
+```json
+"selection": {
+  "group": "resting_tsundere",
+  "weight": 3,
+  "cooldown_ticks": 12000
+}
+```
+
+Specificity is evaluated first, then group repeat suppression, cooldown, and
+weighted choice.
 
 Refresh wood-family progression action:
 

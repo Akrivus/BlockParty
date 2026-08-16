@@ -217,7 +217,14 @@ neoForge {
 
 tasks.named('runGameTestServer') {
     doFirst {
-        delete layout.buildDirectory.dir('gametest-run/world')
+        def gameTestWorld = layout.buildDirectory.dir('gametest-run/world').get().asFile
+        def gameTestPack = new File(gameTestWorld, 'datapacks/block_party_gametest')
+        delete gameTestWorld
+        // Install fixtures as a world datapack so they never enter the production JAR or content catalogue.
+        copy {
+            from 'src/gameTest/resources'
+            into gameTestPack
+        }
     }
 }
 

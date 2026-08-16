@@ -19,6 +19,18 @@ public final class SceneFilterCatalogSelfTest {
         if (!missing.isEmpty()) throw new AssertionError("Tool filter catalog is missing runtime filters: " + missing);
         var invalid = JsonParser.parseString("{\"type\":\"block_party:not_registered\"}").getAsJsonObject();
         if (SceneFilterCatalog.validate(invalid) == null) throw new AssertionError("Unknown scene filter unexpectedly validated.");
+        String[] environmentFilters = {
+                "{\"type\":\"block_party:time_period\",\"value\":\"evening\"}",
+                "{\"type\":\"block_party:weather\",\"value\":\"thunder\"}",
+                "{\"type\":\"block_party:dimension\",\"value\":\"minecraft:overworld\"}",
+                "{\"type\":\"block_party:biome\",\"value\":\"#minecraft:is_forest\"}",
+                "{\"type\":\"block_party:at_location\",\"scope\":\"player\",\"name\":\"first_date\",\"radius\":4}"
+        };
+        for (String value : environmentFilters) {
+            var filter = JsonParser.parseString(value).getAsJsonObject();
+            String problem = SceneFilterCatalog.validate(filter);
+            if (problem != null) throw new AssertionError("Environment filter did not validate: " + problem);
+        }
         System.out.println("Scene filter catalog check passed.");
     }
 }

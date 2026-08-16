@@ -82,9 +82,9 @@ final class WorkbenchService {
         SceneNode introduction = new SceneNode("introduction", NodeType.DIALOGUE, "Introduction",
                 "block_party:right_click", List.of(), "Write the opening dialogue.", false, null,
                 List.of(new ResponseEdge("next_response", "Continue", "ending", TransitionType.IMMEDIATE, List.of())),
-                List.of(), null, null, new EditorPosition(100, 100));
+                List.of(), null, null, null, new EditorPosition(100, 100));
         SceneNode ending = new SceneNode("ending", NodeType.END, "Ending", null, List.of(), null, false, null,
-                List.of(), List.of(), null, "ending", new EditorPosition(410, 100));
+                List.of(), List.of(), null, "ending", null, new EditorPosition(410, 100));
         String id = WorkbenchSession.safeId(requestedId);
         String title = requestedTitle == null || requestedTitle.isBlank()
                 ? id.replace('_', ' ')

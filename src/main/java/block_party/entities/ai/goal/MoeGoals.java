@@ -10,9 +10,10 @@ public final class MoeGoals {
     public static void register(Moe moe, GoalSelector goals) {
         goals.addGoal(0, new ActiveChoreGoal(moe));
         goals.addGoal(1, new FollowSessionGoal(moe));
-        goals.addGoal(2, new EnvironmentalMovementGoal(moe));
-        goals.addGoal(3, new SocialReactionGoal(moe));
-        goals.addGoal(4, new IdleRoutineGoal(moe));
+        goals.addGoal(2, new SceneDirectiveGoal(moe));
+        goals.addGoal(3, new EnvironmentalMovementGoal(moe));
+        goals.addGoal(4, new SocialReactionGoal(moe));
+        goals.addGoal(5, new IdleRoutineGoal(moe));
     }
 
     public static void updateActionState(Moe moe) {
@@ -20,6 +21,11 @@ public final class MoeGoals {
             return;
         }
         if (moe.updateFollowSessionMovement()) {
+            moe.social().clearMovementIntent();
+            moe.environment().clearMovementIntent();
+            return;
+        }
+        if (moe.sceneDirective().updateMovement(moe)) {
             moe.social().clearMovementIntent();
             moe.environment().clearMovementIntent();
             return;

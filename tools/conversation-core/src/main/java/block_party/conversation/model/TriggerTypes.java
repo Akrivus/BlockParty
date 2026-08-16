@@ -7,7 +7,8 @@ public final class TriggerTypes {
     private static final List<String> VALUES = List.of(
             "creation", "hiding_spot_discovered", "attention", "phone_call", "follow_started", "follow_ended",
             "party_invite", "gift_received", "wait", "dismiss", "shift_left_click", "left_click",
-            "shift_right_click", "right_click", "hurt", "attack", "stare", "every_tick", "random_tick", "null");
+            "shift_right_click", "right_click", "hurt", "attack", "stare", "every_tick", "random_tick",
+            "assignment_arrived", "assignment_failed", "assignment_cancelled", "routine_tick", "null");
 
     private TriggerTypes() {
     }

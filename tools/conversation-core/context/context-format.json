@@ -4,7 +4,8 @@
     "world/minecraft-world.md",
     "world/moes.md",
     "world/cardinal-and-corporeal.md",
-    "world/dialogue-format.md"
+    "world/dialogue-format.md",
+    "world/environment-and-locations.md"
   ],
   "tags": {
     "block_party:moe/traits/cardinal": "world/cardinal.md",

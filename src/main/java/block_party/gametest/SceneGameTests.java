@@ -2,6 +2,7 @@ package block_party.gametest;
 
 import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
+import block_party.db.DimBlockPos;
 import block_party.entities.Moe;
 import block_party.entities.MoeInHiding;
 import block_party.entities.goals.HideUntil;
@@ -10,9 +11,11 @@ import block_party.registry.CustomBlocks;
 import block_party.registry.resources.ScenesReloadListener;
 import block_party.entities.movement.PlayerMovementIntent;
 import block_party.entities.movement.RoutineIntent;
+import block_party.entities.movement.SceneDirective;
 import block_party.scene.Response;
 import block_party.scene.SceneAction;
 import block_party.scene.SceneTrigger;
+import block_party.scene.SceneSelectionMemory;
 import block_party.scene.SceneVariables;
 import block_party.scene.actions.OpenInventoryAction;
 import block_party.world.progression.WoodFamilyProgression;
@@ -39,6 +42,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -191,6 +195,258 @@ public final class SceneGameTests {
         }
         if (rejects.scene().fulfills(moe)) {
             helper.fail("Expected structured scene filters to reject mismatched Moe state");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void environmentSceneFiltersSelectTimeWeatherAndWorldLocation(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(540L, 40L));
+        ServerLevel level = helper.getLevel();
+        level.setDayTime(9000L);
+        level.setWeatherParameters(0, 6000, true, false);
+        level.setBlock(moe.blockPosition().east(), Blocks.BELL.defaultBlockState(), 3);
+        String biome = level.getBiome(moe.blockPosition()).unwrapKey().orElseThrow().location().toString();
+        int altitude = moe.blockPosition().getY();
+
+        ScenesReloadListener.ParsedScene accepts = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  {"type":"block_party:time_period","filter":{"value":"evening"}},
+                  {"type":"block_party:if_time","filter":{"start":8000,"end":10000}},
+                  {"type":"block_party:if_time","filter":{"start":22000,"end":10000}},
+                  {"type":"block_party:weather","filter":{"value":"rain"}},
+                  {"type":"block_party:dimension","filter":{"value":"minecraft:overworld"}},
+                  {"type":"block_party:biome","filter":{"value":"%s"}},
+                  {"type":"block_party:altitude","filter":{"value":%d}},
+                  {"type":"block_party:can_see_sky","filter":{}},
+                  {"type":"block_party:light_level","filter":{"source":"maximum","operation":"at_least","value":0}},
+                  {"type":"block_party:near_block","filter":{"block":"minecraft:bell","radius":2}}
+                ],"actions":[]}
+                """.formatted(biome, altitude));
+        ScenesReloadListener.ParsedScene rejects = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  {"type":"block_party:weather","filter":{"value":"thunder"}}
+                ],"actions":[]}
+                """);
+
+        if (!accepts.scene().fulfills(moe) || rejects.scene().fulfills(moe)) {
+            helper.fail("Expected environment filters to distinguish the current rainy evening context");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void namedLocationActionsAndFiltersRespectScopes(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(541L, 41L));
+        parseAction("""
+                {"type":"block_party:remember_location","action":{"scope":"npc","name":"meeting_spot"}}
+                """).apply(moe);
+        parseAction("""
+                {"type":"block_party:remember_location","action":{"scope":"player","name":"meeting_spot"}}
+                """).apply(moe);
+        parseAction("""
+                {"type":"block_party:remember_location","action":{"scope":"world","name":"festival_stage"}}
+                """).apply(moe);
+
+        ScenesReloadListener.ParsedScene atLocation = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  {"type":"block_party:has_location","filter":{"scope":"npc","name":"meeting_spot"}},
+                  {"type":"block_party:at_location","filter":{"scope":"player","name":"meeting_spot","radius":1}},
+                  {"type":"block_party:distance_to_location","filter":{"scope":"world","name":"festival_stage","operation":"at_most","value":1}},
+                  {"type":"block_party:location_dimension","filter":{"scope":"npc","name":"meeting_spot","value":"minecraft:overworld"}}
+                ],"actions":[]}
+                """);
+        if (!atLocation.scene().fulfills(moe)) {
+            helper.fail("Expected named locations to be available in NPC, player, and world scopes");
+            return;
+        }
+
+        SceneVariables.get(moe.level()).locations(moe.getDatabaseID()).set(
+                "other_dimension", new DimBlockPos(Level.NETHER, moe.blockPosition()));
+        ScenesReloadListener.ParsedScene crossDimension = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  {"type":"block_party:at_location","filter":{"scope":"npc","name":"other_dimension","radius":100}}
+                ],"actions":[]}
+                """);
+        if (crossDimension.scene().fulfills(moe)) {
+            helper.fail("Expected at_location to fail across dimensions regardless of radius");
+            return;
+        }
+
+        parseAction("""
+                {"type":"block_party:forget_location","action":{"scope":"player","name":"meeting_spot"}}
+                """).apply(moe);
+        if (SceneVariables.get(moe.level()).player(moe.getOwnerUUID()).locations().has("meeting_spot")) {
+            helper.fail("Expected forget_location to remove only the selected scoped location");
+            return;
+        }
+        if (!SceneVariables.get(moe.level()).locations(moe.getDatabaseID()).has("meeting_spot")
+                || !SceneVariables.get(moe.level()).world().locations().has("festival_stage")) {
+            helper.fail("Expected other named-location scopes to remain isolated");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void sceneDirectivesAssignLocationsTargetsAndLifecycleResults(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(542L, 42L));
+        BlockPos destination = moe.blockPosition().offset(6, 0, 0);
+        SceneVariables.get(moe.level()).npc(moe.getDatabaseID()).locations().set(
+                "workshop", new DimBlockPos(moe.level().dimension(), destination));
+
+        parseAction("""
+                {"type":"block_party:assign_location","action":{"scope":"npc","name":"workshop",
+                  "speed":1.1,"arrival_radius":1.5,"timeout_ticks":40}}
+                """).apply(moe);
+        ScenesReloadListener.ParsedScene active = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  {"type":"block_party:has_assignment","filter":{}},
+                  {"type":"block_party:assignment_kind","filter":{"value":"location"}},
+                  {"type":"block_party:assignment_status","filter":{"value":"active"}},
+                  {"type":"block_party:assignment_location","filter":{"value":"workshop"}},
+                  {"type":"block_party:distance_to_assignment","filter":{"operation":"greater_than","value":2}}
+                ],"actions":[]}
+                """);
+        if (!active.scene().fulfills(moe) || !moe.sceneDirective().updateMovement(moe)) {
+            helper.fail("Expected active named-location directive to expose filters and movement");
+            return;
+        }
+
+        SceneDirective restored = SceneDirective.read(moe.sceneDirective().write());
+        if (restored.kind() != SceneDirective.Kind.LOCATION || !"workshop".equals(restored.name())
+                || restored.ticksRemaining() != 40) {
+            helper.fail("Expected scene directive to preserve its assignment through NBT");
+            return;
+        }
+
+        moe.moveTo(destination.getX() + 0.5D, destination.getY(), destination.getZ() + 0.5D);
+        moe.sceneDirective().tick(moe);
+        if (moe.sceneDirective().status() != SceneDirective.Status.ARRIVED) {
+            helper.fail("Expected location directive to report arrival");
+            return;
+        }
+
+        Moe target = spawnMoeAt(helper, new UUID(543L, 43L), new BlockPos(10, 1, 1));
+        parseAction("""
+                {"type":"block_party:assign_target","action":{"selector":"nearest_moe","timeout_ticks":20}}
+                """).apply(moe);
+        ScenesReloadListener.ParsedScene targetPresent = parseScene("""
+                {"trigger":"block_party:right_click","filters":[
+                  {"type":"block_party:assignment_kind","filter":{"value":"entity"}},
+                  {"type":"block_party:assignment_target_type","filter":{"value":"nearest_moe"}},
+                  {"type":"block_party:assignment_target_present","filter":{}}
+                ],"actions":[]}
+                """);
+        if (!targetPresent.scene().fulfills(moe)) {
+            helper.fail("Expected entity assignment to resolve and expose its target");
+            return;
+        }
+        helper.kill(target);
+        moe.sceneDirective().tick(moe);
+        if (moe.sceneDirective().status() != SceneDirective.Status.UNREACHABLE) {
+            helper.fail("Expected removed entity target to make the assignment unreachable");
+            return;
+        }
+
+        parseAction("""
+                {"type":"block_party:assign_location","action":{"scope":"npc","name":"workshop","timeout_ticks":1}}
+                """).apply(moe);
+        moe.moveTo(destination.getX() - 8.0D, destination.getY(), destination.getZ());
+        moe.sceneDirective().tick(moe);
+        if (moe.sceneDirective().status() != SceneDirective.Status.TIMED_OUT) {
+            helper.fail("Expected active directive to report timeout");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void blockAssignmentsResolveStandingPositionAndResultIdentity(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(544L, 44L));
+        BlockPos bell = moe.blockPosition().offset(5, 0, 0);
+        helper.getLevel().setBlock(bell, Blocks.BELL.defaultBlockState(), 3);
+        parseAction("""
+                {"type":"block_party:assign_near_block","action":{"id":"visit_bell","block":"minecraft:bell",
+                  "search_radius":8,"vertical_radius":2,"arrival_radius":1,"timeout_ticks":20}}
+                """).apply(moe);
+        if (moe.sceneDirective().kind() != SceneDirective.Kind.BLOCK
+                || !"visit_bell".equals(moe.sceneDirective().id())
+                || moe.sceneDirective().blockTarget().isEmpty()
+                || !moe.sceneDirective().blockTarget().getPos().equals(bell)
+                || moe.sceneDirective().destination(moe) == null) {
+            helper.fail("Expected block assignment to preserve its ID, block target, and standing destination");
+            return;
+        }
+        helper.getLevel().removeBlock(bell, false);
+        moe.sceneDirective().assignBlock("missing_bell", null, null, "minecraft:bell", 1.0D, 1.0D, 20);
+        moe.sceneDirective().tick(moe);
+        if (!moe.sceneDirective().hasResult()
+                || !"missing_bell".equals(moe.sceneDirective().resultId())
+                || !"missing_block".equals(moe.sceneDirective().failureReason())) {
+            helper.fail("Expected failed block assignment to retain a consumable identified result");
+            return;
+        }
+        parseAction("{\"type\":\"block_party:consume_assignment_result\"}").apply(moe);
+        if (moe.sceneDirective().hasResult()) {
+            helper.fail("Expected consume_assignment_result to clear the terminal result");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 12)
+    public static void timedSceneActionsWaitAndRestorePresentation(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(545L, 45L));
+        moe.setEmotion("NORMAL");
+        SceneAction wait = parseAction("{\"type\":\"block_party:wait_ticks\",\"action\":{\"ticks\":3}}");
+        SceneAction emotion = parseAction("{\"type\":\"block_party:set_emotion\",\"action\":{\"emotion\":\"HAPPY\",\"ticks\":3}}");
+        wait.apply(moe);
+        emotion.apply(moe);
+        if (wait.isComplete(moe) || emotion.isComplete(moe) || !"HAPPY".equals(moe.getEmotion())) {
+            helper.fail("Expected timed wait and emotion actions to remain active initially");
+            return;
+        }
+        helper.runAfterDelay(4, () -> {
+            if (!wait.isComplete(moe) || !emotion.isComplete(moe)) {
+                helper.fail("Expected timed scene actions to complete after their duration");
+                return;
+            }
+            emotion.onComplete(moe);
+            if (!"NORMAL".equals(moe.getEmotion())) {
+                helper.fail("Expected timed emotion to restore the prior presentation");
+                return;
+            }
+            helper.kill(moe);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void routineSelectionMetadataTracksCooldownAndAvailability(GameTestHelper helper) {
+        Moe moe = spawnMoe(helper, new UUID(546L, 46L));
+        var parsed = parseScene("""
+                {"trigger":"block_party:routine_tick","selection":{"group":"resting","weight":3,"cooldown_ticks":200},
+                 "filters":[{"type":"block_party:is_available_for_routine","filter":{}},
+                            {"type":"block_party:seconds_since_routine","filter":{"operation":"at_least","value":0}}],
+                 "actions":[]}
+                """);
+        if (!parsed.scene().fulfills(moe) || parsed.scene().selection().weight() != 3
+                || !"resting".equals(parsed.scene().selection().group())) {
+            helper.fail("Expected routine filters and selection metadata to parse");
+            return;
+        }
+        SceneSelectionMemory memory = moe.sceneSelectionMemory();
+        memory.record(parsed.scene(), moe.level().getGameTime());
+        if (memory.eligible(parsed.scene(), moe.level().getGameTime()) || !memory.repeatedInGroup(parsed.scene())) {
+            helper.fail("Expected routine scene cooldown and repeat memory to activate after selection");
             return;
         }
         helper.kill(moe);
@@ -880,7 +1136,8 @@ public final class SceneGameTests {
                 ],"actions":[]}
                 """);
         if (!inferred.scene().fulfills(moe)) {
-            helper.fail("Expected routine_intent filter to see inferred relaxation intent");
+            helper.fail("Expected routine and personality filters to match: "
+                    + inferred.scene().diagnose(moe).reasons());
             return;
         }
 

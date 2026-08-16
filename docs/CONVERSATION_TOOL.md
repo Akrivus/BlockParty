@@ -245,8 +245,27 @@ overwrites an existing project; targeted replacement requires an exact
 `--only <job-id> --force` selection. Live installation stages compilation and
 replaces only pack directories owned by the batch.
 
-See `tools/conversation-core/examples/batch/resting.batch.json` for a minimal
-recorded-provider example.
+Environment selectors may use `time_period`, `weather`, `dimension`, `biome`,
+`altitude`, `can_see_sky`, `light_level`, `near_block`, and named-location
+filters. Locked selectors are supplied to the generation prompt as factual
+scene context, so generated dialogue can assume the selected time and place
+without redesigning those mechanics.
+
+Projects may capture named locations from a Moe, player, home, anchor, or
+remembered place; assign a Moe to a named location or supported entity target;
+clear that assignment; and branch on assignment lifecycle filters and
+triggers. Generated dialogue treats assignment as intent and does not claim
+arrival until an `assignment_arrived` scene runs.
+
+Routine cards can use selection group, weight, and cooldown fields in the
+Workbench. Iteration 12 actions expose nearby block destinations, assignment
+result consumption, timed waits, temporary animation/emotion, simple poses,
+and assignment look targets. The project graph remains the behavior sequence;
+the tool does not create a second route or behavior-tree format.
+
+See `tools/conversation-core/examples/batch/resting.batch.json` for the current
+OpenAI authoring example. `resting-ci.batch.json` is the deliberately small
+recorded-provider fixture used only by deterministic verification.
 
 ## Iteration Six Generation Studio
 
@@ -262,6 +281,11 @@ repair, intentions, dialogue, review, and build stages. The workbench polls
 local progress while Java retains ownership of budgets, validation, repair,
 simulation, compilation, and archives. When complete, the generated project
 becomes the open workbench project.
+
+Minimum and maximum card counts are generation targets, not correctness gates.
+A mechanically complete graph outside the requested range is retained with a
+`CARD_COUNT_OUTSIDE_TARGET` warning instead of receiving filler cards or being
+discarded solely because of its size.
 
 The generation brief's dialogue-character limit is enforced after prose
 generation, with one rewrite attempt for oversized lines. Response labels are
@@ -298,3 +322,17 @@ and appear as preview warnings. Unknown tags remain visible but never inject
 arbitrary prompt text. Generation archives the resolved bundle as
 `context.json`; replay reuses the archived catalog so later tag changes cannot
 alter a recorded run.
+
+## Iteration Thirteen Mechanics-Aware Generation
+
+Explicit environmental and behavioral wording is treated as mechanics rather
+than flavor. The graph stage receives the scene-filter catalog, valid enum
+values, action fields, and asynchronous assignment patterns. Inferred
+`SCENE_FILTER` conditions remain in the project when batch-locked selectors are
+applied instead of being discarded.
+
+High-confidence omissions—such as requested time, weather, idle routine state,
+travel, block targets, animation, waiting, or returning home—participate in
+graph repair and are archived in `mechanics-audit.json`. Movement remains
+event-driven: post-arrival staging belongs on an `assignment_arrived` card
+keyed to the assignment ID, not immediately after the departure action.

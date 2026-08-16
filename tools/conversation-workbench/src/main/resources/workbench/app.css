@@ -251,6 +251,10 @@ textarea:focus {
 .legend {
   white-space: nowrap;
 }
+.legend button {
+  margin-right: 6px;
+  padding: 5px 8px;
+}
 .dot {
   display: inline-block;
   width: 7px;
@@ -678,6 +682,22 @@ dialog form {
   margin-top: 3px;
   padding: 7px;
 }
+.scene-filter-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 6px;
+}
+.scene-filter-fields label {
+  min-width: 0;
+}
+.primitive-fields label:has(> .scene-filter-fields) {
+  grid-column: 1 / -1;
+}
+.primitive-fields details textarea {
+  width: 100%;
+  min-height: 90px;
+}
 .node-card.connect-target {
   outline: 3px dashed var(--blue);
   cursor: crosshair;
@@ -753,7 +773,8 @@ dialog form {
 }
 @media (max-width: 760px) {
   .settings-grid,
-  .primitive-fields {
+  .primitive-fields,
+  .scene-filter-fields {
     grid-template-columns: 1fr;
   }
   .state-row {

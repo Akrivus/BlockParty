@@ -42,6 +42,7 @@ public final class SceneManager {
             return false;
         }
         this.trigger = trigger;
+        this.moe.sceneSelectionMemory().record(scene, this.moe.level().getGameTime());
         this.setAction(null);
         this.setActions(scene.getActions());
         return true;
@@ -68,5 +69,10 @@ public final class SceneManager {
 
     public SceneTrigger getTriggerForTests() {
         return this.trigger;
+    }
+
+    public boolean isActive() {
+        return this.trigger != SceneTrigger.NULL && this.trigger != SceneTrigger.CREATION
+                || this.action != null || !this.actions.isEmpty();
     }
 }

@@ -2,11 +2,13 @@ package block_party.scene;
 
 import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
+import block_party.db.DimBlockPos;
 import block_party.db.records.AttentionRecord;
 import block_party.db.records.PlayerRelationship;
 import block_party.entities.Moe;
 import block_party.entities.environment.MoePlaceMemory;
 import block_party.entities.movement.MoeAnchor;
+import block_party.entities.movement.SceneDirective;
 import block_party.entities.preferences.MoeItemPreferences;
 import block_party.entities.social.MoeSocialContext;
 import block_party.entities.social.SocialAffinities;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -26,6 +29,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.InteractionHand;
@@ -34,6 +38,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.Biome;
 
 public final class SceneObservationFactories {
     private static final SceneObservation FAIL_CLOSED = moe -> false;
@@ -47,7 +53,38 @@ public final class SceneObservationFactories {
             return diagnostic(type, json, simple);
         }
         SceneObservation built = switch (type.getPath()) {
-            case "if_time" -> moe -> compare((int) (moe.level().getDayTime() % 24000L), json);
+            case "if_time" -> moe -> timeMatches((int) (moe.level().getDayTime() % 24000L), json);
+            case "time_period" -> moe -> timePeriodMatches((int) (moe.level().getDayTime() % 24000L), json);
+            case "weather" -> moe -> weatherMatches(moe, json);
+            case "dimension" -> moe -> resourceMatches(moe.level().dimension().location(), json);
+            case "biome" -> moe -> biomeMatches(moe, json);
+            case "altitude" -> moe -> compare(moe.blockPosition().getY(), json);
+            case "can_see_sky" -> moe -> maybeNegate(moe.level().canSeeSky(moe.blockPosition()), json);
+            case "light_level" -> moe -> compare(lightLevel(moe, json), json);
+            case "near_block" -> moe -> nearbyBlockMatches(moe, json);
+            case "has_location" -> moe -> maybeNegate(location(moe, json).isPresent(), json);
+            case "at_location" -> moe -> location(moe, json).map(saved -> atLocation(moe, saved, json)).orElse(false);
+            case "distance_to_location" -> moe -> location(moe, json).map(saved -> locationDistance(moe, saved, json)).orElse(false);
+            case "location_dimension" -> moe -> location(moe, json)
+                    .map(saved -> resourceMatches(saved.getDim().location(), json)).orElse(false);
+            case "has_assignment" -> moe -> maybeNegate(moe.sceneDirective().assigned(), json);
+            case "assignment_kind" -> moe -> enumMatches(moe.sceneDirective().kind(), json);
+            case "assignment_status" -> moe -> enumMatches(moe.sceneDirective().status(), json);
+            case "assignment_location" -> moe -> stringMatches(moe.sceneDirective().name(), json);
+            case "assignment_target_type" -> moe -> stringMatches(moe.sceneDirective().selector(), json);
+            case "distance_to_assignment" -> moe -> assignmentDistance(moe, json);
+            case "assignment_target_present" -> moe -> maybeNegate(
+                    moe.sceneDirective().kind() == SceneDirective.Kind.ENTITY
+                            && moe.sceneDirective().destination(moe) != null, json);
+            case "assignment_id" -> moe -> stringMatches(moe.sceneDirective().id(), json);
+            case "has_assignment_result" -> moe -> maybeNegate(moe.sceneDirective().hasResult(), json);
+            case "assignment_result_id" -> moe -> stringMatches(moe.sceneDirective().resultId(), json);
+            case "assignment_result_status" -> moe -> enumMatches(moe.sceneDirective().resultStatus(), json);
+            case "assignment_failure_reason" -> moe -> stringMatches(moe.sceneDirective().failureReason(), json);
+            case "is_available_for_routine" -> moe -> maybeNegate(moe.availableForRoutineScene(), json);
+            case "seconds_since_routine" -> moe -> compare((float) (moe.ticksSinceRoutineScene() / 20.0D), json);
+            case "has_active_scene" -> moe -> maybeNegate(moe.sceneManager().isActive(), json);
+            case "has_active_chore" -> moe -> maybeNegate(moe.chores().activeId().isPresent(), json);
             case "elapsed_since_marker" -> moe -> SceneTimeMarkers.elapsed(
                     moe,
                     GsonHelper.getAsString(json, "name", ""),
@@ -199,6 +236,22 @@ public final class SceneObservationFactories {
             case "follow_intent" -> enumReason("follow intent", moe.getFollowIntent(), json);
             case "follow_ticks_remaining" -> compareReason("follow ticks remaining", moe.getFollowTicksRemaining(), json);
             case "elapsed_since_marker" -> "time marker " + GsonHelper.getAsString(json, "name", "") + " has not elapsed";
+            case "has_assignment" -> "Moe has no scene assignment";
+            case "assignment_kind" -> enumReason("assignment kind", moe.sceneDirective().kind(), json);
+            case "assignment_status" -> enumReason("assignment status", moe.sceneDirective().status(), json);
+            case "assignment_location" -> stringReason("assignment location", moe.sceneDirective().name(), json);
+            case "assignment_target_type" -> stringReason("assignment target", moe.sceneDirective().selector(), json);
+            case "distance_to_assignment" -> "assignment destination is missing, cross-dimensional, or outside the required distance";
+            case "assignment_target_present" -> "assignment target is unavailable";
+            case "assignment_id" -> stringReason("assignment id", moe.sceneDirective().id(), json);
+            case "has_assignment_result" -> "Moe has no assignment result";
+            case "assignment_result_id" -> stringReason("assignment result id", moe.sceneDirective().resultId(), json);
+            case "assignment_result_status" -> enumReason("assignment result", moe.sceneDirective().resultStatus(), json);
+            case "assignment_failure_reason" -> stringReason("assignment failure", moe.sceneDirective().failureReason(), json);
+            case "is_available_for_routine" -> "Moe is busy with dialogue, following, sitting, a chore, assignment, or scene";
+            case "seconds_since_routine" -> compareReason("seconds since routine", (float) (moe.ticksSinceRoutineScene() / 20.0D), json);
+            case "has_active_scene" -> "Moe has no active scene";
+            case "has_active_chore" -> "Moe has no active chore";
             case "follow_player_is_target" -> "follow player " + moe.getFollowPlayerUUID() + " is not dialogue target " + targetPlayerUuid(moe);
             case "has_anchor" -> currentAnchor(moe).isEmpty() ? "missing routine anchor" : "routine anchor does not match " + expectedType(json);
             case "anchor_type" -> currentAnchor(moe)
@@ -532,13 +585,110 @@ public final class SceneObservationFactories {
     }
 
     private static boolean traitMatches(String actual, JsonObject json) {
-        return stringMatches(actual, json);
+        String normalizedActual = actual == null ? "" : actual.toLowerCase(Locale.ROOT);
+        JsonObject normalized = json.deepCopy();
+        if (normalized.has("value")) {
+            normalized.addProperty("value", GsonHelper.getAsString(normalized, "value", "").toLowerCase(Locale.ROOT));
+        }
+        return stringMatches(normalizedActual, normalized);
     }
 
     private static boolean enumMatches(Enum<?> actual, JsonObject json) {
         String expected = GsonHelper.getAsString(json, "value", "");
         boolean pass = actual.name().equalsIgnoreCase(expected);
         return maybeNegate(pass, json);
+    }
+
+    private static boolean timeMatches(int time, JsonObject json) {
+        if (!json.has("start") && !json.has("end")) return compare(time, json);
+        int start = Math.floorMod(GsonHelper.getAsInt(json, "start", 0), 24000);
+        int end = Math.floorMod(GsonHelper.getAsInt(json, "end", 24000), 24000);
+        boolean pass = start <= end ? start <= time && time < end : time >= start || time < end;
+        return maybeNegate(pass, json);
+    }
+
+    private static boolean timePeriodMatches(int time, JsonObject json) {
+        String period = GsonHelper.getAsString(json, "value", "").toLowerCase(Locale.ROOT);
+        int[] range = switch (period) {
+            case "morning" -> new int[] {0, 4000};
+            case "noon" -> new int[] {4000, 8000};
+            case "evening" -> new int[] {8000, 12000};
+            case "night" -> new int[] {12000, 16000};
+            case "midnight" -> new int[] {16000, 20000};
+            case "dawn" -> new int[] {20000, 24000};
+            default -> null;
+        };
+        return maybeNegate(range != null && range[0] <= time && time < range[1], json);
+    }
+
+    private static boolean weatherMatches(Moe moe, JsonObject json) {
+        String expected = GsonHelper.getAsString(json, "value", "clear").toLowerCase(Locale.ROOT);
+        boolean pass = switch (expected) {
+            case "thunder" -> moe.level().isThundering();
+            case "rain" -> moe.level().isRaining() && !moe.level().isThundering();
+            case "clear", "sunny" -> !moe.level().isRaining();
+            default -> false;
+        };
+        return maybeNegate(pass, json);
+    }
+
+    private static boolean resourceMatches(ResourceLocation actual, JsonObject json) {
+        String expected = GsonHelper.getAsString(json, "value", GsonHelper.getAsString(json, "name", ""));
+        return maybeNegate(actual.toString().equals(expected), json);
+    }
+
+    private static boolean biomeMatches(Moe moe, JsonObject json) {
+        String expected = GsonHelper.getAsString(json, "value", GsonHelper.getAsString(json, "biome", ""));
+        Holder<Biome> biome = moe.level().getBiome(moe.blockPosition());
+        boolean pass = expected.startsWith("#")
+                ? biome.is(TagKey.create(Registries.BIOME, ResourceLocation.parse(expected.substring(1))))
+                : biome.unwrapKey().map(key -> key.location().toString().equals(expected)).orElse(false);
+        return maybeNegate(pass, json);
+    }
+
+    private static int lightLevel(Moe moe, JsonObject json) {
+        return switch (GsonHelper.getAsString(json, "source", "maximum").toLowerCase(Locale.ROOT)) {
+            case "block" -> moe.level().getBrightness(LightLayer.BLOCK, moe.blockPosition());
+            case "sky" -> moe.level().getBrightness(LightLayer.SKY, moe.blockPosition());
+            default -> moe.level().getMaxLocalRawBrightness(moe.blockPosition());
+        };
+    }
+
+    private static boolean nearbyBlockMatches(Moe moe, JsonObject json) {
+        int radius = Math.clamp(GsonHelper.getAsInt(json, "radius", 4), 0, 16);
+        JsonObject match = json.deepCopy();
+        match.remove("not");
+        BlockPos origin = moe.blockPosition();
+        boolean found = false;
+        for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-radius, -radius, -radius), origin.offset(radius, radius, radius))) {
+            if (blockMatches(moe.level().getBlockState(pos), match)) {
+                found = true;
+                break;
+            }
+        }
+        return maybeNegate(found, json);
+    }
+
+    private static Optional<DimBlockPos> location(Moe moe, JsonObject json) {
+        return Optional.ofNullable(scopedVariables(moe, variableScope(json, SceneVariableScope.NPC))
+                .locations().get(GsonHelper.getAsString(json, "name", "")));
+    }
+
+    private static boolean atLocation(Moe moe, DimBlockPos saved, JsonObject json) {
+        double radius = Math.max(0.0D, GsonHelper.getAsDouble(json, "radius", 2.0D));
+        boolean pass = !saved.isEmpty() && saved.getDim().equals(moe.level().dimension())
+                && saved.getPos().distSqr(moe.blockPosition()) <= radius * radius;
+        return maybeNegate(pass, json);
+    }
+
+    private static boolean locationDistance(Moe moe, DimBlockPos saved, JsonObject json) {
+        if (saved.isEmpty() || !saved.getDim().equals(moe.level().dimension())) return false;
+        return compare((float) Math.sqrt(saved.getPos().distSqr(moe.blockPosition())), json);
+    }
+
+    private static boolean assignmentDistance(Moe moe, JsonObject json) {
+        Vec3 destination = moe.sceneDirective().destination(moe);
+        return destination != null && compare((float) Math.sqrt(moe.position().distanceToSqr(destination)), json);
     }
 
     private static boolean compare(float actual, JsonObject json) {

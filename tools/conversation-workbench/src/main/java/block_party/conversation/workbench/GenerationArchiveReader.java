@@ -14,6 +14,7 @@ final class GenerationArchiveReader {
                     "catalog.json",
                     "context.json",
                     "graph-validation.json",
+                    "mechanics-audit.json",
                     "intentions.json",
                     "review.json");
     private static final List<String> STAGE_DOCUMENTS =

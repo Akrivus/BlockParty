@@ -22,6 +22,10 @@ import block_party.scene.actions.GiveItemAction;
 import block_party.scene.actions.GoToAnchorAction;
 import block_party.scene.actions.HideAction;
 import block_party.scene.actions.MarkTimeAction;
+import block_party.scene.actions.LocationAction;
+import block_party.scene.actions.SceneDirectiveAction;
+import block_party.scene.actions.StageAction;
+import block_party.scene.actions.TimedSceneAction;
 import block_party.scene.actions.OpenInventoryAction;
 import block_party.scene.actions.RefreshWoodFamilyProgressionAction;
 import block_party.scene.actions.RefreshSamuraiProgressionAction;
@@ -102,14 +106,25 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         if (candidates.isEmpty()) {
             return null;
         }
-        Collections.shuffle(candidates);
         candidates.removeIf(scene -> !scene.fulfills(moe));
+        long gameTime = moe.level().getGameTime();
+        candidates.removeIf(scene -> !moe.sceneSelectionMemory().eligible(scene, gameTime));
         if (candidates.isEmpty()) {
             return null;
         }
         int mostSpecific = candidates.stream().mapToInt(Scene::filterCount).max().orElse(0);
         candidates.removeIf(scene -> scene.filterCount() < mostSpecific);
-        return candidates.getFirst();
+        List<Scene> selectable = List.copyOf(candidates);
+        candidates.removeIf(scene -> moe.sceneSelectionMemory().repeatedInGroup(scene)
+                && selectable.stream().anyMatch(other -> other != scene
+                        && other.selection().group().equals(scene.selection().group())));
+        int totalWeight = candidates.stream().mapToInt(scene -> scene.selection().weight()).sum();
+        int choice = moe.getRandom().nextInt(Math.max(1, totalWeight));
+        for (Scene scene : candidates) {
+            choice -= scene.selection().weight();
+            if (choice < 0) return scene;
+        }
+        return candidates.getLast();
     }
 
     public List<SceneDebugResult> debug(SceneTrigger trigger, Moe moe) {
@@ -212,7 +227,13 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         SceneTrigger trigger = SceneTrigger.NULL.fromValue(own(resource(GsonHelper.getAsString(json, "trigger", "block_party:null"))));
         List<SceneObservation> filters = parseFilters(json.has("filters") ? json.getAsJsonArray("filters") : new JsonArray());
         List<SceneAction> actions = parseActions(optionalArray(json, "actions", "scene " + id), "scene " + id);
-        return new ParsedScene(trigger, new Scene(id, filters, actions));
+        JsonObject selectionJson = json.has("selection") && json.get("selection").isJsonObject()
+                ? json.getAsJsonObject("selection") : new JsonObject();
+        Scene.Selection selection = new Scene.Selection(
+                GsonHelper.getAsString(selectionJson, "group", ""),
+                GsonHelper.getAsInt(selectionJson, "weight", 1),
+                GsonHelper.getAsInt(selectionJson, "cooldown_ticks", 0));
+        return new ParsedScene(trigger, new Scene(id, filters, actions, selection));
     }
 
     private static List<SceneObservation> parseFilters(JsonArray array) {
@@ -323,6 +344,54 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         parsers.put("mark_time", payload -> new MarkTimeAction(
                 GsonHelper.getAsString(payload, "name", ""),
                 variableScope(payload, SceneVariableScope.NPC)));
+        parsers.put("remember_location", payload -> new LocationAction(
+                LocationAction.Operation.REMEMBER,
+                GsonHelper.getAsString(payload, "name", ""),
+                variableScope(payload, SceneVariableScope.NPC),
+                LocationAction.Source.fromValue(GsonHelper.getAsString(payload, "source", "moe"))));
+        parsers.put("forget_location", payload -> new LocationAction(
+                LocationAction.Operation.FORGET,
+                GsonHelper.getAsString(payload, "name", ""),
+                variableScope(payload, SceneVariableScope.NPC), LocationAction.Source.MOE));
+        parsers.put("assign_location", payload -> new SceneDirectiveAction(
+                SceneDirectiveAction.Operation.ASSIGN_LOCATION,
+                GsonHelper.getAsString(payload, "name", ""), GsonHelper.getAsString(payload, "id", ""),
+                variableScope(payload, SceneVariableScope.NPC), null, "", 0, 0,
+                GsonHelper.getAsDouble(payload, "speed", 1.0D),
+                GsonHelper.getAsDouble(payload, "arrival_radius", 2.0D),
+                GsonHelper.getAsInt(payload, "timeout_ticks", 1200)));
+        parsers.put("assign_target", payload -> new SceneDirectiveAction(
+                SceneDirectiveAction.Operation.ASSIGN_TARGET, "", GsonHelper.getAsString(payload, "id", ""), SceneVariableScope.NPC,
+                SceneDirectiveAction.TargetSelector.fromValue(GsonHelper.getAsString(payload, "selector", "owner")),
+                "", 0, 0,
+                GsonHelper.getAsDouble(payload, "speed", 1.0D),
+                GsonHelper.getAsDouble(payload, "arrival_radius", 2.0D),
+                GsonHelper.getAsInt(payload, "timeout_ticks", 1200)));
+        parsers.put("assign_near_block", payload -> new SceneDirectiveAction(
+                SceneDirectiveAction.Operation.ASSIGN_BLOCK, "", GsonHelper.getAsString(payload, "id", ""),
+                SceneVariableScope.NPC, null, GsonHelper.getAsString(payload, "block", ""),
+                GsonHelper.getAsInt(payload, "search_radius", 16), GsonHelper.getAsInt(payload, "vertical_radius", 4),
+                GsonHelper.getAsDouble(payload, "speed", 1.0D),
+                GsonHelper.getAsDouble(payload, "arrival_radius", 2.0D),
+                GsonHelper.getAsInt(payload, "timeout_ticks", 1200)));
+        parsers.put("clear_assignment", payload -> new SceneDirectiveAction(
+                SceneDirectiveAction.Operation.CLEAR, "", "", SceneVariableScope.NPC, null, "", 0, 0, 1.0D, 2.0D, 0));
+        parsers.put("consume_assignment_result", payload -> moe -> moe.sceneDirective().consumeResult());
+        parsers.put("wait_ticks", payload -> new TimedSceneAction(TimedSceneAction.Kind.WAIT, "",
+                GsonHelper.getAsInt(payload, "ticks", 20), GsonHelper.getAsInt(payload, "ticks", 20)));
+        parsers.put("wait_random_ticks", payload -> new TimedSceneAction(TimedSceneAction.Kind.WAIT, "",
+                GsonHelper.getAsInt(payload, "min_ticks", 20), GsonHelper.getAsInt(payload, "max_ticks", 60)));
+        parsers.put("play_animation", payload -> new TimedSceneAction(TimedSceneAction.Kind.ANIMATION,
+                GsonHelper.getAsString(payload, "animation", "DEFAULT"),
+                GsonHelper.getAsInt(payload, "ticks", 40), GsonHelper.getAsInt(payload, "ticks", 40)));
+        parsers.put("set_emotion", payload -> new TimedSceneAction(TimedSceneAction.Kind.EMOTION,
+                GsonHelper.getAsString(payload, "emotion", "NORMAL"),
+                GsonHelper.getAsInt(payload, "ticks", 40), GsonHelper.getAsInt(payload, "ticks", 40)));
+        parsers.put("sit", payload -> new StageAction(StageAction.Operation.SIT));
+        parsers.put("stand", payload -> new StageAction(StageAction.Operation.STAND));
+        parsers.put("jump", payload -> new StageAction(StageAction.Operation.JUMP));
+        parsers.put("swing_hand", payload -> new StageAction(StageAction.Operation.SWING_HAND));
+        parsers.put("look_at_assignment", payload -> new StageAction(StageAction.Operation.LOOK_AT_ASSIGNMENT));
         parsers.put("refresh_wood_family_progression", payload -> RefreshWoodFamilyProgressionAction.INSTANCE);
         parsers.put("refresh_samurai_progression", payload -> RefreshSamuraiProgressionAction.INSTANCE);
         parsers.put("player_counter", payload -> new CounterAction(
@@ -467,6 +536,13 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         if (json.has("actions") && json.get("actions").isJsonArray()) {
             validateActions(id, json.getAsJsonArray("actions"), issues);
         }
+        if (json.has("selection") && json.get("selection").isJsonObject()) {
+            JsonObject selection = json.getAsJsonObject("selection");
+            if (GsonHelper.getAsInt(selection, "weight", 1) <= 0
+                    || GsonHelper.getAsInt(selection, "cooldown_ticks", 0) < 0) {
+                issues.add(new ContentValidationIssue(id, "selection weight must be positive and cooldown cannot be negative", true));
+            }
+        }
     }
 
     private static void validateFilter(ResourceLocation id, JsonElement element, Set<String> writtenCookies, List<ContentValidationIssue> issues) {
@@ -483,8 +559,15 @@ public final class ScenesReloadListener implements PreparableReloadListener {
             case "has_cookie", "player_has_cookie", "world_has_cookie" -> validateCookieReference(id, payload, writtenCookies, issues);
             case "held_item", "player_held_item", "attention_item", "gift_item" -> validateItem(id, payload, issues);
             case "has_item", "moe_has_item", "player_has_item" -> validateItem(id, payload, issues);
-            case "block", "observed_block", "social_target_block" -> validateBlock(id, payload, issues);
+            case "block", "observed_block", "social_target_block", "near_block" -> validateBlock(id, payload, issues);
             case "self" -> validateEntity(id, payload, issues);
+            case "dimension" -> validateResourceField(id, payload, "value", false, issues);
+            case "location_dimension" -> {
+                validateResourceField(id, payload, "value", false, issues);
+                validateLocationName(id, payload, issues);
+            }
+            case "biome" -> validateResourceField(id, payload, "value", true, issues);
+            case "has_location", "at_location", "distance_to_location" -> validateLocationName(id, payload, issues);
         }
     }
 
@@ -553,6 +636,79 @@ public final class ScenesReloadListener implements PreparableReloadListener {
             }
             case "give_item", "take_item" -> validateItem(id, payload, issues);
             case "create_voicemail" -> validateDialogueText(id, payload, issues);
+            case "remember_location", "forget_location", "assign_location" -> {
+                validateLocationName(id, payload, issues);
+                if ("remember_location".equals(action) && !Set.of(
+                        "moe", "player", "home", "current_anchor", "remembered_place")
+                        .contains(GsonHelper.getAsString(payload, "source", "moe").toLowerCase(Locale.ROOT))) {
+                    issues.add(new ContentValidationIssue(id, "invalid location source", true));
+                }
+                if ("assign_location".equals(action)) validateDirectiveNumbers(id, payload, issues);
+            }
+            case "assign_target" -> {
+                if (!Set.of("owner", "dialogue_player", "social_target", "nearest_moe")
+                        .contains(GsonHelper.getAsString(payload, "selector", "owner").toLowerCase(Locale.ROOT))) {
+                    issues.add(new ContentValidationIssue(id, "invalid assignment target selector", true));
+                }
+                validateDirectiveNumbers(id, payload, issues);
+            }
+            case "assign_near_block" -> {
+                validateBlock(id, payload, issues);
+                validateDirectiveNumbers(id, payload, issues);
+                if (GsonHelper.getAsInt(payload, "search_radius", 16) < 1
+                        || GsonHelper.getAsInt(payload, "search_radius", 16) > 32
+                        || GsonHelper.getAsInt(payload, "vertical_radius", 4) < 0
+                        || GsonHelper.getAsInt(payload, "vertical_radius", 4) > 16) {
+                    issues.add(new ContentValidationIssue(id, "block assignment search radius must be 1-32 and vertical radius 0-16", true));
+                }
+            }
+            case "wait_ticks", "play_animation", "set_emotion" -> {
+                if (GsonHelper.getAsInt(payload, "ticks", 20) < 0) {
+                    issues.add(new ContentValidationIssue(id, "timed action ticks cannot be negative", true));
+                }
+                if ("play_animation".equals(action) && !Set.of(
+                        "DEFAULT", "AWE", "BEG", "HAPPY_DANCE", "LOOK_AROUND", "SHIVER", "YEARBOOK", "WAVE")
+                        .contains(GsonHelper.getAsString(payload, "animation", "").toUpperCase(Locale.ROOT))) {
+                    issues.add(new ContentValidationIssue(id, "invalid animation", true));
+                }
+                if ("set_emotion".equals(action) && !Set.of(
+                        "ANGRY", "BEGGING", "CONFUSED", "CRYING", "MISCHIEVOUS", "EMBARRASSED", "HAPPY",
+                        "NORMAL", "PAINED", "PSYCHOTIC", "SCARED", "SICK", "SNOOTY", "SMITTEN", "TIRED")
+                        .contains(GsonHelper.getAsString(payload, "emotion", "").toUpperCase(Locale.ROOT))) {
+                    issues.add(new ContentValidationIssue(id, "invalid emotion", true));
+                }
+            }
+            case "wait_random_ticks" -> {
+                int minimum = GsonHelper.getAsInt(payload, "min_ticks", 20);
+                int maximum = GsonHelper.getAsInt(payload, "max_ticks", 60);
+                if (minimum < 0 || maximum < minimum) {
+                    issues.add(new ContentValidationIssue(id, "random wait requires 0 <= min_ticks <= max_ticks", true));
+                }
+            }
+        }
+    }
+
+    private static void validateDirectiveNumbers(ResourceLocation id, JsonObject payload, List<ContentValidationIssue> issues) {
+        if (GsonHelper.getAsDouble(payload, "speed", 1.0D) <= 0.0D
+                || GsonHelper.getAsDouble(payload, "arrival_radius", 2.0D) < 0.0D
+                || GsonHelper.getAsInt(payload, "timeout_ticks", 1200) < 0) {
+            issues.add(new ContentValidationIssue(id, "assignment speed must be positive; radius and timeout cannot be negative", true));
+        }
+    }
+
+    private static void validateLocationName(ResourceLocation id, JsonObject payload, List<ContentValidationIssue> issues) {
+        String name = GsonHelper.getAsString(payload, "name", "");
+        if (!name.matches("[a-z0-9_.-]+")) {
+            issues.add(new ContentValidationIssue(id, "invalid named location: " + name, true));
+        }
+    }
+
+    private static void validateResourceField(ResourceLocation id, JsonObject payload, String field, boolean tagAllowed,
+            List<ContentValidationIssue> issues) {
+        String value = GsonHelper.getAsString(payload, field, "");
+        String resource = tagAllowed && value.startsWith("#") ? value.substring(1) : value;
+        if (ResourceLocation.tryParse(resource) == null || (!tagAllowed && value.startsWith("#"))) {
+            issues.add(new ContentValidationIssue(id, "invalid " + field + " resource: " + value, true));
         }
     }
 

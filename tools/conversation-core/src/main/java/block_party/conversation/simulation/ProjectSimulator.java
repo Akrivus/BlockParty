@@ -136,6 +136,18 @@ public final class ProjectSimulator {
                     trace.add("take " + Math.max(1, action.count()) + " x " + action.item());
                 }
                 case MARK_TIME -> trace.add("mark time " + action.marker());
+                case REMEMBER_LOCATION -> trace.add("remember " + action.scope() + " location " + action.location());
+                case FORGET_LOCATION -> trace.add("forget " + action.scope() + " location " + action.location());
+                case ASSIGN_LOCATION -> trace.add("assign " + action.scope() + " location " + action.location());
+                case ASSIGN_TARGET -> trace.add("assign target " + action.target());
+                case CLEAR_ASSIGNMENT -> trace.add("clear scene assignment");
+                case ASSIGN_NEAR_BLOCK -> trace.add("assign nearby block " + action.block());
+                case CONSUME_ASSIGNMENT_RESULT -> trace.add("consume assignment result");
+                case WAIT_TICKS -> trace.add("wait " + action.ticks() + " ticks");
+                case WAIT_RANDOM_TICKS -> trace.add("wait " + action.minTicks() + "-" + action.maxTicks() + " ticks");
+                case PLAY_ANIMATION -> trace.add("play " + action.animation() + " for " + action.ticks() + " ticks");
+                case SET_EMOTION -> trace.add("show " + action.emotion() + " for " + action.ticks() + " ticks");
+                case SIT, STAND, JUMP, SWING_HAND, LOOK_AT_ASSIGNMENT -> trace.add("stage " + action.type().name().toLowerCase());
                 case OPEN_INVENTORY, START_FOLLOW, CLEAR_FOLLOW, END, RAW -> trace.add("action " + action.type().name().toLowerCase());
             }
         }

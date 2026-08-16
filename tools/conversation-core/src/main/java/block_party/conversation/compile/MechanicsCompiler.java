@@ -120,6 +120,64 @@ final class MechanicsCompiler {
                 payload.addProperty("scope", lower(scope(action.scope()).name()));
                 payload.addProperty("name", action.marker());
             }
+            case REMEMBER_LOCATION, FORGET_LOCATION -> {
+                result.addProperty("type", "block_party:" + (action.type() == ActionType.REMEMBER_LOCATION
+                        ? "remember_location" : "forget_location"));
+                payload.addProperty("scope", lower(scope(action.scope()).name()));
+                payload.addProperty("name", action.location());
+                if (action.type() == ActionType.REMEMBER_LOCATION) {
+                    payload.addProperty("source", value(action.source(), "moe"));
+                }
+            }
+            case ASSIGN_LOCATION -> {
+                result.addProperty("type", "block_party:assign_location");
+                payload.addProperty("scope", lower(scope(action.scope()).name()));
+                payload.addProperty("name", action.location());
+                if (action.id() != null && !action.id().isBlank()) payload.addProperty("id", action.id());
+                directiveFields(action, payload);
+            }
+            case ASSIGN_TARGET -> {
+                result.addProperty("type", "block_party:assign_target");
+                payload.addProperty("selector", value(action.target(), "owner"));
+                if (action.id() != null && !action.id().isBlank()) payload.addProperty("id", action.id());
+                directiveFields(action, payload);
+            }
+            case CLEAR_ASSIGNMENT -> result.addProperty("type", "block_party:clear_assignment");
+            case ASSIGN_NEAR_BLOCK -> {
+                result.addProperty("type", "block_party:assign_near_block");
+                payload.addProperty("block", action.block());
+                if (action.id() != null && !action.id().isBlank()) payload.addProperty("id", action.id());
+                payload.addProperty("search_radius", action.searchRadius() <= 0 ? 16 : action.searchRadius());
+                payload.addProperty("vertical_radius", Math.max(0, action.verticalRadius()));
+                directiveFields(action, payload);
+            }
+            case CONSUME_ASSIGNMENT_RESULT -> result.addProperty("type", "block_party:consume_assignment_result");
+            case WAIT_TICKS -> {
+                result.addProperty("type", "block_party:wait_ticks");
+                payload.addProperty("ticks", Math.max(0, action.ticks()));
+            }
+            case WAIT_RANDOM_TICKS -> {
+                result.addProperty("type", "block_party:wait_random_ticks");
+                payload.addProperty("min_ticks", Math.max(0, action.minTicks()));
+                payload.addProperty("max_ticks", Math.max(action.minTicks(), action.maxTicks()));
+            }
+            case PLAY_ANIMATION -> {
+                result.addProperty("type", "block_party:play_animation");
+                payload.addProperty("animation", value(action.animation(), "DEFAULT"));
+                payload.addProperty("ticks", Math.max(0, action.ticks()));
+            }
+            case SET_EMOTION -> {
+                result.addProperty("type", "block_party:set_emotion");
+                payload.addProperty("emotion", value(action.emotion(), "NORMAL"));
+                payload.addProperty("ticks", Math.max(0, action.ticks()));
+            }
+            case SIT, STAND, JUMP, SWING_HAND, LOOK_AT_ASSIGNMENT -> result.addProperty("type", "block_party:" + switch (action.type()) {
+                case SIT -> "sit";
+                case STAND -> "stand";
+                case JUMP -> "jump";
+                case SWING_HAND -> "swing_hand";
+                default -> "look_at_assignment";
+            });
             case OPEN_INVENTORY -> result.addProperty("type", "block_party:open_inventory");
             case START_FOLLOW -> {
                 result.addProperty("type", "block_party:start_follow_session");
@@ -135,6 +193,12 @@ final class MechanicsCompiler {
             result.add("action", payload);
         }
         return result;
+    }
+
+    private static void directiveFields(PackAction action, JsonObject payload) {
+        payload.addProperty("speed", action.speed() <= 0.0D ? 1.0D : action.speed());
+        payload.addProperty("arrival_radius", action.arrivalRadius() <= 0.0D ? 2.0D : action.arrivalRadius());
+        payload.addProperty("timeout_ticks", action.timeoutTicks() <= 0 ? 1200 : action.timeoutTicks());
     }
 
     private static String scoped(StateScope scope, String base) {

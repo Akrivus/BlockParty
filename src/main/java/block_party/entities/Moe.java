@@ -20,6 +20,7 @@ import block_party.entities.movement.MoeRoutineBehavior;
 import block_party.entities.movement.PartyInvites;
 import block_party.entities.movement.PlayerMovementIntent;
 import block_party.entities.movement.RoutineIntent;
+import block_party.entities.movement.SceneDirective;
 import block_party.entities.preferences.MoeGiftMemory;
 import block_party.entities.preferences.MoeItemPreferences;
 import block_party.entities.profile.MoeBlockProfile;
@@ -36,6 +37,7 @@ import block_party.scene.Dialogue;
 import block_party.scene.Response;
 import block_party.scene.SceneManager;
 import block_party.scene.SceneTrigger;
+import block_party.scene.SceneSelectionMemory;
 import block_party.world.structure.MoeStructureAssignment;
 import block_party.world.structure.MoeStructureCohortCoordinator;
 import net.minecraft.core.BlockPos;
@@ -116,6 +118,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     public static final String NBT_FOLLOW_TICKS_REMAINING = "TicksRemaining";
     public static final String NBT_FOLLOW_CAN_CHANGE_DIMENSION = "CanChangeDimension";
     public static final String NBT_STRUCTURE_ASSIGNMENT = "StructureAssignment";
+    public static final String NBT_SCENE_DIRECTIVE = "SceneDirective";
+    public static final String NBT_SCENE_SELECTION = "SceneSelection";
+    public static final String NBT_LAST_ROUTINE_SCENE = "LastRoutineScene";
     public static final String NBT_CHORE = "Chore";
     public static final String NBT_REMEMBERED_PLACE = "RememberedPlace";
     public static final String NBT_LAST_SEEN_AT = "LastSeenAt";
@@ -193,6 +198,7 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     private FollowSession followSession = FollowSession.none();
     private RoutineIntent routineIntent = RoutineIntent.IDLE;
     private MoeStructureAssignment structureAssignment = MoeStructureAssignment.none();
+    private SceneDirective sceneDirective = new SceneDirective();
     private final ChoreScheduler chores = new ChoreScheduler(this);
     private final MoeEnvironmentalBehavior environment = new MoeEnvironmentalBehavior(this);
     private final MoeEnvironmentalMemory environmentalMemory = new MoeEnvironmentalMemory(this);
@@ -200,6 +206,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     private final MoeRoutineBehavior routine = new MoeRoutineBehavior(this);
     private final MoeSocialBehavior social = new MoeSocialBehavior(this);
     private final SceneManager sceneManager = new SceneManager(this);
+    private final SceneSelectionMemory sceneSelectionMemory = new SceneSelectionMemory();
+    private int routineTickCountdown = 100;
+    private long lastRoutineSceneGameTime = Long.MIN_VALUE;
     private List<MoeAnchor> routineAnchorCache = List.of();
     private long routineAnchorCacheGameTime = Long.MIN_VALUE;
     private boolean computingRoutineAnchorCache;
@@ -324,6 +333,11 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         if (compound.contains(NBT_STRUCTURE_ASSIGNMENT)) {
             this.setStructureAssignment(MoeStructureAssignment.read(compound.getCompound(NBT_STRUCTURE_ASSIGNMENT)), false);
         }
+        if (compound.contains(NBT_SCENE_DIRECTIVE)) {
+            this.sceneDirective = SceneDirective.read(compound.getCompound(NBT_SCENE_DIRECTIVE));
+        }
+        if (compound.contains(NBT_SCENE_SELECTION)) this.sceneSelectionMemory.read(compound.getCompound(NBT_SCENE_SELECTION));
+        if (compound.contains(NBT_LAST_ROUTINE_SCENE)) this.lastRoutineSceneGameTime = compound.getLong(NBT_LAST_ROUTINE_SCENE);
         this.chores.read(compound);
         this.environmentalMemory.readRememberedPlace(compound, NBT_REMEMBERED_PLACE);
         if (compound.contains(NBT_LAST_SEEN_AT)) {
@@ -375,6 +389,11 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         if (this.structureAssignment.assigned()) {
             compound.put(NBT_STRUCTURE_ASSIGNMENT, this.structureAssignment.write());
         }
+        if (this.sceneDirective.assigned()) {
+            compound.put(NBT_SCENE_DIRECTIVE, this.sceneDirective.write());
+        }
+        compound.put(NBT_SCENE_SELECTION, this.sceneSelectionMemory.write());
+        if (this.lastRoutineSceneGameTime != Long.MIN_VALUE) compound.putLong(NBT_LAST_ROUTINE_SCENE, this.lastRoutineSceneGameTime);
         this.chores.write(compound);
         this.environmentalMemory.writeRememberedPlace(compound, NBT_REMEMBERED_PLACE);
         compound.putLong(NBT_LAST_SEEN_AT, this.getLastSeen());
@@ -423,6 +442,8 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
             this.environmentalMemory.tick();
             this.gifts.tick();
             this.tickFollowSession();
+            this.sceneDirective.tick(this);
+            this.tickRoutineScene();
             this.updateHungerState();
             this.updateLonelyState();
             this.updateStressState();
@@ -1118,7 +1139,9 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     }
 
     public boolean triggerScene(SceneTrigger trigger) {
-        return this.sceneManager.trigger(trigger);
+        boolean triggered = this.sceneManager.trigger(trigger);
+        if (triggered && trigger == SceneTrigger.ROUTINE_TICK) this.lastRoutineSceneGameTime = this.level().getGameTime();
+        return triggered;
     }
 
     public UUID getDialogueTarget() {
@@ -1334,6 +1357,30 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     public MoeRoutineBehavior routine() {
         return this.routine;
+    }
+
+    public SceneDirective sceneDirective() {
+        return this.sceneDirective;
+    }
+
+    public SceneSelectionMemory sceneSelectionMemory() { return this.sceneSelectionMemory; }
+
+    public long ticksSinceRoutineScene() {
+        return this.lastRoutineSceneGameTime == Long.MIN_VALUE ? Long.MAX_VALUE
+                : Math.max(0L, this.level().getGameTime() - this.lastRoutineSceneGameTime);
+    }
+
+    public boolean availableForRoutineScene() {
+        return !this.hasDialogue() && !this.isFollowing() && !this.isSitting()
+                && this.chores.activeId().isEmpty()
+                && this.sceneDirective().status() != SceneDirective.Status.ACTIVE
+                && !this.sceneManager.isActive();
+    }
+
+    private void tickRoutineScene() {
+        if (--this.routineTickCountdown > 0) return;
+        this.routineTickCountdown = 100 + this.random.nextInt(101);
+        if (this.availableForRoutineScene()) this.triggerScene(SceneTrigger.ROUTINE_TICK);
     }
 
     public MoeSocialBehavior social() {

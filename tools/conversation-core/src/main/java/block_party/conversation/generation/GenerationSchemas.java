@@ -7,6 +7,7 @@ import block_party.conversation.model.PackCondition;
 import block_party.conversation.model.ResponseCues;
 import block_party.conversation.model.ResponseEdge;
 import block_party.conversation.model.SpeakerPresentation;
+import block_party.conversation.model.SceneFilterCatalog;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -104,6 +105,7 @@ final class GenerationSchemas {
     private static JsonObject schemaFor(Type type, boolean nullable) {
         if (type == String.class) return nullable ? nullableString() : string();
         if (type == int.class || type == Integer.class) return integer();
+        if (type == double.class || type == Double.class) return typed("number");
         if (type == boolean.class || type == Boolean.class) return typed("boolean");
         if (type == JsonElement.class) return typed("null");
         if (type == JsonObject.class) return speaker();
@@ -132,6 +134,8 @@ final class GenerationSchemas {
                                         ? boundedResponses(component.getGenericType())
                                 : value == ResponseEdge.class && component.getName().equals("cue")
                                         ? responseCue()
+                                : value == PackCondition.class && component.getName().equals("filter")
+                                        ? sceneFilter()
                                 : schemaFor(component.getGenericType(), !component.getType().isPrimitive()));
             }
             JsonObject object = object(properties);
@@ -154,6 +158,54 @@ final class GenerationSchemas {
         ResponseCues.VALUES.forEach(values::add);
         schema.add("enum", values);
         schema.addProperty("description", "Dialogue response icon key, never the visible response label.");
+        return schema;
+    }
+
+    private static JsonObject sceneFilter() {
+        JsonObject type = string();
+        JsonArray types = new JsonArray();
+        SceneFilterCatalog.types().forEach(types::add);
+        type.add("enum", types);
+        return nullable(object(
+                property("type", type),
+                property("value", nullableStringOrNumber()),
+                property("operation", nullableString()),
+                property("start", nullableNumber()),
+                property("end", nullableNumber()),
+                property("not", nullableBoolean()),
+                property("source", nullableString()),
+                property("block", nullableString()),
+                property("item", nullableString()),
+                property("radius", nullableNumber()),
+                property("scope", nullableString()),
+                property("name", nullableString())));
+    }
+
+    private static JsonObject nullableStringOrNumber() {
+        JsonObject schema = new JsonObject();
+        JsonArray types = new JsonArray();
+        types.add("string");
+        types.add("number");
+        types.add("null");
+        schema.add("type", types);
+        return schema;
+    }
+
+    private static JsonObject nullableNumber() {
+        JsonObject schema = new JsonObject();
+        JsonArray types = new JsonArray();
+        types.add("number");
+        types.add("null");
+        schema.add("type", types);
+        return schema;
+    }
+
+    private static JsonObject nullableBoolean() {
+        JsonObject schema = new JsonObject();
+        JsonArray types = new JsonArray();
+        types.add("boolean");
+        types.add("null");
+        schema.add("type", types);
         return schema;
     }
 
