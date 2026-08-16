@@ -105,6 +105,9 @@ Player responses contain:
 - **Target:** the destination card ID;
 - **Transition:** when that destination becomes active.
 
+Each dialogue card supports at most three player responses, matching the in-game
+dialogue UI. AI generation keeps the first three if a model returns more.
+
 The common transition choices are:
 
 - `IMMEDIATE` — nest the destination dialogue in the current interaction;
@@ -352,6 +355,13 @@ checkout:
 This creates the core and workbench launchers below `tools\...\build\install`.
 Re-run the install task after changing Java code or browser assets.
 
+Installation is not required inside the repository. Run a CLI command directly
+through the root shorthand:
+
+```powershell
+.\gradlew.bat tool -Pargs="batch plan authoring\routines\resting\resting.batch.json"
+```
+
 Before committing tooling changes:
 
 ```powershell
@@ -360,6 +370,39 @@ Before committing tooling changes:
 
 The checks cover valid and unsafe examples, simulation, compilation,
 generation repair, archive replay, workbench resources, and workbench export.
+
+## 13. Batch-generate routine dialogue
+
+Use a batch specification when many low-stakes packs share a prompt family but
+need different runtime filters. Start with a read-only preview:
+
+```powershell
+& $tool batch plan authoring\routines\resting\resting.batch.json
+```
+
+`plan` reports job, family, existing-project, and maximum-call counts without
+writing files or contacting a provider. Then materialize versioned briefs and
+generate only missing projects:
+
+```powershell
+& $tool batch expand authoring\routines\resting\resting.batch.json
+& $tool batch generate authoring\routines\resting\resting.batch.json --resume
+```
+
+Open any `jobs\<job-id>\project.json` in the workbench for normal card editing.
+The project is the source of truth; future resume runs skip it. Before export,
+validate the complete set and either compile a standalone datapack or update
+the mod's live resources:
+
+```powershell
+& $tool batch validate authoring\routines\resting\resting.batch.json
+& $tool batch compile authoring\routines\resting\resting.batch.json dist\resting
+& $tool batch install authoring\routines\resting\resting.batch.json --live
+```
+
+`batch install --live` is for development `/reload` testing. It replaces only
+the batch projects' exact pack directories beneath Block Party's scene
+resources.
 
 ## Troubleshooting
 

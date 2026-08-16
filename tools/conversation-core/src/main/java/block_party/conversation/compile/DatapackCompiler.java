@@ -7,6 +7,7 @@ import block_party.conversation.model.ProjectIndex;
 import block_party.conversation.model.ResponseEdge;
 import block_party.conversation.model.SceneNode;
 import block_party.conversation.model.ScenePackProject;
+import block_party.conversation.model.SpeakerPresentation;
 import block_party.conversation.model.TriggerTypes;
 import block_party.conversation.validation.ProjectValidator;
 import block_party.conversation.validation.ValidationReport;
@@ -87,7 +88,10 @@ public final class DatapackCompiler {
             payload.addProperty("text", node.text());
             payload.addProperty("tooltip", node.tooltip());
             if (node.speaker() != null) {
-                payload.add("speaker", node.speaker().deepCopy());
+                JsonObject speaker = node.speaker().deepCopy();
+                normalizeSpeakerKey(speaker, "emotion");
+                normalizeSpeakerKey(speaker, "animation");
+                payload.add("speaker", speaker);
             }
             JsonArray responses = new JsonArray();
             for (ResponseEdge edge : node.responses()) {
@@ -108,6 +112,12 @@ public final class DatapackCompiler {
             actions.add(dialogue);
         }
         return actions;
+    }
+
+    private static void normalizeSpeakerKey(JsonObject speaker, String key) {
+        if (speaker.has(key) && !speaker.get(key).isJsonNull()) {
+            speaker.addProperty(key, SpeakerPresentation.normalize(speaker.get(key).getAsString()));
+        }
     }
 
     private static void appendTarget(JsonArray actions, String target, block_party.conversation.model.TransitionType transition,

@@ -96,6 +96,9 @@ public final class SceneObservationFactories {
             case "player_has_item" -> moe -> targetPlayer(moe) != null && maybeNegate(SceneItemStacks.has(targetPlayer(moe).getInventory(), json), json);
             case "block" -> moe -> blockMatches(moe.getVisibleBlockState(), json);
             case "name" -> moe -> stringMatches(moe.getGivenName(), json);
+            case "blood_type" -> moe -> traitMatches(moe.getBloodType(), json);
+            case "dere" -> moe -> traitMatches(moe.getDere(), json);
+            case "zodiac" -> moe -> traitMatches(moe.getZodiac(), json);
             case "has_social_target" -> moe -> MoeSocialContext.find(moe, socialRadius(json)).isPresent();
             case "social_affinity" -> moe -> socialContext(moe, json).map(context -> compare(context.signal().affinity(), json)).orElse(false);
             case "social_tension" -> moe -> socialContext(moe, json).map(context -> compare(context.signal().tension(), json)).orElse(false);

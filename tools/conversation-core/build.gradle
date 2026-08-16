@@ -29,6 +29,11 @@ tasks.register('conversationToolCheck') {
             mainClass = 'block_party.conversation.generation.WorldContextSelfTest'
             args rootProject.projectDir.absolutePath
         }
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            mainClass = 'block_party.conversation.model.SceneFilterCatalogSelfTest'
+            args rootProject.projectDir.absolutePath
+        }
         def fixture = file('examples/flower-request.project.json')
         def verification = layout.buildDirectory.dir('tool-check').get().asFile
         delete verification
@@ -128,6 +133,39 @@ tasks.register('conversationToolCheck') {
                 new File(generated, 'context.json').bytes,
                 new File(replayed, 'context.json').bytes)) {
             throw new GradleException('Generation replay changed archived context.')
+        }
+
+        def batchRoot = new File(verification, 'batch-authoring')
+        batchRoot.mkdirs()
+        def batchSpec = new File(batchRoot, 'resting.batch.json')
+        batchSpec.bytes = file('examples/batch/resting.batch.json').bytes
+        ['plan', 'expand', 'generate', 'validate'].each { operation ->
+            javaexec {
+                classpath = sourceSets.main.runtimeClasspath
+                mainClass = application.mainClass
+                args 'batch', operation, batchSpec.absolutePath
+                if (operation == 'generate') args '--resume'
+            }
+        }
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            mainClass = application.mainClass
+            args 'batch', 'compile', batchSpec.absolutePath, new File(verification, 'batch-pack').absolutePath
+        }
+        def batchProject = new File(batchRoot, 'jobs/resting_fixture__general__01/project.json')
+        def matrixProject = new File(batchRoot, 'jobs/resting_fixture__dere__tsundere__01/project.json')
+        if (!batchProject.isFile() || !matrixProject.isFile()
+                || !batchProject.text.contains('SCENE_FILTER') || !matrixProject.text.contains('block_party:dere')) {
+            throw new GradleException('Batch generation did not create a project with locked scene filters.')
+        }
+        def projectBeforeResume = batchProject.bytes
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            mainClass = application.mainClass
+            args 'batch', 'generate', batchSpec.absolutePath, '--resume'
+        }
+        if (!java.util.Arrays.equals(projectBeforeResume, batchProject.bytes)) {
+            throw new GradleException('Batch resume overwrote an existing project.')
         }
     }
 }

@@ -7,8 +7,11 @@ import block_party.conversation.model.PackAction;
 import block_party.conversation.model.PackCondition;
 import block_party.conversation.model.ProjectIndex;
 import block_party.conversation.model.ResponseEdge;
+import block_party.conversation.model.ResponseCues;
 import block_party.conversation.model.SceneNode;
+import block_party.conversation.model.SpeakerPresentation;
 import block_party.conversation.model.ScenePackProject;
+import block_party.conversation.model.SceneFilterCatalog;
 import block_party.conversation.model.StateDeclaration;
 import block_party.conversation.model.StateReference;
 import block_party.conversation.model.StateType;
@@ -26,10 +29,6 @@ import java.util.regex.Pattern;
 public final class ProjectValidator {
     private static final Pattern ID = Pattern.compile("[a-z0-9_.-]+");
     private static final Pattern RESOURCE = Pattern.compile("[#]?[a-z0-9_.-]+:[a-z0-9_./-]+");
-    private static final Set<String> CUES = Set.of(
-            "green_checkmark", "red_x", "chat_bubble", "lovely_heart", "trusty_armor",
-            "stressful_skull", "leather_bag", "anvil", "next_response", "close_dialogue", "open_dialogue");
-
     public ValidationReport validate(ScenePackProject project) {
         List<Diagnostic> issues = new ArrayList<>();
         if (project == null || project.pack() == null) {
@@ -70,7 +69,7 @@ public final class ProjectValidator {
         project.nodes().stream().filter(node -> node.type() == NodeType.GAMEPLAY_GATE).forEach(node -> reachable.addAll(reachable(node.id(), nodes)));
         nodes.keySet().stream().filter(id -> !reachable.contains(id))
                 .forEach(id -> issues.add(warning("UNREACHABLE_NODE", id, "Node is not reachable from an entry or gameplay gate.")));
-        if (reachable.stream().map(nodes::get).noneMatch(node -> node.type() == NodeType.END)) {
+        if (reachable.stream().map(nodes::get).noneMatch(ProjectValidator::hasEnding)) {
             issues.add(error("NO_REACHABLE_END", project.entry(), "The graph has no reachable ending."));
         }
         analyzeStateUsage(project, issues);
@@ -124,6 +123,7 @@ public final class ProjectValidator {
             issues.add(error("INVALID_TRIGGER", node.id(),
                     "Unknown trigger '" + node.trigger() + "'. Use right_click for ordinary Moe interaction."));
         }
+        validateSpeaker(node, issues);
         if (node.type() == NodeType.GAMEPLAY_GATE && !node.id().equals(project.entry())
                 && node.conditions().stream().noneMatch(condition -> condition.type() == ConditionType.HAS_COOKIE
                         || condition.type() == ConditionType.COUNTER)) {
@@ -144,10 +144,14 @@ public final class ProjectValidator {
             if (node.responses().isEmpty()) {
                 issues.add(error("NO_RESPONSES", node.id(), "Dialogue must have at least one response."));
             }
+            if (node.responses().size() > SceneNode.MAX_RESPONSES) {
+                issues.add(error("TOO_MANY_RESPONSES", node.id(), "Dialogue has " + node.responses().size()
+                        + " responses; the dialogue UI supports at most " + SceneNode.MAX_RESPONSES + "."));
+            }
             Set<String> cues = new HashSet<>();
             for (ResponseEdge edge : node.responses()) {
                 String cue = unqualify(edge.cue());
-                if (!CUES.contains(cue)) {
+                if (!ResponseCues.valid(cue)) {
                     issues.add(error("INVALID_CUE", node.id(), "Unknown response cue '" + edge.cue() + "'."));
                 } else if (!cues.add(cue)) {
                     issues.add(error("DUPLICATE_CUE", node.id(), "Response cue '" + cue + "' is repeated."));
@@ -165,6 +169,31 @@ public final class ProjectValidator {
         }
     }
 
+    private static boolean hasEnding(SceneNode node) {
+        return node.type() == NodeType.END
+                || node.responses().stream().anyMatch(edge -> edge.transition() == TransitionType.PACK_EXIT);
+    }
+
+    private static void validateSpeaker(SceneNode node, List<Diagnostic> issues) {
+        if (node.speaker() == null) return;
+        if (node.speaker().has("emotion") && !node.speaker().get("emotion").isJsonNull()) {
+            if (!node.speaker().get("emotion").isJsonPrimitive()
+                    || !node.speaker().get("emotion").getAsJsonPrimitive().isString()
+                    || !SpeakerPresentation.validEmotion(node.speaker().get("emotion").getAsString())) {
+                issues.add(error("INVALID_SPEAKER_EMOTION", node.id(),
+                        "Speaker emotion must be one of " + SpeakerPresentation.EMOTIONS + "."));
+            }
+        }
+        if (node.speaker().has("animation") && !node.speaker().get("animation").isJsonNull()) {
+            if (!node.speaker().get("animation").isJsonPrimitive()
+                    || !node.speaker().get("animation").getAsJsonPrimitive().isString()
+                    || !SpeakerPresentation.validAnimation(node.speaker().get("animation").getAsString())) {
+                issues.add(error("INVALID_SPEAKER_ANIMATION", node.id(),
+                        "Speaker animation must be one of " + SpeakerPresentation.ANIMATIONS + "."));
+            }
+        }
+    }
+
     private static void validateCondition(PackCondition condition, String node, ScenePackProject project,
             ProjectIndex index, List<Diagnostic> issues) {
         if (condition == null || condition.type() == null) {
@@ -173,6 +202,11 @@ public final class ProjectValidator {
         }
         if (condition.type() == ConditionType.RAW) {
             rawAllowed(project, condition.raw(), node, issues);
+            return;
+        }
+        if (condition.type() == ConditionType.SCENE_FILTER) {
+            String problem = SceneFilterCatalog.validate(condition.filter());
+            if (problem != null) issues.add(error("INVALID_SCENE_FILTER", node, problem));
             return;
         }
         if (condition.type() == ConditionType.HAS_COOKIE || condition.type() == ConditionType.COUNTER) {

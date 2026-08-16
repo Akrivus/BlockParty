@@ -29,6 +29,11 @@ public final class WorldContextResolver {
         for (String path : manifest.always()) {
             pending.add(new PendingInclusion(path, "MANDATORY_WORLD_RULE", null));
         }
+        for (String tag : brief.contextTags()) {
+            String path = manifest.tags().get(tag);
+            if (path == null) warnings.add("Explicit context tag has no document mapping: " + tag);
+            else pending.add(new PendingInclusion(path, "EXPLICIT_TAG", tag));
+        }
         for (GenerationSubject subject : brief.subjects()) {
             String block = subject.resolvedBlock();
             if (block == null || block.isBlank()) {

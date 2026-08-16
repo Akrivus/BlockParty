@@ -39,7 +39,10 @@ final class GenerationArchiveReader {
 
     static Path generationRoot(Path projectPath) {
         Path parent = projectPath.getParent();
-        return parent != null && Files.isDirectory(parent.resolve("generation")) ? parent : null;
+        if (parent == null) return null;
+        if (Files.isDirectory(parent.resolve("generation"))) return parent;
+        Path generated = parent.resolve("generated");
+        return Files.isDirectory(generated.resolve("generation")) ? generated : null;
     }
 
     private JsonArray readStages(Path archive) throws Exception {

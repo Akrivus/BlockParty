@@ -105,8 +105,8 @@ A scene file has this shape:
         "speaker": {
           "identity": "character",
           "position": "left",
-          "animation": "wave",
-          "emotion": "happy",
+          "animation": "WAVE",
+          "emotion": "HAPPY",
           "speaks": false,
           "scale": 1.0
         },
@@ -396,6 +396,9 @@ Supported operations:
 Supported string/trait filters:
 
 - `block_party:name`
+- `block_party:blood_type`
+- `block_party:dere`
+- `block_party:zodiac`
 - `block_party:has_cookie`
 - `block_party:social_target_name`
 - `block_party:social_target_blood_type`
@@ -410,6 +413,17 @@ Example:
   "type": "block_party:name",
   "operation": "contains",
   "value": "Suzu"
+}
+```
+
+The generic self-trait filters accept `value`, for example:
+
+```json
+{
+  "type": "block_party:zodiac",
+  "filter": {
+    "value": "aquarius"
+  }
 }
 ```
 
@@ -736,8 +750,8 @@ response.
     "speaker": {
       "identity": "character",
       "position": "left",
-      "animation": "wave",
-      "emotion": "normal",
+      "animation": "WAVE",
+      "emotion": "NORMAL",
       "speaks": false,
       "voice": "block_party:moe.say",
       "scale": 1.0
@@ -763,12 +777,18 @@ Fields:
 - `speaker`: optional speaker object.
 - `responses`: optional response array.
 
+The dialogue UI displays at most three responses. Authoring projects should not
+define more than three on a dialogue card.
+
 Speaker fields:
 
 - `identity`: `character` default, or `narrator`
 - `position`: `left` default, `center`, or `right`
-- `animation`: string, default `DEFAULT`
-- `emotion`: string, default `NORMAL`
+- `animation`: `DEFAULT`, `AWE`, `BEG`, `HAPPY_DANCE`, `LOOK_AROUND`,
+  `SHIVER`, `YEARBOOK`, or `WAVE`; defaults to `DEFAULT`
+- `emotion`: `ANGRY`, `BEGGING`, `CONFUSED`, `CRYING`, `MISCHIEVOUS`,
+  `EMBARRASSED`, `HAPPY`, `NORMAL`, `PAINED`, `PSYCHOTIC`, `SCARED`, `SICK`,
+  `SNOOTY`, `SMITTEN`, or `TIRED`; defaults to `NORMAL`
 - `speaks`: boolean, default `false`
 - `voice`: optional voice/sound ID used only when `speaks` is true
 - `scale`: float, default `1.0`
@@ -1046,7 +1066,7 @@ Hide-until values:
     "tooltip": true,
     "speaker": {
       "identity": "character",
-      "emotion": "normal"
+      "emotion": "NORMAL"
     },
     "sound": "block_party:moe.say",
     "delay_minutes": 60

@@ -121,8 +121,8 @@ final class WorkbenchService {
             String provider, String modelName, String recordedResponses) throws Exception {
         GenerationBrief providerBrief = new GenerationBrief(
                 1, "revision", "revision", "Revision", instruction,
-                List.of(), false, List.of(), List.of(), List.of(),
-                null, null, provider, modelName, recordedResponses);
+                List.of(), false, List.of(), List.of(), List.of(), List.of(),
+                null, List.of(), null, null, provider, modelName, recordedResponses);
         return new DialogueRevisionService().request(NarrativeModels.create(providerBrief, repositoryRoot()), project, node, instruction,
                 neighboringDialogue(project, node), revisionArchive());
     }

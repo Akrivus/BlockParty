@@ -37,7 +37,7 @@
       ],
       "text": "Could you bring me three flowers?",
       "tooltip": true,
-      "speaker": {"emotion": "hopeful"},
+      "speaker": {"emotion": "NORMAL"},
       "responses": [
         {
           "cue": "green_checkmark",
@@ -80,7 +80,7 @@
       "title": "Thank the player",
       "text": "You remembered. Thank you.",
       "tooltip": true,
-      "speaker": {"emotion": "happy"},
+      "speaker": {"emotion": "HAPPY"},
       "responses": [
         {"cue": "lovely_heart", "label": "You're welcome", "target": "rewarded", "transition": "IMMEDIATE"}
       ],

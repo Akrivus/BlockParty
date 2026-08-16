@@ -237,6 +237,10 @@
               placeholder="What does the character say?"
             ></textarea>
           </label>
+          <div class="split">
+            <label>Emotion<select name="emotion"></select></label>
+            <label>Animation<select name="animation"></select></label>
+          </div>
           <details>
             <summary>Formatting and dynamic text</summary>
             <p class="hint">
@@ -462,7 +466,7 @@
                 </select></label
               ><label>Model<input id="gen-model" value="gpt-5.6-luna" /></label>
             </div>
-            <label
+            <label id="gen-recorded-field"
               >Recorded responses directory<input
                 id="gen-recorded"
                 value="tools/conversation-core/examples/generation/responses/flower" /></label

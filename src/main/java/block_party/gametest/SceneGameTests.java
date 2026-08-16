@@ -866,11 +866,17 @@ public final class SceneGameTests {
         Moe moe = spawnMoe(helper, owner);
         moe.setStress(14.0F);
         moe.setRelaxation(0.0F);
+        moe.setBloodType("AB");
+        moe.setDere("TSUNDERE");
+        moe.setZodiac("AQUARIUS");
 
         ScenesReloadListener.ParsedScene inferred = parseScene("""
                 {"trigger":"block_party:right_click","filters":[
                     {"type":"block_party:routine_intent","filter":{"value":"relax"}},
-                    {"type":"block_party:explicit_routine_intent","filter":{"value":"idle"}}
+                    {"type":"block_party:explicit_routine_intent","filter":{"value":"idle"}},
+                    {"type":"block_party:blood_type","filter":{"value":"ab"}},
+                    {"type":"block_party:dere","filter":{"value":"tsundere"}},
+                    {"type":"block_party:zodiac","filter":{"value":"aquarius"}}
                 ],"actions":[]}
                 """);
         if (!inferred.scene().fulfills(moe)) {

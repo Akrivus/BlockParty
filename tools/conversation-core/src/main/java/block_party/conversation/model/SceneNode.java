@@ -17,6 +17,8 @@ public record SceneNode(
         String next,
         String ending,
         EditorPosition editor) {
+    public static final int MAX_RESPONSES = 3;
+
     public SceneNode {
         conditions = conditions == null ? List.of() : List.copyOf(conditions);
         responses = responses == null ? List.of() : List.copyOf(responses);

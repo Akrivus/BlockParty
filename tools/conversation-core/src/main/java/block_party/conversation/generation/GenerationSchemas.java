@@ -4,6 +4,9 @@ import block_party.conversation.model.ScenePackProject;
 import block_party.conversation.model.SceneNode;
 import block_party.conversation.model.TriggerTypes;
 import block_party.conversation.model.PackCondition;
+import block_party.conversation.model.ResponseCues;
+import block_party.conversation.model.ResponseEdge;
+import block_party.conversation.model.SpeakerPresentation;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -125,6 +128,10 @@ final class GenerationSchemas {
                         component.getName(),
                         value == SceneNode.class && component.getName().equals("trigger")
                                 ? trigger()
+                                : value == SceneNode.class && component.getName().equals("responses")
+                                        ? boundedResponses(component.getGenericType())
+                                : value == ResponseEdge.class && component.getName().equals("cue")
+                                        ? responseCue()
                                 : schemaFor(component.getGenericType(), !component.getType().isPrimitive()));
             }
             JsonObject object = object(properties);
@@ -135,10 +142,34 @@ final class GenerationSchemas {
         throw new IllegalArgumentException("No generation schema mapping for " + type);
     }
 
+    private static JsonObject boundedResponses(Type type) {
+        JsonObject schema = schemaFor(type, false);
+        schema.addProperty("maxItems", SceneNode.MAX_RESPONSES);
+        return schema;
+    }
+
+    private static JsonObject responseCue() {
+        JsonObject schema = string();
+        JsonArray values = new JsonArray();
+        ResponseCues.VALUES.forEach(values::add);
+        schema.add("enum", values);
+        schema.addProperty("description", "Dialogue response icon key, never the visible response label.");
+        return schema;
+    }
+
     private static JsonObject speaker() {
         return object(
-                property("emotion", nullableString()),
-                property("animation", nullableString()));
+                property("emotion", nullableEnum(SpeakerPresentation.EMOTIONS)),
+                property("animation", nullableEnum(SpeakerPresentation.ANIMATIONS)));
+    }
+
+    private static JsonObject nullableEnum(java.util.List<String> allowed) {
+        JsonObject schema = nullableString();
+        JsonArray values = new JsonArray();
+        allowed.forEach(values::add);
+        values.add(com.google.gson.JsonNull.INSTANCE);
+        schema.add("enum", values);
+        return schema;
     }
 
     private static JsonObject trigger() {

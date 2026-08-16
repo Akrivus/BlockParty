@@ -7,6 +7,8 @@ import block_party.conversation.io.ProjectJson;
 import block_party.conversation.model.ActionType;
 import block_party.conversation.model.ConditionType;
 import block_party.conversation.model.ScenePackProject;
+import block_party.conversation.model.SceneNode;
+import block_party.conversation.model.SpeakerPresentation;
 import block_party.conversation.simulation.SimulationScenario;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,6 +26,7 @@ public final class WorkbenchSelfTest {
         verifyAuthoringSchema();
         verifyExportAndStarter(service, project);
         verifyLiveResourcesExport(project);
+        verifyBatchGenerationArchive();
         verifySessionFlow(Path.of(args[0]));
         System.out.println("Workbench check passed.");
     }
@@ -78,6 +81,14 @@ public final class WorkbenchSelfTest {
         int conditions = ((java.util.Map<?, ?>) schema.get("conditions")).size();
         if (actions != ActionType.values().length || conditions != ConditionType.values().length) {
             throw new AssertionError("Authoring schema does not cover every primitive type.");
+        }
+        var enums = (java.util.Map<?, ?>) schema.get("enums");
+        if (!SpeakerPresentation.EMOTIONS.equals(enums.get("emotion"))
+                || !SpeakerPresentation.ANIMATIONS.equals(enums.get("animation"))) {
+            throw new AssertionError("Authoring schema does not expose the runtime speaker presentation keys.");
+        }
+        if (!Integer.valueOf(SceneNode.MAX_RESPONSES).equals(schema.get("maximumResponses"))) {
+            throw new AssertionError("Authoring schema does not expose the dialogue response limit.");
         }
     }
 
@@ -141,6 +152,17 @@ public final class WorkbenchSelfTest {
         service.exportLiveResources(project);
         if (Files.exists(expected.resolve("stale.json"))) {
             throw new AssertionError("Repeated live resource export must replace the current pack directory.");
+        }
+    }
+
+    private static void verifyBatchGenerationArchive() throws Exception {
+        Path job = Files.createTempDirectory("block-party-batch-archive-check-");
+        Path project = job.resolve("project.json");
+        Files.writeString(project, "{}");
+        Path generated = job.resolve("generated/generation");
+        Files.createDirectories(generated);
+        if (!job.resolve("generated").equals(GenerationArchiveReader.generationRoot(project))) {
+            throw new AssertionError("Workbench must discover batch generation provenance.");
         }
     }
 }

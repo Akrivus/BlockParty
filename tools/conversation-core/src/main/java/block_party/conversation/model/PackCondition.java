@@ -1,6 +1,7 @@
 package block_party.conversation.model;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 public record PackCondition(
         ConditionType type,
@@ -13,5 +14,6 @@ public record PackCondition(
         boolean not,
         String marker,
         int minGameDays,
+        JsonObject filter,
         JsonElement raw) {
 }

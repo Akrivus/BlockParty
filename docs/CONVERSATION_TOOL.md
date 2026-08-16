@@ -104,8 +104,9 @@ that archive without contacting a model and must reproduce the project and
 datapack byte-for-byte. The deterministic fixture deliberately starts with an
 invalid graph so CI exercises the repair path.
 
-The default `recorded` provider reads responses from `recordedResponses`,
-relative to the brief. For a live generation, set `provider` to `openai`, put
+The optional `recorded` provider reads responses from `recordedResponses`,
+which is required only for that provider and resolved relative to the brief.
+For a live generation, set `provider` to `openai`, omit `recordedResponses`, put
 the desired model identifier in `model`, and expose `OPENAI_API_KEY` to the
 process. The OpenAI integration is isolated behind `NarrativeModel`, uses the
 Responses API's JSON output mode, and never writes the API key to an archive.
@@ -206,6 +207,46 @@ The browser never compiles or validates projects independently. Its local API
 delegates those operations to `conversation-core`, preserving one definition
 of the project format and generated datapack behavior. Projects with validation
 errors can be explored and repaired, but cannot be saved or exported.
+
+## Filter-driven batch authoring
+
+Iteration 9 adds deterministic CLI batches for routine and ambient dialogue.
+A versioned `*.batch.json` defines prompt families, reusable selector tags,
+optional `each` or explicit `product` matrices, and variation counts. Expansion
+creates one editable `brief.json` and `project.json` per deterministic job under
+`jobs/<job-id>`; model transcripts and compiled intermediates stay in the
+ignored `generated` directory.
+
+```powershell
+$tool = "tools\conversation-core\build\install\conversation-core\bin\conversation-core.bat"
+& $tool batch plan authoring\routines\resting\resting.batch.json
+& $tool batch expand authoring\routines\resting\resting.batch.json
+& $tool batch generate authoring\routines\resting\resting.batch.json --resume
+& $tool batch validate authoring\routines\resting\resting.batch.json
+& $tool batch compile authoring\routines\resting\resting.batch.json dist\resting
+& $tool batch install authoring\routines\resting\resting.batch.json --live
+```
+
+From a repository checkout, installation is optional. The root Gradle shorthand
+builds and runs the CLI directly:
+
+```powershell
+.\gradlew.bat tool -Pargs="batch plan authoring\routines\resting\resting.batch.json"
+```
+
+For scripts that should avoid Gradle property quoting, set
+`BLOCK_PARTY_CONVERSATION_ARGS` and run the same task. With no arguments,
+`tool` prints CLI help.
+
+Batch selectors use validated `SCENE_FILTER` project conditions rather than raw
+mechanics. The CLI locks selectors onto generated root scenes, while the
+workbench exposes their JSON for intentional author edits. `--resume` never
+overwrites an existing project; targeted replacement requires an exact
+`--only <job-id> --force` selection. Live installation stages compilation and
+replaces only pack directories owned by the batch.
+
+See `tools/conversation-core/examples/batch/resting.batch.json` for a minimal
+recorded-provider example.
 
 ## Iteration Six Generation Studio
 

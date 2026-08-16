@@ -7,8 +7,12 @@ import block_party.conversation.model.ConditionType;
 import block_party.conversation.model.NodeType;
 import block_party.conversation.model.StateScope;
 import block_party.conversation.model.StateType;
+import block_party.conversation.model.SceneFilterCatalog;
+import block_party.conversation.model.SceneNode;
+import block_party.conversation.model.ResponseCues;
 import block_party.conversation.model.TransitionType;
 import block_party.conversation.model.TriggerTypes;
+import block_party.conversation.model.SpeakerPresentation;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,6 +32,7 @@ final class AuthoringSchema {
         conditions.put("MOE_HAS_ITEM", List.of("item", "count", "not"));
         conditions.put("BLOCK", List.of("item", "not"));
         conditions.put("ELAPSED_TIME", List.of("marker", "minGameDays", "not"));
+        conditions.put("SCENE_FILTER", List.of("filter"));
         conditions.put("RAW", List.of("raw"));
 
         Map<String, List<String>> actions = new LinkedHashMap<>();
@@ -51,13 +56,18 @@ final class AuthoringSchema {
         enums.put("nodeType", names(NodeType.values()));
         enums.put("stateType", names(StateType.values()));
         enums.put("trigger", TriggerTypes.values());
+        enums.put("emotion", SpeakerPresentation.EMOTIONS);
+        enums.put("animation", SpeakerPresentation.ANIMATIONS);
         return Map.of(
                 "conditions", conditions,
+                "sceneFilters", SceneFilterCatalog.types(),
+                "sceneFilterEnums", SceneFilterCatalog.enums(),
                 "actions", actions,
                 "enums", enums,
                 "conditionTypes", names(ConditionType.values()),
                 "actionTypes", names(ActionType.values()),
-                "cues", List.of("chat_bubble", "green_checkmark", "red_x", "lovely_heart", "trusty_armor", "next_response"));
+                "maximumResponses", SceneNode.MAX_RESPONSES,
+                "cues", ResponseCues.VALUES);
     }
 
     private static <E extends Enum<E>> List<String> names(E[] values) {

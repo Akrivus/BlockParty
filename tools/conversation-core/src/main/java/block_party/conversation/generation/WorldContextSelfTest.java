@@ -47,7 +47,7 @@ public final class WorldContextSelfTest {
         return new GenerationBrief(
                 1, "context_check", "context_check", "Context Check", "Check context.",
                 List.of(new GenerationSubject("BLOCK", block, null, "PRIMARY")),
-                true, List.of(), List.of(), List.of(), null, null,
+                true, List.of(), List.of(), List.of(), List.of(), null, List.of(), null, null,
                 "recorded", "fixture", "unused");
     }
 }

@@ -5,8 +5,12 @@ import block_party.conversation.generation.model.ModelRequest;
 import block_party.conversation.generation.model.ModelResponse;
 import block_party.conversation.generation.model.NarrativeModel;
 import block_party.conversation.io.ProjectJson;
+import block_party.conversation.model.ConditionType;
 import block_party.conversation.model.NodeType;
+import block_party.conversation.model.PackCondition;
+import block_party.conversation.model.ResponseCues;
 import block_party.conversation.model.ScenePackProject;
+import block_party.conversation.model.SceneNode;
 import block_party.conversation.model.TriggerTypes;
 import block_party.conversation.report.BuildReportWriter;
 import block_party.conversation.simulation.ProjectSimulator;
@@ -80,9 +84,15 @@ public final class GenerationPipeline {
                         + "placeholder dialogue, and speaker objects containing emotion and animation—not speaker names. "
                         + "Copy the brief's pack id, namespace, and title exactly. Never use RAW mechanics and do not wrap "
                         + "the project in a graph or mechanics object. Use right_click for ordinary Moe interaction. Every "
-                        + "later GAMEPLAY_GATE must include a HAS_COOKIE or COUNTER condition written by an earlier choice.",
+                        + "later GAMEPLAY_GATE must include a HAS_COOKIE or COUNTER condition written by an earlier choice. "
+                        + "A DIALOGUE node may have at most " + SceneNode.MAX_RESPONSES + " player responses. "
+                        + "Response cue is an icon enum from the schema; put words shown to the player in label. "
+                        + "Never emit SCENE_FILTER conditions; locked batch selectors are applied by the tool.",
                 context(brief, catalog, plan), ScenePackProject.class);
         graph = alignPackIdentity(brief, graph);
+        graph = applyLockedSelectors(brief, graph);
+        graph = truncateResponses(graph);
+        graph = normalizeResponseCues(graph);
         ValidationReport validation = new ProjectValidator().validate(graph);
         int repairs = 0;
         while (!validation.valid() && repairs++ < MAX_GRAPH_REPAIRS) {
@@ -98,6 +108,9 @@ public final class GenerationPipeline {
                             + "and add SET_COOKIE for that same state directly to the gate actions; a counter guard is invalid.",
                     ProjectJson.gson().toJson(repairContext), ScenePackProject.class);
             graph = alignPackIdentity(brief, graph);
+            graph = applyLockedSelectors(brief, graph);
+            graph = truncateResponses(graph);
+            graph = normalizeResponseCues(graph);
             validation = new ProjectValidator().validate(graph);
         }
         write(output.resolve("graph-validation.json"), ProjectJson.gson().toJson(validation));
@@ -123,6 +136,7 @@ public final class GenerationPipeline {
         String dialoguePrompt = "Return one dialogue patch for every project node. Each patch contains only the node ID, "
                 + "polished text, a speaker object, and responseLabels in their existing order. The text field is rendered "
                 + "verbatim in a speech bubble: write only words spoken aloud by the Moe, in first person where natural. "
+                + "Speaker emotion and animation must use only the enum values allowed by the response schema. "
                 + "Never use brackets, narration, speaker labels, screenplay directions, or descriptions of gestures, looks, "
                 + "feelings, or actions. Put performance only in speaker emotion and animation. Example: write ‘Sometimes I "
                 + "wish I had green hair like Grass.’, not ‘[Dirt looks down and confides their wish.]’. "
@@ -183,6 +197,44 @@ public final class GenerationPipeline {
         return new GenerationResult(written, output, session.calls, session.inputTokens, session.outputTokens);
     }
 
+    private static ScenePackProject truncateResponses(ScenePackProject graph) {
+        JsonObject project = ProjectJson.gson().toJsonTree(graph).getAsJsonObject();
+        for (JsonElement element : project.getAsJsonArray("nodes")) {
+            JsonObject node = element.getAsJsonObject();
+            if (!node.has("responses") || !node.get("responses").isJsonArray()) continue;
+            JsonArray responses = node.getAsJsonArray("responses");
+            while (responses.size() > SceneNode.MAX_RESPONSES) {
+                responses.remove(responses.size() - 1);
+            }
+        }
+        return ProjectJson.gson().fromJson(project, ScenePackProject.class);
+    }
+
+    private static ScenePackProject normalizeResponseCues(ScenePackProject graph) {
+        JsonObject project = ProjectJson.gson().toJsonTree(graph).getAsJsonObject();
+        for (JsonElement element : project.getAsJsonArray("nodes")) {
+            JsonObject node = element.getAsJsonObject();
+            if (!node.has("responses") || !node.get("responses").isJsonArray()) continue;
+            Set<String> used = new HashSet<>();
+            for (JsonElement responseElement : node.getAsJsonArray("responses")) {
+                JsonObject response = responseElement.getAsJsonObject();
+                String cue = response.has("cue") && !response.get("cue").isJsonNull()
+                        ? response.get("cue").getAsString() : null;
+                if (ResponseCues.valid(cue) && used.add(unqualifyCue(cue))) continue;
+                String replacement = ResponseCues.NEUTRAL_DEFAULTS.stream()
+                        .filter(candidate -> !used.contains(candidate)).findFirst().orElse("chat_bubble");
+                response.addProperty("cue", replacement);
+                used.add(replacement);
+            }
+        }
+        return ProjectJson.gson().fromJson(project, ScenePackProject.class);
+    }
+
+    private static String unqualifyCue(String cue) {
+        int separator = cue.indexOf(':');
+        return separator >= 0 ? cue.substring(separator + 1) : cue;
+    }
+
     private static ScenePackProject alignPackIdentity(GenerationBrief brief, ScenePackProject project) {
         JsonObject json = ProjectJson.gson().toJsonTree(project).getAsJsonObject();
         JsonObject pack = json.getAsJsonObject("pack");
@@ -190,6 +242,34 @@ public final class GenerationPipeline {
         pack.addProperty("namespace", brief.namespace());
         pack.addProperty("title", brief.title());
         return ProjectJson.gson().fromJson(json, ScenePackProject.class);
+    }
+
+    private static ScenePackProject applyLockedSelectors(GenerationBrief brief, ScenePackProject project) {
+        if (brief.lockedFilters().isEmpty() && (brief.lockedTrigger() == null || brief.lockedTrigger().isBlank())) {
+            return project;
+        }
+        List<SceneNode> nodes = new ArrayList<>();
+        for (SceneNode node : project.nodes()) {
+            boolean root = node.id().equals(project.entry()) || node.trigger() != null && !node.trigger().isBlank();
+            if (!root) {
+                nodes.add(node);
+                continue;
+            }
+            List<PackCondition> conditions = new ArrayList<>(node.conditions().stream()
+                    .filter(condition -> condition.type() != ConditionType.SCENE_FILTER).toList());
+            for (JsonObject filter : brief.lockedFilters()) {
+                conditions.add(new PackCondition(
+                        ConditionType.SCENE_FILTER, null, null, null, 0, null, 0, false, null, 0, filter, null));
+            }
+            String trigger = brief.lockedTrigger() == null || brief.lockedTrigger().isBlank()
+                    ? node.trigger() : brief.lockedTrigger();
+            nodes.add(new SceneNode(
+                    node.id(), node.type(), node.title(), trigger, conditions, node.text(), node.tooltip(), node.speaker(),
+                    node.responses(), node.actions(), node.next(), node.ending(), node.editor()));
+        }
+        return new ScenePackProject(
+                project.projectFormat(), project.target(), project.pack(), project.contract(), project.state(),
+                project.allowRawMechanics(), project.entry(), nodes);
     }
 
     private static ScenePackProject applyDialogue(ScenePackProject graph, DialoguePass dialogue) {
@@ -358,7 +438,21 @@ public final class GenerationPipeline {
             archivedRequest.addProperty("userPrompt", user);
             write(directory.resolve("request.json"), ProjectJson.gson().toJson(archivedRequest));
             Instant started = Instant.now();
-            ModelResponse response = model.generate(request);
+            ModelResponse response;
+            try {
+                response = model.generate(request);
+            } catch (Exception exception) {
+                JsonObject metadata = new JsonObject();
+                metadata.addProperty("stage", stage.name());
+                metadata.addProperty("status", "FAILED");
+                metadata.addProperty("startedAt", started.toString());
+                metadata.addProperty("failedAt", Instant.now().toString());
+                metadata.addProperty("errorType", exception.getClass().getName());
+                metadata.addProperty("error", exception.getMessage() == null
+                        ? exception.getClass().getSimpleName() : exception.getMessage());
+                write(directory.resolve("metadata.json"), ProjectJson.gson().toJson(metadata));
+                throw exception;
+            }
             String serialized = ProjectJson.gson().toJson(response.structuredOutput());
             outputCharacters += serialized.length();
             if (outputCharacters > budget.maximumOutputCharacters()) throw new IllegalStateException("Generation output budget exhausted.");

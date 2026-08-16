@@ -128,6 +128,24 @@ tasks.register('workbench', JavaExec) {
     }
 }
 
+tasks.register('tool', JavaExec) {
+    group = 'conversation tools'
+    description = 'Runs the conversation CLI without installing standalone launchers.'
+    dependsOn ':tools:conversation-core:classes'
+    mainClass = 'block_party.conversation.cli.ConversationCli'
+
+    doFirst {
+        def coreProject = project(':tools:conversation-core')
+        classpath = coreProject.sourceSets.main.runtimeClasspath
+        def forwarded = System.getenv('BLOCK_PARTY_CONVERSATION_ARGS')
+        def command = providers.gradleProperty('args').orNull
+        def arguments = forwarded ?: command
+        args arguments
+                ? org.apache.tools.ant.types.Commandline.translateCommandline(arguments)
+                : ['help']
+    }
+}
+
 tasks.register('installConversationTools') {
     group = 'conversation tools'
     description = 'Installs standalone launchers for the conversation tools.'

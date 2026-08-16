@@ -9,5 +9,6 @@ public enum ConditionType {
     MOE_HAS_ITEM,
     BLOCK,
     ELAPSED_TIME,
+    SCENE_FILTER,
     RAW
 }

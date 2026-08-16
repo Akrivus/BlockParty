@@ -51,6 +51,7 @@ public final class SceneFilters {
                 "player_has_cookie", "world_has_cookie", "player_held_item", "player_has_item", "counter", "has_cookie", "held_item",
                 "has_item", "moe_has_item", "block",
                 "family_name", "name", "has_social_target", "social_affinity", "social_tension",
+                "blood_type", "dere", "zodiac",
                 "social_interest", "social_visual", "social_reaction", "social_target_name",
                 "social_target_block", "social_target_blood_type", "social_target_dere",
                 "social_target_zodiac", "social_target_emotion",

@@ -510,6 +510,14 @@ function renderInspector() {
     (state.schema.enums.trigger || [])
       .map((value) => `<option value="${attr(value)}">${esc(value.replaceAll("_", " "))}</option>`)
       .join("");
+  for (const key of ["emotion", "animation"]) {
+    f.elements[key].innerHTML =
+      '<option value="">No speaker override</option>' +
+      (state.schema.enums[key] || [])
+        .map((value) => `<option value="${attr(value)}">${esc(value.replaceAll("_", " "))}</option>`)
+        .join("");
+    f.elements[key].value = n.speaker?.[key]?.toUpperCase() ?? "";
+  }
   for (const key of [
     "id",
     "title",
@@ -566,6 +574,11 @@ function editSelected(fn) {
 function renderResponses(n) {
   const root = $("#responses");
   root.innerHTML = "";
+  const add = $("#add-response");
+  add.disabled = n.responses.length >= state.schema.maximumResponses;
+  add.title = add.disabled
+    ? `The dialogue UI supports at most ${state.schema.maximumResponses} responses.`
+    : "";
   n.responses.forEach((r, i) => {
     const box = document.createElement("div");
     box.className = "response";
@@ -638,6 +651,28 @@ function renderPrimitiveList(root, list, kind, commit) {
 function primitiveField(name, value, kind, commit) {
   const label = document.createElement("label");
   label.textContent = words(name);
+  if (name === "filter") {
+    const filter = value && typeof value === "object" ? clone(value) : { type: "block_party:always" };
+    const type = document.createElement("select");
+    type.innerHTML = (state.schema.sceneFilters || [])
+      .map((entry) => `<option value="${attr(entry)}"${filter.type === entry ? " selected" : ""}>${esc(entry)}</option>`)
+      .join("");
+    const payload = document.createElement("textarea");
+    const fields = clone(filter);
+    delete fields.type;
+    payload.value = JSON.stringify(fields, null, 2);
+    const save = () => {
+      try {
+        commit({ type: type.value, ...JSON.parse(payload.value || "{}") });
+      } catch (e) {
+        toast("Scene filter fields must be valid JSON.", true);
+      }
+    };
+    type.onchange = save;
+    payload.onchange = save;
+    label.append(type, payload);
+    return label;
+  }
   let input;
   const enumValues = state.schema.enums[name];
   if (enumValues) {
@@ -658,9 +693,9 @@ function primitiveField(name, value, kind, commit) {
     input = document.createElement("input");
     input.type = "number";
     input.value = value ?? 0;
-  } else if (name === "raw") {
+  } else if (name === "raw" || name === "filter") {
     input = document.createElement("textarea");
-    input.value = JSON.stringify(value ?? {}, null, 2);
+    input.value = JSON.stringify(value ?? (name === "filter" ? { type: "block_party:always" } : {}), null, 2);
   } else {
     input = document.createElement("input");
     input.value = value ?? "";
@@ -669,11 +704,11 @@ function primitiveField(name, value, kind, commit) {
   input.onchange = () => {
     if (input.type === "checkbox") commit(input.checked);
     else if (input.type === "number") commit(Number(input.value));
-    else if (name === "raw") {
+    else if (name === "raw" || name === "filter") {
       try {
         commit(JSON.parse(input.value));
       } catch (e) {
-        toast("Raw value must be valid JSON.", true);
+        toast(`${words(name)} must be valid JSON.`, true);
       }
     } else commit(input.value || undefined);
   };
@@ -801,6 +836,7 @@ function openGenerationStudio() {
   $("#gen-auto-context").checked = brief?.automaticContext !== false;
   $("#gen-documents").value = (brief?.documents || []).join("\n");
   $("#gen-provider").value = brief?.provider || "openai";
+  updateGenerationProviderFields();
   $("#gen-model").value = brief?.model || "gpt-5.6-luna";
   $("#gen-recorded").value = workingPath(
     brief?.recordedResponses ||
@@ -813,8 +849,12 @@ function openGenerationStudio() {
   renderGenerationStatus({ state: "IDLE", stage: "IDLE", calls: 0 });
   $("#generation-dialog").showModal();
 }
+function updateGenerationProviderFields() {
+  $("#gen-recorded-field").hidden = $("#gen-provider").value !== "recorded";
+}
 function generationBrief() {
-  return {
+  const provider = $("#gen-provider").value;
+  const brief = {
     generationFormat: 1,
     id: $("#gen-id").value,
     namespace: state.project.pack.namespace || "block_party_generated",
@@ -851,11 +891,13 @@ function generationBrief() {
       maximumInputCharacters: 500000,
       maximumOutputCharacters: 200000,
     },
-    provider: $("#gen-provider").value,
+    provider,
     model: $("#gen-model").value,
-    recordedResponses: $("#gen-recorded").value,
   };
+  if (provider === "recorded") brief.recordedResponses = $("#gen-recorded").value;
+  return brief;
 }
+$("#gen-provider").onchange = updateGenerationProviderFields;
 async function previewCatalog() {
   try {
     const catalog = await api("catalog", { brief: generationBrief() });
@@ -1154,6 +1196,11 @@ $("#card-form").addEventListener("change", (e) => {
         for (const r of x.responses) if (r.target === old) r.target = n.id;
       }
       state.selected = n.id;
+    } else if (key === "emotion" || key === "animation") {
+      n.speaker ??= {};
+      if (e.target.value) n.speaker[key] = e.target.value;
+      else delete n.speaker[key];
+      if (!n.speaker.emotion && !n.speaker.animation) n.speaker = null;
     } else n[key] = e.target.value || null;
   });
 });
@@ -1168,7 +1215,12 @@ $("#add-action").onclick = () =>
       value: "true",
     }),
   );
-$("#add-response").onclick = () =>
+$("#add-response").onclick = () => {
+  const n = selected();
+  if (n.responses.length >= state.schema.maximumResponses) {
+    toast(`Dialogue cards support at most ${state.schema.maximumResponses} responses.`, true);
+    return;
+  }
   editSelected((n) =>
     n.responses.push({
       cue: "chat_bubble",
@@ -1178,6 +1230,7 @@ $("#add-response").onclick = () =>
       actions: [],
     }),
   );
+};
 $("#add-card").onclick = () => {
   snapshot();
   let i = 1;

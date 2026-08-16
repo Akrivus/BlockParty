@@ -66,6 +66,13 @@ public final class ProjectSimulator {
             List<String> branchTrace = new ArrayList<>(nextTrace);
             branchTrace.add("choose " + edge.cue() + (edge.label() == null ? "" : " (" + edge.label() + ")"));
             apply(edge.actions(), branch, branchTrace);
+            if (edge.transition() == block_party.conversation.model.TransitionType.PACK_EXIT) {
+                ++result.routes;
+                result.endings.add("PACK_EXIT");
+                branchTrace.add("ending PACK_EXIT");
+                result.traces.add(branchTrace);
+                continue;
+            }
             walk(edge.target(), index, branch, nextPath, branchTrace, result);
         }
     }
@@ -86,7 +93,7 @@ public final class ProjectSimulator {
                     }
                     yield true;
                 }
-                case BLOCK, ELAPSED_TIME, RAW -> {
+                case BLOCK, ELAPSED_TIME, SCENE_FILTER, RAW -> {
                     result.external.add(condition.type().name().toLowerCase() + " condition");
                     yield true;
                 }

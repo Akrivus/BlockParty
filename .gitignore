@@ -27,6 +27,7 @@ logs
 /dist/
 /*_generated/
 /authoring/test_*/
+/authoring/**/jobs/**/generated/
 /authoring/**/generated/generation/
 /authoring/**/generated/datapack/
 /authoring/**/generated/reports/

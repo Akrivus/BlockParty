@@ -1,5 +1,6 @@
 package block_party.conversation.cli;
 
+import block_party.conversation.batch.BatchService;
 import block_party.conversation.compile.CompilationResult;
 import block_party.conversation.compile.DatapackCompiler;
 import block_party.conversation.graph.MermaidExporter;
@@ -46,6 +47,7 @@ public final class ConversationCli {
             help();
             return 0;
         }
+        if ("batch".equals(args[0])) return batch(args);
         if (args.length < 2) {
             help();
             return 2;
@@ -68,6 +70,46 @@ public final class ConversationCli {
                 yield 2;
             }
         };
+    }
+
+    private static int batch(String[] args) throws Exception {
+        if (args.length < 3) {
+            throw new IllegalArgumentException("Batch commands require an operation and batch specification path.");
+        }
+        String operation = args[1];
+        BatchService batch = new BatchService(Path.of(args[2]));
+        return switch (operation) {
+            case "plan" -> {
+                System.out.println(ProjectJson.gson().toJson(batch.plan()));
+                yield 0;
+            }
+            case "expand" -> {
+                batch.expand();
+                System.out.println("Expanded batch authoring sources.");
+                yield 0;
+            }
+            case "generate" -> batch.generate(has(args, "--resume"), option(args, "--only"), has(args, "--force"),
+                    has(args, "--confirm-large-batch"));
+            case "validate" -> batch.validateProjects();
+            case "compile" -> {
+                if (args.length < 4) throw new IllegalArgumentException("Batch compile requires an output directory.");
+                yield batch.compile(Path.of(args[3]));
+            }
+            case "install" -> {
+                if (!has(args, "--live")) throw new IllegalArgumentException("Batch install currently requires --live.");
+                yield batch.installLive();
+            }
+            default -> throw new IllegalArgumentException("Unknown batch operation '" + operation + "'.");
+        };
+    }
+
+    private static boolean has(String[] args, String option) {
+        return java.util.Arrays.asList(args).contains(option);
+    }
+
+    private static String option(String[] args, String option) {
+        for (int index = 0; index + 1 < args.length; index++) if (option.equals(args[index])) return args[index + 1];
+        return null;
     }
 
     private static int generate(Path briefPath, Path output) throws Exception {
@@ -219,5 +261,11 @@ public final class ConversationCli {
         System.out.println("  catalog <brief.json> <catalog.json>");
         System.out.println("  generate <brief.json> <empty-output-directory>");
         System.out.println("  replay <previous-generation-directory> <empty-output-directory>");
+        System.out.println("  batch plan <batch.json>");
+        System.out.println("  batch expand <batch.json>");
+        System.out.println("  batch generate <batch.json> [--resume] [--only <job-id> --force] [--confirm-large-batch]");
+        System.out.println("  batch validate <batch.json>");
+        System.out.println("  batch compile <batch.json> <empty-output-directory>");
+        System.out.println("  batch install <batch.json> --live");
     }
 }

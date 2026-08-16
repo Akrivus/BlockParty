@@ -19,6 +19,16 @@ final class MechanicsCompiler {
         if (condition.type() == ConditionType.RAW) {
             return condition.raw().deepCopy();
         }
+        if (condition.type() == ConditionType.SCENE_FILTER) {
+            JsonObject result = condition.filter().deepCopy();
+            String type = result.get("type").getAsString();
+            if (!type.contains(":")) result.addProperty("type", "block_party:" + type);
+            JsonObject payload = result.deepCopy();
+            payload.remove("type");
+            result.entrySet().removeIf(entry -> !"type".equals(entry.getKey()));
+            if (!payload.isEmpty()) result.add("filter", payload);
+            return result;
+        }
         if (condition.type() == ConditionType.ALWAYS) {
             return new JsonPrimitive("block_party:always");
         }

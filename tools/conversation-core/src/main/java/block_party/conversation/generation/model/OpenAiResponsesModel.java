@@ -11,12 +11,14 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
+import java.io.IOException;
 import java.time.Duration;
 
 public final class OpenAiResponsesModel implements NarrativeModel {
     private static final Duration REQUEST_TIMEOUT = Duration.ofMinutes(5);
     private static final int MAX_OUTPUT_TOKENS_PER_STAGE = 32_768;
     private static final int MAX_PROJECT_OUTPUT_TOKENS = 65_536;
+    private static final int MAX_TRANSIENT_ATTEMPTS = 3;
 
     private final String model;
     private final String apiKey;
@@ -64,14 +66,7 @@ public final class OpenAiResponsesModel implements NarrativeModel {
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(ProjectJson.gson().toJson(body)))
                 .build();
-        HttpResponse<String> response;
-        try {
-            response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-        } catch (HttpTimeoutException exception) {
-            throw new IllegalStateException("OpenAI " + request.stage().name().toLowerCase(java.util.Locale.ROOT)
-                    + " request timed out after " + REQUEST_TIMEOUT.toMinutes() + " minutes using " + model
-                    + ". Retry the stage or reduce the requested scene size.", exception);
-        }
+        HttpResponse<String> response = sendWithRetries(httpRequest, request);
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new IllegalStateException("OpenAI Responses API returned HTTP "
                     + response.statusCode() + ": " + apiError(response.body()));
@@ -94,6 +89,37 @@ public final class OpenAiResponsesModel implements NarrativeModel {
                 string(json, "id"),
                 "openai",
                 model);
+    }
+
+    private HttpResponse<String> sendWithRetries(HttpRequest httpRequest, ModelRequest request) throws Exception {
+        for (int attempt = 1; attempt <= MAX_TRANSIENT_ATTEMPTS; attempt++) {
+            try {
+                HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+                boolean transientStatus = response.statusCode() == 429 || response.statusCode() >= 500;
+                if (!transientStatus || attempt == MAX_TRANSIENT_ATTEMPTS) return response;
+            } catch (HttpTimeoutException exception) {
+                throw new IllegalStateException("OpenAI " + stageName(request)
+                        + " request timed out after " + REQUEST_TIMEOUT.toMinutes() + " minutes using " + model
+                        + ". Retry the stage or reduce the requested scene size.", exception);
+            } catch (IOException exception) {
+                if (attempt == MAX_TRANSIENT_ATTEMPTS) {
+                    throw new IllegalStateException("OpenAI " + stageName(request) + " request failed after "
+                            + MAX_TRANSIENT_ATTEMPTS + " attempts: " + safeMessage(exception), exception);
+                }
+            }
+            try {
+                Thread.sleep(500L * attempt);
+            } catch (InterruptedException exception) {
+                Thread.currentThread().interrupt();
+                throw exception;
+            }
+        }
+        throw new IllegalStateException("OpenAI " + stageName(request) + " request retry loop ended unexpectedly.");
+    }
+
+    private static String safeMessage(Exception exception) {
+        return exception.getMessage() == null || exception.getMessage().isBlank()
+                ? exception.getClass().getSimpleName() : exception.getMessage();
     }
 
     private static int outputTokenCeiling(ModelRequest request) {
