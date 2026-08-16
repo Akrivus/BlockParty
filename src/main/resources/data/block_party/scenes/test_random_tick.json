@@ -1,7 +1,0 @@
-{
-  "trigger": "block_party:random_tick",
-  "filters": [
-    "block_party:always"
-  ],
-  "actions": []
-}

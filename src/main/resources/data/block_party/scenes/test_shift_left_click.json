@@ -1,7 +1,0 @@
-{
-  "trigger": "block_party:shift_left_click",
-  "filters": [
-    "block_party:always"
-  ],
-  "actions": []
-}

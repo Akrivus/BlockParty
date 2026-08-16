@@ -113,6 +113,7 @@ public final class WorkbenchServer {
         JsonObject response = new JsonObject();
         response.addProperty("path", service.projectPath().toString());
         response.addProperty("defaultExportPath", service.defaultExportPath(project).toString());
+        response.addProperty("liveResourcesPath", service.liveResourcesPath(project).toString());
         response.add("project", ProjectJson.gson().toJsonTree(project));
         return response;
     }
@@ -149,6 +150,9 @@ public final class WorkbenchServer {
         JsonObject body = readObject(exchange);
         ScenePackProject project = ProjectJson.gson().fromJson(
                 body.get("project"), ScenePackProject.class);
+        if (body.has("liveResources") && body.get("liveResources").getAsBoolean()) {
+            return session.requireProject().exportLiveResources(project);
+        }
         return session.requireProject().export(project, Path.of(body.get("output").getAsString()));
     }
 

@@ -138,6 +138,30 @@ After filtering, scenes with the highest filter count are preferred. Do not rely
 on file order for story progression; equal-specificity scenes may be selected in
 any order.
 
+### Dialogue formatting and substitutions
+
+Dialogue uses a small Markdown-like syntax: `*bold*`, `/italic/`, `_underline_`,
+and `-strikethrough-`. Equivalent tags are `<b>`, `<i>`, `<u>`, and `<s>`.
+Colors use `<color=cyan>text</color>` and support the standard named Minecraft
+color set.
+
+The `send_dialogue` text field resolves these dynamic tokens at runtime:
+
+| Token | Value |
+| --- | --- |
+| `@name` | Speaking Moe's given name |
+| `@family_name` | Speaking Moe's family name |
+| `@.name` | Current player's name |
+| `@social.name` | Most interesting nearby Moe |
+| `@nearby.name` | Nearest nearby Moe |
+| `@nearby.names` | Up to three nearby Moe names |
+| `@cookie_name` / `@.cookie_name` | Moe/player cookie value |
+| `#counter_name` / `#.counter_name` | Moe/player counter value |
+
+Cookie and counter names should be declared by the pack. Nearby/player tokens
+can resolve to an empty string when no target exists. Response labels support
+formatting, but do not resolve dynamic tokens.
+
 ## Reload Validation
 
 Scene reload validates author-facing references before making scenes available.

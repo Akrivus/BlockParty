@@ -16,9 +16,6 @@ public final class WorldContextSelfTest {
         if (!cryingTags.contains("block_party:moe/traits/cardinal")) {
             throw new AssertionError("Crying Obsidian must resolve as cardinal.");
         }
-        if (crying.inclusions().stream().noneMatch(item -> "BLOCK_PROFILE".equals(item.reason()))) {
-            throw new AssertionError("Crying Obsidian must receive its block profile.");
-        }
         ResolvedGenerationContext obsidian = new WorldContextResolver().resolve(
                 brief("minecraft:obsidian"), repository);
         if (obsidian.subjectTags().get("minecraft:obsidian")

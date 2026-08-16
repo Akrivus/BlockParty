@@ -237,6 +237,23 @@
               placeholder="What does the character say?"
             ></textarea>
           </label>
+          <details>
+            <summary>Formatting and dynamic text</summary>
+            <p class="hint">
+              Format with <code>*bold*</code>, <code>/italic/</code>,
+              <code>_underline_</code>, <code>-strikethrough-</code>, or
+              <code>&lt;color=cyan&gt;text&lt;/color&gt;</code>.
+            </p>
+            <p class="hint">
+              Dialogue tokens: <code>@name</code> (Moe),
+              <code>@family_name</code>, <code>@.name</code> (player),
+              <code>@social.name</code>, <code>@nearby.name</code>,
+              <code>@nearby.names</code>, <code>@cookie</code>,
+              <code>@.player_cookie</code>, <code>#counter</code>, and
+              <code>#.player_counter</code>. Dynamic tokens are not resolved in
+              player response labels.
+            </p>
+          </details>
           <div class="split">
             <label>Next card<input name="next" list="node-ids" /></label
             ><label>Ending<input name="ending" /></label>
@@ -371,6 +388,17 @@
         <p class="hint">
           Prefilled from the workbench launch directory and pack id. You can
           paste another directory from Windows Explorer.
+        </p>
+        <label class="check-label"
+          ><input id="export-live-resources" type="checkbox" /> Export into
+          live mod resources</label
+        >
+        <p class="hint">
+          Developer testing only: replaces this pack under
+          <code>src/main/resources/data/block_party/scenes</code> so a running
+          development instance can pick it up with <code>/reload</code>.
+          Datapack creators should leave this off—the output becomes part of
+          the mod source tree instead of a standalone distributable pack.
         </p>
         <div class="export-actions">
           <button id="run-export" type="button" class="primary">

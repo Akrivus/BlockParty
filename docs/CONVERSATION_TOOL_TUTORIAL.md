@@ -141,6 +141,11 @@ state there refactors typed condition and action references.
 The Checks section displays errors and warnings. Select a diagnostic to focus
 its card.
 
+The dialogue card's **Formatting and dynamic text** section lists the markup
+and runtime substitutions available to authors. Automatic generation receives
+the same reference as mandatory context, so it may reuse a scene across Moe or
+player state without inventing unsupported placeholder names.
+
 Errors block saving and export. Typical examples include:
 
 - a response targeting a card that does not exist;
@@ -210,6 +215,17 @@ C:\path\to\BlockParty\dist\flower_request
 You may edit this path or copy a directory path from Windows Explorer. The
 target must either not exist or be an empty directory; this prevents accidental
 overwrites.
+
+For faster in-game iteration, select **Export into live mod resources**. This
+developer-only option writes just the compiled scene JSON directly to
+`src\main\resources\data\block_party\scenes\<pack-id>`. Re-exporting replaces
+only that pack directory, after which `/reload` can pick up the changes in a
+running development world.
+
+The option is off by default. Datapack and modpack creators should normally
+leave it off because live export does not create a standalone distributable
+pack, and its output lives inside the mod source tree where it can appear as a
+source-control change.
 
 Successful export creates:
 

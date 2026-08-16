@@ -30,6 +30,7 @@ import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Comparator;
 import java.util.List;
 
 final class WorkbenchService {
@@ -58,6 +59,11 @@ final class WorkbenchService {
         }
         packName = packName.replaceAll("[^a-zA-Z0-9._-]", "-");
         return workingDirectory.resolve("dist").resolve(packName).normalize();
+    }
+
+    Path liveResourcesPath(ScenePackProject project) {
+        return repositoryRoot().resolve("src/main/resources/data/block_party/scenes")
+                .resolve(project.pack().id()).toAbsolutePath().normalize();
     }
 
     static void createStarter(Path path) throws Exception {
@@ -204,5 +210,53 @@ final class WorkbenchService {
         result.addProperty("routes", simulation.routes());
         result.addProperty("datapackFiles", compilation.files().size());
         return result;
+    }
+
+    JsonObject exportLiveResources(ScenePackProject project) throws Exception {
+        ValidationReport validation = validate(project);
+        if (!validation.valid()) {
+            throw new IllegalArgumentException("Live export refused: project has validation errors.");
+        }
+        Path scenesRoot = repositoryRoot().resolve("src/main/resources/data/block_party/scenes")
+                .toAbsolutePath().normalize();
+        Path output = liveResourcesPath(project);
+        if (!scenesRoot.equals(output.getParent())) {
+            throw new IllegalArgumentException("Live export target must be one pack directory beneath " + scenesRoot + ".");
+        }
+        Path staging = Files.createTempDirectory("block-party-live-export-");
+        try {
+            var compilation = new DatapackCompiler().compile(project, staging);
+            Path compiledScenes = staging.resolve("data").resolve(project.pack().namespace())
+                    .resolve("scenes").resolve(project.pack().id());
+            deleteDirectory(output);
+            Files.createDirectories(output);
+            try (var files = Files.walk(compiledScenes)) {
+                for (Path source : files.toList()) {
+                    Path target = output.resolve(compiledScenes.relativize(source)).normalize();
+                    if (!target.startsWith(output)) {
+                        throw new IllegalArgumentException("Compiled scene path escaped the live export directory.");
+                    }
+                    if (Files.isDirectory(source)) Files.createDirectories(target);
+                    else Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+            SimulationReport simulation = new ProjectSimulator().simulate(project);
+            JsonObject result = new JsonObject();
+            result.addProperty("output", output.toString());
+            result.addProperty("routes", simulation.routes());
+            result.addProperty("datapackFiles", compilation.files().stream()
+                    .filter(path -> path.startsWith(compiledScenes)).count());
+            result.addProperty("liveResources", true);
+            return result;
+        } finally {
+            deleteDirectory(staging);
+        }
+    }
+
+    private static void deleteDirectory(Path directory) throws Exception {
+        if (!Files.exists(directory)) return;
+        try (var paths = Files.walk(directory)) {
+            for (Path path : paths.sorted(Comparator.reverseOrder()).toList()) Files.delete(path);
+        }
     }
 }

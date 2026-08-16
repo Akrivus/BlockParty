@@ -75,6 +75,10 @@ async function loadProject() {
     }
     $("#project-path").textContent = data.path;
     $("#export-path").value = data.defaultExportPath || "";
+    $("#export-path").dataset.standard = data.defaultExportPath || "";
+    $("#export-path").dataset.live = data.liveResourcesPath || "";
+    $("#export-live-resources").checked = false;
+    $("#export-path").disabled = false;
     $("#dirty").textContent = "Saved";
     $("#save").disabled = true;
     restoreScenario();
@@ -1123,12 +1127,14 @@ function restoreScenario() {
 }
 async function runExport() {
   try {
+    const liveResources = $("#export-live-resources").checked;
     const r = await api("export", {
       project: state.project,
       output: $("#export-path").value,
+      liveResources,
     });
     $("#export-result").innerHTML =
-      `<p class="all-clear">Exported ${r.datapackFiles} datapack files across ${r.routes} routes to<br><b>${esc(r.output)}</b></p>`;
+      `<p class="all-clear">${liveResources ? "Updated" : "Exported"} ${r.datapackFiles} scene pack files across ${r.routes} routes to<br><b>${esc(r.output)}</b>${liveResources ? "<br>Run <code>/reload</code> in the development world to reload datapacks." : ""}</p>`;
   } catch (e) {
     $("#export-result").innerHTML =
       `<p class="diagnostic ERROR">${esc(e.message)}</p>`;
@@ -1261,9 +1267,23 @@ $("#trace-next").onclick = () => {
 };
 const exportButton = document.createElement("button");
 exportButton.textContent = "Export";
-exportButton.onclick = () => $("#export-dialog").showModal();
+exportButton.onclick = () => {
+  $("#export-live-resources").checked = false;
+  $("#export-path").disabled = false;
+  $("#export-path").value = $("#export-path").dataset.standard || "";
+  $("#export-result").innerHTML = "";
+  $("#export-dialog").showModal();
+};
 $("#simulate").after(exportButton);
 $("#run-export").onclick = runExport;
+$("#export-live-resources").onchange = (event) => {
+  const live = event.target.checked;
+  $("#export-path").value = live
+    ? $("#export-path").dataset.live || ""
+    : $("#export-path").dataset.standard || "";
+  $("#export-path").disabled = live;
+  $("#export-result").innerHTML = "";
+};
 $("#search").oninput = (e) => {
   state.search = e.target.value;
   renderOutline();

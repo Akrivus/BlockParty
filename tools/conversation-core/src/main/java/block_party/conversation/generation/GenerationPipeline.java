@@ -73,7 +73,7 @@ public final class GenerationPipeline {
                 "Plan a compact interactive Block Party scene pack. Return only an ArcPlan with "
                         + "premise, characterArc, beats, and outcomes; do not write cards or dialogue.",
                 context(brief, catalog), ArcPlan.class);
-        validatePlan(brief, plan);
+        validatePlan(plan);
 
         ScenePackProject graph = session.call(model, GenerationStage.GRAPH,
                 "Return one complete ScenePackProject in projectFormat 2. Use uppercase enum values, "
@@ -125,7 +125,9 @@ public final class GenerationPipeline {
                 + "verbatim in a speech bubble: write only words spoken aloud by the Moe, in first person where natural. "
                 + "Never use brackets, narration, speaker labels, screenplay directions, or descriptions of gestures, looks, "
                 + "feelings, or actions. Put performance only in speaker emotion and animation. Example: write ‘Sometimes I "
-                + "wish I had green hair like Grass.’, not ‘[Dirt looks down and confides their wish.]’. Preserve response "
+                + "wish I had green hair like Grass.’, not ‘[Dirt looks down and confides their wish.]’. "
+                + "Use only dialogue formatting and runtime substitutions documented in the supplied context; substitutions "
+                + "belong in dialogue text, never response labels. Preserve response "
                 + "count and meaning. Every text must be at most " + dialogueLimit + " characters, and every response label "
                 + "at most " + MAX_RESPONSE_LABEL_CHARACTERS + " characters. Voice direction: "
                 + brief.constraints().dialogueStyle() + " For cards without a speaker, use null emotion and animation fields. "
@@ -276,19 +278,16 @@ public final class GenerationPipeline {
                 "Intentions did not match dialogue nodes. Missing: " + missing + "; unknown: " + unknown + ".");
     }
 
-    private static void validatePlan(GenerationBrief brief, ArcPlan plan) {
+    private static void validatePlan(ArcPlan plan) {
         if (plan.beats().isEmpty()) throw new IllegalStateException("Arc plan has no beats.");
-        if (plan.beats().size() > brief.constraints().maximumCards()) {
-            throw new IllegalStateException("Arc plan exceeds the maximum card budget.");
-        }
         if (plan.outcomes().size() < 2) throw new IllegalStateException("Arc plan needs at least two outcomes.");
     }
 
     private static void enforceBrief(GenerationBrief brief, ScenePackProject project) {
         int cards = project.nodes().size();
-        if (cards < brief.constraints().minimumCards() || cards > brief.constraints().maximumCards()) {
-            throw new IllegalStateException("Generated graph has " + cards + " cards; expected "
-                    + brief.constraints().minimumCards() + "–" + brief.constraints().maximumCards() + ".");
+        if (cards < brief.constraints().minimumCards()) {
+            throw new IllegalStateException("Generated graph has " + cards + " cards; expected at least "
+                    + brief.constraints().minimumCards() + ".");
         }
         if (project.allowRawMechanics()) throw new IllegalStateException("Generated projects cannot enable raw mechanics.");
     }

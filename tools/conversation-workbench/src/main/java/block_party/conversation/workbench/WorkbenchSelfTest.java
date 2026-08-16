@@ -3,6 +3,7 @@ package block_party.conversation.workbench;
 import block_party.conversation.generation.DialogueRevisionService;
 import block_party.conversation.generation.MechanicsFingerprint;
 import block_party.conversation.generation.model.RecordedDirectoryModel;
+import block_party.conversation.io.ProjectJson;
 import block_party.conversation.model.ActionType;
 import block_party.conversation.model.ConditionType;
 import block_party.conversation.model.ScenePackProject;
@@ -22,6 +23,7 @@ public final class WorkbenchSelfTest {
         verifyStaticResources();
         verifyAuthoringSchema();
         verifyExportAndStarter(service, project);
+        verifyLiveResourcesExport(project);
         verifySessionFlow(Path.of(args[0]));
         System.out.println("Workbench check passed.");
     }
@@ -111,6 +113,34 @@ public final class WorkbenchSelfTest {
         if (!"my_new_pack".equals(created.pack().id())
                 || !source.toAbsolutePath().normalize().equals(session.requireProject().projectPath())) {
             throw new AssertionError("Session creation must normalize identity and open the new project.");
+        }
+    }
+
+    private static void verifyLiveResourcesExport(ScenePackProject project) throws Exception {
+        Path repository = Files.createTempDirectory("block-party-live-export-check-");
+        Files.writeString(repository.resolve("settings.gradle"), "");
+        Path projectPath = repository.resolve("authoring/live/project.json");
+        Files.createDirectories(projectPath.getParent());
+        Files.writeString(projectPath, ProjectJson.gson().toJson(project));
+        WorkbenchService service = new WorkbenchService(projectPath);
+        Path expected = repository.resolve("src/main/resources/data/block_party/scenes")
+                .resolve(project.pack().id()).toAbsolutePath().normalize();
+        if (!expected.equals(service.liveResourcesPath(project))) {
+            throw new AssertionError("Live resource export path is incorrect.");
+        }
+        service.exportLiveResources(project);
+        if (!Files.isDirectory(expected)) {
+            throw new AssertionError("Live resource export did not create the pack directory.");
+        }
+        try (var files = Files.list(expected)) {
+            if (files.findAny().isEmpty()) {
+                throw new AssertionError("Live resource export did not write scene files.");
+            }
+        }
+        Files.writeString(expected.resolve("stale.json"), "{}");
+        service.exportLiveResources(project);
+        if (Files.exists(expected.resolve("stale.json"))) {
+            throw new AssertionError("Repeated live resource export must replace the current pack directory.");
         }
     }
 }

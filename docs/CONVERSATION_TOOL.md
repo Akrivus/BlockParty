@@ -196,7 +196,11 @@ The workbench provides:
   requirements;
 - atomic validated saves back to the opened `project.json`;
 - verified export of the source project, graph, reports, and datapack to an
-  empty directory.
+  empty directory;
+- optional live-resource export of one pack directly to
+  `src/main/resources/data/block_party/scenes/<pack-id>` for `/reload` testing.
+  This unchecked developer option replaces only the selected pack directory;
+  standalone export remains the recommended choice for distributable packs.
 
 The browser never compiles or validates projects independently. Its local API
 delegates those operations to `conversation-core`, preserving one definition

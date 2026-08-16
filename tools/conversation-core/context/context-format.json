@@ -3,7 +3,8 @@
   "always": [
     "world/minecraft-world.md",
     "world/moes.md",
-    "world/cardinal-and-corporeal.md"
+    "world/cardinal-and-corporeal.md",
+    "world/dialogue-format.md"
   ],
   "tags": {
     "block_party:moe/traits/cardinal": "world/cardinal.md",
