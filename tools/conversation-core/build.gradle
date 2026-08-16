@@ -24,6 +24,11 @@ tasks.register('conversationToolCheck') {
     dependsOn tasks.named('classes')
 
     doLast {
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            mainClass = 'block_party.conversation.generation.WorldContextSelfTest'
+            args rootProject.projectDir.absolutePath
+        }
         def fixture = file('examples/flower-request.project.json')
         def verification = layout.buildDirectory.dir('tool-check').get().asFile
         delete verification
@@ -115,6 +120,14 @@ tasks.register('conversationToolCheck') {
         }
         if (!new File(generated, 'generation/03-graph_repair').isDirectory()) {
             throw new GradleException('Generation fixture did not exercise graph repair.')
+        }
+        if (!new File(generated, 'context.json').isFile()) {
+            throw new GradleException('Generation did not archive resolved context.')
+        }
+        if (!java.util.Arrays.equals(
+                new File(generated, 'context.json').bytes,
+                new File(replayed, 'context.json').bytes)) {
+            throw new GradleException('Generation replay changed archived context.')
         }
     }
 }

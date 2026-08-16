@@ -7,15 +7,22 @@ import block_party.conversation.model.ScenePackProject;
 public final class MermaidExporter {
     public String export(ScenePackProject project) {
         StringBuilder output = new StringBuilder("flowchart LR\n");
+        boolean hasPackExit = project.nodes().stream()
+                .flatMap(node -> node.responses().stream())
+                .anyMatch(edge -> edge.target() == null || edge.target().isBlank());
         for (SceneNode node : project.nodes()) {
             output.append("    ").append(safe(node.id())).append("[")
                     .append(escape(node.title() == null ? node.id() : node.title())).append("]\n");
         }
+        if (hasPackExit) output.append("    pack_exit((Exit))\n");
         for (SceneNode node : project.nodes()) {
             for (ResponseEdge edge : node.responses()) {
                 output.append("    ").append(safe(node.id())).append(" -->|")
                         .append(escape(edge.label() == null ? edge.cue() : edge.label())).append("| ")
-                        .append(safe(edge.target())).append("\n");
+                        .append(edge.target() == null || edge.target().isBlank()
+                                ? "pack_exit"
+                                : safe(edge.target()))
+                        .append("\n");
             }
             if (node.next() != null && !node.next().isBlank()) {
                 output.append("    ").append(safe(node.id())).append(" -. gameplay .-> ")

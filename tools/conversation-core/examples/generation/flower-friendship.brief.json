@@ -4,6 +4,14 @@
   "namespace": "block_party_generated",
   "title": "Flower Friendship",
   "prompt": "A reserved Moe asks the player for three small flowers, remembers whether they follow through, and reacts differently to warmth or reliability.",
+  "subjects": [
+    {
+      "kind": "BLOCK",
+      "id": "minecraft:crying_obsidian",
+      "role": "PRIMARY"
+    }
+  ],
+  "automaticContext": true,
   "characters": ["target_moe"],
   "documents": ["docs/SCENE_ARC_AUTHORING.md"],
   "existingPacks": [],

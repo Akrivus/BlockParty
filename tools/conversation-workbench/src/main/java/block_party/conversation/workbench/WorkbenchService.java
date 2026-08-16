@@ -113,8 +113,10 @@ final class WorkbenchService {
 
     DialogueRevision requestRevision(ScenePackProject project, String node, String instruction,
             String provider, String modelName, String recordedResponses) throws Exception {
-        GenerationBrief providerBrief = new GenerationBrief(1, "revision", "revision", "Revision", instruction,
-                List.of(), List.of(), List.of(), null, null, provider, modelName, recordedResponses);
+        GenerationBrief providerBrief = new GenerationBrief(
+                1, "revision", "revision", "Revision", instruction,
+                List.of(), false, List.of(), List.of(), List.of(),
+                null, null, provider, modelName, recordedResponses);
         return new DialogueRevisionService().request(NarrativeModels.create(providerBrief, repositoryRoot()), project, node, instruction,
                 neighboringDialogue(project, node), revisionArchive());
     }

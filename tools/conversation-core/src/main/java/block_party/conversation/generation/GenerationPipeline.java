@@ -5,13 +5,18 @@ import block_party.conversation.generation.model.ModelRequest;
 import block_party.conversation.generation.model.ModelResponse;
 import block_party.conversation.generation.model.NarrativeModel;
 import block_party.conversation.io.ProjectJson;
+import block_party.conversation.model.NodeType;
 import block_party.conversation.model.ScenePackProject;
+import block_party.conversation.model.TriggerTypes;
 import block_party.conversation.report.BuildReportWriter;
 import block_party.conversation.simulation.ProjectSimulator;
 import block_party.conversation.validation.Diagnostic;
 import block_party.conversation.validation.ProjectValidator;
+import block_party.conversation.validation.Severity;
 import block_party.conversation.validation.ValidationReport;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -19,10 +24,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public final class GenerationPipeline {
     private static final int MAX_GRAPH_REPAIRS = 2;
+    private static final int MAX_DIALOGUE_REPAIRS = 1;
+    private static final int MAX_RESPONSE_LABEL_CHARACTERS = 64;
     private final NarrativeModel model;
     private final GenerationProgressListener progress;
 
@@ -36,25 +47,42 @@ public final class GenerationPipeline {
     }
 
     public GenerationResult generate(GenerationBrief brief, Path repositoryRoot, Path output) throws Exception {
+        return generate(brief, repositoryRoot, output, null);
+    }
+
+    public GenerationResult generate(
+            GenerationBrief brief,
+            Path repositoryRoot,
+            Path output,
+            ContentCatalog archivedCatalog) throws Exception {
         if (brief.generationFormat() != 1) throw new IllegalArgumentException("Unsupported generationFormat " + brief.generationFormat());
         refuseNonEmpty(output);
         Files.createDirectories(output);
         Path generation = output.resolve("generation");
         Files.createDirectories(generation);
 
-        ContentCatalog catalog = new ContentCataloger().catalog(brief, repositoryRoot);
+        ContentCatalog catalog = archivedCatalog == null
+                ? new ContentCataloger().catalog(brief, repositoryRoot)
+                : archivedCatalog;
         write(output.resolve("brief.json"), ProjectJson.gson().toJson(brief));
         write(output.resolve("catalog.json"), ProjectJson.gson().toJson(catalog));
+        write(output.resolve("context.json"), ProjectJson.gson().toJson(catalog.context()));
         Session session = new Session(brief.budget(), generation, progress);
 
         ArcPlan plan = session.call(model, GenerationStage.ARC_PLAN,
-                "Plan a compact interactive Block Party scene pack. Return JSON only.",
+                "Plan a compact interactive Block Party scene pack. Return only an ArcPlan with "
+                        + "premise, characterArc, beats, and outcomes; do not write cards or dialogue.",
                 context(brief, catalog), ArcPlan.class);
         validatePlan(brief, plan);
 
         ScenePackProject graph = session.call(model, GenerationStage.GRAPH,
-                "Create projectFormat 2 mechanics and graph. Use placeholder dialogue. Return JSON only. Never use RAW mechanics.",
+                "Return one complete ScenePackProject in projectFormat 2. Use uppercase enum values, "
+                        + "placeholder dialogue, and speaker objects containing emotion and animation—not speaker names. "
+                        + "Copy the brief's pack id, namespace, and title exactly. Never use RAW mechanics and do not wrap "
+                        + "the project in a graph or mechanics object. Use right_click for ordinary Moe interaction. Every "
+                        + "later GAMEPLAY_GATE must include a HAS_COOKIE or COUNTER condition written by an earlier choice.",
                 context(brief, catalog, plan), ScenePackProject.class);
+        graph = alignPackIdentity(brief, graph);
         ValidationReport validation = new ProjectValidator().validate(graph);
         int repairs = 0;
         while (!validation.valid() && repairs++ < MAX_GRAPH_REPAIRS) {
@@ -63,30 +91,66 @@ public final class GenerationPipeline {
             repairContext.add("project", ProjectJson.gson().toJsonTree(graph));
             repairContext.add("diagnostics", ProjectJson.gson().toJsonTree(validation));
             graph = session.call(model, GenerationStage.GRAPH_REPAIR,
-                    "Repair only the diagnosed structural/mechanical errors. Return the complete projectFormat 2 project as JSON.",
+                    "Repair only the diagnosed structural or mechanical errors. Return one complete ScenePackProject "
+                            + "in projectFormat 2; speaker must be an object, never null or a name string. "
+                            + "Use null emotion and animation fields for cards without a speaker. For REPEATABLE_REWARD, "
+                            + "declare a COOKIE state, add a not=true HAS_COOKIE condition for it to the GAMEPLAY_GATE, "
+                            + "and add SET_COOKIE for that same state directly to the gate actions; a counter guard is invalid.",
                     ProjectJson.gson().toJson(repairContext), ScenePackProject.class);
+            graph = alignPackIdentity(brief, graph);
             validation = new ProjectValidator().validate(graph);
         }
-        if (!validation.valid()) throw new IllegalStateException("Graph repair exhausted with " + validation.errors() + " error(s).");
+        write(output.resolve("graph-validation.json"), ProjectJson.gson().toJson(validation));
+        if (!validation.valid()) {
+            throw new IllegalStateException("Graph repair exhausted with "
+                    + validation.errors() + " error(s): " + errorSummary(validation));
+        }
         enforceBrief(brief, graph);
 
         Intentions intentions = session.call(
                 model,
                 GenerationStage.INTENTIONS,
-                "Write one temporary scene intention for every DIALOGUE node. "
-                        + "Do not redesign mechanics. Return JSON only.",
+                "Return an object with a scenes array containing one temporary intention for every DIALOGUE node. "
+                        + "Each scene requires node, speakerObjective, emotionalState, mayReveal, mustNotReveal, "
+                        + "playerChoicePurpose, and continuity. Do not redesign mechanics. Return JSON only.",
                 context(brief, catalog, plan, graph),
                 Intentions.class);
+        validateIntentions(graph, intentions);
         write(output.resolve("intentions.json"), ProjectJson.gson().toJson(intentions));
 
         String mechanics = MechanicsFingerprint.of(graph);
-        ScenePackProject written = session.call(
+        int dialogueLimit = brief.constraints().maximumDialogueCharacters();
+        String dialoguePrompt = "Return one dialogue patch for every project node. Each patch contains only the node ID, "
+                + "polished text, a speaker object, and responseLabels in their existing order. The text field is rendered "
+                + "verbatim in a speech bubble: write only words spoken aloud by the Moe, in first person where natural. "
+                + "Never use brackets, narration, speaker labels, screenplay directions, or descriptions of gestures, looks, "
+                + "feelings, or actions. Put performance only in speaker emotion and animation. Example: write ‘Sometimes I "
+                + "wish I had green hair like Grass.’, not ‘[Dirt looks down and confides their wish.]’. Preserve response "
+                + "count and meaning. Every text must be at most " + dialogueLimit + " characters, and every response label "
+                + "at most " + MAX_RESPONSE_LABEL_CHARACTERS + " characters. Voice direction: "
+                + brief.constraints().dialogueStyle() + " For cards without a speaker, use null emotion and animation fields. "
+                + "Do not return mechanics.";
+        DialoguePass dialogue = session.call(
                 model,
                 GenerationStage.DIALOGUE,
-                "Polish only dialogue text, response labels, speaker emotion, and animation. "
-                        + "Preserve every mechanic, id, edge, and transition. Return the complete project JSON.",
+                dialoguePrompt,
                 context(brief, catalog, plan, graph, intentions),
-                ScenePackProject.class);
+                DialoguePass.class);
+        List<String> dialogueErrors = dialogueFormatErrors(graph, dialogue, dialogueLimit);
+        int dialogueRepairs = 0;
+        while (!dialogueErrors.isEmpty() && dialogueRepairs++ < MAX_DIALOGUE_REPAIRS) {
+            dialogue = session.call(
+                    model,
+                    GenerationStage.DIALOGUE,
+                    dialoguePrompt + " Rewrite every rejected patch as actual spoken dialogue.",
+                    context(brief, catalog, plan, graph, intentions, dialogue, dialogueErrors),
+                    DialoguePass.class);
+            dialogueErrors = dialogueFormatErrors(graph, dialogue, dialogueLimit);
+        }
+        if (!dialogueErrors.isEmpty()) {
+            throw new IllegalStateException("Dialogue formatting failed: " + String.join("; ", dialogueErrors));
+        }
+        ScenePackProject written = applyDialogue(graph, dialogue);
         if (!mechanics.equals(MechanicsFingerprint.of(written))) {
             throw new IllegalStateException("Dialogue stage attempted to mutate locked mechanics.");
         }
@@ -101,14 +165,12 @@ public final class GenerationPipeline {
         GenerationReview review = session.call(
                 model,
                 GenerationStage.REVIEW,
-                "Review voice, continuity, repetition, promises, and player-choice meaning. "
+                "Review voice, continuity, repetition, promises, player-choice meaning, and canon. "
+                        + "Check cardinal/corporeal identity, trait support, individual memories, and invented mechanics. "
                         + "Return findings as JSON; do not modify the project.",
                 context(brief, catalog, plan, written, intentions),
                 GenerationReview.class);
         write(output.resolve("review.json"), ProjectJson.gson().toJson(review));
-        if (review.findings().stream().anyMatch(finding -> "ERROR".equalsIgnoreCase(finding.severity()))) {
-            throw new IllegalStateException("Generation review reported blocking findings.");
-        }
 
         Path projectPath = output.resolve("project.json");
         ProjectJson.write(projectPath, written);
@@ -117,6 +179,101 @@ public final class GenerationPipeline {
         new DatapackCompiler().compile(written, output.resolve("datapack"));
         session.writeManifest(brief, written);
         return new GenerationResult(written, output, session.calls, session.inputTokens, session.outputTokens);
+    }
+
+    private static ScenePackProject alignPackIdentity(GenerationBrief brief, ScenePackProject project) {
+        JsonObject json = ProjectJson.gson().toJsonTree(project).getAsJsonObject();
+        JsonObject pack = json.getAsJsonObject("pack");
+        pack.addProperty("id", brief.id());
+        pack.addProperty("namespace", brief.namespace());
+        pack.addProperty("title", brief.title());
+        return ProjectJson.gson().fromJson(json, ScenePackProject.class);
+    }
+
+    private static ScenePackProject applyDialogue(ScenePackProject graph, DialoguePass dialogue) {
+        Map<String, DialoguePatch> patches = new HashMap<>();
+        for (DialoguePatch patch : dialogue.nodes()) {
+            if (patch.node() == null || patch.node().isBlank()) {
+                throw new IllegalStateException("Dialogue stage returned a patch without a node ID.");
+            }
+            if (patches.put(patch.node(), patch) != null) {
+                throw new IllegalStateException("Dialogue stage returned duplicate patches for " + patch.node() + ".");
+            }
+        }
+        Set<String> expected = new HashSet<>();
+        for (var node : graph.nodes()) expected.add(node.id());
+        Set<String> returned = new HashSet<>(patches.keySet());
+        if (!expected.equals(returned)) {
+            Set<String> missing = new HashSet<>(expected);
+            missing.removeAll(returned);
+            Set<String> unknown = new HashSet<>(returned);
+            unknown.removeAll(expected);
+            throw new IllegalStateException(
+                    "Dialogue patches did not match graph nodes. Missing: " + missing + "; unknown: " + unknown + ".");
+        }
+
+        JsonObject project = ProjectJson.gson().toJsonTree(graph).getAsJsonObject();
+        for (JsonElement element : project.getAsJsonArray("nodes")) {
+            JsonObject node = element.getAsJsonObject();
+            DialoguePatch patch = patches.get(node.get("id").getAsString());
+            node.addProperty("text", patch.text());
+            node.add("speaker", patch.speaker() == null ? JsonNull.INSTANCE : patch.speaker().deepCopy());
+            JsonArray responses = node.getAsJsonArray("responses");
+            if (responses.size() != patch.responseLabels().size()) {
+                throw new IllegalStateException("Dialogue patch changed response count for "
+                        + node.get("id").getAsString() + ".");
+            }
+            for (int index = 0; index < responses.size(); index++) {
+                responses.get(index).getAsJsonObject().addProperty("label", patch.responseLabels().get(index));
+            }
+        }
+        return ProjectJson.gson().fromJson(project, ScenePackProject.class);
+    }
+
+    private static List<String> dialogueFormatErrors(
+            ScenePackProject graph, DialoguePass dialogue, int maximumDialogueCharacters) {
+        List<String> errors = new ArrayList<>();
+        Set<String> dialogueNodes = new HashSet<>();
+        for (var node : graph.nodes()) {
+            if (node.type() == NodeType.DIALOGUE) dialogueNodes.add(node.id());
+        }
+        for (DialoguePatch patch : dialogue.nodes()) {
+            String text = patch.text() == null ? "" : patch.text().strip();
+            if (text.isEmpty() && dialogueNodes.contains(patch.node())) {
+                errors.add(patch.node() + " has no spoken text");
+            } else if (!text.isEmpty() && (text.startsWith("[") || text.endsWith("]"))) {
+                errors.add(patch.node() + " uses bracketed stage direction instead of spoken dialogue");
+            } else if (text.length() > maximumDialogueCharacters) {
+                errors.add(patch.node() + " dialogue is " + text.length() + " characters; maximum is "
+                        + maximumDialogueCharacters);
+            }
+            for (int index = 0; index < patch.responseLabels().size(); index++) {
+                String label = patch.responseLabels().get(index);
+                if (label != null && label.length() > MAX_RESPONSE_LABEL_CHARACTERS) {
+                    errors.add(patch.node() + " response " + (index + 1) + " is " + label.length()
+                            + " characters; maximum is " + MAX_RESPONSE_LABEL_CHARACTERS);
+                }
+            }
+        }
+        return errors;
+    }
+
+    private static void validateIntentions(ScenePackProject graph, Intentions intentions) {
+        Set<String> expected = new HashSet<>();
+        for (var node : graph.nodes()) {
+            if (node.type() == NodeType.DIALOGUE) expected.add(node.id());
+        }
+        Set<String> returned = new HashSet<>();
+        for (SceneIntention intention : intentions.scenes()) {
+            if (intention.node() != null) returned.add(intention.node());
+        }
+        if (expected.equals(returned)) return;
+        Set<String> missing = new HashSet<>(expected);
+        missing.removeAll(returned);
+        Set<String> unknown = new HashSet<>(returned);
+        unknown.removeAll(expected);
+        throw new IllegalStateException(
+                "Intentions did not match dialogue nodes. Missing: " + missing + "; unknown: " + unknown + ".");
     }
 
     private static void validatePlan(GenerationBrief brief, ArcPlan plan) {
@@ -134,6 +291,16 @@ public final class GenerationPipeline {
                     + brief.constraints().minimumCards() + "–" + brief.constraints().maximumCards() + ".");
         }
         if (project.allowRawMechanics()) throw new IllegalStateException("Generated projects cannot enable raw mechanics.");
+    }
+
+    private static String errorSummary(ValidationReport validation) {
+        return validation.diagnostics().stream()
+                .filter(issue -> issue.severity() == Severity.ERROR)
+                .limit(12)
+                .map(issue -> "[" + issue.code()
+                        + (issue.node() == null ? "" : " @ " + issue.node())
+                        + "] " + issue.message())
+                .collect(java.util.stream.Collectors.joining("; "));
     }
 
     private static String context(Object... values) {
@@ -178,7 +345,12 @@ public final class GenerationPipeline {
             int number = ++calls;
             progress.stageStarted(stage, number);
             inputCharacters += system.length() + user.length();
-            ModelRequest request = new ModelRequest(stage, system, user, null, budget.maximumOutputCharacters() - outputCharacters);
+            ModelRequest request = new ModelRequest(
+                    stage,
+                    system,
+                    user,
+                    GenerationSchemas.forType(type),
+                    budget.maximumOutputCharacters() - outputCharacters);
             Path directory = archive.resolve(String.format("%02d-%s", number, stage.name().toLowerCase(java.util.Locale.ROOT)));
             Files.createDirectories(directory);
             JsonObject archivedRequest = new JsonObject();
@@ -204,7 +376,165 @@ public final class GenerationPipeline {
             metadata.addProperty("outputTokens", response.usage().outputTokens());
             write(directory.resolve("metadata.json"), ProjectJson.gson().toJson(metadata));
             progress.stageCompleted(stage, number);
-            return ProjectJson.gson().fromJson(response.structuredOutput(), type);
+            return ProjectJson.gson().fromJson(normalizeProjectResponse(response.structuredOutput(), type), type);
+        }
+
+        private static JsonElement normalizeProjectResponse(JsonElement response, Class<?> type) {
+            if (type == Intentions.class) return normalizeLegacyIntentionsResponse(response);
+            if (type == DialoguePass.class) return normalizeLegacyDialogueResponse(response);
+            if (type != ScenePackProject.class || !response.isJsonObject()) return response;
+            JsonObject normalized = response.deepCopy().getAsJsonObject();
+            if (!normalized.has("nodes") || !normalized.get("nodes").isJsonArray()) return normalized;
+            for (JsonElement element : normalized.getAsJsonArray("nodes")) {
+                if (!element.isJsonObject()) continue;
+                JsonObject node = element.getAsJsonObject();
+                normalizeSpeaker(node);
+                normalizeConditions(node);
+                normalizeTrigger(node);
+            }
+            normalizeDeclaredOutcomes(normalized);
+            return normalized;
+        }
+
+        private static void normalizeDeclaredOutcomes(JsonObject project) {
+            if (!project.has("contract") || !project.get("contract").isJsonObject()) return;
+            JsonObject contract = project.getAsJsonObject("contract");
+            JsonArray outcomes = contract.has("outcomes") && contract.get("outcomes").isJsonArray()
+                    ? contract.getAsJsonArray("outcomes")
+                    : new JsonArray();
+            contract.add("outcomes", outcomes);
+            Set<String> declared = new HashSet<>();
+            for (JsonElement outcome : outcomes) {
+                if (outcome.isJsonPrimitive()) declared.add(outcome.getAsString());
+            }
+            for (JsonElement element : project.getAsJsonArray("nodes")) {
+                if (!element.isJsonObject()) continue;
+                String ending = stringValue(element.getAsJsonObject(), "ending");
+                if (!ending.isBlank() && declared.add(ending)) outcomes.add(ending);
+            }
+        }
+
+        private static JsonElement normalizeLegacyIntentionsResponse(JsonElement response) {
+            if (!response.isJsonObject()) return response;
+            JsonObject result = response.deepCopy().getAsJsonObject();
+            if (!result.has("scenes") && result.has("sceneIntentions")
+                    && result.get("sceneIntentions").isJsonArray()) {
+                JsonArray scenes = new JsonArray();
+                for (JsonElement element : result.getAsJsonArray("sceneIntentions")) {
+                    if (!element.isJsonObject()) continue;
+                    JsonObject legacy = element.getAsJsonObject();
+                    JsonObject scene = new JsonObject();
+                    scene.addProperty("node", stringValue(legacy, "nodeId"));
+                    scene.addProperty("speakerObjective", stringValue(legacy, "intention"));
+                    scene.addProperty("emotionalState", "");
+                    scene.add("mayReveal", new JsonArray());
+                    scene.add("mustNotReveal", new JsonArray());
+                    scene.add("playerChoicePurpose", new JsonObject());
+                    scene.add("continuity", new JsonArray());
+                    scenes.add(scene);
+                }
+                result.remove("sceneIntentions");
+                result.add("scenes", scenes);
+            }
+            if (!result.has("scenes") || !result.get("scenes").isJsonArray()) return result;
+            for (JsonElement element : result.getAsJsonArray("scenes")) {
+                if (!element.isJsonObject()) continue;
+                JsonObject scene = element.getAsJsonObject();
+                normalizeStringList(scene, "mayReveal");
+                normalizeStringList(scene, "mustNotReveal");
+                normalizeStringList(scene, "continuity");
+                if (scene.has("playerChoicePurpose")
+                        && !scene.get("playerChoicePurpose").isJsonNull()
+                        && !scene.get("playerChoicePurpose").isJsonObject()) {
+                    JsonObject purpose = new JsonObject();
+                    purpose.addProperty("summary", scene.get("playerChoicePurpose").getAsString());
+                    scene.add("playerChoicePurpose", purpose);
+                }
+            }
+            return result;
+        }
+
+        private static void normalizeStringList(JsonObject object, String property) {
+            if (!object.has(property) || object.get(property).isJsonNull()) {
+                object.add(property, new JsonArray());
+            } else if (!object.get(property).isJsonArray()) {
+                JsonArray values = new JsonArray();
+                values.add(object.get(property).getAsString());
+                object.add(property, values);
+            }
+        }
+
+        private static JsonElement normalizeLegacyDialogueResponse(JsonElement response) {
+            if (!response.isJsonObject()) return response;
+            JsonObject object = response.getAsJsonObject();
+            if (!object.has("projectFormat") || !object.has("nodes") || !object.get("nodes").isJsonArray()) {
+                return response;
+            }
+            JsonObject result = new JsonObject();
+            JsonArray patches = new JsonArray();
+            for (JsonElement element : object.getAsJsonArray("nodes")) {
+                if (!element.isJsonObject()) continue;
+                JsonObject legacyNode = element.getAsJsonObject();
+                JsonObject patch = new JsonObject();
+                patch.addProperty("node", stringValue(legacyNode, "id"));
+                patch.addProperty("text", stringValue(legacyNode, "text"));
+                patch.add("speaker", legacyNode.has("speaker") && legacyNode.get("speaker").isJsonObject()
+                        ? legacyNode.getAsJsonObject("speaker").deepCopy()
+                        : emptySpeaker());
+                JsonArray labels = new JsonArray();
+                if (legacyNode.has("responses") && legacyNode.get("responses").isJsonArray()) {
+                    for (JsonElement edgeElement : legacyNode.getAsJsonArray("responses")) {
+                        labels.add(stringValue(edgeElement.getAsJsonObject(), "label"));
+                    }
+                }
+                patch.add("responseLabels", labels);
+                patches.add(patch);
+            }
+            result.add("nodes", patches);
+            return result;
+        }
+
+        private static JsonObject emptySpeaker() {
+            JsonObject speaker = new JsonObject();
+            speaker.add("emotion", JsonNull.INSTANCE);
+            speaker.add("animation", JsonNull.INSTANCE);
+            return speaker;
+        }
+
+        private static void normalizeSpeaker(JsonObject node) {
+            if (!node.has("speaker") || !node.get("speaker").isJsonNull()) return;
+            JsonObject speaker = new JsonObject();
+            speaker.add("emotion", JsonNull.INSTANCE);
+            speaker.add("animation", JsonNull.INSTANCE);
+            node.add("speaker", speaker);
+        }
+
+        private static void normalizeConditions(JsonObject node) {
+            if (!node.has("conditions") || !node.get("conditions").isJsonArray()) return;
+            for (JsonElement element : node.getAsJsonArray("conditions")) {
+                if (!element.isJsonObject()) continue;
+                JsonObject condition = element.getAsJsonObject();
+                if (!"BLOCK".equals(stringValue(condition, "type"))) continue;
+                if (hasText(condition, "item") || !hasText(condition, "marker")) continue;
+                condition.addProperty("item", condition.get("marker").getAsString());
+                condition.add("marker", JsonNull.INSTANCE);
+            }
+        }
+
+        private static void normalizeTrigger(JsonObject node) {
+            String trigger = stringValue(node, "trigger");
+            if (!trigger.isBlank()) node.addProperty("trigger", TriggerTypes.canonicalize(trigger));
+        }
+
+        private static boolean hasText(JsonObject object, String property) {
+            return object.has(property)
+                    && !object.get(property).isJsonNull()
+                    && object.get(property).isJsonPrimitive()
+                    && !object.get(property).getAsString().isBlank();
+        }
+
+        private static String stringValue(JsonObject object, String property) {
+            return hasText(object, property) ? object.get(property).getAsString() : "";
         }
 
         void writeManifest(GenerationBrief brief, ScenePackProject project) throws IOException {

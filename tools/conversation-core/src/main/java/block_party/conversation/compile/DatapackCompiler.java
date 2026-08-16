@@ -7,6 +7,7 @@ import block_party.conversation.model.ProjectIndex;
 import block_party.conversation.model.ResponseEdge;
 import block_party.conversation.model.SceneNode;
 import block_party.conversation.model.ScenePackProject;
+import block_party.conversation.model.TriggerTypes;
 import block_party.conversation.validation.ProjectValidator;
 import block_party.conversation.validation.ValidationReport;
 import com.google.gson.JsonArray;
@@ -53,7 +54,7 @@ public final class DatapackCompiler {
         Path scenes = output.resolve("data").resolve(project.pack().namespace()).resolve("scenes").resolve(project.pack().id());
         for (SceneNode root : roots) {
             JsonObject scene = new JsonObject();
-            scene.addProperty("trigger", qualify(root.trigger() == null || root.trigger().isBlank() ? "right_click" : root.trigger()));
+            scene.addProperty("trigger", compileTrigger(root.trigger()));
             JsonArray filters = new JsonArray();
             root.conditions().forEach(condition -> filters.add(MechanicsCompiler.condition(condition, index)));
             scene.add("filters", filters);
@@ -169,5 +170,9 @@ public final class DatapackCompiler {
 
     private static String qualify(String value) {
         return value.contains(":") ? value : "block_party:" + value;
+    }
+
+    private static String compileTrigger(String value) {
+        return TriggerTypes.qualified(value);
     }
 }

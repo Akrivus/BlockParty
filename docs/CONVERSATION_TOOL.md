@@ -218,6 +218,11 @@ local progress while Java retains ownership of budgets, validation, repair,
 simulation, compilation, and archives. When complete, the generated project
 becomes the open workbench project.
 
+The generation brief's dialogue-character limit is enforced after prose
+generation, with one rewrite attempt for oversized lines. Response labels are
+limited to 64 characters. A separate dialogue-style direction controls voice
+without mixing presentation preferences into the world-context documents.
+
 The **Review** panel displays the brief, token and call totals, per-stage model
 metadata, archived requests and structured responses, review findings, and
 scene intentions. A generated card's intention also appears in its inspector.
@@ -233,3 +238,18 @@ archive is available.
 The `recorded` provider keeps generation and revision tests deterministic and
 offline. The `openai` provider reads `OPENAI_API_KEY` only in the Java process;
 the browser, project, and archive never receive the key.
+
+## Iteration Eight World Context
+
+Generation briefs can identify block or character subjects. With automatic
+context enabled, the standalone tool reads Block Party block-tag JSON directly,
+resolves nested tag membership, and adds compact world, Moe-identity, trait,
+and optional block-profile prompts to the catalog. Minecraft and NeoForge do
+not need to be running.
+
+The built-in context manifest maps trusted Block Party tags to versioned prompt
+documents. Dere and blood-type conflicts use the same precedence as the game
+and appear as preview warnings. Unknown tags remain visible but never inject
+arbitrary prompt text. Generation archives the resolved bundle as
+`context.json`; replay reuses the archived catalog so later tag changes cannot
+alter a recorded run.

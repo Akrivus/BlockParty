@@ -13,6 +13,7 @@ import block_party.conversation.model.StateDeclaration;
 import block_party.conversation.model.StateReference;
 import block_party.conversation.model.StateType;
 import block_party.conversation.model.TransitionType;
+import block_party.conversation.model.TriggerTypes;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -119,6 +120,23 @@ public final class ProjectValidator {
             validateCondition(condition, node.id(), project, index, issues);
         }
         validateActions(node.actions(), node.id(), project, index, issues);
+        if (!TriggerTypes.valid(node.trigger())) {
+            issues.add(error("INVALID_TRIGGER", node.id(),
+                    "Unknown trigger '" + node.trigger() + "'. Use right_click for ordinary Moe interaction."));
+        }
+        if (node.type() == NodeType.GAMEPLAY_GATE && !node.id().equals(project.entry())
+                && node.conditions().stream().noneMatch(condition -> condition.type() == ConditionType.HAS_COOKIE
+                        || condition.type() == ConditionType.COUNTER)) {
+            issues.add(error("UNGATED_GAMEPLAY_GATE", node.id(),
+                    "Later gameplay gates require a HAS_COOKIE or COUNTER condition written by an earlier interaction."));
+        }
+        for (ResponseEdge edge : node.responses()) {
+            if ((edge.target() == null || edge.target().isBlank())
+                    && edge.transition() != TransitionType.PACK_EXIT) {
+                issues.add(error("MISSING_TARGET", node.id(),
+                        "Response target is required unless transition is PACK_EXIT."));
+            }
+        }
         if (node.type() == NodeType.DIALOGUE) {
             if (node.text() == null || node.text().isBlank()) {
                 issues.add(error("EMPTY_DIALOGUE", node.id(), "Dialogue text must not be empty."));
@@ -163,7 +181,8 @@ public final class ProjectValidator {
         }
         if (Set.of(ConditionType.HAS_ITEM, ConditionType.HELD_ITEM, ConditionType.MOE_HAS_ITEM, ConditionType.BLOCK)
                 .contains(condition.type()) && !resource(condition.item())) {
-            issues.add(error("INVALID_RESOURCE", node, "Condition requires a valid item, tag, or block resource id."));
+            issues.add(error("INVALID_RESOURCE", node,
+                    "Condition requires a valid resource ID in its item field; BLOCK also uses item, not marker."));
         }
     }
 
@@ -253,7 +272,8 @@ public final class ProjectValidator {
             collectWrites(gate.actions(), writes);
             if (guards.stream().noneMatch(writes::contains)) {
                 issues.add(error("REPEATABLE_REWARD", gate.id(),
-                        "Reward path needs a negative cookie guard set before the reward is reached."));
+                        "Declare a COOKIE state, add not=true HAS_COOKIE for it to this GAMEPLAY_GATE, and add SET_COOKIE "
+                                + "for the same state directly to this gate's actions. Counter guards are not accepted."));
             }
         }
     }

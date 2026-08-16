@@ -8,12 +8,14 @@ public record ContentCatalog(
         List<String> actions,
         List<String> conditions,
         List<String> responseCues,
-        List<CatalogDocument> documents) {
+        List<CatalogDocument> documents,
+        ResolvedGenerationContext context) {
     public ContentCatalog {
         characters = List.copyOf(characters);
         actions = List.copyOf(actions);
         conditions = List.copyOf(conditions);
         responseCues = List.copyOf(responseCues);
         documents = List.copyOf(documents);
+        context = context == null ? ResolvedGenerationContext.empty() : context;
     }
 }

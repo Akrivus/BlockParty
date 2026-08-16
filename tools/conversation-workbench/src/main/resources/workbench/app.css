@@ -24,22 +24,33 @@
 * {
   box-sizing: border-box;
 }
+html {
+  scrollbar-gutter: stable;
+}
 body {
   margin: 0;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 .topbar {
-  height: 66px;
+  flex: 0 0 auto;
+  min-height: 66px;
   background: var(--ink);
   color: white;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 18px;
+  gap: 14px;
   border-bottom: 3px solid var(--coral);
 }
 .brand {
   display: flex;
+  min-width: 0;
+  flex: 0 1 auto;
   align-items: center;
   gap: 11px;
 }
@@ -68,8 +79,13 @@ body {
 }
 .toolbar {
   display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 7px;
+  padding: 8px 0;
 }
 button {
   font: 600 12px inherit;
@@ -104,11 +120,16 @@ button:disabled {
   margin-left: 6px;
 }
 .shell {
-  height: calc(100vh - 66px);
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
   display: grid;
   grid-template-columns: 250px minmax(420px, 1fr) 350px;
 }
 .rail {
+  min-width: 0;
+  min-height: 0;
   background: var(--panel);
   padding: 16px;
   overflow: auto;
@@ -206,6 +227,7 @@ textarea:focus {
 }
 .workspace {
   min-width: 0;
+  min-height: 0;
   background: #e8e2d7;
 }
 .canvas-head {
@@ -456,6 +478,9 @@ summary b {
 }
 dialog {
   width: min(760px, 90vw);
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow: hidden;
   border: 0;
   border-radius: 13px;
   padding: 0;
@@ -467,7 +492,23 @@ dialog::backdrop {
   backdrop-filter: blur(3px);
 }
 dialog form {
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   padding: 22px;
+}
+.wide-dialog,
+#simulation-dialog,
+#revision-dialog {
+  height: min(760px, calc(100vh - 32px));
+  height: min(760px, calc(100dvh - 32px));
+}
+.wide-dialog form,
+#simulation-dialog form,
+#revision-dialog form {
+  height: 100%;
 }
 .dialog-head {
   display: flex;
@@ -539,6 +580,21 @@ dialog form {
   opacity: 1;
   transform: translate(-50%, 0);
 }
+@media (max-width: 1400px) {
+  .topbar {
+    padding: 6px 12px;
+  }
+  .brand small {
+    max-width: 280px;
+  }
+  .toolbar {
+    gap: 4px;
+    padding: 2px 0;
+  }
+  .topbar button {
+    padding: 6px 8px;
+  }
+}
 @media (max-width: 1050px) {
   .shell {
     grid-template-columns: 210px 1fr 310px;
@@ -549,24 +605,25 @@ dialog form {
 }
 @media (max-width: 760px) {
   body {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
     overflow: auto;
   }
   .topbar {
-    height: auto;
-    min-height: 66px;
     align-items: flex-start;
     padding: 10px;
     gap: 8px;
   }
   .toolbar {
-    flex-wrap: wrap;
-    justify-content: flex-end;
+    padding: 0;
   }
   .brand small {
     max-width: 200px;
   }
   .shell {
-    height: auto;
+    min-height: 0;
+    flex: none;
     display: flex;
     flex-direction: column;
   }
@@ -753,6 +810,20 @@ dialog form {
 .catalog-document b {
   display: block;
 }
+.catalog-document small {
+  display: block;
+  color: var(--coral-dark);
+}
+.context-group {
+  margin-top: 12px;
+}
+.context-group h4 {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 .provenance-summary {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -826,8 +897,10 @@ dialog form {
   display: none !important;
 }
 .start-screen {
+  width: 100%;
   min-height: 100vh;
-  overflow: auto;
+  min-height: 100dvh;
+  flex: 1 0 auto;
   padding: 52px 24px;
   background:
     radial-gradient(circle at 85% 12%, #df654d22, transparent 28%),

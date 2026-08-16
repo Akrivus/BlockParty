@@ -23,6 +23,17 @@ const $ = (s) => document.querySelector(s),
   clone = (o) => JSON.parse(JSON.stringify(o));
 const recoveryKey = () => `block-party-workbench:${state.path}`;
 
+function workingPath(path) {
+  if (!path || /^[a-zA-Z]:[\\/]/.test(path) || path.startsWith("/")) {
+    return path;
+  }
+  const root = (state.session?.workingDirectory || "").replace(/[\\/]+$/, "");
+  const separator = root.includes("\\") ? "\\" : "/";
+  return root
+    ? `${root}${separator}${path.replaceAll(/[\\/]/g, separator)}`
+    : path;
+}
+
 async function api(path, body) {
   const options =
     body === undefined
@@ -208,6 +219,7 @@ async function createPack() {
       $("#gen-title").value = title;
       $("#gen-prompt").value = $("#start-prompt").value.trim();
       $("#gen-characters").value = $("#start-characters").value.trim();
+      $("#gen-subject").value = $("#start-subject").value.trim();
       $("#gen-documents").value = $("#start-documents")
         .value.split(",")
         .map((value) => value.trim())
@@ -489,6 +501,11 @@ function renderInspector() {
   $("#card-form").hidden = !n;
   if (!n) return;
   const f = $("#card-form");
+  f.elements.trigger.innerHTML =
+    '<option value="">Default (right click)</option>' +
+    (state.schema.enums.trigger || [])
+      .map((value) => `<option value="${attr(value)}">${esc(value.replaceAll("_", " "))}</option>`)
+      .join("");
   for (const key of [
     "id",
     "title",
@@ -771,14 +788,20 @@ function openGenerationStudio() {
   $("#gen-min").value = brief?.constraints?.minimumCards || 6;
   $("#gen-max").value = brief?.constraints?.maximumCards || 12;
   $("#gen-dialogue-limit").value =
-    brief?.constraints?.maximumDialogueCharacters || 240;
+    brief?.constraints?.maximumDialogueCharacters || 160;
+  $("#gen-dialogue-style").value =
+    brief?.constraints?.dialogueStyle ||
+    "Concise, playful internet-anime banter. Be expressive and lightly meme-y; use occasional rawr/xd energy only when it suits the character, never as constant noise.";
   $("#gen-characters").value = (brief?.characters || []).join(", ");
+  $("#gen-subject").value = brief?.subjects?.[0]?.id || "";
+  $("#gen-auto-context").checked = brief?.automaticContext !== false;
   $("#gen-documents").value = (brief?.documents || []).join("\n");
-  $("#gen-provider").value = brief?.provider || "recorded";
-  $("#gen-model").value = brief?.model || "fixture";
-  $("#gen-recorded").value =
+  $("#gen-provider").value = brief?.provider || "openai";
+  $("#gen-model").value = brief?.model || "gpt-5.6-luna";
+  $("#gen-recorded").value = workingPath(
     brief?.recordedResponses ||
-    "tools/conversation-core/examples/generation/responses/flower";
+      "tools/conversation-core/examples/generation/responses/flower",
+  );
   $("#gen-calls").value = brief?.budget?.maximumCalls || 12;
   const base = $("#export-path").value.replace(/[\\/]?[^\\/]+$/, "");
   $("#gen-output").value = `${base}\\${$("#gen-id").value}`;
@@ -793,6 +816,16 @@ function generationBrief() {
     namespace: state.project.pack.namespace || "block_party_generated",
     title: $("#gen-title").value,
     prompt: $("#gen-prompt").value,
+    subjects: $("#gen-subject").value.trim()
+      ? [
+          {
+            kind: "BLOCK",
+            id: $("#gen-subject").value.trim(),
+            role: "PRIMARY",
+          },
+        ]
+      : [],
+    automaticContext: $("#gen-auto-context").checked,
     characters: csv($("#gen-characters").value),
     documents: $("#gen-documents")
       .value.split(/\r?\n/)
@@ -803,6 +836,7 @@ function generationBrief() {
       minimumCards: Number($("#gen-min").value),
       maximumCards: Number($("#gen-max").value),
       maximumDialogueCharacters: Number($("#gen-dialogue-limit").value),
+      dialogueStyle: $("#gen-dialogue-style").value.trim(),
       requiredFeatures: [],
       allowedActions: state.schema.actionTypes.filter((x) => x !== "RAW"),
       allowedConditions: state.schema.conditionTypes.filter((x) => x !== "RAW"),
@@ -821,14 +855,50 @@ function generationBrief() {
 async function previewCatalog() {
   try {
     const catalog = await api("catalog", { brief: generationBrief() });
+    const context = catalog.context || { inclusions: [], warnings: [] };
+    const reasonNames = {
+      MANDATORY_WORLD_RULE: "World rules",
+      TAG: "Resolved block traits",
+      BLOCK_PROFILE: "Block context",
+      CHARACTER_PROFILE: "Character context",
+    };
+    const groups = (context.inclusions || []).reduce((result, item) => {
+      (result[item.reason] ??= []).push(item);
+      return result;
+    }, {});
+    const automatic = Object.entries(groups)
+      .map(
+        ([reason, items]) =>
+          `<section class="context-group"><h4>${esc(reasonNames[reason] || reason)}</h4>${items
+            .map(
+              (item) =>
+                `<div class="catalog-document"><b>${esc(item.title)}</b>${item.source ? `<small>${esc(item.source)}</small>` : ""}${item.content.length} characters · ${esc(item.sha256.slice(0, 12))}…</div>`,
+            )
+            .join("")}</section>`,
+      )
+      .join("");
+    const automaticPaths = new Set(
+      (context.inclusions || []).map((item) => `context/${item.path}`),
+    );
+    const creatorDocuments = catalog.documents.filter(
+      (document) => !automaticPaths.has(document.path),
+    );
     $("#catalog-preview").innerHTML =
       `<p class="all-clear">${catalog.documents.length} bounded document(s); ${catalog.actions.length} action and ${catalog.conditions.length} condition types.</p>` +
-      catalog.documents
+      (context.warnings || [])
+        .map((warning) => `<p class="diagnostic WARNING">${esc(warning)}</p>`)
+        .join("") +
+      automatic +
+      (creatorDocuments.length
+        ? '<section class="context-group"><h4>Creator documents</h4>'
+        : "") +
+      creatorDocuments
         .map(
           (d) =>
             `<div class="catalog-document"><b>${esc(d.path)}</b>${d.content.length} characters · ${esc(d.sha256.slice(0, 12))}…</div>`,
         )
-        .join("");
+        .join("") +
+      (creatorDocuments.length ? "</section>" : "");
   } catch (e) {
     $("#catalog-preview").innerHTML =
       `<p class="diagnostic ERROR">${esc(e.message)}</p>`;
@@ -887,11 +957,18 @@ function renderProvenance() {
     return;
   }
   const manifest = p.manifest || {};
-  root.innerHTML = `<div class="provenance-summary"><div class="provenance-panel"><h3>Brief</h3><b>${esc(p.brief?.title || "")}</b><p>${esc(p.brief?.prompt || "")}</p></div><div class="provenance-panel"><h3>Usage</h3><b>${manifest.calls || 0} calls</b><p>${manifest.input_tokens || 0} input · ${manifest.output_tokens || 0} output tokens</p></div><div class="provenance-panel"><h3>Intentions</h3><b>${p.intentions?.scenes?.length || 0} dialogue cards</b></div><div class="provenance-panel"><h3>Review</h3><b>${p.review?.findings?.length || 0} finding(s)</b></div></div><h3>Archived stages</h3>${(p.stages || []).map((s) => `<details class="stage-archive"><summary><b>${esc(s.metadata?.stage || s.directory)}</b><span>${esc(s.metadata?.provider || "")} · ${esc(s.metadata?.model || "")}</span></summary><h4>Request</h4><pre class="archive-json">${esc(JSON.stringify(s.request, null, 2))}</pre><h4>Response</h4><pre class="archive-json">${esc(JSON.stringify(s.response, null, 2))}</pre></details>`).join("")}`;
+  const findings = p.review?.findings || [];
+  const findingList = findings.length
+    ? `<h3>Review findings</h3><div class="review-findings">${findings.map((finding) => `<div class="diagnostic ${esc((finding.severity || "warning").toUpperCase())}"><b>${esc((finding.severity || "warning").toUpperCase())} · ${esc(finding.code || "review")}${finding.node ? ` · ${esc(finding.node)}` : ""}</b><p>${esc(finding.message || "")}</p></div>`).join("")}</div>`
+    : '<h3>Review findings</h3><p class="hint">No editorial findings.</p>';
+  root.innerHTML = `<div class="provenance-summary"><div class="provenance-panel"><h3>Brief</h3><b>${esc(p.brief?.title || "")}</b><p>${esc(p.brief?.prompt || "")}</p></div><div class="provenance-panel"><h3>Context</h3><b>${p.context?.inclusions?.length || 0} automatic include(s)</b><p>${p.context?.warnings?.length || 0} warning(s)</p></div><div class="provenance-panel"><h3>Usage</h3><b>${manifest.calls || 0} calls</b><p>${manifest.input_tokens || 0} input · ${manifest.output_tokens || 0} output tokens</p></div><div class="provenance-panel"><h3>Intentions</h3><b>${p.intentions?.scenes?.length || 0} dialogue cards</b></div><div class="provenance-panel"><h3>Review</h3><b>${findings.length} finding(s)</b></div></div>${findingList}<h3>Archived stages</h3>${(p.stages || []).map((s) => `<details class="stage-archive"><summary><b>${esc(s.metadata?.stage || s.directory)}</b><span>${esc(s.metadata?.provider || "")} · ${esc(s.metadata?.model || "")}</span></summary><h4>Request</h4><pre class="archive-json">${esc(JSON.stringify(s.request, null, 2))}</pre><h4>Response</h4><pre class="archive-json">${esc(JSON.stringify(s.response, null, 2))}</pre></details>`).join("")}`;
 }
 
 function openRevision() {
   if (!selected()) return;
+  if (!$("#revision-recorded").value.match(/^(?:[a-zA-Z]:[\\/]|\/)/)) {
+    $("#revision-recorded").value = workingPath($("#revision-recorded").value);
+  }
   $("#revision-alternatives").innerHTML = "";
   $("#revision-dialog").showModal();
 }

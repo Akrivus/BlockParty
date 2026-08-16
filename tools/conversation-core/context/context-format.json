@@ -1,0 +1,61 @@
+{
+  "format": 1,
+  "always": [
+    "world/minecraft-world.md",
+    "world/moes.md",
+    "world/cardinal-and-corporeal.md"
+  ],
+  "tags": {
+    "block_party:moe/traits/cardinal": "world/cardinal.md",
+    "block_party:moe/traits/dere/nyandere": "traits/dere/nyandere.md",
+    "block_party:moe/traits/dere/himedere": "traits/dere/himedere.md",
+    "block_party:moe/traits/dere/kuudere": "traits/dere/kuudere.md",
+    "block_party:moe/traits/dere/tsundere": "traits/dere/tsundere.md",
+    "block_party:moe/traits/dere/yandere": "traits/dere/yandere.md",
+    "block_party:moe/traits/dere/deredere": "traits/dere/deredere.md",
+    "block_party:moe/traits/dere/dandere": "traits/dere/dandere.md",
+    "block_party:moe/traits/blood_type/a": "traits/blood-type/a.md",
+    "block_party:moe/traits/blood_type/ab": "traits/blood-type/ab.md",
+    "block_party:moe/traits/blood_type/b": "traits/blood-type/b.md",
+    "block_party:moe/traits/blood_type/o": "traits/blood-type/o.md",
+    "block_party:moe/traits/zodiac/aries": "traits/zodiac.md",
+    "block_party:moe/traits/zodiac/taurus": "traits/zodiac.md",
+    "block_party:moe/traits/zodiac/gemini": "traits/zodiac.md",
+    "block_party:moe/traits/zodiac/cancer": "traits/zodiac.md",
+    "block_party:moe/traits/zodiac/leo": "traits/zodiac.md",
+    "block_party:moe/traits/zodiac/virgo": "traits/zodiac.md",
+    "block_party:moe/traits/zodiac/libra": "traits/zodiac.md",
+    "block_party:moe/traits/zodiac/scorpio": "traits/zodiac.md",
+    "block_party:moe/traits/zodiac/sagittarius": "traits/zodiac.md",
+    "block_party:moe/traits/zodiac/capricorn": "traits/zodiac.md",
+    "block_party:moe/traits/zodiac/aquarius": "traits/zodiac.md",
+    "block_party:moe/traits/zodiac/pisces": "traits/zodiac.md",
+    "block_party:moe/has_wings": "traits/physical/wings.md",
+    "block_party:moe/has_cat_features": "traits/physical/cat-features.md",
+    "block_party:moe/has_glow": "traits/physical/glow.md",
+    "block_party:moe/traits/flammable": "traits/physical/flammable.md",
+    "block_party:moe/traits/ignores_darkness": "traits/environment/ignores-darkness.md",
+    "block_party:moe/traits/ignores_rain": "traits/environment/ignores-rain.md",
+    "block_party:moe/place/cave_blocks": "traits/place/caves.md",
+    "block_party:moe/place/garden_blocks": "traits/place/gardens.md",
+    "block_party:moe/place/shrine_blocks": "traits/place/shrines.md",
+    "block_party:moe/place/workshop_blocks": "traits/place/workshops.md"
+  },
+  "exclusiveGroups": {
+    "blood type": [
+      "block_party:moe/traits/blood_type/a",
+      "block_party:moe/traits/blood_type/ab",
+      "block_party:moe/traits/blood_type/b",
+      "block_party:moe/traits/blood_type/o"
+    ],
+    "dere": [
+      "block_party:moe/traits/dere/nyandere",
+      "block_party:moe/traits/dere/himedere",
+      "block_party:moe/traits/dere/kuudere",
+      "block_party:moe/traits/dere/tsundere",
+      "block_party:moe/traits/dere/yandere",
+      "block_party:moe/traits/dere/deredere",
+      "block_party:moe/traits/dere/dandere"
+    ]
+  }
+}

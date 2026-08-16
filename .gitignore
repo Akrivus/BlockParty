@@ -22,6 +22,11 @@ eclipse
 run
 logs
 
+# Conversation authoring and export artifacts
+/authoring/
+/dist/
+/*_generated/
+
 # Files from Forge MDK
 forge*changelog.txt
 *.log

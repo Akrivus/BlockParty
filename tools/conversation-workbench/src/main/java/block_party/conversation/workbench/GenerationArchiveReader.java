@@ -9,7 +9,13 @@ import java.util.List;
 
 final class GenerationArchiveReader {
     private static final List<String> ROOT_DOCUMENTS =
-            List.of("brief.json", "catalog.json", "intentions.json", "review.json");
+            List.of(
+                    "brief.json",
+                    "catalog.json",
+                    "context.json",
+                    "graph-validation.json",
+                    "intentions.json",
+                    "review.json");
     private static final List<String> STAGE_DOCUMENTS =
             List.of("metadata.json", "request.json", "response.json");
 

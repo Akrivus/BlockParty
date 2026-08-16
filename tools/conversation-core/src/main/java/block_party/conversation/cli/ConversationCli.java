@@ -3,6 +3,7 @@ package block_party.conversation.cli;
 import block_party.conversation.compile.CompilationResult;
 import block_party.conversation.compile.DatapackCompiler;
 import block_party.conversation.graph.MermaidExporter;
+import block_party.conversation.generation.ContentCatalog;
 import block_party.conversation.generation.ContentCataloger;
 import block_party.conversation.generation.GenerationBrief;
 import block_party.conversation.generation.GenerationPipeline;
@@ -82,8 +83,11 @@ public final class ConversationCli {
     private static int replay(Path previous, Path output) throws Exception {
         previous = previous.toAbsolutePath().normalize();
         GenerationBrief brief = readBrief(previous.resolve("brief.json"));
+        ContentCatalog catalog = ProjectJson.gson().fromJson(
+                Files.readString(previous.resolve("catalog.json"), StandardCharsets.UTF_8),
+                ContentCatalog.class);
         GenerationResult result = new GenerationPipeline(new RecordedDirectoryModel(previous.resolve("generation")))
-                .generate(brief, repositoryRoot(previous), output);
+                .generate(brief, repositoryRoot(previous), output, catalog);
         System.out.printf("Replayed %s with %d archived call(s).%n", result.project().pack().id(), result.modelCalls());
         return 0;
     }

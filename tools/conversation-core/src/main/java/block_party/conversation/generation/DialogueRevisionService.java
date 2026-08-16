@@ -32,8 +32,12 @@ public final class DialogueRevisionService {
                 node.responses().stream().map(value -> value.label()).toList()));
         payload.addProperty("neighborContext", context == null ? "" : context);
         payload.addProperty("mechanicsFingerprint", MechanicsFingerprint.of(project));
-        var response = model.generate(new ModelRequest(GenerationStage.DIALOGUE_REVISION, REVISION_PROMPT,
-                ProjectJson.gson().toJson(payload), null, 20_000));
+        var response = model.generate(new ModelRequest(
+                GenerationStage.DIALOGUE_REVISION,
+                REVISION_PROMPT,
+                ProjectJson.gson().toJson(payload),
+                GenerationSchemas.forType(DialogueRevision.class),
+                20_000));
         DialogueRevision revision = ProjectJson.gson().fromJson(response.structuredOutput(), DialogueRevision.class);
         if (revision.alternatives().isEmpty()) {
             throw new IllegalStateException("Revision returned no alternatives.");

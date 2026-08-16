@@ -276,6 +276,19 @@ bounds, then list only the repository documents that should become model
 context. Use **Preview catalog** before generation to inspect each included
 path, character count, and content hash.
 
+Set **Max dialogue characters** to the largest line the in-game speech bubble
+should display; new briefs default to 160. The dialogue stage rejects longer
+lines and rewrites them once, and response-button labels are capped at 64
+characters. **Dialogue voice** is a free-form style direction. Its default is
+concise, playful internet-anime banter, and it can be replaced for a specific
+pack without changing world or character context.
+
+Set a primary block subject such as `minecraft:crying_obsidian` to include
+world rules and applicable block traits automatically. The preview groups
+mandatory world rules, tag-derived traits, block profiles, and creator-selected
+documents and reports conflicting exclusive tags. Turn off automatic context
+only when intentionally testing a context-free brief.
+
 The recorded flower fixture uses:
 
 ```text

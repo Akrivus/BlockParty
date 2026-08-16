@@ -21,5 +21,10 @@ public record SceneNode(
         conditions = conditions == null ? List.of() : List.copyOf(conditions);
         responses = responses == null ? List.of() : List.copyOf(responses);
         actions = actions == null ? List.of() : List.copyOf(actions);
+        if (speaker != null
+                && (!speaker.has("emotion") || speaker.get("emotion").isJsonNull())
+                && (!speaker.has("animation") || speaker.get("animation").isJsonNull())) {
+            speaker = null;
+        }
     }
 }

@@ -8,6 +8,7 @@ import block_party.conversation.model.NodeType;
 import block_party.conversation.model.StateScope;
 import block_party.conversation.model.StateType;
 import block_party.conversation.model.TransitionType;
+import block_party.conversation.model.TriggerTypes;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -49,6 +50,7 @@ final class AuthoringSchema {
         enums.put("transition", names(TransitionType.values()));
         enums.put("nodeType", names(NodeType.values()));
         enums.put("stateType", names(StateType.values()));
+        enums.put("trigger", TriggerTypes.values());
         return Map.of(
                 "conditions", conditions,
                 "actions", actions,

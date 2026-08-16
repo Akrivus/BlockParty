@@ -43,7 +43,9 @@ final class GenerationRun {
             String message = exception.getMessage() == null
                     ? exception.getClass().getSimpleName()
                     : exception.getMessage();
-            status = new Status("FAILED", "FAILED", status.calls(), message);
+            Status failedAt = status;
+            String stage = failedAt.stage().replace("_COMPLETE", "");
+            status = new Status("FAILED", stage, failedAt.calls(), message);
         }
     }
 
