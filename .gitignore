@@ -22,10 +22,19 @@ eclipse
 run
 logs
 
-# Conversation authoring and export artifacts
-/authoring/
+# Conversation build and export artifacts. Authoring prompts and projects are
+# versioned source files and intentionally remain visible.
 /dist/
 /*_generated/
+/authoring/test_*/
+/authoring/**/generated/generation/
+/authoring/**/generated/datapack/
+/authoring/**/generated/reports/
+/authoring/**/generated/catalog.json
+/authoring/**/generated/context.json
+/authoring/**/generated/graph-validation.json
+/authoring/**/generated/intentions.json
+/authoring/**/generated/review.json
 
 # Files from Forge MDK
 forge*changelog.txt
