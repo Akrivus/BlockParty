@@ -7,6 +7,7 @@ import block_party.conversation.compile.DatapackCompiler;
 import block_party.conversation.generation.GenerationBrief;
 import block_party.conversation.generation.GenerationConstraints;
 import block_party.conversation.generation.GenerationPipeline;
+import block_party.conversation.generation.ReviewGate;
 import block_party.conversation.generation.model.NarrativeModel;
 import block_party.conversation.generation.model.OpenAiResponsesModel;
 import block_party.conversation.generation.model.RecordedDirectoryModel;
@@ -184,7 +185,9 @@ public final class BatchService {
         Files.createDirectories(output);
         Map<Path, String> owners = new LinkedHashMap<>();
         for (BatchJob job : jobs()) {
-            ScenePackProject project = ProjectJson.read(job.directory().resolve("project.json"));
+            Path projectPath = job.directory().resolve("project.json");
+            ReviewGate.requireAdjacentReviewPublishable(projectPath, "Batch compilation for " + job.id());
+            ScenePackProject project = ProjectJson.read(projectPath);
             Path temporary = Files.createTempDirectory("block-party-batch-compile-");
             try {
                 new DatapackCompiler().compile(project, temporary);
@@ -206,7 +209,9 @@ public final class BatchService {
         if (validateProjects() != 0) return 1;
         Path scenesRoot = repository.resolve("src/main/resources/data/block_party/scenes").normalize();
         for (BatchJob job : jobs()) {
-            ScenePackProject project = ProjectJson.read(job.directory().resolve("project.json"));
+            Path projectPath = job.directory().resolve("project.json");
+            ReviewGate.requireAdjacentReviewPublishable(projectPath, "Live batch installation for " + job.id());
+            ScenePackProject project = ProjectJson.read(projectPath);
             Path target = scenesRoot.resolve(project.pack().id()).normalize();
             if (!scenesRoot.equals(target.getParent())) throw new IllegalArgumentException("Unsafe live target " + target);
             Path temporary = Files.createTempDirectory("block-party-batch-live-");

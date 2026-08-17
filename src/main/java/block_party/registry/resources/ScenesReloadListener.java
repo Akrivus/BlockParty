@@ -61,12 +61,15 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 public final class ScenesReloadListener implements PreparableReloadListener {
     private static final String DIRECTORY = "scenes";
@@ -211,6 +214,16 @@ public final class ScenesReloadListener implements PreparableReloadListener {
             BlockParty.LOGGER.warn("[Block Party Content] {} scene validation issue(s)", this.validationIssues.size());
             this.validationIssues.stream().limit(50).forEach(issue ->
                     BlockParty.LOGGER.warn("[Block Party Content] {}: {}", issue.sceneId(), issue.message()));
+            var server = ServerLifecycleHooks.getCurrentServer();
+            if (server != null) {
+                server.getPlayerList().broadcastSystemMessage(Component.literal(
+                        "[Block Party Content] " + this.validationIssues.size() + " scene validation issue(s)")
+                        .withStyle(ChatFormatting.RED), false);
+                this.validationIssues.forEach(issue -> server.getPlayerList().broadcastSystemMessage(
+                        Component.literal((issue.rejectScene() ? "REJECTED " : "WARNING ")
+                                + issue.sceneId() + ": " + issue.message())
+                                .withStyle(issue.rejectScene() ? ChatFormatting.RED : ChatFormatting.YELLOW), false));
+            }
         }
     }
 

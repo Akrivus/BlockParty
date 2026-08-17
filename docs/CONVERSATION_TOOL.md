@@ -113,6 +113,13 @@ Responses API's JSON output mode, and never writes the API key to an archive.
 All provider output still passes through the local typed parser, mechanical
 lock, validation, simulation, and compiler. CI never makes network calls.
 
+Generation review is a publication gate. High-severity findings leave the
+generated project, review, provenance, and reports available for editing, but
+the pipeline does not compile a datapack. The CLI `compile` and `build`
+commands, batch compilation/live installation, and both workbench export modes
+also refuse a project whose adjacent `review.json` still contains a
+high-severity finding. Medium and low findings remain advisory.
+
 Repository cataloging only reads paths explicitly listed by the brief. Each
 document is normalized, hashed, and capped at 24,000 characters so prompts do
 not silently absorb an entire modpack or repository.
@@ -295,6 +302,12 @@ without mixing presentation preferences into the world-context documents.
 The **Review** panel displays the brief, token and call totals, per-stage model
 metadata, archived requests and structured responses, review findings, and
 scene intentions. A generated card's intention also appears in its inspector.
+High-severity review findings also appear in the normal **Checks** panel and
+mark their associated cards. They block compilation and export, but never
+prevent opening or editing the source project. After correcting the project,
+use **Re-run review** to save the edited source, replace the stale `review.json`,
+and unlock export when no high-severity findings remain. Manual review calls
+are archived alongside the original generation stages.
 
 **Revise** requests two or three prose alternatives for the selected card.
 Alternatives are not applied automatically. Java checks response count, applies

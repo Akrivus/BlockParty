@@ -439,6 +439,14 @@ requested mechanic required graph repair.
 
 ## Troubleshooting
 
+### Review blocks export
+
+High-severity generation-review findings appear under **Checks** and in
+**Generation review**. Select a finding to open its card, edit the project, and
+resolve ordinary validation errors. Then choose **Re-run review**. The edited
+project is saved and the new review replaces the stale blocking review; export
+is enabled when the new review contains no high-severity findings.
+
 ### The export directory is not empty
 
 Choose a new pack directory or move the previous export elsewhere. Export does

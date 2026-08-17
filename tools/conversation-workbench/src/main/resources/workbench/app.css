@@ -468,7 +468,8 @@ summary b {
   line-height: 1.35;
   cursor: pointer;
 }
-.diagnostic.ERROR {
+.diagnostic.ERROR,
+.diagnostic.HIGH {
   border-color: #b33b34;
   background: #fff0ed;
 }

@@ -8,6 +8,9 @@ import block_party.conversation.generation.DialogueAlternative;
 import block_party.conversation.generation.DialogueRevision;
 import block_party.conversation.generation.DialogueRevisionService;
 import block_party.conversation.generation.GenerationBrief;
+import block_party.conversation.generation.ReviewGate;
+import block_party.conversation.generation.GenerationReview;
+import block_party.conversation.generation.GenerationReviewService;
 import block_party.conversation.io.ProjectJson;
 import block_party.conversation.model.EditorPosition;
 import block_party.conversation.model.NodeType;
@@ -117,6 +120,28 @@ final class WorkbenchService {
         return new GenerationArchiveReader().read(projectPath);
     }
 
+    JsonObject rerunReview(ScenePackProject project) throws Exception {
+        var validation = new ProjectValidator().validate(project);
+        if (!validation.valid()) {
+            throw new IllegalArgumentException("Resolve project validation errors before re-running review.");
+        }
+        Path root = GenerationArchiveReader.generationRoot(projectPath);
+        if (root == null || !Files.isRegularFile(root.resolve("brief.json"))) {
+            throw new IllegalStateException("This project has no generation brief to review against.");
+        }
+        GenerationBrief brief = ProjectJson.gson().fromJson(Files.readString(root.resolve("brief.json")), GenerationBrief.class);
+        GenerationReview review = new GenerationReviewService().review(
+                NarrativeModels.create(brief, repositoryRoot()), brief, project, root.resolve("generation"));
+        ProjectJson.write(projectPath, project);
+        Files.writeString(root.resolve("review.json"), ProjectJson.gson().toJson(review) + System.lineSeparator(),
+                StandardCharsets.UTF_8);
+        JsonObject result = new JsonObject();
+        result.add("review", ProjectJson.gson().toJsonTree(review));
+        result.add("provenance", provenance());
+        result.addProperty("publishable", ReviewGate.publishable(review));
+        return result;
+    }
+
     DialogueRevision requestRevision(ScenePackProject project, String node, String instruction,
             String provider, String modelName, String recordedResponses) throws Exception {
         GenerationBrief providerBrief = new GenerationBrief(
@@ -182,6 +207,7 @@ final class WorkbenchService {
     }
 
     JsonObject export(ScenePackProject project, Path output) throws Exception {
+        ReviewGate.requireAdjacentReviewPublishable(projectPath, "Export");
         ValidationReport validation = validate(project);
         if (!validation.valid()) {
             throw new IllegalArgumentException("Export refused: project has validation errors.");
@@ -213,6 +239,7 @@ final class WorkbenchService {
     }
 
     JsonObject exportLiveResources(ScenePackProject project) throws Exception {
+        ReviewGate.requireAdjacentReviewPublishable(projectPath, "Live export");
         ValidationReport validation = validate(project);
         if (!validation.valid()) {
             throw new IllegalArgumentException("Live export refused: project has validation errors.");

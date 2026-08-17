@@ -35,6 +35,7 @@ public final class WorkbenchServer {
         server.createContext("/api/save", exchange -> api(exchange, this::save));
         server.createContext("/api/export", exchange -> api(exchange, this::export));
         server.createContext("/api/provenance", exchange -> api(exchange, this::provenance));
+        server.createContext("/api/review/rerun", exchange -> api(exchange, this::rerunReview));
         server.createContext("/api/catalog", exchange -> api(exchange, this::catalog));
         server.createContext("/api/generation/start", exchange -> api(exchange, this::startGeneration));
         server.createContext("/api/generation/status", exchange -> api(exchange, this::generationStatus));
@@ -159,6 +160,13 @@ public final class WorkbenchServer {
     private Object provenance(HttpExchange exchange) throws Exception {
         requireMethod(exchange, "GET");
         return session.requireProject().provenance();
+    }
+
+    private Object rerunReview(HttpExchange exchange) throws Exception {
+        requireMethod(exchange, "POST");
+        JsonObject body = readObject(exchange);
+        return session.requireProject().rerunReview(
+                ProjectJson.gson().fromJson(body.get("project"), ScenePackProject.class));
     }
 
     private Object catalog(HttpExchange exchange) throws Exception {

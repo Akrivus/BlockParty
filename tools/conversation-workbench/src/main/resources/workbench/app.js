@@ -341,6 +341,11 @@ function visible(n) {
         .includes(q))
   );
 }
+function blockingReviewFindings() {
+  return (state.provenance?.review?.findings || []).filter(
+    (finding) => (finding.severity || "").toUpperCase() === "HIGH",
+  );
+}
 function renderOutline() {
   const root = $("#outline");
   root.innerHTML = "";
@@ -363,7 +368,7 @@ function renderCanvas() {
   canvas.style.height = `${Math.max(1200, ...visibleNodes.map((n) => n.editor.y + 220))}px`;
   for (const n of visibleNodes) {
     const card = document.createElement("article");
-    card.className = `node-card ${n.type}${n.id === state.selected ? " selected" : ""}${state.diagnostics.some((d) => d.node === n.id && d.severity === "ERROR") ? " has-error" : ""}${state.connecting === n.id ? " connect-source" : state.connecting ? " connect-target" : ""}`;
+    card.className = `node-card ${n.type}${n.id === state.selected ? " selected" : ""}${state.diagnostics.some((d) => d.node === n.id && d.severity === "ERROR") || blockingReviewFindings().some((finding) => finding.node === n.id) ? " has-error" : ""}${state.connecting === n.id ? " connect-source" : state.connecting ? " connect-target" : ""}`;
     card.style.left = n.editor.x + "px";
     card.style.top = n.editor.y + "px";
     card.dataset.id = n.id;
@@ -1111,9 +1116,41 @@ function renderProvenance() {
   const manifest = p.manifest || {};
   const findings = p.review?.findings || [];
   const findingList = findings.length
-    ? `<h3>Review findings</h3><div class="review-findings">${findings.map((finding) => `<div class="diagnostic ${esc((finding.severity || "warning").toUpperCase())}"><b>${esc((finding.severity || "warning").toUpperCase())} · ${esc(finding.code || "review")}${finding.node ? ` · ${esc(finding.node)}` : ""}</b><p>${esc(finding.message || "")}</p></div>`).join("")}</div>`
+    ? `<h3>Review findings</h3><div class="review-findings">${findings.map((finding) => `<div class="diagnostic ${esc((finding.severity || "warning").toUpperCase())}"${finding.node ? ` data-review-node="${attr(finding.node)}"` : ""}><b>${esc((finding.severity || "warning").toUpperCase())} · ${esc(finding.code || "review")}${finding.node ? ` · ${esc(finding.node)}` : ""}</b><p>${esc(finding.message || "")}</p></div>`).join("")}</div>`
     : '<h3>Review findings</h3><p class="hint">No editorial findings.</p>';
   root.innerHTML = `<div class="provenance-summary"><div class="provenance-panel"><h3>Brief</h3><b>${esc(p.brief?.title || "")}</b><p>${esc(p.brief?.prompt || "")}</p></div><div class="provenance-panel"><h3>Context</h3><b>${p.context?.inclusions?.length || 0} automatic include(s)</b><p>${p.context?.warnings?.length || 0} warning(s)</p></div><div class="provenance-panel"><h3>Usage</h3><b>${manifest.calls || 0} calls</b><p>${manifest.input_tokens || 0} input · ${manifest.output_tokens || 0} output tokens</p></div><div class="provenance-panel"><h3>Intentions</h3><b>${p.intentions?.scenes?.length || 0} dialogue cards</b></div><div class="provenance-panel"><h3>Review</h3><b>${findings.length} finding(s)</b></div></div>${findingList}<h3>Archived stages</h3>${(p.stages || []).map((s) => `<details class="stage-archive"><summary><b>${esc(s.metadata?.stage || s.directory)}</b><span>${esc(s.metadata?.provider || "")} · ${esc(s.metadata?.model || "")}</span></summary><h4>Request</h4><pre class="archive-json">${esc(JSON.stringify(s.request, null, 2))}</pre><h4>Response</h4><pre class="archive-json">${esc(JSON.stringify(s.response, null, 2))}</pre></details>`).join("")}`;
+  root.querySelectorAll("[data-review-node]").forEach((finding) => {
+    finding.onclick = () => {
+      $("#review-dialog").close();
+      select(finding.dataset.reviewNode, true);
+    };
+  });
+}
+
+async function rerunReview() {
+  if (state.diagnostics.some((diagnostic) => diagnostic.severity === "ERROR")) {
+    return toast("Resolve validation errors before re-running review.", true);
+  }
+  const button = $("#rerun-review");
+  button.disabled = true;
+  button.textContent = "Reviewing…";
+  try {
+    const result = await api("review/rerun", { project: state.project });
+    state.provenance = result.provenance;
+    state.dirty = false;
+    localStorage.removeItem(recoveryKey());
+    $("#dirty").textContent = "Saved";
+    $("#save").disabled = true;
+    renderProvenance();
+    renderDiagnostics();
+    renderCanvas();
+    toast(result.publishable ? "Review passed; export is unlocked." : "Review still has blocking findings.", !result.publishable);
+  } catch (error) {
+    toast(error.message, true);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Re-run review";
+  }
 }
 
 function openRevision() {
@@ -1189,8 +1226,9 @@ async function validate() {
 function renderDiagnostics() {
   const root = $("#diagnostics");
   root.innerHTML = "";
-  $("#check-count").textContent = state.diagnostics.length || "✓";
-  if (!state.diagnostics.length) {
+  const reviewBlockers = blockingReviewFindings();
+  $("#check-count").textContent = state.diagnostics.length + reviewBlockers.length || "✓";
+  if (!state.diagnostics.length && !reviewBlockers.length) {
     root.innerHTML =
       '<div class="all-clear">Everything connects cleanly.</div>';
     return;
@@ -1200,6 +1238,13 @@ function renderDiagnostics() {
     item.className = "diagnostic " + d.severity;
     item.innerHTML = `<b>${esc(d.severity)} · ${esc(d.code)}</b>${esc(d.message)}`;
     if (d.node) item.onclick = () => select(d.node, true);
+    root.append(item);
+  }
+  for (const finding of reviewBlockers) {
+    const item = document.createElement("div");
+    item.className = "diagnostic HIGH";
+    item.innerHTML = `<b>HIGH REVIEW · ${esc(finding.code || "review")}</b>${esc(finding.message || "")}`;
+    if (finding.node) item.onclick = () => select(finding.node, true);
     root.append(item);
   }
 }
@@ -1415,6 +1460,13 @@ $("#start-generation").onclick = startGeneration;
 $("#review-generation").onclick = () => {
   renderProvenance();
   $("#review-dialog").showModal();
+};
+$("#rerun-review").onclick = rerunReview;
+$("#review-first-blocker").onclick = () => {
+  const finding = blockingReviewFindings().find((candidate) => candidate.node);
+  if (!finding) return toast("No card-specific blocking finding.");
+  $("#review-dialog").close();
+  select(finding.node, true);
 };
 $("#revise-card").onclick = openRevision;
 $("#request-revision").onclick = requestRevision;

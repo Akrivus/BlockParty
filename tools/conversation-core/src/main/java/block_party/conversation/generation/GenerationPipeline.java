@@ -203,7 +203,9 @@ public final class GenerationPipeline {
         ProjectJson.write(projectPath, written);
         var simulation = new ProjectSimulator().simulate(written);
         new BuildReportWriter().write(output.resolve("reports"), written, finalValidation, simulation);
-        new DatapackCompiler().compile(written, output.resolve("datapack"));
+        if (ReviewGate.publishable(review)) {
+            new DatapackCompiler().compile(written, output.resolve("datapack"));
+        }
         session.writeManifest(brief, written);
         return new GenerationResult(written, output, session.calls, session.inputTokens, session.outputTokens);
     }

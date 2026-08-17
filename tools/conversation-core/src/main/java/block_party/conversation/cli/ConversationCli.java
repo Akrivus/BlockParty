@@ -9,6 +9,7 @@ import block_party.conversation.generation.ContentCataloger;
 import block_party.conversation.generation.GenerationBrief;
 import block_party.conversation.generation.GenerationPipeline;
 import block_party.conversation.generation.GenerationResult;
+import block_party.conversation.generation.ReviewGate;
 import block_party.conversation.generation.model.NarrativeModel;
 import block_party.conversation.generation.model.OpenAiResponsesModel;
 import block_party.conversation.generation.model.RecordedDirectoryModel;
@@ -60,9 +61,9 @@ public final class ConversationCli {
         return switch (args[0]) {
             case "validate" -> validate(project);
             case "simulate" -> simulate(project, args.length >= 3 ? Path.of(args[2]) : null);
-            case "compile" -> compile(project, requiredOutput(args));
+            case "compile" -> compile(projectPath, project, requiredOutput(args));
             case "graph" -> graph(project, requiredOutput(args));
-            case "build" -> build(project, requiredOutput(args));
+            case "build" -> build(projectPath, project, requiredOutput(args));
             case "explain" -> explain(project, requiredValue(args));
             default -> {
                 System.err.println("Unknown command: " + args[0]);
@@ -197,7 +198,8 @@ public final class ConversationCli {
         return report.cycles().isEmpty() ? 0 : 1;
     }
 
-    private static int compile(ScenePackProject project, Path output) throws Exception {
+    private static int compile(Path projectPath, ScenePackProject project, Path output) throws Exception {
+        ReviewGate.requireAdjacentReviewPublishable(projectPath, "Compilation");
         CompilationResult result = new DatapackCompiler().compile(project, output);
         System.out.printf("Compiled %d file(s) to %s%n", result.files().size(), result.output().toAbsolutePath());
         return 0;
@@ -213,7 +215,8 @@ public final class ConversationCli {
         return 0;
     }
 
-    private static int build(ScenePackProject project, Path output) throws Exception {
+    private static int build(Path projectPath, ScenePackProject project, Path output) throws Exception {
+        ReviewGate.requireAdjacentReviewPublishable(projectPath, "Build");
         ValidationReport validation = new ProjectValidator().validate(project);
         if (!validation.valid()) {
             System.err.println("Build refused: project has " + validation.errors() + " validation error(s).");
