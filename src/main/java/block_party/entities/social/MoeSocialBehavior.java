@@ -21,6 +21,9 @@ public final class MoeSocialBehavior {
     }
 
     public Vec3 idleOrbitDestination() {
+        if (!MoeSocialContext.eligible(this.moe)) {
+            return null;
+        }
         List<Moe> nearby = MoeSocialContext.nearby(this.moe, IDLE_SOCIAL_RADIUS).stream()
                 .filter(other -> !other.isFollowing() && !other.isSitting() && !other.isPassenger())
                 .toList();
@@ -37,6 +40,9 @@ public final class MoeSocialBehavior {
     }
 
     public Vec3 placeDestination() {
+        if (!MoeSocialContext.eligible(this.moe)) {
+            return null;
+        }
         SocialPlaceCandidate candidate = this.bestSocialPlaceCandidate();
         if (candidate == null || candidate.behavior() == MoeSocialRules.SocialPlaceBehavior.IGNORE) {
             return null;
@@ -60,7 +66,7 @@ public final class MoeSocialBehavior {
     }
 
     public boolean canUseGoal() {
-        if (this.moe.shouldSkipGoalMovement() || this.moe.isFollowing()) {
+        if (!MoeSocialContext.eligible(this.moe) || this.moe.shouldSkipGoalMovement() || this.moe.isFollowing()) {
             this.clearMovementIntent();
             return false;
         }
@@ -79,6 +85,7 @@ public final class MoeSocialBehavior {
 
     public boolean canContinueGoal() {
         return this.hasMovementIntent()
+                && MoeSocialContext.eligible(this.moe)
                 && !this.moe.shouldSkipGoalMovement()
                 && !this.moe.isFollowing();
     }
@@ -102,6 +109,10 @@ public final class MoeSocialBehavior {
     }
 
     public boolean updateState() {
+        if (!MoeSocialContext.eligible(this.moe)) {
+            this.clearMovementIntent();
+            return false;
+        }
         MoeSocialContext context = MoeSocialContext.find(this.moe, IDLE_SOCIAL_RADIUS - 2.0D).orElse(null);
         if (context == null) {
             return false;
@@ -128,7 +139,8 @@ public final class MoeSocialBehavior {
     }
 
     public boolean updateMovementIntent() {
-        if (this.movementTicks <= 0 || this.movementDestination == null) {
+        if (!MoeSocialContext.eligible(this.moe) || this.movementTicks <= 0 || this.movementDestination == null) {
+            this.clearMovementIntent();
             return false;
         }
         if (this.moe.isFollowing() || this.moe.isSitting() || this.moe.isPassenger() || this.moe.hasDialogue()) {

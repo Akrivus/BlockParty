@@ -15,11 +15,14 @@ public record MoeSocialContext(
         MoeSocialRules.SocialVisual visual,
         MoeSocialRules.DereReaction reaction) {
     public static Optional<MoeSocialContext> find(Moe moe, double radius) {
+        if (!eligible(moe)) {
+            return Optional.empty();
+        }
         AABB area = moe.getBoundingBox().inflate(radius);
         Moe socialTarget = null;
         MoeSocialRules.SocialSignal strongest = new MoeSocialRules.SocialSignal(0.0F, 0.0F, 0.0F);
         for (Moe other : moe.level().getEntities(EntityTypeTest.forClass(Moe.class), area, other ->
-                other != moe && other.isAlive() && !other.isRemoved())) {
+                other != moe && eligible(other))) {
             MoeSocialRules.SocialSignal signal = signal(moe, other);
             if (signal.interest() > strongest.interest()) {
                 strongest = signal;
@@ -35,14 +38,21 @@ public record MoeSocialContext(
     }
 
     public static List<Moe> nearby(Moe moe, double radius) {
+        if (!eligible(moe)) {
+            return List.of();
+        }
         List<Moe> nearby = new ArrayList<>();
         AABB area = moe.getBoundingBox().inflate(radius);
         for (Moe other : moe.level().getEntities(EntityTypeTest.forClass(Moe.class), area, other ->
-                other != moe && other.isAlive() && !other.isRemoved())) {
+                other != moe && eligible(other))) {
             nearby.add(other);
         }
         nearby.sort(Comparator.comparingDouble(moe::distanceToSqr));
         return List.copyOf(nearby);
+    }
+
+    public static boolean eligible(Moe moe) {
+        return moe != null && moe.isAlive() && !moe.isRemoved() && !moe.isCardinal();
     }
 
     public static MoeSocialRules.SocialSignal signal(Moe observer, Moe target) {

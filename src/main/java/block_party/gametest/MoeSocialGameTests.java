@@ -5,6 +5,7 @@ import block_party.blocks.GardenLanternBlock;
 import block_party.db.BlockPartyDB;
 import block_party.entities.Moe;
 import block_party.entities.social.MoeSocialPlaceMemory;
+import block_party.entities.social.MoeSocialContext;
 import block_party.entities.environment.MoePlaceMemory;
 import block_party.entities.social.MoeSocialRules;
 import block_party.entities.social.SocialAffinities;
@@ -28,6 +29,45 @@ import static block_party.gametest.MovementGameTestSupport.insertSimpleDataBlock
 @PrefixGameTestTemplate(false)
 public final class MoeSocialGameTests {
     private MoeSocialGameTests() {
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void cardinalMoeDoesNotInitiateSocialGrouping(GameTestHelper helper) {
+        Moe cardinal = helper.spawn(CustomEntities.MOE.get(), 1, 1, 1);
+        Moe corporeal = helper.spawn(CustomEntities.MOE.get(), 3, 1, 1);
+        cardinal.setVisibleBlockState(Blocks.OAK_LOG.defaultBlockState());
+        cardinal.setBloodType("O");
+        corporeal.setBloodType("AB");
+        if (!cardinal.isCardinal()) {
+            helper.fail("Expected oak log Moe to carry the cardinal trait");
+            return;
+        }
+        if (MoeSocialContext.find(cardinal, 8.0D).isPresent()
+                || cardinal.social().idleOrbitDestination() != null
+                || cardinal.socialPlaceMemoryForTests().isPresent()) {
+            helper.fail("Cardinal Moe participated in social grouping");
+            return;
+        }
+        helper.kill(cardinal);
+        helper.kill(corporeal);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void cardinalMoeIsNotASocialGroupingTarget(GameTestHelper helper) {
+        Moe corporeal = helper.spawn(CustomEntities.MOE.get(), 1, 1, 1);
+        Moe cardinal = helper.spawn(CustomEntities.MOE.get(), 3, 1, 1);
+        cardinal.setVisibleBlockState(Blocks.OAK_LOG.defaultBlockState());
+        corporeal.setBloodType("O");
+        cardinal.setBloodType("AB");
+        if (MoeSocialContext.find(corporeal, 8.0D).isPresent()
+                || !MoeSocialContext.nearby(corporeal, 8.0D).isEmpty()) {
+            helper.fail("Cardinal Moe was selected as a social grouping target");
+            return;
+        }
+        helper.kill(corporeal);
+        helper.kill(cardinal);
+        helper.succeed();
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
@@ -269,10 +309,10 @@ public final class MoeSocialGameTests {
         Moe friend = spawnMoe(helper, level, owner, new BlockPos(5, 1, 1));
         observer.setBloodType("A");
         observer.setDere("DANDERE");
-        observer.setBlockState(Blocks.OAK_LOG.defaultBlockState());
+        observer.setBlockState(Blocks.GLASS.defaultBlockState());
         friend.setBloodType("B");
         friend.setDere("TSUNDERE");
-        friend.setBlockState(Blocks.MAGMA_BLOCK.defaultBlockState());
+        friend.setBlockState(Blocks.TNT.defaultBlockState());
 
         BlockPos garden = helper.absolutePos(new BlockPos(8, 1, 1));
         level.setBlock(garden.below(), Blocks.GRASS_BLOCK.defaultBlockState(), 3);
