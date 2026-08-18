@@ -199,6 +199,30 @@ textarea:focus {
   padding: 2px 6px;
   border-radius: 9px;
 }
+.solution-target {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin: 14px 0;
+  padding: 10px 12px;
+}
+.solution-target legend {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0 5px;
+  text-transform: uppercase;
+}
+.review-context-field {
+  border-top: 1px solid var(--line);
+  margin-top: 16px;
+  padding-top: 14px;
+}
+.review-context-field small {
+  color: var(--muted);
+  display: block;
+  margin-top: 5px;
+}
 .outline-item {
   width: 100%;
   display: flex;
@@ -1069,6 +1093,31 @@ dialog form {
 }
 body.start-mode {
   overflow: auto;
+}
+.start-active-solution {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+}
+.start-active-solution h2,
+.start-active-solution p {
+  margin: 3px 0 0;
+}
+.start-solution-project-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.start-solution-project-list button {
+  display: grid;
+  text-align: left;
 }
 body.start-mode > .topbar,
 body.start-mode > .shell,

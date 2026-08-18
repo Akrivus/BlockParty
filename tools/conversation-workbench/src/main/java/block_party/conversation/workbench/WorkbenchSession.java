@@ -44,10 +44,14 @@ final class WorkbenchSession {
     }
 
     synchronized Map<String, Object> create(Path source, String id, String title) throws Exception {
+        return create(source, id, title, true);
+    }
+
+    synchronized Map<String, Object> create(Path source, String id, String title, boolean addToSolution) throws Exception {
         Path target = source == null ? defaultProjectPath(id) : source;
         WorkbenchService.createStarter(target, id, title);
         Map<String, Object> result = openProject(target);
-        if (solution != null) addProjectToSolution(target, "Projects");
+        if (solution != null && addToSolution) addProjectToSolution(target, "Projects");
         return result;
     }
 
@@ -85,6 +89,27 @@ final class WorkbenchSession {
         WorkbenchService candidate = new WorkbenchService(source);
         solution = solution.add(solutionPath, candidate.projectPath(), group);
         solution.write(solutionPath);
+        return describe();
+    }
+
+    synchronized Map<String, Object> registerProject(Path targetSolution, String name, Path project, String group) throws Exception {
+        Path target = targetSolution.toAbsolutePath().normalize();
+        if (!target.getFileName().toString().endsWith(".bpsolution.json")) {
+            target = target.resolveSibling(target.getFileName() + ".bpsolution.json");
+        }
+        WorkbenchSolution updated;
+        if (Files.isRegularFile(target)) {
+            updated = WorkbenchSolution.read(target);
+        } else {
+            if (name == null || name.isBlank()) throw new IllegalArgumentException("A name is required when creating a solution.");
+            updated = new WorkbenchSolution(1, name, List.of());
+        }
+        WorkbenchService candidate = new WorkbenchService(project);
+        updated = updated.add(target, candidate.projectPath(), group);
+        updated.write(target);
+        solutionPath = target;
+        solution = updated;
+        stateStore.recentSolution(target, updated.name());
         return describe();
     }
 

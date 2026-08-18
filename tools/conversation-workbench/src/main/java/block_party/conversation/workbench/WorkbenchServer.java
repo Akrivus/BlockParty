@@ -33,6 +33,7 @@ public final class WorkbenchServer {
         server.createContext("/api/solution/new", exchange -> api(exchange, this::createSolution));
         server.createContext("/api/solution/open", exchange -> api(exchange, this::openSolution));
         server.createContext("/api/solution/project/add", exchange -> api(exchange, this::addSolutionProject));
+        server.createContext("/api/solution/project/register", exchange -> api(exchange, this::registerSolutionProject));
         server.createContext("/api/solution/project/remove", exchange -> api(exchange, this::removeSolutionProject));
         server.createContext("/api/state/pin", exchange -> api(exchange, this::pin));
         server.createContext("/api/project", exchange -> api(exchange, this::project));
@@ -77,7 +78,10 @@ public final class WorkbenchServer {
         workbench.server.start();
         URI uri = URI.create("http://localhost:" + workbench.server.getAddress().getPort() + "/");
         System.out.println("Block Party Conversation Workbench: " + uri);
-        if (source == null || !workbench.session.describe().get("projectOpen").equals(true)) {
+        Map<String, Object> launchState = workbench.session.describe();
+        if (launchState.get("solutionOpen").equals(true) && !launchState.get("projectOpen").equals(true)) {
+            System.out.println("Opened empty solution; create or add its first project in the start screen.");
+        } else if (source == null || !launchState.get("projectOpen").equals(true)) {
             System.out.println("No pack selected; opening the start screen.");
         } else {
             System.out.println("Editing: " + workbench.session.requireProject().projectPath());
@@ -106,7 +110,8 @@ public final class WorkbenchServer {
         Path path = body.has("path") && !body.get("path").getAsString().isBlank()
                 ? Path.of(body.get("path").getAsString())
                 : null;
-        return session.create(path, id, title);
+        boolean addToSolution = !body.has("addToSolution") || body.get("addToSolution").getAsBoolean();
+        return session.create(path, id, title, addToSolution);
     }
 
     private Object close(HttpExchange exchange) {
@@ -214,7 +219,8 @@ public final class WorkbenchServer {
         requireMethod(exchange, "POST");
         JsonObject body = readObject(exchange);
         return session.requireProject().rerunReview(
-                ProjectJson.gson().fromJson(body.get("project"), ScenePackProject.class));
+                ProjectJson.gson().fromJson(body.get("project"), ScenePackProject.class),
+                body.has("authorContext") ? body.get("authorContext").getAsString() : "");
     }
 
     private Object catalog(HttpExchange exchange) throws Exception {
@@ -231,6 +237,16 @@ public final class WorkbenchServer {
         WorkbenchService service = session.requireProject();
         service.startGeneration(brief, Path.of(body.get("output").getAsString()));
         return service.generationStatus();
+    }
+
+    private Object registerSolutionProject(HttpExchange exchange) throws Exception {
+        requireMethod(exchange, "POST");
+        JsonObject body = readObject(exchange);
+        return session.registerProject(
+                Path.of(requiredString(body, "solution")),
+                body.has("name") && !body.get("name").isJsonNull() ? body.get("name").getAsString() : null,
+                Path.of(requiredString(body, "project")),
+                body.has("group") ? body.get("group").getAsString() : "Projects");
     }
 
     private Object generationStatus(HttpExchange exchange) {

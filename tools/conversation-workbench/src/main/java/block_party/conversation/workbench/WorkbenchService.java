@@ -120,7 +120,7 @@ final class WorkbenchService {
         return new GenerationArchiveReader().read(projectPath);
     }
 
-    JsonObject rerunReview(ScenePackProject project) throws Exception {
+    JsonObject rerunReview(ScenePackProject project, String authorContext) throws Exception {
         var validation = new ProjectValidator().validate(project);
         if (!validation.valid()) {
             throw new IllegalArgumentException("Resolve project validation errors before re-running review.");
@@ -130,8 +130,14 @@ final class WorkbenchService {
             throw new IllegalStateException("This project has no generation brief to review against.");
         }
         GenerationBrief brief = ProjectJson.gson().fromJson(Files.readString(root.resolve("brief.json")), GenerationBrief.class);
+        JsonObject reviewContext = new JsonObject();
+        reviewContext.addProperty("reviewContextFormat", 1);
+        reviewContext.addProperty("notes", authorContext == null ? "" : authorContext.trim());
+        Files.writeString(root.resolve("review-context.json"),
+                ProjectJson.gson().toJson(reviewContext) + System.lineSeparator(), StandardCharsets.UTF_8);
         GenerationReview review = new GenerationReviewService().review(
-                NarrativeModels.create(brief, repositoryRoot()), brief, project, root.resolve("generation"));
+                NarrativeModels.create(brief, repositoryRoot()), brief, project,
+                reviewContext.get("notes").getAsString(), root.resolve("generation"));
         ProjectJson.write(projectPath, project);
         Files.writeString(root.resolve("review.json"), ProjectJson.gson().toJson(review) + System.lineSeparator(),
                 StandardCharsets.UTF_8);

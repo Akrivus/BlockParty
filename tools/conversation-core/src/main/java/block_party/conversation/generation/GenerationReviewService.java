@@ -14,11 +14,23 @@ import java.time.Instant;
 public final class GenerationReviewService {
     public GenerationReview review(NarrativeModel model, GenerationBrief brief, ScenePackProject project, Path archive)
             throws Exception {
+        return review(model, brief, project, null, archive);
+    }
+
+    public GenerationReview review(NarrativeModel model, GenerationBrief brief, ScenePackProject project,
+            String authorContext, Path archive) throws Exception {
         String system = "Re-review this author-edited Block Party project. Report only current findings; do not repeat "
                 + "issues that the supplied project has fixed. Use HIGH only for concrete defects that must block compilation, "
                 + "such as broken routes, impossible mechanics, false gameplay claims, or material canon violations. "
-                + "Use MEDIUM or LOW for preferences and polish. Return findings as JSON; do not modify the project.";
-        String user = ProjectJson.gson().toJson(java.util.List.of(brief, project));
+                + "Use MEDIUM or LOW for preferences and polish. Treat supplied author review context as project canon and "
+                + "environmental facts, while still reporting contradictions with that context or concrete runtime defects. "
+                + "Do not demand an in-project mechanic for an inaccessible or externally enforced world rule. "
+                + "Return findings as JSON; do not modify the project.";
+        JsonObject payload = new JsonObject();
+        payload.add("brief", ProjectJson.gson().toJsonTree(brief));
+        payload.add("project", ProjectJson.gson().toJsonTree(project));
+        payload.addProperty("authorReviewContext", authorContext == null ? "" : authorContext);
+        String user = ProjectJson.gson().toJson(payload);
         var response = model.generate(new ModelRequest(
                 GenerationStage.REVIEW, system, user, GenerationSchemas.forType(GenerationReview.class), 24_000));
         GenerationReview review = ProjectJson.gson().fromJson(response.structuredOutput(), GenerationReview.class);

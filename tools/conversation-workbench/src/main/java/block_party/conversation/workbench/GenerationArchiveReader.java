@@ -16,6 +16,7 @@ final class GenerationArchiveReader {
                     "graph-validation.json",
                     "mechanics-audit.json",
                     "intentions.json",
+                    "review-context.json",
                     "review.json");
     private static final List<String> STAGE_DOCUMENTS =
             List.of("metadata.json", "request.json", "response.json");

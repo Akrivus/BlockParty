@@ -120,7 +120,21 @@ function showStartScreen() {
   $("#start-working-directory").textContent = state.session?.workingDirectory
     ? `Working directory: ${state.session.workingDirectory}`
     : "";
+  renderStartSolution();
   renderRecents();
+}
+
+function renderStartSolution() {
+  const panel = $("#start-active-solution");
+  panel.hidden = !state.session?.solutionOpen;
+  if (!state.session?.solutionOpen) return;
+  $("#start-active-solution-name").textContent = state.session.solution.name;
+  $("#start-active-solution-path").textContent = state.session.solutionPath;
+  const projects = state.session.solution.projects || [];
+  $("#start-solution-project-list").innerHTML = projects.length
+    ? projects.map(item => `<button type="button" data-start-solution-project="${attr(item.path)}"><strong>${esc(item.id)}</strong><small>${esc(item.group || "Projects")}${item.missing ? " · missing" : ""}</small></button>`).join("")
+    : '<p class="hint">This solution is empty. Create a generated or blank project below to add its first scene pack.</p>';
+  $$('[data-start-solution-project]').forEach(button => button.onclick = () => openPack(button.dataset.startSolutionProject));
 }
 
 function recentPacks() { return state.session?.userState?.recentProjects || []; }
@@ -277,6 +291,7 @@ async function createPack() {
       id,
       title,
       path: $("#start-source").value.trim(),
+      addToSolution: startMode !== "prompt",
     });
     await loadProject();
     if (startMode === "prompt") {
@@ -1018,9 +1033,41 @@ function openGenerationStudio() {
   $("#gen-calls").value = brief?.budget?.maximumCalls || 12;
   const base = $("#export-path").value.replace(/[\\/]?[^\\/]+$/, "");
   $("#gen-output").value = `${base}\\${$("#gen-id").value}`;
+  $("#gen-solution-mode").value = state.session?.solutionOpen ? "active" : "none";
+  $("#gen-solution-path").value = state.session?.solutionPath || "";
+  $("#gen-solution-name").value = "";
+  $("#gen-solution-group").value = "Projects";
+  updateGenerationSolutionFields();
   $("#catalog-preview").innerHTML = "";
   renderGenerationStatus({ state: "IDLE", stage: "IDLE", calls: 0 });
   $("#generation-dialog").showModal();
+}
+function updateGenerationSolutionFields() {
+  const mode = $("#gen-solution-mode").value;
+  if (mode === "active" && !state.session?.solutionOpen) {
+    $("#gen-solution-mode").value = "none";
+    return updateGenerationSolutionFields();
+  }
+  $("#gen-solution-path-field").hidden = mode !== "existing" && mode !== "create";
+  $("#gen-solution-name-field").hidden = mode !== "create";
+  $("#gen-solution-group-field").hidden = mode === "none";
+  $("#gen-solution-hint").textContent = mode === "none"
+    ? "The generated project will remain standalone."
+    : mode === "active"
+      ? `The generated project will be added to ${state.session.solution.name}.`
+      : mode === "create"
+        ? "A new solution will be created and opened when generation succeeds."
+        : "The solution will be opened and updated when generation succeeds.";
+}
+
+function generationSolutionTarget() {
+  const mode = $("#gen-solution-mode").value;
+  if (mode === "none") return null;
+  const solution = mode === "active" ? state.session.solutionPath : workingPath($("#gen-solution-path").value.trim());
+  const name = mode === "create" ? $("#gen-solution-name").value.trim() : null;
+  if (!solution) throw new Error("Choose a solution file.");
+  if (mode === "create" && !name) throw new Error("Name the new solution.");
+  return { solution, name, group: $("#gen-solution-group").value.trim() || "Projects" };
 }
 function updateGenerationProviderFields() {
   $("#gen-recorded-field").hidden = $("#gen-provider").value !== "recorded";
@@ -1125,6 +1172,7 @@ async function previewCatalog() {
 }
 async function startGeneration() {
   try {
+    state.pendingSolutionTarget = generationSolutionTarget();
     await api("generation/start", {
       brief: generationBrief(),
       output: $("#gen-output").value,
@@ -1160,6 +1208,14 @@ async function pollGeneration() {
   renderGenerationStatus(status);
   if (status.state === "RUNNING") setTimeout(pollGeneration, 500);
   else if (status.state === "COMPLETE") {
+    if (state.pendingSolutionTarget) {
+      const target = state.pendingSolutionTarget;
+      state.session = await api("solution/project/register", {
+        ...target,
+        project: $("#gen-output").value,
+      });
+      state.pendingSolutionTarget = null;
+    }
     toast("Generation complete");
     localStorage.removeItem(recoveryKey());
     await loadProject();
@@ -1175,6 +1231,7 @@ function renderProvenance() {
     return;
   }
   const manifest = p.manifest || {};
+  $("#review-context").value = p["review-context"]?.notes || "";
   const findings = p.review?.findings || [];
   const findingList = findings.length
     ? `<h3>Review findings</h3><div class="review-findings">${findings.map((finding) => `<div class="diagnostic ${esc((finding.severity || "warning").toUpperCase())}"${finding.node ? ` data-review-node="${attr(finding.node)}"` : ""}><b>${esc((finding.severity || "warning").toUpperCase())} · ${esc(finding.code || "review")}${finding.node ? ` · ${esc(finding.node)}` : ""}</b><p>${esc(finding.message || "")}</p></div>`).join("")}</div>`
@@ -1196,7 +1253,10 @@ async function rerunReview() {
   button.disabled = true;
   button.textContent = "Reviewing…";
   try {
-    const result = await api("review/rerun", { project: state.project });
+    const result = await api("review/rerun", {
+      project: state.project,
+      authorContext: $("#review-context").value.trim(),
+    });
     state.provenance = result.provenance;
     state.dirty = false;
     localStorage.removeItem(recoveryKey());
@@ -1662,6 +1722,7 @@ $("#start-create").onclick = createPack;
 $("#start-open").onclick = () => openPack($("#start-open-path").value.trim());
 $("#start-open-solution").onclick = () => openSolution($("#start-solution-path").value.trim());
 $("#start-create-solution").onclick = createSolution;
+$("#gen-solution-mode").onchange = updateGenerationSolutionFields;
 $("#close-compare").onclick = () => { state.compareDocument = null; $("#compare-pane").hidden = true; };
 $("#add-solution-project").onclick = async () => {
   const path = prompt("Project file or generation directory to add:");

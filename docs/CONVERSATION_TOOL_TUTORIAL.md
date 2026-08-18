@@ -295,6 +295,8 @@ bounds, then list only the repository documents that should become model
 context. Use **Preview catalog** before generation to inspect each included
 path, character count, and content hash.
 
+The review dialog includes **Author review context** for durable project-level canon and environmental facts that cannot be inferred from the scene graph. It is stored as `review-context.json` beside the generation archive and supplied to every manual re-review. Use it to explain externally enforced facts—such as inaccessible realms or gate mechanics—not merely to ask the reviewer to ignore a valid defect. Review context is authoring metadata and is not compiled into the data pack.
+
 Set **Max dialogue characters** to the largest line the in-game speech bubble
 should display; new briefs default to 160. The dialogue stage rejects longer
 lines and rewrites them once, and response-button labels are capped at 64
@@ -486,6 +488,8 @@ For a larger story arc, keep each conversation in its own `project.json` and org
 ```
 
 Paths are relative to the solution file when possible. Removing a project from a solution only removes the reference; it never deletes authoring files. Open projects appear as tabs, and the split button in the solution explorer opens a second project beside the active graph. Recents and pins are machine-local and do not dirty the repository.
+
+The Generation Studio can register its successful output directly in a solution. Under **Solution**, choose **Current solution**, **Another solution file**, or **Create a new solution**, then select a group. Registration happens only after every generation stage succeeds, so a failed run does not add a missing or incomplete project reference. When creating a solution, the `.bpsolution.json` extension is supplied automatically if omitted.
 
 Batch specifications can register successful jobs in a solution:
 

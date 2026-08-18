@@ -20,6 +20,14 @@
             </p>
           </div>
         </header>
+        <section id="start-active-solution" class="start-active-solution" hidden>
+          <div>
+            <small>ACTIVE SOLUTION</small>
+            <h2 id="start-active-solution-name">Solution</h2>
+            <p id="start-active-solution-path"></p>
+          </div>
+          <div id="start-solution-project-list" class="start-solution-project-list"></div>
+        </section>
         <div class="start-options">
           <button class="start-card featured" data-start-mode="prompt">
             <span class="start-number">01</span>
@@ -499,6 +507,19 @@
                 id="gen-recorded"
                 value="tools/conversation-core/examples/generation/responses/flower" /></label
             ><label>Empty output directory<input id="gen-output" /></label>
+            <fieldset class="solution-target">
+              <legend>Solution</legend>
+              <label>Add generated project to<select id="gen-solution-mode">
+                <option value="none">No solution</option>
+                <option value="active">Current solution</option>
+                <option value="existing">Another solution file</option>
+                <option value="create">Create a new solution</option>
+              </select></label>
+              <label id="gen-solution-path-field" hidden>Solution file<input id="gen-solution-path" placeholder="authoring\story_arc.bpsolution.json" /></label>
+              <label id="gen-solution-name-field" hidden>New solution name<input id="gen-solution-name" placeholder="Story Arc" /></label>
+              <label id="gen-solution-group-field" hidden>Group<input id="gen-solution-group" value="Projects" /></label>
+              <p class="hint" id="gen-solution-hint">The generated project will remain standalone.</p>
+            </fieldset>
             <div class="settings-grid">
               <label
                 >Maximum calls<input
@@ -534,6 +555,10 @@
           <button value="close" aria-label="Close">×</button>
         </div>
         <div id="provenance-content"></div>
+        <label class="review-context-field">Author review context
+          <textarea id="review-context" rows="4" placeholder="Project-level canon and environmental facts the reviewer should remember. Example: The Moe realm is inaccessible through ordinary movement; shrine gates are its externally enforced entrances."></textarea>
+          <small>Saved beside the generated project and supplied to future re-reviews. This does not enter the runtime data pack.</small>
+        </label>
         <div class="dialog-actions">
           <button id="review-first-blocker" type="button">Open first blocker</button>
           <button id="rerun-review" type="button" class="primary">Re-run review</button>

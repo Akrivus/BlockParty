@@ -135,6 +135,10 @@ public final class WorkbenchSelfTest {
         WorkbenchStateStore store = new WorkbenchStateStore(root.resolve("state.json"));
         WorkbenchSession session = new WorkbenchSession(null, store);
         session.createSolution(solutionPath, "Story Arc");
+        if (!(boolean) session.describe().get("solutionOpen")
+                || (boolean) session.describe().get("projectOpen")) {
+            throw new AssertionError("An empty solution must remain open without pretending a pack is selected.");
+        }
         session.addProjectToSolution(fixture, "Introductions");
         WorkbenchSolution solution = WorkbenchSolution.read(solutionPath);
         if (solution.projects().size() != 1 || !"Introductions".equals(solution.projects().getFirst().group())) {
@@ -151,6 +155,14 @@ public final class WorkbenchSelfTest {
         session.removeProjectFromSolution(solution.projects().getFirst().id());
         if (!WorkbenchSolution.read(solutionPath).projects().isEmpty() || !Files.isRegularFile(fixture)) {
             throw new AssertionError("Removing a solution reference must not delete the project.");
+        }
+        Path generatedSolution = root.resolve("generated-arc.bpsolution.json");
+        session.registerProject(generatedSolution, "Generated Arc", fixture, "Generated Scenes");
+        WorkbenchSolution registered = WorkbenchSolution.read(generatedSolution);
+        if (registered.projects().size() != 1
+                || !"Generated Arc".equals(registered.name())
+                || !"Generated Scenes".equals(registered.projects().getFirst().group())) {
+            throw new AssertionError("Generation must be able to create a solution and register its project.");
         }
     }
 
