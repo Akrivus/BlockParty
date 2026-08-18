@@ -5,11 +5,13 @@ plugins {
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 dependencies {
+    implementation project(':tools:conversation-core')
     implementation 'com.google.code.gson:gson:2.11.0'
 }
 
-sourceSets {
-    main.java.srcDirs += project(':tools:conversation-core').file('src/main/java')
+tasks.named('compileJava') {
+    dependsOn ':tools:conversation-core:compileJava'
+    classpath += files(project(':tools:conversation-core').layout.buildDirectory.dir('classes/java/main'))
 }
 
 application {

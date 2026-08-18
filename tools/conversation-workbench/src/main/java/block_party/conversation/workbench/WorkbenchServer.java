@@ -28,6 +28,13 @@ public final class WorkbenchServer {
         server.createContext("/api/open", exchange -> api(exchange, this::open));
         server.createContext("/api/new", exchange -> api(exchange, this::create));
         server.createContext("/api/close", exchange -> api(exchange, this::close));
+        server.createContext("/api/document/activate", exchange -> api(exchange, this::activateDocument));
+        server.createContext("/api/document/close", exchange -> api(exchange, this::closeDocument));
+        server.createContext("/api/solution/new", exchange -> api(exchange, this::createSolution));
+        server.createContext("/api/solution/open", exchange -> api(exchange, this::openSolution));
+        server.createContext("/api/solution/project/add", exchange -> api(exchange, this::addSolutionProject));
+        server.createContext("/api/solution/project/remove", exchange -> api(exchange, this::removeSolutionProject));
+        server.createContext("/api/state/pin", exchange -> api(exchange, this::pin));
         server.createContext("/api/project", exchange -> api(exchange, this::project));
         server.createContext("/api/schema", exchange -> api(exchange, this::schema));
         server.createContext("/api/validate", exchange -> api(exchange, this::validate));
@@ -70,7 +77,7 @@ public final class WorkbenchServer {
         workbench.server.start();
         URI uri = URI.create("http://localhost:" + workbench.server.getAddress().getPort() + "/");
         System.out.println("Block Party Conversation Workbench: " + uri);
-        if (source == null) {
+        if (source == null || !workbench.session.describe().get("projectOpen").equals(true)) {
             System.out.println("No pack selected; opening the start screen.");
         } else {
             System.out.println("Editing: " + workbench.session.requireProject().projectPath());
@@ -107,9 +114,50 @@ public final class WorkbenchServer {
         return session.close();
     }
 
+    private Object activateDocument(HttpExchange exchange) throws Exception {
+        requireMethod(exchange, "POST");
+        return session.activate(requiredString(readObject(exchange), "document"));
+    }
+
+    private Object closeDocument(HttpExchange exchange) throws Exception {
+        requireMethod(exchange, "POST");
+        return session.closeDocument(requiredString(readObject(exchange), "document"));
+    }
+
+    private Object createSolution(HttpExchange exchange) throws Exception {
+        requireMethod(exchange, "POST");
+        JsonObject body = readObject(exchange);
+        return session.createSolution(Path.of(requiredString(body, "path")), requiredString(body, "name"));
+    }
+
+    private Object openSolution(HttpExchange exchange) throws Exception {
+        requireMethod(exchange, "POST");
+        return session.openSolution(Path.of(requiredString(readObject(exchange), "path")));
+    }
+
+    private Object addSolutionProject(HttpExchange exchange) throws Exception {
+        requireMethod(exchange, "POST");
+        JsonObject body = readObject(exchange);
+        return session.addProjectToSolution(Path.of(requiredString(body, "path")),
+                body.has("group") ? body.get("group").getAsString() : "Projects");
+    }
+
+    private Object removeSolutionProject(HttpExchange exchange) throws Exception {
+        requireMethod(exchange, "POST");
+        return session.removeProjectFromSolution(requiredString(readObject(exchange), "id"));
+    }
+
+    private Object pin(HttpExchange exchange) throws Exception {
+        requireMethod(exchange, "POST");
+        JsonObject body = readObject(exchange);
+        session.pin(requiredString(body, "kind"), Path.of(requiredString(body, "path")),
+                !body.has("pinned") || body.get("pinned").getAsBoolean());
+        return session.describe();
+    }
+
     private Object project(HttpExchange exchange) throws Exception {
         requireMethod(exchange, "GET");
-        WorkbenchService service = session.requireProject();
+        WorkbenchService service = session.requireProject(queryParameter(exchange, "document"));
         ScenePackProject project = service.load();
         JsonObject response = new JsonObject();
         response.addProperty("path", service.projectPath().toString());
@@ -226,6 +274,16 @@ public final class WorkbenchServer {
             throw new IllegalArgumentException(name + " is required.");
         }
         return body.get(name).getAsString();
+    }
+
+    private static String queryParameter(HttpExchange exchange, String name) {
+        String query = exchange.getRequestURI().getRawQuery();
+        if (query == null) return null;
+        for (String part : query.split("&")) {
+            String[] pair = part.split("=", 2);
+            if (pair.length == 2 && pair[0].equals(name)) return java.net.URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
+        }
+        return null;
     }
 
     private void api(HttpExchange exchange, ApiHandler handler) throws IOException {

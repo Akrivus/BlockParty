@@ -28,6 +28,7 @@ public final class WorkbenchSelfTest {
         verifyLiveResourcesExport(project);
         verifyBatchGenerationArchive();
         verifySessionFlow(Path.of(args[0]));
+        verifySolutionFlow(Path.of(args[0]));
         System.out.println("Workbench check passed.");
     }
 
@@ -108,7 +109,8 @@ public final class WorkbenchSelfTest {
     }
 
     private static void verifySessionFlow(Path fixture) throws Exception {
-        WorkbenchSession session = new WorkbenchSession(null);
+        Path state = Files.createTempDirectory("block-party-state-check-").resolve("state.json");
+        WorkbenchSession session = new WorkbenchSession(null, new WorkbenchStateStore(state));
         if ((boolean) session.describe().get("projectOpen")) {
             throw new AssertionError("A pathless workbench must start without a project.");
         }
@@ -124,6 +126,31 @@ public final class WorkbenchSelfTest {
         if (!"my_new_pack".equals(created.pack().id())
                 || !source.toAbsolutePath().normalize().equals(session.requireProject().projectPath())) {
             throw new AssertionError("Session creation must normalize identity and open the new project.");
+        }
+    }
+
+    private static void verifySolutionFlow(Path fixture) throws Exception {
+        Path root = Files.createTempDirectory("block-party-solution-check-");
+        Path solutionPath = root.resolve("story.bpsolution.json");
+        WorkbenchStateStore store = new WorkbenchStateStore(root.resolve("state.json"));
+        WorkbenchSession session = new WorkbenchSession(null, store);
+        session.createSolution(solutionPath, "Story Arc");
+        session.addProjectToSolution(fixture, "Introductions");
+        WorkbenchSolution solution = WorkbenchSolution.read(solutionPath);
+        if (solution.projects().size() != 1 || !"Introductions".equals(solution.projects().getFirst().group())) {
+            throw new AssertionError("Solution must retain grouped project references.");
+        }
+        session.openProject(fixture);
+        session.openProject(fixture);
+        if (((java.util.List<?>) session.describe().get("documents")).size() != 1) {
+            throw new AssertionError("Opening the same project twice must reuse its document tab.");
+        }
+        if (store.state().recentProjects().isEmpty() || store.state().recentSolutions().isEmpty()) {
+            throw new AssertionError("Workbench state must remember projects and solutions.");
+        }
+        session.removeProjectFromSolution(solution.projects().getFirst().id());
+        if (!WorkbenchSolution.read(solutionPath).projects().isEmpty() || !Files.isRegularFile(fixture)) {
+            throw new AssertionError("Removing a solution reference must not delete the project.");
         }
     }
 

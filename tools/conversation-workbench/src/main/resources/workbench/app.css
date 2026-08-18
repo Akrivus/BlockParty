@@ -1071,9 +1071,33 @@ body.start-mode {
   overflow: auto;
 }
 body.start-mode > .topbar,
-body.start-mode > .shell {
+body.start-mode > .shell,
+body.start-mode > .document-tabs {
   display: none;
 }
+
+/* Iteration 14: persistent solution workspace */
+.document-tabs { display:flex; gap:2px; min-height:38px; padding:5px 12px 0; overflow-x:auto; background:var(--panel, #171a1f); border-bottom:1px solid var(--border, #343a43); }
+.document-tab { display:flex; align-items:center; gap:8px; max-width:240px; padding:7px 10px; border-radius:7px 7px 0 0; border:1px solid transparent; background:transparent; color:var(--muted, #aab0ba); white-space:nowrap; }
+.document-tab.active { color:var(--text, #f5f6f8); background:var(--surface, #232830); border-color:var(--border, #343a43); border-bottom-color:var(--surface, #232830); }
+.document-tab .tab-title { overflow:hidden; text-overflow:ellipsis; }
+.document-tab .tab-close { opacity:.55; font-size:16px; }
+.document-tab:hover .tab-close { opacity:1; }
+.solution-explorer { padding-bottom:12px; border-bottom:1px solid var(--border, #343a43); }
+.solution-group { margin:8px 0 12px; }
+.solution-group > b { display:block; padding:4px 6px; color:var(--muted, #aab0ba); font-size:11px; text-transform:uppercase; letter-spacing:.08em; }
+.solution-project { display:grid; grid-template-columns:1fr auto auto; gap:4px; align-items:center; width:100%; padding:5px; border-radius:6px; }
+.solution-project > button:first-child { min-width:0; overflow:hidden; text-overflow:ellipsis; text-align:left; }
+.solution-project.missing { opacity:.55; }
+.solution-project .pin.active { color:#f1c75b; }
+.workspace { position:relative; }
+.compare-pane { position:absolute; inset:0 0 0 50%; z-index:8; overflow:auto; padding:14px; background:var(--surface, #232830); border-left:2px solid var(--accent, #8b76ff); box-shadow:-12px 0 28px rgba(0,0,0,.2); }
+.compare-pane > header { display:flex; align-items:flex-start; justify-content:space-between; position:sticky; top:0; padding:4px 0 12px; background:inherit; }
+.compare-pane header div { display:grid; gap:3px; }
+.compare-card { margin:8px 0; padding:10px; border:1px solid var(--border, #343a43); border-radius:8px; background:var(--panel, #171a1f); }
+.compare-card small { color:var(--muted, #aab0ba); }
+.compare-card p { margin:6px 0 0; white-space:pre-wrap; }
+@media (max-width: 1050px) { .compare-pane { inset:45% 0 0 0; border-left:0; border-top:2px solid var(--accent, #8b76ff); } }
 @media (max-width: 760px) {
   .start-screen {
     padding: 28px 15px;

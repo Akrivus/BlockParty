@@ -16,7 +16,8 @@ public record BatchDefinition(
         String recordedResponses,
         BatchDefaults defaults,
         Map<String, SelectorTag> selectorTags,
-        List<BatchFamily> families) {
+        List<BatchFamily> families,
+        SolutionTarget solution) {
     public BatchDefinition {
         namespace = namespace == null || namespace.isBlank() ? "block_party" : namespace;
         title = title == null || title.isBlank() ? id : title;
@@ -25,6 +26,13 @@ public record BatchDefinition(
         defaults = defaults == null ? new BatchDefaults(null, null, 0, 0, 0, 0, null, null, null, null) : defaults;
         selectorTags = selectorTags == null ? Map.of() : Map.copyOf(selectorTags);
         families = families == null ? List.of() : List.copyOf(families);
+    }
+
+    public record SolutionTarget(String path, String group, Boolean addGeneratedProjects) {
+        public SolutionTarget {
+            group = group == null || group.isBlank() ? "Projects" : group;
+            addGeneratedProjects = addGeneratedProjects == null ? Boolean.FALSE : addGeneratedProjects;
+        }
     }
 
     public record BatchDefaults(

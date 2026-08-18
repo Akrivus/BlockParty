@@ -15,8 +15,8 @@ const state = {
   traces: [],
   trace: 0,
   step: 0,
+  compareDocument: null,
 };
-const recentKey = "block-party-workbench:recent-packs";
 let startMode = "prompt";
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)],
@@ -51,7 +51,7 @@ async function api(path, body) {
 async function loadProject() {
   try {
     const [data, schema, provenance] = await Promise.all([
-      api("project"),
+      api(`project?document=${encodeURIComponent(state.session?.activeDocument || "")}`),
       api("schema"),
       api("provenance"),
     ]);
@@ -84,6 +84,7 @@ async function loadProject() {
     restoreScenario();
     document.body.classList.remove("start-mode");
     $("#start-screen").hidden = true;
+    renderWorkspaceChrome();
     render();
     await validate();
   } catch (e) {
@@ -96,6 +97,12 @@ async function bootstrap() {
     state.session = await api("session");
     if (state.session.projectOpen) {
       await loadProject();
+    } else if (state.session.userState?.lastSolution) {
+      state.session = await api("solution/open", {
+        path: state.session.userState.lastSolution,
+      });
+      if (state.session.projectOpen) await loadProject();
+      else showStartScreen();
     } else {
       showStartScreen();
     }
@@ -109,29 +116,24 @@ function showStartScreen() {
   $("#start-screen").hidden = false;
   $("#start-create-panel").hidden = true;
   $("#start-open-panel").hidden = true;
+  $("#start-solution-panel").hidden = true;
   $("#start-working-directory").textContent = state.session?.workingDirectory
     ? `Working directory: ${state.session.workingDirectory}`
     : "";
   renderRecents();
 }
 
-function recentPacks() {
-  try {
-    return JSON.parse(localStorage.getItem(recentKey) || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function rememberRecent(path, title) {
-  const recents = recentPacks().filter((item) => item.path !== path);
-  recents.unshift({ path, title: title || path, opened: Date.now() });
-  localStorage.setItem(recentKey, JSON.stringify(recents.slice(0, 8)));
-}
+function recentPacks() { return state.session?.userState?.recentProjects || []; }
 
 function renderRecents() {
   const root = $("#recent-packs");
-  const recents = recentPacks();
+  const projects = recentPacks();
+  const solutions = state.session?.userState?.recentSolutions || [];
+  const generated = state.session?.recentGenerations || [];
+  const pinnedProjects = state.session?.userState?.pinnedProjects || [];
+  const pinnedSolutions = state.session?.userState?.pinnedSolutions || [];
+  const pinned = [...pinnedSolutions.map(path => ({ path, title: solutions.find(item => item.path === path)?.title || path, solution:true, pinned:true, opened:Number.MAX_SAFE_INTEGER })), ...pinnedProjects.map(path => ({ path, title: projects.find(item => item.path === path)?.title || path, pinned:true, opened:Number.MAX_SAFE_INTEGER }))];
+  const recents = [...pinned, ...solutions.map((item) => ({ ...item, solution: true })), ...projects, ...generated.map(item => ({ ...item, generated: true, opened: 0 }))].filter((item,index,all) => all.findIndex(other => other.path === item.path) === index).sort((a,b) => b.opened-a.opened).slice(0,16);
   if (!recents.length) {
     root.innerHTML =
       '<div class="recent-empty">Packs you open will appear here.</div>';
@@ -140,22 +142,81 @@ function renderRecents() {
   root.innerHTML = recents
     .map(
       (item, index) =>
-        `<div class="recent-pack"><button type="button" data-recent-open="${index}"><strong>${esc(item.title)}</strong><small>${esc(item.path)}</small></button><button type="button" data-recent-remove="${index}" title="Remove from recent packs">×</button></div>`,
+        `<div class="recent-pack"><button type="button" data-recent-open="${index}"><strong>${item.pinned ? "★ " : item.solution ? "◆ " : item.generated ? "✦ " : ""}${esc(item.title)}</strong><small>${item.generated ? "Recently generated · " : ""}${esc(item.path)}</small></button></div>`,
     )
     .join("");
   $$("[data-recent-open]").forEach(
     (button) =>
       (button.onclick = () =>
-        openPack(recents[Number(button.dataset.recentOpen)].path)),
+        (recents[Number(button.dataset.recentOpen)].solution ? openSolution : openPack)(recents[Number(button.dataset.recentOpen)].path)),
   );
-  $$("[data-recent-remove]").forEach(
-    (button) =>
-      (button.onclick = () => {
-        recents.splice(Number(button.dataset.recentRemove), 1);
-        localStorage.setItem(recentKey, JSON.stringify(recents));
-        renderRecents();
-      }),
-  );
+}
+
+async function openSolution(path) {
+  try {
+    state.session = await api("solution/open", { path: workingPath(path) });
+    if (state.session.projectOpen) await loadProject(); else { showStartScreen(); renderRecents(); }
+  } catch (error) { toast(error.message, true); }
+}
+
+async function createSolution() {
+  const path = workingPath($("#start-solution-path").value.trim());
+  const name = $("#start-solution-name").value.trim();
+  if (!path || !name) return toast("Solution path and name are required.", true);
+  try { state.session = await api("solution/new", { path, name }); showStartScreen(); renderRecents(); }
+  catch (error) { toast(error.message, true); }
+}
+
+function renderWorkspaceChrome() {
+  const tabs = $("#document-tabs");
+  tabs.innerHTML = (state.session?.documents || []).map(document => `<button class="document-tab ${document.id === state.session.activeDocument ? "active" : ""}" data-document="${attr(document.id)}"><span class="tab-title">${esc(document.title)}</span><span class="tab-close" data-close-document="${attr(document.id)}">×</span></button>`).join("");
+  $$('[data-document]').forEach(button => button.onclick = async event => {
+    if (event.target.dataset.closeDocument) return;
+    if (state.dirty && !confirm("Switch projects with unsaved changes?")) return;
+    state.session = await api("document/activate", { document: button.dataset.document }); await loadProject();
+  });
+  $$('[data-close-document]').forEach(button => button.onclick = async event => {
+    event.stopPropagation();
+    if (button.dataset.closeDocument === state.session.activeDocument && state.dirty && !confirm("Close this project with unsaved changes?")) return;
+    state.session = await api("document/close", { document: button.dataset.closeDocument });
+    if (state.session.projectOpen) await loadProject(); else showStartScreen();
+  });
+  const explorer = $("#solution-explorer");
+  explorer.hidden = !state.session?.solutionOpen;
+  if (!state.session?.solutionOpen) return;
+  $("#solution-name").textContent = state.session.solution.name;
+  const solutionPath = state.session.solution.path;
+  const solutionPinned = (state.session.userState?.pinnedSolutions || []).includes(solutionPath);
+  $("#pin-solution").classList.toggle("active", solutionPinned);
+  $("#pin-solution").textContent = solutionPinned ? "★" : "☆";
+  $("#pin-solution").onclick = async () => {
+    state.session = await api("state/pin", {
+      kind: "solution",
+      path: solutionPath,
+      pinned: !$("#pin-solution").classList.contains("active"),
+    });
+    renderWorkspaceChrome();
+  };
+  const groups = (state.session.solution.projects || []).reduce((result, item) => { (result[item.group || "Projects"] ??= []).push(item); return result; }, {});
+  const pinnedPaths = state.session?.userState?.pinnedProjects || [];
+  $("#solution-projects").innerHTML = Object.entries(groups).map(([group, projects]) => `<div class="solution-group"><b>${esc(group)}</b>${projects.map(item => `<div class="solution-project ${item.missing ? "missing" : ""}"><button data-solution-open="${attr(item.path)}">${esc(item.id)}</button><button class="pin ${pinnedPaths.includes(item.path) ? "active" : ""}" data-pin-project="${attr(item.path)}" title="Pin">${pinnedPaths.includes(item.path) ? "★" : "☆"}</button><button data-split-project="${attr(item.path)}" title="Open side by side">◫</button></div>`).join("")}</div>`).join("");
+  $$('[data-solution-open]').forEach(button => button.onclick = () => openPack(button.dataset.solutionOpen));
+  $$('[data-split-project]').forEach(button => button.onclick = () => openCompare(button.dataset.splitProject));
+  $$('[data-pin-project]').forEach(button => button.onclick = async () => { const pinned = !button.classList.contains("active"); state.session = await api("state/pin", { kind:"project", path:button.dataset.pinProject, pinned }); renderWorkspaceChrome(); });
+}
+
+async function openCompare(path) {
+  try {
+    state.session = await api("open", { path });
+    const id = state.session.activeDocument;
+    const data = await api(`project?document=${encodeURIComponent(id)}`);
+    state.compareDocument = id;
+    $("#compare-title").textContent = data.project.pack?.title || data.project.pack?.id;
+    $("#compare-content").innerHTML = (data.project.nodes || []).map(node => `<article class="compare-card"><small>${esc(node.type)} · ${esc(node.id)}</small><strong>${esc(node.title || node.id)}</strong>${node.text ? `<p>${esc(node.text)}</p>` : ""}</article>`).join("");
+    $("#compare-pane").hidden = false;
+    await api("document/activate", { document: state.session.documents.find(item => item.path === state.path)?.id || state.session.documents[0].id });
+    state.session = await api("session"); renderWorkspaceChrome();
+  } catch (error) { toast(error.message, true); }
 }
 
 function slug(value) {
@@ -168,9 +229,10 @@ function slug(value) {
 
 function openStartPanel(mode) {
   startMode = mode;
-  $("#start-create-panel").hidden = mode === "open";
+  $("#start-create-panel").hidden = mode === "open" || mode === "solution";
   $("#start-open-panel").hidden = mode !== "open";
-  if (mode !== "open") {
+  $("#start-solution-panel").hidden = mode !== "solution";
+  if (mode !== "open" && mode !== "solution") {
     const prompt = mode === "prompt";
     $("#start-prompt-fields").hidden = !prompt;
     $("#start-create-kicker").textContent = prompt
@@ -183,8 +245,10 @@ function openStartPanel(mode) {
       ? "Create and generate"
       : "Create blank pack";
     $("#start-title").focus();
-  } else {
+  } else if (mode === "open") {
     $("#start-open-path").focus();
+  } else {
+    $("#start-solution-path").focus();
   }
 }
 
@@ -192,7 +256,6 @@ async function openPack(path) {
   try {
     state.session = await api("open", { path });
     await loadProject();
-    rememberRecent(state.path, state.project.pack?.title);
   } catch (error) {
     toast(error.message, true);
   }
@@ -216,7 +279,6 @@ async function createPack() {
       path: $("#start-source").value.trim(),
     });
     await loadProject();
-    rememberRecent(state.path, title);
     if (startMode === "prompt") {
       openGenerationStudio();
       $("#gen-id").value = id;
@@ -1101,7 +1163,6 @@ async function pollGeneration() {
     toast("Generation complete");
     localStorage.removeItem(recoveryKey());
     await loadProject();
-    rememberRecent(state.path, state.project.pack?.title);
   }
 }
 
@@ -1531,6 +1592,15 @@ addEventListener("keydown", (e) => {
     e.preventDefault();
     save();
   }
+  if ((e.ctrlKey || e.metaKey) && e.key === "Tab" && state.session?.documents?.length > 1) {
+    e.preventDefault();
+    const documents = state.session.documents;
+    const current = documents.findIndex(item => item.id === state.session.activeDocument);
+    const next = (current + (e.shiftKey ? -1 : 1) + documents.length) % documents.length;
+    if (!state.dirty || confirm("Switch projects with unsaved changes?")) {
+      api("document/activate", { document: documents[next].id }).then(session => { state.session = session; return loadProject(); }).catch(error => toast(error.message, true));
+    }
+  }
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
     e.preventDefault();
     restore(
@@ -1590,4 +1660,14 @@ $("#start-id").oninput = () => {
 };
 $("#start-create").onclick = createPack;
 $("#start-open").onclick = () => openPack($("#start-open-path").value.trim());
+$("#start-open-solution").onclick = () => openSolution($("#start-solution-path").value.trim());
+$("#start-create-solution").onclick = createSolution;
+$("#close-compare").onclick = () => { state.compareDocument = null; $("#compare-pane").hidden = true; };
+$("#add-solution-project").onclick = async () => {
+  const path = prompt("Project file or generation directory to add:");
+  if (!path) return;
+  const group = prompt("Solution group:", "Projects") || "Projects";
+  try { state.session = await api("solution/project/add", { path: workingPath(path), group }); renderWorkspaceChrome(); }
+  catch (error) { toast(error.message, true); }
+};
 bootstrap();

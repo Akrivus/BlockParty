@@ -471,3 +471,28 @@ Stop and restart the workbench. If using an installed distribution, re-run
 That Windows file-lock issue belongs to the Minecraft artifact build rather
 than the standalone conversation tools. Re-running the affected Gradle command
 after the lock clears normally reuses the completed artifact.
+# Workbench solutions
+
+For a larger story arc, keep each conversation in its own `project.json` and organize the projects with a Workbench solution. From the start screen choose **Open a solution**, or create a file ending in `.bpsolution.json`.
+
+```json
+{
+  "solutionFormat": 1,
+  "name": "Block Party Story Arcs",
+  "projects": [
+    { "id": "fireflies", "path": "fireflies/generated/project.json", "group": "Seasonal Events" }
+  ]
+}
+```
+
+Paths are relative to the solution file when possible. Removing a project from a solution only removes the reference; it never deletes authoring files. Open projects appear as tabs, and the split button in the solution explorer opens a second project beside the active graph. Recents and pins are machine-local and do not dirty the repository.
+
+Batch specifications can register successful jobs in a solution:
+
+```json
+"solution": {
+  "path": "../block_party.bpsolution.json",
+  "group": "Routine Dialogue",
+  "addGeneratedProjects": true
+}
+```

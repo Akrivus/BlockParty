@@ -36,6 +36,11 @@
             <strong>Open existing pack</strong>
             <small>Open project.json or a generation directory.</small>
           </button>
+          <button class="start-card" data-start-mode="solution">
+            <span class="start-number">04</span>
+            <strong>Open a solution</strong>
+            <small>Return to a workspace of related conversation projects.</small>
+          </button>
         </div>
         <section id="start-create-panel" class="start-panel" hidden>
           <div class="start-panel-head">
@@ -119,8 +124,14 @@
             </button>
           </div>
         </section>
+        <section id="start-solution-panel" class="start-panel" hidden>
+          <div class="start-panel-head"><div><small>SOLUTION</small><h2>Open or create a workspace</h2></div><button class="start-cancel" type="button">Cancel</button></div>
+          <label>Solution file<input id="start-solution-path" placeholder="authoring\block_party.bpsolution.json" /></label>
+          <label>New solution name<input id="start-solution-name" placeholder="Block Party Story Arcs" /></label>
+          <div class="dialog-actions"><button id="start-open-solution" type="button">Open solution</button><button id="start-create-solution" type="button" class="primary">Create solution</button></div>
+        </section>
         <section class="recent-section">
-          <div class="section-title"><span>Recent packs</span></div>
+          <div class="section-title"><span>Recent work</span></div>
           <div id="recent-packs" class="recent-packs"></div>
         </section>
         <footer class="start-footer">
@@ -158,8 +169,13 @@
         <span id="dirty" class="quiet">Saved</span>
       </div>
     </header>
+    <nav id="document-tabs" class="document-tabs" aria-label="Open projects"></nav>
     <main class="shell">
       <aside class="rail left-rail">
+        <section id="solution-explorer" class="solution-explorer" hidden>
+          <div class="section-title"><span id="solution-name">Solution</span><span class="section-actions"><button id="pin-solution" type="button" title="Pin solution">☆</button><button id="add-solution-project" type="button" title="Add project">＋</button></span></div>
+          <div id="solution-projects"></div>
+        </section>
         <label class="search"
           ><span>Find a card</span
           ><input id="search" type="search" placeholder="Title, id, dialogue…"
@@ -199,6 +215,10 @@
             <div id="cards"></div>
           </div>
         </div>
+        <aside id="compare-pane" class="compare-pane" hidden>
+          <header><div><small>SIDE BY SIDE</small><strong id="compare-title"></strong></div><button id="close-compare" type="button">×</button></header>
+          <div id="compare-content"></div>
+        </aside>
       </section>
       <aside class="rail inspector" id="inspector">
         <div id="empty-inspector" class="empty">

@@ -145,6 +145,7 @@ public final class BatchService {
                 if (!validation.valid()) throw new IllegalStateException("Locked project has " + validation.errors() + " validation error(s).");
                 ProjectJson.write(generated.resolve("project.json"), locked);
                 ProjectJson.write(projectPath, locked);
+                registerSolutionProject(projectPath, job.id());
                 statuses.put(job.id(), new JobStatus("VALID", result.modelCalls(), result.inputTokens(), result.outputTokens(), null));
             } catch (Exception exception) {
                 failures++;
@@ -177,6 +178,36 @@ public final class BatchService {
         }
         writeManifest(statuses);
         return failures == 0 ? 0 : 1;
+    }
+
+    private void registerSolutionProject(Path projectPath, String id) throws Exception {
+        var target = definition.solution();
+        if (target == null || !Boolean.TRUE.equals(target.addGeneratedProjects())
+                || target.path() == null || target.path().isBlank()) return;
+        Path solutionPath = specification.getParent().resolve(target.path()).toAbsolutePath().normalize();
+        JsonObject solution = Files.isRegularFile(solutionPath)
+                ? ProjectJson.gson().fromJson(Files.readString(solutionPath), JsonObject.class) : new JsonObject();
+        if (!solution.has("solutionFormat")) solution.addProperty("solutionFormat", 1);
+        if (!solution.has("name")) solution.addProperty("name", definition.title());
+        JsonArray projects = solution.has("projects") && solution.get("projects").isJsonArray()
+                ? solution.getAsJsonArray("projects") : new JsonArray();
+        Path parent = solutionPath.getParent();
+        String stored;
+        try { stored = parent.relativize(projectPath.toAbsolutePath().normalize()).toString(); }
+        catch (IllegalArgumentException exception) { stored = projectPath.toAbsolutePath().normalize().toString(); }
+        boolean present = false;
+        for (JsonElement element : projects) if (element.isJsonObject()
+                && stored.equals(element.getAsJsonObject().has("path") ? element.getAsJsonObject().get("path").getAsString() : "")) present = true;
+        if (!present) {
+            JsonObject reference = new JsonObject(); reference.addProperty("id", id);
+            reference.addProperty("path", stored); reference.addProperty("group", target.group()); projects.add(reference);
+        }
+        solution.add("projects", projects);
+        Files.createDirectories(parent);
+        Path temporary = solutionPath.resolveSibling(solutionPath.getFileName() + ".batch.tmp");
+        Files.writeString(temporary, ProjectJson.gson().toJson(solution) + System.lineSeparator());
+        try { Files.move(temporary, solutionPath, java.nio.file.StandardCopyOption.ATOMIC_MOVE, java.nio.file.StandardCopyOption.REPLACE_EXISTING); }
+        catch (java.nio.file.AtomicMoveNotSupportedException ignored) { Files.move(temporary, solutionPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING); }
     }
 
     public int compile(Path output) throws Exception {
