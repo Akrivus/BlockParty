@@ -217,13 +217,30 @@ neoForge {
 
 tasks.named('runGameTestServer') {
     doFirst {
-        def gameTestWorld = layout.buildDirectory.dir('gametest-run/world').get().asFile
+        def gameTestDirectory = layout.buildDirectory.dir('gametest-run').get().asFile
+        def gameTestLog = new File(gameTestDirectory, 'logs/latest.log')
+        delete gameTestLog
+        if (gameTestLog.exists()) {
+            throw new GradleException("Cannot start GameTests because ${gameTestLog} is locked by another process.")
+        }
+        def gameTestWorld = new File(gameTestDirectory, 'world')
         def gameTestPack = new File(gameTestWorld, 'datapacks/block_party_gametest')
         delete gameTestWorld
         // Install fixtures as a world datapack so they never enter the production JAR or content catalogue.
         copy {
             from 'src/gameTest/resources'
             into gameTestPack
+        }
+    }
+    doLast {
+        def gameTestLog = layout.buildDirectory.file('gametest-run/logs/latest.log').get().asFile
+        if (!gameTestLog.isFile()) {
+            throw new GradleException("GameTest server did not produce ${gameTestLog}.")
+        }
+        def output = gameTestLog.getText('UTF-8')
+        if (!(output =~ /All \d+ required tests passed/).find()) {
+            throw new GradleException('GameTest server exited without reporting that all required tests passed. See '
+                    + gameTestLog + ' for the server failure.')
         }
     }
 }

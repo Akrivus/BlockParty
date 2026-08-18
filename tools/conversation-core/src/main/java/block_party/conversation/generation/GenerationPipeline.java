@@ -201,6 +201,7 @@ public final class GenerationPipeline {
 
         Path projectPath = output.resolve("project.json");
         ProjectJson.write(projectPath, written);
+        ReviewGate.recordReviewedProject(projectPath, written);
         var simulation = new ProjectSimulator().simulate(written);
         new BuildReportWriter().write(output.resolve("reports"), written, finalValidation, simulation);
         if (ReviewGate.publishable(review)) {

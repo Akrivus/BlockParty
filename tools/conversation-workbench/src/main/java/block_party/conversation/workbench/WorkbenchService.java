@@ -135,6 +135,7 @@ final class WorkbenchService {
         ProjectJson.write(projectPath, project);
         Files.writeString(root.resolve("review.json"), ProjectJson.gson().toJson(review) + System.lineSeparator(),
                 StandardCharsets.UTF_8);
+        ReviewGate.recordReviewedProject(projectPath, project);
         JsonObject result = new JsonObject();
         result.add("review", ProjectJson.gson().toJsonTree(review));
         result.add("provenance", provenance());
@@ -207,7 +208,7 @@ final class WorkbenchService {
     }
 
     JsonObject export(ScenePackProject project, Path output) throws Exception {
-        ReviewGate.requireAdjacentReviewPublishable(projectPath, "Export");
+        ReviewGate.requireAdjacentReviewPublishable(projectPath, project, "Export");
         ValidationReport validation = validate(project);
         if (!validation.valid()) {
             throw new IllegalArgumentException("Export refused: project has validation errors.");
@@ -239,7 +240,7 @@ final class WorkbenchService {
     }
 
     JsonObject exportLiveResources(ScenePackProject project) throws Exception {
-        ReviewGate.requireAdjacentReviewPublishable(projectPath, "Live export");
+        ReviewGate.requireAdjacentReviewPublishable(projectPath, project, "Live export");
         ValidationReport validation = validate(project);
         if (!validation.valid()) {
             throw new IllegalArgumentException("Live export refused: project has validation errors.");
