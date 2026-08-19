@@ -44,6 +44,11 @@ tasks.register('conversationToolCheck') {
             mainClass = 'block_party.conversation.generation.ReviewGateSelfTest'
             args file('examples/flower-request.project.json').absolutePath
         }
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            mainClass = 'block_party.conversation.compile.DialogueCompilationSelfTest'
+            args file('examples/flower-request.project.json').absolutePath
+        }
         def fixture = file('examples/flower-request.project.json')
         def verification = layout.buildDirectory.dir('tool-check').get().asFile
         delete verification

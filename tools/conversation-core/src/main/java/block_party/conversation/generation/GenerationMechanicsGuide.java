@@ -47,6 +47,10 @@ final class GenerationMechanicsGuide {
                 "When a player response accepts an immediate trip, put the assignment action on that response and use "
                         + "EXTERNAL_EVENT toward a node triggered by assignment_arrived. Do not use LATER_INTERACTION unless "
                         + "the player must right-click again. Do not START_FOLLOW while an assignment route is active because follow suppresses directive movement.");
+        guide.addProperty("dialogueStatePattern",
+                "Only independently selectable scene roots declare triggers, SCENE_FILTER conditions, or selection metadata. "
+                        + "An IMMEDIATE response targeting DIALOGUE recursively embeds that target as the next dialogue state, so the target must omit trigger, conditions, and selection. "
+                        + "Use LATER_INTERACTION for another player interaction, EXTERNAL_EVENT for event resumption, and PACK_EXIT to end.");
         guide.addProperty("sceneFilterShape",
                 "A PackCondition has type SCENE_FILTER and a nested filter object, e.g. "
                         + "{type:SCENE_FILTER, filter:{type:block_party:weather,value:clear}}. "

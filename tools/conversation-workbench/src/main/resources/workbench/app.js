@@ -444,12 +444,13 @@ function renderCanvas() {
   canvas.style.width = `${Math.max(1800, ...visibleNodes.map((n) => n.editor.x + 310))}px`;
   canvas.style.height = `${Math.max(1200, ...visibleNodes.map((n) => n.editor.y + 220))}px`;
   for (const n of visibleNodes) {
+    const role = dialogueRole(n);
     const card = document.createElement("article");
     card.className = `node-card ${n.type}${n.id === state.selected ? " selected" : ""}${state.diagnostics.some((d) => d.node === n.id && d.severity === "ERROR") || blockingReviewFindings().some((finding) => finding.node === n.id) ? " has-error" : ""}${state.connecting === n.id ? " connect-source" : state.connecting ? " connect-target" : ""}`;
     card.style.left = n.editor.x + "px";
     card.style.top = n.editor.y + "px";
     card.dataset.id = n.id;
-    card.innerHTML = `<div class="card-top"><i class="card-type"></i><span class="card-title">${esc(n.title || n.id)}</span><span class="card-id">${esc(n.id)}</span></div><div class="card-text">${esc((n.text || n.ending || "No dialogue").slice(0, 130))}</div><div class="card-footer"><span>${n.conditions.length} conditions · ${n.actions.length} actions</span><span class="port">${targets(n).length} →</span></div>`;
+    card.innerHTML = `<div class="card-top"><i class="card-type"></i><span class="card-title">${esc(n.title || n.id)}</span><span class="card-role ${role.kind}">${esc(role.label)}</span><span class="card-id">${esc(n.id)}</span></div><div class="card-text">${esc((n.text || n.ending || "No dialogue").slice(0, 130))}</div><div class="card-footer"><span>${n.conditions.length} conditions · ${n.actions.length} actions</span><span class="port">${targets(n).length} →</span></div>`;
     card.onpointerdown = (e) => dragStart(e, n, card);
     card.onclick = (e) => {
       e.stopPropagation();
@@ -460,6 +461,17 @@ function renderCanvas() {
     cards.append(card);
   }
   drawEdges(shown);
+}
+function incomingImmediate(nodeId) {
+  return state.project.nodes.filter(node => (node.responses || []).some(response =>
+    response.target === nodeId && response.transition === "IMMEDIATE"));
+}
+function dialogueRole(node) {
+  if (node.type !== "DIALOGUE") return { kind: node.type.toLowerCase(), label: node.type === "END" ? "ending" : "gate" };
+  if (node.id === state.project.entry) return { kind: "root", label: "entry root" };
+  if (incomingImmediate(node.id).length) return { kind: "embedded", label: "embedded" };
+  if (node.trigger) return { kind: "root", label: "scene root" };
+  return { kind: "unbound", label: "unbound" };
 }
 function targets(n) {
   return [
@@ -611,7 +623,7 @@ function renderInspector() {
   if (!n) return;
   const f = $("#card-form");
   f.elements.trigger.innerHTML =
-    '<option value="">Default (right click)</option>' +
+    '<option value="">No trigger (embedded dialogue)</option>' +
     (state.schema.enums.trigger || [])
       .map((value) => `<option value="${attr(value)}">${esc(value.replaceAll("_", " "))}</option>`)
       .join("");
@@ -637,6 +649,18 @@ function renderInspector() {
   f.elements.selectionWeight.value = n.selection?.weight || 1;
   f.elements.selectionCooldownTicks.value = n.selection?.cooldownTicks || 0;
   $("#type-badge").textContent = n.type;
+  const role = dialogueRole(n);
+  const roleBox = $("#dialogue-role");
+  roleBox.hidden = n.type !== "DIALOGUE";
+  roleBox.innerHTML = n.type === "DIALOGUE"
+    ? `<b>${esc(role.label)}</b><span>${role.kind === "embedded" ? "Recursively stored in its parent response; triggers, conditions, and selection do not belong here." : role.kind === "root" ? "Compiled as an independently selectable scene." : "Not currently reached by an immediate response or a scene trigger."}</span>${role.kind === "embedded" && (n.trigger || n.conditions.length || n.selection) ? '<button id="convert-continuation" type="button">Clear root-only metadata</button>' : ""}`
+    : "";
+  const convert = $("#convert-continuation");
+  if (convert) convert.onclick = () => editSelected(node => {
+    node.trigger = null;
+    node.conditions = [];
+    node.selection = null;
+  });
   $("#response-count").textContent = n.responses.length;
   $("#condition-count").textContent = n.conditions.length;
   $("#action-count").textContent = n.actions.length;

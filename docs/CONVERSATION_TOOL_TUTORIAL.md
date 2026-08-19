@@ -473,6 +473,14 @@ Stop and restart the workbench. If using an installed distribution, re-run
 That Windows file-lock issue belongs to the Minecraft artifact build rather
 than the standalone conversation tools. Re-running the affected Gradle command
 after the lock clears normally reuses the completed artifact.
+# Dialogue states and scene boundaries
+
+An uninterrupted conversation is authored as a graph but compiled as recursively nested dialogue actions. The entry card declares `right_click` and any scene filters. Cards reached through `IMMEDIATE` responses are embedded dialogue states: leave their trigger, conditions, and routine selection empty. Their response actions run first, followed by the target card's entry actions and dialogue.
+
+Use `LATER_INTERACTION` when the player must interact again, `EXTERNAL_EVENT` when an assignment or other event resumes the scene, and `PACK_EXIT` to close the conversation. Those boundaries end the current dialogue instead of recursively embedding the target. Validation blocks immediate targets with root-only metadata, immediate gameplay gates, recursive cycles, and dialogue trees whose expanded output is too large.
+
+The Workbench labels dialogue cards as **entry root**, **scene root**, **embedded**, or **unbound**. An embedded card with accidental root metadata offers **Clear root-only metadata** in the inspector.
+
 # Workbench solutions
 
 For a larger story arc, keep each conversation in its own `project.json` and organize the projects with a Workbench solution. From the start screen choose **Open a solution**, or create a file ending in `.bpsolution.json`.

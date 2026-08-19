@@ -433,6 +433,27 @@ textarea:focus {
   padding: 5px 7px;
   border-radius: 5px;
 }
+.card-role {
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 2px 5px;
+  text-transform: uppercase;
+}
+.card-role.root { background: #f5dfb8; color: #765117; }
+.card-role.embedded { background: #dce8f2; color: #355b78; }
+.card-role.unbound { background: #eee9e1; color: #766e63; }
+.dialogue-role {
+  background: #f4f0e7;
+  border-radius: 7px;
+  display: grid;
+  gap: 5px;
+  margin-bottom: 12px;
+  padding: 9px;
+}
+.dialogue-role span { color: var(--muted); font-size: 10px; line-height: 1.4; }
 .danger {
   color: #a33c34;
   border-color: #e4bbb5;

@@ -84,7 +84,8 @@ public final class GenerationPipeline {
                 "Return one complete ScenePackProject in projectFormat 2. Use uppercase enum values, "
                         + "placeholder dialogue, and speaker objects containing emotion and animation—not speaker names. "
                         + "Copy the brief's pack id, namespace, and title exactly. Never use RAW mechanics and do not wrap "
-                        + "the project in a graph or mechanics object. Use right_click for ordinary Moe interaction. Every "
+                        + "the project in a graph or mechanics object. Use right_click only on independently selectable ordinary interaction roots; "
+                        + "IMMEDIATE dialogue targets are recursively embedded dialogue states and must omit trigger, conditions, and selection. Every "
                         + "later GAMEPLAY_GATE must include a HAS_COOKIE or COUNTER condition written by an earlier choice. "
                         + "A DIALOGUE node may have at most " + SceneNode.MAX_RESPONSES + " player responses. "
                         + "Response cue is an icon enum from the schema; put words shown to the player in label. "
@@ -113,6 +114,9 @@ public final class GenerationPipeline {
                             + "Honor MISSING_PROMPT_* diagnostics with the documented SCENE_FILTER, assignment, arrival, and staging primitives. "
                             + "For CONFLICTING_MOVEMENT_MODES remove START_FOLLOW from assignment routes. For DEFERRED_ASSIGNMENT_START, "
                             + "move the assignment onto the accepting response and target the assignment_arrived node with EXTERNAL_EVENT. "
+                            + "For IMMEDIATE_TARGET_HAS_TRIGGER, IMMEDIATE_TARGET_HAS_SCENE_FILTERS, or IMMEDIATE_TARGET_HAS_SELECTION, "
+                            + "remove root-only metadata from the continuation or change the edge to LATER_INTERACTION when another click is intended. "
+                            + "For IMMEDIATE_DIALOGUE_CYCLE break the recursive dialogue with LATER_INTERACTION or PACK_EXIT. "
                             + "SCENE_FILTER requires a nested filter object whose own type is a block_party resource ID; never put that type in state.",
                     context(repairContext, GenerationMechanicsGuide.describe(brief)), ScenePackProject.class);
             graph = normalizeSceneFilters(graph);

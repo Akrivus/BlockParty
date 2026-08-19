@@ -29,6 +29,8 @@ import java.util.regex.Pattern;
 public final class ProjectValidator {
     private static final Pattern ID = Pattern.compile("[a-z0-9_.-]+");
     private static final Pattern RESOURCE = Pattern.compile("[#]?[a-z0-9_.-]+:[a-z0-9_./-]+");
+    private static final int MAX_DIALOGUE_DEPTH = 32;
+    private static final int MAX_EXPANDED_DIALOGUE_STATES = 256;
     public ValidationReport validate(ScenePackProject project) {
         List<Diagnostic> issues = new ArrayList<>();
         if (project == null || project.pack() == null) {
@@ -63,6 +65,7 @@ public final class ProjectValidator {
             targets(node).stream().filter(target -> !nodes.containsKey(target))
                     .forEach(target -> issues.add(error("BROKEN_EDGE", node.id(), "Target '" + target + "' does not exist.")));
         }
+        validateDialogueBoundaries(project, index, issues);
 
         Set<String> reachable = reachable(project.entry(), nodes);
         // Gameplay gates are independently triggered roots after an explicit edge establishes their state.
@@ -74,8 +77,107 @@ public final class ProjectValidator {
         }
         analyzeStateUsage(project, issues);
         analyzeRoots(project, issues);
+        analyzeDialogueExpansion(project, nodes, issues);
         analyzeRewards(project, nodes, issues);
         return new ValidationReport(issues);
+    }
+
+    private static void analyzeDialogueExpansion(
+            ScenePackProject project, Map<String, SceneNode> nodes, List<Diagnostic> issues) {
+        Set<String> rootIds = new HashSet<>();
+        rootIds.add(project.entry());
+        project.nodes().stream()
+                .filter(node -> node.type() == NodeType.DIALOGUE
+                        && node.trigger() != null && !node.trigger().isBlank())
+                .map(SceneNode::id).forEach(rootIds::add);
+        for (String rootId : rootIds) {
+            SceneNode root = nodes.get(rootId);
+            if (root == null || root.type() != NodeType.DIALOGUE) continue;
+            ExpansionMetrics metrics = dialogueExpansion(root, nodes, new HashSet<>(), 1);
+            if (metrics.depth() > MAX_DIALOGUE_DEPTH) {
+                issues.add(error("DIALOGUE_DEPTH_LIMIT", root.id(), "Immediate dialogue reaches depth "
+                        + metrics.depth() + "; maximum is " + MAX_DIALOGUE_DEPTH + ". Split it with a later interaction."));
+            }
+            if (metrics.states() > MAX_EXPANDED_DIALOGUE_STATES) {
+                issues.add(error("DIALOGUE_EXPANSION_LIMIT", root.id(), "Immediate dialogue expands to more than "
+                        + MAX_EXPANDED_DIALOGUE_STATES + " nested states. Split converging or long branches into later interactions."));
+            }
+        }
+    }
+
+    private static ExpansionMetrics dialogueExpansion(
+            SceneNode node, Map<String, SceneNode> nodes, Set<String> active, int depth) {
+        if (!active.add(node.id())) return new ExpansionMetrics(0, depth);
+        int states = 1;
+        int maximumDepth = depth;
+        for (ResponseEdge edge : node.responses()) {
+            if (edge.transition() != TransitionType.IMMEDIATE) continue;
+            SceneNode target = nodes.get(edge.target());
+            if (target == null || target.type() == NodeType.GAMEPLAY_GATE) continue;
+            ExpansionMetrics child = dialogueExpansion(target, nodes, new HashSet<>(active), depth + 1);
+            states = Math.min(MAX_EXPANDED_DIALOGUE_STATES + 1, states + child.states());
+            maximumDepth = Math.max(maximumDepth, child.depth());
+        }
+        return new ExpansionMetrics(states, maximumDepth);
+    }
+
+    private record ExpansionMetrics(int states, int depth) {}
+
+    private static void validateDialogueBoundaries(
+            ScenePackProject project, ProjectIndex index, List<Diagnostic> issues) {
+        Map<String, SceneNode> nodes = index.nodes();
+        for (SceneNode source : project.nodes()) {
+            for (ResponseEdge edge : source.responses()) {
+                SceneNode target = nodes.get(edge.target());
+                if (target == null || edge.transition() != TransitionType.IMMEDIATE) continue;
+                if (target.type() == NodeType.GAMEPLAY_GATE) continue; // The node-level diagnostic is more specific.
+                if (target.trigger() != null && !target.trigger().isBlank()) {
+                    issues.add(error("IMMEDIATE_TARGET_HAS_TRIGGER", source.id(),
+                            "Immediate dialogue target '" + target.id() + "' declares trigger '" + target.trigger()
+                                    + "'. Remove its trigger or change the response to LATER_INTERACTION."));
+                }
+                if (!target.conditions().isEmpty()) {
+                    issues.add(error("IMMEDIATE_TARGET_HAS_SCENE_FILTERS", source.id(),
+                            "Immediate dialogue target '" + target.id()
+                                    + "' has conditions that cannot run inside nested dialogue. Move them to a scene root or use a later interaction."));
+                }
+                if (target.selection() != null) {
+                    issues.add(error("IMMEDIATE_TARGET_HAS_SELECTION", source.id(),
+                            "Immediate dialogue target '" + target.id()
+                                    + "' has scene selection metadata. Remove it or use a later interaction."));
+                }
+            }
+        }
+        detectImmediateDialogueCycles(project, nodes, issues);
+    }
+
+    private static void detectImmediateDialogueCycles(
+            ScenePackProject project, Map<String, SceneNode> nodes, List<Diagnostic> issues) {
+        Set<String> visited = new HashSet<>();
+        Set<String> active = new HashSet<>();
+        for (SceneNode node : project.nodes()) {
+            detectImmediateDialogueCycles(node, nodes, visited, active, issues);
+        }
+    }
+
+    private static void detectImmediateDialogueCycles(SceneNode node, Map<String, SceneNode> nodes,
+            Set<String> visited, Set<String> active, List<Diagnostic> issues) {
+        if (visited.contains(node.id())) return;
+        if (!active.add(node.id())) return;
+        for (ResponseEdge edge : node.responses()) {
+            if (edge.transition() != TransitionType.IMMEDIATE) continue;
+            SceneNode target = nodes.get(edge.target());
+            if (target == null || target.type() == NodeType.GAMEPLAY_GATE) continue;
+            if (active.contains(target.id())) {
+                issues.add(error("IMMEDIATE_DIALOGUE_CYCLE", node.id(),
+                        "Immediate dialogue reaches active state '" + target.id()
+                                + "'. Break the cycle with LATER_INTERACTION or PACK_EXIT."));
+            } else {
+                detectImmediateDialogueCycles(target, nodes, visited, active, issues);
+            }
+        }
+        active.remove(node.id());
+        visited.add(node.id());
     }
 
     private static void validateContract(ScenePackProject project, ProjectIndex index, List<Diagnostic> issues) {

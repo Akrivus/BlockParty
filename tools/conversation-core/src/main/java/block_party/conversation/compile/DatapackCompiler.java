@@ -9,6 +9,7 @@ import block_party.conversation.model.SceneNode;
 import block_party.conversation.model.ScenePackProject;
 import block_party.conversation.model.SpeakerPresentation;
 import block_party.conversation.model.TriggerTypes;
+import block_party.conversation.model.TransitionType;
 import block_party.conversation.validation.ProjectValidator;
 import block_party.conversation.validation.ValidationReport;
 import com.google.gson.JsonArray;
@@ -28,6 +29,8 @@ import java.util.Map;
 import java.util.Set;
 
 public final class DatapackCompiler {
+    private static final int MAX_DIALOGUE_DEPTH = 32;
+    private static final int MAX_EXPANDED_DIALOGUE_STATES = 256;
     public CompilationResult compile(ScenePackProject project, Path output) throws IOException {
         ValidationReport validation = new ProjectValidator().validate(project);
         if (!validation.valid()) {
@@ -70,7 +73,7 @@ public final class DatapackCompiler {
             JsonArray filters = new JsonArray();
             root.conditions().forEach(condition -> filters.add(MechanicsCompiler.condition(condition, index)));
             scene.add("filters", filters);
-            scene.add("actions", renderNode(root, nodes, index, new HashSet<>()));
+            scene.add("actions", renderNode(root, nodes, index, new HashSet<>(), new ExpansionBudget(), 0));
             files.add(writeJson(scenes.resolve(root.id() + ".json"), scene));
         }
 
@@ -85,7 +88,16 @@ public final class DatapackCompiler {
         return new CompilationResult(output, files);
     }
 
-    private static JsonArray renderNode(SceneNode node, Map<String, SceneNode> nodes, ProjectIndex index, Set<String> stack) {
+    private static JsonArray renderNode(SceneNode node, Map<String, SceneNode> nodes, ProjectIndex index,
+            Set<String> stack, ExpansionBudget budget, int depth) {
+        if (depth > MAX_DIALOGUE_DEPTH) {
+            throw new IllegalArgumentException("Immediate dialogue exceeds maximum depth " + MAX_DIALOGUE_DEPTH
+                    + " at '" + node.id() + "'. Break the conversation with a later interaction.");
+        }
+        if (++budget.states > MAX_EXPANDED_DIALOGUE_STATES) {
+            throw new IllegalArgumentException("Immediate dialogue expands beyond " + MAX_EXPANDED_DIALOGUE_STATES
+                    + " states at '" + node.id() + "'. Split the conversation into later interactions.");
+        }
         if (!stack.add(node.id())) {
             throw new IllegalArgumentException("Immediate dialogue cycle reaches '" + node.id() + "'. Use a gameplay gate to break runtime recursion.");
         }
@@ -93,7 +105,11 @@ public final class DatapackCompiler {
         if (node.type() == NodeType.END) {
             appendEnd(actions);
         } else if (node.type() == NodeType.GAMEPLAY_GATE) {
-            appendTarget(actions, node.next(), null, nodes, index, stack);
+            SceneNode gateTarget = nodes.get(node.next());
+            TransitionType gateTransition = gateTarget != null
+                    && gateTarget.trigger() != null && !gateTarget.trigger().isBlank()
+                            ? TransitionType.EXTERNAL_EVENT : TransitionType.IMMEDIATE;
+            appendTarget(actions, node.next(), gateTransition, nodes, index, stack, budget, depth);
         } else {
             JsonObject payload = new JsonObject();
             payload.addProperty("text", node.text());
@@ -112,7 +128,8 @@ public final class DatapackCompiler {
                     response.addProperty("text", edge.label());
                 }
                 JsonArray responseActions = compileActions(edge.actions(), index);
-                appendTarget(responseActions, edge.target(), edge.transition(), nodes, index, new HashSet<>(stack));
+                appendTarget(responseActions, edge.target(), edge.transition(), nodes, index,
+                        new HashSet<>(stack), budget, depth);
                 response.add("actions", responseActions);
                 responses.add(response);
             }
@@ -131,21 +148,24 @@ public final class DatapackCompiler {
         }
     }
 
-    private static void appendTarget(JsonArray actions, String target, block_party.conversation.model.TransitionType transition,
-            Map<String, SceneNode> nodes, ProjectIndex index, Set<String> stack) {
+    private static void appendTarget(JsonArray actions, String target, TransitionType transition,
+            Map<String, SceneNode> nodes, ProjectIndex index, Set<String> stack, ExpansionBudget budget, int depth) {
         SceneNode next = nodes.get(target);
         if (next == null) {
             return;
         }
-        if (next.type() == NodeType.GAMEPLAY_GATE
-                || next.trigger() != null && !next.trigger().isBlank()
-                || transition == block_party.conversation.model.TransitionType.LATER_INTERACTION
-                || transition == block_party.conversation.model.TransitionType.EXTERNAL_EVENT
-                || transition == block_party.conversation.model.TransitionType.PACK_EXIT) {
+        if (transition == TransitionType.LATER_INTERACTION
+                || transition == TransitionType.EXTERNAL_EVENT
+                || transition == TransitionType.PACK_EXIT
+                || next.type() == NodeType.GAMEPLAY_GATE) {
             appendEnd(actions);
             return;
         }
-        for (JsonElement action : renderNode(next, nodes, index, stack)) {
+        if (next.trigger() != null && !next.trigger().isBlank()) {
+            throw new IllegalArgumentException("Immediate dialogue target '" + next.id()
+                    + "' declares a trigger. Remove it or use LATER_INTERACTION.");
+        }
+        for (JsonElement action : renderNode(next, nodes, index, stack, budget, depth + 1)) {
             actions.add(action.deepCopy());
         }
     }
@@ -197,4 +217,6 @@ public final class DatapackCompiler {
     private static String compileTrigger(String value) {
         return TriggerTypes.qualified(value);
     }
+
+    private static final class ExpansionBudget { int states; }
 }
