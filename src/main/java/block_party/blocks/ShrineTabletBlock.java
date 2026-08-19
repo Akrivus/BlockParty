@@ -74,13 +74,14 @@ public class ShrineTabletBlock extends AbstractDataBlock {
 
     private BlockPattern getGatePattern() {
         return BlockPatternBuilder.start()
-                .where('#', BlockInWorld.hasState(state -> state.is(CustomTags.SAKURA_WOOD)))
+                .where('#', BlockInWorld.hasState(state -> state.is(CustomTags.SHRINE_FRAME_BLOCKS)))
+                .where('E', BlockInWorld.hasState(state -> state.is(CustomTags.SHRINE_EDGE_BLOCKS)))
                 .where('X', BlockInWorld.hasState(state -> state.is(CustomTags.SHRINE_BASE_BLOCKS)))
                 .where('~', BlockInWorld.hasState(BlockState::isAir))
                 .where('.', BlockInWorld.hasState(state -> !state.canOcclude()))
                 .where(' ', BlockInWorld.hasState(BlockState::isAir))
                 .aisle(
-                        "#########",
+                        "E#######E",
                         " .#.#.#. ",
                         " ####### ",
                         "  #~~~#  ",
@@ -94,7 +95,7 @@ public class ShrineTabletBlock extends AbstractDataBlock {
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         Direction facing = context.getHorizontalDirection();
-        if (context.getLevel().getBlockState(context.getClickedPos().relative(facing)).is(CustomTags.SAKURA_WOOD)) {
+        if (context.getLevel().getBlockState(context.getClickedPos().relative(facing)).is(CustomTags.SHRINE_FRAME_BLOCKS)) {
             return this.defaultBlockState().setValue(FACING, facing.getOpposite());
         }
         return null;

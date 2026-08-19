@@ -70,9 +70,11 @@ Late game torii behavior should become community-based: after Suzu trusts the
 player, Moes can freely visit the Overworld through active torii instead of only
 appearing in crisis.
 
-Sakura trees are not naturally occurring. Sakura wood is tied to old gate magic.
-Other wood torii can exist and may support character preferences, but sakura
-torii should remain special.
+Torii construction is not gated on Sakura world generation. Shrine frames accept
+the data-driven `block_party:shrine_frame_blocks` tag, with beam tips selected by
+`block_party:shrine_edge_blocks`; Sakura remains a decorative option rather than
+a progression prerequisite. Activating a valid shrine introduces Suzu and sets
+the shared `torii_gate_opened` world cookie.
 
 Suzu should oppose using the sword on the mask. Her objection is not cowardice:
 her generation did not truly defeat the samurai, they took him apart. Reuniting
@@ -571,7 +573,26 @@ condition. Fancy boss behavior can come after the arc is playable.
 
 ## Active Phase 3 Slice
 
-The wood-family replenishment spine is now implemented as quiet behavior first:
+The wood-family arrival spine uses collection plus deliberate planting for Oak,
+Birch, Spruce, Jungle, Acacia, and Dark Oak:
+
+- shrine activation must have set the shared `torii_gate_opened` world cookie
+- item pickups in `block_party:moe/progression/tracked_items` are recorded in a
+  player-scoped ledger keyed by item id; the Oak requirement reads the
+  `minecraft:oak_log` ledger entry
+- after 64 of a family's specific log item, planting its vanilla sapling in a
+  valid location during the morning can introduce that family's cardinal
+- the planting must be within the 2048-block horizontal Manhattan influence of
+  a persisted torii, matching the existing pink-sky, Fuji, and firefly presentation
+- a nearby active Oak cardinal suppresses duplicate arrivals
+- encounter scenes can use `block_party:reset_progression_counters` with the
+  `minecraft:oak_log` item id to consume that ledger entry, pacing the next encounter by
+  another 64 qualifying pickups without consuming progress on mere eligibility
+- Oak sapling-drop attention remains recorded for compatibility, but no longer
+  summons the cardinal; the other wood families retain the legacy attention
+  arrival until they migrate to their own collection and planting definitions
+
+The older replenishment behavior remains useful after a cardinal has arrived:
 
 - oak, birch, spruce, acacia, jungle, and dark oak sapling drops can summon
   matching wood-family representatives after relevant tree cutting

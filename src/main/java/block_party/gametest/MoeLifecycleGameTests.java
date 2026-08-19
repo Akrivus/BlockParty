@@ -146,6 +146,11 @@ public final class MoeLifecycleGameTests {
         ServerLevel level = helper.getLevel();
         UUID owner = new UUID(1414L, 2525L);
         var cookies = SceneVariables.get(level).playerCookies(owner);
+        SceneVariables.get(level).worldCookies().delete(SamuraiProgression.TORII_GATE_OPENED);
+
+        assertEquals(helper, false, CardinalSpawnRules.canSpawn(level, Blocks.OAK_LOG.defaultBlockState(), owner), "wood before Suzu gate");
+        SceneVariables.get(level).worldCookies().set(SamuraiProgression.TORII_GATE_OPENED, "true");
+        assertEquals(helper, true, CardinalSpawnRules.canSpawn(level, Blocks.OAK_LOG.defaultBlockState(), owner), "wood after Suzu gate");
 
         assertEquals(helper, false, CardinalSpawnRules.canSpawn(level, Blocks.DANDELION.defaultBlockState(), owner), "flower before boots");
         cookies.set(SamuraiProgression.BOOTS_OBTAINED, "true");

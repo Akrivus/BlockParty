@@ -22,6 +22,8 @@ import block_party.world.CellPhone;
 import block_party.world.Attention;
 import block_party.world.TsukumogamiSpawns;
 import block_party.world.structure.MoeStructureCohortCoordinator;
+import block_party.world.progression.WoodCardinalArrivals;
+import block_party.world.progression.PlayerProgressionCounters;
 import block_party.db.voicemail.Voicemails;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
@@ -71,6 +73,9 @@ public final class BlockParty {
         NeoForge.EVENT_BUS.addListener(TsukumogamiSpawns::onBlockPlaced);
         NeoForge.EVENT_BUS.addListener(TsukumogamiSpawns::onBlockBroken);
         NeoForge.EVENT_BUS.addListener(TsukumogamiSpawns::onServerTick);
+        NeoForge.EVENT_BUS.addListener(PlayerProgressionCounters::onItemPickup);
+        NeoForge.EVENT_BUS.addListener(PlayerProgressionCounters::onBlockBroken);
+        NeoForge.EVENT_BUS.addListener(WoodCardinalArrivals::onBlockPlaced);
         NeoForge.EVENT_BUS.addListener(HidingSpots::onBreakStart);
         NeoForge.EVENT_BUS.addListener(HidingSpots::onBreakEnd);
         NeoForge.EVENT_BUS.addListener(HidingSpots::onPistonPush);

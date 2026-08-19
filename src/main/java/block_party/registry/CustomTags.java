@@ -12,6 +12,9 @@ public final class CustomTags {
     public static final TagKey<Block> SAKURA_LOGS = block("sakura_logs");
     public static final TagKey<Block> SAKURA_WOOD = block("sakura_wood");
     public static final TagKey<Block> SHRINE_BASE_BLOCKS = block("shrine_base_blocks");
+    public static final TagKey<Block> SHRINE_FRAME_BLOCKS = block("shrine_frame_blocks");
+    public static final TagKey<Block> SHRINE_EDGE_BLOCKS = block("shrine_edge_blocks");
+    public static final TagKey<Block> PROGRESSION_COUNTER_BLOCKS = block("moe/progression/tracked_blocks");
     public static final TagKey<Block> SPAWNS_FIREFLIES = block("spawns_fireflies");
     public static final TagKey<Block> TSUKUMOGAMI_CANDIDATES = block("tsukumogami_candidates");
     public static final TagKey<Block> WISTERIA = block("wisteria");
@@ -72,6 +75,7 @@ public final class CustomTags {
         public static final TagKey<Item> PARRY_SWORDS = item("parry_swords");
         public static final TagKey<Item> SAMURAI_ITEMS = item("samurai_items");
         public static final TagKey<Item> NO_REPAIR = item("no_repair");
+        public static final TagKey<Item> PROGRESSION_COUNTER_ITEMS = item("moe/progression/tracked_items");
 
         private Items() {
         }

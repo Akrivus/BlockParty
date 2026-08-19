@@ -12,7 +12,8 @@ import net.minecraft.world.level.block.state.BlockState;
 public final class CardinalSpawnRules {
     private static final List<Rule> RULES = List.of(
             Rule.open(state -> state.is(Blocks.BELL)),
-            Rule.open(state -> state.is(CustomTags.SAMURAI_WOOD_CARDINALS)),
+            Rule.gated(state -> state.is(CustomTags.SAMURAI_WOOD_CARDINALS),
+                    ProgressionGate.worldCookie(SamuraiProgression.TORII_GATE_OPENED)),
             Rule.gated(state -> state.is(CustomTags.SAMURAI_FLOWER_CARDINALS),
                     ProgressionGate.playerCookie(SamuraiProgression.BOOTS_OBTAINED)),
             Rule.gated(state -> state.is(CustomTags.SAMURAI_ORE_CARDINALS),

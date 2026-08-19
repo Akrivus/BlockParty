@@ -5,8 +5,16 @@ import block_party.db.BlockPartyDB;
 import block_party.db.records.AttentionRecord;
 import block_party.entities.Moe;
 import block_party.entities.chores.CardinalForestChore;
+import block_party.entities.chores.PlaceBlockChores;
 import block_party.scene.SceneVariables;
 import block_party.world.progression.WoodFamilyProgression;
+import block_party.world.progression.SamuraiProgression;
+import block_party.world.progression.WoodCardinalArrivals;
+import block_party.world.progression.PlayerProgressionCounters;
+import block_party.registry.CustomTags;
+import block_party.registry.CustomBlocks;
+import block_party.blocks.entity.ShrineTabletBlockEntity;
+import block_party.scene.actions.ResetProgressionCountersAction;
 import block_party.registry.CustomEntities;
 import block_party.scene.SceneObservation;
 import block_party.scene.SceneObservationFactories;
@@ -38,8 +46,68 @@ public final class AttentionGameTests {
     private AttentionGameTests() {
     }
 
+    @GameTest(template = "empty", timeoutTicks = 20, batch = "wood_arrival")
+    public static void oakArrivalRequiresSuzuLogsMorningAndSapling(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        UUID player = new UUID(1990L, 2990L);
+        BlockPos sapling = helper.absolutePos(new BlockPos(3, 1, 3));
+        level.setBlock(sapling.below(), Blocks.DIRT.defaultBlockState(), 3);
+        level.setBlock(sapling, Blocks.OAK_SAPLING.defaultBlockState(), 3);
+        SceneVariables.get(level).worldCookies().delete(SamuraiProgression.TORII_GATE_OPENED);
+
+        WoodCardinalArrivals.recordOakLogs(level, player, new ItemStack(Items.OAK_LOG), 64);
+        if (WoodCardinalArrivals.tryArrival(level, sapling, level.getBlockState(sapling), player, 1000L)) {
+            helper.fail("Expected Oak arrival to wait for Suzu's gate");
+            return;
+        }
+        SceneVariables.get(level).worldCookies().set(SamuraiProgression.TORII_GATE_OPENED, "true");
+        SceneVariables.get(level).playerCounters(player).delete("progression/items/minecraft:oak_log");
+        WoodCardinalArrivals.recordOakLogs(level, player, new ItemStack(Items.OAK_LOG), 63);
+        if (WoodCardinalArrivals.tryArrival(level, sapling, level.getBlockState(sapling), player, 1000L)) {
+            helper.fail("Expected Oak arrival to wait for 64 collected logs");
+            return;
+        }
+        WoodCardinalArrivals.recordOakLogs(level, player, new ItemStack(Items.OAK_LOG), 1);
+        if (WoodCardinalArrivals.tryArrival(level, sapling, level.getBlockState(sapling), player, 6000L)) {
+            helper.fail("Expected Oak arrival to wait for the morning window");
+            return;
+        }
+        BlockPos shrinePos = helper.absolutePos(new BlockPos(6, 1, 3));
+        level.setBlock(shrinePos, CustomBlocks.SHRINE_TABLET.get().defaultBlockState(), 3);
+        ((ShrineTabletBlockEntity) level.getBlockEntity(shrinePos)).markClaimed(player);
+        if (!WoodCardinalArrivals.tryArrival(level, sapling, level.getBlockState(sapling), player, 1000L)) {
+            helper.fail("Expected valid morning Oak planting to trigger arrival; tracked logs="
+                    + PlayerProgressionCounters.countItem(level, player, Items.OAK_LOG)
+                    + ", gate=" + SceneVariables.get(level).worldCookies().get(SamuraiProgression.TORII_GATE_OPENED));
+            return;
+        }
+        List<Moe> arrivals = level.getEntitiesOfClass(Moe.class, new AABB(sapling).inflate(4.0D),
+                moe -> moe.getVisibleBlockState().is(Blocks.OAK_LOG));
+        if (arrivals.size() != 1 || !player.equals(arrivals.getFirst().getDialogueTarget())) {
+            helper.fail("Expected one Oak cardinal arrival for the planting player, got " + arrivals);
+            return;
+        }
+        if (PlayerProgressionCounters.countItem(level, player, Items.OAK_LOG) != 64) {
+            helper.fail("Expected eligibility and spawning to leave the encounter counter intact");
+            return;
+        }
+        new ResetProgressionCountersAction(
+                ResetProgressionCountersAction.Kind.ITEM,
+                Items.OAK_LOG.builtInRegistryHolder().key().location()).apply(arrivals.getFirst());
+        if (PlayerProgressionCounters.countItem(level, player, Items.OAK_LOG) != 0) {
+            helper.fail("Expected the Oak encounter to consume the matching progression ledger entries");
+            return;
+        }
+        helper.kill(arrivals.getFirst());
+        if (WoodCardinalArrivals.tryArrival(level, sapling, level.getBlockState(sapling), player, 1000L)) {
+            helper.fail("Expected another Oak encounter to require another 64 collected logs");
+            return;
+        }
+        helper.succeed();
+    }
+
     @GameTest(template = "empty", timeoutTicks = 20)
-    public static void saplingDropsRecordForestAttentionAndSummonVisitor(GameTestHelper helper) {
+    public static void oakSaplingDropsRecordAttentionWithoutSummoningVisitor(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPartyDB db = BlockPartyDB.get(level);
         UUID player = new UUID(1901L, 2901L);
@@ -70,36 +138,16 @@ public final class AttentionGameTests {
             return;
         }
 
-        List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(pos).inflate(4.0D));
-        if (moes.size() != 1 || !player.equals(moes.getFirst().getDialogueTarget())) {
-            helper.fail("Expected one attention Moe targeting the player, got " + moes);
+        if (!level.getEntitiesOfClass(Moe.class, new AABB(pos).inflate(4.0D), moe ->
+                player.equals(moe.getDialogueTarget()) && moe.getVisibleBlockState().is(Blocks.OAK_LOG)).isEmpty()) {
+            helper.fail("Expected Oak's migrated planting arrival not to summon from sapling drops");
             return;
         }
-        Moe moe = moes.getFirst();
-        if (!moe.isCardinal() || !moe.getVisibleBlockState().equals(Blocks.OAK_LOG.defaultBlockState())
-                || !moe.chores().hasActive(CardinalForestChore.ID)) {
-            helper.fail("Expected oak sapling attention to summon an oak log cardinal chore visitor");
-            return;
-        }
-        moe.sceneManager().tick();
-        if (moe.hasDialogue()) {
-            helper.fail("Expected oak forest attention to wait for player interaction before opening dialogue");
-            return;
-        }
-        if (!filter("has_attention", json()).verify(moe)
-                || !filter("attention_type", json("type", "oak_forest")).verify(moe)
-                || !filter("attention_source", json("source", "sapling_drop")).verify(moe)
-                || !filter("attention_item", json("item", "minecraft:oak_sapling")).verify(moe)
-                || !filter("attention_block", json("block", "minecraft:oak_leaves")).verify(moe)) {
-            helper.fail("Expected attention scene filters to match oak forest sapling attention");
-            return;
-        }
-        helper.kill(moe);
         helper.succeed();
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
-    public static void repeatAttentionReusesActiveVisitor(GameTestHelper helper) {
+    public static void repeatOakAttentionDoesNotSummonVisitor(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         BlockPartyDB db = BlockPartyDB.get(level);
         UUID player = new UUID(1913L, 2913L);
@@ -118,17 +166,17 @@ public final class AttentionGameTests {
         }
 
         List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(pos).inflate(8.0D));
-        if (moes.size() != 1) {
-            helper.fail("Expected repeated attention to reuse the active visitor, got " + moes.size());
+        if (!moes.isEmpty()) {
+            helper.fail("Expected repeated Oak attention to remain record-only, got " + moes.size());
             return;
         }
-        helper.kill(moes.getFirst());
         helper.succeed();
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
     public static void birchSaplingDropsUseGeneralizedForestAttention(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
+        SceneVariables.get(level).worldCookies().set(SamuraiProgression.TORII_GATE_OPENED, "true");
         BlockPartyDB db = BlockPartyDB.get(level);
         UUID player = new UUID(1911L, 2911L);
         BlockPos pos = helper.absolutePos(new BlockPos(2, 1, 2));
@@ -156,12 +204,10 @@ public final class AttentionGameTests {
         }
 
         List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(pos).inflate(4.0D));
-        if (moes.size() != 1 || !moes.getFirst().getVisibleBlockState().equals(Blocks.BIRCH_LOG.defaultBlockState())
-                || !moes.getFirst().chores().hasActive(CardinalForestChore.ID)) {
-            helper.fail("Expected birch sapling attention to summon a birch log chore visitor");
+        if (!moes.isEmpty()) {
+            helper.fail("Expected Birch attention to remain record-only after planting-arrival migration");
             return;
         }
-        helper.kill(moes.getFirst());
         helper.succeed();
     }
 
@@ -180,11 +226,7 @@ public final class AttentionGameTests {
             return;
         }
 
-        if (!Attention.noticeDrops(level, origin, Blocks.OAK_LEAVES.defaultBlockState(), player, List.of(new ItemStack(Items.OAK_SAPLING)))) {
-            helper.fail("Expected oak sapling attention to start");
-            return;
-        }
-        Moe moe = level.getEntitiesOfClass(Moe.class, new AABB(origin).inflate(4.0D)).getFirst();
+        Moe moe = spawnOakChoreVisitor(level, origin, player);
         moe.clearDialogue();
         moe.moveToBlock(origin);
         ItemEntity sapling = new ItemEntity(level, origin.getX() + 0.5D, origin.getY(), origin.getZ() + 0.5D, new ItemStack(Items.OAK_SAPLING));
@@ -226,6 +268,7 @@ public final class AttentionGameTests {
     @GameTest(template = "empty", timeoutTicks = 40)
     public static void darkOakAttentionVisitorPlantsFourSaplings(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
+        SceneVariables.get(level).worldCookies().set(SamuraiProgression.TORII_GATE_OPENED, "true");
         BlockPartyDB db = BlockPartyDB.get(level);
         UUID player = new UUID(1912L, 2912L);
         BlockPos origin = helper.absolutePos(new BlockPos(2, 1, 2));
@@ -242,7 +285,8 @@ public final class AttentionGameTests {
             helper.fail("Expected dark oak sapling attention to start");
             return;
         }
-        Moe moe = level.getEntitiesOfClass(Moe.class, new AABB(origin).inflate(4.0D)).getFirst();
+        Moe moe = spawnChoreVisitor(level, origin, player, Blocks.DARK_OAK_LOG.defaultBlockState(),
+                PlaceBlockChores.Config.DARK_OAK_SAPLING);
         moe.clearDialogue();
         moe.moveToBlock(origin);
         ItemEntity sapling = new ItemEntity(level, origin.getX() + 0.5D, origin.getY(), origin.getZ() + 0.5D, new ItemStack(Items.DARK_OAK_SAPLING, 4));
@@ -327,11 +371,7 @@ public final class AttentionGameTests {
             return;
         }
 
-        if (!Attention.noticeDrops(level, origin, Blocks.OAK_LEAVES.defaultBlockState(), player, List.of(new ItemStack(Items.OAK_SAPLING)))) {
-            helper.fail("Expected oak sapling attention to start");
-            return;
-        }
-        Moe moe = level.getEntitiesOfClass(Moe.class, new AABB(origin).inflate(8.0D)).getFirst();
+        Moe moe = spawnOakChoreVisitor(level, origin, player);
         moe.clearDialogue();
         moe.moveToBlock(spaced);
         moe.getInventory().setItem(0, new ItemStack(Items.OAK_SAPLING));
@@ -362,11 +402,7 @@ public final class AttentionGameTests {
             return;
         }
 
-        if (!Attention.noticeDrops(level, origin, Blocks.OAK_LEAVES.defaultBlockState(), player, List.of(new ItemStack(Items.OAK_SAPLING)))) {
-            helper.fail("Expected oak sapling attention to start");
-            return;
-        }
-        Moe moe = level.getEntitiesOfClass(Moe.class, new AABB(origin).inflate(4.0D)).getFirst();
+        Moe moe = spawnOakChoreVisitor(level, origin, player);
         moe.clearDialogue();
         moe.moveToBlock(origin);
         BlockPos trappedPos = origin.above(5);
@@ -483,6 +519,23 @@ public final class AttentionGameTests {
 
     private static SceneObservation filter(String path, JsonObject json) {
         return SceneObservationFactories.build(BlockParty.source(path), json);
+    }
+
+    private static Moe spawnOakChoreVisitor(ServerLevel level, BlockPos origin, UUID player) {
+        return spawnChoreVisitor(level, origin, player, Blocks.OAK_LOG.defaultBlockState(),
+                PlaceBlockChores.Config.OAK_SAPLING);
+    }
+
+    private static Moe spawnChoreVisitor(ServerLevel level, BlockPos origin, UUID player, BlockState state,
+                                         PlaceBlockChores.Config config) {
+        Moe moe = new Moe(CustomEntities.MOE.get(), level);
+        moe.moveToBlock(origin);
+        moe.setBlockState(state);
+        moe.setPlayerUUID(player);
+        moe.setDialogueTarget(player);
+        moe.chores().start(CardinalForestChore.sapling(level, origin, player, config));
+        level.addFreshEntity(moe);
+        return moe;
     }
 
     private static JsonObject json() {

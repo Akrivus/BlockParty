@@ -22,6 +22,7 @@ public final class SamuraiProgression {
     public static final String SUZU_TRUST_READY = "suzu_trust_ready";
     public static final String CRYING_OBSIDIAN_ARC_COMPLETE = "crying_obsidian_arc_complete";
     public static final String TORII_VISITOR_MODE_UNLOCKED = "torii_visitor_mode_unlocked";
+    public static final String TORII_GATE_OPENED = "torii_gate_opened";
 
     private SamuraiProgression() {
     }

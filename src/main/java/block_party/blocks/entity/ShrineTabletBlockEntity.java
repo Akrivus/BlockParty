@@ -6,6 +6,8 @@ import block_party.db.BlockPartyDB;
 import block_party.network.CustomMessenger;
 import block_party.registry.CustomBlockEntities;
 import block_party.registry.CustomSounds;
+import block_party.scene.SceneVariables;
+import block_party.world.progression.SamuraiProgression;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -32,6 +34,7 @@ public class ShrineTabletBlockEntity extends AbstractDataBlockEntity {
         if (!(this.level instanceof ServerLevel level)) {
             return;
         }
+        SceneVariables.get(level).worldCookies().set(SamuraiProgression.TORII_GATE_OPENED, "true");
         BlockPos spawnPos = this.getBlockPos().below(5);
         LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
         if (lightning != null) {

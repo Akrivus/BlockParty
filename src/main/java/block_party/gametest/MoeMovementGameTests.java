@@ -19,6 +19,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
@@ -92,6 +93,7 @@ public final class MoeMovementGameTests {
         BlockPartyDB db = BlockPartyDB.get(level);
         UUID owner = new UUID(1713L, 2713L);
         Moe moe = spawnMoe(helper, level, owner, new BlockPos(1, 1, 1));
+        moe.setVisibleBlockState(Blocks.OAK_LOG.defaultBlockState());
         BlockPos anchorPos = helper.absolutePos(new BlockPos(12, 1, 1));
         try {
             insertSimpleDataBlock(db, BlockPartyDB.TABLE_GARDEN_LANTERNS, owner, level, anchorPos);
@@ -682,7 +684,7 @@ public final class MoeMovementGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty", timeoutTicks = 20)
+    @GameTest(template = "empty", timeoutTicks = 20, batch = "environment_light")
     public static void darknessAvoidanceChoosesLight(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         level.setWeatherParameters(6000, 0, false, false);
@@ -695,7 +697,7 @@ public final class MoeMovementGameTests {
 
         BlockPos lightSpot = helper.absolutePos(new BlockPos(8, 1, 1));
         level.setBlock(lightSpot.below(), Blocks.STONE.defaultBlockState(), 3);
-        level.setBlock(lightSpot, Blocks.TORCH.defaultBlockState(), 3);
+        level.setBlock(lightSpot, Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 15), 3);
 
         Vec3 destination = moe.environment().routineDestination();
         if (destination == null || destination.distanceToSqr(Vec3.atBottomCenterOf(lightSpot)) > 0.01D) {

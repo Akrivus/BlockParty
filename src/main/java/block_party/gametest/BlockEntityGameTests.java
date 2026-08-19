@@ -7,6 +7,8 @@ import block_party.blocks.entity.PaperLanternBlockEntity;
 import block_party.blocks.entity.SakuraSaplingBlockEntity;
 import block_party.blocks.entity.ShimenawaBlockEntity;
 import block_party.blocks.entity.ShrineTabletBlockEntity;
+import block_party.scene.SceneVariables;
+import block_party.world.progression.SamuraiProgression;
 import block_party.db.BlockPartyDB;
 import block_party.db.DimBlockPos;
 import block_party.db.records.Garden;
@@ -398,6 +400,8 @@ public final class BlockEntityGameTests {
             return;
         }
         assertEquals(helper, Blocks.BELL.defaultBlockState(), moe.getBlockState(), "shrine spawned Moe block state");
+        assertEquals(helper, "true", SceneVariables.get(level).worldCookies().get(SamuraiProgression.TORII_GATE_OPENED),
+                "shrine activation world gate");
         assertEquals(helper, 1, countOwnerListEntries(db, owner, moe.getDatabaseID()), "shrine owner list entries");
         if (level.getEntitiesOfClass(LightningBolt.class, new AABB(spawnPos).inflate(2.0)).isEmpty()) {
             helper.fail("Expected shrine tablet to spawn visual lightning");
