@@ -18,6 +18,7 @@ import block_party.scene.SceneTrigger;
 import block_party.scene.SceneSelectionMemory;
 import block_party.scene.SceneVariables;
 import block_party.scene.actions.OpenInventoryAction;
+import block_party.scene.actions.AcceptOfferedGiftAction;
 import block_party.world.progression.WoodFamilyProgression;
 import block_party.db.voicemail.Voicemails;
 import com.google.gson.JsonParser;
@@ -36,6 +37,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -1011,6 +1013,74 @@ public final class SceneGameTests {
         }
         if (rejects.scene().fulfills(moe)) {
             helper.fail("Expected gift scene filters to reject disliked gift");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void shiftRightClickOffersMainHandItemAndAcceptanceTransfersOne(GameTestHelper helper) {
+        Player owner = helper.makeMockPlayer(GameType.SURVIVAL);
+        owner.setShiftKeyDown(true);
+        owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COD, 3));
+        Moe moe = spawnMoe(helper, owner.getUUID());
+        moe.setBlockState(Blocks.CHEST.defaultBlockState());
+
+        moe.interactAt(owner, Vec3.ZERO, InteractionHand.MAIN_HAND);
+        if (moe.offeredGift().isEmpty() || !moe.offeredGift().get().is(Items.COD)) {
+            helper.fail("Expected shift-right-click to remember the offered main-hand item");
+            return;
+        }
+        ScenesReloadListener.ParsedScene eager = parseScene("""
+                {"trigger":"block_party:shift_right_click","filters":[
+                  {"type":"block_party:offered_item_preference","filter":{"operation":"at_least","value":0.5}},
+                  {"type":"block_party:offered_item_begging","filter":{"operation":"at_least","value":0.5}}
+                ],"actions":[]}
+                """);
+        if (!eager.scene().fulfills(moe)) {
+            helper.fail("Expected offered-item preference filters to match the remembered fish");
+            return;
+        }
+
+        if (!AcceptOfferedGiftAction.accept(moe, owner)) {
+            helper.fail("Expected the unchanged offered item to be accepted");
+            return;
+        }
+
+        assertEquals(helper, 2, owner.getMainHandItem().getCount(), "accepted gift remaining in player hand");
+        assertEquals(helper, 1, moe.getInventory().countItem(Items.COD), "accepted gift in Moe inventory");
+        assertEquals(helper, "HAPPY", moe.getEmotion(), "accepted gift reaction");
+        if (moe.latestGiftPreferenceSignal().isEmpty()) {
+            helper.fail("Expected successful acceptance to record gift preference memory");
+            return;
+        }
+        if (moe.offeredGift().isPresent()) {
+            helper.fail("Expected accepted offer to be cleared");
+            return;
+        }
+        helper.kill(moe);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void acceptanceDoesNotTakeAReplacementMainHandItem(GameTestHelper helper) {
+        Player owner = helper.makeMockPlayer(GameType.SURVIVAL);
+        owner.setShiftKeyDown(true);
+        owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
+        Moe moe = spawnMoe(helper, owner.getUUID());
+
+        moe.interactAt(owner, Vec3.ZERO, InteractionHand.MAIN_HAND);
+        owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COOKIE, 2));
+        if (AcceptOfferedGiftAction.accept(moe, owner)) {
+            helper.fail("Expected a changed main-hand item to invalidate acceptance");
+            return;
+        }
+
+        assertEquals(helper, 2, owner.getMainHandItem().getCount(), "replacement hand stack remains untouched");
+        assertEquals(helper, 0, moe.getInventory().countItem(Items.COOKIE), "replacement item not accepted");
+        if (moe.latestGiftPreferenceSignal().isPresent()) {
+            helper.fail("Expected invalidated offer not to create gift memory");
             return;
         }
         helper.kill(moe);

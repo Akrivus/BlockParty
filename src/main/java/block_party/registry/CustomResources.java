@@ -9,6 +9,7 @@ import block_party.registry.resources.MoeSoundsReloadListener;
 import block_party.registry.resources.MoeTextureReloadListener;
 import block_party.registry.resources.ScenesReloadListener;
 import block_party.registry.resources.SocialAffinityReloadListener;
+import block_party.registry.resources.ArrivalReloadListener;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 
 public final class CustomResources {
@@ -25,6 +26,7 @@ public final class CustomResources {
     public static final MoeItemPreferenceReloadListener MOE_ITEM_PREFERENCES = new MoeItemPreferenceReloadListener();
     public static final CountingJsonReloadListener SCENE_RESOURCES = new CountingJsonReloadListener("scenes");
     public static final ScenesReloadListener SCENES = new ScenesReloadListener();
+    public static final ArrivalReloadListener ARRIVALS = new ArrivalReloadListener();
 
     private CustomResources() {
     }
@@ -42,5 +44,6 @@ public final class CustomResources {
         event.addListener(BlockParty.source("moe_item_preferences"), MOE_ITEM_PREFERENCES);
         event.addListener(BlockParty.source("scene_resources"), SCENE_RESOURCES);
         event.addListener(BlockParty.source("scenes"), SCENES);
+        event.addListener(BlockParty.source("arrivals"), ARRIVALS);
     }
 }

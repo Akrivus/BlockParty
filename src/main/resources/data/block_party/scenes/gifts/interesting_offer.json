@@ -1,0 +1,15 @@
+{
+  "trigger": "block_party:shift_right_click",
+  "filters": [
+    {"type":"block_party:offered_item_interest","filter":{"operation":"at_least","value":0.35}},
+    {"type":"block_party:offered_item_preference","filter":{"operation":"less_than","value":0.35}},
+    {"type":"block_party:offered_item_aversion","filter":{"operation":"less_than","value":0.35}},
+    {"type":"block_party:offered_item_begging","filter":{"operation":"less_than","value":0.5}}
+  ],
+  "actions": [
+    {"type":"block_party:send_dialogue","action":{"text":"Oh... what made you choose this?","tooltip":true,"responses":[
+      {"icon":"block_party:chat_bubble","text":"I thought you'd find it interesting.","actions":[{"type":"block_party:accept_offered_gift"},"block_party:end"]},
+      {"icon":"block_party:red_x","text":"Maybe another time.","actions":["block_party:end"]}
+    ]}}
+  ]
+}

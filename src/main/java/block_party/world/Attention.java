@@ -9,7 +9,7 @@ import block_party.scene.SceneTrigger;
 import block_party.world.attention.AttentionDefinition;
 import block_party.world.attention.AttentionDefinitions;
 import block_party.world.progression.CardinalSpawnRules;
-import block_party.world.progression.WoodCardinalArrivals;
+import block_party.world.progression.ArrivalService;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -111,7 +111,7 @@ public final class Attention {
         } catch (SQLException exception) {
             return false;
         }
-        if (WoodCardinalArrivals.usesPlantingArrival(definition.cardinalState())) {
+        if (ArrivalService.hasArrival(definition.cardinalState())) {
             return true;
         }
         if (hasActiveAttentionVisitor(level, pos, definition, attentionPlayer)) {

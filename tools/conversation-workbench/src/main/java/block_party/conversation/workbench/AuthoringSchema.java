@@ -41,6 +41,7 @@ final class AuthoringSchema {
         actions.put("CHANGE_COUNTER", List.of("scope", "state", "operation", "amount"));
         actions.put("GIVE_ITEM", List.of("item", "count"));
         actions.put("TAKE_ITEM", List.of("item", "count"));
+        actions.put("ACCEPT_OFFERED_GIFT", List.of());
         actions.put("MARK_TIME", List.of("marker"));
         actions.put("REMEMBER_LOCATION", List.of("scope", "location", "source"));
         actions.put("FORGET_LOCATION", List.of("scope", "location"));

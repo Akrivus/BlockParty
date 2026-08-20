@@ -3,7 +3,7 @@ package block_party.world;
 import block_party.db.BlockPartyDB;
 import block_party.db.DimBlockPos;
 import block_party.db.records.Shrine;
-import block_party.db.records.TsukumogamiCandidate;
+import block_party.db.records.AwakeningOpportunity;
 import block_party.entities.Moe;
 import block_party.entities.MoeSpawner;
 import block_party.entities.data.HidingSpots;
@@ -17,8 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -26,26 +25,24 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-public final class TsukumogamiSpawns {
+public final class AwakeningService {
     public static final int OBSERVABLE_DISTANCE = 2048;
     public static final long MATURATION_TICKS = 24000L;
     private static final int TICK_INTERVAL = 200;
     private static final UUID EMPTY_UUID = new UUID(0L, 0L);
 
-    private TsukumogamiSpawns() {
+    private AwakeningService() {
     }
 
     public static void onBlockPlaced(BlockEvent.EntityPlaceEvent event) {
-        LevelAccessor accessor = event.getLevel();
-        if (accessor instanceof ServerLevel level) {
-            UUID player = event.getEntity() instanceof Player placer ? placer.getUUID() : EMPTY_UUID;
-            trackPlacedBlock(level, event.getPos(), event.getPlacedBlock(), player);
+        if (event.getLevel() instanceof ServerLevel level && event.getEntity() instanceof ServerPlayer player) {
+            trackPlacedBlock(level, event.getPos(), event.getPlacedBlock(), player.getUUID());
         }
     }
 
     public static void onBlockBroken(BlockEvent.BreakEvent event) {
         if (event.getLevel() instanceof ServerLevel level) {
-            discardCandidate(level, event.getPos());
+            discardOpportunity(level, event.getPos());
         }
     }
 
@@ -54,12 +51,12 @@ public final class TsukumogamiSpawns {
             return;
         }
         for (ServerLevel level : event.getServer().getAllLevels()) {
-            matureCandidates(level, level.getGameTime());
+            matureOpportunities(level, level.getGameTime());
         }
     }
 
     public static boolean trackPlacedBlock(ServerLevel level, BlockPos pos, BlockState state, UUID player) {
-        if (!state.is(CustomTags.TSUKUMOGAMI_CANDIDATES)) {
+        if (!state.is(CustomTags.AWAKENING_OPPORTUNITIES)) {
             return false;
         }
         BlockPartyDB db = BlockPartyDB.get(level);
@@ -74,7 +71,7 @@ public final class TsukumogamiSpawns {
         }
         UUID owner = player == null || player.equals(EMPTY_UUID) ? shrine.playerUuid() : player;
         try {
-            db.upsertTsukumogamiCandidate(
+            db.upsertAwakeningOpportunity(
                     level,
                     pos,
                     owner,
@@ -89,15 +86,15 @@ public final class TsukumogamiSpawns {
         }
     }
 
-    public static int matureCandidates(ServerLevel level, long gameTime) {
+    public static int matureOpportunities(ServerLevel level, long gameTime) {
         BlockPartyDB db = BlockPartyDB.get(level);
         int spawned = 0;
         try {
-            for (TsukumogamiCandidate candidate : db.listMatureTsukumogamiCandidates(gameTime)) {
-                if (candidate.dimPos().getDim() != level.dimension()) {
+            for (AwakeningOpportunity opportunity : db.listMatureAwakeningOpportunities(gameTime)) {
+                if (opportunity.dimPos().getDim() != level.dimension()) {
                     continue;
                 }
-                if (trySpawn(level, candidate)) {
+                if (tryAwaken(level, opportunity)) {
                     ++spawned;
                 }
             }
@@ -106,12 +103,12 @@ public final class TsukumogamiSpawns {
         return spawned;
     }
 
-    public static boolean isValidCandidate(ServerLevel level, TsukumogamiCandidate candidate) {
-        BlockPos pos = candidate.dimPos().getPos();
+    public static boolean isValidOpportunity(ServerLevel level, AwakeningOpportunity opportunity) {
+        BlockPos pos = opportunity.dimPos().getPos();
         BlockState current = level.getBlockState(pos);
-        return candidate.dimPos().getDim() == level.dimension()
-                && current.equals(candidate.blockState())
-                && current.is(CustomTags.TSUKUMOGAMI_CANDIDATES)
+        return opportunity.dimPos().getDim() == level.dimension()
+                && current.equals(opportunity.blockState())
+                && current.is(CustomTags.AWAKENING_OPPORTUNITIES)
                 && !current.is(CustomTags.CARDINAL)
                 && HidingSpots.get(level).find(pos).isEmpty()
                 && closestObservableShrine(BlockPartyDB.get(level), level, pos).isPresent()
@@ -119,33 +116,33 @@ public final class TsukumogamiSpawns {
                 && !isRedstoneCircuitPosition(level, pos);
     }
 
-    private static boolean trySpawn(ServerLevel level, TsukumogamiCandidate candidate) {
+    private static boolean tryAwaken(ServerLevel level, AwakeningOpportunity opportunity) {
         BlockPartyDB db = BlockPartyDB.get(level);
         try {
-            if (!isValidCandidate(level, candidate)) {
-                db.deleteTsukumogamiCandidate(candidate.databaseId());
+            if (!isValidOpportunity(level, opportunity)) {
+                db.deleteAwakeningOpportunity(opportunity.databaseId());
                 return false;
             }
-            BlockPos sourcePos = candidate.dimPos().getPos();
+            BlockPos sourcePos = opportunity.dimPos().getPos();
             BlockEntity blockEntity = level.getBlockEntity(sourcePos);
-            CompoundTag tileEntityData = blockEntity == null ? candidate.tileEntityData() : blockEntity.getPersistentData().copy();
+            CompoundTag tileEntityData = blockEntity == null ? opportunity.tileEntityData() : blockEntity.getPersistentData().copy();
             Moe moe = MoeSpawner.spawn(
                     level,
                     sourcePos.above(),
                     level.getBlockState(sourcePos),
-                    candidate.playerUuid(),
+                    opportunity.playerUuid(),
                     tileEntityData,
                     created -> {
                         created.setHasHome(true);
                         created.setHome(new DimBlockPos(level.dimension(), sourcePos));
-                        created.setRoutineIntent(RoutineIntent.REST);
+                        created.setRoutineIntent(RoutineIntent.SLEEP);
                     });
             if (moe == null) {
-                db.deleteTsukumogamiCandidate(candidate.databaseId());
+                db.deleteAwakeningOpportunity(opportunity.databaseId());
                 return false;
             }
             level.destroyBlock(sourcePos, false);
-            db.deleteTsukumogamiCandidate(candidate.databaseId());
+            db.deleteAwakeningOpportunity(opportunity.databaseId());
             return true;
         } catch (SQLException exception) {
             return false;
@@ -207,9 +204,9 @@ public final class TsukumogamiSpawns {
                 || block == Blocks.CALIBRATED_SCULK_SENSOR;
     }
 
-    private static void discardCandidate(ServerLevel level, BlockPos pos) {
+    private static void discardOpportunity(ServerLevel level, BlockPos pos) {
         try {
-            BlockPartyDB.get(level).deleteTsukumogamiCandidate(level, pos);
+            BlockPartyDB.get(level).deleteAwakeningOpportunity(level, pos);
         } catch (SQLException ignored) {
         }
     }

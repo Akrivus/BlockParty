@@ -1,0 +1,14 @@
+{
+  "collected": {
+    "item": "minecraft:spruce_log"
+  },
+  "threshold": 64,
+  "placed": {
+    "block": "minecraft:spruce_sapling"
+  },
+  "support": {
+    "tag": "minecraft:dirt"
+  },
+  "result": "minecraft:spruce_log",
+  "exclusion_radius": 24
+}

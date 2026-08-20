@@ -581,7 +581,7 @@ Birch, Spruce, Jungle, Acacia, and Dark Oak:
   player-scoped ledger keyed by item id; the Oak requirement reads the
   `minecraft:oak_log` ledger entry
 - after 64 of a family's specific log item, planting its vanilla sapling in a
-  valid location during the morning can introduce that family's cardinal
+  valid location can introduce that family's cardinal
 - the planting must be within the 2048-block horizontal Manhattan influence of
   a persisted torii, matching the existing pink-sky, Fuji, and firefly presentation
 - a nearby active Oak cardinal suppresses duplicate arrivals

@@ -1,0 +1,13 @@
+{
+  "trigger": "block_party:shift_right_click",
+  "filters": [
+    {"type":"block_party:offered_item_aversion","filter":{"operation":"at_least","value":0.35}},
+    {"type":"block_party:offered_item_begging","filter":{"operation":"less_than","value":0.5}}
+  ],
+  "actions": [
+    {"type":"block_party:send_dialogue","action":{"text":"You are sure you want me to take this?","tooltip":true,"responses":[
+      {"icon":"block_party:green_checkmark","text":"I'm sure.","actions":[{"type":"block_party:accept_offered_gift"},"block_party:end"]},
+      {"icon":"block_party:red_x","text":"Never mind.","actions":["block_party:end"]}
+    ]}}
+  ]
+}

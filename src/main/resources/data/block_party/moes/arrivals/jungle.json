@@ -1,0 +1,14 @@
+{
+  "collected": {
+    "item": "minecraft:jungle_log"
+  },
+  "threshold": 64,
+  "placed": {
+    "block": "minecraft:jungle_sapling"
+  },
+  "support": {
+    "tag": "minecraft:dirt"
+  },
+  "result": "minecraft:jungle_log",
+  "exclusion_radius": 24
+}

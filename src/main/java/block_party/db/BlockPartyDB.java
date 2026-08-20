@@ -9,7 +9,7 @@ import block_party.db.records.NPC;
 import block_party.db.records.PlayerRelationship;
 import block_party.db.records.Sapling;
 import block_party.db.records.Shrine;
-import block_party.db.records.TsukumogamiCandidate;
+import block_party.db.records.AwakeningOpportunity;
 import block_party.entities.Moe;
 import block_party.utils.NBT;
 import block_party.world.CellPhone;
@@ -59,7 +59,8 @@ public final class BlockPartyDB extends SavedData {
     public static final String TABLE_GARDEN_LANTERNS = "GardenLanterns";
     public static final String TABLE_LOCATIONS = "Locations";
     public static final String TABLE_SAPLINGS = "Saplings";
-    public static final String TABLE_TSUKUMOGAMI_CANDIDATES = "TsukumogamiCandidates";
+    /** Legacy physical table name retained so existing worlds keep queued awakenings. */
+    public static final String TABLE_AWAKENING_OPPORTUNITIES = "TsukumogamiCandidates";
     public static final String TABLE_PLAYER_RELATIONSHIPS = "PlayerRelationships";
     public static final String TABLE_ATTENTION_RECORDS = "AttentionRecords";
     public static final String COLUMN_DATABASE_ID = "DatabaseID";
@@ -127,7 +128,7 @@ public final class BlockPartyDB extends SavedData {
                         ShrineDatabaseID INTEGER NOT NULL DEFAULT 0,
                         UNIQUE(PosDim, PosX, PosY, PosZ)
                     );
-                    """.formatted(TABLE_TSUKUMOGAMI_CANDIDATES));
+                    """.formatted(TABLE_AWAKENING_OPPORTUNITIES));
             statement.execute("""
                     CREATE TABLE IF NOT EXISTS %s (
                         DatabaseID INTEGER PRIMARY KEY,
@@ -836,7 +837,7 @@ public final class BlockPartyDB extends SavedData {
         }
     }
 
-    public void upsertTsukumogamiCandidate(ServerLevel level, BlockPos pos, UUID player, BlockState state,
+    public void upsertAwakeningOpportunity(ServerLevel level, BlockPos pos, UUID player, BlockState state,
                                            CompoundTag tileEntityData, long createdGameTime, long matureAtGameTime,
                                            long shrineDatabaseId) throws SQLException {
         Connection connection = this.openConnection();
@@ -852,7 +853,7 @@ public final class BlockPartyDB extends SavedData {
                     CreatedGameTime = excluded.CreatedGameTime,
                     MatureAtGameTime = excluded.MatureAtGameTime,
                     ShrineDatabaseID = excluded.ShrineDatabaseID;
-                """.formatted(TABLE_TSUKUMOGAMI_CANDIDATES))) {
+                """.formatted(TABLE_AWAKENING_OPPORTUNITIES))) {
             statement.setString(1, level.dimension().location().toString());
             statement.setInt(2, pos.getX());
             statement.setInt(3, pos.getY());
@@ -869,7 +870,7 @@ public final class BlockPartyDB extends SavedData {
         }
     }
 
-    public List<TsukumogamiCandidate> listMatureTsukumogamiCandidates(long gameTime) throws SQLException {
+    public List<AwakeningOpportunity> listMatureAwakeningOpportunities(long gameTime) throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
                 SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, BlockState, TileEntityData,
@@ -877,12 +878,12 @@ public final class BlockPartyDB extends SavedData {
                 FROM %s
                 WHERE MatureAtGameTime <= ?
                 ORDER BY MatureAtGameTime ASC, DatabaseID ASC;
-                """.formatted(TABLE_TSUKUMOGAMI_CANDIDATES))) {
+                """.formatted(TABLE_AWAKENING_OPPORTUNITIES))) {
             statement.setLong(1, gameTime);
-            List<TsukumogamiCandidate> rows = new ArrayList<>();
+            List<AwakeningOpportunity> rows = new ArrayList<>();
             try (ResultSet result = statement.executeQuery()) {
                 while (result.next()) {
-                    rows.add(readTsukumogamiCandidate(result));
+                    rows.add(readAwakeningOpportunity(result));
                 }
             }
             return List.copyOf(rows);
@@ -891,7 +892,7 @@ public final class BlockPartyDB extends SavedData {
         }
     }
 
-    public Optional<TsukumogamiCandidate> findTsukumogamiCandidate(ServerLevel level, BlockPos pos) throws SQLException {
+    public Optional<AwakeningOpportunity> findAwakeningOpportunity(ServerLevel level, BlockPos pos) throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
                 SELECT DatabaseID, PosDim, PosX, PosY, PosZ, PlayerUUID, BlockState, TileEntityData,
@@ -899,22 +900,22 @@ public final class BlockPartyDB extends SavedData {
                 FROM %s
                 WHERE PosDim = ? AND PosX = ? AND PosY = ? AND PosZ = ?
                 LIMIT 1;
-                """.formatted(TABLE_TSUKUMOGAMI_CANDIDATES))) {
+                """.formatted(TABLE_AWAKENING_OPPORTUNITIES))) {
             statement.setString(1, level.dimension().location().toString());
             statement.setInt(2, pos.getX());
             statement.setInt(3, pos.getY());
             statement.setInt(4, pos.getZ());
             try (ResultSet result = statement.executeQuery()) {
-                return result.next() ? Optional.of(readTsukumogamiCandidate(result)) : Optional.empty();
+                return result.next() ? Optional.of(readAwakeningOpportunity(result)) : Optional.empty();
             }
         } finally {
             this.free(connection);
         }
     }
 
-    public void deleteTsukumogamiCandidate(long id) throws SQLException {
+    public void deleteAwakeningOpportunity(long id) throws SQLException {
         Connection connection = this.openConnection();
-        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + TABLE_TSUKUMOGAMI_CANDIDATES + " WHERE " + COLUMN_DATABASE_ID + " = ?;")) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + TABLE_AWAKENING_OPPORTUNITIES + " WHERE " + COLUMN_DATABASE_ID + " = ?;")) {
             statement.setLong(1, id);
             statement.executeUpdate();
         } finally {
@@ -922,12 +923,12 @@ public final class BlockPartyDB extends SavedData {
         }
     }
 
-    public void deleteTsukumogamiCandidate(ServerLevel level, BlockPos pos) throws SQLException {
+    public void deleteAwakeningOpportunity(ServerLevel level, BlockPos pos) throws SQLException {
         Connection connection = this.openConnection();
         try (PreparedStatement statement = connection.prepareStatement("""
                 DELETE FROM %s
                 WHERE PosDim = ? AND PosX = ? AND PosY = ? AND PosZ = ?;
-                """.formatted(TABLE_TSUKUMOGAMI_CANDIDATES))) {
+                """.formatted(TABLE_AWAKENING_OPPORTUNITIES))) {
             statement.setString(1, level.dimension().location().toString());
             statement.setInt(2, pos.getX());
             statement.setInt(3, pos.getY());
@@ -1015,13 +1016,13 @@ public final class BlockPartyDB extends SavedData {
                 result.getInt("Priority"));
     }
 
-    private static TsukumogamiCandidate readTsukumogamiCandidate(ResultSet result) throws SQLException {
+    private static AwakeningOpportunity readAwakeningOpportunity(ResultSet result) throws SQLException {
         CompoundTag tileEntityData = new CompoundTag();
         try {
             tileEntityData = TagParser.parseTag(result.getString("TileEntityData"));
         } catch (Exception ignored) {
         }
-        return new TsukumogamiCandidate(
+        return new AwakeningOpportunity(
                 result.getLong(COLUMN_DATABASE_ID),
                 readDimBlockPos(result),
                 readUuid(result, COLUMN_PLAYER_UUID),

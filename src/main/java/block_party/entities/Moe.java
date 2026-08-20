@@ -203,6 +203,8 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     private final MoeEnvironmentalBehavior environment = new MoeEnvironmentalBehavior(this);
     private final MoeEnvironmentalMemory environmentalMemory = new MoeEnvironmentalMemory(this);
     private final MoeGiftMemory gifts = new MoeGiftMemory(this);
+    private ItemStack offeredGift = ItemStack.EMPTY;
+    private UUID offeredGiftPlayer = new UUID(0L, 0L);
     private final MoeRoutineBehavior routine = new MoeRoutineBehavior(this);
     private final MoeSocialBehavior social = new MoeSocialBehavior(this);
     private final SceneManager sceneManager = new SceneManager(this);
@@ -453,7 +455,8 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     @Override
     public SoundEvent getAmbientSound() {
-        return this.hasCatFeatures() ? MoeSounds.get(this, MoeSounds.Sound.MEOW) : super.getAmbientSound();
+        MoeSounds.Sound sound = this.hasCatFeatures() ? MoeSounds.Sound.MEOW : MoeSounds.getEmotionSound(this.getEmotion());
+        return MoeSounds.get(this, sound);
     }
 
     @Override
@@ -504,6 +507,11 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
             }
             if (this.canDialogueWith(player)) {
                 this.setDialogueTarget(player.getUUID());
+                if (player.isShiftKeyDown()) {
+                    this.rememberOfferedGift(player);
+                } else {
+                    this.clearOfferedGift();
+                }
                 this.triggerScene(player.isShiftKeyDown() ? SceneTrigger.SHIFT_RIGHT_CLICK : SceneTrigger.RIGHT_CLICK);
             }
         }
@@ -939,6 +947,29 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
 
     public Optional<ItemStack> latestGiftItem() {
         return this.gifts.latestItem();
+    }
+
+    public void rememberOfferedGift(Player player) {
+        ItemStack held = player == null ? ItemStack.EMPTY : player.getMainHandItem();
+        this.offeredGift = held.isEmpty() ? ItemStack.EMPTY : held.copyWithCount(1);
+        this.offeredGiftPlayer = held.isEmpty() ? new UUID(0L, 0L) : player.getUUID();
+    }
+
+    public Optional<ItemStack> offeredGift() {
+        return this.offeredGift.isEmpty() ? Optional.empty() : Optional.of(this.offeredGift.copy());
+    }
+
+    public Optional<MoeItemPreferences.PreferenceSignal> offeredGiftPreferenceSignal() {
+        return this.offeredGift().map(stack -> MoeItemPreferences.signal(this, stack));
+    }
+
+    public boolean offeredGiftBelongsTo(Player player) {
+        return player != null && this.offeredGiftPlayer.equals(player.getUUID());
+    }
+
+    public void clearOfferedGift() {
+        this.offeredGift = ItemStack.EMPTY;
+        this.offeredGiftPlayer = new UUID(0L, 0L);
     }
 
     public float getExhaustion() {

@@ -13,6 +13,7 @@ import block_party.scene.SceneTrigger;
 import block_party.scene.SceneVariableScope;
 import block_party.scene.Speaker;
 import block_party.scene.actions.CookieAction;
+import block_party.scene.actions.AcceptOfferedGiftAction;
 import block_party.scene.actions.CounterAction;
 import block_party.scene.actions.CreateVoicemailAction;
 import block_party.scene.actions.ClearRoutineIntentAction;
@@ -440,6 +441,7 @@ public final class ScenesReloadListener implements PreparableReloadListener {
         parsers.put("clear_routine_intent", payload -> ClearRoutineIntentAction.INSTANCE);
         parsers.put("sleep_at_home", payload -> new SleepAtHomeAction(HideUntil.EXPOSED.fromValue(GsonHelper.getAsString(payload, "until", "exposed"))));
         parsers.put("open_inventory", payload -> OpenInventoryAction.INSTANCE);
+        parsers.put("accept_offered_gift", payload -> AcceptOfferedGiftAction.INSTANCE);
         parsers.put("give_item", payload -> new GiveItemAction(
                 SceneItemStacks.parse(payload),
                 GiveItemAction.Target.fromValue(GsonHelper.getAsString(payload, "target", "player"))));

@@ -734,7 +734,13 @@ Gift and item-preference filters:
 - `block_party:gift_begging`
 - `block_party:gift_item`
 - `block_party:held_item_preference`
+- `block_party:held_item_aversion`
+- `block_party:held_item_interest`
 - `block_party:held_item_begging`
+- `block_party:offered_item_preference`
+- `block_party:offered_item_aversion`
+- `block_party:offered_item_interest`
+- `block_party:offered_item_begging`
 
 Social-place filters:
 
@@ -1158,6 +1164,19 @@ Fields:
 The default `take_item` behavior is gift-like: remove the item from the player
 and store it in the Moe inventory. If the Moe inventory cannot hold the item,
 the action does not remove it from the player.
+
+For consent-based gifting, sneak-right-click snapshots one item from the player's
+main hand as the current offer. Branch the `shift_right_click` conversation with
+the `offered_item_preference`, `offered_item_aversion`, `offered_item_interest`,
+and `offered_item_begging` numeric filters. A confirming response can then use:
+
+```json
+"block_party:accept_offered_gift"
+```
+
+This action transfers exactly one item only when the player still holds the same
+item and the Moe has inventory space. Successful acceptance records the gift,
+applies its preference reaction, and triggers `gift_received`.
 
 ## Hide And Sleep Actions
 

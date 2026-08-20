@@ -14,9 +14,9 @@ public final class CustomTags {
     public static final TagKey<Block> SHRINE_BASE_BLOCKS = block("shrine_base_blocks");
     public static final TagKey<Block> SHRINE_FRAME_BLOCKS = block("shrine_frame_blocks");
     public static final TagKey<Block> SHRINE_EDGE_BLOCKS = block("shrine_edge_blocks");
-    public static final TagKey<Block> PROGRESSION_COUNTER_BLOCKS = block("moe/progression/tracked_blocks");
+    public static final TagKey<Block> TRACKED_BLOCKS = block("moe/progression/tracked_blocks");
     public static final TagKey<Block> SPAWNS_FIREFLIES = block("spawns_fireflies");
-    public static final TagKey<Block> TSUKUMOGAMI_CANDIDATES = block("tsukumogami_candidates");
+    public static final TagKey<Block> AWAKENING_OPPORTUNITIES = block("awakening_opportunities");
     public static final TagKey<Block> WISTERIA = block("wisteria");
     public static final TagKey<Block> PLACE_CAVE_BLOCKS = block("moe/place/cave_blocks");
     public static final TagKey<Block> PLACE_CROPS = block("moe/place/crops");

@@ -2,11 +2,12 @@ package block_party.gametest;
 
 import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
-import block_party.db.records.TsukumogamiCandidate;
+import block_party.db.records.AwakeningOpportunity;
 import block_party.entities.Moe;
+import block_party.entities.MoeInHiding;
 import block_party.entities.movement.RoutineIntent;
 import block_party.registry.CustomEntities;
-import block_party.world.TsukumogamiSpawns;
+import block_party.world.AwakeningService;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -24,8 +25,8 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(BlockParty.ID)
 @PrefixGameTestTemplate(false)
-public final class TsukumogamiGameTests {
-    private TsukumogamiGameTests() {
+public final class AwakeningGameTests {
+    private AwakeningGameTests() {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
@@ -36,7 +37,7 @@ public final class TsukumogamiGameTests {
         BlockPos shrine = helper.absolutePos(new BlockPos(1, 1, 1));
         BlockPos pos = helper.absolutePos(new BlockPos(5, 1, 1));
         try {
-            clearTsukumogamiState(db);
+            clearAwakeningState(db);
             insertShrine(db, level, shrine, owner);
         } catch (SQLException exception) {
             helper.fail("Expected shrine setup to succeed: " + exception.getMessage());
@@ -45,12 +46,12 @@ public final class TsukumogamiGameTests {
         BlockState state = Blocks.CRAFTING_TABLE.defaultBlockState();
         level.setBlock(pos, state, 3);
 
-        if (!TsukumogamiSpawns.trackPlacedBlock(level, pos, state, owner)) {
-            helper.fail("Expected tsukumogami candidate tracking to accept crafting table near shrine");
+        if (!AwakeningService.trackPlacedBlock(level, pos, state, owner)) {
+            helper.fail("Expected awakening opportunity tracking to accept crafting table near shrine");
             return;
         }
         try {
-            TsukumogamiCandidate candidate = db.findTsukumogamiCandidate(level, pos).orElse(null);
+            AwakeningOpportunity candidate = db.findAwakeningOpportunity(level, pos).orElse(null);
             if (candidate == null || !owner.equals(candidate.playerUuid()) || candidate.matureAtGameTime() <= candidate.createdGameTime()) {
                 helper.fail("Expected prospective spawn candidate row with owner and future maturity");
                 return;
@@ -70,14 +71,14 @@ public final class TsukumogamiGameTests {
         BlockPos pos = helper.absolutePos(new BlockPos(5, 1, 1));
         BlockState state = Blocks.CRAFTING_TABLE.defaultBlockState();
         try {
-            clearTsukumogamiState(db);
+            clearAwakeningState(db);
         } catch (SQLException exception) {
-            helper.fail("Expected tsukumogami state cleanup to succeed: " + exception.getMessage());
+            helper.fail("Expected awakening state cleanup to succeed: " + exception.getMessage());
             return;
         }
         level.setBlock(pos, state, 3);
 
-        if (TsukumogamiSpawns.trackPlacedBlock(level, pos, state, owner)) {
+        if (AwakeningService.trackPlacedBlock(level, pos, state, owner)) {
             helper.fail("Expected candidate tracking to ignore blocks outside shrine influence");
             return;
         }
@@ -92,7 +93,7 @@ public final class TsukumogamiGameTests {
         BlockPos shrine = helper.absolutePos(new BlockPos(1, 1, 1));
         BlockPos pos = helper.absolutePos(new BlockPos(5, 1, 1));
         try {
-            clearTsukumogamiState(db);
+            clearAwakeningState(db);
             insertShrine(db, level, shrine, owner);
         } catch (SQLException exception) {
             helper.fail("Expected shrine setup to succeed: " + exception.getMessage());
@@ -100,28 +101,38 @@ public final class TsukumogamiGameTests {
         }
         BlockState state = Blocks.CRAFTING_TABLE.defaultBlockState();
         level.setBlock(pos, state, 3);
-        TsukumogamiSpawns.trackPlacedBlock(level, pos, state, owner);
+        AwakeningService.trackPlacedBlock(level, pos, state, owner);
 
-        int spawned = TsukumogamiSpawns.matureCandidates(level, level.getGameTime() + TsukumogamiSpawns.MATURATION_TICKS);
+        int spawned = AwakeningService.matureOpportunities(level, level.getGameTime() + AwakeningService.MATURATION_TICKS);
         if (spawned != 1) {
-            helper.fail("Expected one mature tsukumogami candidate to spawn, got " + spawned);
+            helper.fail("Expected one mature awakening opportunity to spawn, got " + spawned);
             return;
         }
         List<Moe> moes = level.getEntitiesOfClass(Moe.class, new AABB(pos.above()).inflate(1.0D));
         if (moes.size() != 1) {
-            helper.fail("Expected spawned tsukumogami Moe above source block, got " + moes.size());
+            helper.fail("Expected spawned awakened Moe above source block, got " + moes.size());
             return;
         }
         Moe moe = moes.getFirst();
-        if (moe.isCardinal() || !moe.hasHome() || !moe.getHome().getPos().equals(pos) || moe.getRoutineIntent() != RoutineIntent.REST) {
-            helper.fail("Expected spawned tsukumogami to be non-cardinal, resting, and homed to source block");
+        if (moe.isCardinal() || !moe.hasHome() || !moe.getHome().getPos().equals(pos) || moe.getRoutineIntent() != RoutineIntent.SLEEP) {
+            helper.fail("Expected awakened Moe to be non-cardinal, sleeping, and homed to its source block");
             return;
         }
         if (!level.getBlockState(pos).isAir()) {
-            helper.fail("Expected source block to be removed while tsukumogami Moe is active");
+            helper.fail("Expected source block to be removed while awakened Moe is active");
             return;
         }
-        helper.kill(moe);
+        moe.moveToBlock(pos);
+        if (!moe.routine().updateMovement()) {
+            helper.fail("Expected awakened Moe to hide after returning home");
+            return;
+        }
+        List<MoeInHiding> hidden = level.getEntitiesOfClass(MoeInHiding.class, new AABB(pos).inflate(1.0D));
+        if (hidden.size() != 1 || !level.getBlockState(pos).equals(state)) {
+            helper.fail("Expected awakened Moe to restore its block and inhabit the source position");
+            return;
+        }
+        helper.kill(hidden.getFirst());
         helper.succeed();
     }
 
@@ -133,7 +144,7 @@ public final class TsukumogamiGameTests {
         BlockPos shrine = helper.absolutePos(new BlockPos(1, 1, 1));
         BlockPos pos = helper.absolutePos(new BlockPos(5, 1, 1));
         try {
-            clearTsukumogamiState(db);
+            clearAwakeningState(db);
             insertShrine(db, level, shrine, owner);
         } catch (SQLException exception) {
             helper.fail("Expected shrine setup to succeed: " + exception.getMessage());
@@ -142,15 +153,15 @@ public final class TsukumogamiGameTests {
         BlockState state = Blocks.CRAFTING_TABLE.defaultBlockState();
         level.setBlock(pos, state, 3);
         level.setBlock(pos.east(), Blocks.LEVER.defaultBlockState(), 3);
-        TsukumogamiSpawns.trackPlacedBlock(level, pos, state, owner);
+        AwakeningService.trackPlacedBlock(level, pos, state, owner);
 
-        int spawned = TsukumogamiSpawns.matureCandidates(level, level.getGameTime() + TsukumogamiSpawns.MATURATION_TICKS);
+        int spawned = AwakeningService.matureOpportunities(level, level.getGameTime() + AwakeningService.MATURATION_TICKS);
         if (spawned != 0) {
             helper.fail("Expected redstone-adjacent candidate to be discarded without spawning");
             return;
         }
         try {
-            if (db.findTsukumogamiCandidate(level, pos).isPresent()) {
+            if (db.findAwakeningOpportunity(level, pos).isPresent()) {
                 helper.fail("Expected invalid redstone candidate row to be deleted");
                 return;
             }
@@ -183,10 +194,10 @@ public final class TsukumogamiGameTests {
         }
     }
 
-    private static void clearTsukumogamiState(BlockPartyDB db) throws SQLException {
+    private static void clearAwakeningState(BlockPartyDB db) throws SQLException {
         Connection connection = db.openConnection();
         try (PreparedStatement shrineStatement = connection.prepareStatement("DELETE FROM " + BlockPartyDB.TABLE_SHRINES + ";");
-             PreparedStatement candidateStatement = connection.prepareStatement("DELETE FROM " + BlockPartyDB.TABLE_TSUKUMOGAMI_CANDIDATES + ";")) {
+             PreparedStatement candidateStatement = connection.prepareStatement("DELETE FROM " + BlockPartyDB.TABLE_AWAKENING_OPPORTUNITIES + ";")) {
             shrineStatement.executeUpdate();
             candidateStatement.executeUpdate();
         } finally {

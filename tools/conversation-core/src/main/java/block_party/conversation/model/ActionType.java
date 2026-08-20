@@ -6,6 +6,7 @@ public enum ActionType {
     CHANGE_COUNTER,
     GIVE_ITEM,
     TAKE_ITEM,
+    ACCEPT_OFFERED_GIFT,
     MARK_TIME,
     REMEMBER_LOCATION,
     FORGET_LOCATION,

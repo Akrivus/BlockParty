@@ -172,7 +172,13 @@ public final class SceneObservationFactories {
             case "gift_interest" -> moe -> moe.latestGiftPreferenceSignal().map(signal -> compare(signal.interest(), json)).orElse(false);
             case "gift_begging" -> moe -> moe.latestGiftPreferenceSignal().map(signal -> compare(signal.begging(), json)).orElse(false);
             case "gift_item" -> moe -> moe.latestGiftItem().map(stack -> itemMatches(stack, json)).orElse(false);
+            case "offered_item_preference" -> moe -> moe.offeredGiftPreferenceSignal().map(signal -> compare(signal.preference(), json)).orElse(false);
+            case "offered_item_aversion" -> moe -> moe.offeredGiftPreferenceSignal().map(signal -> compare(signal.aversion(), json)).orElse(false);
+            case "offered_item_interest" -> moe -> moe.offeredGiftPreferenceSignal().map(signal -> compare(signal.interest(), json)).orElse(false);
+            case "offered_item_begging" -> moe -> moe.offeredGiftPreferenceSignal().map(signal -> compare(signal.begging(), json)).orElse(false);
             case "held_item_preference" -> moe -> targetPlayer(moe) != null && compare(heldItemSignal(moe, json).preference(), json);
+            case "held_item_aversion" -> moe -> targetPlayer(moe) != null && compare(heldItemSignal(moe, json).aversion(), json);
+            case "held_item_interest" -> moe -> targetPlayer(moe) != null && compare(heldItemSignal(moe, json).interest(), json);
             case "held_item_begging" -> moe -> targetPlayer(moe) != null && compare(heldItemSignal(moe, json).begging(), json);
             case "social_place_behavior" -> moe -> moe.socialPlaceMemoryForTests().map(memory -> enumMatches(memory.behavior(), json)).orElse(false);
             case "social_place_type" -> moe -> moe.socialPlaceMemoryForTests().map(memory -> enumMatches(memory.type(), json)).orElse(false);

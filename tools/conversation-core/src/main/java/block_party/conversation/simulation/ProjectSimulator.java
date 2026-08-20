@@ -135,6 +135,7 @@ public final class ProjectSimulator {
                     state.inventory.merge(action.item(), -Math.max(1, action.count()), Integer::sum);
                     trace.add("take " + Math.max(1, action.count()) + " x " + action.item());
                 }
+                case ACCEPT_OFFERED_GIFT -> trace.add("accept offered main-hand gift");
                 case MARK_TIME -> trace.add("mark time " + action.marker());
                 case REMEMBER_LOCATION -> trace.add("remember " + action.scope() + " location " + action.location());
                 case FORGET_LOCATION -> trace.add("forget " + action.scope() + " location " + action.location());

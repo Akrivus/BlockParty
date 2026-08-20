@@ -23,7 +23,7 @@ Approximate source count by top-level package:
 - `blocks`: 23 files. Decorative blocks and data block entities for shrine, shimenawa, lanterns, saplings, and locative blocks.
 - `registry`: 22 files. NeoForge deferred registration plus reload listeners for scenes, names, aliases, textures, sounds, social affinities, and item preferences.
 - `gametest`: 17 files. Active server-side regression suite.
-- `world`: 15 files. Cell phone service, attention tracking, tsukumogami spawn candidates, progression gates, and structure helpers.
+- `world`: 15 files. Cell phone service, attention tracking, awakening opportunities, progression gates, and structure helpers.
 - `items`: 15 files. Spawn egg, controllers, letters, food, music discs, samurai equipment, and sortable creative-tab metadata.
 - `db`: 14 files. SavedData, SQLite bootstrap, typed record helpers, rows/tables, shrine locations, and voicemail playback/storage.
 - `network`: 12 files. NeoForge custom payload records and transport glue.
@@ -79,7 +79,7 @@ Strong active surfaces:
 - Load Moe names, aliases, texture metadata, sound metadata, social affinities, and item preferences from resources.
 - Use restored server-side data block behavior for shrine, shimenawa, garden lantern, location, and sapling rows.
 - Use server-side shrine tablet effects and shimenawa hidden NPC row creation.
-- Cover decorative blocks, worldgen resource availability, particles, samurai server behavior, attention records, social behavior, movement/routine primitives, and tsukumogami candidates through GameTests.
+- Cover decorative blocks, worldgen resource availability, particles, samurai server behavior, attention records, social behavior, movement/routine primitives, and awakening opportunities through GameTests.
 
 Known follow-up surfaces before broader content expansion:
 

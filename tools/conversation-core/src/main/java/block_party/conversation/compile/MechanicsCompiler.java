@@ -115,6 +115,7 @@ final class MechanicsCompiler {
                 payload.addProperty("source", value(action.source(), "player"));
                 payload.addProperty("destination", value(action.destination(), "moe"));
             }
+            case ACCEPT_OFFERED_GIFT -> result.addProperty("type", "block_party:accept_offered_gift");
             case MARK_TIME -> {
                 result.addProperty("type", "block_party:mark_time");
                 payload.addProperty("scope", lower(scope(action.scope()).name()));

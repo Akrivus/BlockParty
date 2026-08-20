@@ -5,7 +5,7 @@ import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
 
-public record TsukumogamiCandidate(
+public record AwakeningOpportunity(
         long databaseId,
         DimBlockPos dimPos,
         UUID playerUuid,

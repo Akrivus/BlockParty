@@ -1,0 +1,14 @@
+{
+  "collected": {
+    "item": "minecraft:birch_log"
+  },
+  "threshold": 64,
+  "placed": {
+    "block": "minecraft:birch_sapling"
+  },
+  "support": {
+    "tag": "minecraft:dirt"
+  },
+  "result": "minecraft:birch_log",
+  "exclusion_radius": 24
+}

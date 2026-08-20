@@ -36,7 +36,7 @@ public final class PlayerProgressionCounters {
 
     public static void onBlockBroken(BlockEvent.BreakEvent event) {
         if (!(event.getLevel() instanceof ServerLevel level) || !(event.getPlayer() instanceof ServerPlayer player)
-                || !event.getState().is(CustomTags.PROGRESSION_COUNTER_BLOCKS)) {
+                || !event.getState().is(CustomTags.TRACKED_BLOCKS)) {
             return;
         }
         add(level, player.getUUID(), blockKey(event.getState().getBlock()), 1);

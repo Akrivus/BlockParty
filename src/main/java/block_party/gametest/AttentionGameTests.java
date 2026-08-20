@@ -9,7 +9,7 @@ import block_party.entities.chores.PlaceBlockChores;
 import block_party.scene.SceneVariables;
 import block_party.world.progression.WoodFamilyProgression;
 import block_party.world.progression.SamuraiProgression;
-import block_party.world.progression.WoodCardinalArrivals;
+import block_party.world.progression.ArrivalService;
 import block_party.world.progression.PlayerProgressionCounters;
 import block_party.registry.CustomTags;
 import block_party.registry.CustomBlocks;
@@ -47,7 +47,7 @@ public final class AttentionGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20, batch = "wood_arrival")
-    public static void oakArrivalRequiresSuzuLogsMorningAndSapling(GameTestHelper helper) {
+    public static void oakArrivalRequiresSuzuLogsToriiAndSapling(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         UUID player = new UUID(1990L, 2990L);
         BlockPos sapling = helper.absolutePos(new BlockPos(3, 1, 3));
@@ -55,28 +55,24 @@ public final class AttentionGameTests {
         level.setBlock(sapling, Blocks.OAK_SAPLING.defaultBlockState(), 3);
         SceneVariables.get(level).worldCookies().delete(SamuraiProgression.TORII_GATE_OPENED);
 
-        WoodCardinalArrivals.recordOakLogs(level, player, new ItemStack(Items.OAK_LOG), 64);
-        if (WoodCardinalArrivals.tryArrival(level, sapling, level.getBlockState(sapling), player, 1000L)) {
+        ArrivalService.recordCollectedItem(level, player, new ItemStack(Items.OAK_LOG), 64);
+        if (ArrivalService.tryArrival(level, sapling, level.getBlockState(sapling), player)) {
             helper.fail("Expected Oak arrival to wait for Suzu's gate");
             return;
         }
         SceneVariables.get(level).worldCookies().set(SamuraiProgression.TORII_GATE_OPENED, "true");
         SceneVariables.get(level).playerCounters(player).delete("progression/items/minecraft:oak_log");
-        WoodCardinalArrivals.recordOakLogs(level, player, new ItemStack(Items.OAK_LOG), 63);
-        if (WoodCardinalArrivals.tryArrival(level, sapling, level.getBlockState(sapling), player, 1000L)) {
+        ArrivalService.recordCollectedItem(level, player, new ItemStack(Items.OAK_LOG), 63);
+        if (ArrivalService.tryArrival(level, sapling, level.getBlockState(sapling), player)) {
             helper.fail("Expected Oak arrival to wait for 64 collected logs");
             return;
         }
-        WoodCardinalArrivals.recordOakLogs(level, player, new ItemStack(Items.OAK_LOG), 1);
-        if (WoodCardinalArrivals.tryArrival(level, sapling, level.getBlockState(sapling), player, 6000L)) {
-            helper.fail("Expected Oak arrival to wait for the morning window");
-            return;
-        }
+        ArrivalService.recordCollectedItem(level, player, new ItemStack(Items.OAK_LOG), 1);
         BlockPos shrinePos = helper.absolutePos(new BlockPos(6, 1, 3));
         level.setBlock(shrinePos, CustomBlocks.SHRINE_TABLET.get().defaultBlockState(), 3);
         ((ShrineTabletBlockEntity) level.getBlockEntity(shrinePos)).markClaimed(player);
-        if (!WoodCardinalArrivals.tryArrival(level, sapling, level.getBlockState(sapling), player, 1000L)) {
-            helper.fail("Expected valid morning Oak planting to trigger arrival; tracked logs="
+        if (!ArrivalService.tryArrival(level, sapling, level.getBlockState(sapling), player)) {
+            helper.fail("Expected valid Oak planting to trigger arrival; tracked logs="
                     + PlayerProgressionCounters.countItem(level, player, Items.OAK_LOG)
                     + ", gate=" + SceneVariables.get(level).worldCookies().get(SamuraiProgression.TORII_GATE_OPENED));
             return;
@@ -84,7 +80,7 @@ public final class AttentionGameTests {
         List<Moe> arrivals = level.getEntitiesOfClass(Moe.class, new AABB(sapling).inflate(4.0D),
                 moe -> moe.getVisibleBlockState().is(Blocks.OAK_LOG));
         if (arrivals.size() != 1 || !player.equals(arrivals.getFirst().getDialogueTarget())) {
-            helper.fail("Expected one Oak cardinal arrival for the planting player, got " + arrivals);
+            helper.fail("Expected one Oak cardinal encounter targeting the planting player, got " + arrivals);
             return;
         }
         if (PlayerProgressionCounters.countItem(level, player, Items.OAK_LOG) != 64) {
@@ -99,7 +95,7 @@ public final class AttentionGameTests {
             return;
         }
         helper.kill(arrivals.getFirst());
-        if (WoodCardinalArrivals.tryArrival(level, sapling, level.getBlockState(sapling), player, 1000L)) {
+        if (ArrivalService.tryArrival(level, sapling, level.getBlockState(sapling), player)) {
             helper.fail("Expected another Oak encounter to require another 64 collected logs");
             return;
         }

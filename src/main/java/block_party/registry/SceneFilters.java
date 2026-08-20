@@ -66,7 +66,8 @@ public final class SceneFilters {
                 "remembered_place_capacity", "remembered_place_anchor_type", "observed_block",
                 "observed_signal_layer", "observed_affinity", "observed_tension", "observed_interest",
                 "gift_preference", "gift_aversion", "gift_interest", "gift_begging", "gift_item",
-                "held_item_preference", "held_item_begging", "social_place_behavior", "social_place_type",
+                "offered_item_preference", "offered_item_aversion", "offered_item_interest", "offered_item_begging",
+                "held_item_preference", "held_item_aversion", "held_item_interest", "held_item_begging", "social_place_behavior", "social_place_type",
                 "social_place_distance", "social_place_owner_name");
     }
 

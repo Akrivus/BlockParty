@@ -1,0 +1,12 @@
+{
+  "trigger": "block_party:shift_right_click",
+  "filters": [
+    {"type":"block_party:offered_item_begging","filter":{"operation":"at_least","value":0.5}}
+  ],
+  "actions": [
+    {"type":"block_party:send_dialogue","action":{"text":"Really? You would give that to me?","tooltip":true,"responses":[
+      {"icon":"block_party:lovely_heart","text":"It's yours.","actions":[{"type":"block_party:accept_offered_gift"},"block_party:end"]},
+      {"icon":"block_party:red_x","text":"Not this time.","actions":["block_party:end"]}
+    ]}}
+  ]
+}

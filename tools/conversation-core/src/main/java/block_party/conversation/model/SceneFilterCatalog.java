@@ -74,7 +74,9 @@ public final class SceneFilterCatalog {
             "social_target_emotion", "social_visual", "social_reaction", "attention_type",
             "attention_source", "remembered_place_type", "remembered_place_anchor_type",
             "observed_signal_layer", "gift_preference", "gift_aversion", "gift_interest",
-            "gift_begging", "social_place_behavior", "social_place_type", "dimension", "biome",
+            "gift_begging", "offered_item_preference", "offered_item_aversion", "offered_item_interest",
+            "offered_item_begging", "held_item_preference", "held_item_aversion", "held_item_interest",
+            "held_item_begging", "social_place_behavior", "social_place_type", "dimension", "biome",
             "location_dimension", "assignment_location", "assignment_id", "assignment_result_id", "assignment_failure_reason");
     private static final Set<String> NUMERIC_FILTERS = Set.of(
             "if_time", "health", "food_level", "loyalty", "stress", "target_affection",
@@ -84,10 +86,11 @@ public final class SceneFilterCatalog {
             "social_interest", "remembered_place_score", "remembered_place_occupancy",
             "remembered_place_capacity", "observed_affinity", "observed_tension", "observed_interest",
             "social_place_distance", "altitude", "light_level", "distance_to_location", "distance_to_assignment",
-            "seconds_since_routine");
+            "seconds_since_routine", "offered_item_preference", "offered_item_aversion", "offered_item_interest",
+            "offered_item_begging", "held_item_preference", "held_item_aversion", "held_item_interest", "held_item_begging");
     private static final Set<String> RESOURCE_FILTERS = Set.of(
             "attention_item", "attention_block", "player_held_item", "player_has_item", "held_item",
-            "has_item", "moe_has_item", "block", "observed_block", "gift_item", "held_item_preference", "near_block");
+            "has_item", "moe_has_item", "block", "observed_block", "gift_item", "near_block");
     private static final Set<String> OTHER_FILTERS = Set.of(
             "elapsed_since_marker", "if_remembers_place", "if_remembers_house", "if_remembers_shelter",
             "if_remembers_garden", "if_remembers_grove", "if_remembers_field", "if_remembers_workshop",
@@ -101,7 +104,7 @@ public final class SceneFilterCatalog {
             "follow_player_is_target", "anchor_type", "samurai_armor_piece", "social_target_block",
             "social_visual", "social_reaction", "remembered_place_type", "remembered_place_anchor_type",
             "observed_signal_layer", "gift_preference", "gift_aversion", "gift_interest", "gift_begging",
-            "held_item_begging", "social_place_behavior", "social_place_type", "social_place_owner_name",
+            "social_place_behavior", "social_place_type", "social_place_owner_name",
             "has_location", "at_location");
 
     private SceneFilterCatalog() {}
