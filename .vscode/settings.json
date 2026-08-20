@@ -1,9 +1,10 @@
 {
   "java.autobuild.enabled": false,
-  "java.configuration.updateBuildConfiguration": "interactive",
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.compile.nullAnalysis.mode": "disabled",
+  "java.completion.enabled": true,
   "java.import.gradle.enabled": true,
   "java.import.maven.enabled": false,
   "java.referencesCodeLens.enabled": true,
-  "java.signatureHelp.enabled": true,
-  "java.completion.enabled": true
+  "java.signatureHelp.enabled": true
 }
