@@ -1,0 +1,13 @@
+{
+  "collected": {
+    "item": "minecraft:nether_quartz"
+  },
+  "threshold": 64,
+  "placed": {
+    "block": "minecraft:torch"
+  },
+  "support": {
+    "block": "minecraft:netherrack"
+  },
+  "result": "minecraft:nether_quartz_ore"
+}

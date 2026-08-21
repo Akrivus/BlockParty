@@ -57,11 +57,15 @@ public final class ArrivalReloadListener implements PreparableReloadListener {
                 blockSelector(placed),
                 blockSelector(support),
                 BuiltInRegistries.BLOCK.getValue(ResourceLocation.parse(GsonHelper.getAsString(json, "result"))),
-                Math.max(0.0D, GsonHelper.getAsDouble(json, "exclusion_radius", 24.0D)));
+                Math.max(0.0D, GsonHelper.getAsDouble(json, "exclusion_radius", 24.0D)),
+                Math.max(1, GsonHelper.getAsInt(json, "home_search_radius", 16)),
+                Math.max(0, GsonHelper.getAsInt(json, "home_search_vertical_radius", 4)));
     }
 
     private static ArrivalDefinition.BlockSelector blockSelector(JsonObject json) {
-        return json.has("tag")
+        return GsonHelper.getAsBoolean(json, "any", false)
+                ? ArrivalDefinition.BlockSelector.anyBlock()
+                : json.has("tag")
                 ? ArrivalDefinition.BlockSelector.tag(ResourceLocation.parse(GsonHelper.getAsString(json, "tag")))
                 : ArrivalDefinition.BlockSelector.block(ResourceLocation.parse(GsonHelper.getAsString(json, "block")));
     }

@@ -9,6 +9,5 @@
   "support": {
     "tag": "minecraft:dirt"
   },
-  "result": "minecraft:spruce_log",
-  "exclusion_radius": 24
+  "result": "minecraft:spruce_log"
 }

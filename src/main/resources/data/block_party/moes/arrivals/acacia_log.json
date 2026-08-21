@@ -9,6 +9,5 @@
   "support": {
     "tag": "minecraft:dirt"
   },
-  "result": "minecraft:acacia_log",
-  "exclusion_radius": 24
+  "result": "minecraft:acacia_log"
 }

@@ -21,6 +21,7 @@ import block_party.registry.SceneFilters;
 import block_party.world.CellPhone;
 import block_party.world.Attention;
 import block_party.world.AwakeningService;
+import block_party.world.MoeWakeService;
 import block_party.world.structure.MoeStructureCohortCoordinator;
 import block_party.world.progression.ArrivalService;
 import block_party.world.progression.PlayerProgressionCounters;
@@ -73,6 +74,8 @@ public final class BlockParty {
         NeoForge.EVENT_BUS.addListener(AwakeningService::onBlockPlaced);
         NeoForge.EVENT_BUS.addListener(AwakeningService::onBlockBroken);
         NeoForge.EVENT_BUS.addListener(AwakeningService::onServerTick);
+        NeoForge.EVENT_BUS.addListener(MoeWakeService::onServerTick);
+        NeoForge.EVENT_BUS.addListener(MoeWakeService::onServerStopped);
         NeoForge.EVENT_BUS.addListener(PlayerProgressionCounters::onItemPickup);
         NeoForge.EVENT_BUS.addListener(PlayerProgressionCounters::onBlockBroken);
         NeoForge.EVENT_BUS.addListener(ArrivalService::onBlockPlaced);

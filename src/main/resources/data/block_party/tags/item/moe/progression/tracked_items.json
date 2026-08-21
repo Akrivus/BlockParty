@@ -1,6 +1,19 @@
 {
   "replace": false,
   "values": [
-    "#minecraft:logs"
+    "#minecraft:logs",
+    "minecraft:dirt",
+    "minecraft:coarse_dirt",
+    "minecraft:rooted_dirt",
+    "minecraft:grass_block",
+    "minecraft:podzol",
+    "minecraft:mycelium",
+    "minecraft:coal",
+    "minecraft:raw_iron",
+    "minecraft:raw_gold",
+    "minecraft:redstone",
+    "minecraft:lapis_lazuli",
+    "minecraft:diamond",
+    "minecraft:emerald"
   ]
 }

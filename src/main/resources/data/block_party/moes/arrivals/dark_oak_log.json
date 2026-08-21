@@ -9,6 +9,5 @@
   "support": {
     "tag": "minecraft:dirt"
   },
-  "result": "minecraft:dark_oak_log",
-  "exclusion_radius": 24
+  "result": "minecraft:dark_oak_log"
 }

@@ -1,0 +1,13 @@
+{
+  "collected": {
+    "item": "minecraft:sand"
+  },
+  "threshold": 64,
+  "placed": {
+    "any": true
+  },
+  "support": {
+    "block": "minecraft:sand"
+  },
+  "result": "minecraft:sand"
+}

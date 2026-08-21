@@ -41,6 +41,8 @@ import block_party.scene.SceneSelectionMemory;
 import block_party.world.structure.MoeStructureAssignment;
 import block_party.world.structure.MoeStructureCohortCoordinator;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -49,6 +51,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerListener;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
@@ -1359,6 +1362,12 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
     }
 
     public boolean sleepAtHome(HideUntil until) {
+        if (this.isCardinal()) {
+            this.setTimeSinceSleep(0);
+            this.addRelaxation(0.5F);
+            this.setStress(Math.max(0.0F, this.getStress() - 0.5F));
+            return this.poofAtRest();
+        }
         if (!this.canSleepAtHome()) {
             return false;
         }
@@ -1366,6 +1375,23 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
         this.addRelaxation(0.5F);
         this.setStress(Math.max(0.0F, this.getStress() - 0.5F));
         return this.hide(until) != null;
+    }
+
+    private boolean poofAtRest() {
+        if (!(this.level() instanceof ServerLevel level)) {
+            return false;
+        }
+        try {
+            NPC row = BlockPartyDB.get(level).findNpc(this.getDatabaseID()).orElse(null);
+            if (row != null) {
+                row.updateFromMoe(BlockPartyDB.get(level), level, this);
+            }
+        } catch (SQLException ignored) {
+            return false;
+        }
+        this.playBlockTransitionEffects(level, true);
+        this.discard();
+        return true;
     }
 
     public boolean canSleepAtHome() {
@@ -1737,7 +1763,20 @@ public class Moe extends PathfinderMob implements ContainerListener, MenuProvide
             return null;
         }
         HidingSpots.get(serverLevel).put(pos, this.getDatabaseID());
+        this.playBlockTransitionEffects(serverLevel, false);
         this.discard();
         return hiding;
+    }
+
+    private void playBlockTransitionEffects(ServerLevel level, boolean particles) {
+        BlockState state = this.getBlockState();
+        var sound = state.getSoundType(level, this.blockPosition(), this);
+        level.playSound(null, this.blockPosition(), sound.getBreakSound(), SoundSource.BLOCKS,
+                (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);
+        if (particles) {
+            level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state),
+                    this.getX(), this.getY() + this.getBbHeight() * 0.5D, this.getZ(),
+                    24, 0.35D, 0.5D, 0.35D, 0.08D);
+        }
     }
 }

@@ -7,11 +7,13 @@ import block_party.entities.Moe;
 import block_party.entities.MoeInHiding;
 import block_party.entities.data.HidingSpots;
 import block_party.entities.goals.HideUntil;
+import block_party.entities.movement.RoutineIntent;
 import block_party.items.CustomSpawnEggItem;
 import block_party.registry.CustomBlocks;
 import block_party.registry.CustomEntities;
 import block_party.registry.CustomItems;
 import block_party.scene.SceneVariables;
+import block_party.world.MoeWakeService;
 import block_party.world.progression.CardinalSpawnRules;
 import block_party.world.progression.ProgressionGate;
 import block_party.world.progression.SamuraiProgression;
@@ -473,6 +475,54 @@ public final class MoeLifecycleGameTests {
             return;
         }
         helper.kill(revealed);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void proximityWakeRequiresRelationshipAndRevealsOnlyAfterThreshold(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        BlockPos pos = helper.absolutePos(new BlockPos(3, 1, 3));
+        player.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D);
+        Moe moe = createPersistedMoe(helper, level, pos, new UUID(901L, 902L), Blocks.DIRT.defaultBlockState());
+        if (moe == null) {
+            return;
+        }
+        long databaseId = moe.getDatabaseID();
+        if (moe.hide(HideUntil.EXPOSED) == null) {
+            helper.fail("Expected proximity-wake setup to hide the Moe");
+            return;
+        }
+        MoeWakeService.clearForTests();
+        var lowRelationship = BlockPartyDB.get(level).findPlayerRelationshipSafe(databaseId, player.getUUID()).orElse(null);
+        if (MoeWakeService.wakeRadius(lowRelationship) != 0.0D) {
+            helper.fail("Expected a player without a relationship not to have a passive wake radius");
+            return;
+        }
+        if (MoeWakeService.tryWake(level, player, 100L) != null) {
+            helper.fail("Expected a player without a relationship not to wake the hidden Moe by proximity");
+            return;
+        }
+        if (HidingSpots.get(level).find(pos).isEmpty()) {
+            helper.fail("Expected rejected proximity wake to leave the Moe hidden");
+            return;
+        }
+        try {
+            BlockPartyDB.get(level).setPlayerFeelings(databaseId, player.getUUID(), 0.0F, 8.0F);
+        } catch (SQLException exception) {
+            helper.fail("Expected trusted-loyalty setup: " + exception.getMessage());
+            return;
+        }
+        Moe revealed = MoeWakeService.tryWake(level, player, 101L);
+        if (revealed == null || revealed.getDatabaseID() != databaseId
+                || revealed.getRoutineIntent() != RoutineIntent.IDLE
+                || !player.getUUID().equals(revealed.getDialogueTarget())
+                || HidingSpots.get(level).find(pos).isPresent()) {
+            helper.fail("Expected relationship-scaled proximity to reveal one Moe into its local idle routine");
+            return;
+        }
+        helper.kill(revealed);
+        MoeWakeService.clearForTests();
         helper.succeed();
     }
 

@@ -13,9 +13,13 @@ import net.minecraft.world.level.block.state.BlockState;
 /** Data-backed rule describing one way a Moe can become eligible to arrive. */
 public record ArrivalDefinition(
         ResourceLocation id, ItemSelector collected, int threshold, BlockSelector placed,
-        BlockSelector support, Block result, double exclusionRadius) {
+        BlockSelector support, Block result, double exclusionRadius, int homeSearchRadius, int homeSearchVerticalRadius) {
     public boolean matches(BlockState placedState, BlockState supportState) {
         return this.placed.matches(placedState) && this.support.matches(supportState);
+    }
+
+    public int placementSpecificity() {
+        return this.placed.specificity() + this.support.specificity();
     }
 
     public int collectedCount(ServerLevel level, UUID player) {
@@ -38,17 +42,26 @@ public record ArrivalDefinition(
         }
     }
 
-    public record BlockSelector(Block block, TagKey<Block> tag) {
+    public record BlockSelector(Block block, TagKey<Block> tag, boolean any) {
         public boolean matches(BlockState state) {
-            return state != null && (this.tag != null ? state.is(this.tag) : state.is(this.block));
+            return state != null && !state.isAir()
+                    && (this.any || (this.tag != null ? state.is(this.tag) : state.is(this.block)));
+        }
+
+        public int specificity() {
+            return this.any ? 0 : this.tag != null ? 1 : 2;
         }
 
         public static BlockSelector block(ResourceLocation id) {
-            return new BlockSelector(BuiltInRegistries.BLOCK.getValue(id), null);
+            return new BlockSelector(BuiltInRegistries.BLOCK.getValue(id), null, false);
         }
 
         public static BlockSelector tag(ResourceLocation id) {
-            return new BlockSelector(null, TagKey.create(Registries.BLOCK, id));
+            return new BlockSelector(null, TagKey.create(Registries.BLOCK, id), false);
+        }
+
+        public static BlockSelector anyBlock() {
+            return new BlockSelector(null, null, true);
         }
     }
 }

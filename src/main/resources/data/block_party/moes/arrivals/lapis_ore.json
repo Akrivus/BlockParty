@@ -1,0 +1,13 @@
+{
+  "collected": {
+    "item": "minecraft:lapis_lazuli"
+  },
+  "threshold": 64,
+  "placed": {
+    "block": "minecraft:torch"
+  },
+  "support": {
+    "tag": "minecraft:stone"
+  },
+  "result": "minecraft:lapis_ore"
+}

@@ -1,0 +1,15 @@
+{
+  "collected": {
+    "item": "minecraft:dirt"
+  },
+  "threshold": 64,
+  "placed": {
+    "any": true
+  },
+  "support": {
+    "block": "minecraft:farmland"
+  },
+  "result": "minecraft:farmland",
+  "exclusion_radius": 48,
+  "home_search_radius": 16
+}

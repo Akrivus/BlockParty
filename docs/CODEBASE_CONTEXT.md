@@ -70,6 +70,10 @@ The historical regression tests under `src/test/java/block_party/regression` are
 
 Strong active surfaces:
 
+- Arrival lifecycle distinguishes cardinal visitors from corporeal residents. Cardinal Moes poof out of the active world when they sleep and require another encounter trigger to return. Corporeal arrivals search near their trigger for a safe block matching their result type, emerge by vacating that block, and retain it as their home/hiding position. Arrival data can tune this search with `home_search_radius` (default `16`) and `home_search_vertical_radius` (default `4`).
+- Arrival block selectors support exact blocks, tags, and `{"any":true}`. Exact placement/support combinations outrank tag matches, which outrank generic `any` rules. Dirt, coarse dirt, rooted dirt, grass block, podzol, and mycelium now use the corporeal stack-plus-place-anything-on-top pattern. Coal, copper, iron, gold, redstone, lapis, diamond, and emerald use their collected drops plus a torch placed on ordinary stone, producing one canonical cardinal identity per ore family.
+- Hidden corporeal Moes are indexed by `HidingSpots` and can wake automatically when a familiar player approaches. The server performs staggered player-centered scans, reveals at most one Moe per player scan, and calculates wake radius continuously as the greater of relationship trust and loyalty divided by `5`, capped at `20` blocks. Players without a relationship still require deliberate block interaction. Player and Moe cooldowns prevent clustered reveals and immediate wake loops.
+
 - Spawn a Moe from a `block_party:spawns_moes` block with `CustomSpawnEggItem`.
 - Preserve block identity, visible block aliases, block entity persistent data, owner, profile fields, SQLite row identity, and hidden-state transitions.
 - Use data-driven scenes, filters, actions, dialogue payloads, and scoped scene variables.

@@ -1,0 +1,13 @@
+{
+  "collected": {
+    "item": "minecraft:dirt"
+  },
+  "threshold": 64,
+  "placed": {
+    "any": true
+  },
+  "support": {
+    "block": "minecraft:podzol"
+  },
+  "result": "minecraft:podzol"
+}

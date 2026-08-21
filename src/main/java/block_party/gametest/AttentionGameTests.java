@@ -4,6 +4,11 @@ import block_party.BlockParty;
 import block_party.db.BlockPartyDB;
 import block_party.db.records.AttentionRecord;
 import block_party.entities.Moe;
+import block_party.entities.MoeInHiding;
+import block_party.entities.MoeSpawner;
+import block_party.entities.data.HidingSpots;
+import block_party.entities.goals.HideUntil;
+import block_party.entities.movement.RoutineIntent;
 import block_party.entities.chores.CardinalForestChore;
 import block_party.entities.chores.PlaceBlockChores;
 import block_party.scene.SceneVariables;
@@ -11,8 +16,8 @@ import block_party.world.progression.WoodFamilyProgression;
 import block_party.world.progression.SamuraiProgression;
 import block_party.world.progression.ArrivalService;
 import block_party.world.progression.PlayerProgressionCounters;
-import block_party.registry.CustomTags;
 import block_party.registry.CustomBlocks;
+import block_party.registry.resources.ArrivalReloadListener;
 import block_party.blocks.entity.ShrineTabletBlockEntity;
 import block_party.scene.actions.ResetProgressionCountersAction;
 import block_party.registry.CustomEntities;
@@ -20,12 +25,14 @@ import block_party.scene.SceneObservation;
 import block_party.scene.SceneObservationFactories;
 import block_party.world.Attention;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -97,6 +104,116 @@ public final class AttentionGameTests {
         helper.kill(arrivals.getFirst());
         if (ArrivalService.tryArrival(level, sapling, level.getBlockState(sapling), player)) {
             helper.fail("Expected another Oak encounter to require another 64 collected logs");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void corporealArrivalClaimsSafeMatchingBlockAndReturnsToHide(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        UUID player = new UUID(1991L, 2991L);
+        BlockPos trigger = helper.absolutePos(new BlockPos(3, 2, 3));
+        BlockPos home = helper.absolutePos(new BlockPos(6, 1, 3));
+        BlockPos shrine = helper.absolutePos(new BlockPos(8, 1, 3));
+        level.setBlock(trigger.below(), Blocks.DIRT.defaultBlockState(), 3);
+        level.setBlock(trigger, Blocks.COBBLESTONE.defaultBlockState(), 3);
+        level.setBlock(home.below(), Blocks.STONE.defaultBlockState(), 3);
+        level.setBlock(home, Blocks.DIRT.defaultBlockState(), 3);
+        level.setBlock(shrine, CustomBlocks.SHRINE_TABLET.get().defaultBlockState(), 3);
+        ((ShrineTabletBlockEntity) level.getBlockEntity(shrine)).markClaimed(player);
+        ArrivalService.recordCollectedItem(level, player, new ItemStack(Items.DIRT), 64);
+        var definition = ArrivalReloadListener.parse(ResourceLocation.fromNamespaceAndPath(BlockParty.ID, "test_dirt"),
+                JsonParser.parseString("""
+                        {"collected":{"item":"minecraft:dirt"},"threshold":64,
+                         "placed":{"any":true},"support":{"block":"minecraft:dirt"},
+                         "result":"minecraft:dirt","exclusion_radius":0,"home_search_radius":8}
+                        """).getAsJsonObject());
+
+        if (!ArrivalService.tryArrival(level, trigger, level.getBlockState(trigger), definition, player)) {
+            helper.fail("Expected corporeal arrival to find a safe nearby dirt home");
+            return;
+        }
+        List<Moe> arrivals = level.getEntitiesOfClass(Moe.class, new AABB(home).inflate(1.0D));
+        if (arrivals.size() != 1 || arrivals.getFirst().isCardinal()
+                || !arrivals.getFirst().getHome().getPos().equals(home)
+                || arrivals.getFirst().getRoutineIntent() != RoutineIntent.SLEEP
+                || !level.isEmptyBlock(home)) {
+            helper.fail("Expected corporeal Moe to emerge from and claim the matching dirt block");
+            return;
+        }
+        Moe moe = arrivals.getFirst();
+        moe.routine().updateMovement();
+        if (!moe.isRemoved() || !level.getBlockState(home).is(Blocks.DIRT)
+                || HidingSpots.get(level).find(home).isEmpty()) {
+            helper.fail("Expected resting corporeal Moe to restore and hide in its claimed dirt block");
+            return;
+        }
+        helper.killAllEntitiesOfClass(MoeInHiding.class);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void oreArrivalUsesDropCounterTorchAndStoneSupport(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        UUID player = new UUID(1993L, 2993L);
+        BlockPos torch = helper.absolutePos(new BlockPos(3, 2, 3));
+        BlockPos shrine = helper.absolutePos(new BlockPos(6, 1, 3));
+        level.setBlock(torch.below(), Blocks.STONE.defaultBlockState(), 3);
+        level.setBlock(torch, Blocks.TORCH.defaultBlockState(), 3);
+        level.setBlock(shrine, CustomBlocks.SHRINE_TABLET.get().defaultBlockState(), 3);
+        ((ShrineTabletBlockEntity) level.getBlockEntity(shrine)).markClaimed(player);
+        ArrivalService.recordCollectedItem(level, player, new ItemStack(Items.COAL), 64);
+
+        if (ArrivalService.tryArrival(level, torch, level.getBlockState(torch), player)) {
+            helper.fail("Expected ore cardinal arrival to wait for the samurai legs gate");
+            return;
+        }
+        SceneVariables.get(level).playerCookies(player).set(SamuraiProgression.LEGS_OBTAINED, "true");
+        if (!ArrivalService.tryArrival(level, torch, level.getBlockState(torch), player)) {
+            helper.fail("Expected torch on stone after 64 coal pickups to summon canonical Coal");
+            return;
+        }
+        List<Moe> arrivals = level.getEntitiesOfClass(Moe.class, new AABB(torch).inflate(4.0D),
+                moe -> moe.getVisibleBlockState().is(Blocks.COAL_ORE));
+        if (arrivals.size() != 1 || !arrivals.getFirst().isCardinal()
+                || !player.equals(arrivals.getFirst().getDialogueTarget())) {
+            helper.fail("Expected one canonical Coal cardinal selected by its eligible collection counter");
+            return;
+        }
+        helper.kill(arrivals.getFirst());
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void cardinalRestPoofsWithoutCreatingHidingBlock(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = helper.absolutePos(new BlockPos(3, 1, 3));
+        level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+        Moe cardinal = MoeSpawner.spawn(level, pos, Blocks.STONE.defaultBlockState(), new UUID(1992L, 2992L),
+                new CompoundTag(), moe -> {});
+        if (cardinal == null) {
+            helper.fail("Expected cardinal test Moe");
+            return;
+        }
+        cardinal.setBlockState(Blocks.BELL.defaultBlockState());
+        cardinal.setRoutineIntent(RoutineIntent.SLEEP);
+        long databaseId = cardinal.getDatabaseID();
+        if (!cardinal.sleepAtHome(HideUntil.EXPOSED)) {
+            helper.fail("Expected cardinal rest operation to succeed");
+            return;
+        }
+        if (!cardinal.isRemoved() || !level.isEmptyBlock(pos) || HidingSpots.get(level).find(pos).isPresent()) {
+            helper.fail("Expected resting cardinal Moe to poof without becoming a block");
+            return;
+        }
+        try {
+            if (BlockPartyDB.get(level).findNpc(databaseId).isEmpty()) {
+                helper.fail("Expected the cardinal identity to remain persisted after poofing");
+                return;
+            }
+        } catch (SQLException exception) {
+            helper.fail("Expected persisted cardinal identity lookup: " + exception.getMessage());
             return;
         }
         helper.succeed();

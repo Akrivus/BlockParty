@@ -1,0 +1,13 @@
+{
+  "collected": {
+    "item": "minecraft:redstone"
+  },
+  "threshold": 64,
+  "placed": {
+    "block": "minecraft:torch"
+  },
+  "support": {
+    "tag": "minecraft:stone"
+  },
+  "result": "minecraft:redstone_ore"
+}

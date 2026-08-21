@@ -20,6 +20,7 @@ import net.neoforged.neoforge.event.level.PistonEvent;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalLong;
+import java.util.Comparator;
 
 public final class HidingSpots extends SavedData {
     public static final String KEY = "BlockParty_HidingSpots";
@@ -74,6 +75,18 @@ public final class HidingSpots extends SavedData {
     public OptionalLong find(BlockPos pos) {
         Long id = this.spots.get(pos);
         return id == null ? OptionalLong.empty() : OptionalLong.of(id);
+    }
+
+    public List<Spot> nearby(BlockPos origin, double radius) {
+        double radiusSqr = radius * radius;
+        return this.spots.entrySet().stream()
+                .filter(entry -> entry.getKey().distSqr(origin) <= radiusSqr)
+                .map(entry -> new Spot(entry.getKey(), entry.getValue()))
+                .sorted(Comparator.comparingDouble(spot -> spot.pos().distSqr(origin)))
+                .toList();
+    }
+
+    public record Spot(BlockPos pos, long databaseId) {
     }
 
     public static Moe reveal(ServerLevel level, BlockPos pos) {

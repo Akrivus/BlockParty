@@ -9,6 +9,5 @@
   "support": {
     "tag": "minecraft:dirt"
   },
-  "result": "minecraft:jungle_log",
-  "exclusion_radius": 24
+  "result": "minecraft:jungle_log"
 }
