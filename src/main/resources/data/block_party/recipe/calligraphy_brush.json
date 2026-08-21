@@ -5,8 +5,8 @@
         "I "
     ],
     "key": {
-        "W": "minecraft:wheat",
-        "I": "minecraft:stick"
+        "W": "minecraft:rabbit_hide",
+        "I": "minecraft:bamboo"
     },
     "result": {
         "count": 1,

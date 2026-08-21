@@ -8,7 +8,7 @@
     "key": {
         "X": "block_party:calligraphy_brush",
         "*": "minecraft:gold_ingot",
-        "_": "block_party:sakura_slab"
+        "_": "#minecraft:wooden_slabs"
     },
     "result": {
         "id": "block_party:shrine_tablet"

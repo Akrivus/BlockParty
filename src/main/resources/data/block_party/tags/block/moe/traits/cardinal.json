@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "minecraft:bamboo",
     "minecraft:bell",
     "#block_party:moe/progression/samurai_wood_cardinals",
     "#block_party:moe/progression/samurai_flower_cardinals",
