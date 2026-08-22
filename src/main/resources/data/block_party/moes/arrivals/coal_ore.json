@@ -7,7 +7,7 @@
     "block": "minecraft:torch"
   },
   "support": {
-    "tag": "minecraft:stone"
+    "tag": "minecraft:base_stone_overworld"
   },
   "result": "minecraft:coal_ore"
 }

@@ -3,9 +3,9 @@
   "values": [
     "minecraft:bamboo",
     "minecraft:bell",
-    "#block_party:moe/progression/samurai_wood_cardinals",
-    "#block_party:moe/progression/samurai_flower_cardinals",
+    "#block_party:moe/progression/samurai_dirt_cardinals",
     "#block_party:moe/progression/samurai_ore_cardinals",
+    "#block_party:moe/progression/samurai_wood_cardinals",
     "minecraft:crying_obsidian"
   ]
 }

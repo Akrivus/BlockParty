@@ -14,7 +14,7 @@ public final class CardinalSpawnRules {
             Rule.open(state -> state.is(Blocks.BELL)),
             Rule.gated(state -> state.is(CustomTags.SAMURAI_WOOD_CARDINALS),
                     ProgressionGate.worldCookie(SamuraiProgression.TORII_GATE_OPENED)),
-            Rule.gated(state -> state.is(CustomTags.SAMURAI_FLOWER_CARDINALS),
+            Rule.gated(state -> state.is(CustomTags.SAMURAI_DIRT_CARDINALS),
                     ProgressionGate.playerCookie(SamuraiProgression.BOOTS_OBTAINED)),
             Rule.gated(state -> state.is(CustomTags.SAMURAI_ORE_CARDINALS),
                     ProgressionGate.playerCookie(SamuraiProgression.LEGS_OBTAINED)),

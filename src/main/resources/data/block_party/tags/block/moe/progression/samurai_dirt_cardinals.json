@@ -2,8 +2,10 @@
   "replace": false,
   "values": [
     "minecraft:coarse_dirt",
+    "minecraft:grass_block",
     "minecraft:mycelium",
     "minecraft:podzol",
+    "minecraft:red_sand",
     "minecraft:sand"
   ]
 }

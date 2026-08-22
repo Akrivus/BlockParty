@@ -130,22 +130,25 @@ The boots begin the armor progression because they change what it means for the
 player to walk through the world. Yami should give them as the wood-family
 payoff, not as a standalone quest reward.
 
-### Dirt, Grass, And Flower Moes
+### Dirt And Ground Cardinal Moes
 
 Theme: overlooked labor.
 
-Dirt and grass are corporeal population types, like stone. They are individuals
-with homes, routines, and social clustering rather than one cardinal identity
-per block. They remain present throughout the game, then become more common
-after Suzu opens the torii gates and voluntary return begins.
+Dirt is a corporeal population type, like stone. Dirt Moes are individuals with
+homes, routines, and social clustering. They see growing plant life on them as a
+form of enlightenment.
 
-Flowers use the grass Moe presentation as their base, with a small render-layer
-overlay that places the source flower on the character's head. Flower Moes carry
-the authored ground arc and can be cardinal voices without making ordinary dirt
-or grass Moes into unique NPCs.
+Grass Block is the clearest cardinal expression of that ideal. Podzol and
+Mycelium represent different avenues of growth, while Coarse Dirt can express
+either youthful innocence or malicious ignorance. These surface identities
+carry the authored ground arc without requiring a separate flower presentation.
+
+Sand is the outward-facing traveler of the family: a beach-and-desert influencer
+who introduces the cell phone. Red Sand is her cousin. Both remain authored
+cardinal identities rather than ordinary corporeal dirt residents.
 
 The ground story should avoid grand speeches. Its strongest form is practical
-labor, small requests, and recognition. A flower cardinal should lead the player
+labor, small requests, and recognition. A ground cardinal should lead the player
 to the leg armor piece by giving that overlooked work a specific voice.
 
 ### Ore Moes
@@ -154,6 +157,9 @@ Theme: safety and return.
 
 Ore Moes are used to visitors who come for what they hold and seldom stay.
 Torches matter because light keeps the way safe. Safety means people can return.
+The arrival trigger observes ordinary cave lighting: after collecting enough of
+an ore's drop, placing a torch on natural Overworld base stone within torii
+influence creates an encounter opportunity. It is not a constructed ritual.
 
 The chest piece belongs here. It has romantic and emotional connotations: the
 samurai wore the heart of the armor while failing to see the Moes as people.
@@ -212,8 +218,8 @@ primitives, not a bespoke progression framework.
 Progression chain:
 
 1. Yami gives the boots.
-2. Boots make the flower cardinal ground arc eligible.
-3. Flower arc gives the leg armor.
+2. Boots make the ground-cardinal arc eligible.
+3. Ground arc gives the leg armor.
 4. Leg armor makes ore cardinal Moes eligible.
 5. Ore arc gives the dou.
 6. Full armor progression makes Crying Obsidian eligible.
@@ -236,7 +242,7 @@ samurai_sword_obtained
 samurai_spirit_defeated
 torii_visitor_mode_unlocked
 dark_oak_arc_complete
-flower_arc_complete
+ground_arc_complete
 ore_arc_complete
 crying_obsidian_arc_complete
 ```
@@ -325,7 +331,7 @@ Example need:
 
 ```text
 player has samurai_boots_obtained
-=> flower cardinals for the ground arc may appear
+=> ground cardinals for the ground arc may appear
 ```
 
 This should not be Samurai-specific. It should become a general spawn condition
@@ -341,7 +347,7 @@ Scenes can set and query:
 
 ```text
 dark_oak_arc_complete
-flower_arc_complete
+ground_arc_complete
 ore_arc_complete
 ```
 
@@ -412,17 +418,6 @@ sets samurai_spirit_summoned
 spawns or schedules the spectral samurai encounter
 ```
 
-### Flower Head Overlay
-
-Flower Moes should reuse the grass Moe presentation rather than creating a model
-for each flower. The client renderer needs a reusable `SpecialLayer` overlay
-that renders the Moe's visible flower block above the head. This is a visual
-identity surface, not a progression mechanic.
-
-The first implementation should register the supported flower blocks with that
-overlay and keep their cardinal status in the normal block trait tag. Dirt and
-grass stay outside that tag, so they remain corporeal routine-driven Moes.
-
 ## Locked Implementation Strategy
 
 Build the volume as narrow, playable slices. Each slice should leave a usable
@@ -459,7 +454,7 @@ arc by name.
 Initial gates:
 
 ```text
-boots -> flower cardinal ground-arc eligibility
+boots -> ground-cardinal arc eligibility
 legs  -> ore cardinal eligibility
 full armor progression -> Crying Obsidian eligibility
 ```
@@ -474,15 +469,14 @@ the first complete example of the engine: conduct is observed, attention is
 earned, familiarity grows over time, a family state is derived, and a relic is
 given.
 
-Playable end state: the player earns the boots, a flower cardinal can begin the
-ground arc, and ordinary dirt/grass Moes remain corporeal world residents.
+Playable end state: the player earns the boots, a ground cardinal can begin the
+ground arc, and ordinary Dirt Moes remain corporeal world residents.
 
 ### Slice 4: Add Ground And Ore Conduct
 
-Author flower-led practical labor scenes that award the leg armor, then ore
+Author ground-cardinal practical labor scenes that award the leg armor, then ore
 safety-and-return scenes that award the dou. Add only the attention definitions
 those scenes truly need: overlooked ground work, cave safety, and safe return.
-Add the flower-head renderer overlay while authoring the first flower Moe.
 
 Playable end state: the player has enough armor for Crying Obsidian to take
 interest, and Suzu's warnings have escalated alongside that recognition.
@@ -558,17 +552,16 @@ condition. Fancy boss behavior can come after the arc is playable.
 4. Author enough wood-family culture/tension scenes to set
    `wood_family_arc_ready`, or the equivalent component cookies.
 5. Author Yami boots payoff scenes.
-6. Add flower-head render overlays and tag the first flower cardinal(s).
-7. Gate flower cardinal encounter eligibility behind boots.
-8. Author flower-led leg-armor scenes.
-9. Gate ore cardinal spawns behind leg armor.
-10. Author ore dou scenes.
-11. Add Crying Obsidian encounter eligibility for full armor.
-12. Add sword acquisition and the sword/sealed-mask crafting-table event.
-13. Add spectral samurai dialogue/combat/defeat condition and award the
+6. Gate ground-cardinal encounter eligibility behind boots.
+7. Author ground-cardinal leg-armor scenes.
+8. Gate ore cardinal spawns behind leg armor.
+9. Author ore dou scenes.
+10. Add Crying Obsidian encounter eligibility for full armor.
+11. Add sword acquisition and the sword/sealed-mask crafting-table event.
+12. Add spectral samurai dialogue/combat/defeat condition and award the
     non-equipable broken-mask relic.
-14. Add Suzu/Crying Obsidian reconciliation scenes.
-15. Add Suzu's all-dimension torii population mode unlocked after the ghost is
+13. Add Suzu/Crying Obsidian reconciliation scenes.
+14. Add Suzu's all-dimension torii population mode unlocked after the ghost is
     defeated, including corporeal Moe presence around active gates.
 
 ## Active Phase 3 Slice

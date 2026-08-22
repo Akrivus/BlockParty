@@ -17,6 +17,7 @@ import block_party.world.progression.SamuraiProgression;
 import block_party.world.progression.ArrivalService;
 import block_party.world.progression.PlayerProgressionCounters;
 import block_party.registry.CustomBlocks;
+import block_party.registry.CustomTags;
 import block_party.registry.resources.ArrivalReloadListener;
 import block_party.blocks.entity.ShrineTabletBlockEntity;
 import block_party.scene.actions.ResetProgressionCountersAction;
@@ -154,15 +155,17 @@ public final class AttentionGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 20)
-    public static void oreArrivalUsesDropCounterTorchAndStoneSupport(GameTestHelper helper) {
+    public static void oreArrivalUsesDropCounterAndNaturalCaveSupport(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         UUID player = new UUID(1993L, 2993L);
         BlockPos torch = helper.absolutePos(new BlockPos(3, 2, 3));
         BlockPos shrine = helper.absolutePos(new BlockPos(6, 1, 3));
-        level.setBlock(torch.below(), Blocks.STONE.defaultBlockState(), 3);
+        level.setBlock(torch.below(), Blocks.DEEPSLATE.defaultBlockState(), 3);
         level.setBlock(torch, Blocks.TORCH.defaultBlockState(), 3);
         level.setBlock(shrine, CustomBlocks.SHRINE_TABLET.get().defaultBlockState(), 3);
         ((ShrineTabletBlockEntity) level.getBlockEntity(shrine)).markClaimed(player);
+        PlayerProgressionCounters.resetItems(level, player, CustomTags.Items.PROGRESSION_COUNTER_ITEMS);
+        SceneVariables.get(level).playerCookies(player).delete(SamuraiProgression.LEGS_OBTAINED);
         ArrivalService.recordCollectedItem(level, player, new ItemStack(Items.COAL), 64);
 
         if (ArrivalService.tryArrival(level, torch, level.getBlockState(torch), player)) {
@@ -171,7 +174,7 @@ public final class AttentionGameTests {
         }
         SceneVariables.get(level).playerCookies(player).set(SamuraiProgression.LEGS_OBTAINED, "true");
         if (!ArrivalService.tryArrival(level, torch, level.getBlockState(torch), player)) {
-            helper.fail("Expected torch on stone after 64 coal pickups to summon canonical Coal");
+            helper.fail("Expected ordinary cave-lighting after 64 coal pickups to summon canonical Coal");
             return;
         }
         List<Moe> arrivals = level.getEntitiesOfClass(Moe.class, new AABB(torch).inflate(4.0D),

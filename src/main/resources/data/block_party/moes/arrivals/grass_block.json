@@ -9,7 +9,5 @@
   "support": {
     "block": "minecraft:grass_block"
   },
-  "result": "minecraft:grass_block",
-  "exclusion_radius": 48,
-  "home_search_radius": 16
+  "result": "minecraft:grass_block"
 }

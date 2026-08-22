@@ -154,9 +154,10 @@ public final class MoeLifecycleGameTests {
         SceneVariables.get(level).worldCookies().set(SamuraiProgression.TORII_GATE_OPENED, "true");
         assertEquals(helper, true, CardinalSpawnRules.canSpawn(level, Blocks.OAK_LOG.defaultBlockState(), owner), "wood after Suzu gate");
 
-        assertEquals(helper, false, CardinalSpawnRules.canSpawn(level, Blocks.DANDELION.defaultBlockState(), owner), "flower before boots");
+        assertEquals(helper, false, CardinalSpawnRules.canSpawn(level, Blocks.GRASS_BLOCK.defaultBlockState(), owner), "ground cardinal before boots");
         cookies.set(SamuraiProgression.BOOTS_OBTAINED, "true");
-        assertEquals(helper, true, CardinalSpawnRules.canSpawn(level, Blocks.DANDELION.defaultBlockState(), owner), "flower after boots");
+        assertEquals(helper, true, CardinalSpawnRules.canSpawn(level, Blocks.GRASS_BLOCK.defaultBlockState(), owner), "ground cardinal after boots");
+        assertEquals(helper, true, CardinalSpawnRules.canSpawn(level, Blocks.DIRT.defaultBlockState(), owner), "ordinary dirt remains corporeal and ungated");
 
         assertEquals(helper, false, CardinalSpawnRules.canSpawn(level, Blocks.IRON_ORE.defaultBlockState(), owner), "ore before legs");
         cookies.set(SamuraiProgression.LEGS_OBTAINED, "true");
